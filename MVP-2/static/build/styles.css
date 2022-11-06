@@ -11,7 +11,16 @@ body {
 }
 
 #logger {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
   font-size: 2rem;
+}
+
+#loggerBtns {
+  display: flex;
+  flex-direction: row;
+  gap: 0.3rem;
 }
 
 table,
@@ -27,4 +36,20 @@ td {
 
 th {
   padding: 0.8rem;
+}
+
+#playBtn,
+#stopBtn {
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+}
+
+#playBtn {
+  filter: invert(89%) sepia(100%) saturate(4775%) hue-rotate(331deg)
+    brightness(99%) contrast(100%);
+}
+#stopBtn {
+  filter: invert(38%) sepia(55%) saturate(2506%) hue-rotate(346deg)
+    brightness(100%) contrast(98%);
 }

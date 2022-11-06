@@ -11,8 +11,10 @@
     <h1>MVP-2: Receive Table</h1>
     <div id="logger">
       Log data
-      <span id="play"></span>
-      <span id="stop"></span>
+      <div id="loggerBtns">
+        <img id="playBtn" src="./svg/play-button.svg"></img>
+        <img id="stopBtn" src="./svg/stop-button.svg"></img>
+      </div>
     </div>
 
     <table id="receiveTable">
@@ -28,5 +30,6 @@
       </tr>
     </table>
     <script type="module" src="dist/webSocketHandlers.js"></script>
+    <script type="module" src="dist/logButtonHandlers.js"></script>
   </body>
 </html>

@@ -1,25 +1,25 @@
 import { Measurement, Packet } from "./modals";
 
-var globalPackets = new Map<number, Packet>();
+var globalPackets = new Map<string, Packet>();
 
-export function updateReceiveTable(packets: Packet[]) {
-  updatePackets(packets)
+export function updateReceiveTable(packets: Map<string, Packet>) {
+  updatePackets(packets);
   let tableBody = document.getElementById(
     "tableBody"
   ) as HTMLTableSectionElement;
   tableBody.textContent = "";
   for (let [_, packet] of globalPackets) {
-    addPacketToTable(tableBody,packet)
+    addPacketToTable(tableBody, packet);
   }
 }
 
-function updatePackets(packets: Packet[]) {
-  for(let packet of packets) {
-    packets[packet.id] = packet
+function updatePackets(packets: Map<string, Packet>) {
+  for (let [id, packet] of packets) {
+    packets.set(id, packet);
   }
 }
 
-function addPacketToTable(tableBody: HTMLTableSectionElement,packet: Packet) {
+function addPacketToTable(tableBody: HTMLTableSectionElement, packet: Packet) {
   let packetRow = createPacketRow(packet);
   tableBody.append(packetRow);
   let measurementsRows = createMeasurementRows(packet.measurements);
