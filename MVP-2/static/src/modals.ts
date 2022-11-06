@@ -1,7 +1,7 @@
 export type Packet = {
   id: number;
   name: string;
-  hexValue: number;
+  hexValue: string;
   count: number;
   cycleTime: number;
   measurements: Measurement[];
