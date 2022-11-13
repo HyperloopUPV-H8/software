@@ -1,0 +1,25 @@
+#idMsg {
+    font-weight: bold;
+    font-size: large;
+}
+
+ul {
+    background-color: black;
+    color: white;
+    list-style-type: none;
+}
+
+/* Para tema blanco
+ul {
+    background-color: white;
+    color: black;
+    list-style-type: none;
+} */
+
+#drop-down-arrow {
+    /* background-image: url(arrow-dropdown-circle.svg); */
+    max-width: 3%;
+    max-height: auto;
+    background-color: white;
+    border-radius: 50%
+}
