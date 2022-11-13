@@ -1,6 +1,7 @@
 #idMsg {
     font-weight: bold;
     font-size: large;
+    margin-left: 1%;
 }
 
 ul {
@@ -21,5 +22,20 @@ ul {
     max-width: 3%;
     max-height: auto;
     background-color: white;
-    border-radius: 50%
+    border-radius: 50%;
+    margin-right: 1%;
 }
+
+#count {
+    background-color: #AFAFAF;
+    border-radius: 40%;
+    text-align: center;
+    font-size: x-small;
+    padding-left: 1%;
+    padding-right: 1%;
+
+}
+
+/* .lineMsg {
+    float: left;
+} */
