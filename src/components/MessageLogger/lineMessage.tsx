@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Message } from "./FaultsAndWarningList";
-import "./lineMessage.css"
+import { Message } from "@components/MessageLogger/structs/Message";
+import "@components/MessageLogger/LineMessage.css"
 import logo from "./arrow-dropdown-circle.svg"
 
 interface Props {

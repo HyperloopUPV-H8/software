@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Message } from "./FaultsAndWarningList";
-import { LineMessage } from "./LineMessage";
-import "./messageList.css"
+import { Message } from "@components/MessageLogger/structs/Message";
+import { LineMessage } from "@components/MessageLogger/LineMessage";
+import "@components/MessageLogger/MessageList.css"
 
 interface Props {
     messages: Message[]
@@ -34,7 +34,7 @@ export const MessageList = ({ messages }: Props) => {
 
 }
 
-//It doesn`t work yet
+
 const messagesRepeated = (messages: Message[]): (number[]) => {
     var counts: number[] = []
     for (let [i, el] of messages.entries()) {
@@ -48,27 +48,19 @@ const messagesRepeated = (messages: Message[]): (number[]) => {
 
 const deleteDuplicated = (id: string, messages: Message[], index: number): number => {
     var count: number = 1
+    var finished: boolean = false
 
-
-
-    for (let i = index; i < messages.length; i++) {
-        if (id === messages[i].id) {
+    while(!finished && index<messages.length){
+        if (id === messages[index].id) {
             console.log("Hay repetidos")
-            messages.splice(i, 1)
+            messages.splice(index, 1)
             count++
+        } else{
+            finished = true
         }
+
+        index++
     }
+
     return count
 }
-
-// const deleteDuplicated = (id: string, messages: Message[], index: number): number => {
-//     var count: number = 1
-//     for (let i = index; i < messages.length; i++) {
-//         if (id === messages[i].id) {
-//             console.log("Hay repetidos")
-//             messages.splice(i, 1)
-//             count++
-//         }
-//     }
-//     return count
-// }

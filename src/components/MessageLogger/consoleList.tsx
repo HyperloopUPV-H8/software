@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Message } from "./FaultsAndWarningList";
-import { MessageList } from "@components/MessageLogger/messageList";
+import { Message } from "@components/MessageLogger/FaultsAndWarningList";
+import { MessageList } from "@components/MessageLogger/MessageList";
 
 interface Props {
     title: string
