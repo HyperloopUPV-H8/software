@@ -1,5 +1,5 @@
 
-import { FaultsAndWarningList } from "@components/MessageLogger/faultsAndWarningList";
+import { FaultsAndWarningList } from "@components/MessageLogger/FaultsAndWarningList";
 import { useState } from "react";
 import "./App.css";
 //import {sdfsd} from "@components/MessageLogger"

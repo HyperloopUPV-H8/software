@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Message } from "./faultsAndWarningList";
+import { Message } from "./FaultsAndWarningList";
 import "./lineMessage.css"
 import logo from "./arrow-dropdown-circle.svg"
 
@@ -9,14 +9,11 @@ interface Props {
 }
 
 export const LineMessage = ({ message, count }: Props) => {
-    //id="drop-down-arrow"
-    const dropDownLine = (): void => {
-        console.log("Implementar línea despleagable")
-    }
+
     return (
-        <li className="lineMsg">
+        <li className="lineMsg" key={message.id}>
             <img id="drop-down-arrow" src={logo} onClick={dropDownLine} />
-            <label id="count">{count}</label>
+            {count > 1 ? <label id="count">{count}</label> : null}
             <label id="idMsg">{message.id}: </label>
             <label>{message.desc}</label>
             <br />
@@ -24,4 +21,14 @@ export const LineMessage = ({ message, count }: Props) => {
         </li>
     )
 
+}
+
+const dropDownLine = (): void => {
+    console.log("Implementar línea despleagable")
+}
+
+const showCounter = (count: number, setShowCount: React.Dispatch<React.SetStateAction<boolean>>): void => {
+    if (count > 0) {
+        setShowCount(true)
+    }
 }
