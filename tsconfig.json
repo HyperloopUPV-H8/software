@@ -20,7 +20,9 @@
       "@components/*": ["components/*"],
       "@models/*": ["models/*"],
       "@adapters/*": ["adapters/*"],
-      "@context/*": ["context/*"]
+      "@context/*": ["context/*"],
+      "@services/*": ["services/*"],
+      "@slices/*": ["slices/*"]
     }
   },
   "include": ["src"],

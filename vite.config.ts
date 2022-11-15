@@ -11,6 +11,8 @@ export default defineConfig({
       "@models": path.resolve(__dirname, "./src/models"),
       "@adapters": path.resolve(__dirname, "./src/adapters"),
       "@context": path.resolve(__dirname, "./src/context"),
+      "@services": path.resolve(__dirname, "./src/services"),
+      "@slices": path.resolve(__dirname, "./src/slices"),
     },
   },
 });
