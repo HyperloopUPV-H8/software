@@ -1,17 +1,21 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { PodData } from "@models/PodData/PodData";
+import type { PodData } from "@models/PodData/PodData";
+import {
+  updatePodData as updatePackets,
+  setLastBatchIDs,
+} from "@models/PodData/PodData";
 
 export const podDataSlice = createSlice({
   name: "podData",
-  initialState: new PodData([]),
+  initialState: { boards: [], lastBatchIDs: [] } as PodData,
   reducers: {
     initializePodData: (podData, action) => {
       return action.payload;
     },
     updatePodData: (podData, action) => {
       let updates = action.payload;
-      podData.setLastBatchIDs(updates);
-      podData.update(updates);
+      setLastBatchIDs(podData, updates);
+      updatePackets(podData, updates);
     },
   },
 });

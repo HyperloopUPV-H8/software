@@ -16,13 +16,7 @@ export const OrderServiceContext = createContext<IOrderService>(
 
 export const OrderService = ({ children }: any) => {
   const dispatch = useDispatch();
-  let orderSocket!: React.MutableRefObject<WebSocket>;
-
-  let orderService = {
-    sendOrder(order: Order) {
-      orderSocket.current.send(JSON.stringify(order));
-    },
-  };
+  let orderSocket = useRef<WebSocket>();
 
   useEffect(() => {
     fetch(
@@ -38,14 +32,15 @@ export const OrderService = ({ children }: any) => {
           orders.push(order);
         }
         dispatch(setOrders(orders));
+      })
+      .catch((reason) => {
+        console.error(`Error fetching Orders Description: ${reason}`);
       });
 
-    orderSocket = useRef(
-      new WebSocket(
-        `ws://${import.meta.env.VITE_SERVER_IP}:${
-          import.meta.env.VITE_SERVER_PORT
-        }${import.meta.env.VITE_ORDERS_URL}`
-      )
+    orderSocket.current = new WebSocket(
+      `ws://${import.meta.env.VITE_SERVER_IP}:${
+        import.meta.env.VITE_SERVER_PORT
+      }${import.meta.env.VITE_ORDERS_URL}`
     );
     dispatch(updateConnection(createConnection("Orders", false)));
     orderSocket.current.onopen = () => {
@@ -56,9 +51,18 @@ export const OrderService = ({ children }: any) => {
     };
 
     return () => {
-      orderSocket.current.close();
+      if (orderSocket.current) {
+        orderSocket.current.close();
+      }
     };
   }, []);
+
+  let orderService = {
+    sendOrder(order: Order) {
+      //FIXME: could be undefined
+      orderSocket.current!.send(JSON.stringify(order));
+    },
+  };
 
   return (
     <OrderServiceContext.Provider value={orderService}>

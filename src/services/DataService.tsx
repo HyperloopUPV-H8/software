@@ -5,22 +5,24 @@ import { PodData } from "@models/PodData/PodData";
 import { createConnection } from "@models/Connection";
 import axios from "axios";
 import { useDispatch } from "react-redux";
+import { podDataMock } from "@mocks/PodDataMock";
 
 async function getPodDataStructure(): Promise<PodData> {
-  return axios
-    .get(
-      `http://${import.meta.env.VITE_SERVER_IP}:${
-        import.meta.env.VITE_SERVER_PORT
-      }${import.meta.env.VITE_POD_DATA_DESCRIPTION_URL}`
-    )
-    .then((response) => {
-      return response.data as PodData;
-    });
+  return Promise.resolve(podDataMock);
+  // return axios
+  //   .get(
+  //     `http://${import.meta.env.VITE_SERVER_IP}:${
+  //       import.meta.env.VITE_SERVER_PORT
+  //     }${import.meta.env.VITE_POD_DATA_DESCRIPTION_URL}`
+  //   )
+  //   .then((response) => {
+  //     return response.data as PodData;
+  //   });
 }
 
 export const DataService = ({ children }: any) => {
   const dispatch = useDispatch();
-  let packetUpdateSocket!: React.MutableRefObject<WebSocket>;
+  let packetUpdateSocket = useRef<WebSocket>();
 
   useEffect(() => {
     getPodDataStructure()
@@ -28,12 +30,10 @@ export const DataService = ({ children }: any) => {
         dispatch(initializePodData(podData));
       })
       .then(() => {
-        packetUpdateSocket = useRef(
-          new WebSocket(
-            `ws://${import.meta.env.SERVER_IP}:${
-              import.meta.env.VITE_SERVER_PORT
-            }${import.meta.env.VITE_ORDERS_DESCRIPTION_URL}`
-          )
+        packetUpdateSocket.current = new WebSocket(
+          `ws://${import.meta.env.VITE_SERVER_IP}:${
+            import.meta.env.VITE_SERVER_PORT
+          }${import.meta.env.VITE_ORDERS_URL}`
         );
         dispatch(updateConnection(createConnection("Packets", false)));
         packetUpdateSocket.current.onopen = (ev) => {
@@ -46,10 +46,15 @@ export const DataService = ({ children }: any) => {
         packetUpdateSocket.current.onclose = () => {
           dispatch(updateConnection(createConnection("Packets", false)));
         };
+      })
+      .catch((reason) => {
+        console.error(`Error fetching Data Description: ${reason}`);
       });
 
     return () => {
-      packetUpdateSocket.current.close();
+      if (packetUpdateSocket.current) {
+        packetUpdateSocket.current.close();
+      }
     };
   }, []);
 

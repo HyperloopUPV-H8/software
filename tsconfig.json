@@ -23,7 +23,8 @@
       "@context/*": ["context/*"],
       "@services/*": ["services/*"],
       "@slices/*": ["slices/*"],
-      "@tests/*": ["tests/*"]
+      "@tests/*": ["tests/*"],
+      "@mocks/*": ["mocks/*"]
     }
   },
   "include": ["src"],

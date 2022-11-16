@@ -1,37 +1,33 @@
 import { PacketUpdate } from "@adapters/PacketUpdate";
 import { Board } from "@models/PodData/Board";
-import { Packet } from "@models/PodData/Packet";
+import { Packet, updatePacket } from "@models/PodData/Packet";
 
-export class PodData {
+export type PodData = {
   boards: Board[];
-  lastBatchIDs: number[] = [];
+  lastBatchIDs: number[];
+};
 
-  constructor(boards: Board[]) {
-    this.boards = boards;
+export function setLastBatchIDs(podData: PodData, updates: PacketUpdate[]) {
+  podData.lastBatchIDs = updates.map((update) => update.id);
+}
+
+export function updatePodData(podData: PodData, updates: PacketUpdate[]) {
+  for (let update of updates) {
+    let packet = getPacket(podData, update.id);
+    updatePacket(packet, update);
   }
+}
 
-  public setLastBatchIDs(updates: PacketUpdate[]) {
-    this.lastBatchIDs = updates.map((update) => update.id);
-  }
+function getPacket(podData: PodData, id: number): Packet {
+  let board = podData.boards.find((board) => {
+    return board.packets.some((packet) => {
+      packet.id == id;
+    });
+  })!;
 
-  public update(updates: PacketUpdate[]) {
-    for (let update of updates) {
-      let packet = this.getPacket(update.id);
-      packet.update(update);
-    }
-  }
+  let packet = board.packets.find((packet) => {
+    return packet.id == id;
+  })!;
 
-  private getPacket(id: number): Packet {
-    let board = this.boards.find((board) => {
-      return board.packets.some((packet) => {
-        packet.id == id;
-      });
-    })!;
-
-    let packet = board.packets.find((packet) => {
-      return packet.id == id;
-    })!;
-
-    return packet;
-  }
+  return packet;
 }
