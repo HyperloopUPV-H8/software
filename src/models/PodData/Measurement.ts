@@ -1,4 +1,4 @@
-enum ValueType {
+export enum ValueType {
   Number,
   Text,
 }

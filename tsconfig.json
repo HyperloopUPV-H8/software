@@ -22,7 +22,8 @@
       "@adapters/*": ["adapters/*"],
       "@context/*": ["context/*"],
       "@services/*": ["services/*"],
-      "@slices/*": ["slices/*"]
+      "@slices/*": ["slices/*"],
+      "@tests/*": ["tests/*"]
     }
   },
   "include": ["src"],
