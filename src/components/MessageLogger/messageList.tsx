@@ -12,15 +12,12 @@ export const MessageList = ({ messages }: Props) => {
 
     useEffect(() => {
             let contadores: number[] = messagesRepeated(messages)
-            console.log("contadores: " + contadores)
             createMessagesWithCounts(contadores)
     }, [])
 
 
 
     const createMessagesWithCounts = (contadores: number[]): void => {
-        console.log("messages.length: " + messages.length)
-        console.log("contadores.length: " + contadores.length)
         let items = [] as MessageCounter[];
 
         for(let i = 0, j = 0; i < messages.length && j < contadores.length; i++, j++){
@@ -65,7 +62,6 @@ const messagesRepeated = (messages: Message[]): (number[]) => {
 
     for(let i = 0; i < messages.length; i++){
         let el = messages[i]
-        console.log(el)
         if(i < messages.length - 1){
             count = checkDuplicated(el.id, messages, i + 1)
         } else{
@@ -78,7 +74,6 @@ const messagesRepeated = (messages: Message[]): (number[]) => {
             //several elements mustn't be counted because they are repeated
             i += count-1
         }
-        console.log("count: " + count)
     } 
     return counts
 }
