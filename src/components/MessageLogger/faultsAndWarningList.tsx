@@ -10,17 +10,6 @@ export const FaultsAndWarningList = () => {
     const [WarningList, setWarningList] = useState<Message[]>(warningMessages);
     const [FaultList, setFaultList] = useState<Message[]>(faultMessages);
 
-
-    //Si hago esto salta error porque se rerenderiza infinitas veces
-    // setWarningList(prevState => (
-    //     [
-    //         ...prevState,
-    //         m1
-    //     ]
-    // ));
-
-    console.log(WarningList)
-    //var titleName: string = "Hola"
     return (
         <>
             <ConsoleList title={"WARNINGS"} messages={WarningList} />

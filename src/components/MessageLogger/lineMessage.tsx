@@ -11,14 +11,16 @@ interface Props {
 export const LineMessage = ({ message, count }: Props) => {
 
     return (
+        <>
         <li className="lineMsg" key={message.id}>
             <img id="drop-down-arrow" src={logo} onClick={dropDownLine} />
             {count > 1 ? <label id="count">{count}</label> : null}
             <label id="idMsg">{message.id}: </label>
-            <label>{message.desc}</label>
+            <label id="descMsg">{message.desc}</label>
             <br />
-            <hr />
         </li>
+            <hr className="hr"/>
+            </>
     )
 
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Message } from "@components/MessageLogger/structs/Message";
+import { Message, MessageCounter } from "@components/MessageLogger/structs/Message";
 import { LineMessage } from "@components/MessageLogger/LineMessage";
 import "@components/MessageLogger/MessageList.css"
 
@@ -8,23 +8,48 @@ interface Props {
 }
 
 export const MessageList = ({ messages }: Props) => {
-    // const [counts, setCounts] = useState([0]);
+    const [messagesWithCounts, setMessagesWithCounts] = useState([] as MessageCounter[]);
 
-    // useEffect(() => {
-    //     setCounts(messagesRepeated(messages))
-    //     console.log(messages)
-    //     console.log("counts: " + counts)
-    // }, [])
+    useEffect(() => {
+        //if(messagesWithCounts.length == 0){
 
-    var counts: number[] = messagesRepeated(messages)
-    console.log(messages)
-    console.log("counts: " + counts)
+            let contadores: number[] = messagesRepeated(messages)
+            createMessagesWithCounts(contadores)
+        //}
+    }, [])
 
+
+
+    const createMessagesWithCounts = (contadores: number[]): void => {
+        console.log(messages)
+        let items = [] as MessageCounter[];
+        for(let i = 0; i < messages.length; i++){
+            let item: MessageCounter = {
+                msg: messages[i],
+                count: contadores[i]
+            }
+    
+            items.push(item)
+            
+                //console.log(item)
+        }
+
+        setMessagesWithCounts(
+            [
+                ...items
+            ]
+        );
+        
+        //console.log(messagesWithCounts)
+    }
+
+
+    console.log(messagesWithCounts)
     return (
         <div id="containerMessages">
-            <ul className="lineMsg">{messages.map((msg, index) => {
+            <ul className="lineMsgUl">{messagesWithCounts.map((item, index) => {
                 return (
-                    <LineMessage key={index} message={msg} count={counts[index]} />
+                    <LineMessage key={index} message={item.msg} count={item.count} />
                 )
             })
             }</ul>
@@ -36,7 +61,7 @@ export const MessageList = ({ messages }: Props) => {
 
 
 const messagesRepeated = (messages: Message[]): (number[]) => {
-    var counts: number[] = []
+    let counts: number[] = []
     for (let [i, el] of messages.entries()) {
         console.log(el)
         let count = deleteDuplicated(el.id, messages, i + 1)
@@ -47,10 +72,10 @@ const messagesRepeated = (messages: Message[]): (number[]) => {
 }
 
 const deleteDuplicated = (id: string, messages: Message[], index: number): number => {
-    var count: number = 1
-    var finished: boolean = false
+    let count: number = 1
+    let finished: boolean = false
 
-    while(!finished && index<messages.length){
+    while(!finished && index < messages.length){
         if (id === messages[index].id) {
             console.log("Hay repetidos")
             messages.splice(index, 1)
@@ -64,3 +89,4 @@ const deleteDuplicated = (id: string, messages: Message[], index: number): numbe
 
     return count
 }
+

@@ -2,6 +2,13 @@
     font-weight: bold;
     font-size: large;
     margin-left: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+#descMsg{
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden; 
 }
 
 ul {
@@ -19,13 +26,14 @@ ul {
 } */
 
 #drop-down-arrow {
-    /* background-image: url(arrow-dropdown-circle.svg); */
-    max-width: 3%;
-    max-height: auto;
+    width: 1rem;
+    height: 1rem;
     background-color: white;
     border-radius: 50%;
     margin-right: 0.5rem;
+    margin-top: 0.2rem;
 }
+
 
 #count {
     background-color: #AFAFAF;
@@ -34,13 +42,21 @@ ul {
     font-size: x-small;
     padding-left: 0.5rem;
     padding-right: 0.5rem;
+    height: 1rem;
 
 }
 
-/* .lineMsg {
-    float: left;
-} */
-
-li{
+.lineMsg{
     width: max-content;
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    text-align: left;
+    white-space: nowrap;
+    margin-left: 0.5rem;
+    align-items: center;
+}
+.hr{
+    width: 100%;
+    justify-content: left;
 }
