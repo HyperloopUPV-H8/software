@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 import { initializePodData, updatePodData } from "@slices/podDataSlice";
+import { updateConnection } from "@slices/connectionsSlice";
 import { PodData } from "@models/PodData/PodData";
+import { createConnection } from "@models/Connection";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 
@@ -18,33 +20,40 @@ async function getPodDataStructure(): Promise<PodData> {
 
 export const DataService = ({ children }: any) => {
   const dispatch = useDispatch();
-  // const packetUpdateSocket = useRef(
-  //   new WebSocket(
-  //     `ws://${import.meta.env.VITE_SERVER_IP}:${
-  //       import.meta.env.VITE_SERVER_PORT
-  //     }${import.meta.env.VITE_WS_PACKETS}`
-  //   )
-  // );
+  let packetUpdateSocket!: React.MutableRefObject<WebSocket>;
 
   useEffect(() => {
-    getPodDataStructure().then((podData) => {
-      dispatch(initializePodData(podData));
-    });
-    // .then(() => {
-    //   packetUpdateSocket.current.onopen = () => {};
-    //   packetUpdateSocket.current.onmessage = (ev) => {
-    //     let packetUpdates = JSON.parse(ev.data);
-    //     dispatch(updatePodData(packetUpdates));
-    //   };
+    getPodDataStructure()
+      .then((podData) => {
+        dispatch(initializePodData(podData));
+      })
+      .then(() => {
+        packetUpdateSocket = useRef(
+          new WebSocket(
+            `ws://${process.env.SERVER_IP}:${process.env.SERVER_PORT}${process.env.ORDERS_DESCRIPTION_URL}`
+          )
+        );
+        packetUpdateSocket.current = new WebSocket(
+          `ws://${import.meta.env.VITE_SERVER_IP}:${
+            import.meta.env.VITE_SERVER_PORT
+          }${import.meta.env.VITE_WS_PACKETS}`
+        );
+        dispatch(updateConnection(createConnection("Packets", false)));
+        packetUpdateSocket.current.onopen = (ev) => {
+          dispatch(updateConnection(createConnection("Packets", true)));
+        };
+        packetUpdateSocket.current.onmessage = (ev) => {
+          let packetUpdates = JSON.parse(ev.data);
+          dispatch(updatePodData(packetUpdates));
+        };
+        packetUpdateSocket.current.onclose = () => {
+          dispatch(updateConnection(createConnection("Packets", false)));
+        };
+      });
 
-    //TODO: implementar
-    //packetUpdateSocket.current.onclose = () => {};
-    //packetUpdateSocket.current.onerror = () => {};
-    // });
-
-    // return () => {
-    //   packetUpdateSocket.current.close();
-    // };
+    return () => {
+      packetUpdateSocket.current.close();
+    };
   }, []);
 
   return <>{children}</>;

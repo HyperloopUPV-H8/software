@@ -1,6 +1,4 @@
-import { Order } from "@models/Order";
-
-export type OrderDescription = {
+export type OrderWebAdapter = {
   id: number;
-  fields: { name: string; valueType: string }[];
+  fieldDescriptions: { name: string; valueType: "Number" | "Text" }[];
 };
