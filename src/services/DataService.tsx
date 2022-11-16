@@ -8,16 +8,15 @@ import { useDispatch } from "react-redux";
 import { podDataMock } from "@mocks/PodDataMock";
 
 async function getPodDataStructure(): Promise<PodData> {
-  return Promise.resolve(podDataMock);
-  // return axios
-  //   .get(
-  //     `http://${import.meta.env.VITE_SERVER_IP}:${
-  //       import.meta.env.VITE_SERVER_PORT
-  //     }${import.meta.env.VITE_POD_DATA_DESCRIPTION_URL}`
-  //   )
-  //   .then((response) => {
-  //     return response.data as PodData;
-  //   });
+  return axios
+    .get(
+      `http://${import.meta.env.VITE_SERVER_IP}:${
+        import.meta.env.VITE_SERVER_PORT
+      }${import.meta.env.VITE_POD_DATA_DESCRIPTION_URL}`
+    )
+    .then((response) => {
+      return response.data as PodData;
+    });
 }
 
 export const DataService = ({ children }: any) => {
