@@ -11,27 +11,30 @@ export const MessageList = ({ messages }: Props) => {
     const [messagesWithCounts, setMessagesWithCounts] = useState([] as MessageCounter[]);
 
     useEffect(() => {
-        //if(messagesWithCounts.length == 0){
-
             let contadores: number[] = messagesRepeated(messages)
+            console.log("contadores: " + contadores)
             createMessagesWithCounts(contadores)
-        //}
     }, [])
 
 
 
     const createMessagesWithCounts = (contadores: number[]): void => {
-        console.log(messages)
+        console.log("messages.length: " + messages.length)
+        console.log("contadores.length: " + contadores.length)
         let items = [] as MessageCounter[];
-        for(let i = 0; i < messages.length; i++){
+
+        for(let i = 0, j = 0; i < messages.length && j < contadores.length; i++, j++){
             let item: MessageCounter = {
                 msg: messages[i],
-                count: contadores[i]
+                count: contadores[j]
             }
-    
+
             items.push(item)
-            
-                //console.log(item)
+
+            if(item.count > 1){
+                //several elements mustn't be represented because they are repeated
+                i += item.count-1
+            }
         }
 
         setMessagesWithCounts(
@@ -39,12 +42,8 @@ export const MessageList = ({ messages }: Props) => {
                 ...items
             ]
         );
-        
-        //console.log(messagesWithCounts)
     }
 
-
-    console.log(messagesWithCounts)
     return (
         <div id="containerMessages">
             <ul className="lineMsgUl">{messagesWithCounts.map((item, index) => {
@@ -62,23 +61,34 @@ export const MessageList = ({ messages }: Props) => {
 
 const messagesRepeated = (messages: Message[]): (number[]) => {
     let counts: number[] = []
-    for (let [i, el] of messages.entries()) {
-        console.log(el)
-        let count = deleteDuplicated(el.id, messages, i + 1)
-        counts.push(count)
+    let count: number = 1
 
-    }
+    for(let i = 0; i < messages.length; i++){
+        let el = messages[i]
+        console.log(el)
+        if(i < messages.length - 1){
+            count = checkDuplicated(el.id, messages, i + 1)
+        } else{
+            //if it is in the last element it is because is alone
+            count = 1 
+        }
+        
+        counts.push(count)
+        if(count > 1){
+            //several elements mustn't be counted because they are repeated
+            i += count-1
+        }
+        console.log("count: " + count)
+    } 
     return counts
 }
 
-const deleteDuplicated = (id: string, messages: Message[], index: number): number => {
+const checkDuplicated = (id: string, messages: Message[], index: number): number => {
     let count: number = 1
     let finished: boolean = false
 
     while(!finished && index < messages.length){
         if (id === messages[index].id) {
-            console.log("Hay repetidos")
-            messages.splice(index, 1)
             count++
         } else{
             finished = true
