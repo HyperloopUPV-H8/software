@@ -18,34 +18,33 @@ async function getPodDataStructure(): Promise<PodData> {
 
 export const DataService = ({ children }: any) => {
   const dispatch = useDispatch();
-  const packetUpdateSocket = useRef(
-    new WebSocket(
-      `ws://${import.meta.env.VITE_SERVER_IP}:${
-        import.meta.env.VITE_SERVER_PORT
-      }${import.meta.env.VITE_WS_PACKETS}`
-    )
-  );
+  // const packetUpdateSocket = useRef(
+  //   new WebSocket(
+  //     `ws://${import.meta.env.VITE_SERVER_IP}:${
+  //       import.meta.env.VITE_SERVER_PORT
+  //     }${import.meta.env.VITE_WS_PACKETS}`
+  //   )
+  // );
 
   useEffect(() => {
-    getPodDataStructure()
-      .then((podData) => {
-        dispatch(initializePodData(podData));
-      })
-      .then(() => {
-        packetUpdateSocket.current.onopen = () => {};
-        packetUpdateSocket.current.onmessage = (ev) => {
-          let packetUpdates = JSON.parse(ev.data);
-          dispatch(updatePodData(packetUpdates));
-        };
+    getPodDataStructure().then((podData) => {
+      dispatch(initializePodData(podData));
+    });
+    // .then(() => {
+    //   packetUpdateSocket.current.onopen = () => {};
+    //   packetUpdateSocket.current.onmessage = (ev) => {
+    //     let packetUpdates = JSON.parse(ev.data);
+    //     dispatch(updatePodData(packetUpdates));
+    //   };
 
-        //TODO: implementar
-        //packetUpdateSocket.current.onclose = () => {};
-        //packetUpdateSocket.current.onerror = () => {};
-      });
+    //TODO: implementar
+    //packetUpdateSocket.current.onclose = () => {};
+    //packetUpdateSocket.current.onerror = () => {};
+    // });
 
-    return () => {
-      packetUpdateSocket.current.close();
-    };
+    // return () => {
+    //   packetUpdateSocket.current.close();
+    // };
   }, []);
 
   return <>{children}</>;

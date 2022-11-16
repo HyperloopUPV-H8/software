@@ -1,13 +1,17 @@
-import { useState } from "react";
 import "./App.css";
-import { TestComponent } from "@components/TestComponent/TestComponent";
 import * as dotenv from "dotenv";
-dotenv.config();
+import { useSelector } from "react-redux";
+import type { RootState } from "./store";
+import { DataService } from "@services/DataService";
+import { podDataMock } from "./mocks/PodDataMock";
 
 function App() {
-  const [count, setCount] = useState(0);
-
-  return <div className="App"></div>;
+  let podData = useSelector((state: RootState) => state.podData);
+  return (
+    <div className="App">
+      <DataService>{JSON.stringify({ podData })}</DataService>
+    </div>
+  );
 }
 
 export default App;
