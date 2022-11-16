@@ -33,11 +33,6 @@ export const DataService = ({ children }: any) => {
             `ws://${process.env.SERVER_IP}:${process.env.SERVER_PORT}${process.env.ORDERS_DESCRIPTION_URL}`
           )
         );
-        packetUpdateSocket.current = new WebSocket(
-          `ws://${import.meta.env.VITE_SERVER_IP}:${
-            import.meta.env.VITE_SERVER_PORT
-          }${import.meta.env.VITE_WS_PACKETS}`
-        );
         dispatch(updateConnection(createConnection("Packets", false)));
         packetUpdateSocket.current.onopen = (ev) => {
           dispatch(updateConnection(createConnection("Packets", true)));

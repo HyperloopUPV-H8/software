@@ -3,6 +3,8 @@ import { useEffect, createContext, useRef } from "react";
 import { Order, createOrder } from "@models/Order";
 import { setOrders } from "@slices/ordersSlice";
 import { useDispatch } from "react-redux";
+import { createConnection } from "@models/Connection";
+import { updateConnection } from "@slices/connectionsSlice";
 
 interface IOrderService {
   sendOrder(order: Order): void;
@@ -41,6 +43,13 @@ export const OrderService = ({ children }: any) => {
         `ws://${process.env.SERVER_IP}:${process.env.SERVER_PORT}${process.env.ORDERS_DESCRIPTION_URL}`
       )
     );
+    dispatch(updateConnection(createConnection("Orders", false)));
+    orderSocket.current.onopen = () => {
+      dispatch(updateConnection(createConnection("Orders", true)));
+    };
+    orderSocket.current.onclose = () => {
+      dispatch(updateConnection(createConnection("Orders", false)));
+    };
 
     return () => {
       orderSocket.current.close();
