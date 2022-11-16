@@ -26,7 +26,9 @@ export const OrderService = ({ children }: any) => {
 
   useEffect(() => {
     fetch(
-      `http://${process.env.SERVER_IP}:${process.env.SERVER_PORT}/backend/orders`
+      `http://${import.meta.env.VITE_SERVER_IP}:${
+        import.meta.env.VITE_SERVER_PORT
+      }${import.meta.env.VITE_ORDERS_URL}`
     )
       .then((response) => response.json())
       .then((orderDescriptions: OrderWebAdapter[]) => {
@@ -40,7 +42,9 @@ export const OrderService = ({ children }: any) => {
 
     orderSocket = useRef(
       new WebSocket(
-        `ws://${process.env.SERVER_IP}:${process.env.SERVER_PORT}${process.env.ORDERS_DESCRIPTION_URL}`
+        `ws://${import.meta.env.VITE_SERVER_IP}:${
+          import.meta.env.VITE_SERVER_PORT
+        }${import.meta.env.VITE_ORDERS_URL}`
       )
     );
     dispatch(updateConnection(createConnection("Orders", false)));

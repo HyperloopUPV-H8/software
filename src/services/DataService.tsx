@@ -30,7 +30,9 @@ export const DataService = ({ children }: any) => {
       .then(() => {
         packetUpdateSocket = useRef(
           new WebSocket(
-            `ws://${process.env.SERVER_IP}:${process.env.SERVER_PORT}${process.env.ORDERS_DESCRIPTION_URL}`
+            `ws://${import.meta.env.SERVER_IP}:${
+              import.meta.env.VITE_SERVER_PORT
+            }${import.meta.env.VITE_ORDERS_DESCRIPTION_URL}`
           )
         );
         dispatch(updateConnection(createConnection("Packets", false)));
