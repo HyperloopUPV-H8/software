@@ -24,8 +24,8 @@ export const ReceiveTable = ({}) => {
             return (
               <React.Fragment key={board.name}>
                 <tr className={styles.boardRow}>
-                  <td colSpan={5}>
-                    <span className={styles.boardName}>{board.name}</span>
+                  <td className={styles.boardName} colSpan={5}>
+                    {board.name}
                   </td>
                 </tr>
                 {board.packets.map((packet) => {

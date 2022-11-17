@@ -19,14 +19,15 @@ $custom-blue: #317ae7;
 #headers th {
   background-color: $custom-blue;
   color: white;
-  padding: 0.5rem;
+  padding: 0.2rem 0.5rem;
   font-weight: 600;
 }
 
 .boardRow {
   outline: 1px solid $custom-blue;
-
   .boardName {
+    text-align: left;
+    padding-left: 1rem;
     color: $custom-blue;
     font-weight: 600;
   }
