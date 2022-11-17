@@ -32,7 +32,7 @@ export const DataService = ({ children }: any) => {
         packetUpdateSocket.current = new WebSocket(
           `ws://${import.meta.env.VITE_SERVER_IP}:${
             import.meta.env.VITE_SERVER_PORT
-          }${import.meta.env.VITE_ORDERS_URL}`
+          }${import.meta.env.VITE_PACKETS_URL}`
         );
         dispatch(updateConnection(createConnection("Packets", false)));
         packetUpdateSocket.current.onopen = (ev) => {

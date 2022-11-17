@@ -14,20 +14,16 @@ export function setLastBatchIDs(podData: PodData, updates: PacketUpdate[]) {
 export function updatePodData(podData: PodData, updates: PacketUpdate[]) {
   for (let update of updates) {
     let packet = getPacket(podData, update.id);
-    updatePacket(packet, update);
+    updatePacket(packet!, update);
   }
 }
 
-function getPacket(podData: PodData, id: number): Packet {
-  let board = podData.boards.find((board) => {
-    return board.packets.some((packet) => {
-      packet.id == id;
-    });
-  })!;
-
-  let packet = board.packets.find((packet) => {
-    return packet.id == id;
-  })!;
-
-  return packet;
+function getPacket(podData: PodData, id: number): Packet | undefined {
+  for (let b of podData.boards) {
+    for (let p of b.packets) {
+      if (p.id == id) {
+        return p
+      }
+    }
+  }
 }
