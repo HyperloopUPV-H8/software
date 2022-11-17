@@ -1,7 +1,10 @@
-import { OrderDescription } from "@adapters/OrderDescription";
+import { OrderWebAdapter } from "@adapters/OrderDescription";
 import { useEffect, createContext, useRef } from "react";
 import { Order, createOrder } from "@models/Order";
 import { setOrders } from "@slices/ordersSlice";
+import { useDispatch } from "react-redux";
+import { createConnection } from "@models/Connection";
+import { updateConnection } from "@slices/connectionsSlice";
 
 interface IOrderService {
   sendOrder(order: Order): void;
@@ -12,35 +15,54 @@ export const OrderServiceContext = createContext<IOrderService>(
 );
 
 export const OrderService = ({ children }: any) => {
-  const orderSocket = useRef(
-    new WebSocket(
-      `ws://${process.env.SERVER_IP}:${process.env.SERVER_PORT}${process.env.ORDERS_DESCRIPTION_URL}`
-    )
-  );
-
-  let orderService = {
-    sendOrder(order: Order) {
-      orderSocket.current.send(JSON.stringify(order));
-    },
-  };
+  const dispatch = useDispatch();
+  let orderSocket = useRef<WebSocket>();
 
   useEffect(() => {
     fetch(
-      `http://${process.env.SERVER_IP}:${process.env.SERVER_PORT}/backend/orders`
+      `http://${import.meta.env.VITE_SERVER_IP}:${
+        import.meta.env.VITE_SERVER_PORT
+      }${import.meta.env.VITE_ORDERS_URL}`
     )
       .then((response) => response.json())
-      .then((orderDescriptions: OrderDescription[]) => {
+      .then((orderDescriptions: OrderWebAdapter[]) => {
         let orders: Order[] = [];
         for (let orderDescription of orderDescriptions) {
           let order = createOrder(orderDescription);
           orders.push(order);
         }
-        setOrders(orders);
+        dispatch(setOrders(orders));
+      })
+      .catch((reason) => {
+        console.error(`Error fetching Orders Description: ${reason}`);
       });
+
+    orderSocket.current = new WebSocket(
+      `ws://${import.meta.env.VITE_SERVER_IP}:${
+        import.meta.env.VITE_SERVER_PORT
+      }${import.meta.env.VITE_ORDERS_URL}`
+    );
+    dispatch(updateConnection(createConnection("Orders", false)));
+    orderSocket.current.onopen = () => {
+      dispatch(updateConnection(createConnection("Orders", true)));
+    };
+    orderSocket.current.onclose = () => {
+      dispatch(updateConnection(createConnection("Orders", false)));
+    };
+
     return () => {
-      orderSocket.current.close();
+      if (orderSocket.current) {
+        orderSocket.current.close();
+      }
     };
   }, []);
+
+  let orderService = {
+    sendOrder(order: Order) {
+      //FIXME: could be undefined
+      orderSocket.current!.send(JSON.stringify(order));
+    },
+  };
 
   return (
     <OrderServiceContext.Provider value={orderService}>

@@ -20,6 +20,7 @@ export default defineConfig({
       "@services": path.resolve(__dirname, "./src/services"),
       "@slices": path.resolve(__dirname, "./src/slices"),
       "@tests": path.resolve(__dirname, "./src/tests"),
+      "@mocks": path.resolve(__dirname, "./src/mocks"),
     },
   },
 });
