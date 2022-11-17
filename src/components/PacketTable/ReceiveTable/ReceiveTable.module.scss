@@ -1,0 +1,53 @@
+@use "@styles/styles";
+
+$custom-blue: #317ae7;
+
+#wrapper {
+  outline: 1px solid $custom-blue;
+  border-radius: styles.$default-border-radius;
+  background-color: styles.$default-background;
+  overflow: hidden;
+}
+
+#table,
+#table th,
+#table td {
+  outline: 1px solid lightgray;
+  border-collapse: collapse;
+}
+
+#headers th {
+  background-color: $custom-blue;
+  color: white;
+  padding: 0.5rem;
+  font-weight: 600;
+}
+
+.boardRow {
+  outline: 1px solid $custom-blue;
+
+  .boardName {
+    color: $custom-blue;
+    font-weight: 600;
+  }
+}
+
+.measurementsRow {
+  display: flex;
+  flex-direction: column;
+}
+
+.measurementRow {
+  display: flex;
+  flex-direction: row;
+
+  padding: 1rem;
+  gap: 1rem;
+}
+
+.measurementContent {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+}

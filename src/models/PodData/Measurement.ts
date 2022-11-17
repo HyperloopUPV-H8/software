@@ -1,6 +1,6 @@
 export enum ValueType {
-  Number,
-  Text,
+  Number = "Number",
+  Text = "Text",
 }
 
 export class Measurement {
