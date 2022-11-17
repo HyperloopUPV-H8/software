@@ -23,7 +23,9 @@ export const ReceiveTable = ({}) => {
             return (
               <>
                 <tr key={board.name} className={styles.boardRow}>
-                  <span className={styles.boardName}>{board.name}</span>
+                  <td colSpan={5}>
+                    <span className={styles.boardName}>{board.name}</span>
+                  </td>
                 </tr>
                 {board.packets.map((packet) => {
                   return (
