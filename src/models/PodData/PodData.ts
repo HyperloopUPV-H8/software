@@ -11,7 +11,7 @@ export function setLastBatchIDs(podData: PodData, updates: PacketUpdate[]) {
   podData.lastBatchIDs = updates.map((update) => update.id);
 }
 
-export function updatePodData(podData: PodData, updates: PacketUpdate[]) {
+export function updatePodData(podData: PodData, updates: any) {
   for (let update of updates) {
     let packet = getPacket(podData, update.id);
     updatePacket(packet!, update);
@@ -22,7 +22,7 @@ function getPacket(podData: PodData, id: number): Packet | undefined {
   for (let b of podData.boards) {
     for (let p of b.packets) {
       if (p.id == id) {
-        return p
+        return p;
       }
     }
   }

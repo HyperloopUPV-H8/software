@@ -3,21 +3,23 @@ export enum ValueType {
   Text = "Text",
 }
 
-export class Measurement {
+export type Measurement = {
   name: string;
   type: ValueType;
   value: string | number;
   units: string;
+};
 
-  constructor(
-    name: string,
-    type: ValueType,
-    value: string | number,
-    units: string
-  ) {
-    this.name = name;
-    this.type = type;
-    this.value = value;
-    this.units = units;
-  }
+export function createMeasurement(
+  name: string,
+  type: ValueType,
+  value: string | number,
+  units: string
+) {
+  return {
+    name,
+    type,
+    value,
+    units,
+  };
 }

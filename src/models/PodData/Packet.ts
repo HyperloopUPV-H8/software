@@ -1,6 +1,10 @@
 import { MeasurementUpdate } from "@adapters/MeasurementUpdate";
 import { PacketUpdate } from "@adapters/PacketUpdate";
-import { Measurement, ValueType } from "@models/PodData/Measurement";
+import {
+  Measurement,
+  ValueType,
+  createMeasurement,
+} from "@models/PodData/Measurement";
 
 export type Packet = {
   id: number;
@@ -15,15 +19,17 @@ export function updatePacket(packet: Packet, update: PacketUpdate) {
   packet.cycleTime = update.cycleTime;
   packet.cycleTime = update.cycleTime;
   packet.hexValue = update.hexValue;
-  packet.measurements = updateMeasurements(update.measurementUpdates)
+  packet.measurements = updateMeasurements(update.measurementUpdates);
 }
 
 function updateMeasurements(
   measurementUpdates: MeasurementUpdate[]
 ): Measurement[] {
-  let measurements = new Array()
+  let measurements = new Array();
   for (let update of measurementUpdates) {
-    measurements.push(new Measurement(update.name, ValueType.Text, update.value, "deg"))
+    measurements.push(
+      createMeasurement(update.name, ValueType.Text, update.value, "deg")
+    );
   }
-  return measurements
+  return measurements;
 }
