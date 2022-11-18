@@ -21,6 +21,8 @@ export default defineConfig({
       "@slices": path.resolve(__dirname, "./src/slices"),
       "@tests": path.resolve(__dirname, "./src/tests"),
       "@mocks": path.resolve(__dirname, "./src/mocks"),
+      "@layouts": path.resolve(__dirname, "./src/layouts"),
+      "@pages": path.resolve(__dirname, "./src/pages"),
     },
   },
 });
