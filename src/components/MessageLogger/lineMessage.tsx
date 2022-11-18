@@ -9,10 +9,18 @@ interface Props {
 }
 
 export const LineMessage = ({ message, count }: Props) => {
+    const [isSelected, setIsSelected] = useState(false)
+
+    const dropDownLine = ()  => {
+        setIsSelected(current => !current);
+        
+    }
 
     return (
         <>
-        <li className="lineMsg" key={message.id}>
+        <li className="lineMsg" key={message.id}  style={{
+                whiteSpace: isSelected ? 'normal' : 'nowrap'
+            }}>
             <img id="drop-down-arrow" src={logo} onClick={dropDownLine} />
             {count > 1 ? <label id="count">{count}</label> : null}
             <label id="idMsg">{message.id}: </label>
@@ -23,14 +31,4 @@ export const LineMessage = ({ message, count }: Props) => {
             </>
     )
 
-}
-
-const dropDownLine = (): void => {
-    console.log("Implementar línea despleagable")
-}
-
-const showCounter = (count: number, setShowCount: React.Dispatch<React.SetStateAction<boolean>>): void => {
-    if (count > 0) {
-        setShowCount(true)
-    }
 }

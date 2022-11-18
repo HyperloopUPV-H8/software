@@ -6,9 +6,10 @@
 }
 
 #descMsg{
+    
     text-overflow: ellipsis;
-    white-space: nowrap;
     overflow: hidden; 
+
 }
 
 ul {
@@ -17,13 +18,6 @@ ul {
     list-style-type: none;
     margin: 0rem;
 }
-
-/* Para tema blanco
-ul {
-    background-color: white;
-    color: black;
-    list-style-type: none;
-} */
 
 #drop-down-arrow {
     width: 1rem;
@@ -47,7 +41,7 @@ ul {
 }
 
 .lineMsg{
-    width: max-content;
+    width: 97%;
     display: flex;
     flex-direction: row;
     justify-content: left;
@@ -56,6 +50,7 @@ ul {
     margin-left: 0.5rem;
     align-items: center;
 }
+
 .hr{
     width: 100%;
     justify-content: left;
