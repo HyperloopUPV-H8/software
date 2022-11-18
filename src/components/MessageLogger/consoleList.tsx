@@ -8,7 +8,6 @@ interface Props {
 }
 
 export const ConsoleList = ({ title, messages }: Props) => {
-    //const [Message, setMessage] = useState();
 
     return (
         <>
