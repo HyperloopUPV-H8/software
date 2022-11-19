@@ -25,7 +25,9 @@
       "@slices/*": ["slices/*"],
       "@tests/*": ["tests/*"],
       "@mocks/*": ["mocks/*"],
-      "@styles/*": ["styles/*"]
+      "@styles/*": ["styles/*"],
+      "@layouts/*": ["layouts/*"],
+      "@pages/*": ["pages/*"]
     }
   },
   "include": ["src"],
