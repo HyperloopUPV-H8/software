@@ -24,7 +24,9 @@
       "@services/*": ["services/*"],
       "@slices/*": ["slices/*"],
       "@tests/*": ["tests/*"],
-      "@mocks/*": ["mocks/*"]
+      "@mocks/*": ["mocks/*"],
+      "@layouts/*": ["layouts/*"],
+      "@pages/*": ["pages/*"]
     }
   },
   "include": ["src"],
