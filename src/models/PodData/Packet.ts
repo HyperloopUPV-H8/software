@@ -12,24 +12,21 @@ export type Packet = {
   hexValue: number;
   count: number;
   cycleTime: number;
-  measurements: Measurement[];
+  measurements: { [name: string]: Measurement };
 };
 export function updatePacket(packet: Packet, update: PacketUpdate) {
   packet.count = update.count;
   packet.cycleTime = update.cycleTime;
   packet.cycleTime = update.cycleTime;
   packet.hexValue = update.hexValue;
-  packet.measurements = updateMeasurements(update.measurementUpdates);
+  updateMeasurements(packet.measurements, update.measurementUpdates);
 }
 
 function updateMeasurements(
-  measurementUpdates: MeasurementUpdate[]
-): Measurement[] {
-  let measurements = new Array();
-  for (let update of measurementUpdates) {
-    measurements.push(
-      createMeasurement(update.name, ValueType.Text, update.value, "deg")
-    );
+  measurements: Packet["measurements"],
+  measurementUpdates: PacketUpdate["measurementUpdates"]
+): void {
+  for (let [_, measurement] of Object.entries(measurements)) {
+    measurement.value = measurementUpdates[measurement.name];
   }
-  return measurements;
 }

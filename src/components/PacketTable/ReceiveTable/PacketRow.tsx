@@ -15,7 +15,7 @@ export const PacketRow = ({ packet }: Props) => {
         <td>{packet.count}</td>
         <td>{packet.cycleTime}</td>
       </tr>
-      {packet.measurements.map((measurement) => {
+      {Object.values(packet.measurements).map((measurement) => {
         return (
           <MeasurementRow
             key={measurement.name}
