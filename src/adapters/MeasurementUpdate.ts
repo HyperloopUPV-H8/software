@@ -1,4 +1,1 @@
-export type MeasurementUpdate = {
-  name: string;
-  value: number | string;
-};
+export type MeasurementUpdate = number | string;

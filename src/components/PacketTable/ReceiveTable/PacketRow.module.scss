@@ -1,0 +1,8 @@
+@use "@styles/styles";
+.packetRow {
+  @include styles.code-text;
+}
+
+.packetRow td {
+  padding: 0 1rem;
+}

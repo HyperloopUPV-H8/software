@@ -6,6 +6,7 @@ import { createConnection } from "@models/Connection";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { podDataMock } from "@mocks/PodDataMock";
+import { PacketUpdate } from "@adapters/PacketUpdate";
 
 async function getPodDataStructure(): Promise<PodData> {
   return axios
@@ -32,14 +33,16 @@ export const DataService = ({ children }: any) => {
         packetUpdateSocket.current = new WebSocket(
           `ws://${import.meta.env.VITE_SERVER_IP}:${
             import.meta.env.VITE_SERVER_PORT
-          }${import.meta.env.VITE_ORDERS_URL}`
+          }${import.meta.env.VITE_PACKETS_URL}`
         );
         dispatch(updateConnection(createConnection("Packets", false)));
         packetUpdateSocket.current.onopen = (ev) => {
           dispatch(updateConnection(createConnection("Packets", true)));
         };
         packetUpdateSocket.current.onmessage = (ev) => {
-          let packetUpdates = JSON.parse(ev.data);
+          let packetUpdates = JSON.parse(ev.data) as {
+            [id: number]: PacketUpdate;
+          };
           dispatch(updatePodData(packetUpdates));
         };
         packetUpdateSocket.current.onclose = () => {

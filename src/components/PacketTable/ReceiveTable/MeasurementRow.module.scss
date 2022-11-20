@@ -1,0 +1,9 @@
+@use "@styles/styles";
+
+.measurementWrapper {
+  @include styles.code-text;
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  padding: 0 1rem;
+}

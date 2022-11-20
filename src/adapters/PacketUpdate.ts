@@ -5,5 +5,5 @@ export type PacketUpdate = {
   hexValue: number;
   cycleTime: number;
   count: number;
-  measurementUpdates: MeasurementUpdate[];
+  measurementUpdates: { [name: string]: MeasurementUpdate };
 };

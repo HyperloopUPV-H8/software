@@ -25,6 +25,7 @@
       "@slices/*": ["slices/*"],
       "@tests/*": ["tests/*"],
       "@mocks/*": ["mocks/*"],
+      "@styles/*": ["styles/*"],
       "@layouts/*": ["layouts/*"],
       "@pages/*": ["pages/*"]
     }

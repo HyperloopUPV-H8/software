@@ -1,0 +1,23 @@
+$normal-font: Inter;
+$code-font: Consolas;
+$default-text-color: #40464f;
+$default-background: #fdfdfd;
+$default-border-radius: 0.8rem;
+$default-font-size: 0.8rem;
+@mixin code-text {
+  font-family: Consolas;
+  font-size: $default-font-size;
+  color: $default-text-color;
+}
+
+@mixin default-text {
+  font-family: $normal-font;
+  font-size: $default-font-size;
+  color: $default-text-color;
+}
+
+//If it's only :root, font-size changes the base rem. If it's :root *, it affects everything, skipping inheritance.
+:root > * {
+  box-sizing: border-box;
+  @include default-text;
+}
