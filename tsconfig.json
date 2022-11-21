@@ -27,7 +27,8 @@
       "@mocks/*": ["mocks/*"],
       "@styles/*": ["styles/*"],
       "@layouts/*": ["layouts/*"],
-      "@pages/*": ["pages/*"]
+      "@pages/*": ["pages/*"],
+      "@public/*": ["public/*"]
     }
   },
   "include": ["src"],
