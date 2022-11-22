@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Message } from "@components/MessageLogger/structs/Message";
-import "@components/MessageLogger/LineMessage.css"
+import styles from "@components/MessageLogger/LineMessage.module.scss"
 import logo from "./arrow-dropdown-circle.svg"
 
 interface Props {
@@ -18,16 +18,18 @@ export const LineMessage = ({ message, count }: Props) => {
 
     return (
         <>
-        <li className="lineMsg" key={message.id}  style={{
+        <li className={styles.lineMsg} key={message.id}  style={{
                 whiteSpace: isSelected ? 'normal' : 'nowrap'
             }}>
-            <img id="drop-down-arrow" src={logo} onClick={dropDownLine} />
-            {count > 1 ? <label id="count">{count}</label> : null}
-            <label id="idMsg">{message.id}: </label>
-            <label id="descMsg">{message.desc}</label>
+            <img id={styles.dropDownArrow} src={logo} onClick={dropDownLine} style={{
+                transform: isSelected ? 'rotate(270deg)' : 'none'
+            }}/>
+            <label id={styles.idMsg}>{message.id}: </label>
+            {count > 1 ? <label id={styles.count}>{count}</label> : null}
+            <label id={styles.descMsg}>{message.desc}</label>
             <br />
         </li>
-            <hr className="hr"/>
+            <hr className={styles.hr}/>
             </>
     )
 

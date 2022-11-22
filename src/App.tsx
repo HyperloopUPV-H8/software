@@ -5,6 +5,7 @@ import { HomePage } from "@pages/HomePage/HomePage";
 import { Chart } from "@components/Chart/Chart";
 import { Axis } from "@components/Chart/Axis";
 import { useState, useEffect } from "react";
+import { FaultsAndWarningList } from "@components/MessageLogger/FaultsAndWarningList";
 
 type Point = [number, number];
 let index = 0;
@@ -34,11 +35,14 @@ function App() {
     <div className="App">
       {/* <Axis maxY={10 / 10} minY={-5 / 10} /> */}
       {/* <Chart points={points} /> */}
+
+
       <DataService>
         <OrderService>
           <HomePage />
         </OrderService>
       </DataService>
+      {/* <FaultsAndWarningList/> */}
     </div>
   );
 }
