@@ -5,7 +5,7 @@
   flex-direction: row;
   user-select: none;
   width: auto;
-  height: 2rem;
+  height: 2.5rem;
 }
 
 #secondEdge {
@@ -16,9 +16,9 @@
   background-color: styles.$default-background;
   display: flex;
   align-items: center;
-  margin: 0 -0.6px;
+  margin: 0 -15px;
   padding: 0.3rem 0;
-  height: fit-content;
+  height: 100%;
 }
 
 #label {

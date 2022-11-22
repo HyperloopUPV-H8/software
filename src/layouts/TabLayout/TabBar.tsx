@@ -6,14 +6,18 @@ import React from "react";
 type Props = {
   items: TabItem[];
   onTabClick: (id: string) => void;
+  visibleTabId: string;
 };
 
-export const TabBar = ({ items, onTabClick }: Props) => {
+export const TabBar = ({ items, onTabClick, visibleTabId }: Props) => {
   return (
     <div id={styles.wrapper}>
       {items.map((item) => {
         return (
-          <React.Fragment key={item.id}>
+          <div
+            key={item.id}
+            className={item.id != visibleTabId ? styles.inactive : ""}
+          >
             <Tab
               title={item.name}
               icon={item.icon}
@@ -21,7 +25,7 @@ export const TabBar = ({ items, onTabClick }: Props) => {
                 onTabClick(item.id);
               }}
             ></Tab>
-          </React.Fragment>
+          </div>
         );
       })}
     </div>

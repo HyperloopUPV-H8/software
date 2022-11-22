@@ -4,13 +4,6 @@
   height: 100%;
   aspect-ratio: 28.712425 / 29;
   background-color: styles.$default-background;
+  border-top-left-radius: 50%;
   @include styles.undraggable;
-
-  mask-image: url("src/public/svg/tab-edge.svg");
-  mask-repeat: no-repeat;
-  mask-size: contain;
-
-  -webkit-mask-image: url("src/public/svg/tab-edge.svg");
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-size: contain;
 }

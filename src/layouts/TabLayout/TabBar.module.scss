@@ -4,10 +4,14 @@
   flex-shrink: 0;
   align-items: flex-end;
   width: 100%;
-  height: 2rem;
+  height: auto;
   overflow-x: scroll;
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
+}
+
+.inactive {
+  opacity: 70%;
 }
 
 #wrapper > *:nth-child(n + 2) {

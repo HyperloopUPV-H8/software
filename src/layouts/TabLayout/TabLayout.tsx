@@ -9,25 +9,29 @@ type Props = {
 };
 
 export const TabLayout = ({ items }: Props) => {
-  let [visibleTab, setVisibleTab] = useState("");
+  let [visibleTabId, setVisibleTabId] = useState("");
 
   function handleClick(id: string) {
-    setVisibleTab(id);
+    setVisibleTabId(id);
   }
 
   useEffect(() => {
     if (items.length > 0) {
-      setVisibleTab(items[0].id);
+      setVisibleTabId(items[0].id);
     }
   }, []);
 
   return (
     <div id={styles.wrapper}>
-      <TabBar items={items} onTabClick={handleClick} />
+      <TabBar
+        items={items}
+        onTabClick={handleClick}
+        visibleTabId={visibleTabId}
+      />
       <div id={styles.body}>
         <div id={styles.componentWrapper}>
           {items.map((item) => {
-            if (visibleTab == item.id) {
+            if (visibleTabId == item.id) {
               return (
                 <React.Fragment key={item.id}>{item.component}</React.Fragment>
               );
