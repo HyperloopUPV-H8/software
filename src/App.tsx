@@ -1,15 +1,46 @@
-
-import { FaultsAndWarningList } from "@components/MessageLogger/FaultsAndWarningList";
-import { useState } from "react";
 import "./App.css";
-//import {sdfsd} from "@components/MessageLogger"
+import { DataService } from "@services/DataService";
+import { OrderService } from "@services/OrderService";
+import { HomePage } from "@pages/HomePage/HomePage";
+import { Chart } from "@components/Chart/Chart";
+import { Axis } from "@components/Chart/Axis";
+import { useState, useEffect } from "react";
+
+type Point = [number, number];
+let index = 0;
 function App() {
-  const [count, setCount] = useState(0);
+  // let [points, setPoints] = useState([] as Point[]);
+  // useEffect(() => {
+  //   let intervalId = setInterval(() => {
+  //     setPoints((prevPoints) => {
+  //       let newPoints = [
+  //         ...prevPoints,
+  //         [index, Math.floor(Math.random() * 100)],
+  //       ] as Point[];
 
+  //       if (newPoints.length > 100) {
+  //         newPoints.shift();
+  //       }
 
-  return <div className="App">
-    <FaultsAndWarningList />
-  </div>;
+  //       return newPoints;
+  //     });
+  //     index++;
+  //   }, 1000 / 60);
+  //   return () => {
+  //     clearInterval(intervalId);
+  //   };
+  // }, []);
+  return (
+    <div className="App">
+      {/* <Axis maxY={10 / 10} minY={-5 / 10} /> */}
+      {/* <Chart points={points} /> */}
+      <DataService>
+        <OrderService>
+          <HomePage />
+        </OrderService>
+      </DataService>
+    </div>
+  );
 }
 
 export default App;

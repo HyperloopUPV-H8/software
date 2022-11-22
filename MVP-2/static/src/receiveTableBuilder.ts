@@ -1,5 +1,4 @@
 import { Measurement, Packet } from "./modals";
-
 var globalPackets = new Map<number, Packet>();
 
 export function updateReceiveTable(packets: Map<number, Packet>) {

@@ -20,7 +20,15 @@
       "@components/*": ["components/*"],
       "@models/*": ["models/*"],
       "@adapters/*": ["adapters/*"],
-      "@context/*": ["context/*"]
+      "@context/*": ["context/*"],
+      "@services/*": ["services/*"],
+      "@slices/*": ["slices/*"],
+      "@tests/*": ["tests/*"],
+      "@mocks/*": ["mocks/*"],
+      "@styles/*": ["styles/*"],
+      "@layouts/*": ["layouts/*"],
+      "@pages/*": ["pages/*"],
+      "@public/*": ["public/*"]
     }
   },
   "include": ["src"],
