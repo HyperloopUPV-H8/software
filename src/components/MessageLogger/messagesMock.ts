@@ -1,0 +1,1 @@
+export const mockmessages = 0;
