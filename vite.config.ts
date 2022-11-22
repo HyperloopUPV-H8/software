@@ -23,7 +23,8 @@ export default defineConfig({
       "@mocks": path.resolve(__dirname, "./src/mocks"),
       "@styles": path.resolve(__dirname, "./src/styles"),
       "@layouts": path.resolve(__dirname, "./src/layouts"),
-      "@pages": path.resolve(__dirname, "./src/pages")
+      "@public": path.resolve(__dirname, "./src/public"),
+      "@pages": path.resolve(__dirname, "./src/pages"),
     },
   },
 });

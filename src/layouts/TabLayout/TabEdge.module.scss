@@ -1,0 +1,9 @@
+@use "@styles/styles";
+
+.tabEdge {
+  height: 100%;
+  aspect-ratio: 28.712425 / 29;
+  background-color: styles.$default-background;
+  border-top-left-radius: 50%;
+  @include styles.undraggable;
+}
