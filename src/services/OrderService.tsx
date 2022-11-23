@@ -1,4 +1,4 @@
-import { OrderWebAdapter } from "@adapters/OrderDescription";
+import { OrderDescription, OrderWebAdapter } from "@adapters/OrderDescription";
 import { useEffect, createContext, useRef } from "react";
 import { Order, createOrder } from "@models/Order";
 import { setOrders } from "@slices/ordersSlice";
@@ -22,13 +22,13 @@ export const OrderService = ({ children }: any) => {
     fetch(
       `http://${import.meta.env.VITE_SERVER_IP}:${
         import.meta.env.VITE_SERVER_PORT
-      }${import.meta.env.VITE_ORDERS_URL}`
+      }${import.meta.env.VITE_ORDER_DESCRIPTIONS_URL}`
     )
       .then((response) => response.json())
-      .then((orderDescriptions: OrderWebAdapter[]) => {
-        let orders: Order[] = [];
-        for (let orderDescription of orderDescriptions) {
-          let order = createOrder(orderDescription);
+      .then((orderWebAdapter: OrderWebAdapter[]) => {
+        let orders: OrderDescription[] = [];
+        for (let adapter of orderWebAdapter) {
+          let order = createOrder(adapter);
           orders.push(order);
         }
         dispatch(setOrders(orders));
@@ -60,6 +60,7 @@ export const OrderService = ({ children }: any) => {
   let orderService = {
     sendOrder(order: Order) {
       //FIXME: could be undefined
+      console.log(order);
       orderSocket.current!.send(JSON.stringify(order));
     },
   };

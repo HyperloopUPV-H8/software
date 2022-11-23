@@ -1,20 +1,23 @@
-import type { OrderWebAdapter } from "@adapters/OrderDescription";
+import type {
+  OrderDescription,
+  OrderWebAdapter,
+} from "@adapters/OrderDescription";
 import { ValueType } from "@models/PodData/Measurement";
-
-export type OrderField = {
-  name: string;
-  value: string | number;
-  valueType: string;
-};
 
 export type Order = {
   id: number;
   fields: OrderField[];
 };
 
-export function createOrder(adapter: OrderWebAdapter): Order {
+export type OrderField = {
+  name: string;
+  value: string | number;
+};
+
+export function createOrder(adapter: OrderWebAdapter): OrderDescription {
   let newFields = adapter.fieldDescriptions.map((descriptionField) => {
-    let value, valueType;
+    let value!: string | number;
+    let valueType!: string;
 
     if (descriptionField.valueType == "Number") {
       value = 0;
@@ -37,7 +40,8 @@ export function createOrder(adapter: OrderWebAdapter): Order {
 
   return {
     id: adapter.id,
-    fields: newFields,
+    name: adapter.name,
+    fieldDescriptions: newFields,
   };
 }
 
