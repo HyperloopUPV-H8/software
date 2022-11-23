@@ -6,13 +6,14 @@ import {
 import { OrderDescription } from "@adapters/OrderDescription";
 import { OrderServiceContext } from "@services/OrderService";
 import { useContext } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "store";
 
-type Props = {
-  orderDescriptions: OrderDescription[];
-};
-
-export const TransmitTable = ({ orderDescriptions }: Props) => {
+export const TransmitTable = () => {
   const orderService = useContext(OrderServiceContext);
+  const orderDescriptions = useSelector((state: RootState) => {
+    return state.orders;
+  });
 
   const createSendOrder = (orderDescription: OrderDescription) => {
     return (fields: FieldState[]) => {

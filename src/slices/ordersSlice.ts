@@ -1,10 +1,11 @@
+import { OrderDescription } from "@adapters/OrderDescription";
 import { createSlice } from "@reduxjs/toolkit";
 const ordersSlice = createSlice({
   name: "orders",
-  initialState: [],
+  initialState: [] as OrderDescription[],
   reducers: {
     setOrders: (orders, action) => {
-      orders = action.payload;
+      return action.payload;
     },
   },
 });

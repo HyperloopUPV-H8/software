@@ -5,6 +5,8 @@ import { OrderField } from "@components/PacketTable/TransmitTable/OrderField";
 import { is } from "immer/dist/internal";
 import { nanoid } from "nanoid";
 import { useState, useEffect } from "react";
+import { Button } from "@components/FormComponents/Button";
+
 type Props = {
   orderDescription: OrderDescription;
   sendOrder: (fields: FieldState[]) => void;
@@ -13,7 +15,7 @@ type Props = {
 export type FieldState = {
   name: string;
   isValid: boolean;
-  currentValue: string | number;
+  currentValue: string | number | boolean;
 };
 
 export const OrderDropdown = ({ orderDescription, sendOrder }: Props) => {
@@ -34,7 +36,7 @@ export const OrderDropdown = ({ orderDescription, sendOrder }: Props) => {
   function updateFieldState(
     name: string,
     isValid: boolean,
-    newValue: string | number
+    newValue: string | number | boolean
   ) {
     setFieldStates((prevFieldStates) => {
       return prevFieldStates.map((fieldState) => {
@@ -75,9 +77,7 @@ function Header(
         <div className={styles.name}>{name}</div>
       </div>
       <div className={styles.right}>
-        <div className={styles.sendBtn}>
-          <button onClick={sendOrder}>Send</button>
-        </div>
+        <Button onClick={sendOrder} />
       </div>
     </div>
   );
@@ -89,24 +89,29 @@ function Body(
   updateFieldState: (
     name: string,
     isValid: boolean,
-    newValue: string | number
+    newValue: string | number | boolean
   ) => void
 ): JSX.Element {
   return (
     <table className={styles.body}>
-      {orderDescription.fieldDescriptions.map((field) => {
-        return (
-          <OrderField
-            key={field.name}
-            name={field.name}
-            valueType={field.valueType}
-            onChange={(isValid: boolean, newValue: string | number) => {
-              //FIXME: que sea mas obvio que la id es el name de la orden o hacerlo de otra manera mas explicita
-              updateFieldState(field.name, isValid, newValue);
-            }}
-          />
-        );
-      })}
+      <tbody>
+        {orderDescription.fieldDescriptions.map((field) => {
+          return (
+            <OrderField
+              key={field.name}
+              name={field.name}
+              valueType={field.valueType}
+              onChange={(
+                isValid: boolean,
+                newValue: string | number | boolean
+              ) => {
+                //FIXME: que sea mas obvio que la id es el name de la orden o hacerlo de otra manera mas explicita
+                updateFieldState(field.name, isValid, newValue);
+              }}
+            />
+          );
+        })}
+      </tbody>
     </table>
   );
 }

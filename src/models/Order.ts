@@ -11,31 +11,18 @@ export type Order = {
 
 export type OrderField = {
   name: string;
-  value: string | number;
+  value: string | number | boolean;
 };
 
-export function createOrder(adapter: OrderWebAdapter): OrderDescription {
+export function createOrderDescription(
+  adapter: OrderWebAdapter
+): OrderDescription {
   let newFields = adapter.fieldDescriptions.map((descriptionField) => {
-    let value!: string | number;
-    let valueType!: string;
-
-    if (descriptionField.valueType == "Number") {
-      value = 0;
-      valueType = ValueType.Number;
-    } else if (descriptionField.valueType == "Text") {
-      value = "";
-      valueType = ValueType.Text;
-    }
-
-    let field = {
+    return {
       name: descriptionField.name,
-      value,
-      valueType,
+      value: 0,
+      valueType: descriptionField.valueType,
     };
-
-    assertIsField(field);
-
-    return field;
   });
 
   return {
@@ -43,10 +30,4 @@ export function createOrder(adapter: OrderWebAdapter): OrderDescription {
     name: adapter.name,
     fieldDescriptions: newFields,
   };
-}
-
-function assertIsField(field: unknown): asserts field is OrderField {
-  if (field != "Number" || field != "Text") {
-    throw new Error("Incorrect value type in OrderWebAdapter");
-  }
 }

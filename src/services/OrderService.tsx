@@ -1,6 +1,6 @@
 import { OrderDescription, OrderWebAdapter } from "@adapters/OrderDescription";
 import { useEffect, createContext, useRef } from "react";
-import { Order, createOrder } from "@models/Order";
+import { Order, createOrderDescription } from "@models/Order";
 import { setOrders } from "@slices/ordersSlice";
 import { useDispatch } from "react-redux";
 import { createConnection } from "@models/Connection";
@@ -25,12 +25,12 @@ export const OrderService = ({ children }: any) => {
       }${import.meta.env.VITE_ORDER_DESCRIPTIONS_URL}`
     )
       .then((response) => response.json())
-      .then((orderWebAdapter: OrderWebAdapter[]) => {
-        let orders: OrderDescription[] = [];
-        for (let adapter of orderWebAdapter) {
-          let order = createOrder(adapter);
-          orders.push(order);
-        }
+      .then((orderWebAdapter: { [key: string]: OrderWebAdapter }) => {
+        let orders: OrderDescription[] = Object.values(orderWebAdapter).map(
+          (adapter) => {
+            return createOrderDescription(adapter);
+          }
+        );
         dispatch(setOrders(orders));
       })
       .catch((reason) => {
