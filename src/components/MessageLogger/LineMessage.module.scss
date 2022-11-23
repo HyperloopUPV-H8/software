@@ -9,6 +9,7 @@
     
     text-overflow: ellipsis;
     overflow: hidden; 
+    margin-top: 0.1rem;
 
 }
 
@@ -26,25 +27,21 @@ ul {
     border-radius: 50%;
     margin-right: 0.5rem;
     margin-top: 0.2rem;
-
-    // transform: rotate(270deg);
-        // -webkit-transform:rotate(270deg);
-        // -moz-transform: rotate(270deg);
-        // -ms-transform: rotate(270deg);
-        // -o-transform: rotate(270deg);
-        // transform: rotate(270deg);
-
 }
 
 
 #count {
     background-color: #AFAFAF;
+    display: flex;
+    align-items: center;
     border-radius: 40%;
     text-align: center;
     font-size: x-small;
     padding-left: 0.5rem;
     padding-right: 0.5rem;
     height: 1rem;
+    margin-right: 0.5rem;
+    margin-top: 0.2rem;
 
 }
 
@@ -56,7 +53,7 @@ ul {
     text-align: left;
     white-space: nowrap;
     margin-left: 0.5rem;
-    align-items: center;
+    align-items: flex-start;
 }
 
 .hr{

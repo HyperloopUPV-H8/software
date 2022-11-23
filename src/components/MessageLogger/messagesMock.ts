@@ -12,10 +12,10 @@ export const warningMessages: Message[] = [{ id: "1", desc: "Warning: Each child
                                 ];
 
 export const faultMessages: Message[] = [{ id: "10", desc: "Fault: Can’t perform a React state update on an unmounted component" }, 
-{ id: "20", desc: "Fault: Each child in a list should have a unique key prop" }, 
-{ id: "20", desc: "Fault: Each child in a list should have a unique key prop" }, 
-{ id: "20", desc: "Fault: Each child in a list should have a unique key prop" }, 
-{ id: "20", desc: "Fault: Each child in a list should have a unique key prop" }, 
-{ id: "20", desc: "Fault: Each child in a list should have a unique key prop" }, 
-{ id: "20", desc: "Fault: Each child in a list should have a unique key prop" }, 
-{ id: "30", desc: "Fault: Adjacent JSX elements must be wrapped in an enclosing tag" }];
+                                    { id: "20", desc: "Fault: Each child in a list should have a unique key prop" }, 
+                                    { id: "20", desc: "Fault: Each child in a list should have a unique key prop" }, 
+                                    { id: "20", desc: "Fault: Each child in a list should have a unique key prop" }, 
+                                    { id: "20", desc: "Fault: Each child in a list should have a unique key prop" }, 
+                                    { id: "20", desc: "Fault: Each child in a list should have a unique key prop" }, 
+                                    { id: "20", desc: "Fault: Each child in a list should have a unique key prop" }, 
+                                    { id: "30", desc: "Fault: Adjacent JSX elements must be wrapped in an enclosing tag" }];

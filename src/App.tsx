@@ -1,9 +1,9 @@
 import "./App.css";
 import { DataService } from "@services/DataService";
 import { OrderService } from "@services/OrderService";
-import { HomePage } from "@pages/HomePage/HomePage";
-import { Chart } from "@components/Chart/Chart";
-import { Axis } from "@components/Chart/Axis";
+// import { HomePage } from "@pages/HomePage/HomePage";
+// import { Chart } from "@components/Chart/Chart";
+// import { Axis } from "@components/Chart/Axis";
 import { useState, useEffect } from "react";
 import { FaultsAndWarningList } from "@components/MessageLogger/FaultsAndWarningList";
 
@@ -37,12 +37,12 @@ function App() {
       {/* <Chart points={points} /> */}
 
 
-      <DataService>
+      {/* <DataService>
         <OrderService>
           <HomePage />
         </OrderService>
-      </DataService>
-      {/* <FaultsAndWarningList/> */}
+      </DataService> */}
+      <FaultsAndWarningList/>
     </div>
   );
 }

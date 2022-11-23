@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Message } from "@components/MessageLogger/structs/Message";
 import styles from "@components/MessageLogger/LineMessage.module.scss"
-import logo from "./arrow-dropdown-circle.svg"
+
 
 interface Props {
     message: Message
@@ -21,8 +21,8 @@ export const LineMessage = ({ message, count }: Props) => {
         <li className={styles.lineMsg} key={message.id}  style={{
                 whiteSpace: isSelected ? 'normal' : 'nowrap'
             }}>
-            <img id={styles.dropDownArrow} src={logo} onClick={dropDownLine} style={{
-                transform: isSelected ? 'rotate(270deg)' : 'none'
+            <img id={styles.dropDownArrow} src="https://cdnjs.cloudflare.com/ajax/libs/ionicons/4.6.3/collection/icon/svg/ios-arrow-dropdown-circle.svg" onClick={dropDownLine} style={{
+                transform: isSelected ? 'none' : 'rotate(270deg)'
             }}/>
             <label id={styles.idMsg}>{message.id}: </label>
             {count > 1 ? <label id={styles.count}>{count}</label> : null}
