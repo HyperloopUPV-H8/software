@@ -1,0 +1,53 @@
+@use "@styles/styles";
+$header-color: #ffe4cc;
+
+#wrapper {
+  width: 100%;
+  border-radius: styles.$default-border-radius;
+  overflow: hidden;
+  border: 1px solid styles.$custom-orange;
+}
+
+.header {
+  width: 100%;
+  height: auto;
+  padding: 0.5rem;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+
+  background-color: $header-color;
+  @include styles.default-text-2;
+  border-bottom: 1px solid styles.$custom-orange;
+
+  .left {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.4rem;
+    .caret {
+      width: 1rem;
+      height: 1rem;
+      background-color: red;
+    }
+    .name {
+      color: styles.$custom-orange;
+      font-weight: 500;
+    }
+  }
+
+  .sendBtn {
+    height: 2rem;
+    button {
+      height: 100%;
+    }
+  }
+}
+
+.body {
+  flex: 1 1 0;
+  width: 100%;
+  @include styles.default-text-2;
+}
