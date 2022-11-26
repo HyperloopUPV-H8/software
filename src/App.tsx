@@ -2,9 +2,10 @@ import "./App.css";
 import { DataService } from "@services/DataService";
 import { OrderService } from "@services/OrderService";
 import { HomePage } from "@pages/HomePage/HomePage";
-import { Chart } from "@components/Chart/Chart";
-import { Axis } from "@components/Chart/Axis";
+// import { Chart } from "@components/Chart/Chart";
+// import { Axis } from "@components/Chart/Axis";
 import { useState, useEffect } from "react";
+import { ConnectionsTable } from "@components/ConnectionsTable/ConnectionsTable";
 
 type Point = [number, number];
 let index = 0;
@@ -34,11 +35,14 @@ function App() {
     <div className="App">
       {/* <Axis maxY={10 / 10} minY={-5 / 10} /> */}
       {/* <Chart points={points} /> */}
+
+      {/* //descomentar
       <DataService>
         <OrderService>
           <HomePage />
         </OrderService>
-      </DataService>
+      </DataService> */}
+      <ConnectionsTable/>
     </div>
   );
 }
