@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "test": "vitest",
-    "preview": "vite preview"
+    "preview": "npm run build && vite preview"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.9.0",
