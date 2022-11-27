@@ -1,5 +1,5 @@
 import { OrderDescription } from "@adapters/OrderDescription";
-
+import { BsFillCaretRightFill } from "react-icons/bs";
 import styles from "@components/PacketTable/TransmitTable/OrderDropdown.module.scss";
 import { OrderField } from "@components/PacketTable/TransmitTable/OrderField";
 import { is } from "immer/dist/internal";
@@ -57,26 +57,40 @@ export const OrderDropdown = ({ orderDescription, sendOrder }: Props) => {
 
   return (
     <div id={styles.wrapper}>
-      {Header(toggleDropdown, orderDescription.name, () => {
-        sendOrder(fieldStates);
-      })}
+      {Header(
+        fieldStates.length > 0,
+        toggleDropdown,
+        isDropdownVisible,
+        orderDescription.name,
+        () => {
+          sendOrder(fieldStates);
+        }
+      )}
       {isDropdownVisible && Body(orderDescription, updateFieldState)}
     </div>
   );
 };
 
 function Header(
+  isCaretVisible: boolean,
   toggleDropdown: () => void,
+  isDropdownVisible: boolean,
   name: string,
   sendOrder: () => void
 ): JSX.Element {
   return (
     <div className={styles.header}>
-      <div className={styles.left}>
-        <div className={styles.caret} onClick={toggleDropdown}></div>
-        <div className={styles.name}>{name}</div>
-      </div>
-      <div className={styles.right}>
+      {isCaretVisible && (
+        <div
+          className={styles.caret}
+          onClick={toggleDropdown}
+          style={{ transform: isDropdownVisible ? "rotate(90deg)" : "" }}
+        >
+          {<BsFillCaretRightFill />}
+        </div>
+      )}
+      <div className={styles.name}>{name}</div>
+      <div className={styles.sendBtn}>
         <Button onClick={sendOrder} />
       </div>
     </div>
