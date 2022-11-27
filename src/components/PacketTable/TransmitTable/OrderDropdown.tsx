@@ -1,11 +1,8 @@
 import { OrderDescription } from "@adapters/OrderDescription";
-import { BsFillCaretRightFill } from "react-icons/bs";
+import { OrderHeader } from "@components/PacketTable/TransmitTable/OrderHeader";
+import { OrderFields } from "@components/PacketTable/TransmitTable/OrderFields";
 import styles from "@components/PacketTable/TransmitTable/OrderDropdown.module.scss";
-import { OrderField } from "@components/PacketTable/TransmitTable/OrderField";
-import { is } from "immer/dist/internal";
-import { nanoid } from "nanoid";
 import { useState, useEffect } from "react";
-import { Button } from "@components/FormComponents/Button";
 
 type Props = {
   orderDescription: OrderDescription;
@@ -57,75 +54,21 @@ export const OrderDropdown = ({ orderDescription, sendOrder }: Props) => {
 
   return (
     <div id={styles.wrapper}>
-      {Header(
-        fieldStates.length > 0,
-        toggleDropdown,
-        isDropdownVisible,
-        orderDescription.name,
-        () => {
+      <OrderHeader
+        isCaretVisible={fieldStates.length > 0}
+        toggleDropdown={toggleDropdown}
+        isDropdownVisible={isDropdownVisible}
+        name={orderDescription.name}
+        sendOrder={() => {
           sendOrder(fieldStates);
-        }
+        }}
+      />
+      {isDropdownVisible && (
+        <OrderFields
+          orderDescription={orderDescription}
+          updateFieldState={updateFieldState}
+        />
       )}
-      {isDropdownVisible && Body(orderDescription, updateFieldState)}
     </div>
   );
 };
-
-function Header(
-  isCaretVisible: boolean,
-  toggleDropdown: () => void,
-  isDropdownVisible: boolean,
-  name: string,
-  sendOrder: () => void
-): JSX.Element {
-  return (
-    <div className={styles.header}>
-      {isCaretVisible && (
-        <div
-          className={styles.caret}
-          onClick={toggleDropdown}
-          style={{ transform: isDropdownVisible ? "rotate(90deg)" : "" }}
-        >
-          {<BsFillCaretRightFill />}
-        </div>
-      )}
-      <div className={styles.name}>{name}</div>
-      <div className={styles.sendBtn}>
-        <Button onClick={sendOrder} />
-      </div>
-    </div>
-  );
-}
-
-//FIXME: usar jsx.Element o React.ReactNode el mismo en todo el proyecto
-function Body(
-  orderDescription: OrderDescription,
-  updateFieldState: (
-    name: string,
-    isValid: boolean,
-    newValue: string | number | boolean
-  ) => void
-): JSX.Element {
-  return (
-    <table className={styles.body}>
-      <tbody>
-        {orderDescription.fieldDescriptions.map((field) => {
-          return (
-            <OrderField
-              key={field.name}
-              name={field.name}
-              valueType={field.valueType}
-              onChange={(
-                isValid: boolean,
-                newValue: string | number | boolean
-              ) => {
-                //FIXME: que sea mas obvio que la id es el name de la orden o hacerlo de otra manera mas explicita
-                updateFieldState(field.name, isValid, newValue);
-              }}
-            />
-          );
-        })}
-      </tbody>
-    </table>
-  );
-}

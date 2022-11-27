@@ -1,11 +1,8 @@
 @use "@styles/styles";
 
 #wrapper {
+  flex: 1 1 0;
   width: 100%;
-}
-
-#wrapper td {
-  padding: 0.6rem;
-  vertical-align: middle;
   @include styles.default-text-2;
+  border-top: 1px solid styles.$custom-orange;
 }
