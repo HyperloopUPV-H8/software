@@ -11,10 +11,9 @@ interface Props {
 export const ConnectionLine = ({ connection }: Props) => {
 
     return (
-        <div className={styles.connectionLineConnected}>
+        <div className={connection.connected? styles.connectionLineConnected: styles.connectionLineDisconnected}>
         <li className={styles.lineMsg} key={connection.id}>
-            <TbPlugConnected/>
-            <TbPlugConnectedX/>
+            {connection.connected? <TbPlugConnected/>:<TbPlugConnectedX/>}
             <label id={styles.idMsg}>{connection.id}: </label>
             <label id={styles.descMsg}>{connection.desc}</label>
             
