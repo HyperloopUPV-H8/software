@@ -8,7 +8,7 @@ interface Props {
 }
 
 export const ConsoleList = ({ title, messages }: Props) => {
-    const [messagesWithCounts, setMessagesWithCounts] = useState([] as MessageCounter[]);
+    const [messagesCounter, setMessagesCounter] = useState([] as MessageCounter[]);
 
     useEffect(() => {
             let contadores: number[] = messagesRepeated(messages)
@@ -34,7 +34,7 @@ export const ConsoleList = ({ title, messages }: Props) => {
             }
         }
 
-        setMessagesWithCounts(
+        setMessagesCounter(
             [
                 ...items
             ]
@@ -44,7 +44,7 @@ export const ConsoleList = ({ title, messages }: Props) => {
     return (
         <>
             <h2>{title}</h2>
-            <MessageList messages={messagesWithCounts} />
+            <MessageList messages={messagesCounter} />
         </>
 
     )
