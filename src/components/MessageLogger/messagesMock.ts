@@ -1,21 +1,21 @@
-import { Message } from "@components/MessageLogger/structs/Message";
+import { Message } from "@adapters/Message";
 
-export const warningMessages: Message[] = [{ id: "1", desc: "Warning: Each child in a list should have a unique key prop" }, 
-                                    { id: "1", desc: "Warning: Each child in a list should have a unique key prop" }, 
-                                    { id: "1", desc: "Warning: Each child in a list should have a unique key prop" }, 
-                                    { id: "2", desc: "Can’t perform a React state update on an unmounted component" }, 
-                                    { id: "3", desc: "Adjacent JSX elements must be wrapped in an enclosing tag" },
-                                    { id: "3", desc: "Adjacent JSX elements must be wrapped in an enclosing tag" },
-                                    { id: "1", desc: "Warning: Each child in a list should have a unique key prop" }, 
-                                    { id: "4", desc: "Warning2: Each child in a list should have a unique key prop" }, 
-                                    { id: "4", desc: "Warning2: Each child in a list should have a unique key prop" }
+export const warningMessages: Message[] = [{ id: 1, description: "Warning: Each child in a list should have a unique key prop", type: "warning" }, 
+                                    { id: 1, description: "Warning: Each child in a list should have a unique key prop", type: "warning"  }, 
+                                    { id: 1, description: "Warning: Each child in a list should have a unique key prop", type: "warning"  }, 
+                                    { id: 2, description: "Can’t perform a React state update on an unmounted component", type: "warning"  }, 
+                                    { id: 3, description: "Adjacent JSX elements must be wrapped in an enclosing tag", type: "warning"  },
+                                    { id: 3, description: "Adjacent JSX elements must be wrapped in an enclosing tag", type: "warning"  },
+                                    { id: 1, description: "Warning: Each child in a list should have a unique key prop", type: "warning"  }, 
+                                    { id: 4, description: "Warning2: Each child in a list should have a unique key prop", type: "warning"  }, 
+                                    { id: 4, description: "Warning2: Each child in a list should have a unique key prop", type: "warning"  }
                                 ];
 
-export const faultMessages: Message[] = [{ id: "10", desc: "Fault: Can’t perform a React state update on an unmounted component" }, 
-                                    { id: "20", desc: "Fault: Each child in a list should have a unique key prop" }, 
-                                    { id: "20", desc: "Fault: Each child in a list should have a unique key prop" }, 
-                                    { id: "20", desc: "Fault: Each child in a list should have a unique key prop" }, 
-                                    { id: "20", desc: "Fault: Each child in a list should have a unique key prop" }, 
-                                    { id: "20", desc: "Fault: Each child in a list should have a unique key prop" }, 
-                                    { id: "20", desc: "Fault: Each child in a list should have a unique key prop" }, 
-                                    { id: "30", desc: "Fault: Adjacent JSX elements must be wrapped in an enclosing tag" }];
+export const faultMessages: Message[] = [{ id: 10, description: "Fault: Can’t perform a React state update on an unmounted component", type: "fault"  }, 
+                                    { id: 20, description: "Fault: Each child in a list should have a unique key prop", type: "fault"}, 
+                                    { id: 20, description: "Fault: Each child in a list should have a unique key prop", type: "fault"}, 
+                                    { id: 20, description: "Fault: Each child in a list should have a unique key prop", type: "fault" }, 
+                                    { id: 20, description: "Fault: Each child in a list should have a unique key prop", type: "fault" }, 
+                                    { id: 20, description: "Fault: Each child in a list should have a unique key prop", type: "fault" }, 
+                                    { id: 20, description: "Fault: Each child in a list should have a unique key prop", type: "fault" }, 
+                                    { id: 40, description: "Fault: Adjacent JSX elements must be wrapped in an enclosing tag", type: "fault" }];

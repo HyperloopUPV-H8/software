@@ -3,3 +3,8 @@ export type Message = {
     description: string;
     type: string; //"warning" or "fault"
 }
+
+export type MessageCounter = {
+    msg: Message;
+    count: number;
+}

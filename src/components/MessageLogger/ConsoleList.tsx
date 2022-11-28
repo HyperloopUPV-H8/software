@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Message, MessageCounter } from "@components/MessageLogger/structs/Message";
 import { MessageList } from "@components/MessageLogger/MessageList";
+import { Message, MessageCounter } from "@adapters/Message";
 
 interface Props {
     title: string
@@ -11,6 +11,8 @@ export const ConsoleList = ({ title, messages }: Props) => {
     const [messagesCounter, setMessagesCounter] = useState([] as MessageCounter[]);
 
     useEffect(() => {
+        console.log("Consolelist")
+        console.log(messages)
             let contadores: number[] = messagesRepeated(messages)
             createMessagesWithCounts(contadores)
     }, [])
@@ -73,7 +75,7 @@ const messagesRepeated = (messages: Message[]): (number[]) => {
     return counts
 }
 
-const checkDuplicated = (id: string, messages: Message[], index: number): number => {
+const checkDuplicated = (id: number, messages: Message[], index: number): number => {
     let count: number = 1
     let finished: boolean = false
 

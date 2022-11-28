@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Message, MessageCounter } from "@components/MessageLogger/structs/Message";
 import { LineMessage } from "@components/MessageLogger/LineMessage";
 import styles from "@components/MessageLogger/MessageList.module.scss";
+import { MessageCounter } from "@adapters/Message";
 
 interface Props {
     messages: MessageCounter[]

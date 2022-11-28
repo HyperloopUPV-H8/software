@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Message } from "@components/MessageLogger/structs/Message";
 import styles from "@components/MessageLogger/LineMessage.module.scss"
 import {IoIosArrowDropdownCircle} from 'react-icons/io'
+import { Message } from "@adapters/Message";
 
 
 interface Props {
@@ -27,7 +27,7 @@ export const LineMessage = ({ message, count }: Props) => {
             }}/>
             <label id={styles.idMsg}>{message.id}: </label>
             {count > 1 ? <label id={styles.count}>{count}</label> : null}
-            <label id={styles.descMsg}>{message.desc}</label>
+            <label id={styles.descMsg}>{message.description}</label>
             <br />
         </li>
             <hr className={styles.hr}/>
