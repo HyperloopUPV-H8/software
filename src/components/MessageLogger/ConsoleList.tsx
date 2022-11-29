@@ -11,10 +11,8 @@ export const ConsoleList = ({ title, messages }: Props) => {
     const [messagesCounter, setMessagesCounter] = useState([] as MessageCounter[]);
 
     useEffect(() => {
-        console.log("Consolelist")
-        console.log(messages)
-            let contadores: number[] = messagesRepeated(messages)
-            createMessagesWithCounts(contadores)
+        let contadores: number[] = messagesRepeated(messages)
+        createMessagesWithCounts(contadores)
     }, [])
 
 
