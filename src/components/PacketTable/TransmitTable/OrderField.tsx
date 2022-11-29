@@ -42,7 +42,7 @@ function getFormElement(
           }}
         ></TextInput>
       );
-    case "boolean":
+    case "bool":
       return (
         <CheckBox
           onChange={(value: boolean) => {
