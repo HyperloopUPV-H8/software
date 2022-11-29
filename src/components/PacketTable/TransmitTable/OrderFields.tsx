@@ -24,7 +24,7 @@ export const OrderFields = ({ orderDescription, updateFieldState }: Props) => {
                 isValid: boolean,
                 newValue: string | number | boolean
               ) => {
-                //FIXME: que sea mas obvio que la id es el name de la orden o hacerlo de otra manera mas explicita
+                //FIXME: make it more obvious that the id is the name of the order or do it another way
                 updateFieldState(field.name, isValid, newValue);
               }}
             />
