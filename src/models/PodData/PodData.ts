@@ -15,9 +15,9 @@ export function setLastBatchIDs(
   podData: PodData,
   updates: { [id: number]: PacketUpdate }
 ) {
-  for (let id of Object.keys(updates)) {
-    podData.lastBatchIDs.push(Number.parseInt(id));
-  }
+  podData.lastBatchIDs = Object.keys(updates).map((key) => {
+    return Number.parseInt(key);
+  });
 }
 
 export function updatePodData(

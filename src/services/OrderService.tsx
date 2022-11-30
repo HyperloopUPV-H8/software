@@ -1,6 +1,6 @@
-import { OrderWebAdapter } from "@adapters/OrderDescription";
+import { OrderDescription, OrderWebAdapter } from "@adapters/OrderDescription";
 import { useEffect, createContext, useRef } from "react";
-import { Order, createOrder } from "@models/Order";
+import { Order, createOrderDescription } from "@models/Order";
 import { setOrders } from "@slices/ordersSlice";
 import { useDispatch } from "react-redux";
 import { createConnection } from "@models/Connection";
@@ -22,15 +22,15 @@ export const OrderService = ({ children }: any) => {
     fetch(
       `http://${import.meta.env.VITE_SERVER_IP}:${
         import.meta.env.VITE_SERVER_PORT
-      }${import.meta.env.VITE_ORDERS_URL}`
+      }${import.meta.env.VITE_ORDER_DESCRIPTIONS_URL}`
     )
       .then((response) => response.json())
-      .then((orderDescriptions: OrderWebAdapter[]) => {
-        let orders: Order[] = [];
-        for (let orderDescription of orderDescriptions) {
-          let order = createOrder(orderDescription);
-          orders.push(order);
-        }
+      .then((orderWebAdapter: { [key: string]: OrderWebAdapter }) => {
+        let orders: OrderDescription[] = Object.values(orderWebAdapter).map(
+          (adapter) => {
+            return createOrderDescription(adapter);
+          }
+        );
         dispatch(setOrders(orders));
       })
       .catch((reason) => {
@@ -60,6 +60,7 @@ export const OrderService = ({ children }: any) => {
   let orderService = {
     sendOrder(order: Order) {
       //FIXME: could be undefined
+      console.log(order);
       orderSocket.current!.send(JSON.stringify(order));
     },
   };

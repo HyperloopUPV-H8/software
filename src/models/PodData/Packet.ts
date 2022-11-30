@@ -17,7 +17,6 @@ export type Packet = {
 export function updatePacket(packet: Packet, update: PacketUpdate) {
   packet.count = update.count;
   packet.cycleTime = update.cycleTime;
-  packet.cycleTime = update.cycleTime;
   packet.hexValue = update.hexValue;
   updateMeasurements(packet.measurements, update.measurementUpdates);
 }

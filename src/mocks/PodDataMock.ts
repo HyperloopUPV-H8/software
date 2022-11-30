@@ -25,7 +25,7 @@ export const podDataMock = {
     },
   ],
   lastBatchIDs: [123],
-} as PodData;
+};
 
 // ([
 //   new Board("BMS", [
