@@ -12,9 +12,12 @@ const connectionsSlice = createSlice({
         connections.push(action.payload);
       }
     },
+    initializeMockConnections: (connections, action) => {
+        return action.payload;
+    }, 
   },
 });
 
-export const { updateConnection } = connectionsSlice.actions;
+export const { updateConnection, initializeMockConnections } = connectionsSlice.actions;
 
 export default connectionsSlice.reducer;

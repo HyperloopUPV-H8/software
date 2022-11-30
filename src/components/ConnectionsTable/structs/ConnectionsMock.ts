@@ -1,5 +1,3 @@
-//import { Connection } from "@components/ConnectionsTable/structs/Connection";
-
 import { Connection } from "@models/Connection";
 
 export const ConnectionsMock: Connection[] = [{ name: "Conexión1", isConnected: false },
