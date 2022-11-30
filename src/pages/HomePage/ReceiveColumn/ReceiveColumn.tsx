@@ -4,6 +4,7 @@ import { BiLineChart } from "react-icons/bi";
 import { TabLayout } from "@layouts/TabLayout/TabLayout";
 import { nanoid } from "nanoid";
 import { HiInboxArrowDown } from "react-icons/hi2";
+import { ChartMenu } from "@components/ChartMenu/ChartMenu";
 
 export const ReceiveColumn = () => {
   return (
@@ -19,8 +20,7 @@ export const ReceiveColumn = () => {
           id: nanoid(),
           name: "Charts",
           icon: <BiLineChart />,
-
-          component: <div>Hello Charts</div>,
+          component: <ChartMenu />,
         },
       ]}
     ></TabLayout>
