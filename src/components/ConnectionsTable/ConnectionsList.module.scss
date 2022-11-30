@@ -2,10 +2,11 @@
 
 #containerMessages {
     background-color: styles.$default-background;
-    width: 35rem;
-    height: 20rem;
+    width: 20rem;
+    height: 15rem;
     overflow-x: hidden;
     overflow-y: auto;
+    min-height: fit-content;
 }
 
 .ulConnections {

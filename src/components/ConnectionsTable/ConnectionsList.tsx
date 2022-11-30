@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "@components/ConnectionsTable/ConnectionsList.module.scss";
-import { Connection } from "@components/ConnectionsTable/structs/Connection";
 import { ConnectionLine } from "./ConnectionLine";
+import { Connection } from "@models/Connection";
 
 interface Props {
     connectionsList: Connection[],
