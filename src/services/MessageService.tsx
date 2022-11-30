@@ -1,20 +1,10 @@
-import { OrderWebAdapter } from "@adapters/OrderDescription";
+
 import { useEffect, createContext, useRef } from "react";
-import { Order, createOrder } from "@models/Order";
-import { setOrders } from "@slices/ordersSlice";
 import { useDispatch } from "react-redux";
 import { createConnection } from "@models/Connection";
 import { updateConnection } from "@slices/connectionsSlice";
 import { Message } from "@adapters/Message";
 import { updateFaultMessages, updateWarningMessages } from "@slices/messagesSlice";
-
-// interface IOrderService {
-//   sendOrder(order: Order): void;
-// }
-
-// export const OrderServiceContext = createContext<IOrderService>(
-//   {} as IOrderService
-// );
 
 export const MessageService = ({ children }: any) => {
   const dispatch = useDispatch();
