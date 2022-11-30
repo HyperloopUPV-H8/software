@@ -12,6 +12,7 @@ export const ConnectionsTable = () => {
 
   const connections = useSelector((state: RootState) => state.connections);
 
+  //mock with Redux
   mockConnections();
 
   return (

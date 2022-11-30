@@ -1,19 +1,17 @@
 @use "@styles/styles.scss";
 
 #containerMessages {
-    background-color: styles.$default-background;
-    width: 20rem;
-    height: 15rem;
-    overflow-x: hidden;
-    overflow-y: auto;
-    min-height: fit-content;
+  background-color: styles.$default-background;
+  width: 20rem;
+  height: 15rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+  min-height: fit-content;
 }
 
 .ulConnections {
-    width: 100%;
-    //padding-top: 0.3rem;
-    // @include overrideDefaultMethods.override-ul;
-    padding-left: 0rem;
-    @include styles.code-text;
-
+  width: 100%;
+  // @include overrideDefaultMethods.override-ul;
+  padding-left: 0rem;
+  @include styles.code-text;
 }

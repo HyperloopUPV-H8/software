@@ -1,50 +1,47 @@
 @use "@styles/styles.scss";
 
 #idMsg {
-    font-weight: bold;
-    font-size: large;
-    margin-left: 0.5rem;
-    margin-right: 0.5rem;
+  font-weight: bold;
+  font-size: large;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
 }
 
-#descMsg{
-    
-    text-overflow: ellipsis;
-    overflow: hidden; 
-    margin-top: 0.1rem;
-
+#descMsg {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  margin-top: 0.1rem;
 }
 
 ul {
-    list-style-type: none;
-    margin: 0rem;
+  list-style-type: none;
+  margin: 0rem;
 }
 
-.lineMsg{
-    width: 97%;
-    display: flex;
-    flex-direction: row;
-    justify-content: left;
-    text-align: left;
-    white-space: nowrap;
-    margin-left: 0.5rem;
-    align-items: center;
-
+.lineMsg {
+  width: 97%;
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  text-align: left;
+  white-space: nowrap;
+  margin-left: 0.5rem;
+  align-items: center;
 }
 
-.connectionLineDisconnected{
-    background-color: #ECA5A5;
-    color: #C51010
+.connectionLineDisconnected {
+  background-color: #eca5a5;
+  color: #c51010;
 }
 
-.connectionLineConnected{
-    background-color: #C7EFC6;
-    color: #4F8D4A
+.connectionLineConnected {
+  background-color: #c7efc6;
+  color: #4f8d4a;
 }
 
-.hr{
-    width: 100%;
-    justify-content: left;
-    margin-top: 0rem;
-    margin-bottom: 0rem;
+.hr {
+  width: 100%;
+  justify-content: left;
+  margin-top: 0rem;
+  margin-bottom: 0rem;
 }
