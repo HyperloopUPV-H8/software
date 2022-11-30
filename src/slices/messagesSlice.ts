@@ -5,11 +5,15 @@ const messagesSlice = createSlice({
   initialState: {fault: [], warning: []} as  {fault:Message[], warning:Message[]} ,
   reducers: {
     initializeMockFaultMessages: (messages, action) => {
-      messages.fault.push(...action.payload)
+      messages.warning.push(...action.payload)
     },
 
     initializeMockWarningMessages: (messages, action) => {
       messages.warning.push(...action.payload)
+    },
+
+    initializeMockMessages: (messages, action) => {
+      return action.payload;
     },
 
     updateFaultMessages: (messages, action) => {
@@ -22,6 +26,6 @@ const messagesSlice = createSlice({
   },
 });
 
-export const { initializeMockFaultMessages, initializeMockWarningMessages, updateFaultMessages, updateWarningMessages } = messagesSlice.actions;
+export const { initializeMockFaultMessages, initializeMockWarningMessages, initializeMockMessages, updateFaultMessages, updateWarningMessages } = messagesSlice.actions;
 
 export default messagesSlice.reducer;

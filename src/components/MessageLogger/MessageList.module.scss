@@ -2,17 +2,16 @@
 @use "@styles/styles.scss";
 
 #containerMessages {
-    background-color: styles.$default-background;
-    width: 35rem;
-    height: 20rem;
-    overflow-x: hidden;
-    overflow-y: auto;
+  background-color: styles.$default-background;
+  width: 35rem;
+  height: 20rem;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .lineMsgUl {
-    width: 100%;
-    padding-top: 0.3rem;
-    @include overrideDefaultMethods.override-ul;
-    @include styles.code-text;
-
+  width: 100%;
+  padding-top: 0.3rem;
+  @include overrideDefaultMethods.override-ul;
+  @include styles.code-text;
 }
