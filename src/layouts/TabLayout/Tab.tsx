@@ -12,7 +12,7 @@ export const Tab = ({ title, icon, onClick }: Props) => {
       <TabEdge id={styles.firstEdge} />
       <div id={styles.content}>
         <div id={styles.label}>
-          <div id={styles.icon}>{icon}</div>
+          {icon && <div id={styles.icon}>{icon}</div>}
           <div id={styles.title}>{title}</div>
         </div>
       </div>

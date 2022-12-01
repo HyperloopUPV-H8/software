@@ -45,7 +45,6 @@ $border-blue: #317ae7;
 }
 
 #tableBody {
-  overflow-y: scroll;
 }
 
 .boardRow {
@@ -54,6 +53,7 @@ $border-blue: #317ae7;
   .boardName {
     text-align: left;
     padding-left: 1rem;
+    @include styles.default-text-2;
     color: $border-blue;
     font-weight: 600;
   }
