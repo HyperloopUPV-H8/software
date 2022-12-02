@@ -28,7 +28,8 @@
       "@styles/*": ["styles/*"],
       "@layouts/*": ["layouts/*"],
       "@pages/*": ["pages/*"],
-      "@public/*": ["public/*"]
+      "@public/*": ["public/*"],
+      "@utils/*": ["utils/*"]
     }
   },
   "include": ["src"],
