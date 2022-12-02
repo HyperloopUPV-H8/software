@@ -1,54 +1,24 @@
 import styles from "@components/ChartMenu/Chart/LinesCanvas/LinesCanvas.module.scss";
 import { useEffect, useRef } from "react";
 import { ChartCanvas } from "@components/ChartMenu/Chart/LinesCanvas/ChartCanvas";
-import { Point, getValueFromVector, concatenateVectors } from "@utils/math";
+import { getVectorLimits } from "@utils/math";
+import { LineFigure } from "@components/ChartMenu/ChartElement";
+import { maxHeaderSize } from "http";
 type Props = {
-  vectors: Point[][];
+  lineFigures: LineFigure[];
 };
 
-export const LinesCanvas = ({ vectors }: Props) => {
+export const LinesCanvas = ({ lineFigures }: Props) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartCanvas = useRef<ChartCanvas>();
 
   function drawChart() {
     chartCanvas.current!.clear();
-    chartCanvas.current!.figures(vectors);
-  }
-
-  function getMaxXOfVector(vector: Point[]): number {
-    return getValueFromVector(
-      vector,
-      "x",
-      (value, currentBest) => value > currentBest,
-      -Infinity
-    );
-  }
-
-  function getMaxYOfVector(vector: Point[]): number {
-    return getValueFromVector(
-      vector,
-      "y",
-      (value, currentBest) => value > currentBest,
-      -Infinity
-    );
-  }
-
-  function getMinXOfVector(vector: Point[]): number {
-    return getValueFromVector(
-      vector,
-      "x",
-      (value, currentBest) => value < currentBest,
-      Infinity
-    );
-  }
-
-  function getMinYOfVector(vector: Point[]): number {
-    return getValueFromVector(
-      vector,
-      "y",
-      (value, currentBest) => value < currentBest,
-      Infinity
-    );
+    lineFigures.forEach((lineFigure) => {
+      if (lineFigure.vector.length >= 2) {
+        chartCanvas.current!.figure(lineFigure.vector, lineFigure.color);
+      }
+    });
   }
 
   useEffect(() => {
@@ -58,13 +28,18 @@ export const LinesCanvas = ({ vectors }: Props) => {
   }, []);
 
   useEffect(() => {
-    let longVector = concatenateVectors(vectors);
-    chartCanvas.current!.maxX = getMaxXOfVector(longVector);
-    chartCanvas.current!.maxY = getMaxYOfVector(longVector);
-    chartCanvas.current!.minX = getMinXOfVector(longVector);
-    chartCanvas.current!.minY = getMinYOfVector(longVector);
+    let max = -Infinity;
+    let min = Infinity;
+
+    lineFigures.forEach((lineFigure) => {
+      let [localMax, localMin] = getVectorLimits(lineFigure.vector);
+      max = localMax > max ? localMax : max;
+      min = localMin < min ? localMin : min;
+    });
+    chartCanvas.current!.max = max;
+    chartCanvas.current!.min = min;
     drawChart();
-  }, [vectors]);
+  }, [lineFigures]);
 
   return (
     <canvas

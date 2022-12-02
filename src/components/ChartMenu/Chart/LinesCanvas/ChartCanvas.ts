@@ -1,18 +1,15 @@
 import { HSLColor, hslToHex } from "@utils/color";
-import { getNormalizedPoints } from "@utils/math";
-import { Point } from "@utils/math";
+import { urlToHttpOptions } from "url";
 export class ChartCanvas {
-  public maxX!: number;
-  public maxY!: number;
-  public minX!: number;
-  public minY!: number;
+  public max!: number;
+  public min!: number;
 
   private ctx!: CanvasRenderingContext2D;
   private figurePaddingPercentage = 10;
   private numberOfMarks = 10;
   private markLength = 10;
   private decimalDigits = 1;
-  private initialColor = { h: 32, s: 60, l: 80 };
+  private numberOfPoints = 200;
 
   constructor(ctx: CanvasRenderingContext2D) {
     this.ctx = ctx;
@@ -27,22 +24,10 @@ export class ChartCanvas {
     this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
   }
 
-  public figures(vectors: Point[][]) {
-    vectors.forEach((vector, index) => {
-      if (vector.length >= 2) {
-        this.figure(vector, 2, {
-          h: (this.initialColor.h + index * 50) % 360,
-          l: this.initialColor.l,
-          s: this.initialColor.s,
-        });
-      }
-    });
-  }
-
   public figure(
-    vector: Point[],
-    strokeWidth: number = 2,
-    color: HSLColor = { h: 32, s: 100, l: 50 }
+    vector: number[],
+    color: HSLColor = { h: 32, s: 100, l: 50 },
+    strokeWidth: number = 2
   ) {
     let horizontalPadding =
       (this.figurePaddingPercentage / 100) * this.ctx.canvas.width;
@@ -59,26 +44,53 @@ export class ChartCanvas {
     this.ctx.strokeStyle = `#${hexColor.r}${hexColor.g}${hexColor.b}`;
     let previousStrokeWidth = this.ctx.lineWidth;
     this.ctx.lineWidth = strokeWidth;
-    this.path(
-      horizontalPadding,
-      verticalPadding,
-      this.ctx.canvas.width - horizontalPadding,
-      this.ctx.canvas.height - verticalPadding,
-      vector
-    );
+
+    this.drawInFigureRect((width, height) => {
+      this.path(vector, width, height);
+    });
+
     this.ctx.lineWidth = previousStrokeWidth;
   }
 
-  public path(x1: number, y1: number, x2: number, y2: number, points: Point[]) {
-    let normalizedPoints = getNormalizedPoints(points, x2 - x1, y2 - y1);
-    this.ctx.translate(x1, y1);
+  public drawInFigureRect(drawFigure: (width: number, height: number) => void) {
+    let horizontalPadding =
+      (this.figurePaddingPercentage / 100) * this.ctx.canvas.width;
+    let verticalPadding =
+      (this.figurePaddingPercentage / 100) * this.ctx.canvas.height;
+
+    this.ctx.scale(1, -1);
+    this.ctx.translate(0, -this.ctx.canvas.height);
+    this.ctx.translate(horizontalPadding, verticalPadding);
+    drawFigure(
+      this.ctx.canvas.width - 2 * horizontalPadding,
+      this.ctx.canvas.height - 2 * verticalPadding
+    );
+    this.ctx.translate(-horizontalPadding, -verticalPadding);
+    this.ctx.translate(0, this.ctx.canvas.height);
+
+    this.ctx.scale(1, -1);
+  }
+
+  public path(points: number[], width: number, height: number) {
     this.ctx.beginPath();
-    this.ctx.moveTo(normalizedPoints[0].x, normalizedPoints[0].y);
-    normalizedPoints.slice(1).forEach((point) => {
-      this.ctx.lineTo(point.x, point.y);
-    });
+    if (this.max - this.min != 0) {
+      this.ctx.moveTo(0, (points[0] / (this.max - this.min)) * height);
+    } else {
+      this.ctx.moveTo(0, height / 2);
+    }
+
+    for (let i = 1; i < points.length; i++) {
+      if (this.max - this.min != 0) {
+        this.ctx.lineTo(
+          (i * width) / this.numberOfPoints,
+          (points[i] / (this.max - this.min)) * height
+        );
+      } else {
+        this.ctx.lineTo((i * width) / this.numberOfPoints, height / 2);
+      }
+    }
+
     this.ctx.stroke();
-    this.ctx.translate(-x1, -y1);
   }
 
   public axis(x1: number, y1: number, x2: number, y2: number) {
@@ -93,27 +105,11 @@ export class ChartCanvas {
       this.line(x1, y1 + i * spacing, x1 + this.markLength, y1 + i * spacing);
       this.ctx.fillStyle = "#000";
       this.ctx.fillText(
-        (this.maxY - ((this.maxY - this.minY) / n) * i).toFixed(
+        (this.max - ((this.max - this.min) / n) * i).toFixed(
           this.decimalDigits
         ),
         x1 - 70,
         y1 + i * spacing + 10
-      );
-      this.ctx.fillStyle = "#fff";
-    }
-  }
-
-  private horizontalAxisMarks(x1: number, y1: number, x2: number, n: number) {
-    let spacing = (x2 - x1) / n;
-    for (let i = 0; x1 + i * spacing < x2 + spacing; i++) {
-      this.line(x1 + i * spacing, y1, x1 + i * spacing, y1 - this.markLength);
-      this.ctx.fillStyle = "#000";
-      this.ctx.fillText(
-        (this.maxX - ((this.maxX - this.minX) / n) * i).toFixed(
-          this.decimalDigits
-        ),
-        x1 + i * spacing - spacing / 2,
-        y1 + 30
       );
       this.ctx.fillStyle = "#fff";
     }

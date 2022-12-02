@@ -26,20 +26,9 @@ export const Chart = ({ chartElement, handleDropOnChart }: Props) => {
       onDrop={handleDrop}
     >
       <div id={styles.chartWrapper}>
-        <LinesCanvas
-          key={chartElement.id}
-          vectors={chartElement.variables.map((element) => {
-            return element.vector.map((value, index) => {
-              return { x: index, y: value };
-            });
-          })}
-        />
+        <LinesCanvas key={chartElement.id} lineFigures={chartElement.lines} />
       </div>
-      <Legend
-        names={chartElement.variables.map((variable) => {
-          return variable.name;
-        })}
-      ></Legend>
+      <Legend legendItemsData={chartElement.lines}></Legend>
     </div>
   );
 };

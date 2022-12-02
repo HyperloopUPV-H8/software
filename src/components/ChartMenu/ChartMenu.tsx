@@ -4,7 +4,7 @@ import { Sidebar } from "@components/ChartMenu/Sidebar/Sidebar";
 import styles from "@components/ChartMenu/ChartMenu.module.scss";
 import { Chart } from "@components/ChartMenu/Chart/Chart";
 import { DragEvent, useState, useEffect, useRef } from "react";
-import { ChartElement } from "./ChartElement";
+import { ChartElement, LineFigure } from "@components/ChartMenu/ChartElement";
 import { selectMeasurementByName } from "@models/PodData/PodData";
 export const ChartMenu = () => {
   let boards = useSelector((state: RootState) => state.podData.boards);
@@ -14,19 +14,20 @@ export const ChartMenu = () => {
   useEffect(() => {
     setOrderedChartElements((prevChartElements) => {
       return prevChartElements.map((chartElement) => {
-        let newVariables = chartElement.variables.map((variable) => {
-          let newValue = selectMeasurementByName(boards, variable.name)
+        let newLines = chartElement.lines.map((line) => {
+          let newValue = selectMeasurementByName(boards, line.name)
             .value as number;
-          let newVector = [...variable.vector, newValue];
+          let newVector = [...line.vector, newValue];
           if (newVector.length > 200) {
             newVector = newVector.slice(newVector.length - 200);
           }
           return {
-            name: variable.name,
+            name: line.name,
             vector: newVector,
+            color: line.color,
           };
         });
-        return { id: chartElement.id, variables: newVariables };
+        return { id: chartElement.id, lines: newLines };
       });
     });
   }, [boards]);
@@ -48,7 +49,13 @@ export const ChartMenu = () => {
   function handleDrop(ev: DragEvent<HTMLDivElement>) {
     addChartElement({
       id: chartIndex.current,
-      variables: [{ name: ev.dataTransfer.getData("text/plain"), vector: [] }],
+      lines: [
+        {
+          name: ev.dataTransfer.getData("text/plain"),
+          vector: [],
+          color: { h: 32, s: 60, l: 80 },
+        },
+      ],
     });
     chartIndex.current++;
   }
@@ -58,13 +65,22 @@ export const ChartMenu = () => {
     if (isAlreadyInChart(chartElement, measurementName)) {
       return;
     }
+    let newH = (32 + chartElement.lines.length * 123) % 360;
     let newChartElement = {
       ...chartElement,
-      variables: [
-        ...chartElement.variables,
-        { name: measurementName, vector: [0] },
+      lines: [
+        ...chartElement.lines,
+        {
+          name: measurementName,
+          vector: [0],
+          color: {
+            h: newH,
+            s: 60,
+            l: 80,
+          },
+        },
       ],
-    };
+    } as ChartElement;
     let restOfElements = chartElements.filter((element) => element.id != id);
     setOrderedChartElements(() => {
       return [...restOfElements, newChartElement];
@@ -76,9 +92,7 @@ export const ChartMenu = () => {
     measurementName: string
   ): boolean {
     return (
-      chartElement.variables.findIndex(
-        (variable) => variable.name == measurementName
-      ) != -1
+      chartElement.lines.findIndex((line) => line.name == measurementName) != -1
     );
   }
 
