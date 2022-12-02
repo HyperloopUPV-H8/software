@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { MessageList } from "@components/MessageLogger/MessageList";
 import { Message, MessageCounter } from "@adapters/Message";
+import { nanoid } from "nanoid";
 
 interface Props {
   title: string;
@@ -22,7 +23,7 @@ export const ConsoleList = ({ title, messages }: Props) => {
     for (let i = 0; i < messages.length; i++) {
       let el = messages[i];
       let count = defineCount(el, i);
-      msgCounts.push({ msg: messages[i], count: count });
+      msgCounts.push({ id: nanoid(), msg: messages[i], count: count });
       i += checkIndex(count);
     }
     setMessagesCounter([...msgCounts]);
