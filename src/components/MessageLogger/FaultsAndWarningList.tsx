@@ -7,16 +7,12 @@ import {
 import { RootState } from "store";
 import { useDispatch, useSelector } from "react-redux";
 import { Message } from "@adapters/Message";
-import {
-  initializeMockFaultMessages,
-  initializeMockMessages,
-  initializeMockWarningMessages,
-} from "@slices/messagesSlice";
+import { initializeMockMessages } from "@slices/messagesSlice";
 
 export const FaultsAndWarningList = () => {
   //this state is for the static mocks
-  // const [WarningList, setWarningList] = useState<Message[]>(warningMessages);
-  // const [FaultList, setFaultList] = useState<Message[]>(faultMessages);
+  //const [WarningList, setWarningList] = useState<Message[]>(warningMessages);
+  //const [FaultList, setFaultList] = useState<Message[]>(faultMessages);
 
   const messages = useSelector((state: RootState) => state.messages);
 
