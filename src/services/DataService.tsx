@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { initializePodData, updatePodData } from "@slices/podDataSlice";
-import { updateConnection } from "@slices/connectionsSlice";
+import { updateWebsocketConnection } from "@slices/connectionsSlice";
 import { PodData } from "@models/PodData/PodData";
 import { setConnectionState } from "@models/Connection";
 import axios from "axios";
@@ -35,9 +35,13 @@ export const DataService = ({ children }: any) => {
             import.meta.env.VITE_SERVER_PORT
           }${import.meta.env.VITE_PACKETS_URL}`
         );
-        dispatch(updateConnection(setConnectionState("Packets", false)));
+        dispatch(
+          updateWebsocketConnection(setConnectionState("Packets", false))
+        );
         packetUpdateSocket.current.onopen = (ev) => {
-          dispatch(updateConnection(setConnectionState("Packets", true)));
+          dispatch(
+            updateWebsocketConnection(setConnectionState("Packets", true))
+          );
         };
         packetUpdateSocket.current.onmessage = (ev) => {
           let packetUpdates = JSON.parse(ev.data) as {
@@ -46,7 +50,9 @@ export const DataService = ({ children }: any) => {
           dispatch(updatePodData(packetUpdates));
         };
         packetUpdateSocket.current.onclose = () => {
-          dispatch(updateConnection(setConnectionState("Packets", false)));
+          dispatch(
+            updateWebsocketConnection(setConnectionState("Packets", false))
+          );
         };
       })
       .catch((reason) => {

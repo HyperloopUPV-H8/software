@@ -4,7 +4,7 @@ import { Order, createOrder } from "@models/Order";
 import { setOrders } from "@slices/ordersSlice";
 import { useDispatch } from "react-redux";
 import { setConnectionState } from "@models/Connection";
-import { updateConnection } from "@slices/connectionsSlice";
+import { updateWebsocketConnection } from "@slices/connectionsSlice";
 
 interface IOrderService {
   sendOrder(order: Order): void;
@@ -42,12 +42,12 @@ export const OrderService = ({ children }: any) => {
         import.meta.env.VITE_SERVER_PORT
       }${import.meta.env.VITE_ORDERS_URL}`
     );
-    dispatch(updateConnection(setConnectionState("Orders", false)));
+    dispatch(updateWebsocketConnection(setConnectionState("Orders", false)));
     orderSocket.current.onopen = () => {
-      dispatch(updateConnection(setConnectionState("Orders", true)));
+      dispatch(updateWebsocketConnection(setConnectionState("Orders", true)));
     };
     orderSocket.current.onclose = () => {
-      dispatch(updateConnection(setConnectionState("Orders", false)));
+      dispatch(updateWebsocketConnection(setConnectionState("Orders", false)));
     };
 
     return () => {

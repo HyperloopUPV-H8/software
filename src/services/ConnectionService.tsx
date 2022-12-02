@@ -2,9 +2,10 @@ import { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { Connection, setConnectionState } from "@models/Connection";
 import {
-  setDisconnectionState,
-  updateConnection,
-  updateConnectionsArray,
+  setDisconnectionBoardState,
+  updateWebsocketConnection,
+  updateBoardConnection,
+  updateBoardConnectionsArray,
 } from "@slices/connectionsSlice";
 
 export const ConnectionService = ({ children }: any) => {
@@ -19,20 +20,24 @@ export const ConnectionService = ({ children }: any) => {
       }${import.meta.env.VITE_CONNECTIONS_URL}`
     );
 
-    dispatch(updateConnection(setConnectionState("connections", false)));
+    dispatch(
+      updateWebsocketConnection(setConnectionState("connections", false))
+    );
     connectionSocket.current.onopen = () => {
-      dispatch(updateConnection(setConnectionState("connections", true)));
+      dispatch(
+        updateWebsocketConnection(setConnectionState("connections", true))
+      );
     };
 
     connectionSocket.current.onmessage = (ev) => {
       connections = JSON.parse(ev.data);
       //CHECK this action
-      dispatch(updateConnectionsArray(connections));
+      dispatch(updateBoardConnectionsArray(connections));
     };
 
     connectionSocket.current.onclose = () => {
       //WATCH OUT: connections must be disconnected after this
-      dispatch(setDisconnectionState());
+      dispatch(setDisconnectionBoardState());
     };
 
     return () => {

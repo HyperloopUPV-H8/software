@@ -1,33 +1,51 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { Connection } from "@models/Connection";
 const connectionsSlice = createSlice({
   name: "connections",
-  initialState: [] as Connection[],
+  initialState: {
+    websocket: [] as Connection[],
+    board: [] as Connection[],
+  } as { websocket: Connection[]; board: Connection[] },
   reducers: {
-    updateConnection: (connections, action) => {
-      let conn = connections.find((conn) => conn.name == action.payload.name)!;
+    updateWebsocketConnection: (connections, action) => {
+      let conn = connections.websocket.find(
+        (conn) => conn.name == action.payload.name
+      )!;
       if (conn) {
         conn.isConnected = action.payload.isConnected;
       } else {
-        connections.push(action.payload);
+        connections.websocket.push(action.payload);
+      }
+    },
+
+    updateBoardConnection: (connections, action) => {
+      let conn = connections.board.find(
+        (conn) => conn.name == action.payload.name
+      )!;
+      if (conn) {
+        conn.isConnected = action.payload.isConnected;
+      } else {
+        connections.board.push(action.payload);
       }
     },
 
     //CHECK this action
-    updateConnectionsArray: (connections, action) => {
-      let connectionArray = action.payload as Connection[];
-      connectionArray.forEach((element) => {
-        let conn = connections.find((conn) => conn.name == element.name)!;
+    updateBoardConnectionsArray: (
+      connections,
+      action: PayloadAction<Connection[]>
+    ) => {
+      action.payload.forEach((element) => {
+        let conn = connections.board.find((conn) => conn.name == element.name)!;
         if (conn) {
           conn.isConnected = element.isConnected;
         } else {
-          connections.push(element);
+          connections.board.push(element);
         }
       });
     },
 
-    setDisconnectionState: (connections) => {
-      connections.forEach((element) => {
+    setDisconnectionBoardState: (connections) => {
+      connections.board.forEach((element) => {
         element.isConnected = false;
       });
     },
@@ -39,9 +57,10 @@ const connectionsSlice = createSlice({
 });
 
 export const {
-  updateConnection,
-  updateConnectionsArray,
-  setDisconnectionState,
+  updateWebsocketConnection,
+  updateBoardConnection,
+  updateBoardConnectionsArray,
+  setDisconnectionBoardState,
   initializeMockConnections,
 } = connectionsSlice.actions;
 

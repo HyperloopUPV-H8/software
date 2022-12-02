@@ -23,7 +23,12 @@ export const ConnectionsList = () => {
   return (
     <div id={styles.containerMessages}>
       <ul className={styles.ulConnections}>
-        {connectionsList.map((item, index) => {
+        {connectionsList.websocket.map((item, index) => {
+          return <ConnectionLine key={index} connection={item} />;
+        })}
+      </ul>
+      <ul className={styles.ulConnections}>
+        {connectionsList.board.map((item, index) => {
           return <ConnectionLine key={index} connection={item} />;
         })}
       </ul>
@@ -36,8 +41,12 @@ const mockConnections = (): void => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    let connectionsMocks = ConnectionsMock;
+    let websocketConnectionsMocks = ConnectionsMock;
     let boardConnectionsMocks = BoardConnectionsMock;
+    let connectionsMocks = {
+      websocket: websocketConnectionsMocks,
+      board: boardConnectionsMocks,
+    };
     dispatch(initializeMockConnections(connectionsMocks));
   }, []);
 };
