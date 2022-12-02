@@ -1,7 +1,11 @@
-import { useEffect, createContext, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
-import { Connection, createConnection } from "@models/Connection";
-import { updateConnection } from "@slices/connectionsSlice";
+import { Connection, setConnectionState } from "@models/Connection";
+import {
+  setDisconnectionState,
+  updateConnection,
+  updateConnectionsArray,
+} from "@slices/connectionsSlice";
 
 export const ConnectionService = ({ children }: any) => {
   const dispatch = useDispatch();
@@ -15,28 +19,20 @@ export const ConnectionService = ({ children }: any) => {
       }${import.meta.env.VITE_CONNECTIONS_URL}`
     );
 
-    dispatch(updateConnection(createConnection("connections", false)));
+    dispatch(updateConnection(setConnectionState("connections", false)));
     connectionSocket.current.onopen = () => {
-      dispatch(updateConnection(createConnection("connections", true)));
+      dispatch(updateConnection(setConnectionState("connections", true)));
     };
 
     connectionSocket.current.onmessage = (ev) => {
-        connections = JSON.parse(ev.data);
-        connections.forEach(element => {
-            dispatch(updateConnection(element));
-        });
+      connections = JSON.parse(ev.data);
+      //CHECK this action
+      dispatch(updateConnectionsArray(connections));
     };
 
     connectionSocket.current.onclose = () => {
-      dispatch(updateConnection(createConnection("connections", false)));
       //WATCH OUT: connections must be disconnected after this
-      if(connections.length > 0) {
-        connections.forEach(element => {
-            element.isConnected = false;
-            dispatch(updateConnection(element));
-        });
-      }
-
+      dispatch(setDisconnectionState());
     };
 
     return () => {

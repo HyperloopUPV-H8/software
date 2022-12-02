@@ -3,7 +3,7 @@ export type Connection = {
   isConnected: boolean;
 };
 
-export function createConnection(
+export function setConnectionState(
   name: string,
   isConnected: boolean
 ): Connection {

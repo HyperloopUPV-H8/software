@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { initializePodData, updatePodData } from "@slices/podDataSlice";
 import { updateConnection } from "@slices/connectionsSlice";
 import { PodData } from "@models/PodData/PodData";
-import { createConnection } from "@models/Connection";
+import { setConnectionState } from "@models/Connection";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { podDataMock } from "@mocks/PodDataMock";
@@ -35,9 +35,9 @@ export const DataService = ({ children }: any) => {
             import.meta.env.VITE_SERVER_PORT
           }${import.meta.env.VITE_PACKETS_URL}`
         );
-        dispatch(updateConnection(createConnection("Packets", false)));
+        dispatch(updateConnection(setConnectionState("Packets", false)));
         packetUpdateSocket.current.onopen = (ev) => {
-          dispatch(updateConnection(createConnection("Packets", true)));
+          dispatch(updateConnection(setConnectionState("Packets", true)));
         };
         packetUpdateSocket.current.onmessage = (ev) => {
           let packetUpdates = JSON.parse(ev.data) as {
@@ -46,7 +46,7 @@ export const DataService = ({ children }: any) => {
           dispatch(updatePodData(packetUpdates));
         };
         packetUpdateSocket.current.onclose = () => {
-          dispatch(updateConnection(createConnection("Packets", false)));
+          dispatch(updateConnection(setConnectionState("Packets", false)));
         };
       })
       .catch((reason) => {

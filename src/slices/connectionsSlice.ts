@@ -12,12 +12,37 @@ const connectionsSlice = createSlice({
         connections.push(action.payload);
       }
     },
+
+    //CHECK this action
+    updateConnectionsArray: (connections, action) => {
+      let connectionArray = action.payload as Connection[];
+      connectionArray.forEach((element) => {
+        let conn = connections.find((conn) => conn.name == element.name)!;
+        if (conn) {
+          conn.isConnected = element.isConnected;
+        } else {
+          connections.push(element);
+        }
+      });
+    },
+
+    setDisconnectionState: (connections) => {
+      connections.forEach((element) => {
+        element.isConnected = false;
+      });
+    },
+
     initializeMockConnections: (connections, action) => {
-        return action.payload;
-    }, 
+      return action.payload;
+    },
   },
 });
 
-export const { updateConnection, initializeMockConnections } = connectionsSlice.actions;
+export const {
+  updateConnection,
+  updateConnectionsArray,
+  setDisconnectionState,
+  initializeMockConnections,
+} = connectionsSlice.actions;
 
 export default connectionsSlice.reducer;

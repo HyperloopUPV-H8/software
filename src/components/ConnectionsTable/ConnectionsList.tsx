@@ -1,21 +1,43 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styles from "@components/ConnectionsTable/ConnectionsList.module.scss";
 import { ConnectionLine } from "./ConnectionLine";
 import { Connection } from "@models/Connection";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "store";
+import {
+  BoardConnectionsMock,
+  ConnectionsMock,
+} from "@components/ConnectionsTable/structs/ConnectionsMock";
+import { initializeMockConnections } from "@slices/connectionsSlice";
 
 interface Props {
-    connectionsList: Connection[],
+  connectionsList: Connection[];
 }
+//{ connectionsList }: Props
+export const ConnectionsList = () => {
+  const connectionsList = useSelector((state: RootState) => state.connections);
 
-export const ConnectionsList = ({connectionsList}: Props) =>{
-    return (
-        <div id={styles.containerMessages}>
-            <ul className={styles.ulConnections}>{connectionsList.map((item, index) => {
-                return (
-                    <ConnectionLine key={index} connection={item}/>
-                )
-            })
-            }</ul>
-        </div>
-    )
-}
+  //mock with Redux
+  mockConnections();
+
+  return (
+    <div id={styles.containerMessages}>
+      <ul className={styles.ulConnections}>
+        {connectionsList.map((item, index) => {
+          return <ConnectionLine key={index} connection={item} />;
+        })}
+      </ul>
+    </div>
+  );
+};
+
+//mocks with dispatch
+const mockConnections = (): void => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    let connectionsMocks = ConnectionsMock;
+    let boardConnectionsMocks = BoardConnectionsMock;
+    dispatch(initializeMockConnections(connectionsMocks));
+  }, []);
+};
