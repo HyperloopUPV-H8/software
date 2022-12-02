@@ -20,7 +20,7 @@ export const TabBar = ({ items, onTabClick, visibleTabId }: Props) => {
           >
             <Tab
               title={item.name}
-              icon={item.icon}
+              //FIXME: añadir icono
               onClick={() => {
                 onTabClick(item.id);
               }}
