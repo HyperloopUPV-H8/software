@@ -2,27 +2,17 @@ import styles from "@components/ChartMenu/Chart/LinesCanvas/LinesCanvas.module.s
 import { useEffect, useRef } from "react";
 import { ChartCanvas } from "@components/ChartMenu/Chart/LinesCanvas/ChartCanvas";
 import { Point, getValueFromVector, concatenateVectors } from "@utils/math";
-import { HSLColor } from "@utils/color";
 type Props = {
-  figures: LineFigure[];
+  vectors: Point[][];
 };
 
-export type LineFigure = {
-  vector: Point[];
-  color: HSLColor;
-};
-
-export const LinesCanvas = ({ figures }: Props) => {
+export const LinesCanvas = ({ vectors }: Props) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartCanvas = useRef<ChartCanvas>();
 
   function drawChart() {
     chartCanvas.current!.clear();
-    figures.forEach((figure, index) => {
-      if (figure.vector.length >= 2) {
-        chartCanvas.current!.figure(figure.vector, 3, figure.color);
-      }
-    });
+    chartCanvas.current!.figures(vectors);
   }
 
   function getMaxXOfVector(vector: Point[]): number {
@@ -68,17 +58,13 @@ export const LinesCanvas = ({ figures }: Props) => {
   }, []);
 
   useEffect(() => {
-    let longVector = concatenateVectors(
-      figures.map((figure) => {
-        return figure.vector;
-      })
-    );
+    let longVector = concatenateVectors(vectors);
     chartCanvas.current!.maxX = getMaxXOfVector(longVector);
     chartCanvas.current!.maxY = getMaxYOfVector(longVector);
     chartCanvas.current!.minX = getMinXOfVector(longVector);
     chartCanvas.current!.minY = getMinYOfVector(longVector);
     drawChart();
-  }, [figures]);
+  }, [vectors]);
 
   return (
     <canvas

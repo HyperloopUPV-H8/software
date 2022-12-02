@@ -12,6 +12,7 @@ export class ChartCanvas {
   private numberOfMarks = 10;
   private markLength = 10;
   private decimalDigits = 1;
+  private initialColor = { h: 32, s: 60, l: 80 };
 
   constructor(ctx: CanvasRenderingContext2D) {
     this.ctx = ctx;
@@ -26,8 +27,20 @@ export class ChartCanvas {
     this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
   }
 
+  public figures(vectors: Point[][]) {
+    vectors.forEach((vector, index) => {
+      if (vector.length >= 2) {
+        this.figure(vector, 2, {
+          h: (this.initialColor.h + index * 50) % 360,
+          l: this.initialColor.l,
+          s: this.initialColor.s,
+        });
+      }
+    });
+  }
+
   public figure(
-    points: Point[],
+    vector: Point[],
     strokeWidth: number = 2,
     color: HSLColor = { h: 32, s: 100, l: 50 }
   ) {
@@ -51,7 +64,7 @@ export class ChartCanvas {
       verticalPadding,
       this.ctx.canvas.width - horizontalPadding,
       this.ctx.canvas.height - verticalPadding,
-      points
+      vector
     );
     this.ctx.lineWidth = previousStrokeWidth;
   }
@@ -76,7 +89,7 @@ export class ChartCanvas {
 
   private verticalAxisMarks(x1: number, y1: number, y2: number, n: number) {
     let spacing = (y2 - y1) / n;
-    for (let i = 0; y1 + i * spacing < y2; i++) {
+    for (let i = 0; y1 + i * spacing <= y2; i++) {
       this.line(x1, y1 + i * spacing, x1 + this.markLength, y1 + i * spacing);
       this.ctx.fillStyle = "#000";
       this.ctx.fillText(
