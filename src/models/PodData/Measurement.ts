@@ -1,7 +1,18 @@
-export enum ValueType {
-  Number = "Number",
-  Text = "Text",
-}
+type EnumType = `Enum(${string})`;
+
+export type ValueType =
+  | "uint8"
+  | "uint16"
+  | "uint32"
+  | "uint64"
+  | "int8"
+  | "int16"
+  | "int32"
+  | "int64"
+  | "float32"
+  | "float64"
+  | "bool"
+  | EnumType;
 
 export type Measurement = {
   name: string;
