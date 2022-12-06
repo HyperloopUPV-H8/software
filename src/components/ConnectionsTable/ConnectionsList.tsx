@@ -18,7 +18,7 @@ export const ConnectionsList = () => {
   const connectionsList = useSelector((state: RootState) => state.connections);
 
   //mock with Redux
-  mockConnections();
+  //mockConnections();
   var enabled = checkEnabled();
 
   function checkEnabled(): boolean {
