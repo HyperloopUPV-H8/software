@@ -1,9 +1,7 @@
 @use "@styles/styles";
 
-$border-blue: #317ae7;
-
 #wrapper {
-  border: 1px solid $border-blue;
+  border: 1px solid styles.$blue;
   border-radius: styles.$default-border-radius;
   background-color: styles.$default-background;
   width: 100%;
@@ -30,31 +28,14 @@ $border-blue: #317ae7;
   border: 1px solid lightgray;
 }
 
-#headers th {
-  position: sticky;
-  top: 0;
-
-  min-width: 3rem;
-  padding: 0.5rem 0.5rem;
-  @include styles.default-text-2;
-  background-color: #bad6ff;
-  outline: 1px solid #317ae7;
-  color: $border-blue;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-#tableBody {
-}
-
 .boardRow {
-  border: 1px solid $border-blue;
+  border: 1px solid styles.$blue;
 
   .boardName {
     text-align: left;
     padding-left: 1rem;
     @include styles.default-text-2;
-    color: $border-blue;
+    color: styles.$blue;
     font-weight: 600;
   }
 }

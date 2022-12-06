@@ -1,0 +1,13 @@
+@use "@styles/styles";
+
+.row {
+  border: 1px solid styles.$blue;
+
+  .name {
+    text-align: left;
+    padding-left: 1rem;
+    @include styles.default-text-2;
+    color: styles.$blue;
+    font-weight: 600;
+  }
+}

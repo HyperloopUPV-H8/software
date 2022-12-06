@@ -1,5 +1,5 @@
 import { Measurement } from "@models/PodData/Measurement";
-import styles from "@components/PacketTable/ReceiveTable/MeasurementRow.module.scss";
+import styles from "@components/ReceiveTable/MeasurementRow/MeasurementRow.module.scss";
 type Props = {
   measurement: Measurement;
 };
