@@ -21,11 +21,11 @@ export const ConnectionService = ({ children }: any) => {
     );
 
     dispatch(
-      updateWebsocketConnection(setConnectionState("connections", false))
+      updateWebsocketConnection(setConnectionState("Connections", false))
     );
     connectionSocket.current.onopen = () => {
       dispatch(
-        updateWebsocketConnection(setConnectionState("connections", true))
+        updateWebsocketConnection(setConnectionState("Connections", true))
       );
     };
 

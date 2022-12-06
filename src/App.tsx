@@ -1,7 +1,7 @@
 import "./App.css";
 import { DataService } from "@services/DataService";
 import { OrderService } from "@services/OrderService";
-// import { HomePage } from "@pages/HomePage/HomePage";
+import { HomePage } from "@pages/HomePage/HomePage";
 // import { Chart } from "@components/Chart/Chart";
 // import { Axis } from "@components/Chart/Axis";
 import { useState, useEffect } from "react";
@@ -36,12 +36,12 @@ function App() {
       {/* <Axis maxY={10 / 10} minY={-5 / 10} /> */}
       {/* <Chart points={points} /> */}
 
-      {/* <DataService>
+      <DataService>
         <OrderService>
           <HomePage />
         </OrderService>
-      </DataService> */}
-      <ConnectionsList />
+      </DataService>
+      {/* <ConnectionsList /> */}
     </div>
   );
 }

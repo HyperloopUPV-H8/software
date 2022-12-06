@@ -1,7 +1,7 @@
 import { Connection } from "@models/Connection";
 
 export const ConnectionsMock: Connection[] = [
-  { name: "PodData", isConnected: false },
+  { name: "Packets", isConnected: false },
   { name: "Orders", isConnected: true },
   { name: "Connections", isConnected: true },
 ];

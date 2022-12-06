@@ -19,17 +19,36 @@ export const ConnectionsList = () => {
 
   //mock with Redux
   mockConnections();
+  var enabled = checkEnabled();
+
+  function checkEnabled(): boolean {
+    let conn = connectionsList.websocket.find(
+      (el) => el.name === "Connections"
+    );
+    if (conn === undefined) {
+      return false;
+    } else {
+      return conn.isConnected;
+    }
+  }
 
   return (
     <div id={styles.containerMessages}>
+      <div className={styles.titleConnections}>Websockets</div>
       <ul className={styles.ulConnections}>
         {connectionsList.websocket.map((item, index) => {
-          return <ConnectionLine key={index} connection={item} />;
+          return (
+            <ConnectionLine key={index} connection={item} enabled={true} />
+          );
         })}
       </ul>
+
+      <div className={styles.titleConnections}>Boards</div>
       <ul className={styles.ulConnections}>
         {connectionsList.board.map((item, index) => {
-          return <ConnectionLine key={index} connection={item} />;
+          return (
+            <ConnectionLine key={index} connection={item} enabled={enabled} />
+          );
         })}
       </ul>
     </div>

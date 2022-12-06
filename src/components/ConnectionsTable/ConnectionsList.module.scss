@@ -15,3 +15,14 @@
   padding-left: 0rem;
   @include styles.code-text;
 }
+
+.titleConnections {
+  width: 100%;
+  padding-left: 0rem;
+  padding-top: 0.2rem;
+  padding-bottom: 0.2rem;
+  @include styles.code-text;
+  font-size: 1rem;
+  font-style: italic;
+  color: #a9adb6;
+}
