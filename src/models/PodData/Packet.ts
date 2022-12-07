@@ -1,5 +1,7 @@
 import { PacketUpdate } from "@adapters/PacketUpdate";
 import { Measurement, isNumber, getNumber } from "@models/PodData/Measurement";
+import { WritableDraft } from "immer/dist/internal";
+import { original } from "@reduxjs/toolkit";
 
 export type Packet = {
   id: number;
@@ -9,7 +11,10 @@ export type Packet = {
   cycleTime: number;
   measurements: { [name: string]: Measurement };
 };
-export function updatePacket(packet: Packet, update: PacketUpdate) {
+export function updatePacket(
+  packet: WritableDraft<Packet>,
+  update: PacketUpdate
+) {
   packet.count = update.count;
   packet.cycleTime = update.cycleTime;
   packet.hexValue = update.hexValue;
@@ -17,15 +22,17 @@ export function updatePacket(packet: Packet, update: PacketUpdate) {
 }
 
 function updateMeasurements(
-  measurements: Packet["measurements"],
+  measurements: WritableDraft<Packet["measurements"]>,
   measurementUpdates: PacketUpdate["measurementUpdates"]
 ): void {
-  for (let measurement of Object.values(measurements)) {
-    if (isNumber(measurement.type)) {
-      measurement.value = getNumber(
-        measurement.type,
-        measurementUpdates[measurement.name]
+  for (let [mName, newValue] of Object.entries(measurementUpdates)) {
+    if (isNumber(original(measurements[mName])!.type)) {
+      measurements[mName].value = getNumber(
+        original(measurements[mName])!.type,
+        newValue
       );
+    } else {
+      measurements[mName].value = newValue;
     }
   }
 }

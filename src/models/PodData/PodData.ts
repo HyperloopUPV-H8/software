@@ -2,59 +2,51 @@ import { PacketUpdate } from "@adapters/PacketUpdate";
 import { Board } from "@models/PodData/Board";
 import { Packet, updatePacket } from "@models/PodData/Packet";
 import { Measurement } from "@models/PodData/Measurement";
+import { WritableDraft } from "immer/dist/internal";
 
 //TODO: optimizar poddata metiendo mapas extras de ID a board y MName a P Id.
 export type PodData = {
   boards: { [name: string]: Board };
-  lastBatchIDs: number[];
+  packetToBoard: { [id: number]: string };
+  lastUpdates: { [id: number]: PacketUpdate };
 };
 
 export function createEmptyPodData(): PodData {
-  return { boards: {}, lastBatchIDs: [] };
-}
-
-export function setLastBatchIDs(
-  podData: PodData,
-  updates: { [id: number]: PacketUpdate }
-) {
-  podData.lastBatchIDs = Object.keys(updates).map((key) => {
-    return Number.parseInt(key);
-  });
+  return { boards: {}, packetToBoard: {}, lastUpdates: {} };
 }
 
 export function updatePodData(
-  podData: PodData,
+  podData: WritableDraft<PodData>,
   packetUpdates: { [id: number]: PacketUpdate }
 ) {
-  for (let [name, update] of Object.entries(packetUpdates)) {
-    let packet = getPacket(podData, update.id)!;
+  for (let update of Object.values(packetUpdates)) {
+    let packet = getPacket(podData, update.id);
     updatePacket(packet, update);
   }
 }
 
-function getPacket(podData: PodData, id: number): Packet | undefined {
-  for (let [_, board] of Object.entries(podData.boards)) {
-    for (let [_, packet] of Object.entries(board.packets)) {
-      if (packet.id == id) {
-        return packet;
-      }
-    }
-  }
+export function getPacket(
+  podData: WritableDraft<PodData>,
+  id: number
+): WritableDraft<Packet> {
+  return podData.boards[podData.packetToBoard[id]].packets[id];
 }
 
 export function selectMeasurementByName(
   boards: { [key: string]: Board },
-  name: string
+  measurementName: string
 ): Measurement {
   let measurement: Measurement;
-  OuterLoop: for (let board of Object.values(boards)) {
-    let packets = Object.values(board.packets);
-    for (let packet of packets) {
-      if (name in packet.measurements) {
-        measurement = packet.measurements[name];
-        break OuterLoop;
-      }
+
+  Object.values(boards).forEach((board) => {
+    if (
+      board.packets[board.measurementToPacket[measurementName]] != undefined
+    ) {
+      measurement =
+        board.packets[board.measurementToPacket[measurementName]].measurements[
+          measurementName
+        ];
     }
-  }
+  });
   return measurement!;
 }

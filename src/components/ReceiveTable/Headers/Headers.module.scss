@@ -1,0 +1,15 @@
+@use "@styles/styles";
+
+#headers th {
+  position: sticky;
+  top: 0;
+
+  min-width: 3rem;
+  padding: 0.5rem 0.5rem;
+  @include styles.default-text-2;
+  background-color: #bad6ff;
+  outline: 1px solid styles.$blue;
+  color: styles.$blue;
+  font-weight: 600;
+  white-space: nowrap;
+}

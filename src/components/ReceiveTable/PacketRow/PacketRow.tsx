@@ -1,11 +1,13 @@
 import { Packet } from "@models/PodData/Packet";
-import styles from "@components/PacketTable/ReceiveTable/PacketRow.module.scss";
-import { MeasurementRow } from "@components/PacketTable/ReceiveTable/MeasurementRow";
+import styles from "@components/ReceiveTable/PacketRow/PacketRow.module.scss";
+import { MeasurementRow } from "@components/ReceiveTable/MeasurementRow/MeasurementRow";
+import { memo } from "react";
+
 type Props = {
   packet: Packet;
 };
 
-export const PacketRow = ({ packet }: Props) => {
+const PacketRow = ({ packet }: Props) => {
   return (
     <>
       <tr className={styles.packetRow}>
@@ -26,3 +28,5 @@ export const PacketRow = ({ packet }: Props) => {
     </>
   );
 };
+
+export default memo(PacketRow);
