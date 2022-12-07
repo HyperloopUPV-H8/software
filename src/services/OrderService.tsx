@@ -5,7 +5,7 @@ import { setOrders } from "@slices/ordersSlice";
 import { useDispatch } from "react-redux";
 import { setConnectionState } from "@models/Connection";
 import { updateWebsocketConnection } from "@slices/connectionsSlice";
-import { mockOrderWebAdapters } from "@mocks/mockOrderDescriptions";
+
 interface IOrderService {
   sendOrder(order: Order): void;
 }
