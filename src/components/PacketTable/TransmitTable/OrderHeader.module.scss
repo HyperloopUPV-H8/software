@@ -1,0 +1,47 @@
+@use "@styles/styles";
+$header-color: #ffe4cc;
+
+#wrapper {
+  width: 100%;
+  height: auto;
+  padding: 0.5rem;
+
+  display: grid;
+  grid-template:
+    "caret name button" auto
+    / 1.5rem 1fr 5rem;
+  align-items: center;
+  background-color: $header-color;
+  @include styles.default-text-2;
+
+  #caret {
+    grid-area: caret;
+    justify-self: center;
+    width: 1rem;
+    height: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    color: styles.$custom-orange;
+
+    //TODO: arreglar caret, que ocupe el 100%
+    #caret > * {
+      width: 100%;
+      height: 100%;
+    }
+  }
+  #name {
+    grid-area: name;
+    color: styles.$custom-orange;
+    font-weight: 500;
+  }
+}
+
+#sendBtn {
+  grid-area: button;
+  height: 2rem;
+  button {
+    height: 100%;
+  }
+}

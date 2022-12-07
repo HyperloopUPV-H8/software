@@ -1,1 +1,1 @@
-export type MeasurementUpdate = number | string;
+export type MeasurementUpdate = string;

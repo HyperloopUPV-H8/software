@@ -1,0 +1,11 @@
+@use "@styles/styles";
+
+#wrapper {
+  width: 100%;
+}
+
+#wrapper td {
+  padding: 0.6rem;
+  vertical-align: middle;
+  @include styles.default-text-2;
+}

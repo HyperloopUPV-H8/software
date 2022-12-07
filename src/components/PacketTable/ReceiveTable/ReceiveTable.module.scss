@@ -1,34 +1,60 @@
 @use "@styles/styles";
 
-$custom-blue: #317ae7;
+$border-blue: #317ae7;
 
 #wrapper {
-  outline: 1px solid $custom-blue;
+  border: 1px solid $border-blue;
   border-radius: styles.$default-border-radius;
   background-color: styles.$default-background;
-  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+}
+
+#table {
+  width: 100%;
+  height: 100%;
+  border-style: hidden;
+  text-align: center;
 }
 
 #table,
 #table th,
 #table td {
-  outline: 1px solid lightgray;
   border-collapse: collapse;
+  height: fit-content;
+  padding: 0.25rem;
+}
+
+#table td {
+  border: 1px solid lightgray;
 }
 
 #headers th {
-  background-color: $custom-blue;
-  color: white;
-  padding: 0.2rem 0.5rem;
+  position: sticky;
+  top: 0;
+
+  min-width: 3rem;
+  padding: 0.5rem 0.5rem;
+  @include styles.default-text-2;
+  background-color: #bad6ff;
+  outline: 1px solid #317ae7;
+  color: $border-blue;
   font-weight: 600;
+  white-space: nowrap;
+}
+
+#tableBody {
 }
 
 .boardRow {
-  outline: 1px solid $custom-blue;
+  border: 1px solid $border-blue;
+
   .boardName {
     text-align: left;
     padding-left: 1rem;
-    color: $custom-blue;
+    @include styles.default-text-2;
+    color: $border-blue;
     font-weight: 600;
   }
 }

@@ -1,13 +1,17 @@
 $normal-font: Inter;
+//$code-font: Cascadia Code;
+//$code-font: Cascadia Mono;
 $code-font: Consolas;
-$default-text-color: #40464f;
+$default-text-color: #373c43;
 $title-text-color: #4f5762;
 $default-background: #fdfdfd;
-$default-border-radius: 0.8rem;
+$text-color-2: #5a6a89;
+$custom-orange: #f28d30;
+$default-border-radius: 0.2rem;
 $default-font-size: 0.8rem;
 
 @mixin code-text {
-  font-family: Consolas;
+  font-family: $code-font;
   font-size: $default-font-size;
   color: $default-text-color;
 }
@@ -18,6 +22,12 @@ $default-font-size: 0.8rem;
   color: $default-text-color;
 }
 
+@mixin default-text-2 {
+  font-family: Cascadia Code;
+  font-size: $default-font-size;
+  color: $text-color-2;
+}
+
 @mixin undraggable {
   user-drag: none;
   user-select: none;
@@ -25,10 +35,4 @@ $default-font-size: 0.8rem;
   -webkit-user-drag: none;
   -webkit-user-select: none;
   -ms-user-select: none;
-}
-
-//If it's only :root, font-size changes the base rem. If it's :root *, it affects everything, skipping inheritance.
-:root > * {
-  box-sizing: border-box;
-  @include default-text;
 }
