@@ -25,7 +25,6 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 0.4rem;
 
   margin: 0 -0.7rem;
   padding: 0.2rem 0.4rem;
@@ -37,6 +36,7 @@
   #icon {
     width: 100%;
     aspect-ratio: 1/1;
+    margin: 0 0.2rem;
     color: styles.$title-text-color;
   }
 

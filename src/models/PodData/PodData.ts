@@ -1,7 +1,9 @@
 import { PacketUpdate } from "@adapters/PacketUpdate";
 import { Board } from "@models/PodData/Board";
 import { Packet, updatePacket } from "@models/PodData/Packet";
+import { Measurement } from "@models/PodData/Measurement";
 
+//TODO: optimizar poddata metiendo mapas extras de ID a board y MName a P Id.
 export type PodData = {
   boards: { [name: string]: Board };
   lastBatchIDs: number[];
@@ -15,9 +17,9 @@ export function setLastBatchIDs(
   podData: PodData,
   updates: { [id: number]: PacketUpdate }
 ) {
-  for (let id of Object.keys(updates)) {
-    podData.lastBatchIDs.push(Number.parseInt(id));
-  }
+  podData.lastBatchIDs = Object.keys(updates).map((key) => {
+    return Number.parseInt(key);
+  });
 }
 
 export function updatePodData(
@@ -38,4 +40,21 @@ function getPacket(podData: PodData, id: number): Packet | undefined {
       }
     }
   }
+}
+
+export function selectMeasurementByName(
+  boards: { [key: string]: Board },
+  name: string
+): Measurement {
+  let measurement: Measurement;
+  OuterLoop: for (let board of Object.values(boards)) {
+    let packets = Object.values(board.packets);
+    for (let packet of packets) {
+      if (name in packet.measurements) {
+        measurement = packet.measurements[name];
+        break OuterLoop;
+      }
+    }
+  }
+  return measurement!;
 }

@@ -1,9 +1,9 @@
 @use "@styles/styles";
 
-$custom-blue: #317ae7;
+$border-blue: #317ae7;
 
 #wrapper {
-  border: 1px solid $custom-blue;
+  border: 1px solid $border-blue;
   border-radius: styles.$default-border-radius;
   background-color: styles.$default-background;
   width: 100%;
@@ -36,24 +36,25 @@ $custom-blue: #317ae7;
 
   min-width: 3rem;
   padding: 0.5rem 0.5rem;
-
-  background-color: $custom-blue;
-  color: white;
+  @include styles.default-text-2;
+  background-color: #bad6ff;
+  outline: 1px solid #317ae7;
+  color: $border-blue;
   font-weight: 600;
   white-space: nowrap;
 }
 
 #tableBody {
-  overflow-y: scroll;
 }
 
 .boardRow {
-  border: 1px solid $custom-blue;
+  border: 1px solid $border-blue;
 
   .boardName {
     text-align: left;
     padding-left: 1rem;
-    color: $custom-blue;
+    @include styles.default-text-2;
+    color: $border-blue;
     font-weight: 600;
   }
 }

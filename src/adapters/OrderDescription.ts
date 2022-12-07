@@ -1,4 +1,7 @@
 export type OrderWebAdapter = {
   id: number;
-  fieldDescriptions: { name: string; valueType: "Number" | "Text" }[];
+  name: string;
+  fieldDescriptions: { name: string; valueType: string }[];
 };
+
+export type OrderDescription = OrderWebAdapter & { name: string };
