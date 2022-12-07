@@ -7,18 +7,10 @@ import { Axis } from "@components/Chart/Axis";
 import { useState, useEffect } from "react";
 import { FaultsAndWarningList } from "@components/MessageLogger/FaultsAndWarningList";
 
-
-
 let index = 0;
 function App() {
-
-
   return (
     <div className="App">
-      {/* <Axis maxY={10 / 10} minY={-5 / 10} /> */}
-      {/* <Chart points={points} /> */}
-
-
       <DataService>
         <OrderService>
           <HomePage />
@@ -27,6 +19,5 @@ function App() {
     </div>
   );
 }
-
 
 export default App;

@@ -17,7 +17,7 @@ export const FaultsAndWarningList = () => {
   const messages = useSelector((state: RootState) => state.messages);
 
   //with useEffect it doesn't work correctly (and with StrictMode)
-  mockMessages();
+  //mockMessages();
 
   return (
     <>
@@ -32,7 +32,7 @@ const mockMessages = (): void => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    //It works but it is not represented until it rerenders a second time
+    //FIXME: At the begin it has nothing. It works but it is not represented until it rerenders a second time
     let msgs = { fault: faultMessages, warning: warningMessages };
     dispatch(initializeMockMessages(msgs));
   }, []);
