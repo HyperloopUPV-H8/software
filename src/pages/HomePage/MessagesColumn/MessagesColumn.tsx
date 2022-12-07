@@ -4,11 +4,23 @@ import { TabLayout } from "@layouts/TabLayout/TabLayout";
 import { BiLineChart } from "react-icons/bi";
 import { nanoid } from "nanoid";
 import { ReceiveTable } from "@components/PacketTable/ReceiveTable/ReceiveTable";
+import { ConnectionsList } from "@components/ConnectionsTable/ConnectionsList";
 
 export const MessagesColumn = () => {
   return (
     <SplitLayout
       components={[
+        <TabLayout
+          items={[
+            {
+              id: nanoid(),
+              name: "ConnectionsTable",
+              icon: <BiLineChart />,
+
+              component: <ConnectionsList />,
+            },
+          ]}
+        ></TabLayout>,
         <TabLayout
           items={[
             {

@@ -3,9 +3,9 @@ import { useEffect, createContext, useRef } from "react";
 import { Order, createOrderDescription } from "@models/Order";
 import { setOrders } from "@slices/ordersSlice";
 import { useDispatch } from "react-redux";
-import { createConnection } from "@models/Connection";
-import { updateConnection } from "@slices/connectionsSlice";
-import { mockOrderWebAdapters } from "@mocks/mockOrderDescriptions";
+import { setConnectionState } from "@models/Connection";
+import { updateWebsocketConnection } from "@slices/connectionsSlice";
+
 interface IOrderService {
   sendOrder(order: Order): void;
 }
@@ -63,16 +63,20 @@ export const OrderService = ({ children }: any) => {
         import.meta.env.VITE_SERVER_PORT
       }${import.meta.env.VITE_ORDERS_URL}`
     );
-    dispatch(updateConnection(createConnection("Orders", false)));
+    dispatch(updateWebsocketConnection(setConnectionState("Orders", false)));
     orderSocket.current.onopen = () => {
-      dispatch(updateConnection(createConnection("Orders", true)));
+      dispatch(updateWebsocketConnection(setConnectionState("Orders", true)));
+    };
+    orderSocket.current.onerror = () => {
+      //TODO: move all error handling to a separate file and make functions to create errors
+      console.error("Error in Order WebSocket");
     };
     orderSocket.current.onerror = () => {
       //TODO: move all error handling to a separate file and make functions to create errors
       console.error("Error in Order WebSocket");
     };
     orderSocket.current.onclose = () => {
-      dispatch(updateConnection(createConnection("Orders", false)));
+      dispatch(updateWebsocketConnection(setConnectionState("Orders", false)));
     };
   }
 

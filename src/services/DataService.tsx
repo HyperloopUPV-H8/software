@@ -1,8 +1,9 @@
 import { useEffect, useRef } from "react";
 import { initializePodData, updatePodData } from "@slices/podDataSlice";
-import { updateConnection } from "@slices/connectionsSlice";
+import { updateWebsocketConnection } from "@slices/connectionsSlice";
 import { PodData } from "@models/PodData/PodData";
-import { createConnection } from "@models/Connection";
+import { setConnectionState } from "@models/Connection";
+import axios from "axios";
 import { useDispatch } from "react-redux";
 import { PacketUpdate } from "@adapters/PacketUpdate";
 
@@ -54,10 +55,10 @@ export const DataService = ({ children }: any) => {
       }${import.meta.env.VITE_PACKETS_URL}`
     );
 
-    dispatch(updateConnection(createConnection("Packets", false)));
+    dispatch(updateWebsocketConnection(setConnectionState("Packets", false)));
 
     packetUpdateSocket.current.onopen = (ev) => {
-      dispatch(updateConnection(createConnection("Packets", true)));
+      dispatch(updateWebsocketConnection(setConnectionState("Packets", true)));
     };
 
     packetUpdateSocket.current.onmessage = (ev) => {
@@ -72,7 +73,7 @@ export const DataService = ({ children }: any) => {
     };
 
     packetUpdateSocket.current.onclose = () => {
-      dispatch(updateConnection(createConnection("Packets", false)));
+      dispatch(updateWebsocketConnection(setConnectionState("Packets", false)));
     };
   }
 
