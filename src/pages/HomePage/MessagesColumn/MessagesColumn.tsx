@@ -13,7 +13,7 @@ export const MessagesColumn = () => {
           items={[
             {
               id: nanoid(),
-              name: "ConnectionsTable",
+              name: "MessageList",
               icon: <BiLineChart />,
 
               component: (
