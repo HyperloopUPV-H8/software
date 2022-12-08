@@ -8,16 +8,16 @@ import styles from "@pages/HomePage/HomePage.module.scss";
 export const HomePage = () => {
   return (
     <div id={styles.wrapper}>
-      <Header />
+      {/* <Header /> */}
       <div id={styles.body}>
         <SplitLayout
           components={[
             <ReceiveColumn />,
-            <TransmitColumn />,
+            // <TransmitColumn />,
             <MessagesColumn />,
           ]}
           direction={Direction.HORIZONTAL}
-          initialPortions={[0.333, 0.333, 0.333]}
+          initialPortions={[0.5, 0.5]}
         ></SplitLayout>
       </div>
     </div>

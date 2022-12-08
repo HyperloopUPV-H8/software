@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { MessageList } from "@components/MessageLogger/MessageList";
 import { Message, MessageCounter } from "@adapters/Message";
 import { nanoid } from "nanoid";
+import styles from "@components/MessageLogger/ConsoleList.module.scss";
 
 interface Props {
   title: string;
@@ -65,9 +66,9 @@ export const ConsoleList = ({ title, messages }: Props) => {
   };
 
   return (
-    <>
-      <h2>{title}</h2>
+    <div className={styles.containerMessages}>
+      <div className={styles.titleConnections}>{title}</div>
       <MessageList messages={messagesCounter} />
-    </>
+    </div>
   );
 };

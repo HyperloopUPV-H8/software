@@ -1,17 +1,28 @@
 @use "@styles/overrideDefaultMethods.scss";
 @use "@styles/styles.scss";
 
-#containerMessages {
+#faultListWrapper {
   background-color: styles.$default-background;
   width: 100%;
-  height: 100%;
+  height: 90%;
   overflow-x: hidden;
   overflow-y: auto;
+  background-color: #fec8c8;
+  border-radius: 2%;
+}
+
+#warningListWrapper {
+  background-color: styles.$default-background;
+  width: 100%;
+  height: 90%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: #f3e4ad;
 }
 
 .lineMsgUl {
   width: 100%;
-  padding-top: 0.3rem;
+  padding-bottom: 0.3rem;
   @include overrideDefaultMethods.override-ul;
   @include styles.code-text;
 }

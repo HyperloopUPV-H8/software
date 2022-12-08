@@ -9,7 +9,15 @@ interface Props {
 
 export const MessageList = ({ messages }: Props) => {
   return (
-    <div id={styles.containerMessages}>
+    <div
+      id={
+        messages.length <= 0
+          ? styles.faultListWrapper
+          : messages[0].msg.type === "warning"
+          ? styles.warningListWrapper
+          : styles.faultListWrapper
+      }
+    >
       <ul className={styles.lineMsgUl}>
         {messages.map((item, index) => {
           return (

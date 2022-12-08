@@ -1,0 +1,21 @@
+@use "@styles/styles.scss";
+
+.containerMessages {
+  width: 100%;
+  height: 50%;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  min-height: fit-content;
+  //border: 1px solid #317ae7;
+  //border-radius: 0.2rem;
+  margin-bottom: 0.2rem;
+}
+
+.titleConnections {
+  padding-left: 0rem;
+  padding-top: 0.2rem;
+  padding-bottom: 0.2rem;
+  @include styles.code-text;
+  font-style: italic;
+  color: #a9adb6;
+}
