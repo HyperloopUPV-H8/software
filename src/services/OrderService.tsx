@@ -3,8 +3,8 @@ import { useEffect, createContext, useRef } from "react";
 import { Order, createOrderDescription } from "@models/Order";
 import { setOrders } from "@slices/ordersSlice";
 import { useDispatch } from "react-redux";
-import { setConnectionState } from "@models/Connection";
 import { updateWebsocketConnection } from "@slices/connectionsSlice";
+import { createConnection } from "@models/Connection";
 
 interface IOrderService {
   sendOrder(order: Order): void;
@@ -63,9 +63,9 @@ export const OrderService = ({ children }: any) => {
         import.meta.env.VITE_SERVER_PORT
       }${import.meta.env.VITE_ORDERS_URL}`
     );
-    dispatch(updateWebsocketConnection(setConnectionState("Orders", false)));
+    dispatch(updateWebsocketConnection(createConnection("Orders", false)));
     orderSocket.current.onopen = () => {
-      dispatch(updateWebsocketConnection(setConnectionState("Orders", true)));
+      dispatch(updateWebsocketConnection(createConnection("Orders", true)));
     };
     orderSocket.current.onerror = () => {
       //TODO: move all error handling to a separate file and make functions to create errors
@@ -76,7 +76,7 @@ export const OrderService = ({ children }: any) => {
       console.error("Error in Order WebSocket");
     };
     orderSocket.current.onclose = () => {
-      dispatch(updateWebsocketConnection(setConnectionState("Orders", false)));
+      dispatch(updateWebsocketConnection(createConnection("Orders", false)));
     };
   }
 
