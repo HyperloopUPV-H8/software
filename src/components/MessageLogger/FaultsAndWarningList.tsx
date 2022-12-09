@@ -17,7 +17,7 @@ export const FaultsAndWarningList = () => {
 
   const messages = useSelector((state: RootState) => state.messages);
 
-  //with useEffect it doesn't work correctly (and with StrictMode)
+  //with useEffect it doesn't work correctly
   //mockMessages();
 
   return (

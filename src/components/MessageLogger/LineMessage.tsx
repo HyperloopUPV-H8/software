@@ -1,15 +1,22 @@
 import React, { useEffect, useRef, useState } from "react";
 import styles from "@components/MessageLogger/LineMessage.module.scss";
-import { IoIosArrowDropdownCircle } from "react-icons/io";
 import { BsFillCaretRightFill } from "react-icons/bs";
 import { Message } from "@adapters/Message";
+import { Counter } from "@components/MessageLogger/Counter";
 
 interface Props {
   message: Message;
   count: number;
+  color: string;
+  colorBackground: string;
 }
 
-export const LineMessage = ({ message, count }: Props) => {
+export const LineMessage = ({
+  message,
+  count,
+  color,
+  colorBackground,
+}: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isOverflowing, setIsOverflowing] = useState(true);
   const [changeWidth, setChangeWidth] = useState(true);
@@ -20,13 +27,13 @@ export const LineMessage = ({ message, count }: Props) => {
   };
 
   function checkOverflow(el: HTMLElement) {
-    var overflowing = el.clientWidth < el.scrollWidth;
+    let overflowing = el.clientWidth < el.scrollWidth;
 
     return overflowing;
   }
 
   const changeOverflowState = (overflow: boolean) => {
-    setIsOverflowing((_) => overflow);
+    setIsOverflowing(overflow);
   };
 
   useEffect(() => {
@@ -41,10 +48,10 @@ export const LineMessage = ({ message, count }: Props) => {
     return () => {
       descRef.current && observer.unobserve(descRef.current);
     };
-  }, [changeWidth]); //comprobar cuando hacer el useEffect
+  }, [changeWidth]);
 
   return (
-    <>
+    <div style={{ backgroundColor: colorBackground }}>
       <li
         className={styles.lineMsg}
         key={message.id}
@@ -60,32 +67,16 @@ export const LineMessage = ({ message, count }: Props) => {
             visibility: !isOverflowing ? "hidden" : "visible",
           }}
         />
-        <label
-          id={styles.idMsg}
-          style={{
-            color: message.type === "warning" ? "#ce980e" : "#c51010",
-          }}
-        >
+        <label id={styles.idMsg} style={{ color: color }}>
           {message.id}:{" "}
         </label>
-        {count > 1 ? <label id={styles.count}>{count}</label> : null}
-        <label
-          id={styles.descMsg}
-          style={{
-            color: message.type === "warning" ? "#ce980e" : "#c51010",
-          }}
-          ref={descRef}
-        >
+        <Counter count={count} />
+        <label id={styles.descMsg} style={{ color: color }} ref={descRef}>
           {message.description}
         </label>
         <br />
       </li>
-      <hr
-        className={styles.hr}
-        style={{
-          color: message.type === "warning" ? "#ce980e" : "#c51010",
-        }}
-      />
-    </>
+      <hr className={styles.hr} style={{ color: color }} />
+    </div>
   );
 };
