@@ -1,5 +1,5 @@
 import styles from "@pages/HomePage/ReceiveColumn.module.scss";
-import { ReceiveTable } from "@components/PacketTable/ReceiveTable/ReceiveTable";
+import { ReceiveTable } from "@components/ReceiveTable/ReceiveTable";
 import { BiLineChart } from "react-icons/bi";
 import { TabLayout } from "@layouts/TabLayout/TabLayout";
 import { nanoid } from "nanoid";

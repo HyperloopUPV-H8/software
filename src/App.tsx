@@ -4,10 +4,10 @@ import { HomePage } from "@pages/HomePage/HomePage";
 
 import { useEffect } from "react";
 import dataService from "@services/DataService";
+import connectionService from "@services/ConnectionService";
 import { useDispatch } from "react-redux";
 import { initializePodData, updatePodData } from "@slices/podDataSlice";
 import { PacketUpdate } from "@adapters/PacketUpdate";
-import { updateConnection } from "@slices/connectionsSlice";
 
 function App() {
   const dispatch = useDispatch();
@@ -17,20 +17,11 @@ function App() {
       dispatch(initializePodData(podData));
     });
 
-    let packetSocket = dataService.createPacketWebSocket(
-      (ev) => {
-        let packetUpdates = JSON.parse(ev.data) as {
-          [id: number]: PacketUpdate;
-        };
-        dispatch(updatePodData(packetUpdates));
-      },
-      (conn) => {
-        dispatch(updateConnection(conn));
-      }
-    );
-
+    let packetSocket = dataService.createPacketWebSocket();
+    let connectionSocket = connectionService.createOrderWebSocket();
     return () => {
       packetSocket.close();
+      connectionSocket.close();
     };
   }, []);
 

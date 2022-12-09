@@ -4,16 +4,11 @@ import { Packet, updatePacket } from "@models/PodData/Packet";
 import { Measurement } from "@models/PodData/Measurement";
 import { WritableDraft } from "immer/dist/internal";
 
-//TODO: optimizar poddata metiendo mapas extras de ID a board y MName a P Id.
 export type PodData = {
   boards: { [name: string]: Board };
   packetToBoard: { [id: number]: string };
   lastUpdates: { [id: number]: PacketUpdate };
 };
-
-export function createEmptyPodData(): PodData {
-  return { boards: {}, packetToBoard: {}, lastUpdates: {} };
-}
 
 export function updatePodData(
   podData: WritableDraft<PodData>,
