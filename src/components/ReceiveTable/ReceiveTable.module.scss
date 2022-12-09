@@ -4,14 +4,13 @@
 //FIXME: no border between last measurement and next board header
 
 #wrapper {
-  //border: 1px solid styles.$blue;
   background-color: styles.$default-background;
   width: 100%;
   height: 100%;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1rem;
 }
 
 .boards {
