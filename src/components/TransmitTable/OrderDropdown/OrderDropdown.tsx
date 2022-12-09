@@ -1,7 +1,7 @@
 import { OrderDescription } from "@adapters/OrderDescription";
-import { OrderHeader } from "@components/PacketTable/TransmitTable/OrderHeader";
-import { OrderFields } from "@components/PacketTable/TransmitTable/OrderFields";
-import styles from "@components/PacketTable/TransmitTable/OrderDropdown.module.scss";
+import { OrderHeader } from "@components/TransmitTable/OrderHeader/OrderHeader";
+import { OrderFields } from "@components/TransmitTable/OrderFields/OrderFields";
+import styles from "@components/TransmitTable/OrderDropdown/OrderDropdown.module.scss";
 import { useState, useEffect } from "react";
 
 type Props = {

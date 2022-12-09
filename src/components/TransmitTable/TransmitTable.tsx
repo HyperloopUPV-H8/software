@@ -1,8 +1,8 @@
-import styles from "@components/PacketTable/TransmitTable/TransmitTable.module.scss";
+import styles from "@components/TransmitTable/TransmitTable.module.scss";
 import {
   OrderDropdown,
   FieldState,
-} from "@components/PacketTable/TransmitTable/OrderDropdown";
+} from "@components/TransmitTable/OrderDropdown/OrderDropdown";
 import { OrderDescription } from "@adapters/OrderDescription";
 import { OrderServiceContext } from "@services/OrderService";
 import { useContext } from "react";
