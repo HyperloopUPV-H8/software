@@ -11,8 +11,6 @@
 
 .ulConnections {
   width: 100%;
-  // @include overrideDefaultMethods.override-ul;
-  padding-left: 0rem;
   @include styles.code-text;
 }
 
