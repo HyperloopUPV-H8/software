@@ -13,11 +13,11 @@ export const HomePage = () => {
         <SplitLayout
           components={[
             <ReceiveColumn />,
-            <TransmitColumn />,
-            <MessagesColumn />,
+            // <TransmitColumn />,
+            // <MessagesColumn />,
           ]}
           direction={Direction.HORIZONTAL}
-          initialPortions={[0.333, 0.333, 0.333]}
+          initialPortions={[1]}
         ></SplitLayout>
       </div>
     </div>
