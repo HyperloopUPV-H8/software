@@ -16,12 +16,12 @@ export const ReceiveColumn = () => {
           icon: <HiInboxArrowDown />,
           component: <ReceiveTable />,
         },
-        {
-          id: nanoid(),
-          name: "Charts",
-          icon: <BiLineChart />,
-          component: <ChartMenu />,
-        },
+        // {
+        //   id: nanoid(),
+        //   name: "Charts",
+        //   icon: <BiLineChart />,
+        //   component: <ChartMenu />,
+        // },
       ]}
     ></TabLayout>
   );

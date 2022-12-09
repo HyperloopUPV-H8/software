@@ -1,8 +1,24 @@
 @use "@styles/styles";
-.packetRow {
-  @include styles.code-text;
+
+.wrapper {
+  display: grid;
+  grid-template-rows: min-content auto;
+  // content-visibility: auto;
 }
 
-.packetRow td {
-  padding: 0 1rem;
+.packetInfo {
+  @include styles.code-text;
+
+  > * {
+    border: 1px solid lightgray;
+  }
+}
+
+.measurements {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  > * {
+    margin: 0.5rem 0;
+  }
 }

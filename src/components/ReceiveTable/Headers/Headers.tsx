@@ -1,14 +1,13 @@
 import styles from "@components/ReceiveTable/Headers/Headers.module.scss";
+import "@components/ReceiveTable/SharedStyles.scss";
 export const Headers = () => {
   return (
-    <thead id={styles.headers}>
-      <tr>
-        <th>ID</th>
-        <th>NAME</th>
-        <th>HEX VALUE</th>
-        <th>COUNT</th>
-        <th>CYCLE TIME</th>
-      </tr>
-    </thead>
+    <div id={styles.wrapper} className="tableRow">
+      <div>ID</div>
+      <div>NAME</div>
+      <div>HEX VALUE</div>
+      <div>COUNT</div>
+      <div>CYCLE TIME</div>
+    </div>
   );
 };

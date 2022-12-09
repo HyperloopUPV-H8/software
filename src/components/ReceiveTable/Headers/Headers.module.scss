@@ -1,15 +1,24 @@
 @use "@styles/styles";
 
-#headers th {
+#wrapper {
+  border: 1px solid styles.$blue;
+  border-radius: styles.$default-border-radius;
+  border: none;
+  overflow: hidden;
   position: sticky;
   top: 0;
 
-  min-width: 3rem;
-  padding: 0.5rem 0.5rem;
-  @include styles.default-text-2;
-  background-color: #bad6ff;
-  outline: 1px solid styles.$blue;
-  color: styles.$blue;
-  font-weight: 600;
-  white-space: nowrap;
+  width: 100%;
+
+  > * {
+    padding: 0.5rem 0.5rem;
+
+    @include styles.default-text-2;
+    background-color: #bad6ff;
+    outline: 1px solid styles.transparent(styles.$blue, 0);
+    color: styles.$blue;
+    font-weight: 600;
+    white-space: nowrap;
+    text-align: center;
+  }
 }

@@ -1,3 +1,5 @@
+@use "sass:color";
+
 $normal-font: Inter;
 //$code-font: Cascadia Code;
 //$code-font: Cascadia Mono;
@@ -10,6 +12,11 @@ $orange: #f28d30;
 $blue: #317ae7;
 $default-border-radius: 0.2rem;
 $default-font-size: 0.8rem;
+$default-border-width: 1px;
+
+@function transparent($color, $transparency) {
+  @return color.adjust($color, $alpha: $transparency);
+}
 
 @mixin code-text {
   font-family: $code-font;
