@@ -48,6 +48,7 @@ export const OrderService = ({ children }: any) => {
         console.error("Error converting orderDescriptions to JSON", reason)
       )
       .then((orderWebAdapters: { [key: string]: OrderWebAdapter }) => {
+        console.log(orderWebAdapters);
         let orders: OrderDescription[] = Object.values(orderWebAdapters).map(
           (adapter) => {
             return createOrderDescription(adapter);

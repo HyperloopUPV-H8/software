@@ -1,6 +1,6 @@
-import styles from "@components/PacketTable/TransmitTable/OrderFields.module.scss";
+import styles from "@components/TransmitTable/OrderFields/OrderFields.module.scss";
 import { OrderDescription } from "@adapters/OrderDescription";
-import { OrderField } from "@components/PacketTable/TransmitTable/OrderField";
+import { OrderField } from "@components/TransmitTable/OrderField/OrderField";
 type Props = {
   orderDescription: OrderDescription;
   updateFieldState: (

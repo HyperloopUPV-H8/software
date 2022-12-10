@@ -1,4 +1,4 @@
-import styles from "@components/PacketTable/TransmitTable/OrderField.module.scss";
+import styles from "@components/TransmitTable/OrderField/OrderField.module.scss";
 
 import { TextInput } from "@components/FormComponents/TextInput";
 import { CheckBox } from "@components/FormComponents/CheckBox";
