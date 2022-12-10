@@ -35,28 +35,6 @@ export const { initializePodData, updatePodData } = podDataSlice.actions;
 
 export default podDataSlice.reducer;
 
-// export function selectPodDataNames(state: RootState): TreeNode {
-//   return Object.fromEntries(
-//     Object.values(state.podData.boards).map((board) => {
-//       return [
-//         board.name,
-//         Object.fromEntries(
-//           Object.values(board.packets).map((packet) => {
-//             return [
-//               packet.name,
-//               Object.fromEntries(
-//                 Object.values(packet.measurements).map((measurement) => {
-//                   return [measurement.name, undefined];
-//                 })
-//               ),
-//             ];
-//           })
-//         ),
-//       ];
-//     })
-//   );
-// }
-
 export function selectPodDataNames(state: RootState): TreeNode {
   return Object.fromEntries(
     Object.values(state.podData.boards).map((board) => {

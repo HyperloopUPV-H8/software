@@ -6,5 +6,5 @@ interface Props {
 }
 
 export const Counter = ({ count }: Props) => {
-  return <>{count > 1 ? <label id={styles.count}>{count}</label> : null}</>;
+  return <label className={styles.count}>{count}</label>;
 };

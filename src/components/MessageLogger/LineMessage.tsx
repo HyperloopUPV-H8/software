@@ -3,20 +3,22 @@ import styles from "@components/MessageLogger/LineMessage.module.scss";
 import { BsFillCaretRightFill } from "react-icons/bs";
 import { Message } from "@adapters/Message";
 import { Counter } from "@components/MessageLogger/Counter";
+import { getSofterHSLColor, HSLColor, hslColorToString } from "@utils/color";
 
 interface Props {
   message: Message;
   count: number;
-  color: string;
-  colorBackground: string;
+  //color: string;
+  color: HSLColor;
+  //colorBackground: string;
 }
 
 export const LineMessage = ({
   message,
   count,
   color,
-  colorBackground,
-}: Props) => {
+}: //colorBackground,
+Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isOverflowing, setIsOverflowing] = useState(true);
   const [changeWidth, setChangeWidth] = useState(true);
@@ -51,7 +53,9 @@ export const LineMessage = ({
   }, [changeWidth]);
 
   return (
-    <div style={{ backgroundColor: colorBackground }}>
+    <div
+      style={{ backgroundColor: hslColorToString(getSofterHSLColor(color)) }}
+    >
       <li
         className={styles.lineMsg}
         key={message.id}
@@ -67,16 +71,20 @@ export const LineMessage = ({
             visibility: !isOverflowing ? "hidden" : "visible",
           }}
         />
-        <label id={styles.idMsg} style={{ color: color }}>
+        <label id={styles.idMsg} style={{ color: hslColorToString(color) }}>
           {message.id}:{" "}
         </label>
-        <Counter count={count} />
-        <label id={styles.descMsg} style={{ color: color }} ref={descRef}>
+        {count > 1 ? <Counter count={count} /> : null}
+        <label
+          id={styles.descMsg}
+          style={{ color: hslColorToString(color) }}
+          ref={descRef}
+        >
           {message.description}
         </label>
         <br />
       </li>
-      <hr className={styles.hr} style={{ color: color }} />
+      <hr className={styles.hr} style={{ color: hslColorToString(color) }} />
     </div>
   );
 };

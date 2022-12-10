@@ -20,3 +20,11 @@ export function hslToHex({ h, s, l }: HSLColor): {
   };
   return { r: f(0), g: f(8), b: f(4) };
 }
+
+export function getSofterHSLColor({ h, s, l }: HSLColor): HSLColor {
+  return { h: h, s: s, l: l + 45 } as HSLColor;
+}
+
+export function hslColorToString({ h, s, l }: HSLColor): string {
+  return "hsl(" + h + ", " + s + "%, " + l + "%)";
+}

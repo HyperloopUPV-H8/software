@@ -1,12 +1,13 @@
-#count {
+@use "@styles/styles.scss";
+
+.count {
   background-color: #cfcece;
   display: flex;
   align-items: center;
-  border-radius: 40%;
+  border-radius: 0.4rem;
   text-align: center;
-  font-size: x-small;
+  font-size: styles.$default-small-size;
   padding-left: 0.3rem;
   padding-right: 0.3rem;
-  height: 0.8rem;
   margin-right: 0.5rem;
 }
