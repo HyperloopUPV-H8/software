@@ -22,8 +22,16 @@ export const FaultsAndWarningList = () => {
 
   return (
     <div className={styles.containerMessages}>
-      <ConsoleList title={"Warnings"} messages={WarningList} />
-      <ConsoleList title={"Faults"} messages={FaultList} />
+      <ConsoleList
+        title={"Warnings"}
+        messages={WarningList}
+        color={{ h: 41, s: 100, l: 40 }}
+      />
+      <ConsoleList
+        title={"Faults"}
+        messages={FaultList}
+        color={{ h: 0, s: 100, l: 40 }}
+      />
     </div>
   );
 };

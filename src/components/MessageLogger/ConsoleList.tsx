@@ -3,13 +3,15 @@ import { MessageList } from "@components/MessageLogger/MessageList";
 import { Message, MessageCounter } from "@adapters/Message";
 import { nanoid } from "nanoid";
 import styles from "@components/MessageLogger/ConsoleList.module.scss";
+import { HSLColor } from "@utils/color";
 
 interface Props {
   title: string;
   messages: Message[];
+  color: HSLColor;
 }
 
-export const ConsoleList = ({ title, messages }: Props) => {
+export const ConsoleList = ({ title, messages, color }: Props) => {
   const [messagesCounter, setMessagesCounter] = useState(
     [] as MessageCounter[]
   );
@@ -68,16 +70,7 @@ export const ConsoleList = ({ title, messages }: Props) => {
   return (
     <div className={styles.containerMessages}>
       <div className={styles.titleConnections}>{title}</div>
-      <MessageList
-        messages={messagesCounter}
-        color={
-          messagesCounter.length <= 0
-            ? { h: 0, s: 100, l: 40 }
-            : messagesCounter[0].msg.type === "warning"
-            ? { h: 41, s: 100, l: 40 }
-            : { h: 0, s: 100, l: 40 }
-        }
-      />
+      <MessageList messages={messagesCounter} color={color} />
     </div>
   );
 };
