@@ -5,6 +5,7 @@ import { BiLineChart } from "react-icons/bi";
 import { nanoid } from "nanoid";
 import { ConnectionsList } from "@components/ConnectionsTable/ConnectionsList";
 import { ConsoleList } from "@components/MessageLogger/ConsoleList";
+import { FaultsAndWarningList } from "@components/MessageLogger/FaultsAndWarningList";
 export const MessagesColumn = () => {
   return (
     <SplitLayout
@@ -17,10 +18,11 @@ export const MessagesColumn = () => {
               icon: <BiLineChart />,
 
               component: (
-                <ConsoleList
-                  title="Test"
-                  messages={[{ id: 1, type: "warning", description: "Heelo" }]}
-                />
+                // <ConsoleList
+                //   title="Test"
+                //   messages={[{ id: 1, type: "warning", description: "Heelo" }]}
+                // />
+                <FaultsAndWarningList />
               ),
             },
           ]}
@@ -38,6 +40,7 @@ export const MessagesColumn = () => {
         ></TabLayout>,
       ]}
       direction={Direction.VERTICAL}
+      initialPortions={[0.666, 0.333]}
     ></SplitLayout>
   );
 };

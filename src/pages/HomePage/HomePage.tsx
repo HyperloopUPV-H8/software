@@ -8,7 +8,7 @@ import styles from "@pages/HomePage/HomePage.module.scss";
 export const HomePage = () => {
   return (
     <div id={styles.wrapper}>
-      <Header />
+      {/* <Header /> */}
       <div id={styles.body}>
         <SplitLayout
           components={[

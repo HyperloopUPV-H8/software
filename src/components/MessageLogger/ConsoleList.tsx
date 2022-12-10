@@ -2,13 +2,16 @@ import React, { useEffect, useState } from "react";
 import { MessageList } from "@components/MessageLogger/MessageList";
 import { Message, MessageCounter } from "@adapters/Message";
 import { nanoid } from "nanoid";
+import styles from "@components/MessageLogger/ConsoleList.module.scss";
+import { HSLColor } from "@utils/color";
 
 interface Props {
   title: string;
   messages: Message[];
+  color: HSLColor;
 }
 
-export const ConsoleList = ({ title, messages }: Props) => {
+export const ConsoleList = ({ title, messages, color }: Props) => {
   const [messagesCounter, setMessagesCounter] = useState(
     [] as MessageCounter[]
   );
@@ -65,9 +68,9 @@ export const ConsoleList = ({ title, messages }: Props) => {
   };
 
   return (
-    <>
-      <h2>{title}</h2>
-      <MessageList messages={messagesCounter} />
-    </>
+    <div className={styles.containerMessages}>
+      <div className={styles.titleConnections}>{title}</div>
+      <MessageList messages={messagesCounter} color={color} />
+    </div>
   );
 };

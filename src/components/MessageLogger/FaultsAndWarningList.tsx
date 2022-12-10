@@ -8,22 +8,31 @@ import { RootState } from "store";
 import { useDispatch, useSelector } from "react-redux";
 import { Message } from "@adapters/Message";
 import { initializeMockMessages } from "@slices/messagesSlice";
+import styles from "@components/MessageLogger/FaultsAndWarningList.module.scss";
 
 export const FaultsAndWarningList = () => {
   //this state is for the static mocks
-  //const [WarningList, setWarningList] = useState<Message[]>(warningMessages);
-  //const [FaultList, setFaultList] = useState<Message[]>(faultMessages);
+  const [WarningList, setWarningList] = useState<Message[]>(warningMessages);
+  const [FaultList, setFaultList] = useState<Message[]>(faultMessages);
 
   const messages = useSelector((state: RootState) => state.messages);
 
-  //with useEffect it doesn't work correctly (and with StrictMode)
+  //with useEffect it doesn't work correctly
   //mockMessages();
 
   return (
-    <>
-      <ConsoleList title={"WARNINGS"} messages={messages.warning} />
-      <ConsoleList title={"FAULTS"} messages={messages.fault} />
-    </>
+    <div className={styles.containerMessages}>
+      <ConsoleList
+        title={"Warnings"}
+        messages={WarningList}
+        color={{ h: 41, s: 100, l: 40 }}
+      />
+      <ConsoleList
+        title={"Faults"}
+        messages={FaultList}
+        color={{ h: 0, s: 100, l: 40 }}
+      />
+    </div>
   );
 };
 

@@ -1,61 +1,56 @@
 @use "@styles/styles.scss";
 
 #idMsg {
-    font-weight: bold;
-    font-size: large;
-    margin-left: 0.5rem;
-    margin-right: 0.5rem;
+  @include styles.code-text;
+  font-weight: bold;
+  margin-right: 0.2rem;
+  color: #c51010;
 }
 
-#descMsg{
-    
-    text-overflow: ellipsis;
-    overflow: hidden; 
-    margin-top: 0.1rem;
-
+#descMsg {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  margin-top: 0.1rem;
+  color: #c51010;
 }
 
 ul {
-    list-style-type: none;
-    margin: 0rem;
+  list-style-type: none;
+  margin: 0rem;
 }
 
 #dropDownArrowIcon {
-    width: 1rem;
-    height: 1rem;
-    margin-right: 0.5rem;
-    margin-top: 0.2rem;
-    min-width: 1rem;
+  width: 0.8rem;
+  height: 0.8rem;
+  margin-right: 0.2rem;
+  min-width: 1rem;
 }
-
 
 #count {
-    background-color: #AFAFAF;
-    display: flex;
-    align-items: center;
-    border-radius: 40%;
-    text-align: center;
-    font-size: x-small;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-    height: 1rem;
-    margin-right: 0.5rem;
-    margin-top: 0.2rem;
-
+  background-color: #cfcece;
+  display: flex;
+  align-items: center;
+  border-radius: 40%;
+  text-align: center;
+  font-size: x-small;
+  padding-left: 0.3rem;
+  padding-right: 0.3rem;
+  height: 0.8rem;
+  margin-right: 0.5rem;
 }
 
-.lineMsg{
-    width: 97%;
-    display: flex;
-    flex-direction: row;
-    justify-content: left;
-    text-align: left;
-    white-space: nowrap;
-    margin-left: 0.5rem;
-    align-items: flex-start;
+.lineMsg {
+  width: 97%;
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  text-align: left;
+  white-space: nowrap;
+  align-items: center;
 }
 
-.hr{
-    width: 100%;
-    justify-content: left;
+.hr {
+  width: 100%;
+  justify-content: left;
+  color: #c51010;
 }

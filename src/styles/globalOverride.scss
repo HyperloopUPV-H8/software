@@ -8,6 +8,15 @@ td {
   padding: 0;
 }
 
+ul {
+  padding-left: 0;
+}
+
+hr {
+  margin-top: 0rem;
+  margin-bottom: 0rem;
+}
+
 //If it's only :root, font-size changes the base rem. If it's :root *, it affects everything, skipping inheritance.
 :root > * {
   box-sizing: border-box;

@@ -1,0 +1,13 @@
+@use "@styles/styles.scss";
+
+.count {
+  background-color: #cfcece;
+  display: flex;
+  align-items: center;
+  border-radius: 0.4rem;
+  text-align: center;
+  font-size: styles.$default-small-size;
+  padding-left: 0.3rem;
+  padding-right: 0.3rem;
+  margin-right: 0.5rem;
+}

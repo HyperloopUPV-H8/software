@@ -6,6 +6,8 @@ import { PodDataAdapter } from "@adapters/PodData";
 import { PodData } from "@models/PodData/PodData";
 import { RootState } from "store";
 import { TreeNode } from "@components/ChartMenu/TreeNode";
+import { Packet } from "@models/PodData/Packet";
+import { Board } from "@models/PodData/Board";
 
 export const podDataSlice = createSlice({
   name: "podData",
@@ -36,21 +38,23 @@ export default podDataSlice.reducer;
 export function selectPodDataNames(state: RootState): TreeNode {
   return Object.fromEntries(
     Object.values(state.podData.boards).map((board) => {
-      return [
-        board.name,
-        Object.fromEntries(
-          Object.values(board.packets).map((packet) => {
-            return [
-              packet.name,
-              Object.fromEntries(
-                Object.values(packet.measurements).map((measurement) => {
-                  return [measurement.name, undefined];
-                })
-              ),
-            ];
-          })
-        ),
-      ];
+      return [board.name, getBoardPackets(board)];
+    })
+  );
+}
+
+function getBoardPackets(board: Board): Object {
+  return Object.fromEntries(
+    Object.values(board.packets).map((packet) => {
+      return [packet.name, getPacketMeasurements(packet)];
+    })
+  );
+}
+
+function getPacketMeasurements(packet: Packet): Object {
+  return Object.fromEntries(
+    Object.values(packet.measurements).map((measurement) => {
+      return [measurement.name, undefined];
     })
   );
 }
