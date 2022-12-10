@@ -68,7 +68,16 @@ export const ConsoleList = ({ title, messages }: Props) => {
   return (
     <div className={styles.containerMessages}>
       <div className={styles.titleConnections}>{title}</div>
-      <MessageList messages={messagesCounter} />
+      <MessageList
+        messages={messagesCounter}
+        color={
+          messagesCounter.length <= 0
+            ? { h: 0, s: 100, l: 40 }
+            : messagesCounter[0].msg.type === "warning"
+            ? { h: 41, s: 100, l: 40 }
+            : { h: 0, s: 100, l: 40 }
+        }
+      />
     </div>
   );
 };
