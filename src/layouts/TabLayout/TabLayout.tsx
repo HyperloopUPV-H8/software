@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import styles from "@layouts/TabLayout/TabLayout.module.scss";
 import React from "react";
-import { TabBar } from "@layouts/TabLayout/TabBar";
+import { TabBar } from "@layouts/TabLayout/TabBar/TabBar";
 import { TabItem } from "@layouts/TabLayout/TabItem";
 
 type Props = {
@@ -31,11 +31,17 @@ export const TabLayout = ({ items }: Props) => {
       <div id={styles.body}>
         <div id={styles.componentWrapper}>
           {items.map((item) => {
-            if (visibleTabId == item.id) {
-              return (
-                <React.Fragment key={item.id}>{item.component}</React.Fragment>
-              );
-            }
+            return (
+              <div
+                key={item.id}
+                className={styles.visibilityWrapper}
+                style={{
+                  display: visibleTabId == item.id ? "block" : "none",
+                }}
+              >
+                {item.component}
+              </div>
+            );
           })}
         </div>
       </div>

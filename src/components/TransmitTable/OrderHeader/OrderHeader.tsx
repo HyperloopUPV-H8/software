@@ -1,7 +1,6 @@
-import styles from "@components/PacketTable/TransmitTable/OrderHeader.module.scss";
-import { BsFillCaretRightFill } from "react-icons/bs";
+import styles from "@components/TransmitTable/OrderHeader/OrderHeader.module.scss";
 import { Button } from "@components/FormComponents/Button";
-
+import { Caret } from "@components/Caret/Caret";
 type Props = {
   isCaretVisible: boolean;
   toggleDropdown: () => void;
@@ -19,15 +18,12 @@ export const OrderHeader = ({
 }: Props) => {
   return (
     <div id={styles.wrapper}>
-      {isCaretVisible && (
-        <div
-          id={styles.caret}
-          onClick={toggleDropdown}
-          style={{ transform: isDropdownVisible ? "rotate(90deg)" : "" }}
-        >
-          {<BsFillCaretRightFill />}
-        </div>
-      )}
+      <div
+        className={styles.caretWrapper}
+        style={{ visibility: isCaretVisible ? "visible" : "hidden" }}
+      >
+        <Caret isOpen={isDropdownVisible} onClick={toggleDropdown} />
+      </div>
       <div id={styles.name}>{name}</div>
       <div id={styles.sendBtn}>
         <Button onClick={sendOrder} />

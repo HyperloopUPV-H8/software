@@ -1,5 +1,5 @@
-import styles from "@layouts/TabLayout/Tab.module.scss";
-import { TabEdge } from "@layouts/TabLayout/TabEdge";
+import styles from "@layouts/TabLayout/Tab/Tab.module.scss";
+import { TabEdge } from "@layouts/TabLayout/TabEdge/TabEdge";
 type Props = {
   title: string;
   icon?: React.ReactNode;

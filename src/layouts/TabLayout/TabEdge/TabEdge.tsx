@@ -1,4 +1,4 @@
-import styles from "@layouts/TabLayout/TabEdge.module.scss";
+import styles from "@layouts/TabLayout/TabEdge/TabEdge.module.scss";
 
 type Props = {
   id?: string;
