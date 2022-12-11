@@ -1,9 +1,12 @@
 @use "@styles/styles.scss";
 
 .containerMessages {
-  background-color: styles.$default-background;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
+  background-color: styles.$default-background;
   overflow-x: hidden;
   overflow-y: hidden;
+  gap: 1rem;
 }
