@@ -1,4 +1,4 @@
-import { OrderDescription } from "@adapters/OrderDescription";
+import { OrderDescription } from "@adapters/Order";
 import { createSlice } from "@reduxjs/toolkit";
 const ordersSlice = createSlice({
   name: "orders",

@@ -18,18 +18,6 @@ const connectionsSlice = createSlice({
       }
     },
 
-    updateBoardConnection: (connections, action) => {
-      let conn = connections.board.find(
-        (conn) => conn.name == action.payload.name
-      )!;
-      if (conn) {
-        conn.isConnected = action.payload.isConnected;
-      } else {
-        connections.board.push(action.payload);
-      }
-    },
-
-    //CHECK this action
     updateBoardConnectionsArray: (
       connections,
       action: PayloadAction<Connection[]>
@@ -58,7 +46,6 @@ const connectionsSlice = createSlice({
 
 export const {
   updateWebsocketConnection,
-  updateBoardConnection,
   updateBoardConnectionsArray,
   setDisconnectionBoardState,
   initializeMockConnections,

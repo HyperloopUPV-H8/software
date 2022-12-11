@@ -4,6 +4,7 @@ import { HomePage } from "@pages/HomePage/HomePage";
 
 import { useEffect } from "react";
 import dataService from "@services/DataService";
+import messageService from "@services/MessageService";
 import connectionService from "@services/ConnectionService";
 import { useDispatch } from "react-redux";
 import { initializePodData, updatePodData } from "@slices/podDataSlice";
@@ -18,9 +19,11 @@ function App() {
     });
 
     let packetSocket = dataService.createPacketWebSocket();
-    let connectionSocket = connectionService.createOrderWebSocket();
+    let messageSocket = messageService.createMessageWebSocket();
+    let connectionSocket = connectionService.createConnectionsSocket();
     return () => {
       packetSocket.close();
+      messageSocket.close();
       connectionSocket.close();
     };
   }, []);
