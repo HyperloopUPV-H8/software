@@ -1,20 +1,27 @@
 @use "@styles/styles.scss";
 
-#containerMessages {
-  background-color: styles.$default-background;
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+
   width: 100%;
   height: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
   min-height: fit-content;
+  overflow-y: auto;
+  background-color: styles.$default-background;
 }
 
-.ulConnections {
+.connectionsList {
   width: 100%;
   @include styles.code-text;
+
+  > *:not(:last-child) {
+    border-bottom: 1px solid black;
+  }
 }
 
-.titleConnections {
+.title {
   width: 100%;
   padding-left: 0rem;
   padding-top: 0.2rem;

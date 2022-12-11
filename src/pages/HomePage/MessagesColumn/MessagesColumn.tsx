@@ -3,9 +3,8 @@ import { SplitLayout, Direction } from "@layouts/SplitLayout/SplitLayout";
 import { TabLayout } from "@layouts/TabLayout/TabLayout";
 import { BiLineChart } from "react-icons/bi";
 import { nanoid } from "nanoid";
-import { ConnectionsList } from "@components/ConnectionsTable/ConnectionsList";
-import { ConsoleList } from "@components/MessageLogger/ConsoleList";
-import { FaultsAndWarningList } from "@components/MessageLogger/FaultsAndWarningList";
+import { FaultsAndWarningList } from "@components/MessageLogger/FaultsAndWarningList/FaultsAndWarningList";
+import { ConnectionsTable } from "@components/ConnectionsTable/ConnectionsTable";
 export const MessagesColumn = () => {
   return (
     <SplitLayout
@@ -17,13 +16,7 @@ export const MessagesColumn = () => {
               name: "MessageList",
               icon: <BiLineChart />,
 
-              component: (
-                // <ConsoleList
-                //   title="Test"
-                //   messages={[{ id: 1, type: "warning", description: "Heelo" }]}
-                // />
-                <FaultsAndWarningList />
-              ),
+              component: <FaultsAndWarningList />,
             },
           ]}
         ></TabLayout>,
@@ -34,7 +27,7 @@ export const MessagesColumn = () => {
               name: "ConnectionsTable",
               icon: <BiLineChart />,
 
-              component: <ConnectionsList />,
+              component: <ConnectionsTable />,
             },
           ]}
         ></TabLayout>,

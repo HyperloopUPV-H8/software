@@ -17,10 +17,13 @@ $default-small-size: x-small;
 
 $default-border-width: 1px;
 
-@function transparent($color, $transparency) {
+@function transparency($color, $transparency) {
   @return color.adjust($color, $alpha: $transparency);
 }
 
+@function lightness($color, $lightness) {
+  @return color.adjust($color, $lightness: $lightness);
+}
 
 @mixin code-text {
   font-family: $code-font;

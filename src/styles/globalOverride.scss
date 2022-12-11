@@ -10,11 +10,15 @@ td {
 
 ul {
   padding-left: 0;
+  margin: 0;
 }
 
 hr {
   margin-top: 0rem;
   margin-bottom: 0rem;
+  height: 1px;
+  border: none;
+  background-color: black;
 }
 
 //If it's only :root, font-size changes the base rem. If it's :root *, it affects everything, skipping inheritance.
@@ -24,6 +28,11 @@ hr {
   scrollbar-track-color: transparent;
   scrollbar-color: rgb(68, 68, 68) none;
   user-select: none;
+}
+
+:root > * input {
+  outline: none;
+  border-style: solid;
 }
 
 ::-webkit-scrollbar {
