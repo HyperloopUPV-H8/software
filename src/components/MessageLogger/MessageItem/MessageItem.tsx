@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import styles from "@components/MessageLogger/MessageItem/MessageItem.module.scss";
 import { Message } from "@adapters/Message";
 import { Counter } from "@components/MessageLogger/Counter/Counter";
@@ -31,6 +31,10 @@ export const MessageItem = ({ message, count, color }: Props) => {
 
     return overflowing;
   }
+
+  useLayoutEffect(() => {
+    setIsOverflowing(checkOverflow(descriptionRef.current!));
+  }, []);
 
   useEffect(() => {
     resizeObserver.current.observe(descriptionRef.current!);
