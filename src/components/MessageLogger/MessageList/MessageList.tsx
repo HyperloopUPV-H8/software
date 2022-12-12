@@ -1,4 +1,4 @@
-import { LineMessage } from "@components/MessageLogger/LineMessage/LineMessage";
+import { MessageItem } from "@components/MessageLogger/MessageItem/MessageItem";
 import styles from "@components/MessageLogger/MessageList/MessageList.module.scss";
 import { MessageCounter } from "@adapters/Message";
 import { HSLColor } from "@utils/color";
@@ -13,7 +13,7 @@ export const MessageList = ({ messages, color }: Props) => {
     <ul className={styles.messagesList}>
       {messages.map((item) => {
         return (
-          <LineMessage
+          <MessageItem
             key={item.id}
             message={item.msg}
             count={item.count}

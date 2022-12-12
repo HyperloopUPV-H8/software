@@ -1,11 +1,6 @@
 export type Message = {
+  listId: string;
   id: number;
   description: string;
   type: "warning" | "fault";
-};
-
-export type MessageCounter = {
-  id: string;
-  msg: Message;
-  count: number;
 };

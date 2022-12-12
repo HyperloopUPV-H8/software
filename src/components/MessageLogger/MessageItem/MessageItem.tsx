@@ -1,6 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import styles from "@components/MessageLogger/LineMessage/LineMessage.module.scss";
-import { BsFillCaretRightFill } from "react-icons/bs";
+import { useEffect, useRef, useState } from "react";
+import styles from "@components/MessageLogger/MessageItem/MessageItem.module.scss";
 import { Message } from "@adapters/Message";
 import { Counter } from "@components/MessageLogger/Counter/Counter";
 import { getSofterHSLColor, HSLColor, hslColorToString } from "@utils/color";
@@ -11,41 +10,42 @@ interface Props {
   color: HSLColor;
 }
 
-export const LineMessage = ({ message, count, color }: Props) => {
-  const [isOpen, setIsOpen] = useState(false);
+export const MessageItem = ({ message, count, color }: Props) => {
   const [isOverflowing, setIsOverflowing] = useState(true);
-  const [changeWidth, setChangeWidth] = useState(true);
-  let descRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const resizeObserver = useRef(
+    new ResizeObserver((entries) => {
+      let descriptionElement = entries[0].target as HTMLElement;
+      setIsOverflowing(checkOverflow(descriptionElement));
+    })
+  );
+
+  const wrapperRef = useRef<HTMLLIElement>(null);
+  const descriptionRef = useRef<HTMLDivElement>(null);
 
   function checkOverflow(el: HTMLElement) {
+    el.style.whiteSpace = "nowrap";
     let overflowing = el.clientWidth < el.scrollWidth;
+    el.style.whiteSpace = "";
+
     return overflowing;
   }
 
-  function changeOverflowState(overflow: boolean) {
-    setIsOverflowing(overflow);
-  }
-
   useEffect(() => {
-    const observer = new ResizeObserver((_) => {
-      setChangeWidth((current) => !current);
-    });
-    const descElement = descRef.current!;
-    const overflow = checkOverflow(descElement);
-    changeOverflowState(overflow);
+    resizeObserver.current.observe(descriptionRef.current!);
 
-    observer.observe(descElement);
     return () => {
-      descRef.current && observer.unobserve(descRef.current);
+      resizeObserver.current.disconnect();
     };
-  }, [changeWidth]);
+  }, []);
 
   return (
     <li
-      className={styles.lineMsg}
+      ref={wrapperRef}
+      className={`${styles.lineMsg} ${isOpen ? styles.open : styles.close}`}
       key={message.id}
       style={{
-        whiteSpace: isOpen ? "normal" : "nowrap",
         backgroundColor: hslColorToString(getSofterHSLColor(color, 48)),
       }}
     >
@@ -58,14 +58,13 @@ export const LineMessage = ({ message, count, color }: Props) => {
           }}
         />
       )}
-
       <div className={styles.idMsg} style={{ color: hslColorToString(color) }}>
-        {message.id}:
+        {message.id + ":"}
       </div>
       <div
         className={styles.description}
         style={{ color: hslColorToString(color) }}
-        ref={descRef}
+        ref={descriptionRef}
       >
         {message.description}
       </div>

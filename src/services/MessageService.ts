@@ -1,10 +1,7 @@
 import { createConnection } from "@models/Connection";
 import { updateWebsocketConnection } from "@slices/connectionsSlice";
 import { Message } from "@adapters/Message";
-import {
-  updateFaultMessages,
-  updateWarningMessages,
-} from "@slices/messagesSlice";
+import { updateMessages } from "@slices/messagesSlice";
 import { store } from "../store";
 
 function createMessageWebSocket(): WebSocket {
@@ -20,12 +17,13 @@ function createMessageWebSocket(): WebSocket {
   };
 
   messageSocket.onmessage = (ev) => {
+    console.log("On message");
     let message = JSON.parse(ev.data) as Message;
 
     if (message.type === "warning") {
-      dispatch(updateWarningMessages(message));
+      dispatch(updateMessages(message));
     } else if (message.type === "fault") {
-      dispatch(updateFaultMessages(message));
+      dispatch(updateMessages(message));
     } //watch out if type is none of them
   };
 

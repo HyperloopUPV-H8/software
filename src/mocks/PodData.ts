@@ -16,7 +16,7 @@ export const podDataMock = {
             {
               name: "Battery1",
               value: 123,
-              type: ValueType.Number,
+              type: "uint8",
               units: "Volt",
             },
           ],

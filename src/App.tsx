@@ -9,9 +9,17 @@ import connectionService from "@services/ConnectionService";
 import { useDispatch } from "react-redux";
 import { initializePodData, updatePodData } from "@slices/podDataSlice";
 import { PacketUpdate } from "@adapters/PacketUpdate";
+import { warningMessages, faultMessages } from "@mocks/messages";
+import { updateMessages } from "@slices/messagesSlice";
+import { Message } from "@adapters/Message";
 
 function App() {
   const dispatch = useDispatch();
+
+  function getRandomMessage(messages: Message[]) {
+    let randomIndex = Math.floor(Math.random() * messages.length);
+    return messages[randomIndex];
+  }
 
   useEffect(() => {
     dataService.fetchPodDataStructure().then((podData) => {
@@ -21,10 +29,17 @@ function App() {
     let packetSocket = dataService.createPacketWebSocket();
     let messageSocket = messageService.createMessageWebSocket();
     let connectionSocket = connectionService.createConnectionsSocket();
+
+    const intervalId = setInterval(() => {
+      dispatch(updateMessages(getRandomMessage(warningMessages)));
+      dispatch(updateMessages(getRandomMessage(faultMessages)));
+    }, 1000);
+
     return () => {
       packetSocket.close();
       messageSocket.close();
       connectionSocket.close();
+      clearInterval(intervalId);
     };
   }, []);
 
