@@ -17,7 +17,7 @@ export const HomePage = () => {
             <MessagesColumn />,
           ]}
           direction={Direction.HORIZONTAL}
-          initialPortions={[0.333, 0.333, 0.333]}
+          initialPortions={[0.3333, 0.3333, 0.3333]}
         ></SplitLayout>
       </div>
     </div>
