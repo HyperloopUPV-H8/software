@@ -1,0 +1,27 @@
+@use "@styles/styles";
+
+.button {
+  width: 100%;
+  padding: 0.5rem;
+  text-align: center;
+  @include styles.default-text-2;
+  border-radius: styles.$default-border-radius;
+  background-color: styles.$orange;
+  color: white;
+  user-select: none;
+
+  &.enabled {
+    cursor: pointer;
+    &:hover {
+      filter: brightness(1.1);
+    }
+
+    &:active {
+      filter: brightness(0.9);
+    }
+  }
+
+  &.disabled {
+    filter: saturate(0);
+  }
+}

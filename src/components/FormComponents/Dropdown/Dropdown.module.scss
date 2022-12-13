@@ -1,8 +1,6 @@
 @use "@styles/styles";
 
-#textInput {
+.select {
   width: 100%;
-  padding: 0.8rem;
-
   @include styles.default-text-2;
 }
