@@ -4,7 +4,10 @@
   width: 100%;
   display: grid;
   grid-template-columns: 1.2rem auto auto 1fr;
-  grid-template-areas: "caret id counter description";
+  grid-template-rows: 0.9rem auto;
+  grid-template-areas:
+    "caret id counter description"
+    ". . . description";
   text-align: left;
   white-space: nowrap;
   align-items: center;
@@ -32,10 +35,4 @@
 
 .open {
   white-space: normal;
-  align-items: baseline;
-}
-
-.close {
-  white-space: nowrap;
-  align-items: center;
 }

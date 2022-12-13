@@ -47,7 +47,7 @@ export const MessageItem = ({ message, count, color }: Props) => {
   return (
     <li
       ref={wrapperRef}
-      className={`${styles.lineMsg} ${isOpen ? styles.open : styles.close}`}
+      className={`${styles.lineMsg} ${isOpen ? styles.open : ""}`}
       key={message.id}
       style={{
         backgroundColor: hslColorToString(getSofterHSLColor(color, 48)),
