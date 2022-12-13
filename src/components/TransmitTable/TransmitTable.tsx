@@ -1,9 +1,5 @@
 import styles from "@components/TransmitTable/TransmitTable.module.scss";
-import {
-  OrderDropdown,
-  FieldState,
-} from "@components/TransmitTable/OrderDropdown/OrderDropdown";
-import { OrderDescription } from "@adapters/OrderDescription";
+import { OrderForm } from "@components/TransmitTable/OrderForm/OrderForm";
 import { OrderServiceContext } from "@services/OrderService";
 import { useContext } from "react";
 import { useSelector } from "react-redux";
@@ -15,26 +11,14 @@ export const TransmitTable = () => {
     return state.orders;
   });
 
-  const createSendOrder = (orderDescription: OrderDescription) => {
-    return (fields: FieldState[]) => {
-      orderService.sendOrder({
-        id: orderDescription.id,
-        fields: fields.map((field) => {
-          return { name: field.name, value: field.currentValue };
-        }),
-      });
-    };
-  };
-
   return (
     <div id={styles.wrapper}>
       {orderDescriptions.map((orderDescription) => {
-        let sendOrder = createSendOrder(orderDescription);
         return (
-          <OrderDropdown
+          <OrderForm
             key={orderDescription.id}
             orderDescription={orderDescription}
-            sendOrder={sendOrder}
+            sendOrder={orderService.sendOrder}
           />
         );
       })}
