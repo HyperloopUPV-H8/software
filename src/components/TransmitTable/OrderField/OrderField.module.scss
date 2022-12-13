@@ -1,11 +1,10 @@
 @use "@styles/styles";
 
-#wrapper {
+.wrapper {
   width: 100%;
-}
-
-#wrapper td {
-  padding: 0.6rem;
-  vertical-align: middle;
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  gap: 1rem;
+  align-items: center;
   @include styles.default-text-2;
 }

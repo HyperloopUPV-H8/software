@@ -1,7 +1,7 @@
 @use "@styles/styles";
 $header-color: #ffe4cc;
 
-#wrapper {
+.wrapper {
   width: 100%;
   height: auto;
   padding: 0.5rem;
@@ -9,16 +9,25 @@ $header-color: #ffe4cc;
   display: grid;
   grid-template:
     "caret name button" auto
-    / 1.5rem 1fr 5rem;
+    / auto 1fr 5rem;
   align-items: center;
+  gap: 0.5rem;
   background-color: $header-color;
   @include styles.default-text-2;
+
+  .caretWrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 
   .caretWrapper > * {
     color: styles.$orange;
   }
 
-  #name {
+  .name {
     grid-area: name;
     color: styles.$orange;
     font-weight: 500;

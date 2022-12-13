@@ -1,6 +1,6 @@
-import { OrderDescription, OrderWebAdapter } from "@adapters/OrderDescription";
+import { OrderDescription, OrderAdapter, createEnum } from "@adapters/Order";
 import { useEffect, createContext, useRef } from "react";
-import { Order, createOrderDescription } from "@models/Order";
+import { Order } from "@models/Order";
 import { setOrders } from "@slices/ordersSlice";
 import { useDispatch } from "react-redux";
 import { updateWebsocketConnection } from "@slices/connectionsSlice";
@@ -19,6 +19,7 @@ export const OrderService = ({ children }: any) => {
   const orderSocket = useRef<WebSocket>();
   const orderService = useRef({
     sendOrder(order: Order) {
+      console.log(order);
       orderSocket.current!.send(JSON.stringify(order));
     },
   });
@@ -47,15 +48,38 @@ export const OrderService = ({ children }: any) => {
       .catch((reason) =>
         console.error("Error converting orderDescriptions to JSON", reason)
       )
-      .then((orderWebAdapters: { [key: string]: OrderWebAdapter }) => {
-        console.log(orderWebAdapters);
+      .then((orderWebAdapters: { [key: string]: OrderAdapter }) => {
         let orders: OrderDescription[] = Object.values(orderWebAdapters).map(
           (adapter) => {
-            return createOrderDescription(adapter);
+            return {
+              id: adapter.id,
+              name: adapter.name,
+              fieldDescriptions: getFieldDescriptions(
+                adapter.fieldDescriptions
+              ),
+            };
           }
         );
         dispatch(setOrders(orders));
       });
+  }
+
+  function getFieldDescriptions(
+    descriptions: OrderAdapter["fieldDescriptions"]
+  ): OrderDescription["fieldDescriptions"] {
+    return Object.fromEntries(
+      Object.entries(descriptions).map(([name, fieldDescriptionStr]) => {
+        let type, value;
+        if (/^ENUM/.test(fieldDescriptionStr)) {
+          type = "Enum";
+          value = createEnum(fieldDescriptionStr);
+        } else {
+          type = "Default";
+          value = fieldDescriptionStr;
+        }
+        return [name, { type, value }];
+      })
+    );
   }
 
   function createOrderWebSocket() {
