@@ -1,0 +1,22 @@
+@use "@styles/styles";
+#wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.5rem;
+}
+
+#name {
+  margin-bottom: 0.5rem;
+
+  @include styles.default-text-2;
+  font-style: italic;
+  color: #a9adb6;
+}
+
+#measurementList {
+  @include styles.default-text-2;
+}
+
+.treeNode {
+  margin-left: 0.8rem;
+}

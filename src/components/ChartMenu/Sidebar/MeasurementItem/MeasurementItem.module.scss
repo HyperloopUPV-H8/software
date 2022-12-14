@@ -1,0 +1,16 @@
+@use "@styles/styles";
+
+.treeNode {
+  margin-left: 0.8rem;
+}
+
+.wrapper {
+  display: grid;
+  align-items: center;
+  grid-template-columns: auto 1fr;
+  column-gap: 0.3rem;
+  @include styles.default-text-2;
+  font-weight: 500;
+  color: #505868;
+  cursor: pointer;
+}
