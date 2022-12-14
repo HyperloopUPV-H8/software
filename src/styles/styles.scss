@@ -1,5 +1,6 @@
 @use "sass:color";
 
+//TODO: define fallbacks functions in case some are not installed
 $normal-font: Inter;
 //$code-font: Cascadia Code;
 //$code-font: Cascadia Mono;
@@ -41,6 +42,13 @@ $default-border-width: 1px;
   font-family: Cascadia Code;
   font-size: $default-font-size;
   color: $text-color-2;
+}
+
+@mixin tab-font {
+  font-family: $normal-font;
+  font-size: 1rem;
+  font-weight: 500;
+  color: $title-text-color;
 }
 
 @mixin undraggable {

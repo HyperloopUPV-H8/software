@@ -29,7 +29,8 @@
       "@layouts/*": ["layouts/*"],
       "@pages/*": ["pages/*"],
       "@public/*": ["public/*"],
-      "@utils/*": ["utils/*"]
+      "@utils/*": ["utils/*"],
+      "@hooks/*": ["hooks/*"]
     }
   },
   "include": ["src"],
