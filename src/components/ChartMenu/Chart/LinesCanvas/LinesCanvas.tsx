@@ -1,25 +1,18 @@
 import styles from "@components/ChartMenu/Chart/LinesCanvas/LinesCanvas.module.scss";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ChartCanvas } from "@components/ChartMenu/Chart/LinesCanvas/ChartCanvas";
 import { getVectorLimits } from "@utils/math";
 import { LineFigure } from "@components/ChartMenu/ChartElement";
-import { maxHeaderSize } from "http";
+import { memo } from "react";
 type Props = {
-  lineFigures: LineFigure[];
+  lineFigures: Map<string, LineFigure>;
 };
 
-export const LinesCanvas = ({ lineFigures }: Props) => {
+const LinesCanvas = ({ lineFigures }: Props) => {
+  const [canvasSize, setCanvasSize] = useState({ width: 800, height: 400 });
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartCanvas = useRef<ChartCanvas>();
-
-  function drawChart() {
-    chartCanvas.current!.clear();
-    lineFigures.forEach((lineFigure) => {
-      if (lineFigure.vector.length >= 2) {
-        chartCanvas.current!.figure(lineFigure.vector, lineFigure.color);
-      }
-    });
-  }
 
   useEffect(() => {
     const canvas = canvasRef.current!;
@@ -30,23 +23,29 @@ export const LinesCanvas = ({ lineFigures }: Props) => {
   useEffect(() => {
     let max = -Infinity;
     let min = Infinity;
-
     lineFigures.forEach((lineFigure) => {
-      let [localMax, localMin] = getVectorLimits(lineFigure.vector);
-      max = localMax > max ? localMax : max;
-      min = localMin < min ? localMin : min;
+      let [lineMax, lineMin] = getVectorLimits(lineFigure.vector);
+      max = lineMax > max ? lineMax : max;
+      min = lineMin < min ? lineMin : min;
     });
     chartCanvas.current!.max = max;
     chartCanvas.current!.min = min;
     drawChart();
   }, [lineFigures]);
 
+  function drawChart() {
+    chartCanvas.current!.clear();
+    chartCanvas.current!.figures(Array.from(lineFigures.values()));
+  }
+
   return (
     <canvas
       id={styles.canvas}
       ref={canvasRef}
-      width="800"
-      height="400"
+      width={canvasSize.width}
+      height={canvasSize.height}
     ></canvas>
   );
 };
+
+export default memo(LinesCanvas);
