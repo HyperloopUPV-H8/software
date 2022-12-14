@@ -27,7 +27,7 @@ export function getPacket(
   return podData.boards[podData.packetToBoard[id]].packets[id];
 }
 
-export function selectMeasurementByName(
+export function getMeasurement(
   boards: { [key: string]: Board },
   measurementName: string
 ): Measurement {
