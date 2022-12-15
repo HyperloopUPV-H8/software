@@ -1,16 +1,30 @@
 import styles from "@components/ChartMenu/Chart/Legend/Legend.module.scss";
-import { LegendItem } from "@components/ChartMenu/Chart/Legend/LegendItem";
-
+import {
+  LegendItem,
+  LegendItemData,
+} from "@components/ChartMenu/Chart/Legend/LegendItem/LegendItem";
+import { memo } from "react";
 type Props = {
-  names: string[];
+  removeItem: (id: string) => void;
+  legendItems: Map<string, LegendItemData>;
 };
 
-export const Legend = ({ names }: Props) => {
+const Legend = ({ legendItems, removeItem }: Props) => {
   return (
     <div id={styles.wrapper}>
-      {names.map((name) => {
-        return <LegendItem key={name} name={name} />;
+      {Array.from(legendItems.entries()).map(([name, data]) => {
+        return (
+          <LegendItem
+            key={name}
+            data={data}
+            removeItem={() => {
+              removeItem(name);
+            }}
+          />
+        );
       })}
     </div>
   );
 };
+
+export default memo(Legend);

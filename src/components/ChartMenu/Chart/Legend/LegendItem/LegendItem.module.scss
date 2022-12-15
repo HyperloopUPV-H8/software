@@ -1,15 +1,32 @@
 @use "@styles/styles";
 
-#wrapper {
+.wrapper {
   width: 100%;
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto auto 1fr;
   align-items: center;
   padding: 0.5rem;
   @include styles.default-text-2;
+
+  &:not(:hover) {
+    .removeBtn {
+      visibility: hidden;
+    }
+  }
 }
 
-#lineColor {
+.removeBtn {
+  justify-self: right;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+
+  > * {
+    transform: scale(1.5) translate(0.4px, 0.4px);
+  }
+}
+
+.lineColor {
   width: 1.8rem;
   height: 0.5rem;
   border-radius: 5rem;

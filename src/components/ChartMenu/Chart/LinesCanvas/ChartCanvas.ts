@@ -1,5 +1,5 @@
 import { HSLColor, hslToHex } from "@utils/color";
-import { urlToHttpOptions } from "url";
+import { LineFigure } from "@components/ChartMenu/ChartElement";
 export class ChartCanvas {
   public max!: number;
   public min!: number;
@@ -18,17 +18,11 @@ export class ChartCanvas {
     this.ctx.font = "16px Cascadia Code";
   }
 
-  //TODO: change functions visibility
-
   public clear() {
     this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
   }
 
-  public figure(
-    vector: number[],
-    color: HSLColor = { h: 32, s: 100, l: 50 },
-    strokeWidth: number = 2
-  ) {
+  public figures(lines: LineFigure[]) {
     let horizontalPadding =
       (this.figurePaddingPercentage / 100) * this.ctx.canvas.width;
     let verticalPadding =
@@ -40,6 +34,19 @@ export class ChartCanvas {
       this.ctx.canvas.width - horizontalPadding,
       this.ctx.canvas.height - verticalPadding
     );
+
+    lines.forEach((line) => {
+      if (line.vector.length >= 2) {
+        this.figure(line.vector, line.color);
+      }
+    });
+  }
+
+  private figure(
+    vector: number[],
+    color: HSLColor = { h: 32, s: 100, l: 50 },
+    strokeWidth: number = 2
+  ) {
     let hexColor = hslToHex(color);
     this.ctx.strokeStyle = `#${hexColor.r}${hexColor.g}${hexColor.b}`;
     let previousStrokeWidth = this.ctx.lineWidth;
@@ -52,7 +59,9 @@ export class ChartCanvas {
     this.ctx.lineWidth = previousStrokeWidth;
   }
 
-  public drawInFigureRect(drawFigure: (width: number, height: number) => void) {
+  private drawInFigureRect(
+    drawFigure: (width: number, height: number) => void
+  ) {
     let horizontalPadding =
       (this.figurePaddingPercentage / 100) * this.ctx.canvas.width;
     let verticalPadding =
@@ -67,33 +76,39 @@ export class ChartCanvas {
     );
     this.ctx.translate(-horizontalPadding, -verticalPadding);
     this.ctx.translate(0, this.ctx.canvas.height);
-
     this.ctx.scale(1, -1);
   }
 
-  public path(points: number[], width: number, height: number) {
+  private path(points: number[], width: number, height: number) {
     this.ctx.beginPath();
-    if (this.max - this.min != 0) {
-      this.ctx.moveTo(0, (points[0] / (this.max - this.min)) * height);
-    } else {
-      this.ctx.moveTo(0, height / 2);
-    }
+    this.moveToStartHeight(this.normalizePoint(points[0], height), height);
 
     for (let i = 1; i < points.length; i++) {
-      if (this.max - this.min != 0) {
-        this.ctx.lineTo(
-          (i * width) / this.numberOfPoints,
-          (points[i] / (this.max - this.min)) * height
-        );
+      let normalizedPoint = this.normalizePoint(points[i], height);
+      let xpos = i * (width / (this.numberOfPoints - 1));
+      if (this.max != this.min) {
+        this.ctx.lineTo(xpos, normalizedPoint);
       } else {
-        this.ctx.lineTo((i * width) / this.numberOfPoints, height / 2);
+        this.ctx.lineTo(xpos, height / 2);
       }
     }
 
     this.ctx.stroke();
   }
 
-  public axis(x1: number, y1: number, x2: number, y2: number) {
+  private normalizePoint(point: number, height: number): number {
+    return ((point - this.min) / (this.max - this.min)) * height;
+  }
+
+  private moveToStartHeight(initialY: number, height: number) {
+    if (this.max != this.min) {
+      this.ctx.moveTo(0, initialY);
+    } else {
+      this.ctx.moveTo(0, height / 2);
+    }
+  }
+
+  private axis(x1: number, y1: number, x2: number, y2: number) {
     this.ctx.strokeStyle = "#000000";
     this.line(x1, y1, x1, y2);
     this.verticalAxisMarks(x1, y1, y2, this.numberOfMarks);
