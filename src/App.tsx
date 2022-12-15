@@ -30,11 +30,6 @@ function App() {
     let messageSocket = messageService.createMessageWebSocket();
     let connectionSocket = connectionService.createConnectionsSocket();
 
-    // const intervalId = setInterval(() => {
-    //   dispatch(updateMessages(getRandomMessage(warningMessages)));
-    //   dispatch(updateMessages(getRandomMessage(faultMessages)));
-    // }, 1000);
-
     return () => {
       packetSocket.close();
       messageSocket.close();
