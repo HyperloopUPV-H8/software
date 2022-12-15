@@ -1,22 +1,22 @@
 @use "@styles/styles.scss";
 
 .wrapper {
-  padding-left: 0.2rem;
+    padding-left: 0.2rem;
 
-  display: grid;
-  grid-template-columns: auto 1fr;
+    display: grid;
+    grid-template-columns: auto 1fr;
 
-  > *:nth-child(1) {
-    justify-self: center;
-    align-self: center;
-  }
+    > *:nth-child(1) {
+        justify-self: center;
+        align-self: center;
+    }
 }
 
 .id {
-  font-weight: bold;
-  font-size: styles.$default-font-size;
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
+    font-weight: bold;
+    font-size: styles.$normal-font-size;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
 }
 
 $connected: #4f8d4a;
@@ -25,16 +25,16 @@ $disabled: #373c43;
 $background-lightness: 40%;
 
 .connected {
-  color: $connected;
-  background-color: styles.lightness($connected, $background-lightness);
+    color: $connected;
+    background-color: styles.lightness($connected, $background-lightness);
 }
 
 .disconnected {
-  color: $disconnected;
-  background-color: styles.lightness($disconnected, $background-lightness);
+    color: $disconnected;
+    background-color: styles.lightness($disconnected, $background-lightness);
 }
 
 .disabled {
-  color: $disabled;
-  background-color: styles.lightness($disabled, $background-lightness);
+    color: $disabled;
+    background-color: styles.lightness($disabled, $background-lightness);
 }

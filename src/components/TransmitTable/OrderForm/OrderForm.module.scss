@@ -1,9 +1,9 @@
 @use "@styles/styles";
 
 #wrapper {
-  flex: 0 0 auto;
-  width: 100%;
-  border: 1px solid styles.$orange;
-  border-radius: styles.$default-border-radius;
-  overflow: hidden;
+    flex: 0 0 auto;
+    width: 100%;
+    border: 1px solid styles.$orange;
+    border-radius: styles.$normal-border-radius;
+    overflow: hidden;
 }
