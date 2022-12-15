@@ -2,7 +2,6 @@ body {
   margin: 0;
   padding: 0;
   /*TODO: cambiar width y height para que si haces la ventana mas pequeña, los componentes se hacen */
-  width: 100vw;
   height: 100vh;
 }
 * {

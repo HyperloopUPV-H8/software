@@ -1,0 +1,20 @@
+@use "@styles/styles";
+#header {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background-color: #e4e5e7;
+
+    @include styles.normal-text-style;
+    color: #505868;
+    font-weight: bold;
+}
+
+#packetList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.treeNode {
+    margin-left: 0.8rem;
+}

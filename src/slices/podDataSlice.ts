@@ -25,7 +25,6 @@ export const podDataSlice = createSlice({
       action: PayloadAction<{ [id: number]: PacketUpdate }>
     ) => {
       podData.lastUpdates = action.payload;
-
       updatePackets(podData, action.payload);
     },
   },
@@ -36,15 +35,14 @@ export const { initializePodData, updatePodData } = podDataSlice.actions;
 export default podDataSlice.reducer;
 
 export function selectPodDataNames(state: RootState): TreeNode {
-  return { something: undefined };
-  // return Object.fromEntries(
-  //   Object.values(state.podData.boards).map((board) => {
-  //     return [board.name, getBoardPackets(board)];
-  //   })
-  // );
+  return Object.fromEntries(
+    Object.values(state.podData.boards).map((board) => {
+      return [board.name, getBoardPackets(board)];
+    })
+  );
 }
 
-function getBoardPackets(board: Board): Object {
+function getBoardPackets(board: Board): TreeNode {
   return Object.fromEntries(
     Object.values(board.packets).map((packet) => {
       return [packet.name, getPacketMeasurements(packet)];
@@ -52,7 +50,7 @@ function getBoardPackets(board: Board): Object {
   );
 }
 
-function getPacketMeasurements(packet: Packet): Object {
+function getPacketMeasurements(packet: Packet): TreeNode {
   return Object.fromEntries(
     Object.values(packet.measurements).map((measurement) => {
       return [measurement.name, undefined];
@@ -60,7 +58,7 @@ function getPacketMeasurements(packet: Packet): Object {
   );
 }
 
-export function selectUpdatedMeasurements(state: RootState): {
+export function selectMeasurements(state: RootState): {
   [measurementName: string]: string;
 } {
   let updatedMeasurements = {};
