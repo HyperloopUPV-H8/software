@@ -1,22 +1,17 @@
 import styles from "@layouts/TabLayout/Tab/Tab.module.scss";
-import { TabEdge } from "@layouts/TabLayout/TabEdge/TabEdge";
-type Props = {
-  title: string;
-  icon?: React.ReactNode;
-  onClick: () => void;
-};
+import { AiOutlineUnorderedList } from "react-icons/ai";
 
-export const Tab = ({ title, icon, onClick }: Props) => {
-  return (
-    <div id={styles.wrapper} onClick={onClick}>
-      <TabEdge id={styles.firstEdge} />
-      <div id={styles.content}>
-        <div id={styles.label}>
-          {icon && <div id={styles.icon}>{icon}</div>}
-          <div id={styles.title}>{title}</div>
+type Props = {
+    name: string;
+    className?: string;
+    icon?: React.ReactNode;
+    onClick: () => void;
+};
+export const Tab = ({ name, icon, onClick, className = "" }: Props) => {
+    return (
+        <div className={`${styles.wrapper} ${className}`} onClick={onClick}>
+            <AiOutlineUnorderedList className={styles.icon} />
+            <div className={styles.name}>{name}</div>
         </div>
-      </div>
-      <TabEdge id={styles.secondEdge} />
-    </div>
-  );
+    );
 };
