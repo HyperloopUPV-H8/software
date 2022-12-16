@@ -1,0 +1,18 @@
+@use "@styles/styles";
+
+.wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+
+    overflow-x: clip;
+
+    margin-bottom: 1.2rem;
+    .name {
+        display: flex;
+        align-items: center;
+        @include styles.title-text;
+    }
+}

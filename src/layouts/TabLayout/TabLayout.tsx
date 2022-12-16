@@ -1,50 +1,47 @@
 import { useEffect, useState } from "react";
 import styles from "@layouts/TabLayout/TabLayout.module.scss";
-import React from "react";
-import { TabBar } from "@layouts/TabLayout/TabBar/TabBar";
 import { TabItem } from "@layouts/TabLayout/TabItem";
+import { Header } from "@layouts/TabLayout/Header/Header";
 
 type Props = {
-  items: TabItem[];
+    items: TabItem[];
 };
 
 export const TabLayout = ({ items }: Props) => {
-  let [visibleTabId, setVisibleTabId] = useState("");
+    //TODO: fails if item length == 0
+    let [visibleTab, setVisibleTab] = useState(items[0]);
 
-  function handleClick(id: string) {
-    setVisibleTabId(id);
-  }
-
-  useEffect(() => {
-    if (items.length > 0) {
-      setVisibleTabId(items[0].id);
+    function handleClick(tab: TabItem) {
+        setVisibleTab(tab);
     }
-  }, []);
 
-  return (
-    <div id={styles.wrapper}>
-      <TabBar
-        items={items}
-        onTabClick={handleClick}
-        visibleTabId={visibleTabId}
-      />
-      <div id={styles.body}>
-        <div id={styles.componentWrapper}>
-          {items.map((item) => {
-            return (
-              <div
-                key={item.id}
-                className={styles.visibilityWrapper}
-                style={{
-                  display: visibleTabId == item.id ? "block" : "none",
-                }}
-              >
-                {item.component}
-              </div>
-            );
-          })}
+    return (
+        <div className={styles.wrapper}>
+            <Header
+                items={items}
+                visibleTab={visibleTab}
+                handleClick={handleClick}
+            />
+            <div className={styles.body}>
+                <div className={styles.componentWrapper}>
+                    {items.map((item) => {
+                        return (
+                            <div
+                                key={item.id}
+                                className={styles.visibilityWrapper}
+                                style={{
+                                    display:
+                                        visibleTab.id == item.id
+                                            ? "block"
+                                            : "none",
+                                }}
+                            >
+                                {item.component}
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
