@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import styles from "@layouts/TabLayout/TabLayout.module.scss";
-import { TabBar } from "@layouts/TabLayout/TabBar/TabBar";
 import { TabItem } from "@layouts/TabLayout/TabItem";
+import { Header } from "@layouts/TabLayout/Header/Header";
+
 type Props = {
     items: TabItem[];
 };
@@ -16,16 +17,11 @@ export const TabLayout = ({ items }: Props) => {
 
     return (
         <div className={styles.wrapper}>
-            <div className={styles.title}>
-                <div className={styles.name}>{visibleTab.name}</div>
-                {items.length > 1 && (
-                    <TabBar
-                        items={items}
-                        onTabClick={handleClick}
-                        visibleTabId={visibleTab.id}
-                    />
-                )}
-            </div>
+            <Header
+                items={items}
+                visibleTab={visibleTab}
+                handleClick={handleClick}
+            />
             <div className={styles.body}>
                 <div className={styles.componentWrapper}>
                     {items.map((item) => {
