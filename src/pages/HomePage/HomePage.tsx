@@ -6,20 +6,20 @@ import { Header } from "@pages/HomePage/Header/Header";
 import styles from "@pages/HomePage/HomePage.module.scss";
 
 export const HomePage = () => {
-  return (
-    <div id={styles.wrapper}>
-      {/* <Header /> */}
-      <div id={styles.body}>
-        <SplitLayout
-          components={[
-            <ReceiveColumn />,
-            <TransmitColumn />,
-            <MessagesColumn />,
-          ]}
-          direction={Direction.HORIZONTAL}
-          initialPortions={[0.3333, 0.3333, 0.3333]}
-        ></SplitLayout>
-      </div>
-    </div>
-  );
+    return (
+        <div id={styles.wrapper}>
+            {/* <Header /> */}
+            <div id={styles.body}>
+                <SplitLayout
+                    components={[
+                        <ReceiveColumn />,
+                        <TransmitColumn />,
+                        <MessagesColumn />,
+                    ]}
+                    minSizes={[0.2, 0.2, 0.2]}
+                    direction={Direction.HORIZONTAL}
+                ></SplitLayout>
+            </div>
+        </div>
+    );
 };

@@ -1,27 +1,25 @@
 @use "@styles/styles";
 
 .button {
-  width: 100%;
-  padding: 0.5rem;
-  text-align: center;
-  @include styles.default-text-2;
-  border-radius: styles.$default-border-radius;
-  background-color: styles.$orange;
-  color: white;
-  user-select: none;
+    width: 100%;
+    padding: 0.5rem;
+    text-align: center;
+    @include styles.normal-text-style;
+    border-radius: styles.$normal-border-radius;
+    background-color: styles.$orange;
+    color: white;
+    user-select: none;
 
-  &.enabled {
-    cursor: pointer;
-    &:hover {
-      filter: brightness(1.1);
+    &.enabled {
+        cursor: pointer;
+        //FIXME: ANIMATION GETS CUT SHORT WHEN BUTTON IS RELEASED
+        &:active {
+            @include styles.flash-button(styles.$orange);
+        }
+        transition: styles.$background-color-transition;
     }
 
-    &:active {
-      filter: brightness(0.9);
+    &.disabled {
+        background-color: styles.saturation(styles.$orange, -100%);
     }
-  }
-
-  &.disabled {
-    filter: saturate(0);
-  }
 }
