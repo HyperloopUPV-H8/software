@@ -2,9 +2,14 @@
 
 .wrapper {
   width: 100%;
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template: "name value" / minmax(4rem, min-content) 2rem;
   gap: 1rem;
   padding: 0 1rem;
   @include styles.code-text;
+}
+
+.value {
+  grid-area: value;
+  justify-self: right;
 }
