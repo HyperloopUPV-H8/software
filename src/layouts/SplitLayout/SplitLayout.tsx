@@ -16,8 +16,11 @@ export const SplitLayout = ({
     minSizes,
     direction = Direction.HORIZONTAL,
 }: Props) => {
-    const [normalizedPortions, handleSeparatorMouseDown] =
-        useSplitLayoutHandler(components.length, minSizes, direction);
+    const [splitElements, handleSeparatorMouseDown] = useSplitLayoutHandler(
+        components.length,
+        minSizes,
+        direction
+    );
     return (
         <div
             className={styles.wrapper}
@@ -31,7 +34,7 @@ export const SplitLayout = ({
                     <React.Fragment key={index}>
                         <Component
                             component={component}
-                            normalizedPortion={normalizedPortions[index]}
+                            normalizedLength={splitElements[index].length}
                         />
                         {index < components.length - 1 && (
                             <Separator

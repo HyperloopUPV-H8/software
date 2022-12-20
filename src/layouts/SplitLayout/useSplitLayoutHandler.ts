@@ -1,17 +1,16 @@
-import {
-    useState,
-    useEffect,
-    useRef,
-    MouseEvent as ReactMouseEvent,
-} from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { SplitLayoutEventHandler } from "@layouts/SplitLayout/SplitLayoutEventHandler";
-import { iterateFrom, iterateFromReverse } from "@utils/array";
 import { Direction } from "@layouts/SplitLayout/Direction";
 
 type Size = {
     width: number;
     height: number;
+};
+
+type SplitElement = {
+    length: number;
+    minLength: number;
 };
 
 function getElementSize(element: HTMLElement): Size {
@@ -21,14 +20,14 @@ function getElementSize(element: HTMLElement): Size {
 
 class InitialSplitState {
     public initialMousePos: [number, number];
-    public initialPortions: number[];
+    public initialElements: SplitElement[];
     public separatorIndex: number;
     public separatorSize: Size;
     public wrapperSize: Size;
 
     constructor() {
         this.initialMousePos = [0, 0];
-        this.initialPortions = [];
+        this.initialElements = [];
         this.separatorIndex = 0;
         this.separatorSize = { width: 0, height: 0 };
         this.wrapperSize = { width: 0, height: 0 };
@@ -53,18 +52,21 @@ class InitialSplitState {
         return [separatorElement, wrapperElement];
     }
 
-    public updateInitialPortions(portions: number[]) {
-        this.initialPortions = [...portions];
+    public updateInitialElements(elements: SplitElement[]) {
+        this.initialElements = [...elements];
     }
 }
 
 export function useSplitLayoutHandler(
     numberOfComponents: number, //FIXME: TIENE QUE SER DOS O MAS (mirar getNewPortions)
-    minSizes: number[],
+    minLengths: number[],
     direction: Direction
-): [number[], (index: number, ev: React.MouseEvent) => void] {
-    const [normalizedPortions, setNormalizedPortions] = useState(
-        new Array(numberOfComponents).fill(1 / numberOfComponents)
+): [SplitElement[], (index: number, ev: React.MouseEvent) => void] {
+    const [splitElements, setSplitElements] = useState<SplitElement[]>(
+        minLengths.map((minLength) => ({
+            length: 1 / numberOfComponents,
+            minLength: minLength,
+        }))
     );
 
     const initialSplitStateRef = useRef(new InitialSplitState());
@@ -75,17 +77,13 @@ export function useSplitLayoutHandler(
             clientX,
             clientY
         ) => {
-            setNormalizedPortions((prevPortions) => {
+            setSplitElements(() => {
                 const normalizedDisplacement = getNormalizedDisplacement(
                     clientX,
                     clientY
                 );
-
-                const newPortions = getNewPortions(
-                    prevPortions,
-                    normalizedDisplacement
-                );
-                return [...newPortions];
+                const newElements = getResizedElements(normalizedDisplacement);
+                return [...newElements];
             });
         };
     }, []);
@@ -99,9 +97,181 @@ export function useSplitLayoutHandler(
             initialSplitState.updateMousePos(ev);
             initialSplitState.separatorIndex = separatorIndex;
             initialSplitState.updateSeparatorAndWrapperSizes(ev);
-            initialSplitState.updateInitialPortions(normalizedPortions);
+            initialSplitState.updateInitialElements(splitElements);
         };
-    }, [normalizedPortions]);
+    }, [splitElements]);
+
+    function getLength(size: Size): number {
+        if (direction == Direction.HORIZONTAL) {
+            return size.width;
+        } else {
+            return size.height;
+        }
+    }
+
+    function getResizedElements(normalizedDisplacement: number) {
+        const separatorIndex = initialSplitStateRef.current.separatorIndex;
+        const displacementDirection = Math.sign(normalizedDisplacement) as
+            | 1
+            | -1;
+        const [
+            affectedElements,
+            affectedElementsIndex,
+            unaffectedElements,
+            unaffectedElementsIndex,
+        ] = getAffectedAndUnaffectedElements(
+            displacementDirection,
+            separatorIndex
+        );
+
+        const shrinkedElements = substractDisplacement(
+            affectedElements,
+            normalizedDisplacement
+        );
+
+        const [newMainElement, newMainElementIndex] = getNewMainElement(
+            [shrinkedElements, unaffectedElements].flat(),
+            displacementDirection,
+            separatorIndex
+        );
+
+        return getFinalElements(
+            newMainElement,
+            newMainElementIndex,
+            affectedElements,
+            affectedElementsIndex,
+            unaffectedElements,
+            unaffectedElementsIndex,
+            displacementDirection
+        );
+    }
+
+    function getFinalElements(
+        newMainElement: SplitElement,
+        newMainElementIndex: number,
+        affectedElements: SplitElement[],
+        affectedElementsIndex: number,
+        unaffectedElements: SplitElement[],
+        unaffectedElementsIndex: number,
+        displacementDirection: number
+    ) {
+        return displacementDirection > 0
+            ? Object.assign(
+                  [],
+                  {
+                      [unaffectedElementsIndex]: unaffectedElements,
+                  },
+                  {
+                      [newMainElementIndex]: newMainElement,
+                  },
+                  {
+                      [affectedElementsIndex]: affectedElements,
+                  }
+              ).flat()
+            : Object.assign(
+                  [],
+                  {
+                      [affectedElementsIndex]: affectedElements,
+                  },
+                  {
+                      [newMainElementIndex]: newMainElement,
+                  },
+
+                  {
+                      [unaffectedElementsIndex]: unaffectedElements,
+                  }
+              ).flat();
+    }
+
+    function getAffectedAndUnaffectedElements(
+        displacementDirection: 1 | -1,
+        separatorIndex: number
+    ): [SplitElement[], number, SplitElement[], number] {
+        const initialElements = initialSplitStateRef.current.initialElements;
+        let [
+            affectedElements,
+            affectedElementsIndex,
+            unaffectedElements,
+            unaffectedElementsIndex,
+        ] =
+            displacementDirection == 1
+                ? [
+                      initialElements.slice(separatorIndex + 1),
+                      separatorIndex + 1,
+                      initialElements.slice(0, separatorIndex),
+                      0,
+                  ]
+                : [
+                      initialElements.slice(0, separatorIndex + 1),
+                      0,
+                      initialElements.slice(separatorIndex + 2),
+                      separatorIndex + 2,
+                  ];
+
+        return [
+            copyElements(affectedElements),
+            affectedElementsIndex,
+            copyElements(unaffectedElements),
+            unaffectedElementsIndex,
+        ];
+    }
+
+    function getNewMainElement(
+        restOfElements: SplitElement[],
+        displacementDirection: 1 | -1,
+        separatorIndex: number
+    ): [SplitElement, number] {
+        const initialElements = initialSplitStateRef.current.initialElements;
+
+        const mainElementLength =
+            1 -
+            restOfElements.reduce((prevValue, currentElement) => {
+                return prevValue + currentElement.length;
+            }, 0);
+
+        const mainElementIndex =
+            displacementDirection == 1 ? separatorIndex : separatorIndex + 1;
+
+        return [
+            {
+                length: mainElementLength,
+                minLength: initialElements[mainElementIndex].minLength,
+            },
+            mainElementIndex,
+        ];
+    }
+
+    function substractDisplacement(
+        elements: SplitElement[],
+        displacement: number
+    ): SplitElement[] {
+        let orderedElements =
+            displacement > 0 ? [...elements] : [...elements].reverse();
+        let remaindingDisplacement = Math.abs(displacement);
+        for (let i = 0; i < orderedElements.length; i++) {
+            const newLength = Math.max(
+                orderedElements[i].length - remaindingDisplacement,
+                orderedElements[i].minLength
+            );
+            remaindingDisplacement = Math.max(
+                remaindingDisplacement -
+                    (orderedElements[i].length - newLength),
+                0
+            );
+
+            orderedElements[i].length = newLength;
+            if (remaindingDisplacement < 0.00001) break;
+        }
+
+        return displacement > 0 ? orderedElements : orderedElements.reverse();
+    }
+
+    function copyElements(elements: SplitElement[]): SplitElement[] {
+        return elements.map((element) => ({
+            length: element.length,
+            minLength: element.minLength,
+        }));
+    }
 
     function getMouseDisplacement(clientX: number, clientY: number): number {
         if (direction == Direction.HORIZONTAL) {
@@ -125,125 +295,8 @@ export function useSplitLayoutHandler(
         return screenDisplacement / wrapperLengthWithoutSeparators;
     }
 
-    function getLength(size: Size): number {
-        if (direction == Direction.HORIZONTAL) {
-            return size.width;
-        } else {
-            return size.height;
-        }
-    }
-
-    function getNewPortions(
-        prevPortions: number[],
-        normalizedDisplacement: number
-    ) {
-        const newPortions = getPortionsWithDisplacement(
-            normalizedDisplacement,
-            prevPortions
-        );
-        if (
-            newPortions.reduce(
-                (prevPortion, currentPortion) => prevPortion + currentPortion,
-                0
-            ) <= 1
-        ) {
-            return newPortions;
-        } else {
-            return [...prevPortions];
-        }
-    }
-
-    function getPortionsWithDisplacement(
-        normalizedDisplacement: number,
-        prevPortions: number[]
-    ) {
-        const initialPortions = initialSplitStateRef.current.initialPortions;
-        const separatorIndex = initialSplitStateRef.current.separatorIndex;
-        let remaindingDisplacement = Math.abs(normalizedDisplacement);
-
-        const newPortions = [...prevPortions];
-        if (normalizedDisplacement > 0) {
-            newPortions[separatorIndex] =
-                initialPortions[separatorIndex] +
-                Math.abs(normalizedDisplacement);
-            distributeDisplacementForward(
-                initialPortions,
-                remaindingDisplacement,
-                newPortions,
-                separatorIndex
-            );
-        } else {
-            newPortions[separatorIndex + 1] =
-                initialPortions[separatorIndex + 1] +
-                Math.abs(normalizedDisplacement);
-            distributeDisplacementBackwards(
-                initialPortions,
-                remaindingDisplacement,
-                newPortions,
-                separatorIndex
-            );
-        }
-
-        return newPortions;
-    }
-
-    function distributeDisplacementForward(
-        initialPortions: number[],
-        remaindingDisplacement: number,
-        newPortions: number[],
-        separatorIndex: number
-    ) {
-        iterateFrom(
-            initialPortions,
-            (portion, index) => {
-                if (remaindingDisplacement != 0) {
-                    [newPortions[index], remaindingDisplacement] = clampPortion(
-                        portion,
-                        minSizes[index],
-                        remaindingDisplacement
-                    );
-                }
-            },
-            separatorIndex + 1
-        );
-    }
-
-    function distributeDisplacementBackwards(
-        initialPortions: number[],
-        remaindingDisplacement: number,
-        newPortions: number[],
-        separatorIndex: number
-    ) {
-        iterateFromReverse(
-            initialPortions,
-            (portion, index) => {
-                if (remaindingDisplacement != 0) {
-                    [newPortions[index], remaindingDisplacement] = clampPortion(
-                        portion,
-                        minSizes[index],
-                        remaindingDisplacement
-                    );
-                }
-            },
-            separatorIndex
-        );
-    }
-
-    function clampPortion(
-        portion: number,
-        minPortion: number,
-        displacement: number
-    ): [number, number] {
-        const newPortion = Math.max(portion - displacement, minPortion);
-        const remaindingDisplacement = Math.max(
-            displacement - (portion - newPortion),
-            0
-        );
-        return [newPortion, remaindingDisplacement];
-    }
-
     return [
-        normalizedPortions,
+        splitElements,
         splitLayoutEventHandler.current.handleSeperatorMouseDown,
     ];
 }

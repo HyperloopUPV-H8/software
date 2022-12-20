@@ -2,15 +2,15 @@ import styles from "@layouts/SplitLayout/Component/Component.module.scss";
 
 type Props = {
     component: React.ReactNode;
-    normalizedPortion: number;
+    normalizedLength: number;
 };
 
-export const Component = ({ component, normalizedPortion }: Props) => {
+export const Component = ({ component, normalizedLength }: Props) => {
     return (
         <div
             className={styles.wrapper}
             style={{
-                flexBasis: `${normalizedPortion * 100}%`,
+                flexBasis: `${normalizedLength * 100}%`,
             }}
         >
             {component}
