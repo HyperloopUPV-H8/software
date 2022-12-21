@@ -1,4 +1,5 @@
-import { Direction, SplitLayout } from "@layouts/SplitLayout/SplitLayout";
+import { SplitLayout } from "@layouts/SplitLayout/SplitLayout";
+import { Direction } from "@layouts/SplitLayout/Direction";
 import { ReceiveColumn } from "@pages/HomePage/ReceiveColumn/ReceiveColumn";
 import { TransmitColumn } from "@pages/HomePage/TransmitColumn/TransmitColumn";
 import { MessagesColumn } from "@pages/HomePage/MessagesColumn/MessagesColumn";
