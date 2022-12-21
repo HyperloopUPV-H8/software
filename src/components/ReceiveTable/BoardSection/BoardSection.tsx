@@ -1,32 +1,33 @@
 import styles from "@components/ReceiveTable/BoardSection/BoardSection.module.scss";
 import { Board } from "@models/PodData/Board";
-import { Caret } from "@components/Caret/Caret";
+import Header from "@components/ReceiveTable/BoardSection/Header/Header";
 import PacketRow from "@components/ReceiveTable/PacketRow/PacketRow";
-import { memo, useState } from "react";
+import { memo } from "react";
 import { VariableSizeList } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
+import { useCallback, useState } from "react";
 
 type Props = {
   board: Board;
-  scrollContainer: HTMLDivElement;
 };
 
-const BoardSection = ({ board, scrollContainer }: Props) => {
-  let [isVisible, setIsVisible] = useState(true);
+const BoardSection = ({ board }: Props) => {
+  let [isVisible, setIsVisible] = useState(false);
   let packetArr = Object.values(board.packets);
+
+  const toggleDropdown = useCallback(() => {
+    setIsVisible((prevValue) => {
+      return !prevValue;
+    });
+  }, []);
+
   return (
     <div className={styles.wrapper}>
-      <div className={styles.header}>
-        <Caret
-          isOpen={isVisible}
-          onClick={() => {
-            setIsVisible((prevValue) => {
-              return !prevValue;
-            });
-          }}
-        />
-        {<div className={styles.name}>{board.name}</div>}
-      </div>
+      <Header
+        boardName={board.name}
+        isCaretOpen={isVisible}
+        toggleDropdown={toggleDropdown}
+      />
       {isVisible && (
         <div className={styles.packets}>
           <AutoSizer>
@@ -38,7 +39,7 @@ const BoardSection = ({ board, scrollContainer }: Props) => {
                   itemCount={packetArr.length}
                   itemSize={(index) => {
                     return (
-                      Object.keys(packetArr[index].measurements).length * 30 +
+                      Object.keys(packetArr[index].measurements).length * 25 +
                       30
                     );
                   }}
@@ -51,7 +52,6 @@ const BoardSection = ({ board, scrollContainer }: Props) => {
                         key={data[index].id}
                         packet={data[index]}
                         style={style}
-                        scrollContainer={scrollContainer}
                       ></PacketRow>
                     );
                   }}
