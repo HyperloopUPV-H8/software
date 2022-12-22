@@ -7,22 +7,22 @@ import { HiInboxArrowDown } from "react-icons/hi2";
 import { ChartMenu } from "@components/ChartMenu/ChartMenu";
 
 export const ReceiveColumn = () => {
-  return (
-    <TabLayout
-      items={[
-        {
-          id: nanoid(),
-          name: "ReceiveTable",
-          icon: <HiInboxArrowDown />,
-          component: <ReceiveTable />,
-        },
-        // {
-        //   id: nanoid(),
-        //   name: "Charts",
-        //   icon: <BiLineChart />,
-        //   component: <ChartMenu />,
-        // },
-      ]}
-    ></TabLayout>
-  );
+    return (
+        <TabLayout
+            items={[
+                {
+                    id: nanoid(),
+                    name: "Packets",
+                    icon: <HiInboxArrowDown />,
+                    component: <ReceiveTable />,
+                },
+                {
+                    id: nanoid(),
+                    name: "Charts",
+                    icon: <BiLineChart />,
+                    component: <ChartMenu />,
+                },
+            ]}
+        ></TabLayout>
+    );
 };

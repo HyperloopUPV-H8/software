@@ -6,6 +6,9 @@ $isle-color: #ffffff;
 $title-color: #45677d;
 $normal-text-color: #373c43;
 $alternate-text-color: #5a6a89;
+$orange: #f28d30;
+$blue: #317ae7;
+$sidebar-base-color: #f7dec8;
 
 //DARK THEME
 $dark-isle-color: #404654;
@@ -36,14 +39,10 @@ $normal-border-radius: 0.2rem;
 // BORDER-WIDTH
 $normal-border-width: 1px;
 
-$orange: #f28d30;
-$blue: #317ae7;
-
 // TRANSITIONS
 $background-color-transition: background-color 0.08s linear;
 
 // MIXINS
-
 @mixin code-text {
     font-family: $code-font;
     font-size: $normal-font-size;
@@ -103,7 +102,6 @@ $background-color-transition: background-color 0.08s linear;
 }
 
 // FUNCTIONS
-
 @function transparency($color, $transparency) {
     @return color.adjust($color, $alpha: $transparency);
 }

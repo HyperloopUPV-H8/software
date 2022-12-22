@@ -17,14 +17,13 @@ function createMessageWebSocket(): WebSocket {
   };
 
   messageSocket.onmessage = (ev) => {
-    console.log("On message");
     let message = JSON.parse(ev.data) as Message;
 
     if (message.type === "warning") {
       dispatch(updateMessages(message));
     } else if (message.type === "fault") {
       dispatch(updateMessages(message));
-    } //watch out if type is none of them
+    }
   };
 
   messageSocket.onclose = () => {
