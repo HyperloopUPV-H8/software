@@ -10,8 +10,8 @@ type Props = {
 
 export const BoardItem = ({ name, packetNodes }: Props) => {
     return (
-        <div id={styles.wrapper}>
-            <div id={styles.header}>{name}</div>
+        <div className={styles.wrapper}>
+            <div className={styles.header}>{name}</div>
             <PacketItems packetNodes={packetNodes} />
         </div>
     );
@@ -19,7 +19,7 @@ export const BoardItem = ({ name, packetNodes }: Props) => {
 
 const PacketItems = ({ packetNodes }: { packetNodes: TreeNode }) => {
     return (
-        <div id={`${styles.packetList} ${styles.treeNode}`}>
+        <div className={`${styles.packetList} treeNode`}>
             {Object.entries(packetNodes).map(([name, measurementNodes]) => {
                 return (
                     <PacketItem
