@@ -1,28 +1,27 @@
 import styles from "@components/ChartMenu/Chart/Legend/LegendItem/LegendItem.module.scss";
-import { HSLColor, hslToHex } from "@utils/color";
+import { HSLAColor, hslaToHex, hslaToString } from "@utils/color";
 import { MdClose } from "react-icons/md";
 type Props = {
-  data: LegendItemData;
-  removeItem: () => void;
+    data: LegendItemData;
+    removeItem: () => void;
 };
 
 export type LegendItemData = {
-  name: string;
-  color: HSLColor;
+    name: string;
+    color: HSLAColor;
 };
 
 export const LegendItem = ({ data, removeItem }: Props) => {
-  let hexColor = hslToHex(data.color);
-  return (
-    <div className={styles.wrapper}>
-      <div
-        className={styles.lineColor}
-        style={{ backgroundColor: `#${hexColor.r}${hexColor.g}${hexColor.b}` }}
-      ></div>
-      <div className={styles.name}>{data.name}</div>
-      <div className={styles.removeBtn} onClick={removeItem}>
-        <MdClose />
-      </div>
-    </div>
-  );
+    return (
+        <div className={styles.wrapper}>
+            <div
+                className={styles.lineColor}
+                style={{
+                    backgroundColor: hslaToString(data.color),
+                }}
+            ></div>
+            <div className={styles.name}>{data.name}</div>
+            <MdClose className={styles.removeBtn} onClick={removeItem} />
+        </div>
+    );
 };
