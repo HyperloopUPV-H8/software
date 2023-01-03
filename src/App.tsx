@@ -8,17 +8,9 @@ import messageService from "@services/MessageService";
 import connectionService from "@services/ConnectionService";
 import { useDispatch } from "react-redux";
 import { initializePodData } from "@slices/podDataSlice";
-import { PacketUpdate } from "@adapters/PacketUpdate";
-import { updateMessages } from "@slices/messagesSlice";
-import { Message } from "@adapters/Message";
 
 function App() {
     const dispatch = useDispatch();
-
-    function getRandomMessage(messages: Message[]) {
-        let randomIndex = Math.floor(Math.random() * messages.length);
-        return messages[randomIndex];
-    }
 
     useEffect(() => {
         dataService.fetchPodDataStructure().then((podData) => {
@@ -33,7 +25,6 @@ function App() {
             packetSocket.close();
             messageSocket.close();
             connectionSocket.close();
-            //clearInterval(intervalId);
         };
     }, []);
 
