@@ -24,7 +24,7 @@
     .boardName {
         text-align: left;
         padding-left: 1rem;
-        @include styles.normal-text-style;
+        @include styles.normal-text;
         color: styles.$blue;
         font-weight: 600;
         //FIXME: blue border is under gray border from packet

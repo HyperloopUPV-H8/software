@@ -14,7 +14,7 @@
     > * {
         padding: 0.5rem 0.5rem;
 
-        @include styles.normal-text-style;
+        @include styles.normal-text;
         background-color: #bad6ff;
         color: styles.$blue;
         font-weight: 600;

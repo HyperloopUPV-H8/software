@@ -13,7 +13,7 @@
     }
     .name {
         text-align: left;
-        @include styles.normal-text-style;
+        @include styles.normal-text;
         color: styles.$blue;
         font-weight: 600;
     }
