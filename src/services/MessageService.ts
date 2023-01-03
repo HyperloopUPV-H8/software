@@ -5,36 +5,33 @@ import { updateMessages } from "@slices/messagesSlice";
 import { store } from "../store";
 
 function createMessageWebSocket(): WebSocket {
-  let dispatch = store.dispatch;
-  let messageSocket = new WebSocket(
-    `ws://${import.meta.env.VITE_SERVER_IP}:${
-      import.meta.env.VITE_SERVER_PORT
-    }${import.meta.env.VITE_MESSAGES_URL}`
-  );
-  dispatch(updateWebsocketConnection(createConnection("Messages", false)));
-  messageSocket.onopen = () => {
-    dispatch(updateWebsocketConnection(createConnection("Messages", true)));
-  };
-
-  messageSocket.onmessage = (ev) => {
-    let message = JSON.parse(ev.data) as Message;
-
-    if (message.type === "warning") {
-      dispatch(updateMessages(message));
-    } else if (message.type === "fault") {
-      dispatch(updateMessages(message));
-    }
-  };
-
-  messageSocket.onclose = () => {
+    let dispatch = store.dispatch;
+    let messageSocket = new WebSocket(
+        `ws://${import.meta.env.VITE_SERVER_IP}:${
+            import.meta.env.VITE_SERVER_PORT
+        }${import.meta.env.VITE_MESSAGES_URL}`
+    );
     dispatch(updateWebsocketConnection(createConnection("Messages", false)));
-  };
+    messageSocket.onopen = () => {
+        dispatch(updateWebsocketConnection(createConnection("Messages", true)));
+    };
 
-  return messageSocket;
+    messageSocket.onmessage = (ev) => {
+        let message = JSON.parse(ev.data) as Message;
+        dispatch(updateMessages(message));
+    };
+
+    messageSocket.onclose = () => {
+        dispatch(
+            updateWebsocketConnection(createConnection("Messages", false))
+        );
+    };
+
+    return messageSocket;
 }
 
 const messageService = {
-  createMessageWebSocket,
+    createMessageWebSocket,
 };
 
 export default messageService;

@@ -2,12 +2,11 @@
 
 .messagesList {
     width: 100%;
-    height: fit-content;
+    height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
-    background-color: styles.$background-color;
+    background-color: styles.$isle-color;
     @include styles.code-text;
-    border-radius: styles.$normal-border-radius;
 
     > *:not(:last-child) {
         border-bottom: 1px solid black;
