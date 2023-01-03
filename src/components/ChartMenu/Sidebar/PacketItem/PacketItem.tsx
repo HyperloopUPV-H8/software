@@ -9,8 +9,8 @@ type Props = {
 
 const PacketItem = ({ name, measurementNodes }: Props) => {
     return (
-        <div id={styles.wrapper} className={`${styles.treeNode}`}>
-            <div id={styles.name}>{name}</div>
+        <div className={`${styles.wrapper} treeNode`}>
+            <div className={styles.name}>{name}</div>
             <MeasurementItems measurementNodes={measurementNodes} />
         </div>
     );
@@ -22,7 +22,7 @@ const MeasurementItems = ({
     measurementNodes: TreeNode;
 }) => {
     return (
-        <div id={styles.measurementList}>
+        <div className={styles.measurementList}>
             {Object.keys(measurementNodes).map((name) => {
                 return <MeasurementItem key={name} name={name} />;
             })}
