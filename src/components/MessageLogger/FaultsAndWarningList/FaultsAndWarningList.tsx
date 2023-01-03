@@ -6,8 +6,8 @@ import { store } from "../../../store";
 import styles from "@components/MessageLogger/FaultsAndWarningList/FaultsAndWarningList.module.scss";
 import { useInterval } from "@hooks/useInterval";
 import { Message } from "@models/Message";
-const warningColor = { h: 41, s: 100, l: 40 };
-const faultColor = { h: 0, s: 100, l: 40 };
+const warningColor = { h: 41, s: 100, l: 40, a: 1 };
+const faultColor = { h: 0, s: 100, l: 40, a: 1 };
 
 export const FaultsAndWarningList = () => {
     const [messages, setMessages] = useState({
@@ -21,12 +21,6 @@ export const FaultsAndWarningList = () => {
             warning: state.messages.warning,
         });
     }, 1000 / 70);
-    // const warningMessages = useSelector(
-    //     (state: RootState) => state.messages.warning
-    // );
-    // const faultMessages = useSelector(
-    //     (state: RootState) => state.messages.fault
-    // );
 
     return (
         <div className={styles.containerMessages}>

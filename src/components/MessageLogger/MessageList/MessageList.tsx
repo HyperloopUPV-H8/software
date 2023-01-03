@@ -1,11 +1,11 @@
 import MessageItem from "@components/MessageLogger/MessageItem/MessageItem";
 import styles from "@components/MessageLogger/MessageList/MessageList.module.scss";
 import { Message } from "@models/Message";
-import { HSLColor } from "@utils/color";
+import { HSLAColor } from "@utils/color";
 
 interface Props {
     messages: Message[];
-    color: HSLColor;
+    color: HSLAColor;
 }
 
 export const MessageList = ({ messages, color }: Props) => {

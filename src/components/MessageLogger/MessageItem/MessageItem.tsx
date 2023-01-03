@@ -2,12 +2,12 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import styles from "@components/MessageLogger/MessageItem/MessageItem.module.scss";
 import { Message } from "@models/Message";
 import { Counter } from "@components/MessageLogger/Counter/Counter";
-import { getSofterHSLColor, HSLColor, hslColorToString } from "@utils/color";
+import { getSofterHSLAColor, HSLAColor, hslaToString } from "@utils/color";
 import { Caret } from "@components/Caret/Caret";
 import { memo } from "react";
 interface Props {
     message: Message;
-    color: HSLColor;
+    color: HSLAColor;
 }
 
 const MessageItem = ({ message, color }: Props) => {
@@ -50,7 +50,7 @@ const MessageItem = ({ message, color }: Props) => {
             className={`${styles.lineMsg} ${isOpen ? styles.open : ""}`}
             key={message.id}
             style={{
-                backgroundColor: hslColorToString(getSofterHSLColor(color, 48)),
+                backgroundColor: hslaToString(getSofterHSLAColor(color, 48)),
             }}
         >
             {isOverflowing && (
@@ -64,13 +64,13 @@ const MessageItem = ({ message, color }: Props) => {
             )}
             <div
                 className={styles.idMsg}
-                style={{ color: hslColorToString(color) }}
+                style={{ color: hslaToString(color) }}
             >
                 {message.id + ":"}
             </div>
             <div
                 className={styles.description}
-                style={{ color: hslColorToString(color) }}
+                style={{ color: hslaToString(color) }}
                 ref={descriptionRef}
             >
                 {message.description}
