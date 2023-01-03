@@ -3,6 +3,5 @@
 .wrapper {
     width: 100%;
     padding: 0.6rem;
-    @include styles.normal-text-style;
     border-top: 1px solid styles.$orange;
 }

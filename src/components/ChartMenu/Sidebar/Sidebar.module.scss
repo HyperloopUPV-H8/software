@@ -1,11 +1,11 @@
 @use "@styles/styles";
-#wrapper {
-    width: 100%;
+.wrapper {
+    width: auto;
     height: 100%;
 
     display: flex;
     flex-direction: column;
-
-    background-color: #f2f2f2;
     overflow: auto;
+
+    background-color: styles.lightness(styles.$base-color, 35%);
 }

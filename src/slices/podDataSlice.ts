@@ -8,63 +8,73 @@ import { RootState } from "store";
 import { TreeNode } from "@components/ChartMenu/TreeNode";
 import { Packet } from "@models/PodData/Packet";
 import { Board } from "@models/PodData/Board";
+import { isNumber } from "@models/PodData/Measurement";
 
 export const podDataSlice = createSlice({
-  name: "podData",
-  initialState: {
-    boards: {},
-    packetToBoard: {},
-    lastUpdates: {},
-  } as PodData,
-  reducers: {
-    initializePodData: (_, action: PayloadAction<PodDataAdapter>) => {
-      return createPodDataFromAdapter(action.payload);
+    name: "podData",
+    initialState: {
+        boards: {},
+        packetToBoard: {},
+        lastUpdates: {},
+    } as PodData,
+    reducers: {
+        initializePodData: (_, action: PayloadAction<PodDataAdapter>) => {
+            return createPodDataFromAdapter(action.payload);
+        },
+        updatePodData: (
+            podData,
+            action: PayloadAction<{ [id: number]: PacketUpdate }>
+        ) => {
+            podData.lastUpdates = action.payload;
+            updatePackets(podData, action.payload);
+        },
     },
-    updatePodData: (
-      podData,
-      action: PayloadAction<{ [id: number]: PacketUpdate }>
-    ) => {
-      podData.lastUpdates = action.payload;
-      updatePackets(podData, action.payload);
-    },
-  },
 });
 
 export const { initializePodData, updatePodData } = podDataSlice.actions;
 
 export default podDataSlice.reducer;
 
-export function selectPodDataNames(state: RootState): TreeNode {
-  return Object.fromEntries(
-    Object.values(state.podData.boards).map((board) => {
-      return [board.name, getBoardPackets(board)];
-    })
-  );
+export function selectNumericPodDataNames(state: RootState): TreeNode {
+    let boards = {};
+    Object.values(state.podData.boards).forEach((board) => {
+        let packets = getNumericPacketNames(board);
+        if (packets) {
+            Object.assign(boards, { [board.name]: packets });
+        }
+    });
+
+    return boards;
 }
 
-function getBoardPackets(board: Board): TreeNode {
-  return Object.fromEntries(
-    Object.values(board.packets).map((packet) => {
-      return [packet.name, getPacketMeasurements(packet)];
-    })
-  );
+function getNumericPacketNames(board: Board): TreeNode | undefined {
+    let packets = {};
+
+    Object.values(board.packets).forEach((packet) => {
+        let measurements = getNumericMeasurementNames(packet);
+        if (measurements) {
+            Object.assign(packets, { [packet.name]: measurements });
+        }
+    });
+
+    if (Object.entries(packets).length > 0) {
+        return packets;
+    } else {
+        return undefined;
+    }
 }
 
-function getPacketMeasurements(packet: Packet): TreeNode {
-  return Object.fromEntries(
-    Object.values(packet.measurements).map((measurement) => {
-      return [measurement.name, undefined];
-    })
-  );
-}
+function getNumericMeasurementNames(packet: Packet): TreeNode | undefined {
+    let measurements = {} as TreeNode;
+    Object.values(packet.measurements).forEach((measurement) => {
+        if (isNumber(measurement.type)) {
+            Object.assign(measurements, { [measurement.name]: undefined });
+        }
+    });
 
-export function selectMeasurements(state: RootState): {
-  [measurementName: string]: string;
-} {
-  let updatedMeasurements = {};
-  for (let update of Object.values(state.podData.lastUpdates)) {
-    Object.assign(updatedMeasurements, update.measurementUpdates);
-  }
-
-  return updatedMeasurements;
+    if (Object.entries(measurements).length > 0) {
+        return measurements;
+    } else {
+        return undefined;
+    }
 }

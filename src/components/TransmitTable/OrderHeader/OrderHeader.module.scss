@@ -13,7 +13,6 @@ $header-color: #ffe4cc;
     align-items: center;
     gap: 0.5rem;
     background-color: $header-color;
-    @include styles.normal-text-style;
 
     .caretWrapper {
         width: 100%;

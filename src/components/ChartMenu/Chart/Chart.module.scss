@@ -7,11 +7,14 @@
     display: grid;
     grid-template-rows: 15rem auto;
 
-    border: 2px solid #d3d8df;
+    border: 1px solid black;
     border-radius: styles.$normal-border-radius;
     overflow: hidden;
-
     position: relative;
+
+    &:hover .removeBtn {
+        opacity: 1;
+    }
 }
 
 .removeBtn {
@@ -23,12 +26,9 @@
     height: min-content;
 
     font-size: 1.5rem;
-    color: red;
+    color: black;
     line-height: 60%;
     cursor: pointer;
-}
-
-.chartWrapper {
-    width: 100%;
-    height: 100%;
+    opacity: 0;
+    transition: styles.$opacity-transition;
 }
