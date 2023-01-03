@@ -1,14 +1,14 @@
 @use "sass:color";
 
 // COLORS
-$background-color: #cee0f0;
+$background-color: #dce3eb;
 $isle-color: #ffffff;
 $title-color: #45677d;
 $normal-text-color: #373c43;
-$alternate-text-color: #5a6a89;
+$alternate-text-color: #505868;
 $orange: #f28d30;
 $blue: #317ae7;
-$sidebar-base-color: #f7dec8;
+$base-color: hsl(212, 27%, 55%);
 
 //DARK THEME
 $dark-isle-color: #404654;
@@ -17,7 +17,8 @@ $dark-normal-text-color: #bec6d2;
 // FONTS
 //TODO: define fallbacks fonts in case some are not installed
 $sans-font: Inter, Helvetica, Arial;
-$code-font: Cascadia Code, Cascadia Mono, Consolas, Monoscape;
+$code-font: Consolas, Cascadia Code, Cascadia Mono, Monospace;
+$alternate-code-font: Consolas, Monospace;
 
 // FONT-SIZE
 $title-font-size: 1.9rem;
@@ -40,13 +41,21 @@ $normal-border-radius: 0.2rem;
 $normal-border-width: 1px;
 
 // TRANSITIONS
-$background-color-transition: background-color 0.08s linear;
+$normal-transition-time: 0.08s;
+$opacity-transition: opacity $normal-transition-time linear;
+$background-color-transition: background-color $normal-transition-time linear;
 
 // MIXINS
 @mixin code-text {
     font-family: $code-font;
     font-size: $normal-font-size;
     color: $normal-text-color;
+}
+
+@mixin alternate-code-text {
+    font-family: $alternate-code-font;
+    font-size: $normal-font-size;
+    color: $alternate-text-color;
 }
 
 @mixin title-text {
@@ -56,25 +65,32 @@ $background-color-transition: background-color 0.08s linear;
     font-weight: $bold-font-weight;
 }
 
-@mixin normal-text-style {
-    font-family: $code-font;
+@mixin normal-text {
+    font-family: $sans-font;
     font-size: $normal-font-size;
     color: $alternate-text-color;
     font-weight: $normal-font-weight;
 }
 
-@mixin subtitle-text-style {
+@mixin subtitle-text {
     font-family: $code-font;
     font-size: $normal-font-size;
     font-style: italic;
     color: #a9adb6;
 }
 
-@mixin tab-font {
+@mixin tab-text {
     font-family: $sans-font;
     font-size: $normal-font-size;
     font-weight: 500;
     color: $title-color;
+}
+
+@mixin inherit-text {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+    font-weight: inherit;
 }
 
 @mixin undraggable {

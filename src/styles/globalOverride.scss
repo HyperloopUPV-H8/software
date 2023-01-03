@@ -24,7 +24,7 @@ hr {
 //If it's only :root, font-size changes the base rem. If it's :root *, it affects everything, skipping inheritance.
 :root > * {
     box-sizing: border-box;
-    @include styles.normal-text-style;
+    @include styles.normal-text;
     scrollbar-track-color: transparent;
     scrollbar-color: rgb(68, 68, 68) none;
     user-select: none;

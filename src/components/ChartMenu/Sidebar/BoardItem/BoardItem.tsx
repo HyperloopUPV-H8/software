@@ -2,6 +2,8 @@ import styles from "@components/ChartMenu/Sidebar/BoardItem/BoardItem.module.scs
 import { Board } from "@models/PodData/Board";
 import PacketItem from "@components/ChartMenu/Sidebar/PacketItem/PacketItem";
 import { TreeNode } from "@components/ChartMenu/TreeNode";
+import { Caret } from "@components/Caret/Caret";
+import { useState } from "react";
 
 type Props = {
     name: string;
@@ -9,17 +11,35 @@ type Props = {
 };
 
 export const BoardItem = ({ name, packetNodes }: Props) => {
+    const [isOpen, setIsOpen] = useState(false);
     return (
-        <div id={styles.wrapper}>
-            <div id={styles.header}>{name}</div>
-            <PacketItems packetNodes={packetNodes} />
+        <div className={styles.wrapper}>
+            <div className={styles.header}>
+                <Caret
+                    isOpen={isOpen}
+                    onClick={() => {
+                        setIsOpen((prev) => !prev);
+                    }}
+                />
+                {name}
+            </div>
+            <PacketItems packetNodes={packetNodes} isVisible={isOpen} />
         </div>
     );
 };
 
-const PacketItems = ({ packetNodes }: { packetNodes: TreeNode }) => {
+const PacketItems = ({
+    packetNodes,
+    isVisible,
+}: {
+    packetNodes: TreeNode;
+    isVisible: boolean;
+}) => {
     return (
-        <div id={`${styles.packetList} ${styles.treeNode}`}>
+        <div
+            className={`${styles.packetList} treeNode`}
+            style={{ height: isVisible ? "auto" : "0" }}
+        >
             {Object.entries(packetNodes).map(([name, measurementNodes]) => {
                 return (
                     <PacketItem
