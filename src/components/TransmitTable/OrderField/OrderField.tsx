@@ -13,40 +13,38 @@ export const OrderField = ({ name, fieldDescription, onChange }: Props) => {
     return (
         <div className={styles.wrapper}>
             <div className={styles.name}>{name}</div>
-            <div className={styles.formComponent}>
+            {
                 {
-                    {
-                        TextInput: (
-                            <TextInput
-                                placeholder={`${fieldDescription.value}...`}
-                                isRequired={true}
-                                onChange={(value: string, isValid: boolean) => {
-                                    onChange(Number.parseFloat(value), isValid);
-                                }}
-                                checkInput={getCheckInput(
-                                    fieldDescription.value as string
-                                )}
-                            ></TextInput>
-                        ),
-                        CheckBox: (
-                            <CheckBox
-                                isRequired={true}
-                                onChange={(value: boolean) => {
-                                    onChange(value, true);
-                                }}
-                            />
-                        ),
-                        Dropdown: (
-                            <Dropdown
-                                options={fieldDescription.value as Enum}
-                                onChange={(newValue) => {
-                                    onChange(newValue, true);
-                                }}
-                            />
-                        ),
-                    }[getFormElement(fieldDescription)]
-                }
-            </div>
+                    TextInput: (
+                        <TextInput
+                            placeholder={`${fieldDescription.value}...`}
+                            isRequired={true}
+                            onChange={(value: string, isValid: boolean) => {
+                                onChange(Number.parseFloat(value), isValid);
+                            }}
+                            checkInput={getCheckInput(
+                                fieldDescription.value as string
+                            )}
+                        ></TextInput>
+                    ),
+                    CheckBox: (
+                        <CheckBox
+                            isRequired={true}
+                            onChange={(value: boolean) => {
+                                onChange(value, true);
+                            }}
+                        />
+                    ),
+                    Dropdown: (
+                        <Dropdown
+                            options={fieldDescription.value as Enum}
+                            onChange={(newValue) => {
+                                onChange(newValue, true);
+                            }}
+                        />
+                    ),
+                }[getFormElement(fieldDescription)]
+            }
         </div>
     );
 };

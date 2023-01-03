@@ -7,4 +7,7 @@
 
     border-radius: styles.$normal-border-radius;
     overflow: hidden;
+
+    border: 1px solid styles.lightness(styles.$base-color, 35%);
+    border-left: 0;
 }
