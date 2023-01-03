@@ -1,27 +1,31 @@
 @use "@styles/styles";
 
 .wrapper {
-    display: grid;
-    grid-template-rows: auto auto;
+    display: flex;
+    flex-direction: column;
 
-    gap: 1rem;
-    background-color: styles.lightness(styles.$base-color, 35%);
     @include styles.code-text;
 }
 
 .header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.4rem;
     padding: 0.5rem;
     background-color: styles.lightness(styles.$base-color, 30%);
 
     color: styles.$base-color;
     font-weight: bold;
+
+    border-bottom: 1px solid styles.lightness(styles.$base-color, 18%);
 }
 
 .packetList {
     display: flex;
     flex-direction: column;
     padding-right: 1.5rem;
-
+    overflow: hidden;
     > * {
         margin-bottom: 0.8rem;
     }
