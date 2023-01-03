@@ -1,5 +1,5 @@
-import MessageItem from "@components/MessageLogger/MessageItem/MessageItem";
-import styles from "@components/MessageLogger/MessageList/MessageList.module.scss";
+import MessageItem from "@components/FaultsAndWarningLogger/MessageLogger/MessageList/MessageItem/MessageItem";
+import styles from "@components/FaultsAndWarningLogger/MessageLogger/MessageList/MessageList.module.scss";
 import { Message } from "@models/Message";
 import { HSLAColor } from "@utils/color";
 
