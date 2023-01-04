@@ -1,6 +1,6 @@
 # Ethernet View - Frontend
 
-This is the official frontend for the HyperloopUPV verification software.
+This is the official frontend for the HyperloopUPV verification software *Ethernet View*.
 
 ## Building
 To build the page, run `npm run build` in a terminal set at the root of the project.
