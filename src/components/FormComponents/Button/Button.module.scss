@@ -1,0 +1,24 @@
+@use "@styles/styles";
+
+.button {
+    width: 100%;
+    padding: 0.5rem;
+    text-align: center;
+    border-radius: styles.$normal-border-radius;
+    background-color: styles.$orange;
+    color: white;
+    user-select: none;
+
+    &.enabled {
+        cursor: pointer;
+        //FIXME: ANIMATION GETS CUT SHORT WHEN BUTTON IS RELEASED
+        &:active {
+            @include styles.flash-button(styles.$orange);
+        }
+        transition: styles.$background-color-transition;
+    }
+
+    &.disabled {
+        background-color: styles.saturation(styles.$orange, -100%);
+    }
+}

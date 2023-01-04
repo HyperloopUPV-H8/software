@@ -1,0 +1,16 @@
+@use "@styles/styles";
+
+.textInput {
+    width: 100%;
+    padding: 0.8rem;
+    border-radius: styles.$normal-border-radius;
+    font: inherit;
+}
+
+.valid {
+    border-color: greenyellow;
+}
+
+.invalid {
+    border-color: red;
+}

@@ -1,0 +1,21 @@
+@use "@styles/styles";
+
+.wrapper {
+    display: grid;
+    grid-template: "icon title" / auto auto;
+    align-items: center;
+    gap: 0.5rem;
+    height: auto;
+    padding: 0.3rem;
+    border: 1px solid black;
+    border-radius: styles.$normal-border-radius;
+    cursor: pointer;
+}
+
+.icon {
+    grid-area: icon;
+
+    align-self: center;
+    justify-self: center;
+    font-size: 1.5rem;
+}

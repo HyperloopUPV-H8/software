@@ -1,0 +1,38 @@
+@use "@styles/styles.scss";
+
+.lineMsg {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1.2rem auto auto 1fr;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "caret id counter description"
+    ". . . description";
+  text-align: left;
+  white-space: nowrap;
+  align-items: center;
+}
+
+.idMsg {
+  grid-area: id;
+  @include styles.code-text;
+  font-weight: bold;
+  text-align: left;
+}
+
+.description {
+  grid-area: description;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.counter {
+  grid-area: counter;
+  justify-self: center;
+  margin-left: 0.1rem;
+  margin-right: 0.1rem;
+}
+
+.open {
+  white-space: normal;
+}

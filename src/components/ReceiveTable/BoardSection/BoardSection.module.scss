@@ -1,0 +1,17 @@
+@use "@styles/styles";
+
+.wrapper {
+    width: 100%;
+    display: grid;
+    grid-template-rows: min-content auto;
+
+    border: 1px solid styles.$blue;
+    border-radius: styles.$normal-border-radius;
+
+    .packets {
+        width: 100%;
+        height: 40rem;
+
+        border-top: styles.$normal-border-width solid styles.$blue;
+    }
+}

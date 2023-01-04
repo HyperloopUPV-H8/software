@@ -1,0 +1,32 @@
+@use "@styles/styles";
+
+.wrapper {
+    display: grid;
+    grid-template-rows: min-content auto;
+}
+
+.packetInfo {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    // grid-template-columns:
+    //     minmax(3rem, min-content)
+    //     minmax(15rem, min-content)
+    //     minmax(6rem, min-content)
+    //     minmax(6rem, min-content)
+    //     minmax(6rem, min-content);
+    @include styles.code-text;
+    background-color: styles.lightness(styles.$blue, 40%);
+    > * {
+        //border: 1px solid lightgray;
+        margin: -1px 0 0 -1px;
+    }
+}
+
+.measurements {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    > * {
+        //margin: 0.5rem 0;
+    }
+}
