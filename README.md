@@ -3,7 +3,7 @@
 This is the official frontend for the HyperloopUPV verification software *Ethernet View*.
 
 ## Building
-To build the page, run `npm run build` in a terminal set at the root of the project.
+To build the site, run `npm run build` in a terminal set at the root of the project. Then rename the generated folder to static and follow the instructions in the "Building" section of the backend repository.
 
 ## Authors
 
