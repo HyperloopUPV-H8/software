@@ -1,0 +1,38 @@
+@use "@styles/styles";
+
+.loggerWrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: styles.$normal-padding;
+    border-radius: styles.$large-border-radius;
+    background-color: styles.$isle-color;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 2rem;
+    gap: 1rem;
+
+    > * {
+        min-width: 0;
+        min-height: 0;
+        height: 100%;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+    }
+}
+
+.playBtn {
+    color: orange;
+}
+
+.stopBtn {
+    color: red;
+}
