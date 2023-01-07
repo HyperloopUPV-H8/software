@@ -1,6 +1,6 @@
 .messageColumnWrapper {
     height: 100%;
-    display: grid;
-    grid-template-rows: 1fr auto;
+    display: flex;
+    flex-direction: column;
     gap: 1rem;
 }
