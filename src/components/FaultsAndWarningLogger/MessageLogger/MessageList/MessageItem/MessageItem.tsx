@@ -18,12 +18,6 @@ const MessageItem = ({ message, color, onHandleScroll }: Props) => {
   const wrapperRef = useRef<HTMLLIElement>(null);
   const descriptionRef = useRef<HTMLDivElement>(null);
 
-  //const isBottomLocked = useRef(true);
-
-  //   function handleScrollChange() {
-  //     onHandleScroll();
-  //   }
-
   // const resizeObserver = useRef(
   //     new ResizeObserver((entries) => {
   //         let descriptionElement = entries[0].target as HTMLElement;
@@ -66,9 +60,7 @@ const MessageItem = ({ message, color, onHandleScroll }: Props) => {
           isOpen={isOpen}
           onClick={() => {
             setIsOpen((current) => !current);
-            //isBottomLocked.current = !isBottomLocked.current;
-            //handleScrollChange();
-            onHandleScroll();
+            //onHandleScroll();
           }}
         />
       )}
