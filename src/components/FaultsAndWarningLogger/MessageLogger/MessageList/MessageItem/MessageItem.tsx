@@ -18,32 +18,32 @@ const MessageItem = ({ message, color, onHandleScroll }: Props) => {
   const wrapperRef = useRef<HTMLLIElement>(null);
   const descriptionRef = useRef<HTMLDivElement>(null);
 
-  // const resizeObserver = useRef(
-  //     new ResizeObserver((entries) => {
-  //         let descriptionElement = entries[0].target as HTMLElement;
-  //         setIsOverflowing(checkOverflow(descriptionElement));
-  //     })
-  // );
+  const resizeObserver = useRef(
+    new ResizeObserver((entries) => {
+      let descriptionElement = entries[0].target as HTMLElement;
+      setIsOverflowing(checkOverflow(descriptionElement));
+    })
+  );
 
-  // function checkOverflow(el: HTMLElement) {
-  //     el.style.whiteSpace = "nowrap";
-  //     let overflowing = el.clientWidth < el.scrollWidth;
-  //     el.style.whiteSpace = "";
+  function checkOverflow(el: HTMLElement) {
+    el.style.whiteSpace = "nowrap";
+    let overflowing = el.clientWidth < el.scrollWidth;
+    el.style.whiteSpace = "";
 
-  //     return overflowing;
-  // }
+    return overflowing;
+  }
 
-  // useLayoutEffect(() => {
-  //     setIsOverflowing(checkOverflow(descriptionRef.current!));
-  // }, []);
+  useLayoutEffect(() => {
+    setIsOverflowing(checkOverflow(descriptionRef.current!));
+  }, []);
 
-  // useEffect(() => {
-  //     resizeObserver.current.observe(descriptionRef.current!);
+  useEffect(() => {
+    resizeObserver.current.observe(descriptionRef.current!);
 
-  //     return () => {
-  //         resizeObserver.current.disconnect();
-  //     };
-  // }, []);
+    return () => {
+      resizeObserver.current.disconnect();
+    };
+  }, []);
 
   return (
     <li

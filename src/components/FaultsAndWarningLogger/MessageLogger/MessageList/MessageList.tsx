@@ -11,7 +11,8 @@ interface Props {
 
 export const MessageList = ({ messages, color }: Props) => {
   const isBottomLocked = useRef(true);
-  const emptyDivRef = useRef<HTMLDivElement>(null);
+  const scrollUlRef = useRef<HTMLUListElement>(null);
+  const scrollY = useRef(0);
 
   //esto puede sobrar, si funciona el método de abajo
   function handleScroll() {
@@ -21,32 +22,32 @@ export const MessageList = ({ messages, color }: Props) => {
 
   //error: cuando está al final, al salir un nuevo mensaje, a veces se vuelve a poner en modo lectura
   //detectar cuando sube, ver si es eficiente
-  function handleScrollRead(e: React.UIEvent<HTMLElement>) {
+  //CUidado con todas las ! que estoy poniendo, asegurarse
+  function handleScrollRead(ev: React.UIEvent<HTMLElement>) {
+    // Hacer Custom hook para esta funcionalidad [propiedadquenecesito, handleScroll] = useSpecialScroll(messages)
     const bottom =
-      e.currentTarget.scrollHeight - e.currentTarget.scrollTop ===
-      e.currentTarget.clientHeight;
-    if (bottom) {
-      console.log("bottom");
-    }
+      ev.currentTarget.scrollHeight - ev.currentTarget.scrollTop ===
+      ev.currentTarget.clientHeight;
 
+    ev.currentTarget;
     if (!bottom && isBottomLocked.current) {
-      isBottomLocked.current = false;
-      console.log("Read" + isBottomLocked);
+      //igual se puede quitar el bottom aquí
+      if (scrollY.current > scrollUlRef.current!.scrollTop) {
+        console.log("scroll up");
+        isBottomLocked.current = false;
+      }
     } else if (bottom && !isBottomLocked.current) {
       isBottomLocked.current = true;
-      console.log("End" + isBottomLocked);
-    }
-  }
-
-  function handleScrollEnd() {
-    if (isBottomLocked.current) {
-      isBottomLocked.current = true;
-      console.log("End" + isBottomLocked);
     }
   }
 
   function scrollToBottom() {
-    emptyDivRef.current!.scrollIntoView({ behavior: "smooth" });
+    scrollUlRef.current?.scrollTo({
+      top: scrollUlRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+
+    scrollY.current = scrollUlRef.current!.scrollTop;
   }
 
   useEffect(() => {
@@ -54,10 +55,14 @@ export const MessageList = ({ messages, color }: Props) => {
       scrollToBottom();
     }
     console.log("Se ejecuta");
-  }, [isBottomLocked.current]); //comprobar que se ejecuta cuando corresponde
+  }, [messages]); //comprobar que se ejecuta cuando corresponde
 
   return (
-    <ul className={styles.messagesList} onScroll={handleScrollRead}>
+    <ul
+      className={styles.messagesList}
+      onScroll={handleScrollRead}
+      ref={scrollUlRef}
+    >
       {messages.map((message) => {
         return (
           <MessageItem
@@ -68,7 +73,6 @@ export const MessageList = ({ messages, color }: Props) => {
           />
         );
       })}
-      <div className={styles.endDiv} ref={emptyDivRef} />
     </ul>
   );
 };
