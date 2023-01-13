@@ -8,10 +8,9 @@ import { memo } from "react";
 interface Props {
   message: Message;
   color: HSLAColor;
-  onHandleScroll: () => void;
 }
 
-const MessageItem = ({ message, color, onHandleScroll }: Props) => {
+const MessageItem = ({ message, color }: Props) => {
   const [isOverflowing, setIsOverflowing] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
 
