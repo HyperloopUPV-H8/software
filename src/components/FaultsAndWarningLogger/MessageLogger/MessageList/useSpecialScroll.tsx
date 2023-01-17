@@ -15,8 +15,17 @@ export const useSpecialScroll = (
 
     ev.currentTarget;
     if (isBottomLocked.current) {
-      if (scrollY.current > scrollUlRef.current!.scrollTop) {
+      console.log(scrollUlRef.current!.scrollTop);
+      let autoscrollCorrection =
+        scrollY.current - scrollUlRef.current!.scrollTop === 20;
+      //FIXME: When there is a duplicate message, an autoscroll occurs, the scrollY.current is 20 greater than scrollTop, this checks and skips this autoscroll.
+      //Doesn't fix
+      if (
+        scrollY.current > scrollUlRef.current!.scrollTop &&
+        !autoscrollCorrection
+      ) {
         isBottomLocked.current = false;
+        console.log("scroll up");
       }
     } else if (bottom && !isBottomLocked.current) {
       isBottomLocked.current = true;

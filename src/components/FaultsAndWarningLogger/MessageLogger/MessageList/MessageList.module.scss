@@ -13,3 +13,8 @@
     border-bottom: 1px solid black;
   }
 }
+
+.button {
+  @include styles.subtitle-text;
+  width: 100%;
+}
