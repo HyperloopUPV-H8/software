@@ -27,15 +27,11 @@ export const MessageList = ({ messages, color }: Props) => {
       ref={scrollUlRef}
     >
       {/* //FIXME: Scroll to the beggining to charge older messages */}
-      <button
-        className={styles.button}
-        onClick={handleButtonClick2}
-        style={{
-          visibility: messages.length > messagesShown ? "visible" : "hidden",
-        }}
-      >
-        More msgs
-      </button>
+      {messages.length > messagesShown ? (
+        <button className={styles.button} onClick={handleButtonClick2}>
+          More msgs
+        </button>
+      ) : null}
       {messages.map((message, index) => {
         if (index >= messages.length - messagesShown) {
           return (
