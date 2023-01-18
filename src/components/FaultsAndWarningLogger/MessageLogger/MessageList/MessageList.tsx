@@ -14,20 +14,10 @@ const MESSAGES_INITIALLY_SHOWN = 10;
 export const MessageList = ({ messages, color }: Props) => {
   const scrollUlRef = useRef<HTMLUListElement>(null);
   const [handleScroll] = useSpecialScroll(scrollUlRef, messages);
-  //FIXME: Change ref to useState to render when click the button
-  const messagesShown = useRef(MESSAGES_INITIALLY_SHOWN);
-  const [messagesShown2, setmessagesShown2] = useState(
-    MESSAGES_INITIALLY_SHOWN
-  );
-  //let messagesShown = MESSAGES_INITIALLY_SHOWN;
-  function handleButtonClick() {
-    messagesShown.current += MESSAGES_INITIALLY_SHOWN;
-    console.log(messagesShown);
-  }
+  const [messagesShown, setmessagesShown] = useState(MESSAGES_INITIALLY_SHOWN);
 
   function handleButtonClick2() {
-    setmessagesShown2(messagesShown2 + MESSAGES_INITIALLY_SHOWN);
-    console.log(messagesShown2);
+    setmessagesShown(messagesShown + MESSAGES_INITIALLY_SHOWN);
   }
 
   return (
@@ -37,20 +27,17 @@ export const MessageList = ({ messages, color }: Props) => {
       ref={scrollUlRef}
     >
       {/* //FIXME: Scroll to the beggining to charge older messages */}
-      {/* //FIXME: If the number of messages is lower than the messagesShown, button dissapears */}
       <button
         className={styles.button}
         onClick={handleButtonClick2}
         style={{
-          visibility:
-            messages.length > messagesShown.current ? "visible" : "hidden",
+          visibility: messages.length > messagesShown ? "visible" : "hidden",
         }}
       >
         More msgs
       </button>
       {messages.map((message, index) => {
-        if (index >= messages.length - messagesShown2) {
-          //messagesShown.current
+        if (index >= messages.length - messagesShown) {
           return (
             <MessageItem key={message.listId} message={message} color={color} />
           );
