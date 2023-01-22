@@ -1,10 +1,14 @@
-import { OrderDescription, OrderAdapter, createEnum } from "@adapters/Order";
+import { OrderDescription, OrderAdapter, createEnum } from "adapters/Order";
 import { useEffect, createContext, useRef } from "react";
-import { Order } from "@models/Order";
-import { setOrders } from "@slices/ordersSlice";
+import { Order } from "models/Order";
+import { setOrders } from "slices/ordersSlice";
 import { useDispatch } from "react-redux";
-import { updateWebsocketConnection } from "@slices/connectionsSlice";
-import { createConnection } from "@models/Connection";
+import { updateWebsocketConnection } from "slices/connectionsSlice";
+import { createConnection } from "models/Connection";
+import {
+    createWebSocketToBackend,
+    fetchFromBackend,
+} from "services/HTTPHandler";
 
 interface IOrderService {
     sendOrder(order: Order): void;
@@ -35,11 +39,7 @@ export const OrderService = ({ children }: any) => {
     }, []);
 
     function fetchOrderDescriptions() {
-        fetch(
-            `http://${import.meta.env.VITE_SERVER_IP}:${
-                import.meta.env.VITE_SERVER_PORT
-            }${import.meta.env.VITE_ORDER_DESCRIPTIONS_URL}`
-        )
+        return fetchFromBackend(import.meta.env.VITE_ORDER_DESCRIPTIONS_PATH)
             .catch((reason) => {
                 console.error("Error fetching order descriptions", reason);
             })
@@ -85,11 +85,10 @@ export const OrderService = ({ children }: any) => {
     }
 
     function createOrderWebSocket() {
-        orderSocket.current = new WebSocket(
-            `ws://${import.meta.env.VITE_SERVER_IP}:${
-                import.meta.env.VITE_SERVER_PORT
-            }${import.meta.env.VITE_ORDERS_URL}`
+        orderSocket.current = createWebSocketToBackend(
+            import.meta.env.VITE_ORDERS_PATH
         );
+
         dispatch(updateWebsocketConnection(createConnection("Orders", false)));
         orderSocket.current.onopen = () => {
             dispatch(

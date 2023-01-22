@@ -1,16 +1,16 @@
-import { createConnection } from "@models/Connection";
-import { updateWebsocketConnection } from "@slices/connectionsSlice";
-import { Message } from "@adapters/Message";
-import { updateMessages } from "@slices/messagesSlice";
+import { createConnection } from "models/Connection";
+import { updateWebsocketConnection } from "slices/connectionsSlice";
+import { Message } from "adapters/Message";
+import { updateMessages } from "slices/messagesSlice";
 import { store } from "../store";
+import { createWebSocketToBackend } from "services/HTTPHandler";
 
 function createMessageWebSocket(): WebSocket {
     let dispatch = store.dispatch;
-    let messageSocket = new WebSocket(
-        `ws://${import.meta.env.VITE_SERVER_IP}:${
-            import.meta.env.VITE_SERVER_PORT
-        }${import.meta.env.VITE_MESSAGES_URL}`
+    let messageSocket = createWebSocketToBackend(
+        import.meta.env.VITE_MESSAGES_PATH
     );
+
     dispatch(updateWebsocketConnection(createConnection("Messages", false)));
     messageSocket.onopen = () => {
         dispatch(updateWebsocketConnection(createConnection("Messages", true)));

@@ -1,5 +1,5 @@
-import { Message as MessageAdapter } from "@adapters/Message";
-import { Message } from "@models/Message";
+import { Message as MessageAdapter } from "adapters/Message";
+import { Message } from "models/Message";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { nanoid } from "nanoid";
 const messagesSlice = createSlice({

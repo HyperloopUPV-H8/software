@@ -1,7 +1,7 @@
 @use "@styles/styles";
 
-.button {
-    width: 100%;
+.buttonWrapper {
+    flex-grow: 1;
     padding: 0.5rem;
     text-align: center;
     border-radius: styles.$normal-border-radius;

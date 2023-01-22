@@ -1,8 +1,8 @@
-import styles from "@components/TransmitTable/OrderField/OrderField.module.scss";
-import { Enum, FieldDescription } from "@adapters/Order";
-import { TextInput } from "@components/FormComponents/TextInput/TextInput";
-import { CheckBox } from "@components/FormComponents/CheckBox/CheckBox";
-import { Dropdown } from "@components/FormComponents/Dropdown/Dropdown";
+import styles from "components/TransmitTable/OrderField/OrderField.module.scss";
+import { Enum, FieldDescription } from "adapters/Order";
+import { TextInput } from "components/FormComponents/TextInput/TextInput";
+import { CheckBox } from "components/FormComponents/CheckBox/CheckBox";
+import { Dropdown } from "components/FormComponents/Dropdown/Dropdown";
 type Props = {
     name: string;
     fieldDescription: FieldDescription;

@@ -1,8 +1,8 @@
 import { memo } from "react";
-import { MessageList } from "@components/FaultsAndWarningLogger/MessageLogger/MessageList/MessageList";
-import { Message } from "@models/Message";
-import { HSLAColor } from "@utils/color";
-import styles from "@components/FaultsAndWarningLogger/MessageLogger/MessageLogger.module.scss";
+import { MessageList } from "components/FaultsAndWarningLogger/MessageLogger/MessageList/MessageList";
+import { Message } from "models/Message";
+import { HSLAColor } from "utils/color";
+import styles from "components/FaultsAndWarningLogger/MessageLogger/MessageLogger.module.scss";
 interface Props {
     title: string;
     messages: Message[];

@@ -1,5 +1,5 @@
-import styles from "@components/ChartMenu/Chart/Legend/LegendItem/LegendItem.module.scss";
-import { HSLAColor, hslaToHex, hslaToString } from "@utils/color";
+import styles from "components/ChartMenu/Chart/Legend/LegendItem/LegendItem.module.scss";
+import { HSLAColor, hslaToHex, hslaToString } from "utils/color";
 import { MdClose } from "react-icons/md";
 type Props = {
     data: LegendItemData;

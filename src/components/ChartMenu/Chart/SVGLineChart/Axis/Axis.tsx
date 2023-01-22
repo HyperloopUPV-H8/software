@@ -1,5 +1,5 @@
-import { Mark } from "@components/ChartMenu/Chart/SVGLineChart/Axis/Mark/Mark";
-import { useId } from "@hooks/useId";
+import { Mark } from "components/ChartMenu/Chart/SVGLineChart/Axis/Mark/Mark";
+import { useId } from "hooks/useId";
 
 type Props = {
     minY: number;

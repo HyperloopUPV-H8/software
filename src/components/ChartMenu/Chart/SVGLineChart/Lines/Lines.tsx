@@ -1,6 +1,6 @@
-import { LineFigure } from "@components/ChartMenu/Chart/SVGLineChart/LineFigure/LineFigure";
-import { LineFigure as LineFigureElement } from "@components/ChartMenu/ChartElement";
-import { useId } from "@hooks/useId";
+import { LineFigure } from "components/ChartMenu/Chart/SVGLineChart/LineFigure/LineFigure";
+import { LineFigure as LineFigureElement } from "components/ChartMenu/ChartElement";
+import { useId } from "hooks/useId";
 type Props = {
     lineFigures: Map<string, LineFigureElement>;
     maxOfLines: number;

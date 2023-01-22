@@ -1,30 +1,30 @@
-import type { PodData } from "@models/PodData/PodData";
-import { ValueType } from "@models/PodData/Measurement";
+import type { PodData } from "models/PodData/PodData";
+import { ValueType } from "models/PodData/Measurement";
 
 export const podDataMock = {
-  boards: [
-    {
-      name: "BMS",
-      packets: [
+    boards: [
         {
-          id: 123,
-          name: "Batteries",
-          count: 1000,
-          cycleTime: 99.99,
-          hexValue: 2343,
-          measurements: [
-            {
-              name: "Battery1",
-              value: 123,
-              type: "uint8",
-              units: "Volt",
-            },
-          ],
+            name: "BMS",
+            packets: [
+                {
+                    id: 123,
+                    name: "Batteries",
+                    count: 1000,
+                    cycleTime: 99.99,
+                    hexValue: 2343,
+                    measurements: [
+                        {
+                            name: "Battery1",
+                            value: 123,
+                            type: "uint8",
+                            units: "Volt",
+                        },
+                    ],
+                },
+            ],
         },
-      ],
-    },
-  ],
-  lastBatchIDs: [123],
+    ],
+    lastBatchIDs: [123],
 };
 
 // ([

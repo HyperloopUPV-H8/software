@@ -1,14 +1,14 @@
-import styles from "@components/Logger/Logger.module.scss";
+import styles from "components/Logger/Logger.module.scss";
 import { BsFillPlayFill } from "react-icons/bs";
 import { BsFillStopFill } from "react-icons/bs";
 import { useState, useContext } from "react";
-import loggerService from "@services/LoggerService";
+import loggerService from "services/LoggerService";
 
 export const Logger = () => {
     const [loggingState, setLoggingState] = useState(false);
 
     return (
-        <div className={styles.loggerWrapper}>
+        <div className={`${styles.loggerWrapper} island`}>
             <span className={styles.loggingState}>
                 Logging: {`${loggingState}`}
             </span>

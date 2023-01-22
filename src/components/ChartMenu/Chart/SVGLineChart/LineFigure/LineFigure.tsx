@@ -1,6 +1,6 @@
-import { LineFigure as LineFigureElement } from "@components/ChartMenu/ChartElement";
-import { getVectorLimits } from "@utils/math";
-import { getSofterHSLAColor, hslaToHex, hslaToString } from "@utils/color";
+import { LineFigure as LineFigureElement } from "components/ChartMenu/ChartElement";
+import { getVectorLimits } from "utils/math";
+import { getSofterHSLAColor, hslaToHex, hslaToString } from "utils/color";
 
 function normalize(
     number: number,

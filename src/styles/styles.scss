@@ -2,7 +2,7 @@
 
 // COLORS
 $background-color: #dce3eb;
-$isle-color: #ffffff;
+$island-color: #ffffff;
 $title-color: #45677d;
 $normal-text-color: #373c43;
 $alternate-text-color: #505868;
@@ -11,7 +11,7 @@ $blue: #317ae7;
 $base-color: hsl(212, 27%, 55%);
 
 //DARK THEME
-$dark-isle-color: #404654;
+$dark-island-color: #404654;
 $dark-normal-text-color: #bec6d2;
 
 // FONTS
@@ -115,6 +115,14 @@ $background-color-transition: background-color $normal-transition-time linear;
     animation-name: flash-button;
     animation-duration: 2s;
     animation-timing-function: cubic-bezier(0.29, 0.85, 1, 1);
+}
+
+// CLASSES
+
+.island {
+    padding: $normal-padding;
+    border-radius: $large-border-radius;
+    background-color: $island-color;
 }
 
 // FUNCTIONS

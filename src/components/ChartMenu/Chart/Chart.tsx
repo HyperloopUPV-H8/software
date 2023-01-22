@@ -1,8 +1,8 @@
-import styles from "@components/ChartMenu/Chart/Chart.module.scss";
-import Legend from "@components/ChartMenu/Chart/Legend/Legend";
-import { ChartElement } from "@components/ChartMenu/ChartElement";
+import styles from "components/ChartMenu/Chart/Chart.module.scss";
+import Legend from "components/ChartMenu/Chart/Legend/Legend";
+import { ChartElement } from "components/ChartMenu/ChartElement";
 import { DragEvent, useCallback } from "react";
-import { SVGLineChart } from "@components/ChartMenu/Chart/SVGLineChart/SVGLineChart";
+import { SVGLineChart } from "components/ChartMenu/Chart/SVGLineChart/SVGLineChart";
 import { MdClose } from "react-icons/md";
 
 type Props = {
