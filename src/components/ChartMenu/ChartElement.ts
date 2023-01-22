@@ -1,4 +1,4 @@
-import { HSLAColor } from "@utils/color";
+import { HSLAColor } from "utils/color";
 export type ChartElement = {
     id: number;
     lines: Map<string, LineFigure>; //TODO: consider changin to arr

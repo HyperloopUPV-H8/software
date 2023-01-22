@@ -1,5 +1,5 @@
-import styles from "@components/ConnectionsTable/ConnectionsTable.module.scss";
-import { ConnectionList } from "@components/ConnectionsTable/ConnectionList/ConnectionList";
+import styles from "components/ConnectionsTable/ConnectionsTable.module.scss";
+import { ConnectionList } from "components/ConnectionsTable/ConnectionList/ConnectionList";
 import { useSelector } from "react-redux";
 import { RootState } from "store";
 export const ConnectionsTable = () => {

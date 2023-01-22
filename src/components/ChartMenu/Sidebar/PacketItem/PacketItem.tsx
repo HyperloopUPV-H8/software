@@ -1,6 +1,6 @@
-import styles from "@components/ChartMenu/Sidebar/PacketItem/PacketItem.module.scss";
-import MeasurementItem from "@components/ChartMenu/Sidebar/MeasurementItem/MeasurementItem";
-import { TreeNode } from "@components/ChartMenu/TreeNode";
+import styles from "components/ChartMenu/Sidebar/PacketItem/PacketItem.module.scss";
+import MeasurementItem from "components/ChartMenu/Sidebar/MeasurementItem/MeasurementItem";
+import { TreeNode } from "components/ChartMenu/TreeNode";
 
 type Props = {
     name: string;

@@ -1,4 +1,4 @@
-import styles from "@components/ChartMenu/Chart/SVGLineChart/Axis/Mark/Mark.module.scss";
+import styles from "components/ChartMenu/Chart/SVGLineChart/Axis/Mark/Mark.module.scss";
 
 type Props = {
     xPos: number;

@@ -1,5 +1,5 @@
-import { Direction } from "@layouts/SplitLayout/Direction";
-import styles from "@layouts/SplitLayout/Separator/Separator.module.scss";
+import { Direction } from "layouts/SplitLayout/Direction";
+import styles from "layouts/SplitLayout/Separator/Separator.module.scss";
 import React from "react";
 
 type Props = {

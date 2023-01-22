@@ -1,6 +1,6 @@
 export {};
 
-// import { Message } from "@models/Message";
+// import { Message } from "models/Message";
 // import { nanoid } from "nanoid";
 // export const warningMessages: Message[] = [
 //     {
