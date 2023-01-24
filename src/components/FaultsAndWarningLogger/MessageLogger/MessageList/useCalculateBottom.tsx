@@ -26,20 +26,20 @@ export const useSpecialScroll = (
     }
   }
 
-  // function scrollToBottom() {
-  //   scrollUlRef.current?.scrollTo({
-  //     top: scrollUlRef.current.scrollHeight,
-  //     behavior: "smooth",
-  //   });
+  function scrollToBottom() {
+    scrollUlRef.current?.scrollTo({
+      top: scrollUlRef.current.scrollHeight,
+      behavior: "smooth",
+    });
 
-  //   scrollY.current = scrollUlRef.current!.scrollTop;
-  // }
+    scrollY.current = scrollUlRef.current!.scrollTop;
+  }
 
-  // useEffect(() => {
-  //   if (isBottomLocked.current) {
-  //     scrollToBottom();
-  //   }
-  // }, [useEffectDeps]);
+  useEffect(() => {
+    if (isBottomLocked.current) {
+      scrollToBottom();
+    }
+  }, [useEffectDeps]);
 
   return [handleScroll];
 };
