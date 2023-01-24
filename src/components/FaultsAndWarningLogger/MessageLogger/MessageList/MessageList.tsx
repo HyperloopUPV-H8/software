@@ -28,23 +28,6 @@ export const MessageList = ({ messages, color }: Props) => {
     setmessagesShown(messagesShown + MESSAGES_INITIALLY_SHOWN);
   }
 
-  // function handleWheel2(ev: WheelEvent) {
-  //   handleWheel(ev);
-  // }
-
-  // function scrollToBottom() {
-  //   scrollUlRef.current?.scrollTo({
-  //     top: scrollUlRef.current.scrollHeight,
-  //     behavior: "smooth",
-  //   });
-  // }
-
-  // useEffect(() => {
-  //   if (isBottomLocked.current) {
-  //     scrollToBottom();
-  //   }
-  // }, [messages]);
-
   // function handleWheel(ev: WheelEvent) {
   //   if (ev.deltaY > 0) {
   //     console.log("scroll down");
