@@ -1,13 +1,17 @@
 import { createContext } from "react";
+import { useContext, useEffect } from "react";
+import { updatePodData } from "slices/podDataSlice";
+import { PacketUpdate } from "adapters/PacketUpdate";
+import { store } from "../store";
 
-type Handler = (msg: any) => void;
+type Callback = (msg: any) => void;
 type BackendMessage<T = any> = {
     path: string;
     msg: T;
 };
 export class WebSocketHandler {
     public webSocket: WebSocket;
-    private pathToHandlers: Map<string, Array<Handler>> = new Map();
+    private pathToCallbacks: Map<string, Array<Callback>> = new Map();
 
     constructor(url: string) {
         console.log("NEW WEB SOCKET HANDLER");
@@ -18,25 +22,25 @@ export class WebSocketHandler {
         };
 
         this.webSocket.onmessage = (ev: MessageEvent<BackendMessage>) => {
-            const handlers = this.pathToHandlers.get(ev.data.path) ?? [];
+            const callbacks = this.pathToCallbacks.get(ev.data.path) ?? [];
 
-            for (const handler of handlers) {
-                handler(ev.data.msg);
+            for (const callback of callbacks) {
+                callback(ev.data.msg);
             }
         };
     }
 
-    public addHandler(path: string, handler: Handler) {
-        const handlers = this.pathToHandlers.get(path) ?? [];
-        this.pathToHandlers.set(path, [...handlers, handler]);
+    public addCallback(path: string, handler: Callback) {
+        const handlers = this.pathToCallbacks.get(path) ?? [];
+        this.pathToCallbacks.set(path, [...handlers, handler]);
     }
 
-    public removeHandler(path: string, handler: Handler) {
-        if (!this.pathToHandlers.has(path)) {
+    public removeCallback(path: string, handler: Callback) {
+        if (!this.pathToCallbacks.has(path)) {
             console.warn(`Path ${path} doesn't exist in pathToHandlers`);
         } else {
-            const handlers = this.pathToHandlers.get(path)!;
-            this.pathToHandlers.set(
+            const handlers = this.pathToCallbacks.get(path)!;
+            this.pathToCallbacks.set(
                 path,
                 handlers.filter((element) => element != handler)
             );
@@ -47,11 +51,3 @@ export class WebSocketHandler {
 export const WebSocketHandlerContext = createContext<WebSocketHandler | null>(
     null
 );
-
-export function createWebSocketToBackend() {
-    return new WebSocket(
-        `ws://${import.meta.env.VITE_SERVER_IP}:${
-            import.meta.env.VITE_SERVER_PORT
-        }`
-    );
-}
