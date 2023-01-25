@@ -4,7 +4,7 @@ import { useContext, useEffect } from "react";
 export function useWebSocket(
     path: string,
     callback: <T>(msg: T) => void
-): void {
+): (msg: any) => void {
     const webSocketHandler = useContext(WebSocketHandlerContext)!;
 
     useEffect(() => {
@@ -14,4 +14,6 @@ export function useWebSocket(
             webSocketHandler.removeCallback(path, callback);
         };
     }, []);
+
+    return webSocketHandler.send;
 }
