@@ -1,34 +1,36 @@
+import { createConnection } from "models/Connection";
 import { store } from "../store";
-import { createConnection } from "@models/Connection";
 import {
-  setDisconnectionBoardState,
-  updateWebsocketConnection,
-  updateBoardConnectionsArray,
-} from "@slices/connectionsSlice";
+    setDisconnectionBoardState,
+    updateWebsocketConnection,
+    updateBoardConnectionsArray,
+} from "slices/connectionsSlice";
+import { createWebSocketToBackend } from "services/HTTPHandler";
 
 function createConnectionsSocket(): WebSocket {
-  let dispatch = store.dispatch;
-  let connectionSocket = new WebSocket(
-    `ws://${import.meta.env.VITE_SERVER_IP}:${
-      import.meta.env.VITE_SERVER_PORT
-    }${import.meta.env.VITE_CONNECTIONS_URL}`
-  );
-  dispatch(updateWebsocketConnection(createConnection("Connections", false)));
+    let dispatch = store.dispatch;
+    let connectionSocket = createWebSocketToBackend(
+        import.meta.env.VITE_CONNECTIONS_PATH
+    );
 
-  connectionSocket.onopen = () => {
-    dispatch(updateWebsocketConnection(createConnection("Connections", true)));
-  };
+    dispatch(updateWebsocketConnection(createConnection("Connections", false)));
 
-  connectionSocket.onmessage = (ev) => {
-    let connections = JSON.parse(ev.data);
-    dispatch(updateBoardConnectionsArray(connections));
-  };
+    connectionSocket.onopen = () => {
+        dispatch(
+            updateWebsocketConnection(createConnection("Connections", true))
+        );
+    };
 
-  connectionSocket.onclose = () => {
-    dispatch(setDisconnectionBoardState());
-  };
+    connectionSocket.onmessage = (ev) => {
+        let connections = JSON.parse(ev.data);
+        dispatch(updateBoardConnectionsArray(connections));
+    };
 
-  return connectionSocket;
+    connectionSocket.onclose = () => {
+        dispatch(setDisconnectionBoardState());
+    };
+
+    return connectionSocket;
 }
 
 const connectionService = { createConnectionsSocket };

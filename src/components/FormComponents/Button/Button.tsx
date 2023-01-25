@@ -1,23 +1,24 @@
-import styles from "@components/FormComponents/Button/Button.module.scss";
+import styles from "components/FormComponents/Button/Button.module.scss";
 
 type Props = {
-  disabled: boolean;
-  onClick: () => void;
+    label: string;
+    onClick: () => void;
+    disabled?: boolean;
 };
 
-export const Button = ({ disabled, onClick }: Props) => {
-  return (
-    <div
-      className={`${styles.button} ${
-        disabled ? styles.disabled : styles.enabled
-      }`}
-      onClick={() => {
-        if (!disabled) {
-          onClick();
-        }
-      }}
-    >
-      Send
-    </div>
-  );
+export const Button = ({ label, onClick, disabled }: Props) => {
+    return (
+        <div
+            className={`${styles.buttonWrapper} ${
+                disabled ? styles.disabled : styles.enabled
+            }`}
+            onClick={() => {
+                if (!disabled) {
+                    onClick();
+                }
+            }}
+        >
+            {label}
+        </div>
+    );
 };

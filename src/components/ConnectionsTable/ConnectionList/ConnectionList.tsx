@@ -1,6 +1,6 @@
-import styles from "@components/ConnectionsTable/ConnectionList/ConnectionList.module.scss";
-import { ConnectionItem } from "@components/ConnectionsTable/ConnectionItem/ConnectionItem";
-import { Connection } from "@models/Connection";
+import styles from "components/ConnectionsTable/ConnectionList/ConnectionList.module.scss";
+import { ConnectionItem } from "components/ConnectionsTable/ConnectionItem/ConnectionItem";
+import { Connection } from "models/Connection";
 
 interface Props {
     title: string;
@@ -13,7 +13,7 @@ export const ConnectionList = ({
     enabled = true,
 }: Props) => {
     return (
-        <div className={styles.wrapper}>
+        <div className={`${styles.connectionsWrapper} island`}>
             <div className={styles.title}>{title}</div>
             <ul className={styles.connectionsList}>
                 {connections.map((item, index) => {

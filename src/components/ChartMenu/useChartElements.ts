@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
-import { ChartElement, LineFigure } from "@components/ChartMenu/ChartElement";
-import { HSLAColor } from "@utils/color";
+import { ChartElement, LineFigure } from "components/ChartMenu/ChartElement";
+import { HSLAColor } from "utils/color";
 
 function getColor(offset: number): HSLAColor {
     return {

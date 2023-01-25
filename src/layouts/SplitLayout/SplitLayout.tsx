@@ -1,9 +1,9 @@
 import React from "react";
-import styles from "@layouts/SplitLayout/SplitLayout.module.scss";
-import { useSplitLayoutHandler } from "@layouts/SplitLayout/useSplitLayoutHandler";
-import { Component } from "@layouts/SplitLayout/Component/Component";
-import { Separator } from "@layouts/SplitLayout/Separator/Separator";
-import { Direction } from "@layouts/SplitLayout/Direction";
+import styles from "layouts/SplitLayout/SplitLayout.module.scss";
+import { useSplitLayoutHandler } from "layouts/SplitLayout/useSplitLayoutHandler";
+import { Component } from "layouts/SplitLayout/Component/Component";
+import { Separator } from "layouts/SplitLayout/Separator/Separator";
+import { Direction } from "layouts/SplitLayout/Direction";
 
 type Props = {
     components: React.ReactNode[];

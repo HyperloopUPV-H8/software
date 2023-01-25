@@ -1,14 +1,14 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { createPodDataFromAdapter } from "@adapters/PodData";
-import { updatePodData as updatePackets } from "@models/PodData/PodData";
-import { PacketUpdate } from "@adapters/PacketUpdate";
-import { PodDataAdapter } from "@adapters/PodData";
-import { PodData } from "@models/PodData/PodData";
+import { createPodDataFromAdapter } from "adapters/PodData";
+import { updatePodData as updatePackets } from "models/PodData/PodData";
+import { PacketUpdate } from "adapters/PacketUpdate";
+import { PodDataAdapter } from "adapters/PodData";
+import { PodData } from "models/PodData/PodData";
 import { RootState } from "store";
-import { TreeNode } from "@components/ChartMenu/TreeNode";
-import { Packet } from "@models/PodData/Packet";
-import { Board } from "@models/PodData/Board";
-import { isNumber } from "@models/PodData/Measurement";
+import { TreeNode } from "components/ChartMenu/TreeNode";
+import { Packet } from "models/PodData/Packet";
+import { Board } from "models/PodData/Board";
+import { isNumber } from "models/PodData/Measurement";
 
 export const podDataSlice = createSlice({
     name: "podData",

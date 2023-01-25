@@ -21,7 +21,8 @@
     "react-icons": "^4.6.0",
     "react-redux": "^8.0.5",
     "react-virtualized-auto-sizer": "^1.0.7",
-    "react-window": "^1.8.8"
+    "react-window": "^1.8.8",
+    "vite-tsconfig-paths": "^4.0.5"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.16.5",

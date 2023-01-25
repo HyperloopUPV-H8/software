@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import styles from "@layouts/TabLayout/TabLayout.module.scss";
-import { TabItem } from "@layouts/TabLayout/TabItem";
-import { Header } from "@layouts/TabLayout/Header/Header";
+import styles from "layouts/TabLayout/TabLayout.module.scss";
+import { TabItem } from "layouts/TabLayout/TabItem";
+import { Header } from "layouts/TabLayout/Header/Header";
 
 type Props = {
     items: TabItem[];
@@ -16,7 +16,7 @@ export const TabLayout = ({ items }: Props) => {
     }
 
     return (
-        <div className={styles.wrapper}>
+        <div className={`${styles.tabLayoutWrapper} island`}>
             <Header
                 items={items}
                 visibleTab={visibleTab}

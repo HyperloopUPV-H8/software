@@ -1,9 +1,9 @@
 import { useState } from "react";
-import styles from "@components/ReceiveTable/ReceiveTable.module.scss";
-import { Headers } from "@components/ReceiveTable/Headers/Headers";
-import BoardSection from "@components/ReceiveTable/BoardSection/BoardSection";
-import { useInterval } from "@hooks/useInterval";
-import { Board } from "@models/PodData/Board";
+import styles from "components/ReceiveTable/ReceiveTable.module.scss";
+import { Headers } from "components/ReceiveTable/Headers/Headers";
+import { Boards } from "components/ReceiveTable/Boards/Boards";
+import { useInterval } from "hooks/useInterval";
+import { Board } from "models/PodData/Board";
 import { store } from "../../store";
 
 export const ReceiveTable = () => {
@@ -15,19 +15,9 @@ export const ReceiveTable = () => {
     }, 1000 / 100);
 
     return (
-        <div id={styles.wrapper}>
+        <div className={styles.receiveTableWrapper}>
             <Headers />
             <Boards boards={boards} />
-        </div>
-    );
-};
-
-const Boards = ({ boards }: { boards: { [name: string]: Board } }) => {
-    return (
-        <div className={styles.boards}>
-            {Object.values(boards).map((board) => {
-                return <BoardSection key={board.name} board={board} />;
-            })}
         </div>
     );
 };

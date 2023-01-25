@@ -1,13 +1,13 @@
 import "./App.css";
-import { OrderService } from "@services/OrderService";
-import { HomePage } from "@pages/HomePage/HomePage";
+import { OrderService } from "services/OrderService";
+import { HomePage } from "pages/HomePage/HomePage";
 
 import { useEffect } from "react";
-import dataService from "@services/DataService";
-import messageService from "@services/MessageService";
-import connectionService from "@services/ConnectionService";
+import dataService from "services/DataService";
+import messageService from "services/MessageService";
+import connectionService from "services/ConnectionService";
 import { useDispatch } from "react-redux";
-import { initializePodData } from "@slices/podDataSlice";
+import { initializePodData } from "slices/podDataSlice";
 
 function App() {
     const dispatch = useDispatch();

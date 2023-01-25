@@ -1,5 +1,5 @@
-import styles from "@components/ChartMenu/Sidebar/MeasurementItem/MeasurementItem.module.scss";
-import { Measurement } from "@models/PodData/Measurement";
+import styles from "components/ChartMenu/Sidebar/MeasurementItem/MeasurementItem.module.scss";
+import { Measurement } from "models/PodData/Measurement";
 import { DragEvent, memo } from "react";
 import { FiBox } from "react-icons/fi";
 type Props = {
