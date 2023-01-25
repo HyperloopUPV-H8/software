@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 
-import { SplitLayoutEventHandler } from "@layouts/SplitLayout/SplitLayoutEventHandler";
-import { Direction } from "@layouts/SplitLayout/Direction";
+import { SplitLayoutEventHandler } from "layouts/SplitLayout/SplitLayoutEventHandler";
+import { Direction } from "layouts/SplitLayout/Direction";
 
 type Size = {
     width: number;

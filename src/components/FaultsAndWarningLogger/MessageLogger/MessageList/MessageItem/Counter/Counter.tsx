@@ -1,4 +1,4 @@
-import styles from "@components/FaultsAndWarningLogger/MessageLogger/MessageList/MessageItem/Counter/Counter.module.scss";
+import styles from "components/FaultsAndWarningLogger/MessageLogger/MessageList/MessageItem/Counter/Counter.module.scss";
 
 interface Props {
     count: number;

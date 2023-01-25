@@ -1,8 +1,8 @@
-import styles from "@components/ChartMenu/Chart/SVGLineChart/SVGLineChart.module.scss";
-import { LineFigure as LineFigureElement } from "@components/ChartMenu/ChartElement";
-import { Lines } from "@components/ChartMenu/Chart/SVGLineChart/Lines/Lines";
-import { Axis } from "@components/ChartMenu/Chart/SVGLineChart/Axis/Axis";
-import { getMultipleVectorsLimits } from "@utils/math";
+import styles from "components/ChartMenu/Chart/SVGLineChart/SVGLineChart.module.scss";
+import { LineFigure as LineFigureElement } from "components/ChartMenu/ChartElement";
+import { Lines } from "components/ChartMenu/Chart/SVGLineChart/Lines/Lines";
+import { Axis } from "components/ChartMenu/Chart/SVGLineChart/Axis/Axis";
+import { getMultipleVectorsLimits } from "utils/math";
 import { useEffect, useRef } from "react";
 type Props = {
     lineFigures: Map<string, LineFigureElement>;

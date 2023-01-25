@@ -1,8 +1,8 @@
-import { Packet } from "@models/PodData/Packet";
-import styles from "@components/ReceiveTable/PacketRow/PacketRow.module.scss";
-import { MeasurementRow } from "@components/ReceiveTable/MeasurementRow/MeasurementRow";
+import { Packet } from "models/PodData/Packet";
+import styles from "components/ReceiveTable/PacketRow/PacketRow.module.scss";
+import { MeasurementRow } from "components/ReceiveTable/MeasurementRow/MeasurementRow";
 import { memo, useRef, useEffect } from "react";
-import { Measurement } from "@models/PodData/Measurement";
+import { Measurement } from "models/PodData/Measurement";
 type Props = {
     packet: Packet;
     style: React.CSSProperties;

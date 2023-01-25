@@ -1,8 +1,8 @@
-import styles from "@components/ChartMenu/Sidebar/BoardItem/BoardItem.module.scss";
-import { Board } from "@models/PodData/Board";
-import PacketItem from "@components/ChartMenu/Sidebar/PacketItem/PacketItem";
-import { TreeNode } from "@components/ChartMenu/TreeNode";
-import { Caret } from "@components/Caret/Caret";
+import styles from "components/ChartMenu/Sidebar/BoardItem/BoardItem.module.scss";
+import { Board } from "models/PodData/Board";
+import PacketItem from "components/ChartMenu/Sidebar/PacketItem/PacketItem";
+import { TreeNode } from "components/ChartMenu/TreeNode";
+import { Caret } from "components/Caret/Caret";
 import { useState } from "react";
 
 type Props = {

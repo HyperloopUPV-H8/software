@@ -1,18 +1,18 @@
-import { Connection } from "@models/Connection";
+import { Connection } from "models/Connection";
 import { useEffect, useRef } from "react";
-import { initializePodData, updatePodData } from "@slices/podDataSlice";
-import { updateWebsocketConnection } from "@slices/connectionsSlice";
-import { PodData } from "@models/PodData/PodData";
-import { createConnection } from "@models/Connection";
-import { PacketUpdate } from "@adapters/PacketUpdate";
+import { initializePodData, updatePodData } from "slices/podDataSlice";
+import { updateWebsocketConnection } from "slices/connectionsSlice";
+import { PodData } from "models/PodData/PodData";
+import { createConnection } from "models/Connection";
+import { PacketUpdate } from "adapters/PacketUpdate";
 import { store } from "../store";
+import {
+    fetchFromBackend,
+    createWebSocketToBackend,
+} from "services/HTTPHandler";
 
 async function fetchPodDataStructure(): Promise<PodData> {
-    return fetch(
-        `http://${import.meta.env.VITE_SERVER_IP}:${
-            import.meta.env.VITE_SERVER_PORT
-        }${import.meta.env.VITE_POD_DATA_DESCRIPTION_URL}`
-    )
+    return fetchFromBackend(import.meta.env.VITE_POD_DATA_DESCRIPTION_PATH)
         .catch((reason: any) => {
             console.error("Error fetching PodDataDescription", reason);
         })
@@ -33,10 +33,8 @@ async function fetchPodDataStructure(): Promise<PodData> {
 
 function createPacketWebSocket(): WebSocket {
     let dispatch = store.dispatch;
-    let packetUpdateSocket = new WebSocket(
-        `ws://${import.meta.env.VITE_SERVER_IP}:${
-            import.meta.env.VITE_SERVER_PORT
-        }${import.meta.env.VITE_PACKETS_URL}`
+    let packetUpdateSocket = createWebSocketToBackend(
+        import.meta.env.VITE_PACKETS_PATH
     );
 
     dispatch(updateWebsocketConnection(createConnection("Packets", false)));

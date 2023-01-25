@@ -1,4 +1,4 @@
-import styles from "@layouts/TabLayout/Tab/Tab.module.scss";
+import styles from "layouts/TabLayout/Tab/Tab.module.scss";
 import { AiOutlineUnorderedList } from "react-icons/ai";
 
 type Props = {

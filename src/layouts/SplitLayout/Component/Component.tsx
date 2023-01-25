@@ -1,4 +1,4 @@
-import styles from "@layouts/SplitLayout/Component/Component.module.scss";
+import styles from "layouts/SplitLayout/Component/Component.module.scss";
 
 type Props = {
     component: React.ReactNode;

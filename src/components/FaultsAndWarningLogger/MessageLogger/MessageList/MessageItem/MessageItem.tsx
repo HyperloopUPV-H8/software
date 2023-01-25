@@ -1,9 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import styles from "@components/FaultsAndWarningLogger/MessageLogger/MessageList/MessageItem/MessageItem.module.scss";
-import { Message } from "@models/Message";
-import { Counter } from "@components/FaultsAndWarningLogger/MessageLogger/MessageList/MessageItem/Counter/Counter";
-import { getSofterHSLAColor, HSLAColor, hslaToString } from "@utils/color";
-import { Caret } from "@components/Caret/Caret";
+import styles from "components/FaultsAndWarningLogger/MessageLogger/MessageList/MessageItem/MessageItem.module.scss";
+import { Message } from "models/Message";
+import { Counter } from "components/FaultsAndWarningLogger/MessageLogger/MessageList/MessageItem/Counter/Counter";
+import { getSofterHSLAColor, HSLAColor, hslaToString } from "utils/color";
+import { Caret } from "components/Caret/Caret";
 import { memo } from "react";
 interface Props {
   message: Message;

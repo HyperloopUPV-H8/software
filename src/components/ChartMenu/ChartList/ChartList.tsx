@@ -1,12 +1,12 @@
-import { ChartElement } from "@components/ChartMenu/ChartElement";
-import { Chart } from "@components/ChartMenu/Chart/Chart";
-import { useChartElements } from "@components/ChartMenu/useChartElements";
+import { ChartElement } from "components/ChartMenu/ChartElement";
+import { Chart } from "components/ChartMenu/Chart/Chart";
+import { useChartElements } from "components/ChartMenu/useChartElements";
 import { store } from "../../../store";
-import { getMeasurement } from "@models/PodData/PodData";
+import { getMeasurement } from "models/PodData/PodData";
 import { DragEvent } from "react";
-import { useInterval } from "@hooks/useInterval";
+import { useInterval } from "hooks/useInterval";
 
-import styles from "@components/ChartMenu/ChartList/ChartList.module.scss";
+import styles from "components/ChartMenu/ChartList/ChartList.module.scss";
 
 export const ChartList = () => {
     const [

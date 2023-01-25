@@ -5,6 +5,7 @@ import { HSLAColor } from "@utils/color";
 import { useEffect, useRef, useState } from "react";
 import { useWheelScroll } from "./useWheelScroll";
 
+
 interface Props {
   messages: Message[];
   color: HSLAColor;

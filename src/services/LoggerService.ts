@@ -1,16 +1,9 @@
+import { postToBackend } from "services/HTTPHandler";
+
 function sendLoggerRequest(
     loggerRequest: "enable" | "disable"
 ): Promise<Response> {
-    return fetch(
-        `http://${import.meta.env.VITE_SERVER_IP}:${
-            import.meta.env.VITE_SERVER_PORT
-        }${import.meta.env.VITE_LOGGER_URL}`,
-        {
-            method: "POST",
-            mode: "cors",
-            body: loggerRequest,
-        }
-    );
+    return postToBackend(import.meta.env.VITE_LOGGER_PATH, loggerRequest);
 }
 
 function startLogging(): Promise<boolean> {

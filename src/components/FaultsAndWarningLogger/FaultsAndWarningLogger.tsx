@@ -1,9 +1,9 @@
-import MessageLogger from "@components/FaultsAndWarningLogger/MessageLogger/MessageLogger";
+import MessageLogger from "components/FaultsAndWarningLogger/MessageLogger/MessageLogger";
 import { useState } from "react";
 import { store } from "../../store";
-import styles from "@components/FaultsAndWarningLogger/FaultsAndWarningLogger.module.scss";
-import { useInterval } from "@hooks/useInterval";
-import { Message } from "@models/Message";
+import styles from "components/FaultsAndWarningLogger/FaultsAndWarningLogger.module.scss";
+import { useInterval } from "hooks/useInterval";
+import { Message } from "models/Message";
 const warningColor = { h: 41, s: 100, l: 40, a: 1 };
 const faultColor = { h: 0, s: 100, l: 40, a: 1 };
 
@@ -21,7 +21,7 @@ export const FaultsAndWarningLogger = () => {
     }, 1000 / 70);
 
     return (
-        <div className={styles.containerMessages}>
+        <div className={`${styles.containerMessages} island`}>
             <MessageLogger
                 title={"Warnings"}
                 messages={messages.warning}
