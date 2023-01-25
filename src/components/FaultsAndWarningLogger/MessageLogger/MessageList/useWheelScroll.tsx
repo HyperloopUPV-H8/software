@@ -11,12 +11,8 @@ export const useWheelScroll = (
       scrollUlRef.current?.clientHeight;
 
     if (isBottomLocked.current) {
-      console.log(scrollUlRef.current!.scrollTop);
-      //FIXME: When there is a duplicate message, an autoscroll occurs. Before the limitation of messages it didn't happened
       if (ev.deltaY < 0) {
         isBottomLocked.current = false;
-        console.log("scroll up");
-        console.log(ev.deltaY);
       }
     } else if (bottom && !isBottomLocked.current) {
       isBottomLocked.current = true;

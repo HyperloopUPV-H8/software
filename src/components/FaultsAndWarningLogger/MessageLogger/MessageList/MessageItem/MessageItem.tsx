@@ -59,7 +59,6 @@ const MessageItem = ({ message, color }: Props) => {
           isOpen={isOpen}
           onClick={() => {
             setIsOpen((current) => !current);
-            //onHandleScroll();
           }}
         />
       )}
