@@ -5,7 +5,8 @@
     flex-direction: column;
     width: 100%;
     height: 100%;
+    background-color: styles.$island-color;
     overflow-x: hidden;
     overflow-y: hidden;
-    gap: 1rem;
+    gap: 0.5rem;
 }
