@@ -15,5 +15,5 @@ export function useWebSocket(
         };
     }, []);
 
-    return webSocketHandler.send;
+    return webSocketHandler.send.bind(webSocketHandler);
 }

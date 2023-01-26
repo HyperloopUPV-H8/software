@@ -16,7 +16,6 @@ export class WebSocketHandler {
     constructor(url: string) {
         console.log("NEW WEB SOCKET HANDLER");
         this.webSocket = new WebSocket(`ws://${url}`);
-
         this.webSocket.onopen = () => {
             console.log("Opened backend websocket");
         };
@@ -45,6 +44,10 @@ export class WebSocketHandler {
                 handlers.filter((element) => element != handler)
             );
         }
+    }
+
+    public send(msg: any) {
+        this.webSocket.send(msg);
     }
 }
 
