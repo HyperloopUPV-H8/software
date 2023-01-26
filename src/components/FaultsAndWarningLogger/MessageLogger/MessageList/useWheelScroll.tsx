@@ -1,4 +1,4 @@
-import { Message } from "@models/Message";
+import { Message } from "models/Message";
 import { useEffect, WheelEvent } from "react";
 export const useWheelScroll = (
     scrollUlRef: React.RefObject<HTMLUListElement>,

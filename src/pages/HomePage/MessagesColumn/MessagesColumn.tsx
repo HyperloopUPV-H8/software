@@ -7,7 +7,7 @@ import { nanoid } from "nanoid";
 import { FaultsAndWarningLogger } from "components/FaultsAndWarningLogger/FaultsAndWarningLogger";
 import { ConnectionsTable } from "components/ConnectionsTable/ConnectionsTable";
 import { Logger } from "components/Logger/Logger";
-import { BootloaderUploader } from "components/BootloaderUploader/BootloaderUploader";
+//import { BootloaderUploader } from "components/BootloaderUploader/BootloaderUploader";
 
 export const MessagesColumn = () => {
     return (
@@ -41,7 +41,7 @@ export const MessagesColumn = () => {
                 minSizes={[0.2, 0.2]}
             ></SplitLayout>
             <Logger />
-            <BootloaderUploader />
+            {/* <BootloaderUploader /> */}
         </div>
     );
 };

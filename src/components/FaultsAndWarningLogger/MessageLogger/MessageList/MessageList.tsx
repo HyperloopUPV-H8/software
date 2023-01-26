@@ -1,10 +1,9 @@
-import MessageItem from "@components/FaultsAndWarningLogger/MessageLogger/MessageList/MessageItem/MessageItem";
-import styles from "@components/FaultsAndWarningLogger/MessageLogger/MessageList/MessageList.module.scss";
-import { Message } from "@models/Message";
-import { HSLAColor } from "@utils/color";
+import MessageItem from "components/FaultsAndWarningLogger/MessageLogger/MessageList/MessageItem/MessageItem";
+import styles from "components/FaultsAndWarningLogger/MessageLogger/MessageList/MessageList.module.scss";
+import { Message } from "models/Message";
+import { HSLAColor } from "utils/color";
 import { useEffect, useRef, useState } from "react";
 import { useWheelScroll } from "./useWheelScroll";
-
 
 interface Props {
     messages: Message[];
