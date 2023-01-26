@@ -1,26 +1,26 @@
-import { createContext } from "react";
-import { useContext, useEffect } from "react";
-import { updatePodData } from "slices/podDataSlice";
-import { PacketUpdate } from "adapters/PacketUpdate";
-import { store } from "../store";
+import React, { createContext, useRef } from "react";
 
 type Callback = (msg: any) => void;
+export type TypeToCallback = {
+    type: string;
+    callback: Callback;
+};
 type BackendMessage<T = any> = {
     path: string;
     msg: T;
 };
-export class WebSocketHandler {
+class WebSocketHandler {
     public webSocket: WebSocket;
     private pathToCallbacks: Map<string, Array<Callback>> = new Map();
 
     constructor(url: string) {
-        console.log("NEW WEB SOCKET HANDLER");
         this.webSocket = new WebSocket(`ws://${url}`);
         this.webSocket.onopen = () => {
             console.log("Opened backend websocket");
         };
 
         this.webSocket.onmessage = (ev: MessageEvent<BackendMessage>) => {
+            console.log(ev.data);
             const callbacks = this.pathToCallbacks.get(ev.data.path) ?? [];
 
             for (const callback of callbacks) {
@@ -54,3 +54,20 @@ export class WebSocketHandler {
 export const WebSocketHandlerContext = createContext<WebSocketHandler | null>(
     null
 );
+
+type Props = { children: React.ReactNode };
+export const BackendWebSocketContext = ({ children }: Props) => {
+    const webSocketHandler = useRef(
+        new WebSocketHandler(
+            `${import.meta.env.VITE_SERVER_IP}:${
+                import.meta.env.VITE_SERVER_PORT
+            }${import.meta.env.VITE_BACKEND_WEBSOCKET_PATH}`
+        )
+    );
+
+    return (
+        <WebSocketHandlerContext.Provider value={webSocketHandler.current}>
+            {children}
+        </WebSocketHandlerContext.Provider>
+    );
+};
