@@ -1,12 +1,10 @@
 import styles from "components/TransmitTable/TransmitTable.module.scss";
 import { OrderForm } from "components/TransmitTable/OrderForm/OrderForm";
-import { OrderServiceContext } from "services/OrderService";
-import { useContext } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "store";
-
+import { useOrders } from "components/TransmitTable//useOrders";
 export const TransmitTable = () => {
-    const orderService = useContext(OrderServiceContext);
+    const sendOrder = useOrders();
     const orderDescriptions = useSelector((state: RootState) => {
         return state.orders;
     });
@@ -18,7 +16,7 @@ export const TransmitTable = () => {
                     <OrderForm
                         key={orderDescription.id}
                         orderDescription={orderDescription}
-                        sendOrder={orderService.sendOrder}
+                        sendOrder={sendOrder}
                     />
                 );
             })}
