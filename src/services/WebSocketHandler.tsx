@@ -1,4 +1,4 @@
-import React, { createContext, useRef } from "react";
+import React, { createContext, useEffect, useRef } from "react";
 
 type Callback = (msg: any) => void;
 
@@ -17,7 +17,6 @@ class WebSocketHandler {
         };
 
         this.webSocket.onmessage = (ev: MessageEvent<BackendMessage>) => {
-            console.log(ev.data);
             const callbacks = this.pathToCallbacks.get(ev.data.path) ?? [];
 
             for (const callback of callbacks) {
@@ -47,14 +46,14 @@ class WebSocketHandler {
         }
     }
 
-    public send(msg: any) {
-        this.webSocket.send(msg);
-    }
-
     public createSender(type: string) {
         return (msg: any) => {
             this.webSocket.send(JSON.stringify({ type, msg }));
         };
+    }
+
+    public close() {
+        this.webSocket.close();
     }
 }
 
@@ -71,6 +70,12 @@ export const BackendWebSocketContext = ({ children }: Props) => {
             }${import.meta.env.VITE_BACKEND_WEBSOCKET_PATH}`
         )
     );
+
+    useEffect(() => {
+        return () => {
+            webSocketHandler.current.close();
+        };
+    }, []);
 
     return (
         <WebSocketHandlerContext.Provider value={webSocketHandler.current}>
