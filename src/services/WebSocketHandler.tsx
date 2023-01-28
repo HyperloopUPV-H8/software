@@ -27,6 +27,10 @@ class WebSocketHandler {
                 callback(ev.data.msg);
             }
         };
+
+        this.webSocket.onclose = () => {
+            console.log("Closed backend websocket");
+        };
     }
 
     public addCallback(path: string, handler: Callback) {
