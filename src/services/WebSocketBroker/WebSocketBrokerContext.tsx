@@ -5,12 +5,22 @@ export const WebSocketBrokerContext = createContext<WebSocketBroker | null>(
     null
 );
 
-type Props = { url: string; children: React.ReactNode };
+type Props = {
+    url: string;
+    onOpen: () => void;
+    onClose: () => void;
+    children: React.ReactNode;
+};
 
-export const WebSocketBrokerProvider = ({ url, children }: Props) => {
+export const WebSocketBrokerProvider = ({
+    url,
+    onOpen,
+    onClose,
+    children,
+}: Props) => {
     const webSocketBroker = useRef<WebSocketBroker | null>(null);
 
-    webSocketBroker.current ??= new WebSocketBroker(url);
+    webSocketBroker.current ??= new WebSocketBroker(url, onOpen, onClose);
 
     useEffect(() => {
         return () => {

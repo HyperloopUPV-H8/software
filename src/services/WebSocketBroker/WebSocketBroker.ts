@@ -1,14 +1,12 @@
 import { Callback, BackendMessage } from "./types";
 
 export class WebSocketBroker {
-    public webSocket: WebSocket;
-    public typeToCallbacks: Map<string, Array<Callback>> = new Map();
+    private webSocket: WebSocket;
+    private typeToCallbacks: Map<string, Array<Callback>> = new Map();
 
-    constructor(url: string) {
+    constructor(url: string, onOpen: () => void, onClose: () => void) {
         this.webSocket = new WebSocket(`ws://${url}`);
-        this.webSocket.onopen = () => {
-            console.log("Opened backend websocket");
-        };
+        this.webSocket.onopen = onOpen;
 
         this.webSocket.onmessage = (ev: MessageEvent<string>) => {
             const socketMessage = JSON.parse(ev.data) as BackendMessage;
@@ -19,9 +17,7 @@ export class WebSocketBroker {
             }
         };
 
-        this.webSocket.onclose = () => {
-            console.log("Closed backend websocket");
-        };
+        this.webSocket.onclose = onClose;
     }
 
     public addCallback(type: string, callback: Callback) {
