@@ -2,25 +2,25 @@ import { WebSocketBrokerContext } from "./WebSocketBrokerContext";
 import { useContext, useEffect, useCallback } from "react";
 
 export function useWebSocketBroker(
-    type: string,
+    topic: string,
     callback?: (msg: any) => void
 ): (msg: any) => void {
     const webSocketBroker = useContext(WebSocketBrokerContext)!;
 
     useEffect(() => {
         if (callback) {
-            webSocketBroker.addCallback(type, callback);
+            webSocketBroker.addCallback(topic, callback);
         }
 
         return () => {
             if (callback) {
-                webSocketBroker.removeCallback(type, callback);
+                webSocketBroker.removeCallback(topic, callback);
             }
         };
-    }, [type, callback, webSocketBroker]);
+    }, [topic, callback, webSocketBroker]);
 
     const sender = useCallback(() => {
-        return webSocketBroker.createSender(type).bind(webSocketBroker);
+        return webSocketBroker.createSender(topic).bind(webSocketBroker);
     }, [webSocketBroker]);
 
     return sender;
