@@ -3,19 +3,12 @@ import type { Connection } from "models/Connection";
 const connectionsSlice = createSlice({
     name: "connections",
     initialState: {
-        websocket: [] as Connection[],
+        websocket: { name: "BackendWebSocket", isConnected: false },
         board: [] as Connection[],
-    } as { websocket: Connection[]; board: Connection[] },
+    } as { websocket: Connection; board: Connection[] },
     reducers: {
-        updateWebsocketConnection: (connections, action) => {
-            let conn = connections.websocket.find(
-                (conn) => conn.name == action.payload.name
-            )!;
-            if (conn) {
-                conn.isConnected = action.payload.isConnected;
-            } else {
-                connections.websocket.push(action.payload);
-            }
+        setWebSocketConnection: (connections, action) => {
+            connections.websocket.isConnected = action.payload;
         },
 
         updateBoardConnectionsArray: (
@@ -47,7 +40,7 @@ const connectionsSlice = createSlice({
 });
 
 export const {
-    updateWebsocketConnection,
+    setWebSocketConnection,
     updateBoardConnectionsArray,
     setDisconnectionBoardState,
     initializeMockConnections,

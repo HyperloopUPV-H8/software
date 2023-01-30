@@ -13,7 +13,7 @@ export const ConnectionList = ({
     enabled = true,
 }: Props) => {
     return (
-        <div className={`${styles.connectionsWrapper} island`}>
+        <div className={`${styles.connectionsWrapper}`}>
             <div className={styles.title}>{title}</div>
             <ul className={styles.connectionsList}>
                 {connections.map((item, index) => {
