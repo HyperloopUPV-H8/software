@@ -4,14 +4,18 @@ import App from "./App";
 import "./index.css";
 import { store } from "./store";
 import { Provider } from "react-redux";
-import { BackendWebSocketContext } from "services/WebSocketHandler";
+import { WebSocketBrokerProvider } from "services/WebSocketBroker/WebSocketBrokerContext";
+
+const SERVER_URL = `${import.meta.env.VITE_SERVER_IP}:${
+    import.meta.env.VITE_SERVER_PORT
+}${import.meta.env.VITE_BACKEND_WEBSOCKET_PATH}`;
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
         <Provider store={store}>
-            <BackendWebSocketContext>
+            <WebSocketBrokerProvider url={SERVER_URL}>
                 <App />
-            </BackendWebSocketContext>
+            </WebSocketBrokerProvider>
         </Provider>
     </React.StrictMode>
 );

@@ -1,6 +1,7 @@
 import { useInterval } from "hooks/useInterval";
 import { Message } from "models/Message";
-import { useBackendWebSocket } from "hooks/useBackendWebSocket";
+import { useWebSocketBroker } from "services/WebSocketBroker/useWebSocketBroker";
+
 import { updateMessages } from "slices/messagesSlice";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
@@ -9,7 +10,7 @@ import { store } from "../../store";
 export function useMessages() {
     const dispatch = useDispatch();
 
-    useBackendWebSocket("message/update", (msg) => {
+    useWebSocketBroker("message/update", (msg) => {
         const message = JSON.parse(msg) as Message;
         dispatch(updateMessages(message));
     });

@@ -1,7 +1,7 @@
-import { useBackendWebSocket } from "hooks/useBackendWebSocket";
+import { useWebSocketBroker } from "services/WebSocketBroker/useWebSocketBroker";
 
 export function useLogger() {
-    const sendWS = useBackendWebSocket("logger");
+    const sendWS = useWebSocketBroker("logger");
 
     function startLogging() {
         sendWS("enable");
