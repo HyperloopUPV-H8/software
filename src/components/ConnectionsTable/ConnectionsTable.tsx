@@ -10,7 +10,7 @@ export const ConnectionsTable = () => {
         <div className={styles.wrapper}>
             <ConnectionList
                 title="WebSocket"
-                connections={connections.websocket}
+                connections={[connections.websocket]}
             />
             <ConnectionList
                 title="Boards"

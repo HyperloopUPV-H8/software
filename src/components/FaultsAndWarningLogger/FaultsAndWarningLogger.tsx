@@ -9,7 +9,7 @@ const faultColor = { h: 0, s: 100, l: 40, a: 1 };
 export const FaultsAndWarningLogger = () => {
     const messages = useMessages();
     return (
-        <div className={`${styles.containerMessages} island`}>
+        <div className={`${styles.containerMessages}`}>
             <MessageLogger
                 title={"Warnings"}
                 messages={messages.warning}
