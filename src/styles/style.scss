@@ -1,0 +1,18 @@
+@use "fonts.scss";
+
+* {
+    box-sizing: border-box;
+    @include fonts.default-text;
+}
+
+body {
+    margin: 0;
+}
+
+.tagWrapper {
+    border: 1px solid black;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    width: fit-content;
+    height: fit-content;
+}

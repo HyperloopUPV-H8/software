@@ -11,7 +11,7 @@ type Props = {
     max?: number;
 };
 
-export const Bar = ({ type, value, min, max }: Props) => {
+export const Bar = ({ type = "range", value, min, max }: Props) => {
     const lookup = {
         range: (
             <RangeBar

@@ -1,0 +1,16 @@
+$colors: (
+    stable: rgb(105, 236, 105),
+    fault: rgb(233, 99, 99),
+    text: #1a3c3a,
+    light1: hsl(191, 4%, 99%),
+);
+
+:root {
+    @each $name, $color in $colors {
+        --color-#{$name}: #{$color};
+    }
+}
+
+@function getColor($color) {
+    @return var(--color-#{$color});
+}
