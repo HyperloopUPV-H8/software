@@ -1,0 +1,9 @@
+@use "src/styles/colors.scss";
+
+.on {
+    background-color: colors.getColor("stable");
+}
+
+.off {
+    background-color: colors.getColor("fault");
+}

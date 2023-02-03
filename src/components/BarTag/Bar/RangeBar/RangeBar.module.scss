@@ -1,0 +1,41 @@
+@use "src/styles/colors.scss";
+
+.tempWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.rangeBarWrapper {
+    border: 2px solid;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    .content {
+        width: 100%;
+        background-color: white;
+    }
+}
+
+.range {
+    border-color: colors.getColor("stable");
+    background-color: colors.getColor("stable");
+}
+
+.temp {
+    border-color: colors.getColor("fault");
+    background-color: colors.getColor("fault");
+}
+
+.bulb {
+    flex-shrink: 0;
+    margin-top: -110%;
+    width: 200%;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    z-index: 1;
+    background-color: colors.getColor("fault");
+}
