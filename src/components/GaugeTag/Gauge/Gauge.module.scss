@@ -1,0 +1,24 @@
+.gradientDiv {
+    width: 100%;
+    height: 100%;
+    background: conic-gradient(from 180deg, green, yellow, orange, red);
+}
+
+.backgroundArc {
+    stroke: rgba(0, 0, 0, 0.049);
+}
+
+.radialShadowArc {
+    stroke: url(#myGradient);
+    > * {
+        transition: stroke-dasharray 0.1s linear;
+    }
+}
+
+.maskArc {
+    stroke: white;
+
+    > * {
+        transition: stroke-dasharray 0.1s linear;
+    }
+}
