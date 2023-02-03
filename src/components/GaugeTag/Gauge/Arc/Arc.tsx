@@ -1,19 +1,18 @@
 type Props = {
     sweep: number;
-    strokeWidth: number;
     percentage: number;
-    viewBoxLength: number;
-    className?: string;
+    radius: number;
+    strokeWidth: number;
+    className: string;
 };
 
 export const Arc = ({
     sweep,
     strokeWidth,
     percentage,
-    viewBoxLength,
+    radius,
     className,
 }: Props) => {
-    const radius = viewBoxLength / 2;
     const innerRadius = radius - strokeWidth / 2;
     const circumference = 2 * Math.PI * innerRadius;
     const fullArc = circumference * (sweep / 360);
@@ -24,8 +23,8 @@ export const Arc = ({
     const transform = `rotate(${-90 - sweep / 2}, ${radius}, ${radius})`;
     return (
         <g
+            viewBox={`0 0 ${radius * 2} ${radius * 2}`}
             className={className}
-            viewBox={`0 0 ${viewBoxLength} ${viewBoxLength}`}
         >
             <circle
                 cx={radius}
@@ -36,6 +35,9 @@ export const Arc = ({
                 strokeDasharray={dashArray}
                 strokeLinecap={"round"}
                 transform={transform}
+                style={{
+                    transition: "stroke-dasharray 0.1s linear",
+                }}
             />
         </g>
     );

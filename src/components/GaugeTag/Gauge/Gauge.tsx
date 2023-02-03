@@ -1,5 +1,6 @@
-import { clampAndNormalize, toRadians } from "math";
+import { clampAndNormalize } from "math";
 import { Arc } from "./Arc/Arc";
+import { BackgroundArc } from "./BackgroundArc/BackgroundArc";
 import styles from "components/GaugeTag/Gauge/Gauge.module.scss";
 
 type Props = {
@@ -11,20 +12,6 @@ type Props = {
     max: number;
 };
 
-function getGaugeSize(radius: number, sweep: number): [number, number] {
-    let width: number, height: number;
-
-    if (sweep < 180) {
-        width = 2 * radius * Math.sin(toRadians(sweep / 2));
-        height = radius;
-    } else {
-        width = 2 * radius;
-        height = radius + radius * Math.sin(toRadians(sweep / 2 - 90));
-    }
-
-    return [width, height];
-}
-
 export const Gauge = ({
     className,
     sweep,
@@ -35,65 +22,37 @@ export const Gauge = ({
 }: Props) => {
     const radius = 500;
     const percentage = clampAndNormalize(value, min, max) * 100;
-    const [width, height] = getGaugeSize(radius, sweep);
     return (
         <svg
             className={className}
             width="1em"
             height="1em"
-            // viewBox={`${radius - width / 2} 0 ${width} ${height}`}
             viewBox={`0 0 ${radius * 2} ${radius * 2}`}
             xmlns="http://www.w3.org/2000/svg"
         >
             <Arc
                 className={styles.backgroundArc}
                 sweep={sweep}
+                radius={radius}
                 strokeWidth={strokeWidth}
                 percentage={100}
-                viewBoxLength={radius * 2}
             ></Arc>
-            <defs>
-                <mask id="myMask">
-                    <Arc
-                        className={styles.maskArc}
-                        sweep={sweep}
-                        strokeWidth={strokeWidth}
-                        percentage={percentage}
-                        viewBoxLength={radius * 2}
-                    ></Arc>
-                </mask>
 
-                <radialGradient
-                    id="myGradient"
-                    r="55%"
-                >
-                    <stop
-                        offset="40%"
-                        stop-color="#c9c9c9a0"
-                    />
-                    <stop
-                        offset="100%"
-                        stop-color="#c9c9c900"
-                    />
-                </radialGradient>
-            </defs>
-
-            <foreignObject
-                x="0"
-                y="0"
-                width="100%"
-                height="100%"
-                mask="url(#myMask)"
-            >
-                <div className={styles.gradientDiv} />
-            </foreignObject>
-            <Arc
-                className={styles.radialShadowArc}
+            <BackgroundArc
                 sweep={sweep}
-                strokeWidth={strokeWidth}
+                className={styles.rainbowArc}
                 percentage={percentage}
-                viewBoxLength={radius * 2}
-            ></Arc>
+                radius={radius}
+                strokeWidth={strokeWidth}
+            ></BackgroundArc>
+
+            <BackgroundArc
+                sweep={sweep}
+                className={styles.radialShadowArc}
+                percentage={percentage}
+                radius={radius}
+                strokeWidth={strokeWidth}
+            ></BackgroundArc>
         </svg>
     );
 };
