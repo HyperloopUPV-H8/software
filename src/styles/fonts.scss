@@ -1,0 +1,41 @@
+@use "colors.scss";
+
+$font-families: (
+    default: "Inter",
+);
+
+$font-sizes: (
+    default: 1.4rem,
+    small: 1rem,
+);
+
+$font-weights: (
+    bold: 600,
+    normal: 400,
+    light: 300,
+);
+
+:root {
+    @each $name, $font in $font-families {
+        --font-family-#{$name}: #{$font};
+    }
+
+    @each $name, $size in $font-sizes {
+        --font-size-#{$name}: #{$size};
+    }
+
+    @each $name, $weight in $font-weights {
+        --font-weight-#{$name}: #{$weight};
+    }
+}
+
+@mixin default-text {
+    font-family: var(--font-family-default);
+    font-size: var(--font-size-default);
+    font-weight: var(--font-weight-normal);
+    color: colors.getColor("text");
+}
+
+@function getFontSize($size) {
+    @return var(--font-size-#{$size});
+}
