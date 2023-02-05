@@ -1,0 +1,7 @@
+.valueDataWrapper {
+    display: grid;
+    width: max-content;
+    grid-template-rows: auto auto;
+    justify-items: start;
+    gap: 0.2rem;
+}
