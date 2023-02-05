@@ -1,16 +1,24 @@
-$colors: (
-    stable: rgb(105, 236, 105),
-    fault: rgb(233, 99, 99),
-    text: #1a3c3a,
-    light1: hsl(191, 4%, 99%),
+@use "sass:color";
+
+$key-colors: (
+    primary: hsl(192, 28%, 40%),
+    tertiary: hsl(27, 78%, 40%),
 );
 
-:root {
-    @each $name, $color in $colors {
-        --color-#{$name}: #{$color};
+$lightnesses: 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 99, 100;
+
+@mixin globalColors {
+    @each $name, $color in $key-colors {
+        @each $lightness in $lightnesses {
+            --color-#{$name}-#{$lightness}: hsl(
+                #{color.hue($color)},
+                #{color.saturation($color)},
+                #{$lightness}#{"%"}
+            );
+        }
     }
 }
 
-@function getColor($color) {
-    @return var(--color-#{$color});
+@function getColor($name, $lightness) {
+    @return var(--color-#{$name}-#{$lightness});
 }

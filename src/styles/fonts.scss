@@ -1,4 +1,4 @@
-@use "colors.scss";
+@use "./colors.scss";
 
 $font-families: (
     default: "Inter",
@@ -15,7 +15,7 @@ $font-weights: (
     light: 300,
 );
 
-:root {
+@mixin globalFontStyles {
     @each $name, $font in $font-families {
         --font-family-#{$name}: #{$font};
     }
@@ -33,7 +33,7 @@ $font-weights: (
     font-family: var(--font-family-default);
     font-size: var(--font-size-default);
     font-weight: var(--font-weight-normal);
-    color: colors.getColor("text");
+    color: colors.getColor("primary", 20);
 }
 
 @function getFontSize($size) {

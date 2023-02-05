@@ -1,4 +1,13 @@
-@use "fonts.scss";
+@use "./colors.scss";
+@use "./fonts.scss";
+
+:root {
+    @include fonts.globalFontStyles;
+}
+
+:root {
+    @include colors.globalColors;
+}
 
 * {
     box-sizing: border-box;
