@@ -25,7 +25,7 @@ function getJSType(type: VariableType) {
     }
 }
 
-export const ValueNumber = ({ value, type }: Props) => {
+export const Value = ({ value, type }: Props) => {
     const JSType = getJSType(type);
 
     return (
