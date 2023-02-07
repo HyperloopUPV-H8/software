@@ -9,6 +9,7 @@ import path from "path";
 export default defineConfig({
     build: {
         sourcemap: true,
+        outDir: "static",
     },
     plugins: [react(), tsconfigPaths()],
     test: {
