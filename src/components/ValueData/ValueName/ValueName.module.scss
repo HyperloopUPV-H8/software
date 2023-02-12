@@ -2,6 +2,6 @@
 
 .name {
     font-size: fonts.getFontSize("small");
-    font-weight: var(--font-weight-light);
+    font-weight: fonts.getFontWeight("light");
     font-style: italic;
 }
