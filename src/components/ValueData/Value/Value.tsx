@@ -3,6 +3,7 @@ import { VariableType } from "models/PodData/Measurement";
 type Props = {
     value: number | string | boolean;
     type: VariableType;
+    units: string;
 };
 
 function getJSType(type: VariableType) {
@@ -25,14 +26,17 @@ function getJSType(type: VariableType) {
     }
 }
 
-export const Value = ({ value, type }: Props) => {
+export const Value = ({ value, type, units }: Props) => {
     const JSType = getJSType(type);
 
     return (
         <span>
-            {JSType == "number"
-                ? (value as number).toFixed(2)
-                : value.toString()}
+            {`
+            ${
+                JSType == "number"
+                    ? (value as number).toFixed(2)
+                    : value.toString()
+            } ${JSType == "number" ? units : ""}`}
         </span>
     );
 };

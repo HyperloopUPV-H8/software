@@ -14,6 +14,7 @@ export const ValueData = ({ measurement }: Props) => {
             <Value
                 value={measurement.value}
                 type={measurement.type}
+                units={measurement.units}
             />
         </div>
     );
