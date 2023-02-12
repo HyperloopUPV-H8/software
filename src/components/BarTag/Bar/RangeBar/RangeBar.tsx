@@ -1,4 +1,5 @@
-import styles from "components/BarTag/Bar/RangeBar/RangeBar.module.scss";
+import styles from "./RangeBar.module.scss";
+import { clampAndNormalize } from "math";
 type Props = {
     type: "range" | "temp";
     value: number;
@@ -6,19 +7,14 @@ type Props = {
     max: number;
 };
 
-function clamp(value: number, min: number, max: number) {
-    return Math.min(Math.max(value, min), max);
-}
-
-function normalize(value: number, min: number, max: number) {
-    return (value - min) / (max - min);
-}
-
 export const RangeBar = ({ type, value, min, max }: Props) => {
-    const oppositeHeight =
-        (1 - normalize(clamp(value, min, max), min, max)) * 100;
+    const oppositeHeight = (1 - clampAndNormalize(value, min, max)) * 100;
     return (
-        <div className={type == "temp" ? styles.tempWrapper : ""}>
+        <div
+            className={`${styles.wrapper} ${
+                type == "temp" ? styles.tempWrapper : ""
+            }`}
+        >
             <div
                 className={`barWrapper ${styles.rangeBarWrapper} ${
                     type == "range" ? styles.range : styles.temp
