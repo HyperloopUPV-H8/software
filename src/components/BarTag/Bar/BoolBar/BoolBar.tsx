@@ -1,4 +1,4 @@
-import styles from "components/BarTag/Bar/BoolBar/BoolBar.module.scss";
+import styles from "./BoolBar.module.scss";
 type Props = {
     isOn: boolean;
 };

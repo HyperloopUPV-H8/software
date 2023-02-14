@@ -1,9 +1,9 @@
-@use "src/styles/colors.scss";
+@use "src/styles/colors";
 
 .on {
-    background-color: colors.getColor("stable");
+    background-color: colors.getColor("stable", 60);
 }
 
 .off {
-    background-color: colors.getColor("fault");
+    background-color: colors.getColor("fault", 60);
 }

@@ -9,19 +9,20 @@
     @include colors.globalColors;
 }
 
+:root {
+    @include fonts.default-text;
+}
+
 * {
     box-sizing: border-box;
-    @include fonts.default-text;
 }
 
 body {
     margin: 0;
 }
 
-.tagWrapper {
-    border: 1px solid black;
-    border-radius: 0.5rem;
-    padding: 0.5rem;
-    width: fit-content;
-    height: fit-content;
+h1 {
+    font-size: fonts.getFontSize("large");
+    color: colors.getColor("primary", 30);
+    margin: 0;
 }

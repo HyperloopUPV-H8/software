@@ -1,5 +1,4 @@
-import "components/BarTag/Bar/Bar.scss";
-import { useRef } from "react";
+import "./Bar.scss";
 import { RangeBar } from "./RangeBar/RangeBar";
 import { BoolBar } from "./BoolBar/BoolBar";
 export type BarType = "range" | "temp" | "bool";

@@ -5,7 +5,8 @@ $font-families: (
 );
 
 $font-sizes: (
-    default: 1.4rem,
+    large: 1.5rem,
+    default: 1.2rem,
     small: 1rem,
 );
 
@@ -38,4 +39,8 @@ $font-weights: (
 
 @function getFontSize($size) {
     @return var(--font-size-#{$size});
+}
+
+@function getFontWeight($weight) {
+    @return var(--font-weight-#{$weight});
 }

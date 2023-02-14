@@ -1,6 +1,7 @@
-.valueTagWrapper {
+.valueDataWrapper {
     display: grid;
+    width: max-content;
     grid-template-rows: auto auto;
     justify-items: start;
-    border: 1px solid black;
+    gap: 0.2rem;
 }
