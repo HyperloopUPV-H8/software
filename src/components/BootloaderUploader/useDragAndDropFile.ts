@@ -1,14 +1,10 @@
-import { useState, DragEvent, DragEventHandler } from "react";
+import { useState, DragEvent } from "react";
 
 function isCorrectFormat(fileName: string, fileFormat: string): boolean {
     return fileName.endsWith(`.${fileFormat}`);
 }
 
-export function useDragAndDropFile(): [
-    File | undefined,
-    (ev: DragEvent<HTMLDivElement>) => void,
-    (ev: DragEvent<HTMLDivElement>) => void
-] {
+export function useDragAndDropFile() {
     const [file, setFile] = useState<File>();
 
     function dropFileHandler(ev: DragEvent<HTMLDivElement>) {
@@ -66,5 +62,9 @@ export function useDragAndDropFile(): [
         ev.preventDefault();
     }
 
-    return [file, dropFileHandler, dragOverHandler];
+    function clearFile() {
+        setFile(undefined);
+    }
+
+    return [file, clearFile, dropFileHandler, dragOverHandler] as const;
 }
