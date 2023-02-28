@@ -2,11 +2,11 @@ import styles from "components/Logger/Logger.module.scss";
 import { BsFillPlayFill } from "react-icons/bs";
 import { BsFillStopFill } from "react-icons/bs";
 import { useState, useContext } from "react";
-import loggerService from "services/LoggerService";
+import { useLogger } from "./useLogger";
 
 export const Logger = () => {
     const [loggingState, setLoggingState] = useState(false);
-
+    const [startLogging, stopLogging] = useLogger();
     return (
         <div className={`${styles.loggerWrapper} island`}>
             <span className={styles.loggingState}>
@@ -16,9 +16,7 @@ export const Logger = () => {
                 <div
                     className={styles.playBtn}
                     onClick={() => {
-                        loggerService.startLogging().then((success) => {
-                            setLoggingState(success);
-                        });
+                        startLogging();
                     }}
                 >
                     <BsFillPlayFill />
@@ -26,9 +24,7 @@ export const Logger = () => {
                 <div
                     className={styles.stopBtn}
                     onClick={() => {
-                        loggerService.stopLogging().then((success) => {
-                            setLoggingState(!success);
-                        });
+                        stopLogging();
                     }}
                 >
                     <BsFillStopFill />

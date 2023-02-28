@@ -1,16 +1,16 @@
 import styles from "components/ConnectionsTable/ConnectionsTable.module.scss";
 import { ConnectionList } from "components/ConnectionsTable/ConnectionList/ConnectionList";
-import { useSelector } from "react-redux";
-import { RootState } from "store";
+import { useConnections } from "components/ConnectionsTable/useConnections";
+
 export const ConnectionsTable = () => {
-    const connections = useSelector((state: RootState) => state.connections);
+    const connections = useConnections();
     const isConnectionWSOpen = true;
 
     return (
         <div className={styles.wrapper}>
             <ConnectionList
                 title="WebSocket"
-                connections={connections.websocket}
+                connections={[connections.websocket]}
             />
             <ConnectionList
                 title="Boards"

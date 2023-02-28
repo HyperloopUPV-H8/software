@@ -18,11 +18,3 @@ export function postToBackend(path: string, data: BodyInit) {
         }
     );
 }
-
-export function createWebSocketToBackend(path: string) {
-    return new WebSocket(
-        `ws://${import.meta.env.VITE_SERVER_IP}:${
-            import.meta.env.VITE_SERVER_PORT
-        }${path}`
-    );
-}
