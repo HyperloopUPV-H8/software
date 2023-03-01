@@ -1,0 +1,9 @@
+@use "src/styles/colors";
+
+.link {
+    color: colors.getColor("primary", 50);
+}
+
+.link:hover {
+    color: colors.getColor("tertiary", 60);
+}
