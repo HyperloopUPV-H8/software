@@ -1,0 +1,10 @@
+@use "src/styles/colors";
+
+.appWrapper {
+    //FIXME: si hago zoom, se ve el fondo blanco por detras del azul, el fondo ocupa todo el scroll que aparece cuando hago zoom
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    background-color: colors.getColor("primary", 95);
+}
