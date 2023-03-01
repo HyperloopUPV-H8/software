@@ -7,11 +7,7 @@ import { PodData } from "models/PodData/PodData";
 
 export const podDataSlice = createSlice({
     name: "podData",
-    initialState: {
-        boards: {},
-        packetToBoard: {},
-        lastUpdates: {},
-    } as PodData,
+    initialState: {} as PodData,
     reducers: {
         initializePodData: (_, action: PayloadAction<PodDataAdapter>) => {
             return createPodDataFromAdapter(action.payload);

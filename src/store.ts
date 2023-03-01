@@ -1,10 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
+import { measurementsReducer } from "slices/measurementsSlice";
 import { podDataReducer } from "slices/podDataSlice";
-import { controlSectionsReducer } from "slices/controlSectionsSlice";
 export const store = configureStore({
     reducer: {
         podData: podDataReducer,
-        controlSections: controlSectionsReducer,
+        measurements: measurementsReducer,
     },
 });
 
