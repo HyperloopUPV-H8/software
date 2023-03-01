@@ -14,9 +14,10 @@ export type VariableType =
     | "bool"
     | EnumType;
 
-export type ValueType = number | string;
+export type ValueType = number | string | boolean;
 
 export type Measurement = {
+    id: string;
     name: string;
     type: VariableType;
     value: ValueType;
@@ -24,12 +25,14 @@ export type Measurement = {
 };
 
 export function createMeasurement(
+    id: string,
     name: string,
     type: VariableType,
-    value: string | number,
+    value: string | number | boolean,
     units: string
 ) {
     return {
+        id,
         name,
         type,
         value,
@@ -38,7 +41,7 @@ export function createMeasurement(
 }
 
 export function getDefaultMeasurement(): Measurement {
-    return createMeasurement("default", "bool", "true", "");
+    return createMeasurement("some_id", "default", "uint8", 12, "V");
 }
 
 export function isNumber(type: string) {
