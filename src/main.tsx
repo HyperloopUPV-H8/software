@@ -9,26 +9,36 @@ import { App } from "./App";
 import { ControlPage } from "pages/ControlPage/ControlPage";
 
 import "./index.css";
-import { fetchControlSections } from "components/ControlSections/fetchControlSections";
-
+import { loadPodData } from "pages/ControlPage/loadPodData";
+import { WebSocketBrokerProvider } from "services/WebSocketBroker/WebSocketBrokerContext";
 const router = createBrowserRouter([
     {
         path: "/",
         element: <App />,
         children: [
             {
-                path: "/",
+                path: "/vehicle",
                 element: <ControlPage />,
-                loader: async () => fetchControlSections(),
+                loader: loadPodData,
             },
         ],
     },
 ]);
 
+const SERVER_URL = `${import.meta.env.VITE_SERVER_IP}:${
+    import.meta.env.VITE_SERVER_PORT
+}${import.meta.env.VITE_BACKEND_WEBSOCKET_PATH}`;
+
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
         <Provider store={store}>
-            <RouterProvider router={router}></RouterProvider>
+            <WebSocketBrokerProvider
+                url={SERVER_URL}
+                onOpen={() => {}}
+                onClose={() => {}}
+            >
+                <RouterProvider router={router}></RouterProvider>
+            </WebSocketBrokerProvider>
         </Provider>
     </React.StrictMode>
 );
