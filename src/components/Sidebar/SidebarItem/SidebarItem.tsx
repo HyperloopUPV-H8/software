@@ -8,13 +8,14 @@ export type SidebarItemData = {
 
 type Props = {
     item: SidebarItemData;
+    isActive: boolean;
 };
 
-export const SidebarItem = ({ item }: Props) => {
+export const SidebarItem = ({ item, isActive }: Props) => {
     return (
         <NavLink
             to={item.path}
-            className={styles.link}
+            className={`${styles.link} ${isActive ? styles.active : ""}`}
         >
             {item.icon}
         </NavLink>
