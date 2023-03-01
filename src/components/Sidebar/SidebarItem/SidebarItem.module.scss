@@ -1,0 +1,9 @@
+@use "src/styles/colors";
+
+.link {
+    color: colors.getColor("primary", 50);
+}
+
+.active {
+    color: colors.getColor("tertiary", 60);
+}
