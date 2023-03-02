@@ -6,22 +6,15 @@ import { store } from "store";
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { App } from "./App";
-import { ControlPage } from "pages/ControlPage/ControlPage";
 
 import "./index.css";
-import { loadPodData } from "pages/ControlPage/loadPodData";
 import { WebSocketBrokerProvider } from "services/WebSocketBroker/WebSocketBrokerContext";
+import { vehicleRoute } from "pages/VehiclePage/vehicleRoute";
 const router = createBrowserRouter([
     {
         path: "/",
         element: <App />,
-        children: [
-            {
-                path: "/vehicle",
-                element: <ControlPage />,
-                loader: loadPodData,
-            },
-        ],
+        children: [vehicleRoute],
     },
 ]);
 
