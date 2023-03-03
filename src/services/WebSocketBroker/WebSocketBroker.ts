@@ -1,22 +1,36 @@
 import { Callback, BackendMessage } from "./types";
 
 export class WebSocketBroker {
-    private webSocket: WebSocket;
-    private typeToCallbacks: Map<string, Array<Callback>> = new Map();
+    static instance: WebSocketBroker | undefined;
+    private webSocket!: WebSocket;
+    private typeToCallbacks!: Map<string, Array<Callback>>;
 
     constructor(url: string, onOpen: () => void, onClose: () => void) {
+        if (WebSocketBroker.instance) {
+            return WebSocketBroker.instance;
+        } else {
+            this.initWebSocketBroker(url, onOpen, onClose);
+            WebSocketBroker.instance = this;
+        }
+    }
+
+    private initWebSocketBroker(
+        url: string,
+        onOpen: () => void,
+        onClose: () => void
+    ) {
+        this.typeToCallbacks = new Map();
+
         this.webSocket = new WebSocket(`ws://${url}`);
         this.webSocket.onopen = onOpen;
-
         this.webSocket.onmessage = (ev: MessageEvent<string>) => {
             const socketMessage = JSON.parse(ev.data) as BackendMessage;
             const callbacks =
-                this.typeToCallbacks.get(socketMessage.type) ?? [];
+                this.typeToCallbacks.get(socketMessage.topic) ?? [];
             for (const callback of callbacks) {
                 callback(socketMessage.msg);
             }
         };
-
         this.webSocket.onclose = onClose;
     }
 
