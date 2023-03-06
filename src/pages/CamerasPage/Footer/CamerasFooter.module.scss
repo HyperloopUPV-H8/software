@@ -1,0 +1,15 @@
+.cameraFooter {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    gap: 2rem;
+}
+
+.info {
+    flex-grow: 1;
+}
+
+.tube {
+    flex-grow: 6;
+}

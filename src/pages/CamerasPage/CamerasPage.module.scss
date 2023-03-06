@@ -1,0 +1,13 @@
+.camerasContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.camerasBody {
+    flex-grow: 7;
+}
+
+.cameraFooter {
+    flex-grow: 1;
+}
