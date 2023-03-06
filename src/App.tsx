@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import "styles/global.scss";
+import "styles/scrollbars.scss";
 import styles from "./App.module.scss";
 import { Sidebar } from "components/Sidebar/Sidebar";
 import { IoRocketSharp } from "react-icons/io5";
