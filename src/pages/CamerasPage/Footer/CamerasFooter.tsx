@@ -7,13 +7,8 @@ import { Tube } from "./Tube";
 export const CamerasFooter = () => {
     return (
         <div className={styles.cameraFooter}>
-            <div className={styles.info}>
-                <Information />
-            </div>
-
-            <div className={styles.tube}>
-                <Tube />
-            </div>
+            <Information />
+            <Tube />
         </div>
     );
 };
