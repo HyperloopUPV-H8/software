@@ -10,11 +10,12 @@ import { App } from "./App";
 import "./index.css";
 import { WebSocketBrokerProvider } from "services/WebSocketBroker/WebSocketBrokerContext";
 import { vehicleRoute } from "pages/VehiclePage/vehicleRoute";
+import { testingRoute } from "pages/TestingPage/testingRoute";
 const router = createBrowserRouter([
     {
         path: "/",
         element: <App />,
-        children: [vehicleRoute],
+        children: [vehicleRoute, testingRoute],
     },
 ]);
 
