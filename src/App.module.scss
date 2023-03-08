@@ -6,5 +6,7 @@
     height: 100vh;
     display: grid;
     grid-template-columns: auto 1fr;
+    grid-template-rows: minmax(0, 1fr);
+    // align-items: stretch;
     background-color: colors.getColor("primary", 95);
 }
