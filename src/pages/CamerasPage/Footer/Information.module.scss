@@ -2,6 +2,7 @@
 @use "src/styles/fonts.scss";
 
 .informatioWrapper {
+    width: fit-content;
     padding: 10px;
     display: flex;
     flex-direction: column;

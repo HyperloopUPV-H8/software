@@ -13,22 +13,42 @@
     position: relative;
 }
 
-.secondaryCameras {
-    display: grid;
-    grid-template-areas:
-        "title cam2"
-        "title cam3";
+.overlayCameras {
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: start;
     margin: 1rem;
 }
 
 .title {
-    grid-area: title;
-    margin: 0.5rem;
     padding: 0.5rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.name {
+    color: colors.getColor("primary", 99);
+}
+
+.dot {
+    background-color: red;
+    height: 1rem;
+    width: 1rem;
+    margin-left: 0.5rem;
+    border-radius: 50%;
+}
+
+.secondaryCameras {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .cam2 {
-    grid-area: cam2;
     height: 10rem;
     width: 15rem;
     background-color: colors.getColor("primary", 20);
@@ -39,7 +59,6 @@
 }
 
 .cam3 {
-    grid-area: cam3;
     height: 10rem;
     width: 15rem;
     background-color: colors.getColor("primary", 20);
@@ -49,5 +68,38 @@
     color: colors.getColor("primary", 15);
 }
 
-.dot {
-}
+// .secondaryCameras {
+//     display: grid;
+//     grid-template-areas:
+//         "title cam2"
+//         "title cam3";
+//     margin: 1rem;
+// }
+
+// .title {
+//     grid-area: title;
+//     margin: 0.5rem;
+//     padding: 0.5rem;
+// }
+
+// .cam2 {
+//     grid-area: cam2;
+//     height: 10rem;
+//     width: 15rem;
+//     background-color: colors.getColor("primary", 20);
+//     border-radius: 1rem;
+//     margin: 0.5rem;
+//     padding: 0.5rem;
+//     color: colors.getColor("primary", 15);
+// }
+
+// .cam3 {
+//     grid-area: cam3;
+//     height: 10rem;
+//     width: 15rem;
+//     background-color: colors.getColor("primary", 20);
+//     border-radius: 1rem;
+//     margin: 0.5rem;
+//     padding: 0.5rem;
+//     color: colors.getColor("primary", 15);
+// }

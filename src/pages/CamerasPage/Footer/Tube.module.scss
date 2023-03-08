@@ -17,6 +17,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
+
+    -webkit-box-shadow: inset 10px 10px 25px 0px colors.getColor("primary", 10);
+    -moz-box-shadow: inset 10px 10px 25px 0px colors.getColor("primary", 10);
+    box-shadow: inset 10px 10px 25px 0px colors.getColor("primary", 10);
 }
 
 .logo {
