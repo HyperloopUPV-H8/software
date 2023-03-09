@@ -15,13 +15,15 @@ type Props = {
     label: string;
     color: string;
     icon: React.ReactNode;
+    onClick: () => void;
 };
 
-export const EmergencyButton = ({ label, color, icon }: Props) => {
+export const EmergencyButton = ({ label, color, icon, onClick }: Props) => {
     return (
         <div
             className={styles.emergencyButtonWrapper}
             style={{ backgroundColor: getLighterHSl(color) }}
+            onClick={onClick}
         >
             {icon}
             <span
