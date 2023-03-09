@@ -15,8 +15,9 @@ type SignalCandidate = {
 export function useSignal(
     addr: string,
     onSignal: (sig: Signal) => void
-): (sig: Signal) => boolean {
-    const websocket = useRef<WebSocket | null>();
+) {
+    const websocket = useRef<WebSocket>(null!);
+    const [state, setState] = useState<number>(WebSocket.CONNECTING)
 
     useEffect(() => {
         connectSignal();
@@ -25,35 +26,31 @@ export function useSignal(
     function connectSignal() {
         websocket.current = new WebSocket(addr);
 
-        websocket.current.onclose = (_) => {
-            console.log("closed signaling websocket");
-        };
+        websocket.current.onclose = _ => closeSignal("ok");
 
-        websocket.current.onmessage = (ev) => {
+        websocket.current.onmessage = ev => {
             const sig: Signal = JSON.parse(ev.data);
 
-            if (sig.event === "reject") {
-                console.log("last signal rejected, reason:", sig.payload);
-            } else if (sig.event === "close") {
-                closeSignal(sig.payload);
-            } else {
-                console.log("signal:", sig);
-                onSignal(sig);
+            if (sig.event === "close") {
+                closeSignal("ok")
             }
+
+            console.log("signal:", sig);
+            onSignal(sig);
         };
+
+        websocket.current.onopen = _ => setState(WebSocket.OPEN)
     }
 
-    function sendSignal(signal: Signal): boolean {
-        if (!websocket.current) {
-            return false;
-        }
-
+    function sendSignal(signal: Signal) {
         websocket.current.send(JSON.stringify(signal));
-
-        return true;
     }
 
     function closeSignal(reason: string) {
+        if (websocket.current.readyState === WebSocket.CLOSING || websocket.current.readyState === WebSocket.CLOSED) {
+            return
+        }
+
         console.log("signal channel closed, reason:", reason);
         if (!websocket.current) {
             return;
@@ -63,8 +60,7 @@ export function useSignal(
             JSON.stringify({ event: "close", payload: "ok" })
         );
         websocket.current.close();
-        websocket.current = null;
     }
 
-    return sendSignal;
+    return [sendSignal, closeSignal, state] as const;
 }

@@ -1,84 +1,104 @@
 import { useEffect, useRef, useState } from "react";
 import { Signal, useSignal } from "./useSignal";
 
+export type WebRTCState = "rejected" | RTCPeerConnectionState
+
 export function useWebRTC(signalAddr: string, config?: RTCConfiguration) {
-    const [state, setState] = useState<RTCPeerConnectionState>("new");
-    const peer = useRef<RTCPeerConnection>();
-    const videoElement = useRef<HTMLVideoElement | null>(null);
-    const [stream, setStream] = useState<MediaStream>();
+    const videoElement = useRef<HTMLVideoElement>(null!)
+    const [state, setState] = useState<WebRTCState>("new")
+    const remotePeer = useRef<RTCPeerConnection>(null!)
 
-    useEffect(() => {
-        console.log("stream:", stream, "videoElement", videoElement.current);
-        if (stream && videoElement.current) {
-            console.log("set stream to video!");
-            videoElement.current.srcObject = stream;
+    function onSignal(signal: Signal) {
+        if (signal.event === "answer") {
+            onAnswer(signal.payload)
+        } else if (signal.event === "candidate") {
+            onSignalIceCandidate(signal.payload)
+        } else if (signal.event === "reject") {
+            updateState("rejected")
+        } else if (signal.event === "close") {
+            closePeer()
         }
-    }, [videoElement.current, stream]);
-
-    const onSignal = async (lastSignal: Signal) => {
-        if (lastSignal.event === "offer") {
-            onSignalOffer(lastSignal.payload);
-        } else if (lastSignal.event === "candidate") {
-            onSignalCandidate(lastSignal.payload);
-        }
-    };
-
-    const sendSignal = useSignal(signalAddr, onSignal);
-
-    async function onSignalOffer(offer: string) {
-        peer.current = new RTCPeerConnection(config);
-
-        peer.current.onconnectionstatechange = () => {
-            if (!peer.current) {
-                return;
-            }
-
-            setState(peer.current.connectionState);
-        };
-
-        peer.current.addTransceiver("video");
-
-        await peer.current.setRemoteDescription({ type: "offer", sdp: offer });
-
-        const answer = await peer.current.createAnswer();
-
-        if (!answer.sdp) {
-            sendSignal({ event: "close", payload: "failed to create answer" });
-            return;
-        }
-
-        console.log("Created answer");
-
-        const wasAnwserSignalSent = sendSignal({
-            event: "answer",
-            payload: answer.sdp,
-        });
-
-        console.log(wasAnwserSignalSent);
-        await peer.current.setLocalDescription(answer);
-
-        peer.current.onicecandidate = (ev) => {
-            if (!ev.candidate) {
-                return;
-            }
-
-            sendSignal({ event: "candidate", payload: ev.candidate.toJSON() });
-        };
-
-        peer.current.ontrack = (ev) => {
-            console.log("GOT THE TRACK");
-            setStream(ev.streams[0]);
-        };
     }
 
-    async function onSignalCandidate(candidate: RTCIceCandidateInit) {
-        if (!peer.current) {
-            sendSignal({ event: "reject", payload: "peer not ready" });
-            sendSignal({ event: "close", payload: "peer not ready" });
-            return;
+    async function onAnswer(answer: string) {
+        await remotePeer.current.setRemoteDescription({type: "answer", sdp: answer})
+    }
+    
+    async function onSignalIceCandidate(candidate: RTCIceCandidateInit) {
+        await remotePeer.current.addIceCandidate(candidate)
+    }
+
+    const [sendSignal, closeSignal, signalState] = useSignal(signalAddr, onSignal)
+
+    useEffect(() => {
+        remotePeer.current = new RTCPeerConnection(config)
+        remotePeer.current.addTransceiver("video")
+
+        remotePeer.current.onconnectionstatechange = _ => updateState()
+        remotePeer.current.onicecandidate = ev => onIceCandidate(ev.candidate)
+        remotePeer.current.ontrack = ev => onTrack(ev.streams[0])
+
+        window.onunload = _ => onUnload()
+    }, [])
+
+    useEffect(() => {
+        if (signalState === WebSocket.OPEN) {
+            handshake()
+        }
+    }, [signalState])
+
+    async function onUnload() {
+        closeSignal("leaving")
+    }
+
+    async function onTrack(stream: MediaStream) {
+        videoElement.current.srcObject = stream
+    }
+
+    async function handshake() {
+        const offer = await remotePeer.current.createOffer()
+        if (!offer.sdp) {
+            sendSignal({
+                event: "close",
+                payload: "failed to create offer"
+            })
+            return
         }
 
-        peer.current.addIceCandidate(candidate);
+        await remotePeer.current.setLocalDescription({type: "offer", sdp: offer.sdp})
+        sendSignal({
+            event: "offer",
+            payload: offer.sdp
+        })
+    }
+
+    async function updateState(newState?: WebRTCState) {
+        if (newState) {
+            setState(newState)
+            return
+        }
+
+        setState(prev => {
+            if (prev === "rejected") {
+                return prev
+            }
+            return remotePeer.current.connectionState
+        })
+    }
+
+    async function onIceCandidate(candidate: RTCIceCandidate | null) {
+        if (!candidate) {
+            return
+        }
+
+        sendSignal({
+            event: "candidate",
+            payload: candidate.toJSON(),
+        })
+    }
+
+    async function closePeer() {
+        remotePeer.current.close()
     }
 
     return [state, videoElement] as const;
