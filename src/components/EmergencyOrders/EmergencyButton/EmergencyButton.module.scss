@@ -1,0 +1,21 @@
+@use "src/styles/fonts";
+
+.emergencyButtonWrapper {
+    display: flex;
+    padding: 1rem;
+    gap: 1rem;
+    align-items: center;
+    border-radius: 1rem;
+    cursor: pointer;
+}
+
+.content {
+    flex-grow: 1;
+    display: flex;
+}
+
+.label {
+    text-align: center;
+    font-size: fonts.getFontSize("large");
+    font-weight: fonts.getFontWeight("bold");
+}
