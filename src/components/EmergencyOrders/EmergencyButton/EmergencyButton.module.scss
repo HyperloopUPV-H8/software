@@ -9,11 +9,6 @@
     cursor: pointer;
 }
 
-.content {
-    flex-grow: 1;
-    display: flex;
-}
-
 .label {
     text-align: center;
     font-size: fonts.getFontSize("large");

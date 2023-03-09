@@ -24,14 +24,12 @@ export const EmergencyButton = ({ label, color, icon }: Props) => {
             style={{ backgroundColor: getLighterHSl(color) }}
         >
             {icon}
-            <div className={styles.content}>
-                <span
-                    className={styles.label}
-                    style={{ color: color }}
-                >
-                    {label}
-                </span>
-            </div>
+            <span
+                className={styles.label}
+                style={{ color: color }}
+            >
+                {label}
+            </span>
         </div>
     );
 };
