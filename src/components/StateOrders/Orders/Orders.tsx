@@ -7,7 +7,7 @@ type Props = {
 };
 
 export const Orders = ({ orders }: Props) => {
-    const sendAction = useSendOrder();
+    const sendOrder = useSendOrder();
 
     return (
         <div className={styles.ordersWrapper}>
@@ -17,7 +17,7 @@ export const Orders = ({ orders }: Props) => {
                         key={order.id}
                         label={order.name}
                         onClick={() => {
-                            sendAction({ id: order.id });
+                            sendOrder({ id: order.id });
                         }}
                     />
                 );
