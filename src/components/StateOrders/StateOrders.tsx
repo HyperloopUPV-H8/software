@@ -9,7 +9,7 @@ export const StateOrders = () => {
 
     return (
         <Window title="State Actions">
-            <main className={styles.stateActionsWrapper}>
+            <main className={styles.stateOrdersWrapper}>
                 <BoardStateView
                     boardName="LCU"
                     state={stateInfo.state}

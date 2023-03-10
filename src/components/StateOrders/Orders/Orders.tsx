@@ -10,7 +10,7 @@ export const Orders = ({ actions }: Props) => {
     const sendAction = useSendOrder();
 
     return (
-        <div className={styles.actionsWrapper}>
+        <div className={styles.ordersWrapper}>
             {actions.map((action) => {
                 return (
                     <Button
