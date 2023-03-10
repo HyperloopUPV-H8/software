@@ -3,14 +3,14 @@ import { StateAndOrders } from "./StateOrdersType";
 import { useState } from "react";
 
 export function useBoardStateInfo() {
-    const [stateActions, setStateActions] = useState<StateAndOrders>({
+    const [stateOrders, setStateOrders] = useState<StateAndOrders>({
         state: "DEFAULT",
         actions: [],
     });
 
     useWebSocketBroker("vcu/state", (msg: StateAndOrders) => {
-        setStateActions(msg);
+        setStateOrders(msg);
     });
 
-    return stateActions;
+    return stateOrders;
 }

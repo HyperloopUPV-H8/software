@@ -15,7 +15,7 @@ export const StateOrders = () => {
                     state={stateInfo.state}
                 />
                 {stateInfo.actions.length > 0 && (
-                    <Orders actions={stateInfo.actions} />
+                    <Orders orders={stateInfo.actions} />
                 )}
             </main>
         </Window>

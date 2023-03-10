@@ -3,21 +3,21 @@ import { Order } from "../StateOrdersType"; //TODO: mover modelo a otra parte
 import { Button } from "components/Button/Button";
 import { useSendOrder } from "./useSendOrder";
 type Props = {
-    actions: Order[];
+    orders: Order[];
 };
 
-export const Orders = ({ actions }: Props) => {
+export const Orders = ({ orders }: Props) => {
     const sendAction = useSendOrder();
 
     return (
         <div className={styles.ordersWrapper}>
-            {actions.map((action) => {
+            {orders.map((order) => {
                 return (
                     <Button
-                        key={action.id}
-                        label={action.name}
+                        key={order.id}
+                        label={order.name}
                         onClick={() => {
-                            sendAction({ id: action.id });
+                            sendAction({ id: order.id });
                         }}
                     />
                 );
