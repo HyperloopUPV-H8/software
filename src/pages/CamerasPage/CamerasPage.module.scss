@@ -22,51 +22,65 @@
     margin: 1rem;
 }
 
-.title {
-    padding: 0.5rem;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
+// .title {
+//     padding: 0.5rem;
+//     display: flex;
+//     flex-direction: row;
+//     align-items: center;
+// }
 
-.name {
-    color: colors.getColor("primary", 99);
-}
+// .name {
+//     color: colors.getColor("primary", 99);
+// }
 
-.dot {
-    background-color: red;
-    height: 1rem;
-    width: 1rem;
-    margin-left: 0.5rem;
-    border-radius: 50%;
-}
+// .dot {
+//     background-color: red;
+//     height: 1rem;
+//     width: 1rem;
+//     margin-left: 0.5rem;
+//     border-radius: 50%;
+// }
 
-.secondaryCameras {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
+// .secondaryCameras {
+//     display: flex;
+//     flex-direction: column;
+//     justify-content: center;
+//     align-items: center;
+// }
 
-.cam2 {
-    height: 10rem;
-    width: 15rem;
-    background-color: colors.getColor("primary", 20);
-    border-radius: 1rem;
-    margin: 0.5rem;
-    padding: 0.5rem;
-    color: colors.getColor("primary", 15);
-}
+// .gradientSecondaryCam {
+//     //TODO: Change manual color of transparentize
+//     background: linear-gradient(
+//         135deg,
+//         colors.getColor("primary", 40),
+//         transparentize($color: #131e20, $amount: 1)
+//     );
+//     border-radius: 1rem;
+//     padding: 1px;
+//     margin: 0.5rem;
+// }
 
-.cam3 {
-    height: 10rem;
-    width: 15rem;
-    background-color: colors.getColor("primary", 20);
-    border-radius: 1rem;
-    margin: 0.5rem;
-    padding: 0.5rem;
-    color: colors.getColor("primary", 15);
-}
+// .cam2 {
+//     height: 10rem;
+//     width: 15rem;
+//     background-color: colors.getColor("primary", 20);
+
+//     border-radius: 1rem;
+//     // margin: 0.5rem;
+//     padding: 0.5rem;
+
+//     border: 1px solid;
+//     //border-color: linear-gradient(45deg, blue, red);
+//     //linear-gradient(135deg, orange 60%, cyan)
+// }
+
+// .cam3 {
+//     height: 10rem;
+//     width: 15rem;
+//     background-color: colors.getColor("primary", 20);
+//     border-radius: 1rem;
+//     padding: 0.5rem;
+// }
 
 // .secondaryCameras {
 //     display: grid;
