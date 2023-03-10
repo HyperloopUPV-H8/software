@@ -1,0 +1,46 @@
+@use "src/styles/colors.scss";
+.secondaryCameras {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.gradientSecondaryCam {
+    //TODO: Change manual color of transparentize
+    background: linear-gradient(
+        135deg,
+        colors.getColor("primary", 40),
+        transparentize($color: #131e20, $amount: 1)
+    );
+    border-radius: 1rem;
+    padding: 1px;
+    margin: 0.5rem;
+}
+
+.cam {
+    height: 10rem;
+    width: 15rem;
+    background-color: colors.getColor("primary", 20);
+    border-radius: 1rem;
+    padding: 0.5rem;
+}
+
+.title {
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.name {
+    color: colors.getColor("primary", 99);
+}
+
+.dot {
+    background-color: red;
+    height: 1rem;
+    width: 1rem;
+    margin-left: 0.5rem;
+    border-radius: 50%;
+}

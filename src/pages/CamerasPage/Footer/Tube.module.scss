@@ -24,17 +24,24 @@
 }
 
 .logo {
-    width: 5rem;
-    height: 5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    color: colors.getColor("primary", 99);
     //flex-grow: 3;
     // grid-row: 1;
     //grid-column: 7/10;
 }
+.logo2 {
+    font-size: 2rem;
+    color: colors.getColor("primary", 30);
+}
 
 .section {
-    border-left: 2px solid colors.getColor("primary", 30);
-    border-right: 2px solid colors.getColor("primary", 30);
-    height: 100%;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    //height: 100%;
 
     //float: left;
     // grid-row: 1;
