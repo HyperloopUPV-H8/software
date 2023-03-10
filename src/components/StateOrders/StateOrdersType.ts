@@ -1,7 +1,4 @@
-export type Order = {
-    name: string;
-    id: number;
-};
+import { Order } from "models/Order";
 
 export type StateAndOrders = {
     state: string;

@@ -2,7 +2,7 @@ import styles from "./EmergencyOrders.module.scss";
 import { EmergencyButton } from "./EmergencyButton/EmergencyButton";
 import { ReactComponent as StopIcon } from "assets/svg/stop_icon.svg";
 import { ReactComponent as RestartIcon } from "assets/svg/restart_icon.svg";
-import { useWebSocketBroker } from "services/WebSocketBroker/useWebSocketBroker";
+import { useSendOrder } from "hooks/useSendOrder";
 
 const haltColor = "hsl(9, 83%, 52%)";
 const restartColor = "hsl(205, 83%, 52%)";
@@ -12,7 +12,7 @@ const restartVehicleOrder = { id: 3, fields: {} };
 const restartTubeOrder = { id: 4, fields: {} };
 
 export const EmergencyOrders = () => {
-    const sendOrder = useWebSocketBroker("order/send");
+    const sendOrder = useSendOrder();
 
     return (
         <div className={styles.emergencyOrdersWrapper}>
