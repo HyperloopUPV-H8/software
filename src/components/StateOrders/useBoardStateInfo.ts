@@ -5,7 +5,7 @@ import { useState } from "react";
 export function useBoardStateInfo() {
     const [stateOrders, setStateOrders] = useState<StateAndOrders>({
         state: "DEFAULT",
-        actions: [],
+        orders: [],
     });
 
     useWebSocketBroker("vcu/state", (msg: StateAndOrders) => {
