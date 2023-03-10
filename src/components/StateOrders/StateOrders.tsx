@@ -14,8 +14,8 @@ export const StateOrders = () => {
                     boardName="LCU"
                     state={stateInfo.state}
                 />
-                {stateInfo.actions.length > 0 && (
-                    <Orders orders={stateInfo.actions} />
+                {stateInfo.orders.length > 0 && (
+                    <Orders orders={stateInfo.orders} />
                 )}
             </main>
         </Window>
