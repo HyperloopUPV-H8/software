@@ -1,31 +1,26 @@
-import { useState } from "react";
+import { useToggle } from "hooks/useToggle";
+import { useEffect, useState } from "react";
 import style from "./ToggleButton.module.scss"
 
 type Props = {
     label: string;
-    id?: string;
     icon: React.ReactNode;
-    onToggle: (target: string, state: boolean) => void;
+    onToggle: (state: boolean) => void;
 }
 
 export function ToggleButton(props: Props) {
-    const [isToggeled, setIsToggeled] = useState(false)
+    const [isOn, flip] = useToggle()
 
-    const target = props.id ?? props.label
-    function onClick() {
-        setIsToggeled((prev) => {
-            const next = !prev
-            props.onToggle(target, next)
-            return next
-        })
-    }
+    useEffect(() => {
+        props.onToggle(isOn)
+    }, [isOn])
 
     return (
-        <div className={isToggeled ? style.toggleButtonWrapperOn : style.toggleButtonWrapperOff}>
-            <button onClick={onClick}>
+        <label className={isOn ? style.toggleButtonWrapperOn : style.toggleButtonWrapperOff}>
+            <button onClick={flip}>
                 {props.icon}
             </button>
             <p>{props.label}</p>
-        </div>
+        </label>
     )
 }
