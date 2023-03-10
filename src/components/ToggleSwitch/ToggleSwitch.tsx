@@ -3,16 +3,11 @@ import { useEffect } from "react";
 import style from "./ToggleSwitch.module.scss";
 
 type Props = {
-    onToggle: (state: boolean) => void;
+    isOn: boolean,
+    flip: () => void,
 }
 
-export function ToggleSwitch(props: Props) {
-    const [isOn, flip] = useToggle()
-
-    useEffect(() => {
-        props.onToggle(isOn)
-    }, [isOn])
-
+export function ToggleSwitch({ isOn, flip }: Props) {
     return (
         <label className={isOn ? style.toggleSwitchWrapperOn : style.toggleSwitchWrapperOff} onClick={flip}>
             <div></div>
