@@ -1,0 +1,31 @@
+.playWrapper {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-evenly;
+}
+
+.sectionWrapper {
+    display: flex;
+    flex-flow: column;
+}
+
+.controlsWrapper {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-evenly;
+}
+
+.inputWrapper {
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.mainWrapper {
+    width: 20rem;
+    display: flex;
+    flex-flow: column;
+    row-gap: 2rem;
+    justify-content: center;
+}

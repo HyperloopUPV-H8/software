@@ -1,32 +1,31 @@
 @use "src/styles/colors";
 
-$button-size: 5.5rem;
+$button-height: 5.5rem;
 $icon-size: 2rem;
 $label-size: 0.7rem;
 
-.toggleButtonWrapperOn,
-.toggleButtonWrapperOff {
+.toggleButtonWrapper {
     display: flex;
     flex-flow: column;
     align-items: center;
-    width: $button-size;
+    width: fit-content;
     height: fit-content;
 
     button {
-        width: 100%;
-        height: $button-size;
-
+        width: $button-height;
+        height: $button-height;
+    
         font-size: $icon-size;
         font-weight: bold;
-
+    
         appearance: none;
         border: none;
         border-radius: 6px;
-
+    
         background-color: transparent;
-
-        transition: box-shadow 20ms ease-in, transform 20ms ease-in;
-
+    
+        transition: box-shadow 30ms ease-in, transform 30ms ease-in;
+    
         &:active {
             box-shadow: none;
             transform: translateY(0px)
@@ -43,7 +42,7 @@ $label-size: 0.7rem;
     }
 }
 
-.toggleButtonWrapperOn {
+.on {
     * {
         color: colors.getColor("tertiary", 60);
     }
@@ -60,7 +59,7 @@ $label-size: 0.7rem;
     }
 }
 
-.toggleButtonWrapperOff {
+.off {
     * {
         color: colors.getColor("primary", 60);
     }
@@ -73,7 +72,6 @@ $label-size: 0.7rem;
         &:hover {
             background-color: colors.getColor("primary", 80);
             color: colors.getColor("primary", 50);
-            border: none;
         }
     }
 

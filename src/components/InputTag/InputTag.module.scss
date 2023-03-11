@@ -19,6 +19,16 @@ input {
     font-size: 1rem;
 
     color: colors.getColor("neutral", 30);
+
+    &:focus {
+        outline: none;
+    }
+
+    &::-webkit-outer-spin-button, &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+    }
+
+    -moz-appearance: textfield;
 }
 
 legend {
