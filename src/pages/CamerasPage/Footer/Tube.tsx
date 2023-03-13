@@ -1,6 +1,7 @@
 import styles from "./Tube.module.scss";
 import logo from "./Artboard41.png";
 import { ReactComponent as TeamLogo } from "assets/svg/teamLogo.svg";
+import { Kenos } from "./Kenos";
 
 export const Tube = () => {
     return (
@@ -20,6 +21,7 @@ export const Tube = () => {
             <div className={styles.rightSection}></div>
             <div className={styles.rightSection}></div>
             <div className={styles.rightSection}></div>
+            <Kenos />
         </div>
     );
 };

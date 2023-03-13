@@ -11,7 +11,7 @@
     flex-grow: 1;
     background-color: colors.getColor("primary", 15);
     position: relative;
-    //z-index: 1;
+    z-index: 0;
 }
 
 .overlayCameras {
@@ -20,8 +20,9 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: start;
-    margin: 1rem;
-    //z-index: 3;
+    padding: 1rem;
+    position: relative;
+    z-index: 1;
 }
 
 .mainCamera {
@@ -31,7 +32,6 @@
     height: 100%;
     width: 100%;
     background-color: red;
-    //z-index: 2;
 }
 
 .title {
