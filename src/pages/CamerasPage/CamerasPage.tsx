@@ -1,12 +1,25 @@
 import { CamerasFooter } from "./Footer/CamerasFooter";
 import styles from "./CamerasPage.module.scss";
 import { SecondaryCameras } from "./SecondaryCameras";
+import { useWebRTC } from "hooks/useWebRTC";
+import video1 from "./videoAuran.mp4";
 
 export const CamerasPage = () => {
+    const [state, ref] = useWebRTC("ws://127.0.0.1:4040/signal");
     return (
         <div className={styles.camerasContainer}>
             <div className={styles.camerasBody}>
-                <div className={styles.mainCamera}></div>
+                {/* <div className={styles.mainCamera}> */}
+                <video
+                    className={styles.mainCamera}
+                    // ref={ref}
+                    src={video1}
+                    autoPlay
+                    loop
+                    muted
+                />
+                {/* <p>{state}</p> */}
+                {/* </div> */}
                 <div className={styles.overlayCameras}>
                     <div className={styles.title}>
                         <div className={styles.name}>Cam 1</div>
@@ -35,6 +48,8 @@ export const CamerasPage = () => {
             </div>
 
             <CamerasFooter />
+            {/* <video ref={ref} autoPlay loop muted /> */}
+            {/* <p>{state}</p> */}
         </div>
     );
 };

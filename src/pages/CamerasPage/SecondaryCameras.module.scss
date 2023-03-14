@@ -23,11 +23,36 @@
     width: 15rem;
     background-color: colors.getColor("primary", 20);
     border-radius: 1rem;
-    padding: 0.5rem;
+    position: relative;
+    //padding: 0.5rem;
+}
+
+.overlayCam {
+    //height: 100%;
+    // display: flex;
+    // flex-direction: row;
+    // justify-content: space-between;
+    // align-items: start;
+    //padding: 1rem;
+    position: relative;
+    //z-index: 1;
+
+    height: 10rem;
+    width: 15rem;
+    border-radius: 1rem;
+}
+
+.camera2 {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    height: 100%;
+    width: 100%;
+    border-radius: 1rem;
 }
 
 .title {
-    padding: 0.5rem;
+    padding: 1rem;
     display: flex;
     flex-direction: row;
     align-items: center;
