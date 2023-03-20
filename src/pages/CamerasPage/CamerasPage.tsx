@@ -25,6 +25,7 @@ export const CamerasPage = () => {
                         <div className={styles.name}>Cam 1</div>
                         <div className={styles.dot}></div>
                     </div>
+                    {/* <div className={styles.space}></div> */}
                     <SecondaryCameras />
                     {/* <div className={styles.secondaryCameras}>
                         <div className={styles.gradientSecondaryCam}>
@@ -46,10 +47,12 @@ export const CamerasPage = () => {
                     </div> */}
                 </div>
             </div>
-
+            {/* <div className={styles.footerWrapper}> */}
             <CamerasFooter />
-            {/* <video ref={ref} autoPlay loop muted /> */}
-            {/* <p>{state}</p> */}
+            {/* </div> */}
+
+            <video ref={ref} autoPlay loop muted />
+            <p>{state}</p>
         </div>
     );
 };
