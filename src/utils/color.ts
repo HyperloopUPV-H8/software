@@ -36,9 +36,31 @@ export function getSofterHSLAColor(
     { h, s, l, a }: HSLAColor,
     lightnessOffset: number
 ): HSLAColor {
-    return { h, s, l: l + clamp(lightnessOffset, 0, 100), a: a } as HSLAColor;
+    return { h, s, l: clamp(l + lightnessOffset, 0, 100), a: a } as HSLAColor;
 }
 
 export function hslaToString({ h, s, l, a }: HSLAColor): string {
     return `hsl(${h},${s}%,${l}%,${a})`;
+}
+
+export function parseHSL(colorStr: string): HSLAColor {
+    const matches = colorStr
+        .replaceAll(" ", "")
+        .match(/hsl\((\d{1,3}),(\d{1,3})%,(\d{1,3})%\)/)!;
+    const h = parseInt(matches[1]);
+    const s = parseInt(matches[2]);
+    const l = parseInt(matches[3]);
+
+    return { h, s, l, a: 1 };
+}
+
+export function lightenHSL(color: string): string {
+    const matches = color
+        .replaceAll(" ", "")
+        .match(/hsl\((\d{1,3}),(\d{1,3})%,(\d{1,3})%\)/)!;
+    const h = matches[1];
+    const s = matches[2];
+    const l = matches[3];
+    const newLightness = Math.min(parseInt(l) + 35, 100);
+    return `hsl(${h}, ${s}%, ${newLightness}%)`;
 }

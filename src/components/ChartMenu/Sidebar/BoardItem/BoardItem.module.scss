@@ -5,6 +5,8 @@
     flex-direction: column;
 
     @include styles.code-text;
+
+    cursor: pointer;
 }
 
 .header {
@@ -24,6 +26,7 @@
 .packetList {
     display: flex;
     flex-direction: column;
+    padding-top: 0.5rem;
     padding-right: 1.5rem;
     overflow: hidden;
     > * {

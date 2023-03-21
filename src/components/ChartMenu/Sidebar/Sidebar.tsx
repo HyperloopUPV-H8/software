@@ -1,8 +1,8 @@
-import styles from "components/ChartMenu/Sidebar/Sidebar.module.scss";
-import "components/ChartMenu/Sidebar/treeNode.scss";
-import { BoardItem } from "components/ChartMenu/Sidebar/BoardItem/BoardItem";
+import styles from "./Sidebar.module.scss";
+import "./treeNode.scss";
+import { BoardItem } from "./BoardItem/BoardItem";
 import { memo } from "react";
-import { TreeNode } from "components/ChartMenu/TreeNode";
+import { TreeNode } from "./TreeNode";
 
 type Props = {
     boardNodes: TreeNode;
