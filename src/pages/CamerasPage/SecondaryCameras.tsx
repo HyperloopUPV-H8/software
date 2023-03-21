@@ -1,8 +1,18 @@
+import { MouseEventHandler } from "react";
 import { CamerasFooter } from "./Footer/CamerasFooter";
 import styles from "./SecondaryCameras.module.scss";
-import video1 from "./videoAuran.mp4";
 
-export const SecondaryCameras = () => {
+type camWithTitle = {
+    video: string;
+    title: string;
+};
+
+type Props = {
+    videos: camWithTitle[];
+    secondaryCameraClicked: (camClicked: number) => void;
+};
+
+export const SecondaryCameras = ({ videos, secondaryCameraClicked }: Props) => {
     return (
         <div className={styles.secondaryCameras}>
             <div className={styles.gradientSecondaryCam}>
@@ -10,14 +20,17 @@ export const SecondaryCameras = () => {
                     <video
                         className={styles.camera2}
                         // ref={ref}
-                        src={video1}
+                        src={videos[0].video}
                         autoPlay
                         loop
                         muted
+                        onClick={() => {
+                            secondaryCameraClicked(1);
+                        }}
                     />
                     <div className={styles.overlayCam}>
                         <div className={styles.title}>
-                            <div className={styles.name}>Cam 2</div>
+                            <div className={styles.name}>{videos[0].title}</div>
                             <div className={styles.dot}></div>
                         </div>
                     </div>
@@ -28,14 +41,15 @@ export const SecondaryCameras = () => {
                     <video
                         className={styles.camera2}
                         // ref={ref}
-                        src={video1}
+                        src={videos[1].video}
                         autoPlay
                         loop
                         muted
+                        onClick={() => secondaryCameraClicked(2)}
                     />
                     <div className={styles.overlayCam}>
                         <div className={styles.title}>
-                            <div className={styles.name}>Cam 3</div>
+                            <div className={styles.name}>{videos[1].title}</div>
                             <div className={styles.dot}></div>
                         </div>
                     </div>
