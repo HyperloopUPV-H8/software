@@ -22,7 +22,7 @@ export const Pagination = ({ routes }: Props) => {
                 return (
                     <PaginationItem
                         key={index}
-                        pageNumber={index}
+                        pageNumber={index + 1}
                         isActive={route == activeRoute}
                         onClick={() => {
                             setActiveRoute(route);
