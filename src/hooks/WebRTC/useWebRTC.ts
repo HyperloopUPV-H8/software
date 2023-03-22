@@ -25,14 +25,14 @@ export function useWebRTC(signalUrl: string, configuration?: RTCConfiguration) {
         console.log("start handshake")
         peer.current.createOffer().then(
             (offer: RTCSessionDescriptionInit) => sendAndUpdateOffer(offer),
-            (reason: Error) => signalChannel.current.sendClose(340, reason.message)
+            (reason: Error) => signalChannel.current.sendClose(SignalCode.FailCreateOffer, reason.message)
         )
     }
 
     function sendAndUpdateOffer(offer: RTCSessionDescriptionInit) {
         peer.current.setLocalDescription(offer).then(
             () => signalChannel.current.sendSignal("offer", offer),
-            (reason: Error) => signalChannel.current.sendClose(310, reason.message)
+            (reason: Error) => signalChannel.current.sendClose(SignalCode.FailUpdateLocalOffer, reason.message)
         )
     }
 
@@ -55,14 +55,14 @@ export function useWebRTC(signalUrl: string, configuration?: RTCConfiguration) {
     function handleCandidateSignal(signal: Signal<"candidate">) {
         peer.current.addIceCandidate(signal.payload).then(
             () => console.log("add candidate"),
-            (reason: Error) => signalChannel.current.sendError(330, signal, reason.message)
+            (reason: Error) => signalChannel.current.sendError(SignalCode.FailAddCandidate, signal, reason.message)
         )
     }
 
     function handleAnswerSignal(signal: Signal<"answer">) {
         peer.current.setRemoteDescription(signal.payload).then(
             () => console.log("set answer"),
-            (reason: Error) => signalChannel.current.sendError(321, signal, reason.message)
+            (reason: Error) => signalChannel.current.sendError(SignalCode.FailUpdateRemoteAnswer, signal, reason.message)
         )
     }
 
