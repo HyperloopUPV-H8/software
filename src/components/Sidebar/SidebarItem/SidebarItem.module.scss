@@ -1,7 +1,13 @@
 @use "src/styles/colors";
 
+.iconWrapper {
+    > * {
+        font-size: 0.8rem;
+    }
+}
+
 .link {
-    color: colors.getColor("primary", 50);
+    color: colors.getColor("primary", 60);
 }
 
 .active {
