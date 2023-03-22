@@ -9,13 +9,42 @@ type camWithTitle = {
 
 type Props = {
     videos: camWithTitle[];
-    secondaryCameraClicked: (camClicked: number) => void;
+    onClick: (camClicked: number) => void;
 };
 
-export const SecondaryCameras = ({ videos, secondaryCameraClicked }: Props) => {
+export const SecondaryCameras = ({ videos, onClick }: Props) => {
     return (
         <div className={styles.secondaryCameras}>
-            <div className={styles.gradientSecondaryCam}>
+            {videos.map((video, index) => {
+                return (
+                    <div className={styles.gradientSecondaryCam}>
+                        <div className={styles.cam}>
+                            <video
+                                className={styles.camera2}
+                                // ref={ref}
+                                src={video.video}
+                                autoPlay
+                                loop
+                                muted
+                                disablePictureInPicture
+                                onClick={() => {
+                                    onClick(index + 1);
+                                }}
+                            />
+                            <div className={styles.overlayCam}>
+                                <div className={styles.title}>
+                                    <div className={styles.name}>
+                                        {video.title}
+                                    </div>
+                                    <div className={styles.dot}></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            })}
+
+            {/* <div className={styles.gradientSecondaryCam}>
                 <div className={styles.cam}>
                     <video
                         className={styles.camera2}
@@ -24,8 +53,9 @@ export const SecondaryCameras = ({ videos, secondaryCameraClicked }: Props) => {
                         autoPlay
                         loop
                         muted
+                        disablePictureInPicture
                         onClick={() => {
-                            secondaryCameraClicked(1);
+                            onClick(1);
                         }}
                     />
                     <div className={styles.overlayCam}>
@@ -45,7 +75,8 @@ export const SecondaryCameras = ({ videos, secondaryCameraClicked }: Props) => {
                         autoPlay
                         loop
                         muted
-                        onClick={() => secondaryCameraClicked(2)}
+                        disablePictureInPicture
+                        onClick={() => onClick(2)}
                     />
                     <div className={styles.overlayCam}>
                         <div className={styles.title}>
@@ -54,7 +85,7 @@ export const SecondaryCameras = ({ videos, secondaryCameraClicked }: Props) => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> */}
         </div>
     );
 };

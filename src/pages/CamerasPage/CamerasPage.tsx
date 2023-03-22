@@ -15,7 +15,7 @@ export const CamerasPage = () => {
         { video: video3, title: "Cam 3" },
     ]);
 
-    function secondaryCameraClicked(camClicked: number): void {
+    function onClick(camClicked: number): void {
         setVideos((prevVideos) => {
             const newVideos = [...prevVideos];
             let auxCamValue = newVideos[camClicked];
@@ -30,7 +30,6 @@ export const CamerasPage = () => {
     return (
         <div className={styles.camerasContainer}>
             <div className={styles.camerasBody}>
-                {/* <div className={styles.mainCamera}> */}
                 <video
                     className={styles.mainCamera}
                     // ref={ref}
@@ -38,25 +37,16 @@ export const CamerasPage = () => {
                     autoPlay
                     loop
                     muted
+                    disablePictureInPicture
                 />
-                {/* <video
-                    className={styles.mainCamera}
-                    ref={ref}
-                    autoPlay
-                    loop
-                    muted
-                /> */}
-                {/* <p>{state}</p> */}
-                {/* </div> */}
                 <div className={styles.overlayCameras}>
                     <div className={styles.title}>
                         <div className={styles.name}>{videos[0].title}</div>
                         <div className={styles.dot}></div>
                     </div>
-                    {/* <div className={styles.space}></div> */}
                     <SecondaryCameras
                         videos={videos.slice(1, 3)}
-                        secondaryCameraClicked={secondaryCameraClicked}
+                        onClick={onClick}
                     />
                 </div>
             </div>

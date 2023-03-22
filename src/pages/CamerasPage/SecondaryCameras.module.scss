@@ -4,11 +4,12 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 60%;
+    height: 100%;
     width: 30%;
     gap: 1rem;
-    min-height: 4.5rem;
     min-width: 8rem;
+    max-height: 19rem;
+    max-width: 16rem;
 }
 
 .gradientSecondaryCam {
