@@ -1,21 +1,20 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-
 import { Provider } from "react-redux";
 import { store } from "store";
-
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { App } from "./App";
-
 import "./index.css";
 import { WebSocketBrokerProvider } from "services/WebSocketBroker/WebSocketBrokerContext";
 import { vehicleRoute } from "pages/VehiclePage/vehicleRoute";
 import { testingRoute } from "pages/TestingPage/testingRoute";
+import { tubeRoute } from "pages/TubePage/tubeRoute";
+
 const router = createBrowserRouter([
     {
         path: "/",
         element: <App />,
-        children: [vehicleRoute, testingRoute],
+        children: [vehicleRoute, testingRoute, tubeRoute],
     },
 ]);
 
