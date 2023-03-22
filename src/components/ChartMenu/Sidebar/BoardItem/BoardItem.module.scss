@@ -22,14 +22,3 @@
 
     border-bottom: 1px solid styles.lightness(styles.$base-color, 18%);
 }
-
-.packetList {
-    display: flex;
-    flex-direction: column;
-    padding-top: 0.5rem;
-    padding-right: 1.5rem;
-    overflow: hidden;
-    > * {
-        margin-bottom: 0.8rem;
-    }
-}
