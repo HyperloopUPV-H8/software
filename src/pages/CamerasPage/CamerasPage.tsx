@@ -1,14 +1,14 @@
 import { CamerasFooter } from "./Footer/CamerasFooter";
 import styles from "./CamerasPage.module.scss";
 import { SecondaryCameras } from "./SecondaryCameras/SecondaryCameras";
-import { useWebRTC } from "hooks/WebRTC/useWebRTC";
+//import { useWebRTC } from "hooks/WebRTC/useWebRTC";
 import video1 from "./videos/videoAuran.mp4";
 import video2 from "./videos/videoIgnis.mp4";
 import video3 from "./videos/videoTurian.mp4";
 import { useState } from "react";
 
 export const CamerasPage = () => {
-    const [ref, state] = useWebRTC("ws://127.0.0.1:4040/signal");
+    //const [ref, state] = useWebRTC("ws://127.0.0.1:4040/signal");
     const [videos, setVideos] = useState([
         { video: video1, title: "Cam 1" },
         { video: video2, title: "Cam 2" },
