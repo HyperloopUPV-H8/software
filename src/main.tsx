@@ -11,11 +11,12 @@ import "./index.css";
 import { WebSocketBrokerProvider } from "services/WebSocketBroker/WebSocketBrokerContext";
 import { vehicleRoute } from "pages/VehiclePage/vehicleRoute";
 import { camerasRoute } from "pages/CamerasPage/camerasRoute";
+import { testingRoute } from "pages/TestingPage/testingRoute";
 const router = createBrowserRouter([
     {
         path: "/",
         element: <App />,
-        children: [vehicleRoute, camerasRoute],
+        children: [vehicleRoute, camerasRoute, testingRoute],
     },
 ]);
 

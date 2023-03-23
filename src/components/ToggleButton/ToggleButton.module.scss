@@ -1,0 +1,72 @@
+@use "src/styles/colors";
+
+$button-size: 10vh;
+
+.toggleButtonWrapperOn,
+.toggleButtonWrapperOff {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    width: $button-size;
+
+    button {
+        width: 100%;
+        height: $button-size;
+
+        font-size: 4vh;
+        font-weight: bold;
+
+        appearance: none;
+        border: none;
+        border-radius: 6px;
+
+        background-color: transparent;
+
+        transition: box-shadow 30ms ease-in, transform 30ms ease-in;
+
+        &:active {
+            box-shadow: none;
+            transform: translateY(4px)
+        }
+    }
+
+    p {
+        margin-top: 5px;
+        font-size: 1.5vh;
+        text-align: center;
+    }
+}
+
+.toggleButtonWrapperOn {
+    * {
+        color: colors.getColor("tertiary", 60);
+    }
+
+    button {
+        background-color: colors.getColor("tertiary", 90);
+        box-shadow: 0 4px colors.getColor("tertiary", 60);
+
+        &:hover {
+            background-color: colors.getColor("tertiary", 80);
+            color: colors.getColor("tertiary", 50);
+        }
+    }
+}
+
+.toggleButtonWrapperOff {
+    * {
+        color: colors.getColor("primary", 60);
+    }
+
+    button {
+        background-color: colors.getColor("primary", 90);
+        box-shadow: 0 4px colors.getColor("primary", 60);
+
+        &:hover {
+            background-color: colors.getColor("primary", 80);
+            color: colors.getColor("primary", 50);
+            border: none;
+        }
+    }
+
+}
