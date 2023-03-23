@@ -1,10 +1,10 @@
 import { CamerasFooter } from "./Footer/CamerasFooter";
 import styles from "./CamerasPage.module.scss";
-import { SecondaryCameras } from "./SecondaryCameras";
+import { SecondaryCameras } from "./SecondaryCameras/SecondaryCameras";
 import { useWebRTC } from "hooks/WebRTC/useWebRTC";
-import video1 from "./videoAuran.mp4";
-import video2 from "./videoIgnis.mp4";
-import video3 from "./videoTurian.mp4";
+import video1 from "./videos/videoAuran.mp4";
+import video2 from "./videos/videoIgnis.mp4";
+import video3 from "./videos/videoTurian.mp4";
 import { useState } from "react";
 
 export const CamerasPage = () => {
@@ -23,8 +23,6 @@ export const CamerasPage = () => {
             newVideos[0] = auxCamValue;
             return newVideos;
         });
-
-        console.log(videos);
     }
 
     return (
@@ -37,7 +35,7 @@ export const CamerasPage = () => {
                     autoPlay
                     loop
                     muted
-                    disablePictureInPicture
+                    disablePictureInPicture //TODO: In firefox it is not fixed
                 />
                 <div className={styles.overlayCameras}>
                     <div className={styles.title}>

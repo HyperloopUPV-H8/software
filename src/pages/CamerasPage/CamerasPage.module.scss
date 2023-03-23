@@ -32,6 +32,7 @@
     left: 0px;
     height: 100%;
     width: 100%;
+    object-fit: cover;
 }
 
 .title {
@@ -52,88 +53,3 @@
     margin-left: 0.5rem;
     border-radius: 50%;
 }
-
-// .space {
-//     flex-grow: 3;
-// }
-
-// .footerWrapper {
-//     flex-grow: 1;
-// }
-
-// .secondaryCameras {
-//     display: flex;
-//     flex-direction: column;
-//     justify-content: center;
-//     align-items: center;
-// }
-
-// .gradientSecondaryCam {
-//     //TODO: Change manual color of transparentize
-//     background: linear-gradient(
-//         135deg,
-//         colors.getColor("primary", 40),
-//         transparentize($color: #131e20, $amount: 1)
-//     );
-//     border-radius: 1rem;
-//     padding: 1px;
-//     margin: 0.5rem;
-// }
-
-// .cam2 {
-//     height: 10rem;
-//     width: 15rem;
-//     background-color: colors.getColor("primary", 20);
-
-//     border-radius: 1rem;
-//     // margin: 0.5rem;
-//     padding: 0.5rem;
-
-//     border: 1px solid;
-//     //border-color: linear-gradient(45deg, blue, red);
-//     //linear-gradient(135deg, orange 60%, cyan)
-// }
-
-// .cam3 {
-//     height: 10rem;
-//     width: 15rem;
-//     background-color: colors.getColor("primary", 20);
-//     border-radius: 1rem;
-//     padding: 0.5rem;
-// }
-
-// .secondaryCameras {
-//     display: grid;
-//     grid-template-areas:
-//         "title cam2"
-//         "title cam3";
-//     margin: 1rem;
-// }
-
-// .title {
-//     grid-area: title;
-//     margin: 0.5rem;
-//     padding: 0.5rem;
-// }
-
-// .cam2 {
-//     grid-area: cam2;
-//     height: 10rem;
-//     width: 15rem;
-//     background-color: colors.getColor("primary", 20);
-//     border-radius: 1rem;
-//     margin: 0.5rem;
-//     padding: 0.5rem;
-//     color: colors.getColor("primary", 15);
-// }
-
-// .cam3 {
-//     grid-area: cam3;
-//     height: 10rem;
-//     width: 15rem;
-//     background-color: colors.getColor("primary", 20);
-//     border-radius: 1rem;
-//     margin: 0.5rem;
-//     padding: 0.5rem;
-//     color: colors.getColor("primary", 15);
-// }

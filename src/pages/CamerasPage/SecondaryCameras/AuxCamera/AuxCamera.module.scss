@@ -1,16 +1,4 @@
 @use "src/styles/colors.scss";
-.secondaryCameras {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    width: 30%;
-    gap: 1rem;
-    min-width: 8rem;
-    max-height: 19rem;
-    max-width: 16rem;
-}
 
 .gradientSecondaryCam {
     //TODO: Change manual color of transparentize
@@ -32,21 +20,10 @@
     background-color: colors.getColor("primary", 0);
     border-radius: 1rem;
     position: relative;
-    //padding: 0.5rem;
 }
 
 .overlayCam {
-    //height: 100%;
-    // display: flex;
-    // flex-direction: row;
-    // justify-content: space-between;
-    // align-items: start;
-    //padding: 1rem;
     position: relative;
-    //z-index: 1;
-
-    //height: 10rem;
-    //width: 15rem;
     border-radius: 1rem;
 }
 
@@ -57,6 +34,7 @@
     height: 100%;
     width: 100%;
     border-radius: 1rem;
+    object-fit: cover;
 }
 
 .title {

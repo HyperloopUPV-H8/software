@@ -1,19 +1,10 @@
 @use "src/styles/colors.scss";
 .tube {
-    // border-style: solid;
-    // border-width: 1px;
-    // border-color: black;
     border-radius: 30px;
     background-color: colors.getColor("primary", 20);
     height: 100%;
     width: 100%;
     position: relative;
-
-    // display: grid;
-    // margin: 0 auto;
-    // grid-template-columns: repeat(15, 1fr);
-    // grid-template-rows: auto;
-    // align-items: center;
 
     display: flex;
     align-items: center;
@@ -28,10 +19,8 @@
     width: 2.5rem;
     height: 2.5rem;
     color: colors.getColor("primary", 99);
-    //flex-grow: 3;
-    // grid-row: 1;
-    //grid-column: 7/10;
 }
+
 .logo2 {
     font-size: 2rem;
     color: colors.getColor("primary", 30);
@@ -42,11 +31,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    //height: 100%;
-
-    //float: left;
-    // grid-row: 1;
-    // grid-column: 1/10;
 }
 
 .leftSection {
