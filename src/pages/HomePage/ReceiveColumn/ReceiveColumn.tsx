@@ -8,12 +8,12 @@ import { ChartMenu } from "components/ChartMenu/ChartMenu";
 import { RequestState, useFetchPodData } from "./useFetchPodData";
 
 const receiveColumnTabItem = [
-    // {
-    //     id: "receiveTable",
-    //     name: "Packets",
-    //     icon: <HiInboxArrowDown />,
-    //     component: <ReceiveTable />,
-    // },
+    {
+        id: "receiveTable",
+        name: "Packets",
+        icon: <HiInboxArrowDown />,
+        component: <ReceiveTable />,
+    },
     {
         id: "charts",
         name: "Charts",

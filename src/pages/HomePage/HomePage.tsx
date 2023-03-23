@@ -13,8 +13,8 @@ export const HomePage = () => {
                 <SplitLayout
                     components={[
                         <ReceiveColumn />,
-                        // <OrderColumn />,
-                        // <MessagesColumn />,
+                        <OrderColumn />,
+                        <MessagesColumn />,
                     ]}
                     direction={Direction.HORIZONTAL}
                 ></SplitLayout>
