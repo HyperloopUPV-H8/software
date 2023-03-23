@@ -45,9 +45,12 @@ export function useBootloaderUploaderState() {
 
     function sendFile() {
         setState(BootloaderState.AWAITING);
-        if (file) {
-            sendToBootloader(file);
-        }
+        setTimeout(() => {
+            onSendSuccess();
+        }, 2000);
+        // if (file) {
+        //     sendToBootloader(file);
+        // }
     }
 
     function onDrop(ev: React.DragEvent<HTMLDivElement>) {

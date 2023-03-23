@@ -5,7 +5,7 @@ import { PacketUpdate } from "adapters/PacketUpdate";
 import { PodDataAdapter } from "adapters/PodData";
 import { PodData } from "models/PodData/PodData";
 import { RootState } from "store";
-import { TreeNode } from "components/ChartMenu/TreeNode";
+import { TreeNode } from "components/ChartMenu/Sidebar/TreeNode";
 import { Packet } from "models/PodData/Packet";
 import { Board } from "models/PodData/Board";
 import { isNumber } from "models/PodData/Measurement";
@@ -18,7 +18,7 @@ export const podDataSlice = createSlice({
         lastUpdates: {},
     } as PodData,
     reducers: {
-        initializePodData: (_, action: PayloadAction<PodDataAdapter>) => {
+        initPodData: (_, action: PayloadAction<PodDataAdapter>) => {
             return createPodDataFromAdapter(action.payload);
         },
         updatePodData: (
@@ -31,7 +31,7 @@ export const podDataSlice = createSlice({
     },
 });
 
-export const { initializePodData, updatePodData } = podDataSlice.actions;
+export const { initPodData, updatePodData } = podDataSlice.actions;
 
 export default podDataSlice.reducer;
 
@@ -68,7 +68,7 @@ function getNumericMeasurementNames(packet: Packet): TreeNode | undefined {
     let measurements = {} as TreeNode;
     Object.values(packet.measurements).forEach((measurement) => {
         if (isNumber(measurement.type)) {
-            Object.assign(measurements, { [measurement.name]: undefined });
+            Object.assign(measurements, { [measurement.id]: undefined });
         }
     });
 

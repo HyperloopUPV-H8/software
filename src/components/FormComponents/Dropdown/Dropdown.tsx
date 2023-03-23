@@ -16,7 +16,10 @@ export const Dropdown = ({ options, onChange }: Props) => {
         >
             {options.map((option, index) => {
                 return (
-                    <option key={index} value={option}>
+                    <option
+                        key={index}
+                        value={option}
+                    >
                         {option}
                     </option>
                 );
