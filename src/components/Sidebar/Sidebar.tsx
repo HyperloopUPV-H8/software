@@ -1,6 +1,6 @@
 import styles from "./Sidebar.module.scss";
 import { SidebarItem, SidebarItemData } from "./SidebarItem/SidebarItem";
-import { ReactComponent as TeamLogo } from "assets/svg/teamLogo.svg";
+import { ReactComponent as TeamLogo } from "assets/svg/team_logo.svg";
 import { Link, useLocation } from "react-router-dom";
 type Props = {
     items: SidebarItemData[];

@@ -1,6 +1,5 @@
 import styles from "./Tube.module.scss";
-import logo from "./Artboard41.png";
-import { ReactComponent as TeamLogo } from "assets/svg/teamLogo.svg";
+import { ReactComponent as TeamLogo } from "assets/svg/team_logo.svg";
 import { Kenos } from "./Kenos/Kenos";
 
 const SECTIONS_BY_SIDE = 6;

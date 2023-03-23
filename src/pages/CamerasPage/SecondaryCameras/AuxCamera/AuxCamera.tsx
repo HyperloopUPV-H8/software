@@ -22,7 +22,7 @@ export const AuxCamera = ({ video, index, onClick }: Props) => {
             >
                 <video
                     className={styles.camera2}
-                    // ref={ref}
+                    // ref={ref} //TODO: ref of the hook for the streaming
                     src={video.video}
                     autoPlay
                     loop

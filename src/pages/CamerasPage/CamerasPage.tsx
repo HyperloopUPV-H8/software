@@ -9,6 +9,7 @@ import { useState } from "react";
 
 export const CamerasPage = () => {
     //const [ref, state] = useWebRTC("ws://127.0.0.1:4040/signal");
+    //TODO: Changes the videos with the streaming
     const [videos, setVideos] = useState([
         { video: video1, title: "Cam 1" },
         { video: video2, title: "Cam 2" },
@@ -30,7 +31,7 @@ export const CamerasPage = () => {
             <div className={styles.camerasBody}>
                 <video
                     className={styles.mainCamera}
-                    // ref={ref}
+                    // ref={ref} //TODO: ref fo the hook for the streaming
                     src={videos[0].video}
                     autoPlay
                     loop
