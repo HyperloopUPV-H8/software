@@ -55,9 +55,9 @@ export class WebSocketBroker {
         }
     }
 
-    public createSender(type: string) {
+    public createSender(topic: string) {
         return (msg: any) => {
-            this.webSocket.send(JSON.stringify({ type, msg }));
+            this.webSocket.send(JSON.stringify({ topic, msg }));
         };
     }
 
