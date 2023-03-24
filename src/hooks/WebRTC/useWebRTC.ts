@@ -6,7 +6,7 @@ export function useWebRTC(signalUrl: string, configuration?: RTCConfiguration) {
     const peer = useRef<RTCPeerConnection | null>(null);
     const [peerState, setPeerState] = useState<RTCPeerConnectionState>("new");
     const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
-
+    
     useEffect(() => {
         peer.current = new RTCPeerConnection(configuration);
         peer.current.addTransceiver("video");
@@ -27,6 +27,7 @@ export function useWebRTC(signalUrl: string, configuration?: RTCConfiguration) {
 
     function startHandshake() {
         console.log("start handshake");
+
         peer.current!.createOffer().then(
             (offer: RTCSessionDescriptionInit) => sendAndUpdateOffer(offer),
             (reason: Error) =>
@@ -52,6 +53,7 @@ export function useWebRTC(signalUrl: string, configuration?: RTCConfiguration) {
         if (!ev.candidate) {
             return;
         }
+
 
         signalChannel.current!.sendSignal("candidate", ev.candidate.toJSON());
     }
@@ -83,6 +85,7 @@ export function useWebRTC(signalUrl: string, configuration?: RTCConfiguration) {
                 )
         );
     }
+
 
     return [mediaStream, peerState] as const;
 }
