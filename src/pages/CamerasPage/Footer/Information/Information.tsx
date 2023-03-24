@@ -10,14 +10,12 @@ export const Information = () => {
         <div className={styles.informatioWrapper}>
             <div className={styles.title}>Information</div>
             <div className={styles.measurementLine}>
-                <div>Position:</div>
-                <div>17</div>
-                <div>m</div>
+                <span>Position:</span>
+                <span>17 m</span>
             </div>
             <div className={styles.measurementLine}>
-                <div>Speed:</div>
-                <div>28</div>
-                <div>km/h</div>
+                <span>Speed:</span>
+                <span>28 km/h</span>
             </div>
         </div>
     );

@@ -6,6 +6,7 @@ import video1 from "./videos/videoAuran.mp4";
 import video2 from "./videos/videoIgnis.mp4";
 import video3 from "./videos/videoTurian.mp4";
 import { useState } from "react";
+import { TitleCamera } from "./TitleCamera/TitleCam";
 
 export const CamerasPage = () => {
     //const [ref, state] = useWebRTC("ws://127.0.0.1:4040/signal");
@@ -19,7 +20,7 @@ export const CamerasPage = () => {
     function onClick(camClicked: number): void {
         setVideos((prevVideos) => {
             const newVideos = [...prevVideos];
-            let auxCamValue = newVideos[camClicked];
+            const auxCamValue = newVideos[camClicked];
             newVideos[camClicked] = newVideos[0];
             newVideos[0] = auxCamValue;
             return newVideos;
@@ -39,10 +40,11 @@ export const CamerasPage = () => {
                     disablePictureInPicture //TODO: In firefox it is not fixed
                 />
                 <div className={styles.overlayCameras}>
-                    <div className={styles.title}>
+                    <TitleCamera title={videos[0].title} />
+                    {/* <div className={styles.title}>
                         <div className={styles.name}>{videos[0].title}</div>
                         <div className={styles.dot}></div>
-                    </div>
+                    </div> */}
                     <SecondaryCameras
                         videos={videos.slice(1, 3)}
                         onClick={onClick}

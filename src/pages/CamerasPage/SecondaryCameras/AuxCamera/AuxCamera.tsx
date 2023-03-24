@@ -1,3 +1,4 @@
+import { TitleCamera } from "pages/CamerasPage/TitleCamera/TitleCam";
 import styles from "./AuxCamera.module.scss";
 
 type camWithTitle = {
@@ -30,10 +31,7 @@ export const AuxCamera = ({ video, index, onClick }: Props) => {
                     disablePictureInPicture //TODO: In firefox it is not fixed
                 />
                 <div className={styles.overlayCam}>
-                    <div className={styles.title}>
-                        <div className={styles.name}>{video.title}</div>
-                        <div className={styles.dot}></div>
-                    </div>
+                    <TitleCamera title={video.title} />
                 </div>
             </div>
         </div>

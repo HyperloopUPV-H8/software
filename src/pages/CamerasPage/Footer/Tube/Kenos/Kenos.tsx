@@ -1,12 +1,23 @@
 import styles from "./Kenos.module.scss";
 
-export const Kenos = () => {
-    //TODO: Add the useSelector and create the porcentage with the total, warningRange
-    let leftPosition = "80%";
+type Props = {
+    position: number;
+};
 
-    const positionKenos = {
-        left: leftPosition,
-    } as React.CSSProperties;
+const LENGTH_TUBE: number = 100;
 
-    return <div className={styles.kenos} style={positionKenos} />;
+export const Kenos = ({ position }: Props) => {
+    //TODO:create the porcentage with the total, warningRange
+    //TODO: useMemo
+    function porcentagePosition(): string {
+        return (position * 100) / LENGTH_TUBE + "%";
+    }
+
+    return (
+        <div
+            className={styles.kenos}
+            style={{ left: porcentagePosition() }}
+            onClick={porcentagePosition}
+        />
+    );
 };

@@ -19,7 +19,8 @@ export const Tube = () => {
             {sectionsArray.map(() => {
                 return <div className={styles.rightSection} />;
             })}
-            <Kenos />
+            {/* //TODO: Change position to a measurement with addUseSelector */}
+            <Kenos position={20} />
         </div>
     );
 };
