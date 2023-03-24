@@ -3,6 +3,7 @@ import { PumpIndicator } from "./PumpIndicator/PumpIndicator";
 import styles from "./TubeData.module.scss";
 
 export const TubeData = () => {
+    //TODO: link values to store
     const GAUGE_WIDTH = 130;
 
     return (
