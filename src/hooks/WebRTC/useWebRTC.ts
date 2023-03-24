@@ -2,16 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import { SignalChannel } from "./SignalChannel";
 
 export function useWebRTC(signalUrl: string, configuration?: RTCConfiguration) {
-    const signalChannel = useRef<SignalChannel>(null!);
-    const videoElement = useRef<HTMLVideoElement>(null);
-    const peer = useRef<RTCPeerConnection>(null!);
+    const signalChannel = useRef<SignalChannel | null>(null); //TODO: arreglar lo de esta exclamacion rara
+    const peer = useRef<RTCPeerConnection | null>(null);
     const [peerState, setPeerState] = useState<RTCPeerConnectionState>("new");
-
+    const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
+    
     useEffect(() => {
         peer.current = new RTCPeerConnection(configuration);
         peer.current.addTransceiver("video");
         peer.current.onconnectionstatechange = () =>
-            setPeerState(peer.current.connectionState);
+            setPeerState(peer.current!.connectionState);
         peer.current.onicecandidate = handleCandidate;
         peer.current.ontrack = handleTrack;
 
@@ -27,10 +27,11 @@ export function useWebRTC(signalUrl: string, configuration?: RTCConfiguration) {
 
     function startHandshake() {
         console.log("start handshake");
-        peer.current.createOffer().then(
+
+        peer.current!.createOffer().then(
             (offer: RTCSessionDescriptionInit) => sendAndUpdateOffer(offer),
             (reason: Error) =>
-                signalChannel.current.sendClose(
+                signalChannel.current!.sendClose(
                     SignalCode.FailCreateOffer,
                     reason.message
                 )
@@ -38,10 +39,10 @@ export function useWebRTC(signalUrl: string, configuration?: RTCConfiguration) {
     }
 
     function sendAndUpdateOffer(offer: RTCSessionDescriptionInit) {
-        peer.current.setLocalDescription(offer).then(
-            () => signalChannel.current.sendSignal("offer", offer),
+        peer.current!.setLocalDescription(offer).then(
+            () => signalChannel.current!.sendSignal("offer", offer),
             (reason: Error) =>
-                signalChannel.current.sendClose(
+                signalChannel.current!.sendClose(
                     SignalCode.FailUpdateLocalOffer,
                     reason.message
                 )
@@ -53,22 +54,19 @@ export function useWebRTC(signalUrl: string, configuration?: RTCConfiguration) {
             return;
         }
 
-        signalChannel.current.sendSignal("candidate", ev.candidate.toJSON());
+
+        signalChannel.current!.sendSignal("candidate", ev.candidate.toJSON());
     }
 
     function handleTrack(ev: RTCTrackEvent) {
-        if (!videoElement.current) {
-            return;
-        }
-
-        videoElement.current.srcObject = ev.streams[0];
+        setMediaStream(ev.streams[0]);
     }
 
     function handleCandidateSignal(signal: Signal<"candidate">) {
-        peer.current.addIceCandidate(signal.payload).then(
+        peer.current!.addIceCandidate(signal.payload).then(
             () => console.log("add candidate"),
             (reason: Error) =>
-                signalChannel.current.sendError(
+                signalChannel.current!.sendError(
                     SignalCode.FailAddCandidate,
                     signal,
                     reason.message
@@ -77,10 +75,10 @@ export function useWebRTC(signalUrl: string, configuration?: RTCConfiguration) {
     }
 
     function handleAnswerSignal(signal: Signal<"answer">) {
-        peer.current.setRemoteDescription(signal.payload).then(
+        peer.current!.setRemoteDescription(signal.payload).then(
             () => console.log("set answer"),
             (reason: Error) =>
-                signalChannel.current.sendError(
+                signalChannel.current!.sendError(
                     SignalCode.FailUpdateRemoteAnswer,
                     signal,
                     reason.message
@@ -88,5 +86,6 @@ export function useWebRTC(signalUrl: string, configuration?: RTCConfiguration) {
         );
     }
 
-    return [videoElement, peerState] as const;
+
+    return [mediaStream, peerState] as const;
 }
