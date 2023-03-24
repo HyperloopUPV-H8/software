@@ -7,10 +7,6 @@ type Props = {
 
 export const AnimatedFan = ({ rotate }: Props) => {
     return (
-        <div className={styles.animatedFanWrapper}>
-            <Fan
-                className={`${styles.fanIcon} ${rotate ? styles.rotating : ""}`}
-            />
-        </div>
+        <Fan className={`${styles.fanIcon} ${rotate ? styles.rotating : ""}`} />
     );
 };
