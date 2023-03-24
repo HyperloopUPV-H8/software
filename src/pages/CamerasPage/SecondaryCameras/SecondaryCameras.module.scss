@@ -1,0 +1,12 @@
+@use "src/styles/colors.scss";
+.secondaryCameras {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 30%;
+    gap: 1rem;
+    max-height: 19rem;
+    max-width: 16rem;
+}

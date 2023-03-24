@@ -7,6 +7,7 @@ import { App } from "./App";
 import "./index.css";
 import { WebSocketBrokerProvider } from "services/WebSocketBroker/WebSocketBrokerContext";
 import { vehicleRoute } from "pages/VehiclePage/vehicleRoute";
+import { camerasRoute } from "pages/CamerasPage/camerasRoute";
 import { testingRoute } from "pages/TestingPage/testingRoute";
 import { tubeRoute } from "pages/TubePage/tubeRoute";
 
@@ -14,7 +15,7 @@ const router = createBrowserRouter([
     {
         path: "/",
         element: <App />,
-        children: [vehicleRoute, testingRoute, tubeRoute],
+        children: [vehicleRoute, camerasRoute, testingRoute, tubeRoute],
     },
 ]);
 

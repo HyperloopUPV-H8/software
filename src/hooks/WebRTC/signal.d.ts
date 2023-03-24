@@ -1,21 +1,27 @@
 type Signal<Kind extends SignalKinds> = {
-    signal: Kind,
-    payload: SignalPayloadMap[Kind]
-}
+    signal: Kind;
+    payload: SignalPayloadMap[Kind];
+};
 
 type SignalHandles = {
-    [kind in SignalKinds]: (signal: Signal<kind>) => void
-}
+    [kind in SignalKinds]: (signal: Signal<kind>) => void;
+};
 
-type SignalKinds = "offer" | "answer" | "candidate" | "reject" | "close" | "keepalive"
+type SignalKinds =
+    | "offer"
+    | "answer"
+    | "candidate"
+    | "reject"
+    | "close"
+    | "keepalive";
 type SignalPayloadMap = {
-    "offer": RTCSessionDescriptionInit,
-    "answer": RTCSessionDescriptionInit,
-    "candidate": RTCIceCandidateInit,
-    "reject": RejectPayload,
-    "close": ClosePayload,
-    "keepalive": number,
-}
+    offer: RTCSessionDescriptionInit;
+    answer: RTCSessionDescriptionInit;
+    candidate: RTCIceCandidateInit;
+    reject: RejectPayload;
+    close: ClosePayload;
+    keepalive: number;
+};
 
 enum SignalCode {
     Ok = 100,
@@ -39,10 +45,10 @@ enum SignalCode {
 }
 
 type ClosePayload = {
-    code: SignalCode
-    reason?: string
+    code: SignalCode;
+    reason?: string;
 };
 
 type RejectPayload = {
-    origin?: Signal<"offer" | "answer" | "candidate">
+    origin?: Signal<"offer" | "answer" | "candidate">;
 } & ClosePayload;
