@@ -24,9 +24,7 @@ export const Pagination = ({ routes }: Props) => {
                         key={index}
                         pageNumber={index + 1}
                         isActive={route == activeRoute}
-                        onClick={() => {
-                            setActiveRoute(route);
-                        }}
+                        onClick={() => setActiveRoute(route)}
                     />
                 );
             })}

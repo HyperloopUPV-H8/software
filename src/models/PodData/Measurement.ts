@@ -20,6 +20,8 @@ export type Measurement = {
     id: string;
     name: string;
     type: VariableType;
+    safeRange: [number | null, number | null];
+    warningRange: [number | null, number | null];
     value: ValueType;
     units: string;
 };
@@ -28,12 +30,16 @@ export function createMeasurement(
     id: string,
     name: string,
     type: VariableType,
+    safeRange: [number, number],
+    warningRange: [number, number],
     value: string | number | boolean,
     units: string
 ) {
     return {
         id,
         name,
+        safeRange,
+        warningRange,
         type,
         value,
         units,
@@ -41,7 +47,15 @@ export function createMeasurement(
 }
 
 export function getDefaultMeasurement(): Measurement {
-    return createMeasurement("some_id", "default", "uint8", 12, "V");
+    return createMeasurement(
+        "some_id",
+        "default",
+        "uint8",
+        [0, 100],
+        [-10, 200],
+        12,
+        "V"
+    );
 }
 
 export function isNumber(type: string) {
@@ -57,7 +71,6 @@ export function isNumber(type: string) {
         case "float32":
         case "float64":
             return true;
-            break;
         default:
             return false;
     }
