@@ -1,9 +1,5 @@
 import styles from "./Information.module.scss";
 
-type Props = {
-    className: string;
-};
-
 export const Information = () => {
     //TODO: Add the information with the useSelector
     return (

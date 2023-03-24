@@ -9,14 +9,14 @@ export const Tube = () => {
 
     return (
         <div className={styles.tube}>
-            {sectionsArray.map(() => {
-                return <div className={styles.leftSection} />;
+            {sectionsArray.map((_, index) => {
+                return <div key={index} className={styles.leftSection} />;
             })}
             <div className={styles.section}>
                 <TeamLogo className={styles.logo} />
             </div>
-            {sectionsArray.map(() => {
-                return <div className={styles.rightSection} />;
+            {sectionsArray.map((_, index) => {
+                return <div key={index} className={styles.rightSection} />;
             })}
             {/* //TODO: Change position to a measurement with addUseSelector */}
             <Kenos position={20} />

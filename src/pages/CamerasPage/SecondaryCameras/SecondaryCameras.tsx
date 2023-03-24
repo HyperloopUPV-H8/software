@@ -16,7 +16,12 @@ export const SecondaryCameras = ({ videos, onClick }: Props) => {
         <div className={styles.secondaryCameras}>
             {videos.map((video, index) => {
                 return (
-                    <AuxCamera video={video} index={index} onClick={onClick} />
+                    <AuxCamera
+                        key={index}
+                        video={video}
+                        index={index}
+                        onClick={onClick}
+                    />
                 );
             })}
         </div>
