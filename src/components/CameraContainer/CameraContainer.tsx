@@ -3,11 +3,12 @@ import { useWebRTC } from "hooks/WebRTC/useWebRTC";
 import { Camera } from "./Camera/Camera";
 
 type Props = {
-    className: string;
+    signalUrl: string;
+    className?: string;
 };
 
-export const CameraContainer = ({ className }: Props) => {
-    const [stream, state] = useWebRTC("ws://192.168.0.5:50000/signal");
+export const CameraContainer = ({ signalUrl, className = "" }: Props) => {
+    const [stream, state] = useWebRTC(signalUrl);
 
     if (stream) {
         return (
