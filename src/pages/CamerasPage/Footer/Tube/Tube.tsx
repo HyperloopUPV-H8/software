@@ -5,8 +5,7 @@ import { Kenos } from "./Kenos/Kenos";
 const SECTIONS_BY_SIDE = 6;
 
 export const Tube = () => {
-    const sectionsArray = new Array(SECTIONS_BY_SIDE);
-    sectionsArray.fill(0);
+    const sectionsArray = new Array(SECTIONS_BY_SIDE).fill(0);
 
     return (
         <div className={styles.tube}>

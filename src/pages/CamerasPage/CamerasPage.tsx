@@ -41,10 +41,6 @@ export const CamerasPage = () => {
                 />
                 <div className={styles.overlayCameras}>
                     <TitleCamera title={videos[0].title} />
-                    {/* <div className={styles.title}>
-                        <div className={styles.name}>{videos[0].title}</div>
-                        <div className={styles.dot}></div>
-                    </div> */}
                     <SecondaryCameras
                         videos={videos.slice(1, 3)}
                         onClick={onClick}

@@ -1,11 +1,11 @@
 @use "src/styles/colors.scss";
 
 .gradientSecondaryCam {
-    //TODO: Change manual color of transparentize
     background: linear-gradient(
         135deg,
-        colors.getColor("primary", 40),
-        transparentize($color: #131e20, $amount: 1)
+        colors.getColor("primary", 50) 0%,
+        colors.getColor("primary", 30) 35%,
+        rgba(0, 0, 0, 0) 100%
     );
     border-radius: 1rem;
     padding: 1px;

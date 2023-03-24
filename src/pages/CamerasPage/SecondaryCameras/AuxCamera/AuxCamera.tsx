@@ -1,13 +1,13 @@
 import { TitleCamera } from "pages/CamerasPage/TitleCamera/TitleCam";
 import styles from "./AuxCamera.module.scss";
 
-type camWithTitle = {
+type CameraData = {
     video: string;
     title: string;
 };
 
 type Props = {
-    video: camWithTitle;
+    video: CameraData;
     index: number;
     onClick: (camClicked: number) => void;
 };
