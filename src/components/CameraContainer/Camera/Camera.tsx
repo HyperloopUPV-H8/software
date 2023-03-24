@@ -1,5 +1,6 @@
 import styles from "./Camera.module.scss";
 import { useRef, useEffect } from "react";
+import { useMediaStream } from "./useMediaStream";
 
 type Props = {
     stream: MediaStream;
@@ -7,20 +8,12 @@ type Props = {
 };
 
 export const Camera = ({ stream, className = "" }: Props) => {
-    const videoRef = useRef<HTMLVideoElement>(null);
-
-    useEffect(() => {
-        if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-        } else {
-            console.error("video ref is", videoRef.current);
-        }
-    }, [stream]);
+    const ref = useMediaStream(stream);
 
     return (
         <div className={`${styles.videoWrapper} ${className}`}>
             <video
-                ref={videoRef}
+                ref={ref}
                 muted
                 loop
                 playsInline
