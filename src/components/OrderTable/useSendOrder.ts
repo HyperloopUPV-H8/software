@@ -5,6 +5,6 @@ export function useSendOrder() {
     const sendWS = useWebSocketBroker("order/send");
 
     return (order: Order) => {
-        sendWS(JSON.stringify(order));
+        sendWS(order);
     };
 }

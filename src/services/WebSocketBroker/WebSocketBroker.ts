@@ -1,51 +1,63 @@
 import { Callback, BackendMessage } from "./types";
 
 export class WebSocketBroker {
-    private webSocket: WebSocket;
-    private topicToCallbacks: Map<string, Array<Callback>> = new Map();
+    static instance: WebSocketBroker | undefined;
+    private webSocket!: WebSocket;
+    private typeToCallbacks!: Map<string, Array<Callback>>;
 
     constructor(url: string, onOpen: () => void, onClose: () => void) {
+        if (WebSocketBroker.instance) {
+            return WebSocketBroker.instance;
+        } else {
+            this.initWebSocketBroker(url, onOpen, onClose);
+            WebSocketBroker.instance = this;
+        }
+    }
+
+    private initWebSocketBroker(
+        url: string,
+        onOpen: () => void,
+        onClose: () => void
+    ) {
+        this.typeToCallbacks = new Map();
+
         this.webSocket = new WebSocket(`ws://${url}`);
         this.webSocket.onopen = onOpen;
-
         this.webSocket.onmessage = (ev: MessageEvent<string>) => {
             const socketMessage = JSON.parse(ev.data) as BackendMessage;
             const callbacks =
-                this.topicToCallbacks.get(socketMessage.topic) ?? [];
+                this.typeToCallbacks.get(socketMessage.topic) ?? [];
             for (const callback of callbacks) {
                 callback(socketMessage.msg);
             }
         };
-
         this.webSocket.onclose = onClose;
     }
 
-    public addCallback(topic: string, callback: Callback) {
-        const callbacks = this.topicToCallbacks.get(topic) ?? [];
-        this.topicToCallbacks.set(topic, [...callbacks, callback]);
+    public addCallback(type: string, callback: Callback) {
+        const callbacks = this.typeToCallbacks.get(type) ?? [];
+        this.typeToCallbacks.set(type, [...callbacks, callback]);
     }
 
-    public removeCallback(topic: string, handler: Callback) {
-        if (!this.topicToCallbacks.has(topic)) {
-            console.warn(`Path ${topic} doesn't exist in pathToHandlers`);
+    public removeCallback(type: string, handler: Callback) {
+        if (!this.typeToCallbacks.has(type)) {
+            console.warn(`Path ${type} doesn't exist in pathToHandlers`);
         } else {
-            const callbacks = this.topicToCallbacks.get(topic)!;
-            this.topicToCallbacks.set(
-                topic,
+            const callbacks = this.typeToCallbacks.get(type)!;
+            this.typeToCallbacks.set(
+                type,
                 callbacks.filter((element) => element != handler)
             );
 
-            if (this.topicToCallbacks.get(topic)?.length == 0) {
-                this.topicToCallbacks.delete(topic);
+            if (this.typeToCallbacks.get(type)?.length == 0) {
+                this.typeToCallbacks.delete(type);
             }
         }
     }
 
-    public createSender(topic: string) {
+    public createSender(type: string) {
         return (msg: any) => {
-            this.webSocket.send(
-                JSON.stringify({ topic, msg } as BackendMessage)
-            );
+            this.webSocket.send(JSON.stringify({ type, msg }));
         };
     }
 
