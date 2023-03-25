@@ -1,0 +1,230 @@
+package main
+
+import (
+	"bytes"
+	"encoding/binary"
+	"log"
+	"math"
+	"math/rand"
+	"os"
+	"strconv"
+	"strings"
+
+	excelAdapter "github.com/HyperloopUPV-H8/Backend-H8/excel_adapter"
+	"github.com/HyperloopUPV-H8/Backend-H8/excel_adapter/models"
+)
+
+type PacketGenerator struct {
+	packets []Packet
+}
+
+func (pg *PacketGenerator) AddGlobal(global models.GlobalInfo) {}
+
+func New() *PacketGenerator {
+	document := excelAdapter.FetchDocument(os.Getenv("SPREADSHEET_ID"), "excel.xlsx", ".")
+	pg := &PacketGenerator{}
+
+	excelAdapter.Update(document, pg)
+
+	return pg
+
+}
+
+func (pg *PacketGenerator) CreateRandomPacket() []byte {
+	randomPacket := pg.packets[rand.Int63n(int64(len(pg.packets)))]
+
+	buff := bytes.NewBuffer(make([]byte, 0))
+
+	binary.Write(buff, binary.LittleEndian, randomPacket.ID)
+
+	for _, measurement := range randomPacket.Measurements {
+		if strings.Contains(measurement.Type, "Enum") {
+			binary.Write(buff, binary.LittleEndian, uint8(1))
+		} else {
+			number := mapNumberToRange(rand.Float64(), measurement.SafeRange, measurement.Type)
+			writeNumberAsBytes(number, measurement.Type, buff)
+		}
+	}
+
+	return buff.Bytes()
+}
+
+func mapNumberToRange(number float64, numberRange []float64, numberType string) float64 {
+	if len(numberRange) == 0 {
+		return number * getTypeMaxValue(numberType)
+	} else {
+		return (number * (numberRange[1] - numberRange[0])) + numberRange[0]
+	}
+}
+
+func getTypeMaxValue(numberType string) float64 {
+	switch numberType {
+	case "uint8":
+		return math.MaxUint8
+	case "uint16":
+		return math.MaxUint16
+	case "uint32":
+		return math.MaxUint32
+	case "uint64":
+		return math.MaxUint64
+	case "int8":
+		return math.MaxInt8
+	case "int16":
+		return math.MaxInt16
+	case "int32":
+		return math.MaxInt32
+	case "int64":
+		return math.MaxInt64
+	case "float32":
+		return math.MaxFloat32
+	case "float64":
+		return math.MaxFloat64
+	case "bool":
+		return math.MaxUint8
+	default:
+		return math.MaxUint8
+	}
+}
+
+func writeNumberAsBytes(number float64, numberType string, buff *bytes.Buffer) {
+	switch numberType {
+	case "uint8":
+		binary.Write(buff, binary.LittleEndian, uint8(number))
+	case "uint16":
+		binary.Write(buff, binary.LittleEndian, uint16(number))
+
+	case "uint32":
+		binary.Write(buff, binary.LittleEndian, uint32(number))
+
+	case "uint64":
+		binary.Write(buff, binary.LittleEndian, uint64(number))
+
+	case "int8":
+		binary.Write(buff, binary.LittleEndian, int8(number))
+
+	case "int16":
+		binary.Write(buff, binary.LittleEndian, int16(number))
+
+	case "int32":
+		binary.Write(buff, binary.LittleEndian, int32(number))
+
+	case "int64":
+		binary.Write(buff, binary.LittleEndian, int64(number))
+
+	case "float32":
+		binary.Write(buff, binary.LittleEndian, float32(number))
+
+	case "float64":
+		binary.Write(buff, binary.LittleEndian, number)
+
+	case "bool":
+		binary.Write(buff, binary.LittleEndian, uint8(number))
+
+	default:
+		binary.Write(buff, binary.LittleEndian, uint8(number))
+	}
+}
+
+func (pg *PacketGenerator) AddPacket(boardName string, packet models.Packet) {
+	if packet.Description.Type != "data" {
+		return
+	}
+
+	id, err := strconv.ParseUint(packet.Description.ID, 10, 16)
+	if err != nil {
+		log.Fatalf("data transfer: AddPacket: %s\n", err)
+	}
+
+	pg.packets = append(pg.packets, Packet{
+		ID:           uint16(id),
+		Name:         packet.Description.Name,
+		HexValue:     "",
+		Count:        0,
+		CycleTime:    0,
+		Measurements: getMeasurements(packet.Values),
+	})
+
+}
+
+func getMeasurements(values []models.Value) map[string]Measurement {
+	measurements := make(map[string]Measurement, len(values))
+	for _, value := range values {
+		measurements[value.ID] = Measurement{
+			ID:   value.ID,
+			Name: value.Name,
+			Type: value.Type,
+			//TODO: make sure added property (Value) doesn't break stuff
+			Value:        getDefaultValue(value.Type),
+			Units:        value.DisplayUnits,
+			SafeRange:    parseRange(value.SafeRange),
+			WarningRange: parseRange(value.WarningRange),
+		}
+	}
+	return measurements
+}
+
+func parseRange(literal string) []float64 {
+	if literal == "" {
+		return make([]float64, 0)
+	}
+
+	strRange := strings.Split(strings.TrimSuffix(strings.TrimPrefix(strings.Replace(literal, " ", "", -1), "["), "]"), ",")
+
+	if len(strRange) != 2 {
+		log.Fatalf("pod data: parseRange: invalid range %s\n", literal)
+	}
+
+	numRange := make([]float64, 0)
+
+	if strRange[0] != "" {
+		lowerBound, errLowerBound := strconv.ParseFloat(strRange[0], 64)
+
+		if errLowerBound != nil {
+			log.Fatal("error parsing lower bound")
+		}
+
+		numRange = append(numRange, lowerBound)
+	}
+
+	if strRange[1] != "" {
+		upperBound, errUpperBound := strconv.ParseFloat(strRange[1], 64)
+
+		if errUpperBound != nil {
+			log.Fatal("error parsing lower bound")
+		}
+
+		numRange = append(numRange, upperBound)
+	}
+
+	return numRange
+}
+
+func getDefaultValue(valueType string) any {
+	switch valueType {
+	case "uint8", "uint16", "uint32", "uint64", "int8", "int16", "int32", "int64", "float32", "float64":
+		return 0
+	case "bool":
+		return false
+	default:
+		return "Default"
+	}
+}
+
+type Packet struct {
+	ID           uint16                 `json:"id"`
+	Name         string                 `json:"name"`
+	HexValue     string                 `json:"hexValue"`
+	Count        uint16                 `json:"count"`
+	CycleTime    int64                  `json:"cycleTime"`
+	Measurements map[string]Measurement `json:"measurements"`
+}
+
+type Measurement struct {
+	ID           string    `json:"id"`
+	Name         string    `json:"name"`
+	Type         string    `json:"type"`
+	Value        any       `json:"value"`
+	Units        string    `json:"units"`
+	SafeRange    []float64 `json:"safeRange"`
+	WarningRange []float64 `json:"warningRange"`
+}
