@@ -1,26 +1,30 @@
-import { AuxCamera } from "./AuxCamera/AuxCamera";
+import { CameraData } from "../CameraData";
+import { LabeledCamera } from "../LabeledCamera/LabeledCamera";
 import styles from "./SecondaryCameras.module.scss";
 
-type camWithTitle = {
-    video: string;
-    title: string;
-};
-
 type Props = {
-    videos: camWithTitle[];
+    cameras: Array<CameraData>;
     onClick: (camClicked: number) => void;
+    className?: string;
 };
 
-export const SecondaryCameras = ({ videos, onClick }: Props) => {
+export const SecondaryCameras = ({
+    cameras,
+    onClick,
+    className = "",
+}: Props) => {
     return (
-        <div className={styles.secondaryCameras}>
-            {videos.map((video, index) => {
+        <div className={`${styles.secondaryCamerasWrapper} ${className}`}>
+            {cameras.map((camera, index) => {
                 return (
-                    <AuxCamera
+                    <LabeledCamera
                         key={index}
-                        video={video}
-                        index={index}
-                        onClick={onClick}
+                        className={styles.camera}
+                        title={`Cam ${camera.index}`}
+                        signalUrl={camera.url}
+                        onClick={() => {
+                            onClick(index + 1);
+                        }}
                     />
                 );
             })}

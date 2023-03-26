@@ -1,51 +1,43 @@
 import { CamerasFooter } from "./Footer/CamerasFooter";
 import styles from "./CamerasPage.module.scss";
 import { SecondaryCameras } from "./SecondaryCameras/SecondaryCameras";
-//import { useWebRTC } from "hooks/WebRTC/useWebRTC";
-import video1 from "./videos/videoAuran.mp4";
-import video2 from "./videos/videoIgnis.mp4";
-import video3 from "./videos/videoTurian.mp4";
-import { useState } from "react";
-import { CameraTitle } from "./TitleCamera/CameraTitle";
-
+import { useState, useCallback } from "react";
+import { CameraTitle } from "./CameraTitle/CameraTitle";
+import { CameraContainer } from "components/CameraContainer/CameraContainer";
+import { CameraData } from "./CameraData";
+import { LabeledCamera } from "./LabeledCamera/LabeledCamera";
 export const CamerasPage = () => {
-    //const [ref, state] = useWebRTC("ws://127.0.0.1:4040/signal");
-    //TODO: Changes the videos with the streaming
-    const [videos, setVideos] = useState([
-        { video: video1, title: "Cam 1" },
-        { video: video2, title: "Cam 2" },
-        { video: video3, title: "Cam 3" },
+    const [cameras, setCameras] = useState<Array<CameraData>>([
+        { index: 0, url: import.meta.env.VITE_CAMERA_1_URL },
+        { index: 1, url: import.meta.env.VITE_CAMERA_1_URL },
+        { index: 2, url: import.meta.env.VITE_CAMERA_1_URL },
     ]);
 
-    function onClick(camClicked: number): void {
-        setVideos((prevVideos) => {
-            const newVideos = [...prevVideos];
-            const auxCamValue = newVideos[camClicked];
-            newVideos[camClicked] = newVideos[0];
-            newVideos[0] = auxCamValue;
-            return newVideos;
+    const onClick = useCallback((camIndex: number): void => {
+        setCameras((prevCameras) => {
+            const newCameras = [...prevCameras];
+            const auxCamValue = newCameras[camIndex];
+            newCameras[camIndex] = newCameras[0];
+            newCameras[0] = auxCamValue;
+            return newCameras;
         });
-    }
+    }, []);
 
     return (
-        <div className={styles.camerasContainer}>
+        <div className={styles.camerasPageWrapper}>
             <div className={styles.camerasBody}>
-                <video
-                    className={styles.mainCamera}
-                    // ref={ref} //TODO: ref fo the hook for the streaming
-                    src={videos[0].video}
-                    autoPlay
-                    loop
-                    muted
-                    disablePictureInPicture //TODO: In firefox it is not fixed
-                />
-                <div className={styles.overlayCameras}>
-                    <CameraTitle title={videos[0].title} />
-                    <SecondaryCameras
-                        videos={videos.slice(1, 3)}
-                        onClick={onClick}
+                <div className={styles.mainCameraWrapper}>
+                    <LabeledCamera
+                        title={`Cam ${cameras[0].index}`}
+                        className={styles.mainCamera}
+                        signalUrl={import.meta.env.VITE_CAMERA_1_URL}
                     />
                 </div>
+                <SecondaryCameras
+                    cameras={cameras.slice(1)}
+                    onClick={onClick}
+                    className={styles.secondaryCameras}
+                />
             </div>
             <CamerasFooter />
         </div>
