@@ -1,1 +1,1 @@
-export type CameraData = { index: number; url: string };
+export type CameraData = { id: string; url: string };

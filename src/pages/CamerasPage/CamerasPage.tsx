@@ -2,15 +2,14 @@ import { CamerasFooter } from "./Footer/CamerasFooter";
 import styles from "./CamerasPage.module.scss";
 import { SecondaryCameras } from "./SecondaryCameras/SecondaryCameras";
 import { useState, useCallback } from "react";
-import { CameraTitle } from "./CameraTitle/CameraTitle";
-import { CameraContainer } from "components/CameraContainer/CameraContainer";
 import { CameraData } from "./CameraData";
 import { LabeledCamera } from "./LabeledCamera/LabeledCamera";
+
 export const CamerasPage = () => {
     const [cameras, setCameras] = useState<Array<CameraData>>([
-        { index: 0, url: import.meta.env.VITE_CAMERA_1_URL },
-        { index: 1, url: import.meta.env.VITE_CAMERA_1_URL },
-        { index: 2, url: import.meta.env.VITE_CAMERA_1_URL },
+        { id: "Cam 0", url: import.meta.env.VITE_CAMERA_1_URL as string },
+        { id: "Cam 1", url: import.meta.env.VITE_CAMERA_1_URL as string },
+        { id: "Cam 2", url: import.meta.env.VITE_CAMERA_1_URL as string },
     ]);
 
     const onClick = useCallback((camIndex: number): void => {
@@ -29,9 +28,9 @@ export const CamerasPage = () => {
             <div className={styles.camerasBody}>
                 <div className={styles.mainCameraWrapper}>
                     <LabeledCamera
-                        title={`Cam ${cameras[0].index}`}
+                        title={cameras[0].id}
                         className={styles.mainCamera}
-                        signalUrl={import.meta.env.VITE_CAMERA_1_URL}
+                        signalUrl={cameras[0].url}
                     />
                 </div>
                 <SecondaryCameras

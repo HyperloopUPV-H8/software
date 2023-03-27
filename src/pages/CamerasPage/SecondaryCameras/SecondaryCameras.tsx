@@ -20,7 +20,7 @@ export const SecondaryCameras = ({
                     <LabeledCamera
                         key={index}
                         className={styles.camera}
-                        title={`Cam ${camera.index}`}
+                        title={camera.id}
                         signalUrl={camera.url}
                         onClick={() => {
                             onClick(index + 1);
