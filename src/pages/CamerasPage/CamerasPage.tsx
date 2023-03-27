@@ -16,9 +16,10 @@ export const CamerasPage = () => {
     const onClick = useCallback((camIndex: number): void => {
         setCameras((prevCameras) => {
             const newCameras = [...prevCameras];
-            const auxCamValue = newCameras[camIndex];
-            newCameras[camIndex] = newCameras[0];
-            newCameras[0] = auxCamValue;
+            [newCameras[camIndex], newCameras[0]] = [
+                newCameras[0],
+                newCameras[camIndex],
+            ];
             return newCameras;
         });
     }, []);
