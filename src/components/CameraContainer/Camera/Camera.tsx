@@ -23,7 +23,7 @@ export const Camera = ({ stream, ...props }: Props) => {
                 loop
                 playsInline
                 autoPlay
-                disablePictureInPicture //TODO: In firefox it is not fixed
+                disablePictureInPicture // Not supported in firefox
                 className={`${styles.video}`}
             ></video>
         </div>
