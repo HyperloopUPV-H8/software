@@ -1,3 +1,5 @@
+@use "src/styles/colors.scss";
+
 .playWrapper {
     display: flex;
     flex-flow: row;
@@ -7,12 +9,23 @@
 .sectionWrapper {
     display: flex;
     flex-flow: column;
+    background-color: white;
+    border-radius: 1rem;
+}
+
+.title {
+    background-color: colors.getColor("tertiary", 90);
+    color: colors.getColor("tertiary", 70);
+    border-top-right-radius: 1rem;
+    border-top-left-radius: 1rem;
+    padding: 0.5rem;
 }
 
 .controlsWrapper {
     display: flex;
     flex-flow: row;
     justify-content: space-evenly;
+    margin: 1rem;
 }
 
 .inputWrapper {
@@ -26,6 +39,6 @@
     width: 20rem;
     display: flex;
     flex-flow: column;
-    row-gap: 2rem;
+    row-gap: 1rem;
     justify-content: center;
 }
