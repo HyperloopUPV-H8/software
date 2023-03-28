@@ -17,7 +17,7 @@ export const TabBar = ({ items, onTabClick, visibleTabId }: Props) => {
                         key={item.id}
                         className={item.id == visibleTabId ? styles.active : ""}
                         name={item.name}
-                        //FIXME: añadir icono
+                        icon={item.icon}
                         onClick={() => {
                             onTabClick(item);
                         }}

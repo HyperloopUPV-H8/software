@@ -7,41 +7,40 @@ import { nanoid } from "nanoid";
 import { FaultsAndWarningLogger } from "components/FaultsAndWarningLogger/FaultsAndWarningLogger";
 import { ConnectionsTable } from "components/ConnectionsTable/ConnectionsTable";
 import { Logger } from "components/Logger/Logger";
-//import { BootloaderUploader } from "components/BootloaderUploader/BootloaderUploader";
-
+import { BootloaderUploader } from "components/BootloaderUploader/BootloaderUploader";
+import { useRef } from "react";
 export const MessagesColumn = () => {
+    const messagesTabItems = useRef([
+        {
+            id: nanoid(),
+            name: "Messages",
+            icon: <BiLineChart />,
+
+            component: <FaultsAndWarningLogger />,
+        },
+    ]);
+
+    const connectionsTabItems = useRef([
+        {
+            id: nanoid(),
+            name: "Connections",
+            icon: <BiLineChart />,
+
+            component: <ConnectionsTable />,
+        },
+    ]);
+
     return (
         <div className={styles.messageColumnWrapper}>
             <SplitLayout
                 components={[
-                    <TabLayout
-                        items={[
-                            {
-                                id: nanoid(),
-                                name: "Messages",
-                                icon: <BiLineChart />,
-
-                                component: <FaultsAndWarningLogger />,
-                            },
-                        ]}
-                    ></TabLayout>,
-                    <TabLayout
-                        items={[
-                            {
-                                id: nanoid(),
-                                name: "Connections",
-                                icon: <BiLineChart />,
-
-                                component: <ConnectionsTable />,
-                            },
-                        ]}
-                    ></TabLayout>,
+                    <TabLayout items={messagesTabItems.current}></TabLayout>,
+                    <TabLayout items={connectionsTabItems.current}></TabLayout>,
                 ]}
                 direction={Direction.VERTICAL}
-                minSizes={[0.2, 0.2]}
             ></SplitLayout>
             <Logger />
-            {/* <BootloaderUploader /> */}
+            <BootloaderUploader />
         </div>
     );
 };
