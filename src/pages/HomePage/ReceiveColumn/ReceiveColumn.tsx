@@ -6,18 +6,20 @@ import { TabLayout } from "layouts/TabLayout/TabLayout";
 import { HiInboxArrowDown } from "react-icons/hi2";
 import { ChartMenu } from "components/ChartMenu/ChartMenu";
 import { RequestState, useFetchPodData } from "./useFetchPodData";
+import { ReactComponent as IncomingMessage } from "assets/svg/incoming-message.svg";
+import { ReactComponent as Chart } from "assets/svg/chart.svg";
 
 const receiveColumnTabItem = [
     {
         id: "receiveTable",
         name: "Packets",
-        icon: <HiInboxArrowDown />,
+        icon: <IncomingMessage />,
         component: <ReceiveTable />,
     },
     {
         id: "charts",
         name: "Charts",
-        icon: <BiLineChart />,
+        icon: <Chart />,
         component: <ChartMenu />,
     },
 ];
