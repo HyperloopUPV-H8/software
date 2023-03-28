@@ -3,7 +3,7 @@
 .wrapper {
     width: 100%;
     display: grid;
-    grid-template: "name value" / minmax(4rem, min-content) 2rem;
+    grid-template: "name value units" / min(18rem) min(6rem) auto;
     gap: 1rem;
     padding: 0 1rem;
     @include styles.code-text;
@@ -12,4 +12,9 @@
 .value {
     grid-area: value;
     justify-self: right;
+}
+
+.units {
+    grid-area: units;
+    justify-self: left;
 }

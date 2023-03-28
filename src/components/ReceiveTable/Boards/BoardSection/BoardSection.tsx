@@ -1,7 +1,7 @@
-import styles from "components/ReceiveTable/Boards/BoardSection/BoardSection.module.scss";
+import styles from "./BoardSection.module.scss";
 import { Board } from "models/PodData/Board";
-import Header from "components/ReceiveTable/Boards/BoardSection/Header/Header";
-import PacketRow from "components/ReceiveTable/PacketRow/PacketRow";
+import Header from "./Header/Header";
+import PacketRow from "./PacketRow/PacketRow";
 import { memo } from "react";
 import { VariableSizeList } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
@@ -11,7 +11,7 @@ type Props = {
     board: Board;
 };
 
-const BoardSection = ({ board }: Props) => {
+export const BoardSection = ({ board }: Props) => {
     let [isVisible, setIsVisible] = useState(false);
     let packetArr = Object.values(board.packets);
 
@@ -67,5 +67,3 @@ const BoardSection = ({ board }: Props) => {
         </div>
     );
 };
-
-export default memo(BoardSection);
