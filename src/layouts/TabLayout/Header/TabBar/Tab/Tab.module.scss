@@ -6,9 +6,10 @@
     align-items: center;
     gap: 0.5rem;
     height: auto;
-    padding: 0.3rem;
-    border: 1px solid black;
-    border-radius: styles.$normal-border-radius;
+    padding: 0.5rem;
+    //border: 2px solid styles.$alternate-text-color;
+    background-color: rgb(240, 240, 240);
+    border-radius: 0.8rem;
     cursor: pointer;
 }
 

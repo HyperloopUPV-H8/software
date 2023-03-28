@@ -1,5 +1,4 @@
 import styles from "./Tab.module.scss";
-import { AiOutlineUnorderedList } from "react-icons/ai";
 
 type Props = {
     name: string;
@@ -13,7 +12,7 @@ export const Tab = ({ name, icon, onClick, className = "" }: Props) => {
             className={`${styles.wrapper} ${className}`}
             onClick={onClick}
         >
-            <AiOutlineUnorderedList className={styles.icon} />
+            {icon}
             <div className={styles.name}>{name}</div>
         </div>
     );
