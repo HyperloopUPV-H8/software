@@ -1,5 +1,5 @@
-import styles from "layouts/TabLayout/TabBar/TabBar.module.scss";
-import { Tab } from "layouts/TabLayout/Tab/Tab";
+import styles from "./TabBar.module.scss";
+import { Tab } from "./Tab/Tab";
 import { TabItem } from "layouts/TabLayout/TabItem";
 
 type Props = {

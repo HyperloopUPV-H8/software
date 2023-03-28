@@ -7,15 +7,14 @@ import { Direction } from "layouts/SplitLayout/Direction";
 
 type Props = {
     components: React.ReactNode[];
-    minSizes: number[];
     direction?: Direction;
 };
 
 export const SplitLayout = ({
     components,
-    minSizes,
     direction = Direction.HORIZONTAL,
 }: Props) => {
+    const minSizes = components.map(() => 0.2);
     const [splitElements, handleSeparatorMouseDown] = useSplitLayoutHandler(
         components.length,
         minSizes,
