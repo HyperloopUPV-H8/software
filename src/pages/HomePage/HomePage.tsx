@@ -1,7 +1,8 @@
 import { SplitLayout } from "layouts/SplitLayout/SplitLayout";
 import { Direction } from "layouts/SplitLayout/Direction";
 import { ReceiveColumn } from "pages/HomePage/ReceiveColumn/ReceiveColumn";
-import { TransmitColumn } from "pages/HomePage/TransmitColumn/TransmitColumn";
+import { OrderTable } from "components/OrderTable/OrderTable";
+import { OrderColumn } from "pages/HomePage/OrderColumn/OrderColumn";
 import { MessagesColumn } from "pages/HomePage/MessagesColumn/MessagesColumn";
 import styles from "pages/HomePage/HomePage.module.scss";
 
@@ -12,10 +13,9 @@ export const HomePage = () => {
                 <SplitLayout
                     components={[
                         <ReceiveColumn />,
-                        <TransmitColumn />,
+                        <OrderColumn />,
                         <MessagesColumn />,
                     ]}
-                    minSizes={[0.2, 0.2, 0.2]}
                     direction={Direction.HORIZONTAL}
                 ></SplitLayout>
             </div>
