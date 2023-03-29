@@ -5,8 +5,8 @@ export function useWebRTC(signalUrl: string, configuration?: RTCConfiguration) {
     const signalChannel = useRef<SignalChannel | null>(null); //TODO: arreglar lo de esta exclamacion rara
     const peer = useRef<RTCPeerConnection | null>(null);
     const [peerState, setPeerState] = useState<RTCPeerConnectionState>("new");
-    const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
-    
+    const [mediaStreams, setMediaStreams] = useState<MediaStream[] | null>(null);
+
     useEffect(() => {
         peer.current = new RTCPeerConnection(configuration);
         peer.current.addTransceiver("video");
@@ -16,37 +16,20 @@ export function useWebRTC(signalUrl: string, configuration?: RTCConfiguration) {
         peer.current.ontrack = handleTrack;
 
         signalChannel.current = new SignalChannel(signalUrl);
-        signalChannel.current.addSignalListener("answer", handleAnswerSignal);
-        signalChannel.current.addSignalListener(
-            "candidate",
-            handleCandidateSignal
-        );
-
-        signalChannel.current.socket.onopen = () => startHandshake();
+        signalChannel.current.addSignalListener("offer", handleOfferSignal);
+        signalChannel.current.addSignalListener("candidate", handleCandidateSignal);
     }, []);
 
-    function startHandshake() {
-        console.log("start handshake");
-
-        peer.current!.createOffer().then(
-            (offer: RTCSessionDescriptionInit) => sendAndUpdateOffer(offer),
-            (reason: Error) =>
-                signalChannel.current!.sendClose(
-                    SignalCode.FailCreateOffer,
-                    reason.message
+    function sendAndUpdateAnswer() {
+        peer.current!.createAnswer().then(
+            (answer) => {
+                peer.current!.setLocalDescription(answer).then(
+                    () => {
+                        signalChannel.current!.sendSignal("answer", answer)
+                    }
                 )
-        );
-    }
-
-    function sendAndUpdateOffer(offer: RTCSessionDescriptionInit) {
-        peer.current!.setLocalDescription(offer).then(
-            () => signalChannel.current!.sendSignal("offer", offer),
-            (reason: Error) =>
-                signalChannel.current!.sendClose(
-                    SignalCode.FailUpdateLocalOffer,
-                    reason.message
-                )
-        );
+            }
+        )
     }
 
     function handleCandidate(ev: RTCPeerConnectionIceEvent) {
@@ -54,12 +37,12 @@ export function useWebRTC(signalUrl: string, configuration?: RTCConfiguration) {
             return;
         }
 
-
         signalChannel.current!.sendSignal("candidate", ev.candidate.toJSON());
     }
 
     function handleTrack(ev: RTCTrackEvent) {
-        setMediaStream(ev.streams[0]);
+        console.log(ev)
+        setMediaStreams(prevStreams => prevStreams ? [...prevStreams, ...ev.streams] : [...ev.streams]);
     }
 
     function handleCandidateSignal(signal: Signal<"candidate">) {
@@ -74,18 +57,12 @@ export function useWebRTC(signalUrl: string, configuration?: RTCConfiguration) {
         );
     }
 
-    function handleAnswerSignal(signal: Signal<"answer">) {
+    function handleOfferSignal(signal: Signal<"offer">) {
         peer.current!.setRemoteDescription(signal.payload).then(
-            () => console.log("set answer"),
-            (reason: Error) =>
-                signalChannel.current!.sendError(
-                    SignalCode.FailUpdateRemoteAnswer,
-                    signal,
-                    reason.message
-                )
-        );
+            () => sendAndUpdateAnswer()
+        )
     }
 
 
-    return [mediaStream, peerState] as const;
+    return [mediaStreams, peerState] as const;
 }
