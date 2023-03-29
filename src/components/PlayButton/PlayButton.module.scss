@@ -1,7 +1,7 @@
 @use "src/styles/colors";
 
-$button-size: 5.5rem;
-$icon-size: 2rem;
+$button-size: 3.5rem;
+$icon-size: 1rem;
 
 .playButton {
     height: $button-size;
@@ -29,7 +29,7 @@ $icon-size: 2rem;
 
     &:hover {
         color: colors.getColor("stable", 50);
-        background-color: colors.getColor("stable", 80); 
+        background-color: colors.getColor("stable", 80);
     }
 }
 
@@ -39,7 +39,7 @@ $icon-size: 2rem;
 
     &:hover {
         color: colors.getColor("warning", 50);
-        background-color: colors.getColor("warning", 80); 
+        background-color: colors.getColor("warning", 80);
     }
 }
 
@@ -49,7 +49,7 @@ $icon-size: 2rem;
 
     &:hover {
         color: colors.getColor("fault", 50);
-        background-color: colors.getColor("fault", 80); 
+        background-color: colors.getColor("fault", 80);
     }
 }
 

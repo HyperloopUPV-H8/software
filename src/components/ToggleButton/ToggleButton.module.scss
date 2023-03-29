@@ -1,7 +1,8 @@
 @use "src/styles/colors";
 
-$button-height: 5.5rem;
-$icon-size: 2rem;
+$button-height: 2.5rem;
+$button-width: 3rem;
+$icon-size: 1.5rem;
 $label-size: 0.7rem;
 
 .toggleButtonWrapper {
@@ -10,25 +11,26 @@ $label-size: 0.7rem;
     align-items: center;
     width: fit-content;
     height: fit-content;
+    //flex-grow: 1;
 
     button {
-        width: $button-height;
+        width: $button-width;
         height: $button-height;
-    
+
         font-size: $icon-size;
         font-weight: bold;
-    
+
         appearance: none;
         border: none;
         border-radius: 6px;
-    
+
         background-color: transparent;
-    
+
         transition: box-shadow 30ms ease-in, transform 30ms ease-in;
-    
+
         &:active {
             box-shadow: none;
-            transform: translateY(0px)
+            transform: translateY(0px);
         }
     }
 
@@ -74,5 +76,4 @@ $label-size: 0.7rem;
             color: colors.getColor("primary", 50);
         }
     }
-
 }

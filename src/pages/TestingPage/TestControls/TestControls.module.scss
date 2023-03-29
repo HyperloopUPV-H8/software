@@ -1,0 +1,59 @@
+@use "src/styles/colors.scss";
+
+.testControlsWrapper {
+    width: 20rem;
+    display: flex;
+    flex-flow: column;
+
+    row-gap: 0.5rem;
+    //justify-content: center;
+}
+
+.playWrapper {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-evenly;
+}
+
+.sectionWrapper {
+    display: flex;
+    flex-flow: column;
+    background-color: white;
+    border-radius: 1rem;
+    flex-grow: 1;
+    justify-content: space-between;
+    gap: 0.5rem;
+    //height: 75%;
+}
+
+.title {
+    background-color: colors.getColor("tertiary", 90);
+    color: colors.getColor("tertiary", 70);
+    border-top-right-radius: 1rem;
+    border-top-left-radius: 1rem;
+    padding: 0.5rem;
+}
+
+.controlsWrapper {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-evenly;
+}
+
+.inputWrapper {
+    display: flex;
+    flex-flow: column;
+    //justify-content: center;
+    overflow-y: scroll;
+    //max-height: 14rem;
+    flex: 1 1 0;
+    //height: 65%;
+}
+
+.body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    padding: 1rem;
+    gap: 0.5rem;
+}

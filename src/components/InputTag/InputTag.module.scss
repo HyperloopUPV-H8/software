@@ -16,7 +16,7 @@ input {
 
     width: 100%;
 
-    font-size: 1rem;
+    font-size: 0.75rem;
 
     color: colors.getColor("neutral", 30);
 
@@ -24,7 +24,8 @@ input {
         outline: none;
     }
 
-    &::-webkit-outer-spin-button, &::-webkit-inner-spin-button {
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
         -webkit-appearance: none;
     }
 
@@ -43,6 +44,8 @@ legend {
 
 .inputTagWrapperOn {
     border-color: colors.getColor("tertiary", 70);
+    flex-grow: 1;
+    height: 2.8rem;
 
     legend {
         color: colors.getColor("tertiary", 70);
@@ -51,6 +54,8 @@ legend {
 
 .inputTagWrapperOff {
     border-color: colors.getColor("neutral", 70);
+    flex-grow: 1;
+    height: 2.8rem;
 
     legend {
         color: colors.getColor("neutral", 70);

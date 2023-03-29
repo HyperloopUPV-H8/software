@@ -1,44 +1,61 @@
-import { ButtonHTMLAttributes, DetailedHTMLProps, HTMLInputTypeAttribute, ReactNode } from "react";
+import {
+    ButtonHTMLAttributes,
+    DetailedHTMLProps,
+    HTMLInputTypeAttribute,
+    ReactNode,
+} from "react";
 import { FaPlay, FaPause, FaStop } from "react-icons/fa";
 import style from "./PlayButton.module.scss";
 
-type PlayButtonTypeAttribute = "play" | "pause" | "stop" | "disabled"
+type PlayButtonTypeAttribute = "play" | "pause" | "stop" | "disabled";
 
 type Variant = {
-    icon: ReactNode,
-    colorClass: string,
+    icon: ReactNode;
+    colorClass: string;
 };
 
 const playButtonVariants: Record<PlayButtonTypeAttribute, Variant> = {
-    "play": {
+    play: {
         icon: <FaPlay />,
         colorClass: style.green,
     },
-    "pause": {
+    pause: {
         icon: <FaPause />,
         colorClass: style.yellow,
     },
-    "stop": {
+    stop: {
         icon: <FaStop />,
         colorClass: style.red,
     },
-    "disabled": {
+    disabled: {
         icon: <FaStop />,
         colorClass: style.gray,
     },
 };
 
 type Props = {
-    variant: PlayButtonTypeAttribute,
-} & DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>
+    variant: PlayButtonTypeAttribute;
+} & DetailedHTMLProps<
+    ButtonHTMLAttributes<HTMLButtonElement>,
+    HTMLButtonElement
+>;
 
-export function PlayButton({ variant, className, disabled, ...buttonProps }: Props) {
-    const { icon, colorClass } = playButtonVariants[variant]
+export function PlayButton({
+    variant,
+    className,
+    disabled,
+    ...buttonProps
+}: Props) {
+    const { icon, colorClass } = playButtonVariants[variant];
 
-    const name = `${colorClass} ${className} ${style.playButton}`
+    const name = `${colorClass} ${className} ${style.playButton}`;
     return (
-        <button className={name} disabled={disabled || (variant === "disabled")} {...buttonProps}>
+        <button
+            className={name}
+            disabled={disabled || variant === "disabled"}
+            {...buttonProps}
+        >
             {icon}
         </button>
-    )
+    );
 }
