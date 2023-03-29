@@ -5,16 +5,18 @@ export type CameraData = {
     stream: MediaStream;
 };
 
+function streamsToCameras(streams: Array<MediaStream>): Array<CameraData> {
+    return streams.map((stream, index) => ({ id: index, stream }));
+}
+
 export function useCameras(streams: Array<MediaStream>) {
-    const [cameras, setCameras] = useState<Array<CameraData>>(() =>
-        streams?.map((stream, index) => ({ id: index, stream }))
+    const [cameras, setCameras] = useState<Array<CameraData>>(
+        streamsToCameras(streams)
     );
 
     // When streams change, initialize cameras
     useEffect(() => {
-        setCameras(
-            streams?.map((stream, index) => ({ id: index, stream })) ?? []
-        );
+        setCameras(streamsToCameras(streams));
     }, [streams]);
 
     const setMainCamera = useCallback((index: number) => {
