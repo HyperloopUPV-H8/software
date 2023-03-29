@@ -1,31 +1,28 @@
-import { CameraContainer } from "components/CameraContainer/CameraContainer";
+import { Camera } from "components/Camera/Camera";
+import { CameraData } from "../useCameras";
 import { CameraTitle } from "../CameraTitle/CameraTitle";
 import styles from "./LabeledCamera.module.scss";
 
 type Props = {
-    title: string;
-    signalUrl: string;
+    camera: CameraData;
     onClick?: () => void;
     className?: string;
 };
 
 export const LabeledCamera = ({
-    title,
-    signalUrl,
+    camera,
     onClick = () => {},
     className = "",
 }: Props) => {
     return (
         <div className={`${styles.labeledCameraWrapper} ${className}`}>
-            <CameraContainer
+            <Camera
+                stream={camera.stream}
                 className={styles.camera}
-                signalUrl={signalUrl}
-                onClick={() => {
-                    onClick();
-                }}
+                onClick={() => onClick()}
             />
             <CameraTitle
-                title={title}
+                title={`Cam ${camera.id}`}
                 className={styles.titleOverlay}
             />
         </div>

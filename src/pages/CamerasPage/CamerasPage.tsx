@@ -1,45 +1,24 @@
 import { CamerasFooter } from "./Footer/CamerasFooter";
 import styles from "./CamerasPage.module.scss";
-import { SecondaryCameras } from "./SecondaryCameras/SecondaryCameras";
-import { useState, useCallback } from "react";
-import { CameraTitle } from "./CameraTitle/CameraTitle";
-import { CameraContainer } from "components/CameraContainer/CameraContainer";
-import { CameraData } from "./CameraData";
-import { LabeledCamera } from "./LabeledCamera/LabeledCamera";
+import { Cameras } from "pages/CamerasPage/Cameras/Cameras";
+import { useWebRTC } from "hooks/WebRTC/useWebRTC";
+import { AnimatedEllipsis } from "components/AnimatedEllipsis/AnimatedEllipsis";
+
 export const CamerasPage = () => {
-    const [cameras, setCameras] = useState<Array<CameraData>>([
-        { index: 0, url: import.meta.env.VITE_CAMERA_1_URL },
-        { index: 1, url: import.meta.env.VITE_CAMERA_1_URL },
-        { index: 2, url: import.meta.env.VITE_CAMERA_1_URL },
-    ]);
+    const [streams, state] = useWebRTC(import.meta.env.VITE_CAMERA_1_URL);
 
-    const onClick = useCallback((camIndex: number): void => {
-        setCameras((prevCameras) => {
-            const newCameras = [...prevCameras];
-            const auxCamValue = newCameras[camIndex];
-            newCameras[camIndex] = newCameras[0];
-            newCameras[0] = auxCamValue;
-            return newCameras;
-        });
-    }, []);
-
-    return (
-        <div className={styles.camerasPageWrapper}>
-            <div className={styles.camerasBody}>
-                <div className={styles.mainCameraWrapper}>
-                    <LabeledCamera
-                        title={`Cam ${cameras[0].index}`}
-                        className={styles.mainCamera}
-                        signalUrl={import.meta.env.VITE_CAMERA_1_URL}
-                    />
-                </div>
-                <SecondaryCameras
-                    cameras={cameras.slice(1)}
-                    onClick={onClick}
-                    className={styles.secondaryCameras}
-                />
+    if (streams) {
+        return (
+            <div className={styles.camerasPageWrapper}>
+                <Cameras streams={streams} />
+                <CamerasFooter />
             </div>
-            <CamerasFooter />
-        </div>
-    );
+        );
+    } else {
+        return (
+            <div className={styles.loading}>
+                Loading cameras <AnimatedEllipsis />
+            </div>
+        );
+    }
 };
