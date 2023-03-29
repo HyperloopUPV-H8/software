@@ -1,11 +1,9 @@
 .camerasWrapper {
-    height: fit-content;
     display: flex;
     gap: 2rem;
 }
 
 .camera {
-    height: 16rem;
     border-radius: 1.5rem;
     overflow: hidden;
     box-shadow: 5px 4px 50px -24px rgba(0, 0, 0, 0.1);
