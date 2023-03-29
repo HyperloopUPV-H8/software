@@ -23,11 +23,8 @@ export function useWebRTC(signalUrl: string, configuration?: RTCConfiguration) {
     function sendAndUpdateAnswer() {
         peer.current!.createAnswer().then(
             (answer) => {
-                peer.current!.setLocalDescription(answer).then(
-                    () => {
-                        signalChannel.current!.sendSignal("answer", answer)
-                    }
-                )
+                signalChannel.current!.sendSignal("answer", answer)
+                peer.current!.setLocalDescription(answer)
             }
         )
     }
