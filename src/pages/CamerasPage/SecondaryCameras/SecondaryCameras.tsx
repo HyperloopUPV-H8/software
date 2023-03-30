@@ -1,10 +1,10 @@
-import { CameraData } from "../CameraData";
 import { LabeledCamera } from "../LabeledCamera/LabeledCamera";
+import { CameraData } from "../useCameras";
 import styles from "./SecondaryCameras.module.scss";
 
 type Props = {
     cameras: Array<CameraData>;
-    onClick: (camClicked: number) => void;
+    onClick: (index: number) => void;
     className?: string;
 };
 
@@ -20,11 +20,8 @@ export const SecondaryCameras = ({
                     <LabeledCamera
                         key={index}
                         className={styles.camera}
-                        title={camera.id}
-                        signalUrl={camera.url}
-                        onClick={() => {
-                            onClick(index + 1);
-                        }}
+                        camera={camera}
+                        onClick={() => onClick(index + 1)}
                     />
                 );
             })}
