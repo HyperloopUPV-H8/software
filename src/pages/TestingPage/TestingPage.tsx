@@ -15,7 +15,7 @@ export function TestingPage() {
         <PageWrapper title="Testing">
             <div className={style.testingPageWrapper}>
                 <TestControls />
-                <div className={style.threeJSAndgraphics}>
+                <div className={style.podRepresentation}>
                     <div className={style.threeJSAndInfo}>
                         <div className={style.threeJS}></div>
                         <div className={style.info}></div>

@@ -4,9 +4,7 @@
     width: 20rem;
     display: flex;
     flex-flow: column;
-
     row-gap: 0.5rem;
-    //justify-content: center;
 }
 
 .playWrapper {
@@ -23,7 +21,6 @@
     flex-grow: 1;
     justify-content: space-between;
     gap: 0.5rem;
-    //height: 75%;
 }
 
 .title {
@@ -43,11 +40,8 @@
 .inputWrapper {
     display: flex;
     flex-flow: column;
-    //justify-content: center;
     overflow-y: scroll;
-    //max-height: 14rem;
     flex: 1 1 0;
-    //height: 65%;
 }
 
 .body {
