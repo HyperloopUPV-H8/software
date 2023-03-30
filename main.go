@@ -38,6 +38,9 @@ func main() {
 	go func() {
 		for range ticker.C {
 			packet := packetGenerator.CreateRandomPacket()
+			if packet == nil {
+				continue
+			}
 			_, err := conn.Write(packet)
 
 			if err != nil {

@@ -40,9 +40,11 @@ func (pg *PacketGenerator) CreateRandomPacket() []byte {
 	for _, measurement := range randomPacket.Measurements {
 		if strings.Contains(measurement.Type, "Enum") {
 			binary.Write(buff, binary.LittleEndian, uint8(1))
-		} else {
+		} else if measurement.Type != "string" {
 			number := mapNumberToRange(rand.Float64(), measurement.SafeRange, measurement.Type)
 			writeNumberAsBytes(number, measurement.Type, buff)
+		} else {
+			return nil
 		}
 	}
 
