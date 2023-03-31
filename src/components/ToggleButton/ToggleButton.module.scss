@@ -1,7 +1,7 @@
 @use "src/styles/colors";
 
-$button-height: 2.5rem;
-$button-width: 3rem;
+$button-height: 3rem;
+$button-width: 3.5rem;
 $icon-size: 1.5rem;
 $label-size: 0.7rem;
 
@@ -26,6 +26,10 @@ $label-size: 0.7rem;
         background-color: transparent;
 
         transition: box-shadow 30ms ease-in, transform 30ms ease-in;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
         &:active {
             box-shadow: none;
