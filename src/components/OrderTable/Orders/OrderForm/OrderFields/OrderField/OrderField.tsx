@@ -1,7 +1,7 @@
 import styles from "./OrderField.module.scss";
 import { TextInput } from "components/FormComponents/TextInput/TextInput";
 import { CheckBox } from "components/FormComponents/CheckBox/CheckBox";
-import { Dropdown } from "components/FormComponents/Dropdown/Dropdown";
+import { Dropdown } from "components/FormComponents/old_Dropdown/Dropdown";
 import { FieldState, FormField } from "../../useFormFields"; //TODO: mover formfield
 import { NumericType } from "adapters/GolangTypes";
 import { NumericValue } from "adapters/Order";

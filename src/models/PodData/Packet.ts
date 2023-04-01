@@ -1,7 +1,6 @@
 import { PacketUpdate } from "adapters/PacketUpdate";
-import { Measurement, isNumber, getNumber } from "models/PodData/Measurement";
+import { Measurement } from "models/PodData/Measurement";
 import { WritableDraft } from "immer/dist/internal";
-import { original } from "@reduxjs/toolkit";
 
 export type Packet = {
     id: number;
@@ -26,13 +25,6 @@ function updateMeasurements(
     measurementUpdates: PacketUpdate["measurementUpdates"]
 ): void {
     for (let [mName, newValue] of Object.entries(measurementUpdates)) {
-        if (isNumber(original(measurements[mName])!.type)) {
-            measurements[mName].value = getNumber(
-                original(measurements[mName])!.type,
-                newValue
-            );
-        } else {
-            measurements[mName].value = newValue;
-        }
+        measurements[mName].value = newValue;
     }
 }

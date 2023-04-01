@@ -7,7 +7,7 @@ type Props = {
     horizontalDivisions: number;
 };
 
-const STROKE_WIDTH = 0.5;
+const STROKE_WIDTH = 1;
 const STROKE_OPACITY = 0.2;
 
 export const Grid = ({

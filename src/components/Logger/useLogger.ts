@@ -1,13 +1,13 @@
 import { useWebSocketBroker } from "services/WebSocketBroker/useWebSocketBroker";
 
-export function useLogger() {
-    const sendWS = useWebSocketBroker("logger");
+export function useLogger(setState: React.Dispatch<React.SetStateAction<boolean>>) {
+    const sendWS = useWebSocketBroker("logger", (state) => setState(state));
 
     function startLogging() {
-        sendWS("enable");
+        sendWS(true);
     }
     function stopLogging() {
-        sendWS("disable");
+        sendWS(false);
     }
 
     return [startLogging, stopLogging];

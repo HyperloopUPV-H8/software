@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { Connection } from "models/Connection";
+
 const connectionsSlice = createSlice({
     name: "connections",
     initialState: {

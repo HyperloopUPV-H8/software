@@ -6,7 +6,7 @@ import { useLogger } from "./useLogger";
 
 export const Logger = () => {
     const [loggingState, setLoggingState] = useState(false);
-    const [startLogging, stopLogging] = useLogger();
+    const [startLogging, stopLogging] = useLogger(setLoggingState);
     return (
         <div className={`${styles.loggerWrapper} island`}>
             <span className={styles.loggingState}>

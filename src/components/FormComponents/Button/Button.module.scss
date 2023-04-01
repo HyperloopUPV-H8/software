@@ -1,24 +1,24 @@
-@use "@styles/styles";
+@use "src/styles/styles";
 
 .buttonWrapper {
     flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
     padding: 0.5rem;
     text-align: center;
     border-radius: styles.$normal-border-radius;
     background-color: styles.$orange;
     color: white;
     user-select: none;
+    box-shadow: 0px 4px 5px -4px rgba(0, 0, 0, 0.1);
 
     &.enabled {
         cursor: pointer;
-        //FIXME: ANIMATION GETS CUT SHORT WHEN BUTTON IS RELEASED
-        &:active {
-            @include styles.flash-button(styles.$orange);
-        }
-        transition: styles.$background-color-transition;
     }
 
     &.disabled {
-        background-color: styles.saturation(styles.$orange, -100%);
+        background-color: #b6b6b6;
     }
 }

@@ -4,9 +4,10 @@ type Props = {
     label: string;
     onClick: () => void;
     disabled?: boolean;
+    color?: string;
 };
 
-export const Button = ({ label, onClick, disabled }: Props) => {
+export const Button = ({ label, color = "", onClick, disabled }: Props) => {
     return (
         <div
             className={`${styles.buttonWrapper} ${
@@ -17,6 +18,7 @@ export const Button = ({ label, onClick, disabled }: Props) => {
                     onClick();
                 }
             }}
+            style={{ backgroundColor: color }}
         >
             {label}
         </div>
