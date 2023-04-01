@@ -9,8 +9,7 @@ export function useConnections() {
     const dispatch = useDispatch();
 
     useWebSocketBroker("connection/update", (msg) => {
-        let connections = JSON.parse(msg);
-        dispatch(updateBoardConnectionsArray(connections));
+        dispatch(updateBoardConnectionsArray(msg));
     });
 
     return useSelector((state: RootState) => state.connections);
