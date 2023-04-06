@@ -6,11 +6,11 @@ import (
 	"log"
 	"math"
 	"math/rand"
-	"os"
 	"strconv"
 	"strings"
 
 	excelAdapter "github.com/HyperloopUPV-H8/Backend-H8/excel_adapter"
+	"github.com/HyperloopUPV-H8/Backend-H8/excel_adapter/internals"
 	"github.com/HyperloopUPV-H8/Backend-H8/excel_adapter/models"
 )
 
@@ -21,10 +21,26 @@ type PacketGenerator struct {
 func (pg *PacketGenerator) AddGlobal(global models.GlobalInfo) {}
 
 func New() *PacketGenerator {
-	document := excelAdapter.FetchDocument(os.Getenv("SPREADSHEET_ID"), "excel.xlsx", ".")
+	excelAdapter := excelAdapter.NewExcelAdapter(excelAdapter.ExcelAdapterConfig{
+		Download: internals.DownloadConfig{
+			Id:          "1BEwASubu0el9oQA6PSwVKaNU-Q6gbJ40JR6kgqguKYE",
+			Credentials: "./secret.json",
+			Path:        ".",
+			Name:        "ade.xlsx",
+		},
+		Parse: internals.ParseConfig{
+			GlobalSheetPrefix: "GLOBAL ",
+			BoardSheetPrefix:  "BOARD ",
+			TablePrefix:       "[TABLE] ",
+			AddressTable:      "addresses",
+			BackendEntryKey:   "Backend",
+			UnitsTable:        "units",
+			PortsTable:        "ports",
+			IdsTable:          "ids",
+		},
+	})
 	pg := &PacketGenerator{}
-
-	excelAdapter.Update(document, pg)
+	excelAdapter.Update(pg)
 
 	return pg
 

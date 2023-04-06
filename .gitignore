@@ -19,3 +19,5 @@ packet_sender
 secret.json
 excel.xlsx
 .vscode
+
+*.xlsx

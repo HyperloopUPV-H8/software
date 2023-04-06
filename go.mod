@@ -38,4 +38,4 @@ require (
 	google.golang.org/protobuf v1.28.1 // indirect
 )
 
-replace github.com/HyperloopUPV-H8/Backend-H8 => ../../../backend/src
+replace github.com/HyperloopUPV-H8/Backend-H8 => ../h8-backend/src

@@ -12,10 +12,10 @@ import (
 )
 
 const (
-	lip   string = "127.0.0.2"
-	lport uint16 = 5000
-	rip   string = "127.0.0.3"
-	rport uint16 = 5000
+	lip   string = "192.168.0.4"
+	lport uint16 = 50400
+	rip   string = "192.168.0.5"
+	rport uint16 = 50400
 )
 
 func main() {
@@ -38,6 +38,7 @@ func main() {
 	go func() {
 		for range ticker.C {
 			packet := packetGenerator.CreateRandomPacket()
+
 			if packet == nil {
 				continue
 			}
