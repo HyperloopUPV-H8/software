@@ -14,7 +14,7 @@ type Props = {
 function createOrder(id: number, fields: FormField[]): Order {
     return {
         id: id,
-        values: Object.fromEntries(
+        fields: Object.fromEntries(
             fields.map((field) => {
                 return [field.name, field.currentValue];
             })
