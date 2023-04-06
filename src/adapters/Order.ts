@@ -1,19 +1,28 @@
-export type OrderAdapter = {
-  id: number;
-  name: string;
-  fieldDescriptions: { [name: string]: string };
+import { NumericType } from "./GolangTypes";
+
+export type OrderDescription = {
+    readonly id: number;
+    readonly name: string;
+    readonly fields: Record<string, OrderFieldDescription>;
 };
 
-export type OrderDescription = Omit<OrderAdapter, "fieldDescriptions"> & {
-  fieldDescriptions: { [name: string]: FieldDescription };
+export type OrderFieldDescription = {
+    readonly name: string;
+    readonly valueType: Value;
 };
 
-export type FieldDescription = { type: string; value: string | Enum };
+type Value = EnumValue | NumericValue | BooleanValue;
 
-export type Enum = string[];
+type EnumValue = {
+    readonly kind: "enum";
+    readonly value: string[];
+};
 
-export function createEnum(enumExp: string): Enum {
-  return enumExp
-    .substring(enumExp.indexOf("(") + 1, enumExp.indexOf(")"))
-    .split(",");
-}
+export type NumericValue = {
+    readonly kind: "numeric";
+    readonly value: NumericType;
+};
+
+type BooleanValue = {
+    readonly kind: "boolean";
+};
