@@ -19,9 +19,10 @@ export function useWebSocketBroker(
         };
     }, [topic, callback, webSocketBroker]);
 
-    const sender = useCallback(() => {
-        return webSocketBroker.createSender(topic).bind(webSocketBroker);
-    }, [webSocketBroker]);
+    const sender = useCallback(
+        webSocketBroker.createSender(topic).bind(webSocketBroker),
+        [webSocketBroker]
+    );
 
     return sender;
 }
