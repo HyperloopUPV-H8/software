@@ -1,4 +1,4 @@
 export type Order = {
     id: number;
-    fields: { [name: string]: string | number | boolean };
+    fields: Record<string, string | number | boolean>;
 };

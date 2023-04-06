@@ -40,7 +40,7 @@ export const MessagesColumn = () => {
                 direction={Direction.VERTICAL}
             ></SplitLayout>
             <Logger />
-            <BootloaderUploader />
+            {/* <BootloaderUploader /> */}
         </div>
     );
 };

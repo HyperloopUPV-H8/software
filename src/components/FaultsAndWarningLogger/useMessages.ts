@@ -1,5 +1,6 @@
 import { useInterval } from "hooks/useInterval";
 import { Message } from "models/Message";
+import { Message as MessageAdapter } from "adapters/Message";
 import { useWebSocketBroker } from "services/WebSocketBroker/useWebSocketBroker";
 
 import { updateMessages } from "slices/messagesSlice";
@@ -11,8 +12,7 @@ export function useMessages() {
     const dispatch = useDispatch();
 
     useWebSocketBroker("message/update", (msg) => {
-        const message = JSON.parse(msg) as Message;
-        dispatch(updateMessages(message));
+        dispatch(updateMessages(msg));
     });
 
     const [messages, setMessages] = useState({

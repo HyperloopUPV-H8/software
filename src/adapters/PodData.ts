@@ -64,7 +64,7 @@ function getMeasurementToPacket(
 
     Object.values(packets).forEach((packet) => {
         Object.values(packet.measurements).forEach(
-            (m) => (measurementToPacket[m.name] = packet.id)
+            (m) => (measurementToPacket[m.id] = packet.id)
         );
     });
 

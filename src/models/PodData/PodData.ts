@@ -29,18 +29,17 @@ export function getPacket(
 
 export function getMeasurement(
     boards: { [key: string]: Board },
-    measurementName: string
+    measurementId: string
 ): Measurement {
     let measurement: Measurement;
 
     Object.values(boards).forEach((board) => {
         if (
-            board.packets[board.measurementToPacket[measurementName]] !=
-            undefined
+            board.packets[board.measurementToPacket[measurementId]] != undefined
         ) {
             measurement =
-                board.packets[board.measurementToPacket[measurementName]]
-                    .measurements[measurementName];
+                board.packets[board.measurementToPacket[measurementId]]
+                    .measurements[measurementId];
         }
     });
     return measurement!;

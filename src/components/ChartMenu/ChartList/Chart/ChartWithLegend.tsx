@@ -1,4 +1,4 @@
-import styles from "./ChartwithLegend.module.scss";
+import styles from "./ChartWithLegend.module.scss";
 import Legend from "./Legend/Legend";
 import { ChartElement } from "components/ChartMenu/ChartElement";
 import { DragEvent } from "react";
