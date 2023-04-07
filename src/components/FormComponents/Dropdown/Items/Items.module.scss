@@ -8,8 +8,9 @@
     background-color: white;
     gap: 0.15rem;
     padding: 0.3rem;
+    border: 2px solid rgba(188, 188, 188, 0.184);
     border-radius: 0.5rem;
-    box-shadow: 12px 35px 15px rgba(0, 0, 0, 0.01),
-        7px 20px 13px rgba(0, 0, 0, 0.02), 3px 9px 9px rgba(0, 0, 0, 0.03),
-        1px 2px 5px rgba(0, 0, 0, 0.04), 0px 0px 0px rgba(0, 0, 0, 0.04);
+    box-shadow: 20px 17px 48px -13px rgba(0, 0, 0, 0.1),
+        -20px 23px 50px -25px rgba(0, 0, 0, 0.1),
+        0px -5px 50px -83px rgba(0, 0, 0, 0.1);
 }

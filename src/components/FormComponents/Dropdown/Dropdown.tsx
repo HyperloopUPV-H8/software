@@ -2,7 +2,7 @@ import styles from "./Dropdown.module.scss";
 import { Items } from "./Items/Items";
 import { useState } from "react";
 import { Header } from "./Header/Header";
-import { useBoundingRect } from "hooks/useBounds";
+import { useBounds } from "hooks/useBounds";
 
 type Props = {
     options: Array<string>;
@@ -12,7 +12,7 @@ type Props = {
 export const Dropdown = ({ options, onChange }: Props) => {
     const [open, setOpen] = useState(false);
     const [selectedItem, setSelectedItem] = useState(options[0] ?? "");
-    const [ref, rect] = useBoundingRect<HTMLDivElement>();
+    const [ref, rect] = useBounds<HTMLDivElement>();
     return (
         <div
             className={styles.dropdownWrapper}
