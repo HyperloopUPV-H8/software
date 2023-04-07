@@ -9,12 +9,18 @@
     background-color: white;
     border: 2px solid #e6e8eb;
     border-radius: styles.$normal-border-radius;
+}
 
+.headerWrapper:not(.enabled) {
+    color: rgb(156, 156, 156);
+}
+
+.enabled {
     cursor: pointer;
+}
 
-    &:hover {
-        background-color: rgb(248, 248, 248);
-    }
+.enabled:hover {
+    background-color: rgb(248, 248, 248);
 }
 
 .caret {

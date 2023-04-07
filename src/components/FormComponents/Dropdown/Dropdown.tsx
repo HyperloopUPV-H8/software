@@ -11,8 +11,13 @@ type Props = {
 
 export const Dropdown = ({ options, onChange }: Props) => {
     const [open, setOpen] = useState(false);
-    const [selectedItem, setSelectedItem] = useState(options[0] ?? "");
+    const [selectedItem, setSelectedItem] = useState(
+        options[0] ?? "No options"
+    );
     const [ref, rect] = useBounds<HTMLDivElement>();
+
+    const isEnabled = options.length > 0;
+
     return (
         <div
             className={styles.dropdownWrapper}
@@ -22,8 +27,9 @@ export const Dropdown = ({ options, onChange }: Props) => {
                 value={selectedItem}
                 onClick={() => setOpen((prev) => !prev)}
                 isOpen={open}
+                isEnabled={isEnabled}
             />
-            {rect && (
+            {rect && isEnabled && (
                 <Items
                     targetRect={rect}
                     visible={open}

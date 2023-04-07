@@ -5,19 +5,24 @@ type Props = {
     value: string;
     onClick: () => void;
     isOpen: boolean;
+    isEnabled: boolean;
 };
 
-export const Header = ({ value, onClick, isOpen }: Props) => {
+export const Header = ({ value, onClick, isOpen, isEnabled }: Props) => {
     return (
         <div
-            className={styles.headerWrapper}
+            className={`${styles.headerWrapper} ${
+                isEnabled ? styles.enabled : ""
+            }`}
             onClick={onClick}
         >
             {value}{" "}
-            <Caret
-                className={styles.caret}
-                isOpen={isOpen}
-            />
+            {isEnabled && (
+                <Caret
+                    className={styles.caret}
+                    isOpen={isOpen}
+                />
+            )}
         </div>
     );
 };
