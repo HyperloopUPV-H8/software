@@ -1,22 +1,24 @@
-export type GolangTypes = IntegerTypes | FloatingTypes | Bool | Enum;
+export type GolangTypes =
+    | SignedIntegerType
+    | UnsignedIntegerType
+    | FloatingType
+    | Bool
+    | Enum;
 
-type IntegerTypes =
-    | "int8"
-    | "int16"
-    | "int32"
-    | "int64"
-    | "uint8"
-    | "uint16"
-    | "uint32"
-    | "uint64";
+export type SignedIntegerType = "int8" | "int16" | "int32" | "int64";
 
-type FloatingTypes = "float32" | "float64";
+export type UnsignedIntegerType = "uint8" | "uint16" | "uint32" | "uint64";
 
-export type NumericType = IntegerTypes | FloatingTypes;
+export type FloatingType = "float32" | "float64";
 
-export function typeIsNumeric(
+export type NumericType =
+    | SignedIntegerType
+    | UnsignedIntegerType
+    | FloatingType;
+
+export function isNumericType(
     type: string
-): type is IntegerTypes | FloatingTypes {
+): type is SignedIntegerType | UnsignedIntegerType | FloatingType {
     return (
         type == "int8" ||
         type == "int16" ||
@@ -29,6 +31,29 @@ export function typeIsNumeric(
         type == "float32" ||
         type == "float64"
     );
+}
+
+export function isUnsignedIntegerType(
+    type: NumericType
+): type is UnsignedIntegerType {
+    return (
+        type == "uint8" ||
+        type == "uint16" ||
+        type == "uint32" ||
+        type == "uint64"
+    );
+}
+
+export function isSignedIntegerType(
+    type: NumericType
+): type is SignedIntegerType {
+    return (
+        type == "int8" || type == "int16" || type == "int32" || type == "int64"
+    );
+}
+
+export function isFloatingType(type: NumericType): type is FloatingType {
+    return type == "float32" || type == "float64";
 }
 
 type Enum = "Enum";

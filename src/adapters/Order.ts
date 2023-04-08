@@ -11,7 +11,7 @@ export type OrderFieldDescription = {
     readonly valueType: Value;
 };
 
-type Value = EnumValue | NumericValue | BooleanValue;
+export type Value = EnumValue | NumericValue | BooleanValue;
 
 type EnumValue = {
     readonly kind: "enum";

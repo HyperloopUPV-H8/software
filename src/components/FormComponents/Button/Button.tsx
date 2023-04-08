@@ -3,7 +3,7 @@ import { animated, useSpring, easings } from "@react-spring/web";
 import { lightenHSL } from "utils/color";
 type Props = {
     label: string;
-    onClick: () => void;
+    onClick: (ev: React.MouseEvent) => void;
     disabled?: boolean;
     color?: string;
 };
@@ -28,9 +28,9 @@ export const Button = ({
             className={`${styles.buttonWrapper} ${
                 disabled ? styles.disabled : styles.enabled
             }`}
-            onClick={() => {
+            onClick={(ev) => {
                 if (!disabled) {
-                    onClick();
+                    onClick(ev);
                 }
             }}
             style={!disabled ? { ...springs } : {}}

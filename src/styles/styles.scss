@@ -102,19 +102,8 @@ $background-color-transition: background-color $normal-transition-time linear;
     -ms-user-select: none;
 }
 
-@mixin flash-button($color) {
-    @keyframes flash-button {
-        0% {
-            background-color: lightness($color, 18%);
-        }
-        20% {
-            background-color: lightness($color, 0%);
-        }
-    }
-
-    animation-name: flash-button;
-    animation-duration: 2s;
-    animation-timing-function: cubic-bezier(0.29, 0.85, 1, 1);
+@mixin shadow {
+    box-shadow: 0px 4px 5px -4px rgba(0, 0, 0, 0.1);
 }
 
 // CLASSES

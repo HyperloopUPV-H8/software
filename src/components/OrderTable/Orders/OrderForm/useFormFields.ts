@@ -1,4 +1,4 @@
-import { OrderDescription, OrderFieldDescription } from "adapters/Order";
+import { OrderDescription, OrderFieldDescription, Value } from "adapters/Order";
 import { useState, useEffect } from "react";
 
 export enum FieldState {
@@ -7,9 +7,12 @@ export enum FieldState {
     INVALID,
 }
 
-export type FormField = OrderFieldDescription & {
+export type FormField = {
+    name: string;
+    valueType: Value;
     fieldState: FieldState;
     currentValue: string | boolean | number;
+    isEnabled: boolean;
 };
 
 function getInitialFormFields(
@@ -22,6 +25,7 @@ function getInitialFormFields(
                 valueType: fieldDescription.valueType,
                 fieldState: FieldState.INVALID,
                 currentValue: 0,
+                isEnabled: true,
             };
         } else if (fieldDescription.valueType.kind == "boolean") {
             return {
@@ -29,16 +33,24 @@ function getInitialFormFields(
                 valueType: fieldDescription.valueType,
                 fieldState: FieldState.VALID,
                 currentValue: false,
+                isEnabled: true,
             };
         } else {
             return {
                 name: fieldDescription.name,
                 valueType: fieldDescription.valueType,
                 fieldState: FieldState.VALID,
-                currentValue: "",
+                currentValue: fieldDescription.valueType.value[0],
+                isEnabled: true,
             };
         }
     });
+}
+
+function areFieldsValid(fields: Array<FormField>): boolean {
+    return fields.reduce((prevValid, currentField) => {
+        return prevValid && currentField.fieldState == FieldState.VALID;
+    }, true);
 }
 
 export function useFormFields(
@@ -47,7 +59,7 @@ export function useFormFields(
     const [fields, setFields] = useState<FormField[]>(
         getInitialFormFields(fieldDescriptions)
     );
-    const [valid, setValid] = useState(areFieldsValid());
+    const [valid, setValid] = useState(areFieldsValid(fields));
 
     function updateField(updatedField: FormField) {
         setFields((prevField) => {
@@ -61,15 +73,17 @@ export function useFormFields(
         });
     }
 
-    function areFieldsValid(): boolean {
-        return fields.reduce((prevValid, currentField) => {
-            return prevValid && currentField.fieldState == FieldState.VALID;
-        }, true);
+    function changeEnabled(name: string, value: boolean) {
+        setFields((prevFields) => {
+            return prevFields.map((field) =>
+                field.name == name ? { ...field, isEnabled: value } : field
+            );
+        });
     }
 
     useEffect(() => {
-        setValid(areFieldsValid());
+        setValid(areFieldsValid(fields));
     }, [fields]);
 
-    return [fields, updateField, valid] as const;
+    return [fields, updateField, changeEnabled, valid] as const;
 }

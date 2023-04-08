@@ -1,4 +1,9 @@
 export type Order = {
     id: number;
-    fields: Record<string, string | number | boolean>;
+    fields: Record<string, OrderField>;
+};
+
+type OrderField = {
+    value: string | number | boolean;
+    isEnabled: boolean;
 };

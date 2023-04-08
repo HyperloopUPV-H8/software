@@ -1,0 +1,18 @@
+@use "src/styles/styles";
+
+.fieldWrapper {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 8rem 1fr auto;
+    gap: 1rem;
+    align-items: center;
+}
+
+.name {
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.disabled {
+    color: rgb(176, 176, 176);
+}

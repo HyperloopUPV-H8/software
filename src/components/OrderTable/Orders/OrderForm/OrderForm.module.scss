@@ -1,7 +1,6 @@
 @use "src/styles/styles";
 
-#wrapper {
-    flex: 0 0 auto;
+.orderFormWrapper {
     width: 100%;
     @include styles.code-text;
     border: 1px solid styles.$orange;
