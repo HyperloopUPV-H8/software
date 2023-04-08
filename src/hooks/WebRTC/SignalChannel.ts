@@ -1,34 +1,48 @@
+import { Signal, SignalHandles, SignalKinds, SignalPayloadMap } from "./signal"
+
 export class SignalChannel {
     readonly socket: WebSocket
 
-    private readonly defaultHandles: SignalHandles = {
+    private listeners: SignalHandles = {
         "offer": this.emptyHandle.bind(this),
         "answer": this.emptyHandle.bind(this),
         "candidate": this.emptyHandle.bind(this),
-        "close": this.handleClose.bind(this),
-        "reject": this.handleReject.bind(this),
-        "keepalive": this.handleKeepalive.bind(this),
+        "close": this.emptyHandle.bind(this),
+        "poll": this.emptyHandle.bind(this),
     }
-    private handles: SignalHandles = { ...this.defaultHandles }
+
+    private signalBuffer = new Array<Signal<SignalKinds>>()
 
     constructor(url: string, protocols?: string | string[]) {
         this.socket = new WebSocket(url, protocols)
 
-        this.socket.onmessage = <Kind extends SignalKinds>(msg: MessageEvent<any>) => {
-            const signal: Signal<Kind> = JSON.parse(msg.data)
-            console.log(signal)
-            this.handles[signal.signal](signal)
+        this.socket.onopen = () => {
+            this.signalBuffer.forEach(signal => {
+                this.socket.send(JSON.stringify(signal))
+            })
         }
 
-        this.socket.onclose = () => this.socket.close
+        this.socket.onmessage = <Kind extends SignalKinds>(msg: MessageEvent<any>) => {
+            const signal: Signal<Kind> = JSON.parse(msg.data)
+
+            this.listeners[signal.signal](signal)
+        }
+
+        this.socket.onclose = () => {
+            this.socket.close()
+        }
+
+        this.socket.onerror = () => {
+            this.socket.close()
+        }
     }
 
     addSignalListener<Kind extends SignalKinds>(signal: Kind, handle: SignalHandles[Kind]) {
-        this.handles[signal] = handle
+        this.listeners[signal] = handle
     }
 
     removeSignalListener<Kind extends SignalKinds>(signal: Kind) {
-        this.handles[signal] = this.defaultHandles[signal]
+        this.listeners[signal] = this.emptyHandle.bind(this)
     }
 
     sendSignal<Kind extends SignalKinds>(kind: Kind, payload: SignalPayloadMap[Kind]) {
@@ -36,39 +50,27 @@ export class SignalChannel {
             signal: kind,
             payload: payload,
         }
-        console.log(signal)
+
+        if (this.socket.readyState !== WebSocket.OPEN) {
+            this.signalBuffer.push(signal)
+            return
+        }
+
         this.socket.send(JSON.stringify(signal))
     }
 
-    sendError(code: RejectPayload["code"], origin?: RejectPayload["origin"], reason?: RejectPayload["reason"]) {
-        this.sendSignal("reject", {
-            code: code,
-            origin: origin,
-            reason: reason,
-        })
-    }
-
-    sendClose(code: ClosePayload["code"], reason?: ClosePayload["reason"]) {
-        this.sendSignal("close", {
-            code: code,
-            reason: reason,
-        })
-
+    close() {
         this.socket.close()
     }
 
-    emptyHandle<Kind extends SignalKinds>(_: Signal<Kind>) { }
-
-    handleKeepalive(signal: Signal<"keepalive">) {
-        this.socket.send(JSON.stringify(signal))
+    onError(handle: (ev: Event) => void) {
+        this.socket.onerror = handle
     }
 
-    handleClose(signal: Signal<"close">) {
-        this.socket.close()
-        console.warn(`signal channel closed, code: ${signal.payload.code}, reason: "${signal.payload.reason}"`)
+    onClose(handle: (ev: CloseEvent) => void) {
+        this.socket.onclose = handle
     }
 
-    handleReject(signal: Signal<"reject">) {
-        console.error(`${signal.payload.origin?.signal} rejected, code: ${signal.payload.code}, reason: "${signal.payload.reason}"`)
-    }
+    private emptyHandle<Kind extends SignalKinds>(_: Signal<Kind>) { }
+
 }

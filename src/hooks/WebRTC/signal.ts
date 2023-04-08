@@ -1,29 +1,14 @@
-type Signal<Kind extends SignalKinds> = {
+
+export type Signal<Kind extends SignalKinds> = {
     signal: Kind;
     payload: SignalPayloadMap[Kind];
 };
 
-type SignalHandles = {
+export type SignalHandles = {
     [kind in SignalKinds]: (signal: Signal<kind>) => void;
 };
 
-type SignalKinds =
-    | "offer"
-    | "answer"
-    | "candidate"
-    | "reject"
-    | "close"
-    | "keepalive";
-type SignalPayloadMap = {
-    offer: RTCSessionDescriptionInit;
-    answer: RTCSessionDescriptionInit;
-    candidate: RTCIceCandidateInit;
-    reject: RejectPayload;
-    close: ClosePayload;
-    keepalive: number;
-};
-
-enum SignalCode {
+export enum SignalCode {
     Ok = 100,
     Timeout = 101,
     UnexpectedSignal = 110,
@@ -44,11 +29,25 @@ enum SignalCode {
     Other = 400,
 }
 
-type ClosePayload = {
+export type SignalKinds =
+    | "offer"
+    | "answer"
+    | "candidate"
+    | "close"
+    | "poll"
+export type SignalPayloadMap = {
+    offer: RTCSessionDescriptionInit;
+    answer: RTCSessionDescriptionInit;
+    candidate: RTCIceCandidateInit;
+    close: null;
+    poll: null;
+};
+
+export type ClosePayload = {
     code: SignalCode;
     reason?: string;
 };
 
-type RejectPayload = {
+export type RejectPayload = {
     origin?: Signal<"offer" | "answer" | "candidate">;
 } & ClosePayload;
