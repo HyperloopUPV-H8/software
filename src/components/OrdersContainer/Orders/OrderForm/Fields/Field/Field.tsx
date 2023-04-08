@@ -37,6 +37,9 @@ export const Field = ({ name, field, onChange, changeEnabled }: Props) => {
             {field.valueType.kind == "numeric" ? (
                 <TextInput
                     placeholder={`${field.valueType.value}...`}
+                    defaultValue={
+                        !field.isValid ? "" : (field.currentValue as number)
+                    }
                     isRequired={field.isEnabled}
                     isEnabled={field.isEnabled}
                     isValid={field.isValid}

@@ -4,6 +4,7 @@ import { FieldState } from "components/OrdersContainer/Orders/OrderForm/useFormF
 import { ChangeEvent, useState } from "react";
 type Props = {
     placeholder: string;
+    defaultValue: number | string;
     onChange: (value: string) => void;
     isRequired: boolean;
     isEnabled: boolean;
@@ -16,6 +17,7 @@ export const TextInput = ({
     isEnabled,
     isValid,
     placeholder,
+    defaultValue,
 }: Props) => {
     return (
         <input
@@ -26,6 +28,7 @@ export const TextInput = ({
                 isValid ? styles.valid : styles.invalid
             } ${!isEnabled ? styles.disabled : ""}`}
             placeholder={placeholder}
+            defaultValue={defaultValue}
             required={isRequired}
             onChange={(ev: ChangeEvent<HTMLInputElement>) => {
                 onChange(ev.target.value);
