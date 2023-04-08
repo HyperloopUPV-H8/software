@@ -1,0 +1,12 @@
+@use "src/styles/colors.scss";
+
+.bar {
+    width: 70%;
+    height: 1.2rem;
+    background-color: colors.getColor("fault", 60);
+    border-radius: 1rem;
+}
+
+.active {
+    background-color: colors.getColor("stable", 50);
+}
