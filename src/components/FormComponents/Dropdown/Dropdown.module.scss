@@ -1,5 +1,13 @@
 @use "src/styles/styles";
+.dropdownWrapper {
+    position: relative;
+}
 
-.select {
-    width: 100%;
+.hidden {
+    display: none;
+}
+
+.items {
+    position: absolute;
+    bottom: 0;
 }

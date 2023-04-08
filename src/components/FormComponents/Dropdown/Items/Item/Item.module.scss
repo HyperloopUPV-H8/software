@@ -1,0 +1,15 @@
+.itemWrapper {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    font-weight: bold;
+    background-color: white;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    cursor: pointer;
+    transition: background-color 0.1s ease-out;
+}
+
+.itemWrapper:hover {
+    background-color: rgba(0, 0, 0, 0.055);
+}

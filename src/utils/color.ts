@@ -54,13 +54,13 @@ export function parseHSL(colorStr: string): HSLAColor {
     return { h, s, l, a: 1 };
 }
 
-export function lightenHSL(color: string): string {
+export function lightenHSL(color: string, lOffset: number): string {
     const matches = color
         .replaceAll(" ", "")
         .match(/hsl\((\d{1,3}),(\d{1,3})%,(\d{1,3})%\)/)!;
     const h = matches[1];
     const s = matches[2];
     const l = matches[3];
-    const newLightness = Math.min(parseInt(l) + 35, 100);
+    const newLightness = Math.min(parseInt(l) + lOffset, 100);
     return `hsl(${h}, ${s}%, ${newLightness}%)`;
 }
