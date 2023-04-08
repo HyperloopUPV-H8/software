@@ -27,14 +27,6 @@ export class SignalChannel {
 
             this.listeners[signal.signal](signal)
         }
-
-        this.socket.onclose = () => {
-            this.socket.close()
-        }
-
-        this.socket.onerror = () => {
-            this.socket.close()
-        }
     }
 
     addSignalListener<Kind extends SignalKinds>(signal: Kind, handle: SignalHandles[Kind]) {

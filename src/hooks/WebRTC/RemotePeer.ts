@@ -48,7 +48,7 @@ export class RemotePeer {
         await this.peer.setRemoteDescription(signal.payload)
     }
 
-    private async onCloseSignal(signal: Signal<"close">) {
+    private async onCloseSignal(_signal: Signal<"close">) {
         this.close()
     }
 
