@@ -1,4 +1,4 @@
-import styles from "components/OrderTable/Orders/Orders.module.scss";
+import styles from "./Orders.module.scss";
 import { OrderDescription } from "adapters/Order";
 import { OrderForm } from "./OrderForm/OrderForm";
 import { Order } from "models/Order";

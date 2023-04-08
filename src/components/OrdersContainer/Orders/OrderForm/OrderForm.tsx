@@ -26,10 +26,10 @@ function createOrder(id: number, fields: FormField[]): Order {
 }
 
 export const OrderForm = ({ orderDescription, sendOrder }: Props) => {
-    let [fields, updateField, changeEnabled, isFormValid] = useFormFields(
+    const [fields, updateField, changeEnabled, isFormValid] = useFormFields(
         orderDescription.fields
     );
-    let [isDropdownVisible, setIsDropdownVisible] = useState(false);
+    const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
     function toggleDropdown() {
         if (Object.keys(orderDescription.fields).length > 0) {

@@ -4,7 +4,11 @@ import { FieldState, FormField } from "../useFormFields"; //TODO: no acceder al 
 
 type Props = {
     fields: FormField[];
-    updateField: (newField: FormField) => void;
+    updateField: (
+        name: string,
+        value: boolean | string | number,
+        isValid: boolean
+    ) => void;
     changeEnabled: (name: string, isEnabled: boolean) => void;
 };
 
@@ -19,14 +23,9 @@ export const Fields = ({ fields, updateField, changeEnabled }: Props) => {
                         field={field}
                         onChange={(
                             newValue: string | number | boolean,
-                            fieldState: FieldState
+                            isValid: boolean
                         ) => {
-                            //FIXME: make it more obvious that the id is the name of the order or do it another way
-                            updateField({
-                                ...field,
-                                currentValue: newValue,
-                                fieldState: fieldState,
-                            });
+                            updateField(field.name, newValue, isValid);
                         }}
                         changeEnabled={(value) =>
                             changeEnabled(field.name, value)

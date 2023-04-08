@@ -10,8 +10,8 @@ export enum FieldState {
 export type FormField = {
     name: string;
     valueType: Value;
-    fieldState: FieldState;
     currentValue: string | boolean | number;
+    isValid: boolean;
     isEnabled: boolean;
 };
 
@@ -23,24 +23,24 @@ function getInitialFormFields(
             return {
                 name: fieldDescription.name,
                 valueType: fieldDescription.valueType,
-                fieldState: FieldState.INVALID,
                 currentValue: 0,
+                isValid: false,
                 isEnabled: true,
             };
         } else if (fieldDescription.valueType.kind == "boolean") {
             return {
                 name: fieldDescription.name,
                 valueType: fieldDescription.valueType,
-                fieldState: FieldState.VALID,
                 currentValue: false,
+                isValid: true,
                 isEnabled: true,
             };
         } else {
             return {
                 name: fieldDescription.name,
                 valueType: fieldDescription.valueType,
-                fieldState: FieldState.VALID,
                 currentValue: fieldDescription.valueType.value[0],
+                isValid: true,
                 isEnabled: true,
             };
         }
@@ -49,7 +49,11 @@ function getInitialFormFields(
 
 function areFieldsValid(fields: Array<FormField>): boolean {
     return fields.reduce((prevValid, currentField) => {
-        return prevValid && currentField.fieldState == FieldState.VALID;
+        return (
+            prevValid &&
+            ((currentField.isEnabled && currentField.isValid) ||
+                !currentField.isEnabled)
+        );
     }, true);
 }
 
@@ -61,11 +65,15 @@ export function useFormFields(
     );
     const [valid, setValid] = useState(areFieldsValid(fields));
 
-    function updateField(updatedField: FormField) {
-        setFields((prevField) => {
-            return prevField.map((field) => {
-                if (field.name == updatedField.name) {
-                    return updatedField;
+    function updateField(
+        name: string,
+        value: string | boolean | number,
+        isValid: boolean
+    ) {
+        setFields((prevFields) => {
+            return prevFields.map((field) => {
+                if (field.name == name) {
+                    return { ...field, currentValue: value, isValid: isValid };
                 } else {
                     return field;
                 }

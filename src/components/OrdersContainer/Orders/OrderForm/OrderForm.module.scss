@@ -1,9 +1,10 @@
 @use "src/styles/styles";
 
 .orderFormWrapper {
-    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
     @include styles.code-text;
     border: 1px solid styles.$orange;
     border-radius: styles.$normal-border-radius;
-    overflow: hidden;
 }

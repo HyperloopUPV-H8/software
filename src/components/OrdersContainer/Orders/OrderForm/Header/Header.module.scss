@@ -2,10 +2,7 @@
 $header-color: #ffe4cc;
 
 .headerWrapper {
-    width: 100%;
-    height: auto;
     padding: 0.5rem;
-
     display: grid;
     grid-template:
         "caret name button" auto
@@ -41,6 +38,8 @@ $header-color: #ffe4cc;
     grid-area: name;
     color: styles.$orange;
     font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .sendBtn {
     grid-area: button;

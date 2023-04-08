@@ -1,9 +1,9 @@
-import styles from "./OrderTable.module.scss";
+import styles from "./OrdersContainer.module.scss";
 import { useSendOrder } from "./useSendOrder";
 import { Orders } from "./Orders/Orders";
 import { useOrderDescriptions } from "./useOrderDescriptions";
 
-export const OrderTable = () => {
+export const OrdersContainer = () => {
     const sendOrder = useSendOrder();
     const orderDescriptions = useOrderDescriptions();
 

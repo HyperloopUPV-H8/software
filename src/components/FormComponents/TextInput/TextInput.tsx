@@ -1,19 +1,20 @@
 import styles from "components/FormComponents/TextInput/TextInput.module.scss";
-import { FieldState } from "components/OrderTable/Orders/OrderForm/useFormFields";
+//TODO: raise FieldState
+import { FieldState } from "components/OrdersContainer/Orders/OrderForm/useFormFields";
 import { ChangeEvent, useState } from "react";
 type Props = {
     placeholder: string;
     onChange: (value: string) => void;
     isRequired: boolean;
     isEnabled: boolean;
-    state: FieldState;
+    isValid: boolean;
 };
 
 export const TextInput = ({
     onChange,
     isRequired,
     isEnabled,
-    state,
+    isValid,
     placeholder,
 }: Props) => {
     return (
@@ -22,9 +23,7 @@ export const TextInput = ({
             name=""
             disabled={!isEnabled}
             className={`${styles.textInput} ${
-                state == (FieldState.DEFAULT || FieldState.VALID)
-                    ? styles.valid
-                    : styles.invalid
+                isValid ? styles.valid : styles.invalid
             } ${!isEnabled ? styles.disabled : ""}`}
             placeholder={placeholder}
             required={isRequired}

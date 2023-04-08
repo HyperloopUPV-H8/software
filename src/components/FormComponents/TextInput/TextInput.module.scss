@@ -6,6 +6,7 @@
     padding: 0.5rem 0.8rem;
     border-radius: styles.$normal-border-radius;
     font: inherit;
+    transition: border-color 0.1s linear;
 }
 
 .valid {

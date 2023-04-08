@@ -12,14 +12,21 @@ import { NumericValue } from "adapters/Order";
 type Props = {
     name: string;
     field: FieldData;
-    onChange: (
-        newValue: boolean | string | number,
-        fieldState: FieldState
-    ) => void;
+    onChange: (newValue: boolean | string | number, isValid: boolean) => void;
     changeEnabled: (isEnabled: boolean) => void;
 };
 
 export const Field = ({ name, field, onChange, changeEnabled }: Props) => {
+    function handleTextInputChange(value: string) {
+        //FIXME: mergear tipos Value y ValueType o algo así
+        const isValid = isNumberValid(
+            value,
+            (field.valueType as NumericValue).value
+        );
+
+        onChange(Number.parseFloat(value), isValid);
+    }
+
     return (
         <div
             className={`${styles.fieldWrapper} ${
@@ -32,29 +39,15 @@ export const Field = ({ name, field, onChange, changeEnabled }: Props) => {
                     placeholder={`${field.valueType.value}...`}
                     isRequired={field.isEnabled}
                     isEnabled={field.isEnabled}
-                    state={field.fieldState}
-                    onChange={(value) => {
-                        onChange(
-                            Number.parseFloat(value),
-                            (() => {
-                                const numericFieldType =
-                                    field.valueType as NumericValue;
-                                return isNumberValid(
-                                    value,
-                                    numericFieldType.value
-                                )
-                                    ? FieldState.VALID
-                                    : FieldState.INVALID;
-                            })()
-                        );
-                    }}
+                    isValid={field.isValid}
+                    onChange={handleTextInputChange}
                 ></TextInput>
             ) : field.valueType.kind == "boolean" ? (
                 <CheckBox
                     isRequired={field.isEnabled}
                     disabled={!field.isEnabled}
                     onChange={(value: boolean) => {
-                        onChange(value, FieldState.VALID);
+                        onChange(value, true);
                     }}
                 />
             ) : (
@@ -62,7 +55,7 @@ export const Field = ({ name, field, onChange, changeEnabled }: Props) => {
                     options={field.valueType.value}
                     defaultValue={field.currentValue as string}
                     onChange={(newValue) => {
-                        onChange(newValue, FieldState.VALID);
+                        onChange(newValue, true);
                     }}
                 />
             )}
