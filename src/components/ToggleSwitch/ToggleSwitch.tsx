@@ -9,13 +9,12 @@ type Props = {
 export function ToggleSwitch({ onToggle }: Props) {
     const [isOn, flip] = useToggle();
 
-    const onClick = () => {
-        flip();
+    useEffect(() => {
         onToggle(isOn);
-    }
+    }, [isOn])
 
     return (
-        <label className={isOn ? style.toggleSwitchWrapperOn : style.toggleSwitchWrapperOff} onClick={onClick}>
+        <label className={isOn ? style.toggleSwitchWrapperOn : style.toggleSwitchWrapperOff} onClick={flip}>
             <div></div>
         </label>
     )
