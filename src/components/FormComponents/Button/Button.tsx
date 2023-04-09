@@ -25,23 +25,18 @@ export const Button = ({
         },
     }));
 
-    useEffect(() => {
-        if (disabled) {
-            api.start({ to: { backgroundColor: "#b6b6b6" } });
-        } else {
-            api.start({ to: { backgroundColor: color } });
-        }
-    }, [disabled]);
-
     return (
         <animated.div
-            className={`${styles.buttonWrapper}`}
+            className={`${styles.buttonWrapper} ${
+                disabled ? styles.disabled : styles.enabled
+            }`}
             onClick={(ev) => {
                 if (!disabled) {
                     onClick(ev);
                 }
+                ev.stopPropagation();
             }}
-            style={{ ...springs }}
+            style={!disabled ? { ...springs } : {}}
             onMouseDown={() =>
                 api.start({
                     to: { backgroundColor: lightenHSL(color, 15) },

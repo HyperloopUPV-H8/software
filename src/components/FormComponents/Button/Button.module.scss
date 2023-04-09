@@ -18,4 +18,9 @@
     &.enabled {
         cursor: pointer;
     }
+
+    &.disabled {
+        cursor: auto;
+        background-color: #b6b6b6;
+    }
 }
