@@ -35,7 +35,7 @@ export const Header = ({
                 <Button
                     label="send"
                     onClick={(ev) => {
-                        // onButtonClick();
+                        onButtonClick();
                         ev.stopPropagation();
                     }}
                     disabled={disabled}

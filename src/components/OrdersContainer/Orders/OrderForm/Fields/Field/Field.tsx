@@ -21,7 +21,7 @@ export const Field = ({ name, field, onChange, changeEnabled }: Props) => {
         //FIXME: mergear tipos Value y ValueType o algo así
         const isValid = isNumberValid(
             value,
-            (field.valueType as NumericValue).value
+            (field.valueDescription as NumericValue).value
         );
 
         onChange(Number.parseFloat(value), isValid);
@@ -34,16 +34,16 @@ export const Field = ({ name, field, onChange, changeEnabled }: Props) => {
             }`}
         >
             <div className={styles.name}>{name}</div>
-            {field.valueType.kind == "numeric" ? (
+            {field.valueDescription.kind == "numeric" ? (
                 <TextInput
-                    placeholder={`${field.valueType.value}...`}
+                    placeholder={`${field.valueDescription.value}...`}
                     defaultValue={!field.isValid ? "" : (field.value as number)}
                     isRequired={field.isEnabled}
                     isEnabled={field.isEnabled}
                     isValid={field.isValid}
                     onChange={handleTextInputChange}
                 ></TextInput>
-            ) : field.valueType.kind == "boolean" ? (
+            ) : field.valueDescription.kind == "boolean" ? (
                 <CheckBox
                     isRequired={field.isEnabled}
                     disabled={!field.isEnabled}
@@ -53,7 +53,7 @@ export const Field = ({ name, field, onChange, changeEnabled }: Props) => {
                 />
             ) : (
                 <Dropdown
-                    options={field.valueType.value}
+                    options={field.valueDescription.value}
                     defaultValue={field.value as string}
                     onChange={(newValue) => {
                         onChange(newValue, true);

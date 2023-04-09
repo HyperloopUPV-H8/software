@@ -1,4 +1,4 @@
-import { OrderFieldDescription, Value } from "adapters/Order";
+import { OrderFieldDescription, ValueDescription } from "adapters/Order";
 import { useState, useEffect } from "react";
 
 export enum FieldState {
@@ -9,7 +9,7 @@ export enum FieldState {
 
 export type FormField = {
     name: string;
-    valueType: Value;
+    valueDescription: ValueDescription;
     value: string | boolean | number;
     isValid: boolean;
     isEnabled: boolean;
@@ -19,18 +19,18 @@ function getInitialFormFields(
     orderFields: Record<string, OrderFieldDescription>
 ): FormField[] {
     return Object.entries(orderFields).map(([name, fieldDescription]) => {
-        if (fieldDescription.valueType.kind == "numeric") {
+        if (fieldDescription.valueDescription.kind == "numeric") {
             return {
                 name: fieldDescription.name,
-                valueType: fieldDescription.valueType,
+                valueDescription: fieldDescription.valueDescription,
                 value: 0,
                 isValid: false,
                 isEnabled: true,
             };
-        } else if (fieldDescription.valueType.kind == "boolean") {
+        } else if (fieldDescription.valueDescription.kind == "boolean") {
             return {
                 name: fieldDescription.name,
-                valueType: fieldDescription.valueType,
+                valueDescription: fieldDescription.valueDescription,
                 value: false,
                 isValid: true,
                 isEnabled: true,
@@ -38,8 +38,8 @@ function getInitialFormFields(
         } else {
             return {
                 name: fieldDescription.name,
-                valueType: fieldDescription.valueType,
-                value: fieldDescription.valueType.value[0],
+                valueDescription: fieldDescription.valueDescription,
+                value: fieldDescription.valueDescription.value[0],
                 isValid: true,
                 isEnabled: true,
             };

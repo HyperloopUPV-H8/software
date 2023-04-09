@@ -8,10 +8,10 @@ export type OrderDescription = {
 
 export type OrderFieldDescription = {
     readonly name: string;
-    readonly valueType: Value;
+    readonly valueDescription: ValueDescription;
 };
 
-export type Value = EnumValue | NumericValue | BooleanValue;
+export type ValueDescription = EnumValue | NumericValue | BooleanValue;
 
 type EnumValue = {
     readonly kind: "enum";
