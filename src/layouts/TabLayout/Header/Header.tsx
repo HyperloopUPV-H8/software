@@ -10,7 +10,7 @@ type Props = {
 
 export const Header = ({ items, visibleTab, handleClick }: Props) => {
     return (
-        <div className={styles.wrapper}>
+        <div className={styles.headerWrapper}>
             <div className={styles.name}>{visibleTab.name}</div>
             {items.length > 1 && (
                 <TabBar
