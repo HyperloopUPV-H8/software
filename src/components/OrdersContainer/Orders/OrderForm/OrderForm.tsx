@@ -50,7 +50,7 @@ export const OrderForm = ({ orderDescription, sendOrder }: Props) => {
                 hasFields={fields.length > 0}
                 isOpen={isDropdownVisible}
                 toggleDropdown={toggleDropdown}
-                isButtonEnabled={isFormValid}
+                disabled={!isFormValid}
                 onButtonClick={() => {
                     trySendOrder();
                 }}

@@ -2,7 +2,7 @@ import styles from "./Header.module.scss";
 import { Button } from "components/FormComponents/Button/Button";
 import { Caret } from "components/Caret/Caret";
 type Props = {
-    isButtonEnabled: boolean;
+    disabled: boolean;
     onButtonClick: () => void;
     hasFields: boolean;
     isOpen: boolean;
@@ -11,7 +11,7 @@ type Props = {
 };
 
 export const Header = ({
-    isButtonEnabled,
+    disabled,
     hasFields,
     isOpen,
     toggleDropdown,
@@ -35,10 +35,10 @@ export const Header = ({
                 <Button
                     label="send"
                     onClick={(ev) => {
-                        onButtonClick();
+                        // onButtonClick();
                         ev.stopPropagation();
                     }}
-                    disabled={!isButtonEnabled}
+                    disabled={disabled}
                 />
             </div>
         </div>
