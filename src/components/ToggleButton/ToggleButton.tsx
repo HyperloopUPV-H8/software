@@ -11,11 +11,9 @@ type Props = {
 export function ToggleButton({ label, icon, onToggle, ...buttonProps }: Props) {
     const [isOn, flip] = useToggle()
 
-    if (onToggle) {
-        useEffect(() => {
-            onToggle(isOn)
-        }, [isOn])
-    }
+    useEffect(() => {
+        onToggle?.(isOn)
+    }, [isOn])
 
     const name = `${style.toggleButtonWrapper} ${isOn ? style.on : style.off}`
     return (
