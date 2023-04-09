@@ -8,12 +8,12 @@ export type OrderDescription = {
 
 export type OrderFieldDescription = {
     readonly name: string;
-    readonly valueType: Value;
+    readonly valueDescription: ValueDescription;
 };
 
-type Value = EnumValue | NumericValue | BooleanValue;
+export type ValueDescription = EnumValue | NumericValue | BooleanValue;
 
-type EnumValue = {
+export type EnumValue = {
     readonly kind: "enum";
     readonly value: string[];
 };
@@ -23,6 +23,6 @@ export type NumericValue = {
     readonly value: NumericType;
 };
 
-type BooleanValue = {
+export type BooleanValue = {
     readonly kind: "boolean";
 };

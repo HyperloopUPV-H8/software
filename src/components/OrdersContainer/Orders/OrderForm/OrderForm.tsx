@@ -1,11 +1,11 @@
 import styles from "./OrderForm.module.scss";
 import { OrderDescription } from "adapters/Order";
-import { OrderHeader } from "./OrderHeader/OrderHeader";
-import { OrderFields } from "./OrderFields/OrderFields";
+import { Header } from "./Header/Header";
+import { Fields } from "./Fields/Fields";
 import { useState, useEffect } from "react";
 import { Order } from "models/Order";
 import { FormField, useFormFields } from "./useFormFields";
-import { FieldState } from "./useFormFields";
+
 type Props = {
     orderDescription: OrderDescription;
     sendOrder: (order: Order) => void;
@@ -16,20 +16,25 @@ function createOrder(id: number, fields: FormField[]): Order {
         id: id,
         fields: Object.fromEntries(
             fields.map((field) => {
-                return [field.name, field.currentValue];
+                return [
+                    field.name,
+                    { value: field.value, isEnabled: field.isEnabled },
+                ];
             })
         ),
     };
 }
 
 export const OrderForm = ({ orderDescription, sendOrder }: Props) => {
-    let [fields, updateField, isFormValid] = useFormFields(
+    const [fields, updateField, changeEnabled, isFormValid] = useFormFields(
         orderDescription.fields
     );
-    let [isDropdownVisible, setIsDropdownVisible] = useState(false);
+    const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
     function toggleDropdown() {
-        setIsDropdownVisible((prevValue) => !prevValue);
+        if (Object.keys(orderDescription.fields).length > 0) {
+            setIsDropdownVisible((prevValue) => !prevValue);
+        }
     }
 
     function trySendOrder() {
@@ -39,21 +44,22 @@ export const OrderForm = ({ orderDescription, sendOrder }: Props) => {
     }
 
     return (
-        <div id={styles.wrapper}>
-            <OrderHeader
+        <div className={styles.orderFormWrapper}>
+            <Header
                 name={orderDescription.name}
-                isCaretVisible={fields.length > 0}
-                isCaretOpen={isDropdownVisible}
+                hasFields={fields.length > 0}
+                isOpen={isDropdownVisible}
                 toggleDropdown={toggleDropdown}
-                isButtonEnabled={isFormValid}
+                disabled={!isFormValid}
                 onButtonClick={() => {
                     trySendOrder();
                 }}
             />
             {isDropdownVisible && (
-                <OrderFields
+                <Fields
                     fields={fields}
                     updateField={updateField}
+                    changeEnabled={(name, value) => changeEnabled(name, value)}
                 />
             )}
         </div>

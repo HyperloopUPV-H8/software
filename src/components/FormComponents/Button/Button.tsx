@@ -1,9 +1,10 @@
 import styles from "components/FormComponents/Button/Button.module.scss";
 import { animated, useSpring, easings } from "@react-spring/web";
 import { lightenHSL } from "utils/color";
+import { useEffect } from "react";
 type Props = {
     label: string;
-    onClick: () => void;
+    onClick: (ev: React.MouseEvent) => void;
     disabled?: boolean;
     color?: string;
 };
@@ -17,8 +18,9 @@ export const Button = ({
     const [springs, api] = useSpring(() => ({
         from: { backgroundColor: color },
         config: {
-            mass: 1,
-            tension: 2400,
+            mass: 5,
+            tension: 3000,
+            friction: 1,
             clamp: true,
         },
     }));
@@ -28,10 +30,11 @@ export const Button = ({
             className={`${styles.buttonWrapper} ${
                 disabled ? styles.disabled : styles.enabled
             }`}
-            onClick={() => {
+            onClick={(ev) => {
                 if (!disabled) {
-                    onClick();
+                    onClick(ev);
                 }
+                ev.stopPropagation();
             }}
             style={!disabled ? { ...springs } : {}}
             onMouseDown={() =>

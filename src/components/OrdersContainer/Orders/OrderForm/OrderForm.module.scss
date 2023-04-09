@@ -1,8 +1,9 @@
 @use "src/styles/styles";
 
-#wrapper {
-    flex: 0 0 auto;
-    width: 100%;
+.orderFormWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
     @include styles.code-text;
     border: 1px solid styles.$orange;
     border-radius: styles.$normal-border-radius;

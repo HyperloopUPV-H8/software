@@ -9,7 +9,7 @@ type Props = {
 export const Caret = ({ isOpen, onClick, className }: Props) => {
     return (
         <div
-            className={`${styles.wrapper} ${className}`}
+            className={`${styles.caretWrapper} ${className}`}
             onClick={onClick}
             style={{ transform: isOpen ? "rotate(90deg)" : "" }}
         >
