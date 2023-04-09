@@ -5,11 +5,7 @@ import { useWebRTC } from "hooks/WebRTC/useWebRTC";
 import { AnimatedEllipsis } from "components/AnimatedEllipsis/AnimatedEllipsis";
 
 export const CamerasPage = () => {
-    const [cameras, setCameras] = useState<Array<CameraData>>([
-        { index: 0, url: import.meta.env.VITE_CAMERA_1_URL },
-        { index: 1, url: import.meta.env.VITE_CAMERA_1_URL },
-        { index: 2, url: import.meta.env.VITE_CAMERA_1_URL },
-    ]);
+    const [streams, _state] = useWebRTC(import.meta.env.VITE_CAMERAS_URL);
 
     if (streams) {
         return (
