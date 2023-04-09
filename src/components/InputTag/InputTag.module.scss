@@ -1,45 +1,46 @@
 @use "src/styles/colors";
 
-fieldset {
+.inputTagWrapperOn,
+.inputTagWrapperOff {
     height: fit-content;
     transition: border-color 100ms ease-in;
 
     border: 2px solid;
     border-radius: 6px;
-}
 
-input {
-    appearance: none;
-    border: none;
+    input {
+        appearance: none;
+        border: none;
 
-    background-color: transparent;
+        background-color: transparent;
 
-    width: 100%;
+        width: 100%;
 
-    font-size: 0.75rem;
+        font-size: 0.75rem;
 
-    color: colors.getColor("neutral", 30);
+        color: colors.getColor("neutral", 30);
 
-    &:focus {
-        outline: none;
+        &:focus {
+            outline: none;
+        }
+
+        &::-webkit-outer-spin-button,
+        &::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+        }
+
+        -moz-appearance: textfield;
     }
 
-    &::-webkit-outer-spin-button,
-    &::-webkit-inner-spin-button {
-        -webkit-appearance: none;
+    legend {
+        transition: color 100ms ease-in;
+
+        font-weight: 500;
+
+        padding: 0 0.5rem;
+
+        background-color: transparent;
     }
-
-    -moz-appearance: textfield;
-}
-
-legend {
-    transition: color 100ms ease-in;
-
-    font-weight: 500;
-
-    padding: 0 0.5rem;
-
-    background-color: transparent;
 }
 
 .inputTagWrapperOn {

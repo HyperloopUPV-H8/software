@@ -13,7 +13,7 @@ export function ButtonTag({ icon, label, ...buttonProps }: Props) {
     return (
         <label className={style.buttonTagWrapper}>
             <button {...buttonProps}>{icon}</button>
-            {label != null ? <p>{label}</p> : null}
+            {label && <p>{label}</p>}
         </label>
     );
 }
