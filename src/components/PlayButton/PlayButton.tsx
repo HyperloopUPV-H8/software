@@ -7,14 +7,14 @@ import {
 import { FaPlay, FaPause, FaStop } from "react-icons/fa";
 import style from "./PlayButton.module.scss";
 
-type PlayButtonTypeAttribute = "play" | "pause" | "stop" | "disabled";
+type PlayButtonTypeAttribute = keyof typeof playButtonVariants;
 
 type Variant = {
     icon: ReactNode;
     colorClass: string;
 };
 
-const playButtonVariants: Record<PlayButtonTypeAttribute, Variant> = {
+const playButtonVariants = {
     play: {
         icon: <FaPlay />,
         colorClass: style.green,
@@ -31,7 +31,7 @@ const playButtonVariants: Record<PlayButtonTypeAttribute, Variant> = {
         icon: <FaStop />,
         colorClass: style.gray,
     },
-};
+} as const;
 
 type Props = {
     variant: PlayButtonTypeAttribute;
