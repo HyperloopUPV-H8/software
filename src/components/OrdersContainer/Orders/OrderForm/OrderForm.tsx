@@ -18,7 +18,7 @@ function createOrder(id: number, fields: FormField[]): Order {
             fields.map((field) => {
                 return [
                     field.name,
-                    { value: field.currentValue, isEnabled: field.isEnabled },
+                    { value: field.value, isEnabled: field.isEnabled },
                 ];
             })
         ),

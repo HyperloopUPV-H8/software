@@ -37,9 +37,7 @@ export const Field = ({ name, field, onChange, changeEnabled }: Props) => {
             {field.valueType.kind == "numeric" ? (
                 <TextInput
                     placeholder={`${field.valueType.value}...`}
-                    defaultValue={
-                        !field.isValid ? "" : (field.currentValue as number)
-                    }
+                    defaultValue={!field.isValid ? "" : (field.value as number)}
                     isRequired={field.isEnabled}
                     isEnabled={field.isEnabled}
                     isValid={field.isValid}
@@ -56,7 +54,7 @@ export const Field = ({ name, field, onChange, changeEnabled }: Props) => {
             ) : (
                 <Dropdown
                     options={field.valueType.value}
-                    defaultValue={field.currentValue as string}
+                    defaultValue={field.value as string}
                     onChange={(newValue) => {
                         onChange(newValue, true);
                     }}

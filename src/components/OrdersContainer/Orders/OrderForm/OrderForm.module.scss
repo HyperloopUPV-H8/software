@@ -7,4 +7,5 @@
     @include styles.code-text;
     border: 1px solid styles.$orange;
     border-radius: styles.$normal-border-radius;
+    overflow: hidden;
 }

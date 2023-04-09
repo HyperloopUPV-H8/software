@@ -1,4 +1,4 @@
-import { OrderDescription, OrderFieldDescription, Value } from "adapters/Order";
+import { OrderFieldDescription, Value } from "adapters/Order";
 import { useState, useEffect } from "react";
 
 export enum FieldState {
@@ -10,7 +10,7 @@ export enum FieldState {
 export type FormField = {
     name: string;
     valueType: Value;
-    currentValue: string | boolean | number;
+    value: string | boolean | number;
     isValid: boolean;
     isEnabled: boolean;
 };
@@ -23,7 +23,7 @@ function getInitialFormFields(
             return {
                 name: fieldDescription.name,
                 valueType: fieldDescription.valueType,
-                currentValue: 0,
+                value: 0,
                 isValid: false,
                 isEnabled: true,
             };
@@ -31,7 +31,7 @@ function getInitialFormFields(
             return {
                 name: fieldDescription.name,
                 valueType: fieldDescription.valueType,
-                currentValue: false,
+                value: false,
                 isValid: true,
                 isEnabled: true,
             };
@@ -39,7 +39,7 @@ function getInitialFormFields(
             return {
                 name: fieldDescription.name,
                 valueType: fieldDescription.valueType,
-                currentValue: fieldDescription.valueType.value[0],
+                value: fieldDescription.valueType.value[0],
                 isValid: true,
                 isEnabled: true,
             };
@@ -73,7 +73,7 @@ export function useFormFields(
         setFields((prevFields) => {
             return prevFields.map((field) => {
                 if (field.name == name) {
-                    return { ...field, currentValue: value, isValid: isValid };
+                    return { ...field, value: value, isValid: isValid };
                 } else {
                     return field;
                 }
