@@ -4,9 +4,9 @@ import type { Connection } from "models/Connection";
 const connectionsSlice = createSlice({
     name: "connections",
     initialState: {
-        websocket: { name: "BackendWebSocket", isConnected: false },
-        board: [] as Connection[],
-    } as { websocket: Connection; board: Connection[] },
+        websocket: { name: "Backend WebSocket", isConnected: false },
+        boards: [] as Connection[],
+    },
     reducers: {
         setWebSocketConnection: (connections, action) => {
             connections.websocket.isConnected = action.payload;
@@ -16,20 +16,21 @@ const connectionsSlice = createSlice({
             connections,
             action: PayloadAction<Connection[]>
         ) => {
+            // action.payload.forEach is not a function
             action.payload.forEach((element) => {
-                let conn = connections.board.find(
+                let conn = connections.boards.find(
                     (conn) => conn.name == element.name
                 )!;
                 if (conn) {
                     conn.isConnected = element.isConnected;
                 } else {
-                    connections.board.push(element);
+                    connections.boards.push(element);
                 }
             });
         },
 
         setDisconnectionBoardState: (connections) => {
-            connections.board.forEach((element) => {
+            connections.boards.forEach((element) => {
                 element.isConnected = false;
             });
         },
