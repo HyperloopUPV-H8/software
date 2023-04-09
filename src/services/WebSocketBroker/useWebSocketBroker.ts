@@ -4,7 +4,7 @@ import { useContext, useEffect, useCallback } from "react";
 export function useWebSocketBroker(
     topic: string,
     callback?: (msg: any) => void
-): (msg: any) => void {
+) {
     const webSocketBroker = useContext(WebSocketBrokerContext)!;
 
     useEffect(() => {
@@ -19,9 +19,10 @@ export function useWebSocketBroker(
         };
     }, [topic, callback, webSocketBroker]);
 
-    const sender = useCallback(() => {
-        return webSocketBroker.createSender(topic).bind(webSocketBroker);
-    }, [webSocketBroker]);
+    const sender = useCallback(
+        webSocketBroker.createSender(topic).bind(webSocketBroker),
+        [webSocketBroker]
+    );
 
     return sender;
 }

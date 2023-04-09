@@ -17,7 +17,7 @@ export const SidebarItem = ({ item, isActive }: Props) => {
             to={item.path}
             className={`${styles.link} ${isActive ? styles.active : ""}`}
         >
-            {item.icon}
+            <div className={styles.iconWrapper}> {item.icon}</div>
         </NavLink>
     );
 };

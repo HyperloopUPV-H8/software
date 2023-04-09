@@ -15,6 +15,15 @@
 
 * {
     box-sizing: border-box;
+    user-select: none;
+}
+
+svg {
+    display: block;
+}
+
+path {
+    display: block;
 }
 
 body {
