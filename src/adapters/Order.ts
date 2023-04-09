@@ -13,7 +13,7 @@ export type OrderFieldDescription = {
 
 export type ValueDescription = EnumValue | NumericValue | BooleanValue;
 
-type EnumValue = {
+export type EnumValue = {
     readonly kind: "enum";
     readonly value: string[];
 };
@@ -23,6 +23,6 @@ export type NumericValue = {
     readonly value: NumericType;
 };
 
-type BooleanValue = {
+export type BooleanValue = {
     readonly kind: "boolean";
 };

@@ -1,4 +1,10 @@
-import { OrderFieldDescription, ValueDescription } from "adapters/Order";
+import {
+    OrderFieldDescription,
+    ValueDescription,
+    NumericValue,
+    BooleanValue,
+    EnumValue,
+} from "adapters/Order";
 import { useState, useEffect } from "react";
 
 export enum FieldState {
@@ -18,33 +24,62 @@ export type FormField = {
 function getInitialFormFields(
     orderFields: Record<string, OrderFieldDescription>
 ): FormField[] {
-    return Object.entries(orderFields).map(([name, fieldDescription]) => {
-        if (fieldDescription.valueDescription.kind == "numeric") {
-            return {
-                name: fieldDescription.name,
-                valueDescription: fieldDescription.valueDescription,
-                value: 0,
-                isValid: false,
-                isEnabled: true,
-            };
-        } else if (fieldDescription.valueDescription.kind == "boolean") {
-            return {
-                name: fieldDescription.name,
-                valueDescription: fieldDescription.valueDescription,
-                value: false,
-                isValid: true,
-                isEnabled: true,
-            };
-        } else {
-            return {
-                name: fieldDescription.name,
-                valueDescription: fieldDescription.valueDescription,
-                value: fieldDescription.valueDescription.value[0],
-                isValid: true,
-                isEnabled: true,
-            };
-        }
+    return Object.entries(orderFields).map(([_, fieldDescription]) => {
+        return getFormField(fieldDescription);
     });
+}
+
+function getFormField(description: OrderFieldDescription): FormField {
+    if (description.valueDescription.kind == "numeric") {
+        return getNumericFormField(
+            description.name,
+            description.valueDescription
+        );
+    } else if (description.valueDescription.kind == "boolean") {
+        return getBooleanFormField(
+            description.name,
+            description.valueDescription
+        );
+    } else {
+        return getEnumFormField(description.name, description.valueDescription);
+    }
+}
+
+function getNumericFormField(
+    name: string,
+    valueDescription: NumericValue
+): FormField {
+    return {
+        name: name,
+        valueDescription: valueDescription,
+        value: 0,
+        isValid: false,
+        isEnabled: true,
+    };
+}
+function getBooleanFormField(
+    name: string,
+    valueDescription: BooleanValue
+): FormField {
+    return {
+        name: name,
+        valueDescription: valueDescription,
+        value: false,
+        isValid: true,
+        isEnabled: true,
+    };
+}
+function getEnumFormField(
+    name: string,
+    valueDescription: EnumValue
+): FormField {
+    return {
+        name: name,
+        valueDescription: valueDescription,
+        value: valueDescription.value[0],
+        isValid: true,
+        isEnabled: true,
+    };
 }
 
 function areFieldsValid(fields: Array<FormField>): boolean {

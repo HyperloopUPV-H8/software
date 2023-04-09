@@ -16,25 +16,16 @@ export type NumericType =
     | UnsignedIntegerType
     | FloatingType;
 
-export function isNumericType(
-    type: string
-): type is SignedIntegerType | UnsignedIntegerType | FloatingType {
+export function isNumericType(type: string): type is NumericType {
     return (
-        type == "int8" ||
-        type == "int16" ||
-        type == "int32" ||
-        type == "int64" ||
-        type == "uint8" ||
-        type == "uint16" ||
-        type == "uint32" ||
-        type == "uint64" ||
-        type == "float32" ||
-        type == "float64"
+        isUnsignedIntegerType(type) ||
+        isSignedIntegerType(type) ||
+        isFloatingType(type)
     );
 }
 
 export function isUnsignedIntegerType(
-    type: NumericType
+    type: string
 ): type is UnsignedIntegerType {
     return (
         type == "uint8" ||
@@ -44,15 +35,13 @@ export function isUnsignedIntegerType(
     );
 }
 
-export function isSignedIntegerType(
-    type: NumericType
-): type is SignedIntegerType {
+export function isSignedIntegerType(type: string): type is SignedIntegerType {
     return (
         type == "int8" || type == "int16" || type == "int32" || type == "int64"
     );
 }
 
-export function isFloatingType(type: NumericType): type is FloatingType {
+export function isFloatingType(type: string): type is FloatingType {
     return type == "float32" || type == "float64";
 }
 
