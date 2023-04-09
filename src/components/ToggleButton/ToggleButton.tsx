@@ -17,9 +17,8 @@ export function ToggleButton({ label, icon, onToggle, onClick, ...buttonProps }:
         }, [isOn])
     }
 
-    let onClickFlip = (_: any) => {
-        flip()
-    }
+    let onClickFlip = (_: any) => flip()
+
     if (onClick) {
         onClickFlip = (ev: MouseEvent<HTMLButtonElement>) => {
             flip()

@@ -9,15 +9,15 @@ type Props = {
     onToggle?: (state: boolean) => void,
 } & DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>
 
-export function ToggleInput({onToggle, disabled, ...inputProps}: Props) {
+export function ToggleInput({ onToggle, disabled, ...inputProps }: Props) {
     const [isOn, flip] = useToggle();
 
-    if (onToggle) {
-        useEffect(() => {
-            onToggle(isOn)
-        }, [isOn])
-    }
-    
+    useEffect(() => {
+        if (!onToggle) return;
+
+        onToggle(isOn)
+    }, [isOn])
+
 
     return (
         <div className={style.toggleInputWrapper}>
