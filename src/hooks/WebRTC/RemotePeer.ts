@@ -6,6 +6,7 @@ export class RemotePeer {
     peer: RTCPeerConnection
     signal: SignalChannel
     private candidateBuffer = new Array<RTCIceCandidateInit>()
+    private readonly validCandidateStates = new Set(["stable", "have-remote-offer", "have-remote-pranswer"])
 
     constructor(signalAddr: string, configuration?: RTCConfiguration) {
         this.peer = new RTCPeerConnection(configuration)
@@ -24,9 +25,7 @@ export class RemotePeer {
     }
 
     private async onIceCandidate(ev: RTCPeerConnectionIceEvent) {
-        if (!ev.candidate) {
-            return
-        }
+        if (!ev.candidate) return
 
         this.signal.sendSignal("candidate", ev.candidate.toJSON())
     }
@@ -52,19 +51,20 @@ export class RemotePeer {
         this.close()
     }
 
+    private canAddIceCandidate() {
+        return this.validCandidateStates.has(this.peer.signalingState)
+    }
+
     private async onCandidateSignal(signal: Signal<"candidate">) {
-        if (this.peer.signalingState === "stable" || this.peer.signalingState === "have-remote-offer" || this.peer.signalingState === "have-remote-pranswer") {
-            await this.peer.addIceCandidate(signal.payload)
-            return
+        if (!this.canAddIceCandidate()) {
+            return this.candidateBuffer.push(signal.payload)
         }
 
-        this.candidateBuffer.push(signal.payload)
+        await this.peer.addIceCandidate(signal.payload)
     }
 
     private async onSignalingStateChange() {
-        if (this.peer.signalingState !== "stable" && this.peer.signalingState !== "have-remote-offer" && this.peer.signalingState !== "have-remote-pranswer") {
-            return
-        }
+        if (!this.canAddIceCandidate()) return
 
         for (const candidate of this.candidateBuffer) {
             await this.peer.addIceCandidate(candidate)
