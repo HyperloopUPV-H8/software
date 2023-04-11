@@ -1,0 +1,49 @@
+@use "src/styles/colors";
+
+$switch-height: 1.5rem;
+$switch-aspect-ratio: 2;
+$switch-padding: 0.25rem;
+
+.toggleSwitchWrapperOn,
+.toggleSwitchWrapperOff {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: $switch-padding;
+
+    height: $switch-height;
+    width: calc($switch-height * $switch-aspect-ratio);
+
+    border-radius: calc($switch-height / 2);
+
+    transition: padding-left 100ms ease-in, background-color 100ms ease-in;
+
+    div {
+        transition: background-color 100ms ease-in;
+
+        border-radius: 50%;
+        height: 100%;
+        aspect-ratio: 1/1;
+    }
+}
+
+.toggleSwitchWrapperOn {
+    padding-left: calc($switch-height * ($switch-aspect-ratio - 1) + $switch-padding);
+
+    background-color: colors.getColor("tertiary", 90);
+
+    div {
+        background-color: colors.getColor("tertiary", 70);
+    }
+
+}
+
+.toggleSwitchWrapperOff {
+    padding-left: $switch-padding;
+
+    background-color: colors.getColor("neutral", 90);
+
+    div {
+        background-color: colors.getColor("neutral", 70);
+    }
+}

@@ -1,0 +1,65 @@
+@use "src/styles/colors";
+
+$button-height: 3rem;
+$icon-size: 1.5rem;
+$label-size: 0.7rem;
+
+$inner-shadow: inset 0 2px colors.getColor("tertiary", 60);
+
+.buttonTagWrapper {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    height: fit-content;
+    width: 100%;
+
+    p {
+        transition: all 90ms ease-out;
+        color: colors.getColor("primary", 60);
+        margin-top: 5px;
+        margin-bottom: 0px;
+        font-size: $label-size;
+        font-weight: 600;
+        text-align: center;
+        user-select: none;
+    }
+
+    &:hover p {
+        color: colors.getColor("primary", 50);
+    }
+
+    &:active p {
+        color: colors.getColor("tertiary", 50);
+    }
+
+    button {
+        appearance: none;
+        color: colors.getColor("primary", 60);
+        background-color: colors.getColor("primary", 90);
+
+        width: 100%;
+        height: $button-height;
+        transform: translateY(-8px);
+
+        border: none;
+        border-radius: 6px;
+        box-shadow: 0 8px;
+
+        transition: all 30ms ease-out;
+
+        font-size: $icon-size;
+        font-weight: bold;
+
+        &:hover {
+            color: colors.getColor("primary", 50);
+            background-color: colors.getColor("primary", 80);
+        }
+
+        &:active {
+            color: colors.getColor("tertiary", 50);
+            background-color: colors.getColor("tertiary", 80);
+            box-shadow: none;
+            transform: translateY(0px);
+        }
+    }
+}

@@ -1,31 +1,27 @@
-import { useState } from "react";
+import { useToggle } from "hooks/useToggle";
+import { ButtonHTMLAttributes, DetailedHTMLProps, ReactNode, useEffect, MouseEvent } from "react";
 import style from "./ToggleButton.module.scss"
 
 type Props = {
     label: string;
-    id?: string;
-    icon: React.ReactNode;
-    onToggle: (target: string, state: boolean) => void;
-}
+    icon: ReactNode;
+    onToggle?: (state: boolean) => void;
+} & Omit<DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>, "onClick">
 
-export function ToggleButton(props: Props) {
-    const [isToggeled, setIsToggeled] = useState(false)
+export function ToggleButton({ label, icon, onToggle, ...buttonProps }: Props) {
+    const [isOn, flip] = useToggle()
 
-    const target = props.id ?? props.label
-    function onClick() {
-        setIsToggeled((prev) => {
-            const next = !prev
-            props.onToggle(target, next)
-            return next
-        })
-    }
+    useEffect(() => {
+        onToggle?.(isOn)
+    }, [isOn])
 
+    const name = `${style.toggleButtonWrapper} ${isOn ? style.on : style.off}`
     return (
-        <div className={isToggeled ? style.toggleButtonWrapperOn : style.toggleButtonWrapperOff}>
-            <button onClick={onClick}>
-                {props.icon}
+        <label className={name}>
+            <button onClick={flip} {...buttonProps}>
+                {icon}
             </button>
-            <p>{props.label}</p>
-        </div>
+            <p>{label}</p>
+        </label>
     )
 }

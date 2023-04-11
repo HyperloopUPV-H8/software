@@ -4,7 +4,9 @@ $key-colors: (
     primary: hsl(189, 25%, 40%),
     tertiary: hsl(27, 90%, 40%),
     stable: hsl(73, 68%, 40%),
-    fault: hsl(0, 82%, 37%),
+    fault: hsl(0, 68%, 40%),
+    warning: hsl(49, 90%, 40%),
+    neutral: hsl(0, 0%, 40%)
 );
 
 $lightnesses: 0, 10, 15, 20, 30, 40, 50, 60, 70, 80, 85, 90, 95, 99, 100;

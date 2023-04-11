@@ -1,0 +1,62 @@
+@use "src/styles/colors";
+
+$button-size: 3.5rem;
+$icon-size: 1rem;
+
+.playButton {
+    height: $button-size;
+    width: $button-size;
+    font-size: $icon-size;
+    appearance: none;
+    border: none;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+
+    box-shadow: 0 8px;
+    transform: translateY(-8px);
+
+    transition: all 30ms ease-out;
+
+    &:active {
+        box-shadow: none;
+        transform: translateY(0);
+    }
+}
+
+.green {
+    color: colors.getColor("stable", 60);
+    background-color: colors.getColor("stable", 90);
+
+    &:hover {
+        color: colors.getColor("stable", 50);
+        background-color: colors.getColor("stable", 80);
+    }
+}
+
+.yellow {
+    color: colors.getColor("warning", 60);
+    background-color: colors.getColor("warning", 90);
+
+    &:hover {
+        color: colors.getColor("warning", 50);
+        background-color: colors.getColor("warning", 80);
+    }
+}
+
+.red {
+    color: colors.getColor("fault", 60);
+    background-color: colors.getColor("fault", 90);
+
+    &:hover {
+        color: colors.getColor("fault", 50);
+        background-color: colors.getColor("fault", 80);
+    }
+}
+
+.gray {
+    color: colors.getColor("neutral", 60);
+    background-color: colors.getColor("neutral", 90);
+
+    box-shadow: none;
+    transform: translateY(0);
+}
