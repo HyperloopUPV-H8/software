@@ -4,47 +4,37 @@ import type { Connection } from "models/Connection";
 const connectionsSlice = createSlice({
     name: "connections",
     initialState: {
-        websocket: { name: "BackendWebSocket", isConnected: false },
-        board: [] as Connection[],
-    } as { websocket: Connection; board: Connection[] },
+        websocket: { name: "Backend WebSocket", isConnected: false },
+        boards: [] as Array<Connection>,
+    },
     reducers: {
-        setWebSocketConnection: (connections, action) => {
+        setWebSocketConnection: (
+            connections,
+            action: PayloadAction<boolean>
+        ) => {
             connections.websocket.isConnected = action.payload;
         },
 
-        updateBoardConnectionsArray: (
+        updateBoardConnections: (
             connections,
-            action: PayloadAction<Connection[]>
+            action: PayloadAction<Array<Connection>>
         ) => {
-            action.payload.forEach((element) => {
-                let conn = connections.board.find(
-                    (conn) => conn.name == element.name
-                )!;
+            action.payload.forEach(({ name, isConnected }) => {
+                const conn = connections.boards.find(
+                    (conn) => conn.name == name
+                );
+
                 if (conn) {
-                    conn.isConnected = element.isConnected;
+                    conn.isConnected = isConnected;
                 } else {
-                    connections.board.push(element);
+                    connections.boards.push({ name, isConnected });
                 }
             });
-        },
-
-        setDisconnectionBoardState: (connections) => {
-            connections.board.forEach((element) => {
-                element.isConnected = false;
-            });
-        },
-
-        initializeMockConnections: (connections, action) => {
-            return action.payload;
         },
     },
 });
 
-export const {
-    setWebSocketConnection,
-    updateBoardConnectionsArray,
-    setDisconnectionBoardState,
-    initializeMockConnections,
-} = connectionsSlice.actions;
+export const { setWebSocketConnection, updateBoardConnections } =
+    connectionsSlice.actions;
 
 export default connectionsSlice.reducer;

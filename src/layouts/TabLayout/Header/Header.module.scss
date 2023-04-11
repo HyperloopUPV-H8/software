@@ -1,12 +1,12 @@
 @use "src/styles/styles";
 
-.wrapper {
+.headerWrapper {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
-
+    flex: 0 0 2.5rem;
     overflow-x: clip;
 
     margin-bottom: 1.2rem;
@@ -14,5 +14,6 @@
         display: flex;
         align-items: center;
         @include styles.title-text;
+        line-height: 95%;
     }
 }
