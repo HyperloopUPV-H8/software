@@ -5,7 +5,7 @@ const connectionsSlice = createSlice({
     name: "connections",
     initialState: {
         websocket: { name: "Backend WebSocket", isConnected: false },
-        boards: {} as Record<string, Connection>,
+        boards: [] as Array<Connection>,
     },
     reducers: {
         setWebSocketConnection: (
@@ -17,15 +17,17 @@ const connectionsSlice = createSlice({
 
         updateBoardConnections: (
             connections,
-            action: PayloadAction<Record<string, Connection>>
+            action: PayloadAction<Array<Connection>>
         ) => {
-            Object.values(action.payload).forEach(({ name, isConnected }) => {
-                const conn = connections.boards[name];
+            action.payload.forEach(({ name, isConnected }) => {
+                const conn = connections.boards.find(
+                    (conn) => conn.name == name
+                );
 
                 if (conn) {
                     conn.isConnected = isConnected;
                 } else {
-                    connections.boards[name] = { name, isConnected };
+                    connections.boards.push({ name, isConnected });
                 }
             });
         },
