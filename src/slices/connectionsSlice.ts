@@ -5,47 +5,34 @@ const connectionsSlice = createSlice({
     name: "connections",
     initialState: {
         websocket: { name: "Backend WebSocket", isConnected: false },
-        boards: [] as Connection[],
+        boards: {} as Record<string, Connection>,
     },
     reducers: {
-        setWebSocketConnection: (connections, action) => {
+        setWebSocketConnection: (
+            connections,
+            action: PayloadAction<boolean>
+        ) => {
             connections.websocket.isConnected = action.payload;
         },
 
-        updateBoardConnectionsArray: (
+        updateBoardConnections: (
             connections,
-            action: PayloadAction<Connection[]>
+            action: PayloadAction<Record<string, Connection>>
         ) => {
-            // action.payload.forEach is not a function
-            action.payload.forEach((element) => {
-                let conn = connections.boards.find(
-                    (conn) => conn.name == element.name
-                )!;
+            Object.values(action.payload).forEach(({ name, isConnected }) => {
+                const conn = connections.boards[name];
+
                 if (conn) {
-                    conn.isConnected = element.isConnected;
+                    conn.isConnected = isConnected;
                 } else {
-                    connections.boards.push(element);
+                    connections.boards[name] = { name, isConnected };
                 }
             });
-        },
-
-        setDisconnectionBoardState: (connections) => {
-            connections.boards.forEach((element) => {
-                element.isConnected = false;
-            });
-        },
-
-        initializeMockConnections: (connections, action) => {
-            return action.payload;
         },
     },
 });
 
-export const {
-    setWebSocketConnection,
-    updateBoardConnectionsArray,
-    setDisconnectionBoardState,
-    initializeMockConnections,
-} = connectionsSlice.actions;
+export const { setWebSocketConnection, updateBoardConnections } =
+    connectionsSlice.actions;
 
 export default connectionsSlice.reducer;

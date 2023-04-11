@@ -3,13 +3,13 @@ import { RootState } from "store";
 import { useWebSocketBroker } from "services/WebSocketBroker/useWebSocketBroker";
 
 import { useDispatch } from "react-redux";
-import { updateBoardConnectionsArray } from "slices/connectionsSlice";
+import { updateBoardConnections } from "slices/connectionsSlice";
 
 export function useConnections() {
     const dispatch = useDispatch();
 
     useWebSocketBroker("connection/update", (msg) => {
-        dispatch(updateBoardConnectionsArray(msg));
+        dispatch(updateBoardConnections(msg));
     });
 
     return useSelector((state: RootState) => state.connections);
