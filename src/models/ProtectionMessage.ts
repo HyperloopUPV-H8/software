@@ -1,21 +1,11 @@
-export type ProtectionMessage = FaultMessage | WarningMessage;
-
-export type FaultMessage = {
+export type ProtectionMessage = {
     id: string;
     count: number;
-    kind: "fault";
+    kind: "fault" | "warning";
     board: string;
     name: string;
     violation: Violation;
-};
-
-export type WarningMessage = {
-    id: string;
-    count: number;
-    kind: "warning";
-    board: string;
-    name: string;
-    violation: Violation;
+    timestamp: Timestamp;
 };
 
 export type Violation =
@@ -53,4 +43,14 @@ type NotEqualsViolation = {
     kind: "NOT_EQUALS";
     want: number;
     got: number;
+};
+
+export type Timestamp = {
+    counter: number;
+    seconds: number;
+    minutes: number;
+    hour: number;
+    day: number;
+    month: number;
+    year: number;
 };
