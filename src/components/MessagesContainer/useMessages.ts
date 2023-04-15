@@ -1,5 +1,4 @@
 import { useWebSocketBroker } from "services/WebSocketBroker/useWebSocketBroker";
-import { loremIpsum } from "lorem-ipsum";
 import { addMessage } from "slices/messagesSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "store";
@@ -64,13 +63,9 @@ function createRandomViolation(): Violation {
 export function useMessages() {
     const dispatch = useDispatch();
 
-    // useWebSocketBroker("message/update", (msg) => {
-    //     dispatch(addMessage(msg));
-    // });
-
-    useInterval(() => {
-        dispatch(addMessage(createRandomMessage()));
-    }, 100);
+    useWebSocketBroker("message/update", (msg) => {
+        dispatch(addMessage(msg));
+    });
 
     return useSelector((state: RootState) => state.messages);
 }

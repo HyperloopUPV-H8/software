@@ -1,51 +1,59 @@
-import { Message as MessageAdapter } from "adapters/Message";
-import { Message } from "models/Message";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { ProtectionMessageAdapter } from "adapters/ProtectionMessage";
+import { ProtectionMessage } from "models/ProtectionMessage";
 import { nanoid } from "nanoid";
+import { isEqual } from "lodash";
+
+function areMessagesEqual(
+    message: ProtectionMessage,
+    adapter: ProtectionMessageAdapter
+): boolean {
+    if (
+        message.board == adapter.board &&
+        message.kind == adapter.kind &&
+        message.name == adapter.name
+    ) {
+        return isEqual(message.violation, adapter.violation);
+    }
+
+    return false;
+}
+
 const messagesSlice = createSlice({
     name: "messages",
-    initialState: { fault: [], warning: [] } as {
-        fault: Message[];
-        warning: Message[];
-    },
+    initialState: [] as Array<ProtectionMessage>,
     reducers: {
-        updateMessages: {
-            reducer(messages, action: PayloadAction<Message>) {
-                if (action.payload.type == "warning") {
-                    if (
-                        messages.warning.length > 0 &&
-                        messages.warning[messages.warning.length - 1].id ==
-                            action.payload.id
-                    ) {
-                        messages.warning[messages.warning.length - 1].listId =
-                            action.payload.listId;
-                        messages.warning[messages.warning.length - 1].count++;
-                    } else {
-                        messages.warning.push(action.payload);
-                    }
-                } else if ("fault") {
-                    if (
-                        messages.fault.length > 0 &&
-                        messages.fault[messages.fault.length - 1].id ==
-                            action.payload.id
-                    ) {
-                        messages.fault[messages.fault.length - 1].listId =
-                            action.payload.listId;
-                        messages.fault[messages.fault.length - 1].count++;
-                    } else {
-                        messages.fault.push(action.payload);
-                    }
+        addMessage: {
+            reducer(messages, action: PayloadAction<ProtectionMessage>) {
+                const newMessages = [...messages];
+
+                if (
+                    messages.length > 0 &&
+                    areMessagesEqual(
+                        messages[messages.length - 1],
+                        action.payload
+                    )
+                ) {
+                    newMessages[newMessages.length - 1] = {
+                        ...messages[messages.length - 1],
+                        id: action.payload.id,
+                        count: messages[messages.length - 1].count + 1,
+                    };
+                } else {
+                    newMessages.push(action.payload);
                 }
+
+                return newMessages;
             },
-            prepare(message: MessageAdapter) {
+            prepare(message: ProtectionMessageAdapter) {
                 return {
-                    payload: { ...message, listId: nanoid(), count: 1 },
+                    payload: { ...message, id: nanoid(), count: 1 },
                 };
             },
         },
     },
 });
 
-export const { updateMessages } = messagesSlice.actions;
+export const { addMessage } = messagesSlice.actions;
 
 export default messagesSlice.reducer;
