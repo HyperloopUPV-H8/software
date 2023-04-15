@@ -16,9 +16,10 @@
     display: grid;
     grid-template:
         "icon kindAndOrigin counter" auto
-        "icon violation ." auto / auto 1fr auto;
+        "icon violation violation" auto
+        "icon timestamp timestamp" auto / auto 1fr auto;
 
-    gap: 0.6rem 0.8rem;
+    gap: 0.4rem 0.8rem;
 
     padding: 0.6rem;
     background-color: var(--background-color);
@@ -69,4 +70,8 @@
 
 .origin {
     overflow: hidden;
+}
+
+.timestamp {
+    grid-area: timestamp;
 }

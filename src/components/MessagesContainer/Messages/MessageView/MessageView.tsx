@@ -7,6 +7,7 @@ import { ReactComponent as Fault } from "assets/svg/fault.svg";
 import React from "react";
 import { ViolationView } from "./ViolationView/ViolationView";
 import { Origin } from "./Origin/Origin";
+import { TimestampView } from "./TimestampView/TimestampView";
 
 type Props = {
     message: ProtectionMessage;
@@ -39,6 +40,10 @@ export const MessageView = React.memo(({ message }: Props) => {
             <ViolationView
                 className={styles.violation}
                 violation={message.violation}
+            />
+            <TimestampView
+                className={styles.timestamp}
+                timestamp={message.timestamp}
             />
         </article>
     );
