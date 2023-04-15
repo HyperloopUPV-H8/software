@@ -1,0 +1,72 @@
+@use "src/styles/styles";
+
+.message.fault {
+    --main-color: #fc3535;
+    --light-color: #ffb3b3;
+    --background-color: #ffdcdc;
+}
+
+.message.warning {
+    --main-color: #ffba0a;
+    --light-color: #ffdd86;
+    --background-color: #fff0ba;
+}
+
+.message {
+    display: grid;
+    grid-template:
+        "icon kindAndOrigin counter" auto
+        "icon violation ." auto / auto 1fr auto;
+
+    gap: 0.6rem 0.8rem;
+
+    padding: 0.6rem;
+    background-color: var(--background-color);
+    border-radius: 1rem;
+    @include styles.shadow;
+}
+
+.kindAndOrigin {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    overflow: hidden;
+
+    column-gap: 0.8rem;
+    row-gap: 0.5rem;
+}
+
+.icon {
+    grid-area: icon;
+    color: var(--main-color);
+}
+
+.counter {
+    grid-area: counter;
+}
+
+.violation {
+    grid-area: violation;
+}
+
+.violationKind {
+    width: fit-content;
+    height: fit-content;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    padding: 0.15rem 0.4rem;
+    border-radius: 0.5rem;
+    background-color: var(--main-color);
+    color: white;
+    font-weight: bold;
+}
+
+.idAndCounter {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.origin {
+    overflow: hidden;
+}
