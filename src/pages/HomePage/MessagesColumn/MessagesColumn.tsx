@@ -6,10 +6,8 @@ import { BiLineChart } from "react-icons/bi";
 import { nanoid } from "nanoid";
 import { MessagesContainer } from "components/MessagesContainer/MessagesContainer";
 import { Logger } from "components/Logger/Logger";
-import { Bootloader } from "components/Bootloader/Bootloader";
 import { useRef } from "react";
 import { Connections } from "components/Connections/Connections";
-import { Message } from "models/Message";
 
 export const MessagesColumn = () => {
     const messagesTabItems = useRef([
@@ -32,7 +30,6 @@ export const MessagesColumn = () => {
                 direction={Direction.VERTICAL}
             ></SplitLayout>
             <Logger />
-            <Bootloader />
         </div>
     );
 };
