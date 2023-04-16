@@ -2,11 +2,11 @@ import { Measurement } from "models/PodData/Measurement";
 import { MeasurementRow } from "./MeasurementRow/MeasurementRow";
 import styles from "./MeasurementRows.module.scss";
 
-export const MeasurementRows = ({
-    measurements,
-}: {
+type Props = {
     measurements: Record<string, Measurement>;
-}) => {
+};
+
+export const MeasurementRows = ({ measurements }: Props) => {
     return (
         <div className={styles.measurementRowsWrapper}>
             {Object.values(measurements).map((measurement) => {

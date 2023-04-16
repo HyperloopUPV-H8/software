@@ -9,8 +9,11 @@ type Props = {
 
 const Header = ({ boardName, isCaretOpen, toggleDropdown }: Props) => {
     return (
-        <div className={styles.wrapper}>
-            <Caret isOpen={isCaretOpen} onClick={toggleDropdown} />
+        <div
+            className={styles.header}
+            onClick={toggleDropdown}
+        >
+            <Caret isOpen={isCaretOpen} />
             {<div className={styles.name}>{boardName}</div>}
         </div>
     );
