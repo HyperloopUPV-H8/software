@@ -4,11 +4,13 @@ import { Direction } from "layouts/SplitLayout/Direction";
 import { TabLayout } from "layouts/TabLayout/TabLayout";
 import { BiLineChart } from "react-icons/bi";
 import { nanoid } from "nanoid";
-import { FaultsAndWarningLogger } from "components/FaultsAndWarningLogger/FaultsAndWarningLogger";
-import { ConnectionsTable } from "components/ConnectionsTable/ConnectionsTable";
+import { MessagesContainer } from "components/MessagesContainer/MessagesContainer";
 import { Logger } from "components/Logger/Logger";
-import { BootloaderUploader } from "components/BootloaderUploader/BootloaderUploader";
+import { Bootloader } from "components/Bootloader/Bootloader";
 import { useRef } from "react";
+import { Connections } from "components/Connections/Connections";
+import { Message } from "models/Message";
+
 export const MessagesColumn = () => {
     const messagesTabItems = useRef([
         {
@@ -16,17 +18,7 @@ export const MessagesColumn = () => {
             name: "Messages",
             icon: <BiLineChart />,
 
-            component: <FaultsAndWarningLogger />,
-        },
-    ]);
-
-    const connectionsTabItems = useRef([
-        {
-            id: nanoid(),
-            name: "Connections",
-            icon: <BiLineChart />,
-
-            component: <ConnectionsTable />,
+            component: <MessagesContainer />,
         },
     ]);
 
@@ -35,12 +27,12 @@ export const MessagesColumn = () => {
             <SplitLayout
                 components={[
                     <TabLayout items={messagesTabItems.current}></TabLayout>,
-                    <TabLayout items={connectionsTabItems.current}></TabLayout>,
+                    <Connections />,
                 ]}
                 direction={Direction.VERTICAL}
             ></SplitLayout>
             <Logger />
-            {/* <BootloaderUploader /> */}
+            <Bootloader />
         </div>
     );
 };

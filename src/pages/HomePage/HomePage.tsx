@@ -1,7 +1,6 @@
 import { SplitLayout } from "layouts/SplitLayout/SplitLayout";
 import { Direction } from "layouts/SplitLayout/Direction";
 import { ReceiveColumn } from "pages/HomePage/ReceiveColumn/ReceiveColumn";
-import { OrderTable } from "components/OrderTable/OrderTable";
 import { OrderColumn } from "pages/HomePage/OrderColumn/OrderColumn";
 import { MessagesColumn } from "pages/HomePage/MessagesColumn/MessagesColumn";
 import styles from "pages/HomePage/HomePage.module.scss";

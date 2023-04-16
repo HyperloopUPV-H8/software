@@ -1,3 +1,4 @@
+import { MessageTypes, Request, Response } from "./MessageTypes";
 import { Callback, BackendMessage } from "./types";
 
 export class WebSocketBroker {
@@ -55,8 +56,8 @@ export class WebSocketBroker {
         }
     }
 
-    public createSender(topic: string) {
-        return (msg: any) => {
+    public createSender<Topic extends keyof MessageTypes>(topic: Topic) {
+        return (msg: Request<Topic>) => {
             this.webSocket.send(JSON.stringify({ topic, msg }));
         };
     }

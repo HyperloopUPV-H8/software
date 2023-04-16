@@ -1,10 +1,11 @@
+import { MessageTypes, Request, Response } from "./MessageTypes";
 import { WebSocketBrokerContext } from "./WebSocketBrokerContext";
 import { useContext, useEffect, useCallback } from "react";
 
-export function useWebSocketBroker(
-    topic: string,
-    callback?: (msg: any) => void
-): (msg: any) => void {
+export function useWebSocketBroker<Topic extends keyof MessageTypes>(
+    topic: Topic,
+    callback?: (msg: Response<Topic>) => void
+): (msg: Request<Topic>) => void {
     const webSocketBroker = useContext(WebSocketBrokerContext)!;
 
     useEffect(() => {
