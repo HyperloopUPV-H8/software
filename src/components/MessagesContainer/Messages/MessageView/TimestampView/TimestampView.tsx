@@ -15,5 +15,5 @@ export const TimestampView = ({ timestamp, className }: Props) => {
 };
 
 function getTimestampString(timestamp: Timestamp): string {
-    return `${timestamp.hour}:${timestamp.minutes}:${timestamp.seconds} ${timestamp.day}/${timestamp.month}/${timestamp.year}`;
+    return `${timestamp.hours}:${timestamp.minutes}:${timestamp.seconds} ${timestamp.day}/${timestamp.month}/${timestamp.year}`;
 }

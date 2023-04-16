@@ -2,7 +2,6 @@ import { useWebSocketBroker } from "services/WebSocketBroker/useWebSocketBroker"
 import { addMessage } from "slices/messagesSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "store";
-import { useInterval } from "hooks/useInterval";
 import { ProtectionMessageAdapter } from "adapters/ProtectionMessage";
 import { Violation } from "models/ProtectionMessage";
 
@@ -12,6 +11,15 @@ function createRandomMessage(): ProtectionMessageAdapter {
         board: "LCU_MASTER",
         name: "current_1",
         violation: createRandomViolation(),
+        timestamp: {
+            counter: 13233,
+            day: Math.floor(Math.random() * 31) + 1,
+            month: Math.floor(Math.random() * 12) + 1,
+            hours: Math.floor(Math.random() * 24),
+            minutes: Math.floor(Math.random() * 60),
+            seconds: Math.floor(Math.random() * 60),
+            year: Math.floor(Math.random() * 100) + 2000,
+        },
     };
 }
 

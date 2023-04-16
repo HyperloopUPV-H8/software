@@ -49,7 +49,7 @@ export type Timestamp = {
     counter: number;
     seconds: number;
     minutes: number;
-    hour: number;
+    hours: number;
     day: number;
     month: number;
     year: number;
