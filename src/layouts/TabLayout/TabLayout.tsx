@@ -30,7 +30,7 @@ export const TabLayout = ({ items }: Props) => {
                                 style={{
                                     display:
                                         visibleTab.id == item.id
-                                            ? "block"
+                                            ? "flex"
                                             : "none",
                                 }}
                             >
