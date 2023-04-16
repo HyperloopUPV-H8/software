@@ -17,6 +17,7 @@ export const Logger = () => {
                     className={styles.playBtn}
                     onClick={() => {
                         startLogging();
+                        setLoggingState(true);
                     }}
                 >
                     <BsFillPlayFill />
@@ -25,6 +26,7 @@ export const Logger = () => {
                     className={styles.stopBtn}
                     onClick={() => {
                         stopLogging();
+                        setLoggingState(false);
                     }}
                 >
                     <BsFillStopFill />
