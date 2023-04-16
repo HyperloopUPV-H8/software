@@ -6,7 +6,7 @@ type Props = {
     className?: string;
 };
 
-export const Caret = ({ isOpen, onClick, className }: Props) => {
+export const Caret = ({ isOpen, onClick, className = "" }: Props) => {
     return (
         <div
             className={`${styles.caretWrapper} ${className}`}
