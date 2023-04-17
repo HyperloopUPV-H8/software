@@ -5,7 +5,7 @@ import { fetchFromBackend } from "services/HTTPHandler";
 import { initPodData, updatePodData } from "slices/podDataSlice";
 import { useWebSocketBroker } from "services/WebSocketBroker/useWebSocketBroker";
 import { PacketUpdate } from "adapters/PacketUpdate";
-import { initMeasurements } from "slices/measurementsSlice";
+import { initMeasurements, updateMeasurements } from "slices/measurementsSlice";
 
 export enum RequestState {
     PENDING,
@@ -40,8 +40,11 @@ export function useFetchPodData() {
             });
     }, []);
 
-    useWebSocketBroker("podData/update", (msg: PacketUpdate) => {
-        dispatch(updatePodData(msg));
+    useWebSocketBroker("podData/update", (msg) => {
+        if (requestState == RequestState.FULFILLED) {
+            dispatch(updatePodData(msg));
+            dispatch(updateMeasurements(msg));
+        }
     });
 
     return requestState;

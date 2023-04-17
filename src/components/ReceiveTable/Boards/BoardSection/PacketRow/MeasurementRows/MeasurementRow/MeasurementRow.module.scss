@@ -1,6 +1,6 @@
 @use "src/styles/styles";
 
-.wrapper {
+.measurementRow {
     width: 100%;
     display: grid;
     grid-template: "name value units" / min(18rem) min(6rem) auto;

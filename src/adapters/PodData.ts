@@ -16,10 +16,10 @@ type PacketAdapter = Omit<Packet, "measurements"> & {
 type MeasurementAdapter = Measurement;
 
 export function createPodDataFromAdapter(adapter: PodDataAdapter): PodData {
-    let boards: PodData["boards"] = Object.fromEntries(
+    const boards: PodData["boards"] = Object.fromEntries(
         Object.values(adapter["boards"]).map((boardAdapter) => {
-            let packets = getBoardPackets(boardAdapter.packets);
-            let measurementToPacket = getMeasurementToPacket(
+            const packets = getBoardPackets(boardAdapter.packets);
+            const measurementToPacket = getMeasurementToPacket(
                 boardAdapter.packets
             );
             return [
@@ -29,7 +29,7 @@ export function createPodDataFromAdapter(adapter: PodDataAdapter): PodData {
         })
     );
 
-    let packetToBoard = getPacketToBoard(adapter.boards);
+    const packetToBoard = getPacketToBoard(adapter.boards);
 
     return { boards, packetToBoard, lastUpdates: {} };
 }
