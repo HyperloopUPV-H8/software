@@ -18,10 +18,8 @@ type PacketGenerator struct {
 	packets []Packet
 }
 
-func (pg *PacketGenerator) AddGlobal(global models.GlobalInfo) {}
-
-func New() *PacketGenerator {
-	excelAdapter := excelAdapter.NewExcelAdapter(excelAdapter.ExcelAdapterConfig{
+func New() PacketGenerator {
+	excelAdapter := excelAdapter.New(excelAdapter.ExcelAdapterConfig{
 		Download: internals.DownloadConfig{
 			Id:          "1BEwASubu0el9oQA6PSwVKaNU-Q6gbJ40JR6kgqguKYE",
 			Credentials: "./secret.json",
@@ -32,22 +30,59 @@ func New() *PacketGenerator {
 			GlobalSheetPrefix: "GLOBAL ",
 			BoardSheetPrefix:  "BOARD ",
 			TablePrefix:       "[TABLE] ",
-			AddressTable:      "addresses",
-			BackendEntryKey:   "Backend",
-			UnitsTable:        "units",
-			PortsTable:        "ports",
-			IdsTable:          "ids",
+			Global: struct {
+				AddressTable    string "toml:\"address_table\""
+				BackendEntryKey string "toml:\"backend_entry_key\""
+				UnitsTable      string "toml:\"units_table\""
+				PortsTable      string "toml:\"ports_table\""
+				BoardIdsTable   string "toml:\"board_ids_table\""
+				MessageIdsTable string "toml:\"message_ids_table\""
+			}{
+				AddressTable:    "addresses",
+				BackendEntryKey: "Backend",
+				UnitsTable:      "units",
+				PortsTable:      "ports",
+				BoardIdsTable:   "board_ids",
+				MessageIdsTable: "message_ids",
+			},
 		},
 	})
-	pg := &PacketGenerator{}
-	excelAdapter.Update(pg)
+
+	boards := excelAdapter.GetBoards()
+	packets := make([]Packet, 0)
+
+	for _, board := range boards {
+		for _, packet := range board.Packets {
+			if packet.Description.Type != "data" {
+				continue
+			}
+
+			id, err := strconv.ParseUint(packet.Description.ID, 10, 16)
+			if err != nil {
+				log.Fatalf("data transfer: AddPacket: %s\n", err)
+			}
+
+			packets = append(packets, Packet{
+				ID:           uint16(id),
+				Name:         packet.Description.Name,
+				HexValue:     "",
+				Count:        0,
+				CycleTime:    0,
+				Measurements: getMeasurements(packet.Values),
+			})
+		}
+	}
+
+	pg := PacketGenerator{
+		packets: packets,
+	}
 
 	return pg
-
 }
 
 func (pg *PacketGenerator) CreateRandomPacket() []byte {
-	randomPacket := pg.packets[rand.Int63n(int64(len(pg.packets)))]
+	randomIndex := rand.Int63n(int64(len(pg.packets)))
+	randomPacket := pg.packets[randomIndex]
 
 	buff := bytes.NewBuffer(make([]byte, 0))
 
@@ -62,6 +97,7 @@ func (pg *PacketGenerator) CreateRandomPacket() []byte {
 		} else {
 			return nil
 		}
+
 	}
 
 	return buff.Bytes()
@@ -164,19 +200,21 @@ func (pg *PacketGenerator) AddPacket(boardName string, packet models.Packet) {
 
 }
 
-func getMeasurements(values []models.Value) map[string]Measurement {
-	measurements := make(map[string]Measurement, len(values))
+func getMeasurements(values []models.Value) []Measurement {
+	measurements := make([]Measurement, 0, len(values))
 	for _, value := range values {
-		measurements[value.ID] = Measurement{
-			ID:   value.ID,
-			Name: value.Name,
-			Type: value.Type,
-			//TODO: make sure added property (Value) doesn't break stuff
-			Value:        getDefaultValue(value.Type),
-			Units:        value.DisplayUnits,
-			SafeRange:    parseRange(value.SafeRange),
-			WarningRange: parseRange(value.WarningRange),
-		}
+		measurements = append(measurements,
+			Measurement{
+				ID:   value.ID,
+				Name: value.Name,
+				Type: value.Type,
+				//TODO: make sure added property (Value) doesn't break stuff
+				Value:        getDefaultValue(value.Type),
+				Units:        value.DisplayUnits,
+				SafeRange:    parseRange(value.SafeRange),
+				WarningRange: parseRange(value.WarningRange),
+			},
+		)
 	}
 	return measurements
 }
@@ -229,12 +267,12 @@ func getDefaultValue(valueType string) any {
 }
 
 type Packet struct {
-	ID           uint16                 `json:"id"`
-	Name         string                 `json:"name"`
-	HexValue     string                 `json:"hexValue"`
-	Count        uint16                 `json:"count"`
-	CycleTime    int64                  `json:"cycleTime"`
-	Measurements map[string]Measurement `json:"measurements"`
+	ID           uint16        `json:"id"`
+	Name         string        `json:"name"`
+	HexValue     string        `json:"hexValue"`
+	Count        uint16        `json:"count"`
+	CycleTime    int64         `json:"cycleTime"`
+	Measurements []Measurement `json:"measurements"`
 }
 
 type Measurement struct {
