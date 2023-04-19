@@ -57,6 +57,11 @@ $icon-size: 1rem;
     color: colors.getColor("neutral", 60);
     background-color: colors.getColor("neutral", 90);
 
-    box-shadow: none;
-    transform: translateY(0);
+    //box-shadow: none;
+    //transform: translateY(0);
+
+    &:hover {
+        color: colors.getColor("fault", 70);
+        background-color: colors.getColor("fault", 90);
+    }
 }
