@@ -1,7 +1,12 @@
 import { InputTag } from "components/InputTag/InputTag";
 import { ToggleSwitch } from "components/ToggleSwitch/ToggleSwitch";
 import { useToggle } from "hooks/useToggle";
-import { DetailedHTMLProps, InputHTMLAttributes, useEffect } from "react";
+import {
+    DetailedHTMLProps,
+    InputHTMLAttributes,
+    useEffect,
+    useState,
+} from "react";
 import style from "./ToggleInput.module.scss";
 import { InputValue } from "pages/TestingPage/TestControls/TestAttributes";
 

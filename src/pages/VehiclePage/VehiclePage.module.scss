@@ -1,5 +1,7 @@
-.controlPageWrapper {
-    width: 100%;
+.contentWrapper {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
+    flex: 1 1 0;
+    justify-content: space-between;
+    align-items: center;
 }

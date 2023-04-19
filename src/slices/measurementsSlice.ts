@@ -31,12 +31,25 @@ function createMeasurementMapFromPodDataAdapter(
     for (let board of Object.values(podDataAdapter.boards)) {
         for (let packet of Object.values(board.packets)) {
             for (let measurement of Object.values(packet.measurements)) {
+                measurement.safeRange = transformRange(measurement.safeRange);
+                measurement.warningRange = transformRange(
+                    measurement.warningRange
+                );
                 measurements[measurement.id] = measurement;
             }
         }
     }
 
     return measurements;
+}
+
+function transformRange(
+    range: [number | null, number | null]
+): [number, number] {
+    const lowerBound = range[0] ?? -Infinity;
+    const upperBound = range[1] ?? Infinity;
+
+    return [lowerBound, upperBound];
 }
 
 export const { initMeasurements, updateMeasurements } =
