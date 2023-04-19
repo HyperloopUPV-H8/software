@@ -1,20 +1,15 @@
-export type GolangTypes =
+export type GolangTypes = NumericType | Bool | Enum;
+
+export type NumericType =
     | SignedIntegerType
     | UnsignedIntegerType
-    | FloatingType
-    | Bool
-    | Enum;
+    | FloatingType;
 
 export type SignedIntegerType = "int8" | "int16" | "int32" | "int64";
 
 export type UnsignedIntegerType = "uint8" | "uint16" | "uint32" | "uint64";
 
 export type FloatingType = "float32" | "float64";
-
-export type NumericType =
-    | SignedIntegerType
-    | UnsignedIntegerType
-    | FloatingType;
 
 export function isNumericType(type: string): type is NumericType {
     return (

@@ -1,41 +1,46 @@
-type EnumType = `Enum(${string})`;
+import { NumericType, isNumericType } from "GolangTypes";
 
-export type VariableType =
-    | "uint8"
-    | "uint16"
-    | "uint32"
-    | "uint64"
-    | "int8"
-    | "int16"
-    | "int32"
-    | "int64"
-    | "float32"
-    | "float64"
-    | "bool"
-    | EnumType;
+export type Measurement =
+    | NumericMeasurement
+    | BooleanMeasurement
+    | EnumMeasurement;
+
+type AbstractMeasurement = {
+    id: string;
+    name: string;
+};
+
+export type NumericMeasurement = AbstractMeasurement & {
+    type: NumericType;
+    value: NumericValue;
+    units: string;
+    safeRange: [number, number];
+    warningRange: [number, number];
+};
+
+export type NumericValue = { last: number; average: number };
+
+type BooleanMeasurement = AbstractMeasurement & {
+    type: "bool";
+    value: boolean;
+};
+
+type EnumMeasurement = AbstractMeasurement & {
+    type: "Enum";
+    value: string;
+};
 
 export type ValueType = number | string | boolean;
 
-export type Measurement = {
-    id: string;
-    name: string;
-    type: VariableType;
-    safeRange: [number, number];
-    warningRange: [number, number];
-    value: ValueType;
-    units: string;
-};
-
-export function createMeasurement(
+export function createNumericMeasurement(
     id: string,
-
     name: string,
-    type: VariableType,
-    value: ValueType,
+    type: NumericType,
+    value: NumericValue,
     safeRange: [number, number],
     warningRange: [number, number],
     units: string
-): Measurement {
+): NumericMeasurement {
     return {
         id,
         name,
@@ -45,6 +50,12 @@ export function createMeasurement(
         value,
         units,
     };
+}
+
+export function isNumericMeasurement(
+    measurement: Measurement
+): measurement is NumericMeasurement {
+    return isNumericType(measurement.type);
 }
 
 export function isNumber(type: string) {

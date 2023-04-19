@@ -1,4 +1,4 @@
-import { Measurement } from "models/PodData/Measurement";
+import { isNumericMeasurement, Measurement } from "models/PodData/Measurement";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { PodDataAdapter } from "adapters/PodData";
 import { PacketUpdate } from "adapters/PacketUpdate";
@@ -10,7 +10,7 @@ export const measurementsSlice = createSlice({
     initialState: {} as Measurements,
     reducers: {
         initMeasurements: (_, action: PayloadAction<PodDataAdapter>) => {
-            return createMeasurementMapFromPodDataAdapter(action.payload);
+            return createMeasurementsFromPodDataAdapter(action.payload);
         },
         updateMeasurements: (
             state,
@@ -26,19 +26,25 @@ export const measurementsSlice = createSlice({
     },
 });
 
-function createMeasurementMapFromPodDataAdapter(
+function createMeasurementsFromPodDataAdapter(
     podDataAdapter: PodDataAdapter
 ): Measurements {
-    const measurements = {} as Measurements;
+    const measurements: Measurements = {};
 
     for (const board of Object.values(podDataAdapter.boards)) {
         for (const packet of Object.values(board.packets)) {
             for (const measurement of Object.values(packet.measurements)) {
-                measurements[measurement.id] = {
-                    ...measurement,
-                    safeRange: transformRange(measurement.safeRange),
-                    warningRange: transformRange(measurement.warningRange),
-                };
+                if (isNumericMeasurement(measurement)) {
+                    measurements[measurement.id] = {
+                        ...measurement,
+                        safeRange: transformRange(measurement.safeRange),
+                        warningRange: transformRange(measurement.warningRange),
+                    };
+                } else {
+                    measurements[measurement.id] = {
+                        ...measurement,
+                    };
+                }
             }
         }
     }

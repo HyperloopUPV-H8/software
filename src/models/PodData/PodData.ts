@@ -27,6 +27,7 @@ export function getPacket(
     return podData.boards[podData.packetToBoard[id]].packets[id];
 }
 
+//FIXME: return cuando ya lo ha encontrado en vez de recorrer todo
 export function getMeasurement(
     boards: { [key: string]: Board },
     measurementId: string

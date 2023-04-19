@@ -35,7 +35,6 @@ type LowerBoundViolation = {
 
 type EqualsViolation = {
     kind: "EQUALS";
-    want: number;
     got: number;
 };
 

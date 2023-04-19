@@ -1,7 +1,8 @@
 import { PodData } from "models/PodData/PodData";
 import { Board } from "models/PodData/Board";
 import { Packet } from "models/PodData/Packet";
-import { Measurement } from "models/PodData/Measurement";
+import { Measurement, isNumericMeasurement } from "models/PodData/Measurement";
+import { isNumericType } from "GolangTypes";
 
 export type PodDataAdapter = { boards: { [name: string]: BoardAdapter } };
 
@@ -16,9 +17,9 @@ type PacketAdapter = Omit<Packet, "measurements"> & {
 type MeasurementAdapter = Measurement;
 
 export function createPodDataFromAdapter(adapter: PodDataAdapter): PodData {
-    const boards: PodData["boards"] = Object.fromEntries(
-        Object.values(adapter["boards"]).map((boardAdapter) => {
-            const packets = getBoardPackets(boardAdapter.packets);
+    const boards = Object.fromEntries(
+        Object.values(adapter.boards).map((boardAdapter) => {
+            const packets = getPackets(boardAdapter.packets);
             const measurementToPacket = getMeasurementToPacket(
                 boardAdapter.packets
             );
@@ -34,7 +35,7 @@ export function createPodDataFromAdapter(adapter: PodDataAdapter): PodData {
     return { boards, packetToBoard, lastUpdates: {} };
 }
 
-function getBoardPackets(packets: BoardAdapter["packets"]): Board["packets"] {
+function getPackets(packets: BoardAdapter["packets"]): Board["packets"] {
     return Object.fromEntries(
         Object.values(packets).map((packetAdapter) => {
             return [
