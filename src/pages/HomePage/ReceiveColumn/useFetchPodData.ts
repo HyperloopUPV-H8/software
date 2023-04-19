@@ -1,10 +1,9 @@
 import { useDispatch } from "react-redux";
 import { useState } from "react";
 import { useEffect } from "react";
-import { fetchFromBackend } from "services/HTTPHandler";
+import { fetchFromBackend } from "services/fetch";
 import { initPodData, updatePodData } from "slices/podDataSlice";
 import { useWebSocketBroker } from "services/WebSocketBroker/useWebSocketBroker";
-import { PacketUpdate } from "adapters/PacketUpdate";
 import { initMeasurements, updateMeasurements } from "slices/measurementsSlice";
 
 export enum RequestState {
