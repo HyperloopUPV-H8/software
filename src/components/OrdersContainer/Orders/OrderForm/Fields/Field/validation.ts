@@ -2,7 +2,7 @@ import {
     NumericType,
     isSignedIntegerType,
     isUnsignedIntegerType,
-} from "adapters/GolangTypes";
+} from "GolangTypes";
 
 export function isNumberValid(
     valueStr: string,

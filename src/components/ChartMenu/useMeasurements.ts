@@ -7,6 +7,6 @@ export function useMeasurements() {
     const dispatch = useDispatch();
 
     useWebSocketBroker("podData/update", (msg) => {
-        dispatch(updateMeasurements(msg as Record<string, PacketUpdate>));
+        dispatch(updateMeasurements(msg));
     });
 }

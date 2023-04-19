@@ -1,6 +1,6 @@
 import { OrderDescription } from "adapters/Order";
 import { useState, useEffect } from "react";
-import { fetchFromBackend } from "services/HTTPHandler";
+import { fetchFromBackend } from "services/fetch";
 
 export function useOrderDescriptions() {
     const [orderDescriptions, setOrderDescriptions] = useState<

@@ -1,9 +1,9 @@
 import {
     OrderFieldDescription,
     ValueDescription,
-    NumericValue,
-    BooleanValue,
-    EnumValue,
+    NumericDescription,
+    BooleanDescription,
+    EnumDescription,
 } from "adapters/Order";
 import { useState, useEffect } from "react";
 
@@ -47,7 +47,7 @@ function getFormField(description: OrderFieldDescription): FormField {
 
 function getNumericFormField(
     name: string,
-    valueDescription: NumericValue
+    valueDescription: NumericDescription
 ): FormField {
     return {
         name: name,
@@ -59,7 +59,7 @@ function getNumericFormField(
 }
 function getBooleanFormField(
     name: string,
-    valueDescription: BooleanValue
+    valueDescription: BooleanDescription
 ): FormField {
     return {
         name: name,
@@ -71,7 +71,7 @@ function getBooleanFormField(
 }
 function getEnumFormField(
     name: string,
-    valueDescription: EnumValue
+    valueDescription: EnumDescription
 ): FormField {
     return {
         name: name,
