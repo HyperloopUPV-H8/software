@@ -7,21 +7,36 @@ import { ReactComponent as PerturbationIcon } from "assets/svg/perturbationIcon.
 import { PlayButton } from "components/PlayButton/PlayButton";
 import { ButtonTag } from "components/ButtonTag/ButtonTag";
 import style from "./TestControls.module.scss";
-import {
-    FormEvent,
-    ReactNode,
-    RefObject,
-    useEffect,
-    useRef,
-    useState,
-} from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { InputValue, TestAttributes } from "./TestAttributes";
-import { useControlForm } from "./useControlForm";
+import { useControlForm, FormData } from "./useControlForm";
 
 export const TestControls = () => {
-    //const formRef = useRef<HTMLInputElement>(null);
     //TODO: https://medium.com/programming-essentials/how-to-access-data-from-a-child-form-component-with-react-hooks-fab5dd5ed5f0
     const [testAttributes, setTestAttributes] = useState<TestAttributes>({});
+    const [testAttributes1, setTestAttributes1] = useState<FormData>([]);
+
+    const initializeTestAttributes1 = () => {
+        const newMap1 = {
+            ...testAttributes1,
+            ["unit0"]: {
+                id: "unit0",
+                type: "number",
+                value: null,
+                enabled: false,
+                validity: { isValid: true, msg: "xxx" },
+            },
+            ["unit1"]: {
+                id: "unit1",
+                type: "number",
+                value: 10,
+                enabled: false,
+                validity: { isValid: true, msg: "xxx" },
+            },
+        };
+        setTestAttributes1(newMap1);
+        console.log("Hola");
+    };
 
     const initializeTestAttributes = () => {
         const newMap = {
@@ -94,7 +109,8 @@ export const TestControls = () => {
         console.log("Hola");
     };
 
-    useEffect(initializeTestAttributes, []);
+    //useEffect(initializeTestAttributes, []);
+    useEffect(initializeTestAttributes1, []);
 
     const getData = (label: string, value: InputValue) => {
         //TODO: Esta función era para recibir info de los hijos, ahora se hace con el useControlForm
@@ -116,7 +132,7 @@ export const TestControls = () => {
     };
 
     const [FormData, ChangeValue, ChangeEnable, SubmitHandler] =
-        useControlForm();
+        useControlForm(testAttributes1); //TODO: initialState
 
     return (
         <div className={style.testControlsWrapper}>
@@ -142,32 +158,36 @@ export const TestControls = () => {
                         className={style.inputWrapper}
                         onSubmit={handleSubmit} //Is it needed? The type submit is outside the form
                     >
-                        {Object.entries(testAttributes).map((testAttribute) => {
-                            return (
-                                <ToggleInput
-                                    key={testAttribute[0]}
-                                    label={testAttribute[1].label}
-                                    type={testAttribute[1].type}
-                                    min={testAttribute[1].min}
-                                    max={testAttribute[1].max}
-                                    step={testAttribute[1].step}
-                                    onToggle={(state) => {
-                                        ChangeEnable(
-                                            testAttribute[1].label,
-                                            state
-                                        );
-                                    }}
-                                    onChange={(state) => {
-                                        ChangeValue(
-                                            testAttribute[1].label,
-                                            state
-                                        );
-                                    }}
-                                    //data={getData}
-                                    // ref={formRef}
-                                />
-                            );
-                        })}
+                        {Object.entries(testAttributes1).map(
+                            (testAttribute) => {
+                                return (
+                                    <ToggleInput
+                                        key={testAttribute[0]}
+                                        //label={testAttribute[1].label}
+                                        id={testAttribute[1].id}
+                                        type={testAttribute[1].type}
+                                        //min={testAttribute[1].min}
+                                        //max={testAttribute[1].max}
+                                        //step={testAttribute[1].step}
+
+                                        onToggle={(state) => {
+                                            ChangeEnable(
+                                                testAttribute[1].id,
+                                                state
+                                            );
+                                        }}
+                                        onChange={(state) => {
+                                            ChangeValue(
+                                                testAttribute[1].id,
+                                                state
+                                            );
+                                        }}
+
+                                        //data={getData}
+                                    />
+                                );
+                            }
+                        )}
                     </form>
                     <ButtonTag type="submit" icon={<PerturbationIcon />} />
                 </div>
@@ -175,4 +195,21 @@ export const TestControls = () => {
         </div>
     );
 };
-//label=""
+
+{
+    /* <ToggleInput
+    key={testAttribute[0]}
+    label={testAttribute[1].label}
+    type={testAttribute[1].type}
+    min={testAttribute[1].min}
+    max={testAttribute[1].max}
+    step={testAttribute[1].step}
+    onToggle={(state) => {
+        ChangeEnable(testAttribute[1].label, state);
+    }}
+    onChange={(state) => {
+        ChangeValue(testAttribute[1].label, state);
+    }}
+    //data={getData}
+/>; */
+}

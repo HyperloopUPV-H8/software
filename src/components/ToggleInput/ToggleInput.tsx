@@ -11,7 +11,8 @@ import style from "./ToggleInput.module.scss";
 import { InputValue } from "pages/TestingPage/TestControls/TestAttributes";
 
 type Props = {
-    label: string;
+    //label: string;
+    id: string;
     data?: (label: string, value: InputValue) => void;
     //TODO: pass data to child to recover it from form
     onChange: (state: number) => void;
@@ -21,6 +22,17 @@ type Props = {
     DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
     "onChange"
 >;
+// type Props = {
+//     label: string;
+//     data?: (label: string, value: InputValue) => void;
+//     //TODO: pass data to child to recover it from form
+//     onChange: (state: number) => void;
+//     //TODO: Check if it is never undefined
+//     onToggle: (state: boolean) => void;
+// } & Omit<
+//     DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
+//     "onChange"
+// >;
 
 export function ToggleInput({
     onToggle,
@@ -45,7 +57,8 @@ export function ToggleInput({
                 onChange={onChange}
                 {...inputProps}
             />
-            <ToggleSwitch isOn={isOn} flip={flip} />
+            <ToggleSwitch onToggle={onToggle} />
+            {/* <ToggleSwitch isOn={isOn} flip={flip} /> */}
         </div>
     );
 }

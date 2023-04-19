@@ -5,7 +5,7 @@ type InputData = {
     type: string;
     value: number | null; // null cuando este vacio
     enabled: boolean;
-    validity: { isValid: boolean; msg: string };
+    validity: { isValid: boolean; msg: string }; //do not know use
 };
 type ChangingValue = {
     id: string;
@@ -17,7 +17,7 @@ type EnablingValue = {
     enabled: boolean;
 };
 
-type FormData = Array<InputData>;
+export type FormData = Array<InputData>;
 type SubmitHandler = (cb: () => void) => void;
 type ChangeValue = (id: string, value: number) => void;
 type ChangeEnable = (id: string, enable: boolean) => void;
@@ -25,9 +25,9 @@ type ChangeEnable = (id: string, enable: boolean) => void;
 type Action =
     | { type: "CHANGE VALUE"; payload: ChangingValue }
     | { type: "CHANGE ENABLE"; payload: EnablingValue }
-    | { type: "RESET INITIAL STATE" };
+    | { type: "RESET INITIAL STATE"; payload: FormData };
 
-const initialState: FormData = [];
+//const initialState: FormData = [];
 
 const searchId = (form: FormData, id: string): number => {
     return form.findIndex((inputData) => inputData.id == id);
@@ -72,7 +72,7 @@ const taskReducer = (state: FormData, action: Action) => {
             return [...state];
         }
         case "RESET INITIAL STATE": {
-            return initialState;
+            return action.payload;
         }
         default: {
             return state;
@@ -81,12 +81,9 @@ const taskReducer = (state: FormData, action: Action) => {
     //}
 };
 
-export function useControlForm(): [
-    FormData,
-    ChangeValue,
-    ChangeEnable,
-    SubmitHandler
-] {
+export function useControlForm(
+    initialState: FormData
+): [FormData, ChangeValue, ChangeEnable, SubmitHandler] {
     const [form, dispatch] = useReducer(taskReducer, initialState);
 
     const ChangeValue: ChangeValue = (id, value) => {
@@ -98,7 +95,7 @@ export function useControlForm(): [
     };
 
     const ResetInitialState = () => {
-        dispatch({ type: "RESET INITIAL STATE" });
+        dispatch({ type: "RESET INITIAL STATE", payload: initialState });
     };
 
     const SubmitHandler: SubmitHandler = (cb) => {
