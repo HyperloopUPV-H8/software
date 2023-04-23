@@ -71,7 +71,7 @@ $label-size: 0.5rem;
 
     button {
         background-color: colors.getColor("primary", 90);
-        box-shadow: 0 8px colors.getColor("primary", 60);
+        box-shadow: 0 5px colors.getColor("primary", 60);
         transform: translateY(-8px);
 
         &:hover {

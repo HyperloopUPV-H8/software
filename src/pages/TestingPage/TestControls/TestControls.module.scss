@@ -28,6 +28,7 @@
     border-top-right-radius: 1rem;
     border-top-left-radius: 1rem;
     padding: 0.5rem;
+    font-size: large;
 }
 
 .controlsWrapper {
@@ -49,6 +50,7 @@
     display: flex;
     flex-direction: column;
     flex: 1 1 0;
-    padding: 1rem;
-    gap: 0.2rem;
+    padding: 0.5rem;
+    padding-top: 0.7rem;
+    gap: 0.3rem;
 }
