@@ -22,7 +22,7 @@ const initialFormData = [
     {
         id: "unit1",
         type: "number",
-        value: 10,
+        value: null,
         enabled: false,
         validity: { isValid: true, msg: "xxx" },
     },
@@ -36,7 +36,7 @@ const initialFormData = [
     {
         id: "unit3",
         type: "number",
-        value: 10,
+        value: null,
         enabled: false,
         validity: { isValid: true, msg: "xxx" },
     },
@@ -50,7 +50,7 @@ const initialFormData = [
     {
         id: "unit5",
         type: "number",
-        value: 10,
+        value: null,
         enabled: false,
         validity: { isValid: true, msg: "xxx" },
     },
@@ -64,14 +64,14 @@ const initialFormData = [
     {
         id: "unit7",
         type: "number",
-        value: 10,
+        value: null,
         enabled: false,
         validity: { isValid: true, msg: "xxx" },
     },
     {
         id: "unit8",
         type: "number",
-        value: 10,
+        value: null,
         enabled: false,
         validity: { isValid: true, msg: "xxx" },
     },
@@ -85,7 +85,7 @@ const initialFormData = [
     {
         id: "unit10",
         type: "number",
-        value: 10,
+        value: null,
         enabled: false,
         validity: { isValid: true, msg: "xxx" },
     },
@@ -115,7 +115,8 @@ export const TestControls = () => {
 
     const [FormData, ChangeValue, ChangeEnable, SubmitHandler] =
         useControlForm(initialFormData); //TODO: initialState
-    // console.log(testAttributes1);
+
+    useEffect(() => console.log(FormData), [FormData]);
 
     return (
         <div className={style.testControlsWrapper}>
@@ -137,22 +138,13 @@ export const TestControls = () => {
                         />
                         <ToggleButton label="brake" icon={<BreakIcon />} />
                     </div>
-                    <form
-                        className={style.inputWrapper}
-                        onSubmit={() => {}} //Is it needed? The type submit is outside the form
-                    >
+                    <form className={style.inputWrapper}>
                         {Object.entries(FormData).map((testAttribute) => {
-                            //console.log(testAttributes1);
                             return (
                                 <ToggleInput
                                     key={testAttribute[0]}
-                                    //label={testAttribute[1].label}
                                     id={testAttribute[1].id}
                                     type={testAttribute[1].type}
-                                    //min={testAttribute[1].min}
-                                    //max={testAttribute[1].max}
-                                    //step={testAttribute[1].step}
-
                                     onToggle={(state) => {
                                         ChangeEnable(
                                             testAttribute[1].id,
@@ -162,33 +154,19 @@ export const TestControls = () => {
                                     onChange={(state) => {
                                         ChangeValue(testAttribute[1].id, state);
                                     }}
-
-                                    //data={getData}
                                 />
                             );
                         })}
                     </form>
-                    <ButtonTag type="submit" icon={<PerturbationIcon />} />
+                    <ButtonTag
+                        type="submit"
+                        icon={<PerturbationIcon />}
+                        onClick={() => {
+                            SubmitHandler();
+                        }}
+                    />
                 </div>
             </div>
         </div>
     );
 };
-
-{
-    /* <ToggleInput
-    key={testAttribute[0]}
-    label={testAttribute[1].label}
-    type={testAttribute[1].type}
-    min={testAttribute[1].min}
-    max={testAttribute[1].max}
-    step={testAttribute[1].step}
-    onToggle={(state) => {
-        ChangeEnable(testAttribute[1].label, state);
-    }}
-    onChange={(state) => {
-        ChangeValue(testAttribute[1].label, state);
-    }}
-    //data={getData}
-/>; */
-}

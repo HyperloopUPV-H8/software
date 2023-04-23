@@ -18,7 +18,7 @@ type EnablingValue = {
 };
 
 export type FormData = Array<InputData>;
-type SubmitHandler = (cb: () => void) => void;
+type SubmitHandler = () => void;
 type ChangeValue = (id: string, value: number) => void;
 type ChangeEnable = (id: string, enable: boolean) => void;
 
@@ -27,11 +27,10 @@ type Action =
     | { type: "CHANGE ENABLE"; payload: EnablingValue }
     | { type: "RESET INITIAL STATE"; payload: FormData };
 
-//const initialState: FormData = [];
-
 const searchId = (form: FormData, id: string): number => {
-    return 0;
-    //TODO: return form.findIndex((inputData) => inputData.id == id);
+    let index = form.findIndex((inputData) => inputData.id == id);
+    console.log(index);
+    return index;
 };
 
 const checkType = (type: string, value: number): boolean => {
@@ -47,11 +46,8 @@ const checkType = (type: string, value: number): boolean => {
 const taskReducer = (state: FormData, action: Action) => {
     switch (action.type) {
         case "CHANGE ENABLE": {
-            //TODO: let dataIndex = searchId(state, action.payload.id); //and if it doesn't exists?
-            let dataIndex = 0;
-            const currentValues = state;
-            console.log(state);
-            //const currentValues = [...state];
+            let dataIndex = searchId(state, action.payload.id);
+            const currentValues = [...state];
 
             currentValues[dataIndex] = {
                 ...currentValues[dataIndex],
@@ -61,8 +57,7 @@ const taskReducer = (state: FormData, action: Action) => {
             return currentValues;
         }
         case "CHANGE VALUE": {
-            let dataIndex = 0;
-            //TODO: let dataIndex = searchId(state, action.payload.id); //and if it doesn't exists?
+            let dataIndex = searchId(state, action.payload.id);
             if (
                 action.payload.value &&
                 checkType(state[dataIndex].type, action.payload.value)
@@ -75,7 +70,6 @@ const taskReducer = (state: FormData, action: Action) => {
                 return currentValues;
             }
             return [...state];
-            //TODO: [...state];
         }
         case "RESET INITIAL STATE": {
             return action.payload;
@@ -84,7 +78,6 @@ const taskReducer = (state: FormData, action: Action) => {
             return state;
         }
     }
-    //}
 };
 
 export function useControlForm(
@@ -104,12 +97,11 @@ export function useControlForm(
         dispatch({ type: "RESET INITIAL STATE", payload: initialState });
     };
 
-    const SubmitHandler: SubmitHandler = (cb) => {
-        //TODO: create submitHandler
+    const SubmitHandler: SubmitHandler = () => {
+        console.log(form);
         let error = false;
         form.forEach((inputData) => {
             if (inputData.enabled) {
-                //TODO: It doesn't check the type if it is not used
                 if (
                     inputData.value &&
                     checkType(inputData.type, inputData.value)
@@ -131,19 +123,3 @@ export function useControlForm(
 
     return [form, ChangeValue, ChangeEnable, SubmitHandler];
 }
-/**
- * Usar useReducer para el formData en vez de useState
- *
- * Las acciones del useReducer serán las siguientes:
- *      - ChangeEnable: recibe el valor de enable y el id del field
- *      - ChangeValue: recibe el valor del field y el id del field
- *        Tienes que comprobar la validez del valor antes de actualizar la lista.
- *
- * Para comprobar la validez del valor te basas en la propiedad "type" del tipo InputData.
- * Los momentos en los que tienes que comprobar la validez de los campos es dentro del
- * ChangeValue (es decir, cuando un usuario cambia el valor de un campo) y cuando se haga un submit.
- * En el ChangeValue solo compruebas la validez del campo que vas a actualizar mientras que en
- * el submit compruebas la validez de todos los campos. La comprobación en el submit se hace por si
- * hay algún campo vacio.
- *
- */
