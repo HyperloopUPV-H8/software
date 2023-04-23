@@ -43,10 +43,10 @@ export function useBootloaderUploaderState() {
 
     const sendToBootloader = useBootloader(onSendSuccess, onSendFailure);
 
-    function sendFile() {
+    function sendFile(board: string) {
         setState(BootloaderState.AWAITING);
         if (file) {
-            sendToBootloader(file);
+            sendToBootloader({ board, file });
         }
     }
 

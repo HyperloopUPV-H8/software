@@ -1,6 +1,6 @@
 import { Measurement, isNumericMeasurement } from "models/PodData/Measurement";
 import styles from "./MeasurementRow.module.scss";
-import { isNumericType } from "GolangTypes";
+
 type Props = {
     measurement: Measurement;
 };

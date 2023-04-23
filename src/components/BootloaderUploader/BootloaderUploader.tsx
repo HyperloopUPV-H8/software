@@ -19,12 +19,12 @@ export const BootloaderUploader = () => {
             onDragOver={dragOverHandler}
         >
             {state == BootloaderState.EMPTY && <DropElement />}
-            {state == BootloaderState.READY_TO_SEND && (
+            {/* {state == BootloaderState.READY_TO_SEND && (
                 <SendElement
                     fileName={file!.name}
                     onSendBtnClick={sendFile}
                 />
-            )}
+            )} */}
             {state == BootloaderState.AWAITING && <AwaitElement />}
             {state == BootloaderState.SUCCESS && (
                 <ResponseElement response="success" />
