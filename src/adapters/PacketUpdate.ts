@@ -5,5 +5,7 @@ export type PacketUpdate = {
     hexValue: number;
     cycleTime: number;
     count: number;
-    measurementUpdates: { [name: string]: NumericValue | boolean | string };
+    measurementUpdates: {
+        [name: string]: NumericValue | boolean | string;
+    };
 };
