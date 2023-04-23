@@ -12,7 +12,14 @@ type Props = {
 export function ButtonTag({ icon, label, ...buttonProps }: Props) {
     return (
         <label className={style.buttonTagWrapper}>
-            <button {...buttonProps}>{icon}</button>
+            <button
+                onClick={() => {
+                    console.log("submiting");
+                }}
+                {...buttonProps}
+            >
+                {icon}
+            </button>
             {label && <p>{label}</p>}
         </label>
     );

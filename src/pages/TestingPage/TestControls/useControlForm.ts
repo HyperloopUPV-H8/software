@@ -30,7 +30,8 @@ type Action =
 //const initialState: FormData = [];
 
 const searchId = (form: FormData, id: string): number => {
-    return form.findIndex((inputData) => inputData.id == id);
+    return 0;
+    //TODO: return form.findIndex((inputData) => inputData.id == id);
 };
 
 const checkType = (type: string, value: number): boolean => {
@@ -46,8 +47,11 @@ const checkType = (type: string, value: number): boolean => {
 const taskReducer = (state: FormData, action: Action) => {
     switch (action.type) {
         case "CHANGE ENABLE": {
-            let dataIndex = searchId(state, action.payload.id); //and if it doesn't exists?
-            const currentValues = [...state];
+            //TODO: let dataIndex = searchId(state, action.payload.id); //and if it doesn't exists?
+            let dataIndex = 0;
+            const currentValues = state;
+            console.log(state);
+            //const currentValues = [...state];
 
             currentValues[dataIndex] = {
                 ...currentValues[dataIndex],
@@ -57,7 +61,8 @@ const taskReducer = (state: FormData, action: Action) => {
             return currentValues;
         }
         case "CHANGE VALUE": {
-            let dataIndex = searchId(state, action.payload.id); //and if it doesn't exists?
+            let dataIndex = 0;
+            //TODO: let dataIndex = searchId(state, action.payload.id); //and if it doesn't exists?
             if (
                 action.payload.value &&
                 checkType(state[dataIndex].type, action.payload.value)
@@ -70,6 +75,7 @@ const taskReducer = (state: FormData, action: Action) => {
                 return currentValues;
             }
             return [...state];
+            //TODO: [...state];
         }
         case "RESET INITIAL STATE": {
             return action.payload;

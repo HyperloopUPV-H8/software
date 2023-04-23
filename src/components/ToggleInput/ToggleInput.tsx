@@ -46,6 +46,7 @@ export function ToggleInput({
     if (onToggle) {
         useEffect(() => {
             onToggle(isOn);
+            console.log(isOn);
         }, [isOn]);
     }
 
@@ -57,8 +58,8 @@ export function ToggleInput({
                 onChange={onChange}
                 {...inputProps}
             />
-            <ToggleSwitch onToggle={onToggle} />
-            {/* <ToggleSwitch isOn={isOn} flip={flip} /> */}
+            {/* <ToggleSwitch onToggle={onToggle} /> */}
+            <ToggleSwitch onToggle={onToggle} isOn={isOn} flip={flip} />
         </div>
     );
 }

@@ -1,7 +1,7 @@
 @use "src/styles/colors";
 
-$button-size: 3.5rem;
-$icon-size: 1rem;
+$button-size: 2.5rem;
+$icon-size: 0.7rem;
 
 .playButton {
     height: $button-size;
@@ -11,6 +11,10 @@ $icon-size: 1rem;
     border: none;
     aspect-ratio: 1 / 1;
     border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     box-shadow: 0 8px;
     transform: translateY(-8px);

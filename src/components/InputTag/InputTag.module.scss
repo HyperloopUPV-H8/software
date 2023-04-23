@@ -46,7 +46,7 @@
 .inputTagWrapperOn {
     border-color: colors.getColor("tertiary", 70);
     flex-grow: 1;
-    height: 2.8rem;
+    height: 2rem;
 
     legend {
         color: colors.getColor("tertiary", 70);
@@ -56,7 +56,7 @@
 .inputTagWrapperOff {
     border-color: colors.getColor("neutral", 70);
     flex-grow: 1;
-    height: 2.8rem;
+    height: 2rem;
 
     legend {
         color: colors.getColor("neutral", 70);

@@ -4,15 +4,13 @@ import style from "./ToggleSwitch.module.scss";
 
 type Props = {
     onToggle: (isOn: boolean) => void;
-    // isOn: boolean;
-    // flip: () => void;
+    isOn: boolean;
+    flip: () => void;
 };
 
-export function ToggleSwitch({ onToggle }: Props) {
-    const [isOn, flip] = useToggle();
-
+export function ToggleSwitch({ onToggle, isOn, flip }: Props) {
     useEffect(() => {
-        onToggle(isOn); //TODO:
+        onToggle(isOn); //TODO:onToggle?.(isOn); estaba así¿?
     }, [isOn]);
 
     return (

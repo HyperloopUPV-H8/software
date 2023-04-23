@@ -7,132 +7,115 @@ import { ReactComponent as PerturbationIcon } from "assets/svg/perturbationIcon.
 import { PlayButton } from "components/PlayButton/PlayButton";
 import { ButtonTag } from "components/ButtonTag/ButtonTag";
 import style from "./TestControls.module.scss";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, SetStateAction, useEffect, useState } from "react";
 import { InputValue, TestAttributes } from "./TestAttributes";
 import { useControlForm, FormData } from "./useControlForm";
 
+const initialFormData = [
+    {
+        id: "unit0",
+        type: "number",
+        value: null,
+        enabled: false,
+        validity: { isValid: true, msg: "xxx" },
+    },
+    {
+        id: "unit1",
+        type: "number",
+        value: 10,
+        enabled: false,
+        validity: { isValid: true, msg: "xxx" },
+    },
+    {
+        id: "unit2",
+        type: "number",
+        value: null,
+        enabled: false,
+        validity: { isValid: true, msg: "xxx" },
+    },
+    {
+        id: "unit3",
+        type: "number",
+        value: 10,
+        enabled: false,
+        validity: { isValid: true, msg: "xxx" },
+    },
+    {
+        id: "unit4",
+        type: "number",
+        value: null,
+        enabled: false,
+        validity: { isValid: true, msg: "xxx" },
+    },
+    {
+        id: "unit5",
+        type: "number",
+        value: 10,
+        enabled: false,
+        validity: { isValid: true, msg: "xxx" },
+    },
+    {
+        id: "unit6",
+        type: "number",
+        value: null,
+        enabled: false,
+        validity: { isValid: true, msg: "xxx" },
+    },
+    {
+        id: "unit7",
+        type: "number",
+        value: 10,
+        enabled: false,
+        validity: { isValid: true, msg: "xxx" },
+    },
+    {
+        id: "unit8",
+        type: "number",
+        value: 10,
+        enabled: false,
+        validity: { isValid: true, msg: "xxx" },
+    },
+    {
+        id: "unit9",
+        type: "number",
+        value: null,
+        enabled: false,
+        validity: { isValid: true, msg: "xxx" },
+    },
+    {
+        id: "unit10",
+        type: "number",
+        value: 10,
+        enabled: false,
+        validity: { isValid: true, msg: "xxx" },
+    },
+];
+
 export const TestControls = () => {
     //TODO: https://medium.com/programming-essentials/how-to-access-data-from-a-child-form-component-with-react-hooks-fab5dd5ed5f0
-    const [testAttributes, setTestAttributes] = useState<TestAttributes>({});
-    const [testAttributes1, setTestAttributes1] = useState<FormData>([]);
 
-    const initializeTestAttributes1 = () => {
-        const newMap1 = {
-            ...testAttributes1,
-            ["unit0"]: {
-                id: "unit0",
-                type: "number",
-                value: null,
-                enabled: false,
-                validity: { isValid: true, msg: "xxx" },
-            },
-            ["unit1"]: {
-                id: "unit1",
-                type: "number",
-                value: 10,
-                enabled: false,
-                validity: { isValid: true, msg: "xxx" },
-            },
-        };
-        setTestAttributes1(newMap1);
-        console.log("Hola");
-    };
+    // const getData = (label: string, value: InputValue) => {
+    //     //TODO: Esta función era para recibir info de los hijos, ahora se hace con el useControlForm
+    //     setTestAttributes((prev) => {
+    //         const currentAttributes = { ...prev };
+    //         currentAttributes[label].value = value;
+    //         return currentAttributes;
+    //     });
+    // };
 
-    const initializeTestAttributes = () => {
-        const newMap = {
-            ...testAttributes,
-            ["unit0"]: {
-                label: "unit0",
-                type: "number",
-                min: -10.0,
-                max: 10.0,
-                step: 0.01,
-            },
-            ["unit1"]: {
-                label: "unit1",
-                type: "number",
-                min: -10.0,
-                max: 10.0,
-                step: 0.01,
-            },
-            ["unit2"]: {
-                label: "unit2",
-                type: "number",
-                min: -10.0,
-                max: 10.0,
-                step: 0.01,
-            },
-            ["unit3"]: {
-                label: "unit3",
-                type: "number",
-                min: -10.0,
-                max: 10.0,
-                step: 0.01,
-            },
-            ["unit4"]: {
-                label: "unit4",
-                type: "number",
-                min: -10.0,
-                max: 10.0,
-                step: 0.01,
-            },
-            ["unit5"]: {
-                label: "unit5",
-                type: "number",
-                min: -10.0,
-                max: 10.0,
-                step: 0.01,
-            },
-            ["unit6"]: {
-                label: "unit6",
-                type: "number",
-                min: -10.0,
-                max: 10.0,
-                step: 0.01,
-            },
-            ["unit7"]: {
-                label: "unit7",
-                type: "number",
-                min: -10.0,
-                max: 10.0,
-                step: 0.01,
-            },
-            ["force 2"]: {
-                label: "force 2",
-                type: "number",
-                min: -10.0,
-                max: 10.0,
-                step: 0.01,
-            },
-        };
-        setTestAttributes(newMap);
-        console.log("Hola");
-    };
-
-    //useEffect(initializeTestAttributes, []);
-    useEffect(initializeTestAttributes1, []);
-
-    const getData = (label: string, value: InputValue) => {
-        //TODO: Esta función era para recibir info de los hijos, ahora se hace con el useControlForm
-        setTestAttributes((prev) => {
-            const currentAttributes = { ...prev };
-            currentAttributes[label].value = value;
-            return currentAttributes;
-        });
-    };
-
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        Object.entries(testAttributes).map((testAttribute) => {});
-        // const { name, value } = e.target;
-        // setValues({
-        //   ...values,
-        //   [name]: value
-        // });
-    };
+    // const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    //     e.preventDefault();
+    //     Object.entries(testAttributes).map((testAttribute) => {});
+    //     // const { name, value } = e.target;
+    //     // setValues({
+    //     //   ...values,
+    //     //   [name]: value
+    //     // });
+    // };
 
     const [FormData, ChangeValue, ChangeEnable, SubmitHandler] =
-        useControlForm(testAttributes1); //TODO: initialState
+        useControlForm(initialFormData); //TODO: initialState
+    // console.log(testAttributes1);
 
     return (
         <div className={style.testControlsWrapper}>
@@ -156,38 +139,34 @@ export const TestControls = () => {
                     </div>
                     <form
                         className={style.inputWrapper}
-                        onSubmit={handleSubmit} //Is it needed? The type submit is outside the form
+                        onSubmit={() => {}} //Is it needed? The type submit is outside the form
                     >
-                        {Object.entries(testAttributes1).map(
-                            (testAttribute) => {
-                                return (
-                                    <ToggleInput
-                                        key={testAttribute[0]}
-                                        //label={testAttribute[1].label}
-                                        id={testAttribute[1].id}
-                                        type={testAttribute[1].type}
-                                        //min={testAttribute[1].min}
-                                        //max={testAttribute[1].max}
-                                        //step={testAttribute[1].step}
+                        {Object.entries(FormData).map((testAttribute) => {
+                            //console.log(testAttributes1);
+                            return (
+                                <ToggleInput
+                                    key={testAttribute[0]}
+                                    //label={testAttribute[1].label}
+                                    id={testAttribute[1].id}
+                                    type={testAttribute[1].type}
+                                    //min={testAttribute[1].min}
+                                    //max={testAttribute[1].max}
+                                    //step={testAttribute[1].step}
 
-                                        onToggle={(state) => {
-                                            ChangeEnable(
-                                                testAttribute[1].id,
-                                                state
-                                            );
-                                        }}
-                                        onChange={(state) => {
-                                            ChangeValue(
-                                                testAttribute[1].id,
-                                                state
-                                            );
-                                        }}
+                                    onToggle={(state) => {
+                                        ChangeEnable(
+                                            testAttribute[1].id,
+                                            state
+                                        );
+                                    }}
+                                    onChange={(state) => {
+                                        ChangeValue(testAttribute[1].id, state);
+                                    }}
 
-                                        //data={getData}
-                                    />
-                                );
-                            }
-                        )}
+                                    //data={getData}
+                                />
+                            );
+                        })}
                     </form>
                     <ButtonTag type="submit" icon={<PerturbationIcon />} />
                 </div>

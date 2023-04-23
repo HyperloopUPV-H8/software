@@ -22,6 +22,7 @@ export function InputTag({ id, isOn, onChange, ...inputProps }: Props) {
             <input
                 onChange={(e: React.FormEvent<HTMLInputElement>) => {
                     let currentNumber = Number(e.currentTarget.value);
+                    console.log("AAAA");
                     if (checkString(currentNumber)) {
                         onChange(currentNumber); //TODO:
                     } else {
