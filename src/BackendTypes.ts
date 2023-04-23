@@ -1,4 +1,4 @@
-export type GolangTypes = NumericType | Bool | Enum;
+export type BackendType = NumericType | Bool | Enum;
 
 export type NumericType =
     | SignedIntegerType

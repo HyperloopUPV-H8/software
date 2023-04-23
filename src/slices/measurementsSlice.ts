@@ -1,7 +1,18 @@
-import { isNumericMeasurement, Measurement } from "models/PodData/Measurement";
+import {
+    isNumericMeasurement,
+    Measurement,
+    NumericValue,
+} from "models/PodData/Measurement";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { PodDataAdapter } from "adapters/PodData";
+import {
+    getBooleanMeasurement,
+    getEnumMeasurement,
+    getNumericMeasurement,
+    isNumericAdapter,
+    PodDataAdapter,
+} from "adapters/PodData";
 import { PacketUpdate } from "adapters/PacketUpdate";
+import { isNumericType } from "BackendTypes";
 
 export type Measurements = { [name: string]: Measurement };
 
@@ -33,17 +44,13 @@ function createMeasurementsFromPodDataAdapter(
 
     for (const board of Object.values(podDataAdapter.boards)) {
         for (const packet of Object.values(board.packets)) {
-            for (const measurement of Object.values(packet.measurements)) {
-                if (isNumericMeasurement(measurement)) {
-                    measurements[measurement.id] = {
-                        ...measurement,
-                        safeRange: transformRange(measurement.safeRange),
-                        warningRange: transformRange(measurement.warningRange),
-                    };
-                } else {
-                    measurements[measurement.id] = {
-                        ...measurement,
-                    };
+            for (const adapter of Object.values(packet.measurements)) {
+                if (isNumericAdapter(adapter)) {
+                    measurements[adapter.id] = getNumericMeasurement(adapter);
+                } else if (adapter.type == "bool") {
+                    measurements[adapter.id] = getBooleanMeasurement(adapter);
+                } else if (adapter.type == "Enum") {
+                    measurements[adapter.id] = getEnumMeasurement(adapter);
                 }
             }
         }
@@ -52,7 +59,7 @@ function createMeasurementsFromPodDataAdapter(
     return measurements;
 }
 
-function transformRange(
+export function transformRange(
     range: [number | null, number | null]
 ): [number, number] {
     const lowerBound = range[0] ?? -Infinity;

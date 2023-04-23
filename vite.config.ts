@@ -11,6 +11,7 @@ export default defineConfig({
     build: {
         sourcemap: true,
         outDir: "static",
+        minify: false,
     },
     plugins: [react(), tsconfigPaths(), svgr()],
     test: {

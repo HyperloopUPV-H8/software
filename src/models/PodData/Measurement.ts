@@ -1,4 +1,4 @@
-import { NumericType, isNumericType } from "GolangTypes";
+import { NumericType, isNumericType } from "BackendTypes";
 
 export type Measurement =
     | NumericMeasurement
@@ -20,12 +20,12 @@ export type NumericMeasurement = AbstractMeasurement & {
 
 export type NumericValue = { last: number; average: number };
 
-type BooleanMeasurement = AbstractMeasurement & {
+export type BooleanMeasurement = AbstractMeasurement & {
     type: "bool";
     value: boolean;
 };
 
-type EnumMeasurement = AbstractMeasurement & {
+export type EnumMeasurement = AbstractMeasurement & {
     type: "Enum";
     value: string;
 };
