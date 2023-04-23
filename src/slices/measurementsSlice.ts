@@ -1,7 +1,18 @@
-import { Measurement } from "models/PodData/Measurement";
+import {
+    isNumericMeasurement,
+    Measurement,
+    NumericValue,
+} from "models/PodData/Measurement";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { PodDataAdapter } from "adapters/PodData";
+import {
+    getBooleanMeasurement,
+    getEnumMeasurement,
+    getNumericMeasurement,
+    isNumericAdapter,
+    PodDataAdapter,
+} from "adapters/PodData";
 import { PacketUpdate } from "adapters/PacketUpdate";
+import { isNumericType } from "BackendTypes";
 
 export type Measurements = { [name: string]: Measurement };
 
@@ -10,7 +21,7 @@ export const measurementsSlice = createSlice({
     initialState: {} as Measurements,
     reducers: {
         initMeasurements: (_, action: PayloadAction<PodDataAdapter>) => {
-            return createMeasurementMapFromPodDataAdapter(action.payload);
+            return createMeasurementsFromPodDataAdapter(action.payload);
         },
         updateMeasurements: (
             state,
@@ -26,19 +37,21 @@ export const measurementsSlice = createSlice({
     },
 });
 
-function createMeasurementMapFromPodDataAdapter(
+function createMeasurementsFromPodDataAdapter(
     podDataAdapter: PodDataAdapter
 ): Measurements {
-    const measurements = {} as Measurements;
+    const measurements: Measurements = {};
 
     for (const board of Object.values(podDataAdapter.boards)) {
         for (const packet of Object.values(board.packets)) {
-            for (const measurement of Object.values(packet.measurements)) {
-                measurements[measurement.id] = {
-                    ...measurement,
-                    safeRange: transformRange(measurement.safeRange),
-                    warningRange: transformRange(measurement.warningRange),
-                };
+            for (const adapter of Object.values(packet.measurements)) {
+                if (isNumericAdapter(adapter)) {
+                    measurements[adapter.id] = getNumericMeasurement(adapter);
+                } else if (adapter.type == "bool") {
+                    measurements[adapter.id] = getBooleanMeasurement(adapter);
+                } else if (adapter.type == "Enum") {
+                    measurements[adapter.id] = getEnumMeasurement(adapter);
+                }
             }
         }
     }
@@ -46,7 +59,7 @@ function createMeasurementMapFromPodDataAdapter(
     return measurements;
 }
 
-function transformRange(
+export function transformRange(
     range: [number | null, number | null]
 ): [number, number] {
     const lowerBound = range[0] ?? -Infinity;

@@ -10,6 +10,7 @@ export type Packet = {
     cycleTime: number;
     measurements: { [name: string]: Measurement };
 };
+
 export function updatePacket(
     packet: WritableDraft<Packet>,
     update: PacketUpdate

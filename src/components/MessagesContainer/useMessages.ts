@@ -39,7 +39,6 @@ function createRandomViolation(): Violation {
             return {
                 kind: randomKind,
                 got: 10,
-                want: 10,
             };
         case "LOWER_BOUND":
             return {

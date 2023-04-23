@@ -1,14 +1,7 @@
 import { Order } from "models/Order";
 import { Connection } from "models/Connection";
 import { ProtectionMessageAdapter } from "adapters/ProtectionMessage";
-
-type PacketUpdate = {
-    id: number;
-    hexValue: number;
-    cycleTime: number;
-    count: number;
-    measurementUpdates: { [name: string]: number | string | boolean };
-};
+import { PacketUpdate } from "adapters/PacketUpdate";
 
 type ConnectionsUpdate = Connection[];
 

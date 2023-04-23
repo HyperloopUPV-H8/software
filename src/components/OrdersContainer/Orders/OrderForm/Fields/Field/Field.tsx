@@ -3,7 +3,7 @@ import { TextInput } from "components/FormComponents/TextInput/TextInput";
 import { CheckBox } from "components/FormComponents/CheckBox/CheckBox";
 import { Dropdown } from "components/FormComponents/old_Dropdown/Dropdown";
 import { FormField } from "../../useFormFields"; //TODO: mover formfield
-import { NumericValue } from "adapters/Order";
+import { NumericDescription } from "adapters/Order";
 import { isNumberValid } from "./validation";
 
 type Props = {
@@ -18,7 +18,7 @@ export const Field = ({ name, field, onChange, changeEnabled }: Props) => {
         //FIXME: mergear tipos Value y ValueType o algo así
         const isValid = isNumberValid(
             value,
-            (field.valueDescription as NumericValue).value
+            (field.valueDescription as NumericDescription).value
         );
 
         onChange(Number.parseFloat(value), isValid);

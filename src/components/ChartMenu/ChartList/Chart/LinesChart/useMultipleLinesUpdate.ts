@@ -4,13 +4,15 @@ import { dataToPath } from "./path";
 import { LineDataHandler } from "./LineDataHandler";
 import { LineDescription, LineInstance } from "./line";
 import { store } from "store";
+import { NumericMeasurement } from "models/PodData/Measurement";
 
 function getInitialCollectiveRange(measurementsId: Array<string>): {
     min: number;
     max: number;
 } {
     const ranges = measurementsId.map((id) => {
-        return store.getState().measurements[id].warningRange;
+        return (store.getState().measurements[id] as NumericMeasurement)
+            .warningRange;
     });
 
     return getLargestRange(ranges);
@@ -100,9 +102,17 @@ function createLineInstances(
         return {
             id: description.id,
             ref: createPathElement(description.color),
-            range: store.getState().measurements[description.id].warningRange,
+            range: (
+                store.getState().measurements[
+                    description.id
+                ] as NumericMeasurement
+            ).warningRange,
             getUpdate: () =>
-                store.getState().measurements[description.id].value as number,
+                (
+                    store.getState().measurements[
+                        description.id
+                    ] as NumericMeasurement
+                ).value.last,
             lineHandler:
                 lineInstances.find((line) => description.id == line.id)
                     ?.lineHandler ?? new LineDataHandler([], maxLineLength),

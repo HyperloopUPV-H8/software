@@ -1,4 +1,4 @@
-import { NumericType } from "./GolangTypes";
+import { NumericType } from "../BackendTypes";
 
 export type OrderDescription = {
     readonly id: number;
@@ -11,18 +11,21 @@ export type OrderFieldDescription = {
     readonly valueDescription: ValueDescription;
 };
 
-export type ValueDescription = EnumValue | NumericValue | BooleanValue;
+export type ValueDescription =
+    | EnumDescription
+    | NumericDescription
+    | BooleanDescription;
 
-export type EnumValue = {
+export type EnumDescription = {
     readonly kind: "enum";
     readonly value: string[];
 };
 
-export type NumericValue = {
+export type NumericDescription = {
     readonly kind: "numeric";
     readonly value: NumericType;
 };
 
-export type BooleanValue = {
+export type BooleanDescription = {
     readonly kind: "boolean";
 };
