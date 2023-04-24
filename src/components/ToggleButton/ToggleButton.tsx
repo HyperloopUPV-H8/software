@@ -4,7 +4,6 @@ import {
     DetailedHTMLProps,
     ReactNode,
     useEffect,
-    MouseEvent,
 } from "react";
 import style from "./ToggleButton.module.scss";
 

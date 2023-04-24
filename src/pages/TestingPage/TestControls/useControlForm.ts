@@ -1,12 +1,25 @@
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
 
 type InputData = {
     id: string;
     type: string;
-    value: number | null; // null cuando este vacio
+    value: number | null;
     enabled: boolean;
-    validity: { isValid: boolean; msg: string }; //do not know use
+    validity: { isValid: boolean; msg: string };
 };
+
+// {
+//     value:number,
+//     isvalid:true,
+// }
+
+// {
+//     value:null,
+//     isvalid:false,
+// }
+
+// InputDataAbstract & (tipo1 | tipo)
+
 type ChangingValue = {
     id: string;
     value: number | null;
@@ -29,7 +42,6 @@ type Action =
 
 const searchId = (form: FormData, id: string): number => {
     let index = form.findIndex((inputData) => inputData.id == id);
-    console.log(index);
     return index;
 };
 
@@ -58,18 +70,26 @@ const taskReducer = (state: FormData, action: Action) => {
         }
         case "CHANGE VALUE": {
             let dataIndex = searchId(state, action.payload.id);
+            const currentValues = [...state];
             if (
                 action.payload.value &&
                 checkType(state[dataIndex].type, action.payload.value)
             ) {
-                const currentValues = [...state];
                 currentValues[dataIndex] = {
                     ...currentValues[dataIndex],
                     value: action.payload.value,
+                    validity: { isValid: true, msg: "" },
                 };
-                return currentValues;
+            } else {
+                currentValues[dataIndex] = {
+                    ...currentValues[dataIndex],
+                    value: null,
+                    validity: { isValid: false, msg: "" },
+                };
+                console.log("go through else");
             }
-            return [...state];
+
+            return currentValues;
         }
         case "RESET INITIAL STATE": {
             return action.payload;
@@ -82,8 +102,9 @@ const taskReducer = (state: FormData, action: Action) => {
 
 export function useControlForm(
     initialState: FormData
-): [FormData, ChangeValue, ChangeEnable, SubmitHandler] {
+): [FormData, boolean, ChangeValue, ChangeEnable, SubmitHandler] {
     const [form, dispatch] = useReducer(taskReducer, initialState);
+    const [isValid, setIsValid] = useState(true); //TODO: Disable the submit button, new variable to be returned?
 
     const ChangeValue: ChangeValue = (id, value) => {
         dispatch({ type: "CHANGE VALUE", payload: { id, value } });
@@ -121,5 +142,18 @@ export function useControlForm(
         ResetInitialState();
     }, [initialState]);
 
-    return [form, ChangeValue, ChangeEnable, SubmitHandler];
+    useEffect(() => {
+        //setIsValid(true);
+        form.forEach((inputData) => {
+            if (inputData.enabled && inputData.validity.isValid == false) {
+                console.log("llega a setFalse");
+                setIsValid(false); //TODO: Sí que llega, por qué no funciona?
+            }
+            //console.log(inputData.id + " " + inputData.value);
+            //console.log(inputData.id + " " + inputData.validity.isValid);
+        });
+        console.log("isValid Hook: " + isValid);
+    }, [form]);
+
+    return [form, isValid, ChangeValue, ChangeEnable, SubmitHandler];
 }

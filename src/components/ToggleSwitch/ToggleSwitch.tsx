@@ -1,4 +1,3 @@
-import { useToggle } from "hooks/useToggle";
 import { useEffect } from "react";
 import style from "./ToggleSwitch.module.scss";
 
@@ -10,7 +9,7 @@ type Props = {
 
 export function ToggleSwitch({ onToggle, isOn, flip }: Props) {
     useEffect(() => {
-        onToggle(isOn); //TODO:onToggle?.(isOn); estaba así¿?
+        onToggle(isOn);
     }, [isOn]);
 
     return (

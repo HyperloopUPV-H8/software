@@ -7,8 +7,7 @@ import { ReactComponent as PerturbationIcon } from "assets/svg/perturbationIcon.
 import { PlayButton } from "components/PlayButton/PlayButton";
 import { ButtonTag } from "components/ButtonTag/ButtonTag";
 import style from "./TestControls.module.scss";
-import { FormEvent, SetStateAction, useEffect, useState } from "react";
-import { InputValue, TestAttributes } from "./TestAttributes";
+import { useEffect } from "react";
 import { useControlForm, FormData } from "./useControlForm";
 
 const initialFormData = [
@@ -92,31 +91,13 @@ const initialFormData = [
 ];
 
 export const TestControls = () => {
-    //TODO: https://medium.com/programming-essentials/how-to-access-data-from-a-child-form-component-with-react-hooks-fab5dd5ed5f0
+    const [FormData, isValid, ChangeValue, ChangeEnable, SubmitHandler] =
+        useControlForm(initialFormData);
 
-    // const getData = (label: string, value: InputValue) => {
-    //     //TODO: Esta función era para recibir info de los hijos, ahora se hace con el useControlForm
-    //     setTestAttributes((prev) => {
-    //         const currentAttributes = { ...prev };
-    //         currentAttributes[label].value = value;
-    //         return currentAttributes;
-    //     });
-    // };
-
-    // const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    //     e.preventDefault();
-    //     Object.entries(testAttributes).map((testAttribute) => {});
-    //     // const { name, value } = e.target;
-    //     // setValues({
-    //     //   ...values,
-    //     //   [name]: value
-    //     // });
-    // };
-
-    const [FormData, ChangeValue, ChangeEnable, SubmitHandler] =
-        useControlForm(initialFormData); //TODO: initialState
-
-    useEffect(() => console.log(FormData), [FormData]);
+    useEffect(() => {
+        console.log(FormData);
+        console.log("isValid: " + isValid);
+    }, [FormData]);
 
     return (
         <div className={style.testControlsWrapper}>
