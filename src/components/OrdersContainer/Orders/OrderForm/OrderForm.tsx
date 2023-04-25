@@ -1,11 +1,11 @@
 import styles from "./OrderForm.module.scss";
 import { OrderDescription } from "adapters/Order";
-import { Header } from "./Header/Header";
+import { Header, HeaderInfo } from "./Header/Header";
 import { Fields } from "./Fields/Fields";
 import { useState, useRef } from "react";
 import { Order } from "models/Order";
 import { FormField, useForm } from "./useForm";
-
+import { useSpring } from "@react-spring/web";
 type Props = {
     description: OrderDescription;
     sendOrder: (order: Order) => void;
@@ -27,16 +27,28 @@ function createOrder(id: number, fields: FormField[]): Order {
 
 export const OrderForm = ({ description, sendOrder }: Props) => {
     const { form, dispatch } = useForm(description.fields);
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
     const keyListenerRef = useRef((ev: KeyboardEvent) => {
         if (ev.key == " ") {
+            api.start({
+                from: { filter: "brightness(1.2)" },
+                to: { filter: "brightness(1)" },
+            });
+            console.log("sent");
             trySendOrder();
         }
     });
 
+    const [springs, api] = useSpring(() => ({
+        from: { filter: "brightness(1)" },
+        config: {
+            tension: 600,
+        },
+    }));
+
     function toggleDropdown() {
         if (Object.keys(description.fields).length > 0) {
-            setIsExpanded((prevValue) => !prevValue);
+            setIsOpen((prevValue) => !prevValue);
         }
     }
 
@@ -54,18 +66,26 @@ export const OrderForm = ({ description, sendOrder }: Props) => {
         }
     }
 
+    const headerInfo: HeaderInfo =
+        form.fields.length > 0
+            ? {
+                  type: "toggable",
+                  isOpen: isOpen,
+                  toggleDropdown,
+              }
+            : { type: "fixed" };
+
     return (
         <div className={styles.orderFormWrapper}>
             <Header
                 name={description.name}
-                hasFields={form.fields.length > 0}
-                isOpen={isExpanded}
-                toggleDropdown={toggleDropdown}
+                info={headerInfo}
                 disabled={!form.isValid}
                 onTargetClick={changeAutomatic}
                 onButtonClick={trySendOrder}
+                springs={springs}
             />
-            {isExpanded && (
+            {isOpen && (
                 <Fields
                     fields={form.fields}
                     updateField={(id, value, isValid) =>

@@ -2,38 +2,52 @@ import styles from "./Header.module.scss";
 import { useState } from "react";
 import { Button } from "components/FormComponents/Button/Button";
 import { Caret } from "components/Caret/Caret";
+import { SpringValue, animated } from "@react-spring/web";
 import { ReactComponent as Target } from "assets/svg/target.svg";
-type Props = {
-    disabled: boolean;
-    hasFields: boolean;
+
+export type HeaderInfo = ToggableHeader | FixedHeader;
+
+type ToggableHeader = {
+    type: "toggable";
     isOpen: boolean;
     toggleDropdown: () => void;
+};
+
+type FixedHeader = {
+    type: "fixed";
+};
+
+type Props = {
+    name: string;
+    disabled: boolean;
+    info: HeaderInfo;
+    springs: Record<string, SpringValue>;
     onTargetClick: (state: boolean) => void;
     onButtonClick: () => void;
-    name: string;
 };
 
 export const Header = ({
-    disabled,
-    hasFields,
-    isOpen,
-    toggleDropdown,
     name,
+    disabled,
+    info,
+    springs,
     onTargetClick,
     onButtonClick,
 }: Props) => {
     const [targetOn, setTargetOn] = useState(false);
-
     return (
-        <div
+        <animated.div
             className={styles.headerWrapper}
-            onClick={toggleDropdown}
-            style={{ cursor: hasFields ? "pointer" : "auto" }}
+            onClick={info.type == "toggable" ? info.toggleDropdown : () => {}}
+            style={{
+                ...springs,
+                cursor: info.type == "toggable" ? "pointer" : "auto",
+            }}
         >
             <Caret
-                isOpen={isOpen}
+                isOpen={info.type == "toggable" ? info.isOpen : false}
                 className={`${styles.caret} ${
-                    hasFields ? styles.visible : styles.hidden
+                    info.type == "toggable" ? styles.visible : styles.hidden
                 }`}
             />
             <div className={styles.name}>{name}</div>
@@ -43,6 +57,7 @@ export const Header = ({
                 }`}
                 onClick={(ev) => {
                     ev.stopPropagation();
+
                     setTargetOn((prev) => {
                         onTargetClick(!prev);
                         return !prev;
@@ -59,6 +74,6 @@ export const Header = ({
                     disabled={disabled}
                 />
             </div>
-        </div>
+        </animated.div>
     );
 };

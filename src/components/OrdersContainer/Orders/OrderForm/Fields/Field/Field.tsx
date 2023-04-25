@@ -2,7 +2,7 @@ import styles from "./Field.module.scss";
 import { TextInput } from "components/FormComponents/TextInput/TextInput";
 import { CheckBox } from "components/FormComponents/CheckBox/CheckBox";
 import { Dropdown } from "components/FormComponents/old_Dropdown/Dropdown";
-import { FormField } from "components/OrdersContainer/Orders/OrderForm/useForm"; //TODO: mover formfield
+import { FormField } from "components/OrdersContainer/Orders/OrderForm/useForm";
 import { NumericDescription } from "adapters/Order";
 import { isNumberValid } from "./validation";
 
@@ -15,7 +15,6 @@ type Props = {
 
 export const Field = ({ name, field, onChange, changeEnabled }: Props) => {
     function handleTextInputChange(value: string) {
-        //FIXME: mergear tipos Value y ValueType o algo así
         const isValid = isNumberValid(
             value,
             (field.valueDescription as NumericDescription).value
