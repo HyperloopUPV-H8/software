@@ -37,21 +37,18 @@ export const OrderForm = ({ description, sendOrder }: Props) => {
         },
     }));
 
-    function trySendOrder() {
+    const trySendOrder = () => {
         if (form.isValid) {
+            api.start({
+                from: { filter: "brightness(1.2)" },
+                to: { filter: "brightness(1)" },
+            });
+
             sendOrder(createOrder(description.id, form.fields));
         }
-    }
+    };
 
-    const keyPressCallback = useCallback(() => {
-        api.start({
-            from: { filter: "brightness(1.2)" },
-            to: { filter: "brightness(1)" },
-        });
-        trySendOrder();
-    }, []);
-
-    const listen = useListenKey(" ", keyPressCallback);
+    const listen = useListenKey(" ", trySendOrder);
 
     const headerInfo: HeaderInfo =
         form.fields.length > 0

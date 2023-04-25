@@ -1,38 +1,16 @@
 import styles from "components/FormComponents/TextInput/TextInput.module.scss";
-//TODO: raise FieldState
-import { FieldState } from "components/OrdersContainer/Orders/OrderForm/useFormFields";
-import { ChangeEvent, useState } from "react";
-type Props = {
-    placeholder: string;
-    defaultValue: number | string;
-    onChange: (value: string) => void;
-    isRequired: boolean;
-    isEnabled: boolean;
-    isValid: boolean;
-};
 
-export const TextInput = ({
-    onChange,
-    isRequired,
-    isEnabled,
-    isValid,
-    placeholder,
-    defaultValue,
-}: Props) => {
+type Props = { isValid: boolean } & React.InputHTMLAttributes<HTMLInputElement>;
+
+export const TextInput = ({ isValid, ...props }: Props) => {
     return (
         <input
             type="text"
             name=""
-            disabled={!isEnabled}
             className={`${styles.textInput} ${
                 isValid ? styles.valid : styles.invalid
-            } ${!isEnabled ? styles.disabled : ""}`}
-            placeholder={placeholder}
-            defaultValue={defaultValue}
-            required={isRequired}
-            onChange={(ev: ChangeEvent<HTMLInputElement>) => {
-                onChange(ev.target.value);
-            }}
+            } ${props.disabled ? styles.disabled : ""}`}
+            {...props}
         />
     );
 };

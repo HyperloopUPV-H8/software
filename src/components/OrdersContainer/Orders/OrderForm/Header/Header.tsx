@@ -1,5 +1,5 @@
 import styles from "./Header.module.scss";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "components/FormComponents/Button/Button";
 import { Caret } from "components/Caret/Caret";
 import { SpringValue, animated } from "@react-spring/web";
@@ -36,6 +36,10 @@ export const Header = ({
 }: Props) => {
     const [targetOn, setTargetOn] = useState(false);
 
+    useEffect(() => {
+        onTargetClick(targetOn);
+    }, [targetOn]);
+
     return (
         <animated.div
             className={styles.headerWrapper}
@@ -58,9 +62,7 @@ export const Header = ({
                 }`}
                 onClick={(ev) => {
                     ev.stopPropagation();
-
                     setTargetOn((prev) => {
-                        onTargetClick(!prev);
                         return !prev;
                     });
                 }}

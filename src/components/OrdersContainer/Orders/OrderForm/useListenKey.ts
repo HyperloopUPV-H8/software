@@ -1,22 +1,25 @@
-import { useCallback } from "react";
+import { useEffect, useState } from "react";
 
 export function useListenKey(key: string, callback: () => unknown) {
-    const listener = useCallback(
-        (ev: KeyboardEvent) => {
-            if (ev.key == key) {
-                callback();
-            }
-        },
-        [key, callback]
-    );
+    const [listen, setListen] = useState(false);
 
-    function listen(value: boolean) {
-        if (value) {
-            document.addEventListener("keydown", listener);
-        } else {
-            document.removeEventListener("keydown", listener);
+    const listener = (ev: KeyboardEvent) => {
+        if (ev.key == key) {
+            callback();
         }
-    }
+    };
 
-    return listen;
+    useEffect(() => {
+        if (listen) {
+            document.addEventListener("keydown", listener);
+        }
+
+        return () => {
+            document.removeEventListener("keydown", listener);
+        };
+    }, [listen, key, listener, callback]);
+
+    return (value: boolean) => {
+        setListen(value);
+    };
 }

@@ -5,6 +5,7 @@ import { Dropdown } from "components/FormComponents/old_Dropdown/Dropdown";
 import { FormField } from "components/OrdersContainer/Orders/OrderForm/useForm";
 import { NumericDescription } from "adapters/Order";
 import { isNumberValid } from "./validation";
+import { NumericInput } from "components/FormComponents/NumericInput/NumericInput";
 
 type Props = {
     name: string;
@@ -31,14 +32,14 @@ export const Field = ({ name, field, onChange, changeEnabled }: Props) => {
         >
             <div className={styles.name}>{name}</div>
             {field.valueDescription.kind == "numeric" ? (
-                <TextInput
+                <NumericInput
+                    required={field.isEnabled}
+                    disabled={!field.isEnabled}
+                    isValid={field.isValid}
                     placeholder={`${field.valueDescription.value}...`}
                     defaultValue={!field.isValid ? "" : (field.value as number)}
-                    isRequired={field.isEnabled}
-                    isEnabled={field.isEnabled}
-                    isValid={field.isValid}
                     onChange={handleTextInputChange}
-                ></TextInput>
+                />
             ) : field.valueDescription.kind == "boolean" ? (
                 <CheckBox
                     isRequired={field.isEnabled}
