@@ -46,7 +46,7 @@ type ChangeEnable = {
     type: "change_enable";
     payload: {
         id: string;
-        value: boolean;
+        enable: boolean;
     };
 };
 
@@ -74,7 +74,7 @@ function reducer(state: Form, action: Action): Form {
         case "change_enable": {
             const fields = state.fields.map((field) =>
                 field.id == action.payload.id
-                    ? { ...field, isEnabled: action.payload.value }
+                    ? { ...field, isEnabled: action.payload.enable }
                     : field
             );
             return {
@@ -88,5 +88,21 @@ function reducer(state: Form, action: Action): Form {
 export function useForm(descriptions: Record<string, OrderFieldDescription>) {
     const [form, dispatch] = useReducer(reducer, descriptions, createForm);
 
-    return { form, dispatch } as const;
+    const updateField = (
+        id: string,
+        value: string | boolean | number,
+        isValid: boolean
+    ) =>
+        dispatch({
+            type: "update_field",
+            payload: { id, value, isValid },
+        });
+
+    const changeEnable = (id: string, enable: boolean) =>
+        dispatch({
+            type: "change_enable",
+            payload: { id, enable },
+        });
+
+    return { form, updateField, changeEnable } as const;
 }

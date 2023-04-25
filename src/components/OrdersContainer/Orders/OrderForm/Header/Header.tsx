@@ -35,6 +35,7 @@ export const Header = ({
     onButtonClick,
 }: Props) => {
     const [targetOn, setTargetOn] = useState(false);
+
     return (
         <animated.div
             className={styles.headerWrapper}

@@ -9,10 +9,10 @@ type Props = {
         value: boolean | string | number,
         isValid: boolean
     ) => void;
-    changeEnabled: (id: string, isEnabled: boolean) => void;
+    changeEnable: (id: string, isEnabled: boolean) => void;
 };
 
-export const Fields = ({ fields, updateField, changeEnabled }: Props) => {
+export const Fields = ({ fields, updateField, changeEnable }: Props) => {
     return (
         <div className={styles.fieldsWrapper}>
             {fields.map((field) => {
@@ -27,9 +27,7 @@ export const Fields = ({ fields, updateField, changeEnabled }: Props) => {
                         ) => {
                             updateField(field.id, newValue, isValid);
                         }}
-                        changeEnabled={(value) =>
-                            changeEnabled(field.id, value)
-                        }
+                        changeEnabled={(value) => changeEnable(field.id, value)}
                     />
                 );
             })}
