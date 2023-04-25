@@ -8,18 +8,6 @@ type InputData = {
     validity: { isValid: boolean; msg: string };
 };
 
-// {
-//     value:number,
-//     isvalid:true,
-// }
-
-// {
-//     value:null,
-//     isvalid:false,
-// }
-
-// InputDataAbstract & (tipo1 | tipo)
-
 type ChangingValue = {
     id: string;
     value: number | null;
@@ -86,7 +74,6 @@ const taskReducer = (state: FormData, action: Action) => {
                     value: null,
                     validity: { isValid: false, msg: "" },
                 };
-                console.log("go through else");
             }
 
             return currentValues;
@@ -100,11 +87,36 @@ const taskReducer = (state: FormData, action: Action) => {
     }
 };
 
+const checkInitialIsValid = (form: FormData): boolean => {
+    let isValid = true;
+    let numDisabled = 0;
+    form.forEach((inputData) => {
+        if (inputData.enabled) {
+            if (
+                !inputData.value ||
+                !checkType(inputData.type, inputData.value)
+            ) {
+                isValid = false;
+                console.log("Hay error en los valores");
+            }
+        } else {
+            numDisabled++;
+        }
+    });
+    console.log(numDisabled);
+    console.log(form.length);
+    if (numDisabled == form.length) {
+        isValid = false;
+    }
+    console.log("checkIsValid: " + isValid);
+    return isValid;
+};
+
 export function useControlForm(
     initialState: FormData
 ): [FormData, boolean, ChangeValue, ChangeEnable, SubmitHandler] {
     const [form, dispatch] = useReducer(taskReducer, initialState);
-    const [isValid, setIsValid] = useState(true); //TODO: Disable the submit button, new variable to be returned?
+    const [isValid, setIsValid] = useState(checkInitialIsValid(form));
 
     const ChangeValue: ChangeValue = (id, value) => {
         dispatch({ type: "CHANGE VALUE", payload: { id, value } });
@@ -120,7 +132,6 @@ export function useControlForm(
 
     const SubmitHandler: SubmitHandler = () => {
         console.log(form);
-        let error = false;
         form.forEach((inputData) => {
             if (inputData.enabled) {
                 if (
@@ -130,9 +141,7 @@ export function useControlForm(
                     //TODO: take the data, send FormData al backend
                     console.log(inputData.value);
                 } else {
-                    error = true;
                     console.log("Hay error en los valores");
-                    //TODO: Cómo proceder? botón deshabilitado si no es correcto, que todos los campos habilitados estan bien
                 }
             }
         });
@@ -143,14 +152,14 @@ export function useControlForm(
     }, [initialState]);
 
     useEffect(() => {
-        //setIsValid(true);
+        setIsValid(true);
         form.forEach((inputData) => {
             if (inputData.enabled && inputData.validity.isValid == false) {
                 console.log("llega a setFalse");
                 setIsValid(false); //TODO: Sí que llega, por qué no funciona?
             }
-            //console.log(inputData.id + " " + inputData.value);
-            //console.log(inputData.id + " " + inputData.validity.isValid);
+            console.log(inputData.id + " " + inputData.value);
+            console.log(inputData.id + " " + inputData.validity.isValid);
         });
         console.log("isValid Hook: " + isValid);
     }, [form]);

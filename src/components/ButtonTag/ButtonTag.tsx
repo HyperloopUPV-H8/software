@@ -4,19 +4,34 @@ import style from "./ButtonTag.module.scss";
 type Props = {
     label?: string;
     icon: ReactNode;
+    onClick: () => void;
 } & DetailedHTMLProps<
     ButtonHTMLAttributes<HTMLButtonElement>,
     HTMLButtonElement
 >;
 
-export function ButtonTag({ icon, label, ...buttonProps }: Props) {
+export function ButtonTag({
+    icon,
+    label,
+    onClick,
+    disabled,
+    ...buttonProps
+}: Props) {
     return (
-        <label className={style.buttonTagWrapper}>
+        <label
+            className={
+                disabled
+                    ? style.buttonTagWrapperDisabled
+                    : style.buttonTagWrapper
+            }
+        >
             <button
-                onClick={() => {
-                    console.log("submiting");
-                }}
                 {...buttonProps}
+                onClick={() => {
+                    if (!disabled) {
+                        onClick();
+                    }
+                }}
             >
                 {icon}
             </button>

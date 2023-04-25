@@ -3,12 +3,12 @@ import { ToggleSwitch } from "components/ToggleSwitch/ToggleSwitch";
 import { useToggle } from "hooks/useToggle";
 import { DetailedHTMLProps, InputHTMLAttributes, useEffect } from "react";
 import style from "./ToggleInput.module.scss";
-import { InputValue } from "pages/TestingPage/TestControls/TestAttributes";
 
 type Props = {
     id: string;
     onChange: (state: number) => void;
     onToggle: (state: boolean) => void;
+    disabled: boolean;
 } & Omit<
     DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
     "onChange"
@@ -20,7 +20,7 @@ export function ToggleInput({
     disabled,
     ...inputProps
 }: Props) {
-    const [isOn, flip] = useToggle();
+    const [isOn, flip] = useToggle(!disabled);
 
     if (onToggle) {
         useEffect(() => {
@@ -32,7 +32,7 @@ export function ToggleInput({
         <div className={style.toggleInputWrapper}>
             <InputTag
                 isOn={isOn}
-                disabled={!isOn || disabled}
+                disabled={!isOn}
                 onChange={onChange}
                 {...inputProps}
             />

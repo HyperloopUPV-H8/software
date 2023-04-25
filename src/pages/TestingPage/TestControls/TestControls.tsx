@@ -16,21 +16,21 @@ const initialFormData = [
         type: "number",
         value: null,
         enabled: false,
-        validity: { isValid: true, msg: "xxx" },
+        validity: { isValid: false, msg: "xxx" },
     },
     {
         id: "unit1",
         type: "number",
         value: null,
         enabled: false,
-        validity: { isValid: true, msg: "xxx" },
+        validity: { isValid: false, msg: "xxx" },
     },
     {
         id: "unit2",
         type: "number",
         value: null,
         enabled: false,
-        validity: { isValid: true, msg: "xxx" },
+        validity: { isValid: false, msg: "xxx" },
     },
     {
         id: "unit3",
@@ -44,27 +44,27 @@ const initialFormData = [
         type: "number",
         value: null,
         enabled: false,
-        validity: { isValid: true, msg: "xxx" },
+        validity: { isValid: false, msg: "xxx" },
     },
     {
         id: "unit5",
         type: "number",
         value: null,
         enabled: false,
-        validity: { isValid: true, msg: "xxx" },
+        validity: { isValid: false, msg: "xxx" },
     },
     {
         id: "unit6",
         type: "number",
         value: null,
-        enabled: false,
-        validity: { isValid: true, msg: "xxx" },
+        enabled: true,
+        validity: { isValid: false, msg: "xxx" },
     },
     {
         id: "unit7",
         type: "number",
-        value: null,
-        enabled: false,
+        value: 10,
+        enabled: true,
         validity: { isValid: true, msg: "xxx" },
     },
     {
@@ -72,21 +72,21 @@ const initialFormData = [
         type: "number",
         value: null,
         enabled: false,
-        validity: { isValid: true, msg: "xxx" },
+        validity: { isValid: false, msg: "xxx" },
     },
     {
         id: "unit9",
         type: "number",
         value: null,
         enabled: false,
-        validity: { isValid: true, msg: "xxx" },
+        validity: { isValid: false, msg: "xxx" },
     },
     {
         id: "unit10",
         type: "number",
         value: null,
         enabled: false,
-        validity: { isValid: true, msg: "xxx" },
+        validity: { isValid: false, msg: "xxx" },
     },
 ];
 
@@ -126,6 +126,12 @@ export const TestControls = () => {
                                     key={testAttribute[0]}
                                     id={testAttribute[1].id}
                                     type={testAttribute[1].type}
+                                    disabled={!testAttribute[1].enabled}
+                                    value={
+                                        testAttribute[1].value
+                                            ? testAttribute[1].value
+                                            : ""
+                                    }
                                     onToggle={(state) => {
                                         ChangeEnable(
                                             testAttribute[1].id,
@@ -145,6 +151,7 @@ export const TestControls = () => {
                         onClick={() => {
                             SubmitHandler();
                         }}
+                        disabled={!isValid}
                     />
                 </div>
             </div>

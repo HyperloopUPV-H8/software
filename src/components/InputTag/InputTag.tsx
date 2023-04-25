@@ -1,5 +1,6 @@
 import { DetailedHTMLProps, InputHTMLAttributes } from "react";
 import style from "./InputTag.module.scss";
+import { isNumberValid } from "common/validation";
 
 type Props = {
     id: string;
@@ -20,13 +21,17 @@ export function InputTag({ id, isOn, onChange, ...inputProps }: Props) {
             <legend className={style.testInputLabel}>{id}</legend>
             <input
                 onChange={(e: React.FormEvent<HTMLInputElement>) => {
-                    let currentNumber = Number(e.currentTarget.value); //TODO: If is not a number, gives a 0
-                    console.log("currentNumber: " + currentNumber);
-                    //console.log("A" + checkString("12345G"));
-                    if (checkString(currentNumber)) {
+                    let currentNumber = Number.parseFloat(
+                        e.currentTarget.value
+                    );
+                    if (isNumberValid(e.currentTarget.value, "int64")) {
                         onChange(currentNumber);
+                        console.log("currentNumber: " + currentNumber);
+                    } else if (e.currentTarget.value == "") {
+                        onChange(currentNumber);
+                        console.log("currentNumber: " + currentNumber);
                     } else {
-                        //TODO: What to do is it is not a number
+                        //TODO: don't print the key
                         console.log("not a number");
                     }
                 }}
@@ -34,8 +39,4 @@ export function InputTag({ id, isOn, onChange, ...inputProps }: Props) {
             ></input>
         </fieldset>
     );
-}
-
-function checkString(value: number) {
-    return !isNaN(value);
 }
