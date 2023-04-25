@@ -15,7 +15,7 @@ export const Orders = ({ orderDescriptions, sendOrder }: Props) => {
                 return (
                     <OrderForm
                         key={description.id}
-                        orderDescription={description}
+                        description={description}
                         sendOrder={sendOrder}
                     />
                 );

@@ -1,13 +1,15 @@
 import styles from "./OrderForm.module.scss";
 import { OrderDescription } from "adapters/Order";
-import { Header } from "./Header/Header";
+import { Header, HeaderInfo } from "./Header/Header";
 import { Fields } from "./Fields/Fields";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Order } from "models/Order";
-import { FormField, useFormFields } from "./useFormFields";
+import { FormField, useForm } from "./useForm";
+import { useSpring } from "@react-spring/web";
+import { useListenKey } from "./useListenKey";
 
 type Props = {
-    orderDescription: OrderDescription;
+    description: OrderDescription;
     sendOrder: (order: Order) => void;
 };
 
@@ -17,7 +19,7 @@ function createOrder(id: number, fields: FormField[]): Order {
         fields: Object.fromEntries(
             fields.map((field) => {
                 return [
-                    field.name,
+                    field.id,
                     { value: field.value, isEnabled: field.isEnabled },
                 ];
             })
@@ -25,41 +27,53 @@ function createOrder(id: number, fields: FormField[]): Order {
     };
 }
 
-export const OrderForm = ({ orderDescription, sendOrder }: Props) => {
-    const [fields, updateField, changeEnabled, isFormValid] = useFormFields(
-        orderDescription.fields
-    );
-    const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+export const OrderForm = ({ description, sendOrder }: Props) => {
+    const { form, updateField, changeEnable } = useForm(description.fields);
+    const [isOpen, setIsOpen] = useState(false);
+    const [springs, api] = useSpring(() => ({
+        from: { filter: "brightness(1)" },
+        config: {
+            tension: 600,
+        },
+    }));
 
-    function toggleDropdown() {
-        if (Object.keys(orderDescription.fields).length > 0) {
-            setIsDropdownVisible((prevValue) => !prevValue);
-        }
-    }
+    const trySendOrder = () => {
+        if (form.isValid) {
+            api.start({
+                from: { filter: "brightness(1.2)" },
+                to: { filter: "brightness(1)" },
+            });
 
-    function trySendOrder() {
-        if (isFormValid) {
-            sendOrder(createOrder(orderDescription.id, fields));
+            sendOrder(createOrder(description.id, form.fields));
         }
-    }
+    };
+
+    const listen = useListenKey(" ", trySendOrder);
+
+    const headerInfo: HeaderInfo =
+        form.fields.length > 0
+            ? {
+                  type: "toggable",
+                  isOpen: isOpen,
+                  toggleDropdown: () => setIsOpen((prevValue) => !prevValue),
+              }
+            : { type: "fixed" };
 
     return (
         <div className={styles.orderFormWrapper}>
             <Header
-                name={orderDescription.name}
-                hasFields={fields.length > 0}
-                isOpen={isDropdownVisible}
-                toggleDropdown={toggleDropdown}
-                disabled={!isFormValid}
-                onButtonClick={() => {
-                    trySendOrder();
-                }}
+                name={description.name}
+                info={headerInfo}
+                disabled={!form.isValid}
+                onTargetClick={listen}
+                onButtonClick={trySendOrder}
+                springs={springs}
             />
-            {isDropdownVisible && (
+            {isOpen && (
                 <Fields
-                    fields={fields}
+                    fields={form.fields}
                     updateField={updateField}
-                    changeEnabled={(name, value) => changeEnabled(name, value)}
+                    changeEnable={changeEnable}
                 />
             )}
         </div>

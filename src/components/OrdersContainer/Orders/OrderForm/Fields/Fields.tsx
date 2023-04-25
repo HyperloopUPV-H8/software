@@ -1,35 +1,33 @@
 import styles from "./Fields.module.scss";
 import { Field } from "./Field/Field";
-import { FieldState, FormField } from "../useFormFields"; //TODO: no acceder al padre
+import { FormField } from "../useForm"; //TODO: no acceder al padre
 
 type Props = {
     fields: FormField[];
     updateField: (
-        name: string,
+        id: string,
         value: boolean | string | number,
         isValid: boolean
     ) => void;
-    changeEnabled: (name: string, isEnabled: boolean) => void;
+    changeEnable: (id: string, isEnabled: boolean) => void;
 };
 
-export const Fields = ({ fields, updateField, changeEnabled }: Props) => {
+export const Fields = ({ fields, updateField, changeEnable }: Props) => {
     return (
         <div className={styles.fieldsWrapper}>
             {fields.map((field) => {
                 return (
                     <Field
-                        key={field.name}
-                        name={field.name}
+                        key={field.id}
+                        name={field.id}
                         field={field}
                         onChange={(
                             newValue: string | number | boolean,
                             isValid: boolean
                         ) => {
-                            updateField(field.name, newValue, isValid);
+                            updateField(field.id, newValue, isValid);
                         }}
-                        changeEnabled={(value) =>
-                            changeEnabled(field.name, value)
-                        }
+                        changeEnabled={(value) => changeEnable(field.id, value)}
                     />
                 );
             })}

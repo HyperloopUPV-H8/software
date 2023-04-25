@@ -1,10 +1,10 @@
 import styles from "./Field.module.scss";
-import { TextInput } from "components/FormComponents/TextInput/TextInput";
 import { CheckBox } from "components/FormComponents/CheckBox/CheckBox";
 import { Dropdown } from "components/FormComponents/old_Dropdown/Dropdown";
-import { FormField } from "../../useFormFields"; //TODO: mover formfield
+import { FormField } from "components/OrdersContainer/Orders/OrderForm/useForm";
 import { NumericDescription } from "adapters/Order";
 import { isNumberValid } from "./validation";
+import { NumericInput } from "components/FormComponents/NumericInput/NumericInput";
 
 type Props = {
     name: string;
@@ -15,7 +15,6 @@ type Props = {
 
 export const Field = ({ name, field, onChange, changeEnabled }: Props) => {
     function handleTextInputChange(value: string) {
-        //FIXME: mergear tipos Value y ValueType o algo así
         const isValid = isNumberValid(
             value,
             (field.valueDescription as NumericDescription).value
@@ -32,14 +31,14 @@ export const Field = ({ name, field, onChange, changeEnabled }: Props) => {
         >
             <div className={styles.name}>{name}</div>
             {field.valueDescription.kind == "numeric" ? (
-                <TextInput
+                <NumericInput
+                    required={field.isEnabled}
+                    disabled={!field.isEnabled}
+                    isValid={field.isValid}
                     placeholder={`${field.valueDescription.value}...`}
                     defaultValue={!field.isValid ? "" : (field.value as number)}
-                    isRequired={field.isEnabled}
-                    isEnabled={field.isEnabled}
-                    isValid={field.isValid}
                     onChange={handleTextInputChange}
-                ></TextInput>
+                />
             ) : field.valueDescription.kind == "boolean" ? (
                 <CheckBox
                     isRequired={field.isEnabled}
