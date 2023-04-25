@@ -1,12 +1,15 @@
 import styles from "./Header.module.scss";
+import { useState } from "react";
 import { Button } from "components/FormComponents/Button/Button";
 import { Caret } from "components/Caret/Caret";
+import { ReactComponent as Target } from "assets/svg/target.svg";
 type Props = {
     disabled: boolean;
-    onButtonClick: () => void;
     hasFields: boolean;
     isOpen: boolean;
     toggleDropdown: () => void;
+    onTargetClick: (state: boolean) => void;
+    onButtonClick: () => void;
     name: string;
 };
 
@@ -16,8 +19,11 @@ export const Header = ({
     isOpen,
     toggleDropdown,
     name,
+    onTargetClick,
     onButtonClick,
 }: Props) => {
+    const [targetOn, setTargetOn] = useState(false);
+
     return (
         <div
             className={styles.headerWrapper}
@@ -31,6 +37,18 @@ export const Header = ({
                 }`}
             />
             <div className={styles.name}>{name}</div>
+            <Target
+                className={`${styles.target} ${
+                    targetOn ? styles.targetVisible : ""
+                }`}
+                onClick={(ev) => {
+                    ev.stopPropagation();
+                    setTargetOn((prev) => {
+                        onTargetClick(!prev);
+                        return !prev;
+                    });
+                }}
+            />
             <div className={styles.sendBtn}>
                 <Button
                     label="send"

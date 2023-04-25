@@ -2,7 +2,7 @@ import styles from "./Field.module.scss";
 import { TextInput } from "components/FormComponents/TextInput/TextInput";
 import { CheckBox } from "components/FormComponents/CheckBox/CheckBox";
 import { Dropdown } from "components/FormComponents/old_Dropdown/Dropdown";
-import { FormField } from "../../useFormFields"; //TODO: mover formfield
+import { FormField } from "components/OrdersContainer/Orders/OrderForm/useForm"; //TODO: mover formfield
 import { NumericDescription } from "adapters/Order";
 import { isNumberValid } from "./validation";
 

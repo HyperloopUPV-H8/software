@@ -2,12 +2,12 @@ import styles from "./OrderForm.module.scss";
 import { OrderDescription } from "adapters/Order";
 import { Header } from "./Header/Header";
 import { Fields } from "./Fields/Fields";
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Order } from "models/Order";
-import { FormField, useFormFields } from "./useFormFields";
+import { FormField, useForm } from "./useForm";
 
 type Props = {
-    orderDescription: OrderDescription;
+    description: OrderDescription;
     sendOrder: (order: Order) => void;
 };
 
@@ -17,7 +17,7 @@ function createOrder(id: number, fields: FormField[]): Order {
         fields: Object.fromEntries(
             fields.map((field) => {
                 return [
-                    field.name,
+                    field.id,
                     { value: field.value, isEnabled: field.isEnabled },
                 ];
             })
@@ -25,41 +25,61 @@ function createOrder(id: number, fields: FormField[]): Order {
     };
 }
 
-export const OrderForm = ({ orderDescription, sendOrder }: Props) => {
-    const [fields, updateField, changeEnabled, isFormValid] = useFormFields(
-        orderDescription.fields
-    );
-    const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+export const OrderForm = ({ description, sendOrder }: Props) => {
+    const { form, dispatch } = useForm(description.fields);
+    const [isExpanded, setIsExpanded] = useState(false);
+    const keyListenerRef = useRef((ev: KeyboardEvent) => {
+        if (ev.key == " ") {
+            trySendOrder();
+        }
+    });
 
     function toggleDropdown() {
-        if (Object.keys(orderDescription.fields).length > 0) {
-            setIsDropdownVisible((prevValue) => !prevValue);
+        if (Object.keys(description.fields).length > 0) {
+            setIsExpanded((prevValue) => !prevValue);
         }
     }
 
     function trySendOrder() {
-        if (isFormValid) {
-            sendOrder(createOrder(orderDescription.id, fields));
+        if (form.isValid) {
+            sendOrder(createOrder(description.id, form.fields));
+        }
+    }
+
+    function changeAutomatic(isOn: boolean) {
+        if (isOn) {
+            document.addEventListener("keydown", keyListenerRef.current);
+        } else {
+            document.removeEventListener("keydown", keyListenerRef.current);
         }
     }
 
     return (
         <div className={styles.orderFormWrapper}>
             <Header
-                name={orderDescription.name}
-                hasFields={fields.length > 0}
-                isOpen={isDropdownVisible}
+                name={description.name}
+                hasFields={form.fields.length > 0}
+                isOpen={isExpanded}
                 toggleDropdown={toggleDropdown}
-                disabled={!isFormValid}
-                onButtonClick={() => {
-                    trySendOrder();
-                }}
+                disabled={!form.isValid}
+                onTargetClick={changeAutomatic}
+                onButtonClick={trySendOrder}
             />
-            {isDropdownVisible && (
+            {isExpanded && (
                 <Fields
-                    fields={fields}
-                    updateField={updateField}
-                    changeEnabled={(name, value) => changeEnabled(name, value)}
+                    fields={form.fields}
+                    updateField={(id, value, isValid) =>
+                        dispatch({
+                            type: "update_field",
+                            payload: { id, value, isValid },
+                        })
+                    }
+                    changeEnabled={(id, value) =>
+                        dispatch({
+                            type: "change_enable",
+                            payload: { id, value },
+                        })
+                    }
                 />
             )}
         </div>
