@@ -2,7 +2,7 @@ import styles from "./OrderForm.module.scss";
 import { OrderDescription } from "adapters/Order";
 import { Header, HeaderInfo } from "./Header/Header";
 import { Fields } from "./Fields/Fields";
-import { useState, useRef, useCallback } from "react";
+import { useState } from "react";
 import { Order } from "models/Order";
 import { FormField, useForm } from "./useForm";
 import { useSpring } from "@react-spring/web";

@@ -1,12 +1,6 @@
 import { OrderFieldDescription, ValueDescription } from "adapters/Order";
-import { useState, useEffect, useReducer } from "react";
+import { useReducer } from "react";
 import { createForm } from "./createForm";
-
-export enum FieldState {
-    DEFAULT,
-    VALID,
-    INVALID,
-}
 
 export type FormField = {
     id: string;

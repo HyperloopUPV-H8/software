@@ -1,6 +1,6 @@
 import styles from "./Fields.module.scss";
 import { Field } from "./Field/Field";
-import { FieldState, FormField } from "../useForm"; //TODO: no acceder al padre
+import { FormField } from "../useForm"; //TODO: no acceder al padre
 
 type Props = {
     fields: FormField[];
