@@ -4,6 +4,7 @@ import {
     isUnsignedIntegerType,
 } from "./BackendTypes";
 
+//FIXME: Add in "common"
 export function isNumberValid(
     valueStr: string,
     numberType: NumericType
