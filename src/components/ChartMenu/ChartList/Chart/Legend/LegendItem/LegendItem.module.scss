@@ -3,7 +3,7 @@
 .legendItemWrapper {
     width: 100%;
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto auto 1fr auto;
     align-items: center;
     padding: 0.5rem 0;
     @include styles.alternate-code-text;
@@ -11,6 +11,10 @@
     &:hover .removeBtn {
         opacity: 1;
     }
+}
+
+.value {
+    justify-self: right;
 }
 
 .removeBtn {

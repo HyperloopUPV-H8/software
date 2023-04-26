@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import type { Connection } from "models/Connection";
+import type { Connection } from "common";
 
 const connectionsSlice = createSlice({
     name: "connections",
@@ -13,6 +13,12 @@ const connectionsSlice = createSlice({
             action: PayloadAction<boolean>
         ) => {
             connections.websocket.isConnected = action.payload;
+
+            if (!action.payload) {
+                connections.boards.forEach((board) => {
+                    board.isConnected = false;
+                });
+            }
         },
 
         updateBoardConnections: (

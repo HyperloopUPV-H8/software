@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useEffect } from "react";
 import { fetchFromBackend } from "services/fetch";
 import { initPodData, updatePodData } from "slices/podDataSlice";
-import { useWebSocketBroker } from "services/WebSocketBroker/useWebSocketBroker";
+import { useBroker } from "common";
 import { initMeasurements, updateMeasurements } from "slices/measurementsSlice";
 
 export enum RequestState {
@@ -39,7 +39,7 @@ export function useFetchPodData() {
             });
     }, []);
 
-    useWebSocketBroker("podData/update", (msg) => {
+    useBroker("podData/update", (msg) => {
         if (requestState == RequestState.FULFILLED) {
             dispatch(updatePodData(msg));
             dispatch(updateMeasurements(msg));

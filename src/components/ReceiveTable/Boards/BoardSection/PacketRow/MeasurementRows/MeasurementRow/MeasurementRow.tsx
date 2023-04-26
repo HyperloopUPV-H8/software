@@ -1,5 +1,5 @@
-import { Measurement, isNumericMeasurement } from "models/PodData/Measurement";
 import styles from "./MeasurementRow.module.scss";
+import { Measurement, isNumericMeasurement } from "common";
 
 type Props = {
     measurement: Measurement;

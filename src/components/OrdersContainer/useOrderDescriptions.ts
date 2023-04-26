@@ -1,4 +1,4 @@
-import { OrderDescription } from "adapters/Order";
+import { OrderDescription } from "common";
 import { useState, useEffect } from "react";
 import { fetchFromBackend } from "services/fetch";
 

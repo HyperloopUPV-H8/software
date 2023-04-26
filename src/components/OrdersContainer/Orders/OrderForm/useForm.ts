@@ -1,4 +1,4 @@
-import { OrderFieldDescription, ValueDescription } from "adapters/Order";
+import { OrderFieldDescription, ValueDescription } from "common";
 import { useReducer } from "react";
 import { createForm } from "./createForm";
 

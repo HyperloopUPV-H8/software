@@ -1,5 +1,5 @@
 import styles from "./ViolationView.module.scss";
-import { Violation } from "models/ProtectionMessage";
+import { Violation } from "common";
 
 type Props = {
     violation: Violation;

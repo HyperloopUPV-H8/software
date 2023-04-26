@@ -1,5 +1,5 @@
 import styles from "./Boards.module.scss";
-import { Board } from "models/PodData/Board";
+import { Board } from "common";
 import { BoardSection } from "./BoardSection/BoardSection";
 
 export const Boards = ({ boards }: { boards: { [name: string]: Board } }) => {

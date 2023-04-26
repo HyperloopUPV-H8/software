@@ -1,6 +1,8 @@
 import styles from "./LegendItem.module.scss";
-import { HSLAColor, hslaToHex, hslaToString } from "utils/color";
 import { MdClose } from "react-icons/md";
+import { useSelector } from "react-redux";
+import { RootState } from "store";
+import { NumericMeasurement } from "common";
 type Props = {
     name: string;
     color: string;
@@ -8,6 +10,10 @@ type Props = {
 };
 
 export const LegendItem = ({ name, color, removeItem }: Props) => {
+    const measurement = useSelector(
+        (state: RootState) => state.measurements[name]
+    );
+
     return (
         <div className={styles.legendItemWrapper}>
             <div
@@ -17,6 +23,11 @@ export const LegendItem = ({ name, color, removeItem }: Props) => {
                 }}
             ></div>
             <div className={styles.name}>{name}</div>
+            {measurement && (
+                <div className={styles.value}>
+                    {(measurement as NumericMeasurement).value.last.toFixed(3)}
+                </div>
+            )}
             <MdClose
                 className={styles.removeBtn}
                 onClick={removeItem}

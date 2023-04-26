@@ -1,8 +1,8 @@
-import { useWebSocketBroker } from "services/WebSocketBroker/useWebSocketBroker";
+import { useBroker } from "common";
 
 export function useLogger(cb: (state: boolean) => void) {
-    const sendWS = useWebSocketBroker("logger/enable");
-    useWebSocketBroker("logger/enable", (state) => cb(state));
+    const sendWS = useBroker("logger/enable");
+    useBroker("logger/enable", (state) => cb(state));
 
     function startLogging() {
         sendWS(true);

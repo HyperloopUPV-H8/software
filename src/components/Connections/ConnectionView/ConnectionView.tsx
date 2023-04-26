@@ -1,5 +1,5 @@
 import styles from "./ConnectionView.module.scss";
-import { Connection } from "models/Connection";
+import { Connection } from "common";
 import { TbPlugConnectedX, TbPlugConnected } from "react-icons/tb";
 
 type Props = {

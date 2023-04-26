@@ -1,7 +1,7 @@
 import styles from "./Orders.module.scss";
-import { OrderDescription } from "adapters/Order";
+import { OrderDescription } from "common";
 import { OrderForm } from "./OrderForm/OrderForm";
-import { Order } from "models/Order";
+import { Order } from "common";
 
 type Props = {
     sendOrder: (order: Order) => void;

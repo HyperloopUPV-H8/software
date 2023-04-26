@@ -1,11 +1,11 @@
 import { updateMeasurements } from "slices/measurementsSlice";
 import { useDispatch } from "react-redux";
-import { useWebSocketBroker } from "services/WebSocketBroker/useWebSocketBroker";
+import { useBroker } from "common";
 
 export function useMeasurements() {
     const dispatch = useDispatch();
 
-    useWebSocketBroker("podData/update", (msg) => {
+    useBroker("podData/update", (msg) => {
         dispatch(updateMeasurements(msg));
     });
 }

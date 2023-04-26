@@ -1,5 +1,5 @@
 import styles from "./Messages.module.scss";
-import { ProtectionMessage } from "models/ProtectionMessage";
+import { ProtectionMessage } from "common";
 import { MessageView } from "./MessageView/MessageView";
 import { useAutoScroll } from "./useAutoScroll";
 

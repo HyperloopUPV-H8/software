@@ -5,6 +5,7 @@ export function useListenKey(key: string, callback: () => unknown) {
 
     const listener = (ev: KeyboardEvent) => {
         if (ev.key == key) {
+            ev.preventDefault();
             callback();
         }
     };
