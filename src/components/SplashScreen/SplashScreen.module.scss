@@ -1,0 +1,13 @@
+.loadingView {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    font-size: 6rem;
+    font-weight: 900;
+    color: rgb(241, 105, 52);
+}
+
+.monkey {
+    font-family: Noto Color Emoji;
+}

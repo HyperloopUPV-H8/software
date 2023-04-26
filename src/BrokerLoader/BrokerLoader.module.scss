@@ -1,0 +1,12 @@
+@use "src/styles/styles.scss";
+
+.failure {
+    background-color: white;
+    border-radius: 1.5rem;
+    margin: 4rem;
+    padding: 2rem;
+    font-size: 4rem;
+    font-weight: bold;
+    @include styles.shadow;
+    text-align: center;
+}

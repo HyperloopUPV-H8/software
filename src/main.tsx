@@ -1,33 +1,25 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import "./index.css";
+import "./index.scss";
 import { store } from "./store";
 import { Provider } from "react-redux";
-import { WebSocketBrokerProvider } from "services/WebSocketBroker/WebSocketBrokerContext";
-import { setWebSocketConnection } from "slices/connectionsSlice";
+import { BrokerLoader } from "BrokerLoader/BrokerLoader";
+import { SplashScreen } from "components/SplashScreen/SplashScreen";
+
 const SERVER_URL = `${import.meta.env.VITE_SERVER_IP}:${
     import.meta.env.VITE_SERVER_PORT
 }${import.meta.env.VITE_BACKEND_WEBSOCKET_PATH}`;
 
-function handleSocketOpen() {
-    store.dispatch(setWebSocketConnection(true));
-}
-
-function handleSocketClose() {
-    store.dispatch(setWebSocketConnection(false));
-}
-
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
         <Provider store={store}>
-            <WebSocketBrokerProvider
+            <BrokerLoader
                 url={SERVER_URL}
-                onOpen={handleSocketOpen}
-                onClose={handleSocketClose}
+                LoadingView={<SplashScreen />}
             >
                 <App />
-            </WebSocketBrokerProvider>
+            </BrokerLoader>
         </Provider>
     </React.StrictMode>
 );
