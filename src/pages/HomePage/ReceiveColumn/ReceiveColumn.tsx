@@ -1,9 +1,6 @@
 import styles from "./ReceiveColumn.module.scss";
-
 import { ReceiveTable } from "components/ReceiveTable/ReceiveTable";
-import { BiLineChart } from "react-icons/bi";
 import { TabLayout } from "layouts/TabLayout/TabLayout";
-import { HiInboxArrowDown } from "react-icons/hi2";
 import { ChartMenu } from "components/ChartMenu/ChartMenu";
 import { RequestState, useFetchPodData } from "./useFetchPodData";
 import { ReactComponent as IncomingMessage } from "assets/svg/incoming-message.svg";

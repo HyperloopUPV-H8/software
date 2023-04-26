@@ -4,7 +4,7 @@ import { dataToPath } from "./path";
 import { LineDataHandler } from "./LineDataHandler";
 import { LineDescription, LineInstance } from "./line";
 import { store } from "store";
-import { NumericMeasurement } from "models/PodData/Measurement";
+import { NumericMeasurement } from "common";
 
 function getInitialCollectiveRange(measurementsId: Array<string>): {
     min: number;

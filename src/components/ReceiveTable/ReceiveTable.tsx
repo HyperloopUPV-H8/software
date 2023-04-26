@@ -1,7 +1,7 @@
 import styles from "components/ReceiveTable/ReceiveTable.module.scss";
 import { Headers } from "components/ReceiveTable/Headers/Headers";
 import { Boards } from "components/ReceiveTable/Boards/Boards";
-import { Board } from "models/PodData/Board";
+import { Board } from "common";
 import { useState } from "react";
 import { useInterval } from "hooks/useInterval";
 import { store } from "store";
@@ -11,7 +11,7 @@ export const ReceiveTable = () => {
 
     useInterval(() => {
         setBoards(store.getState().podData.boards);
-    }, 1000 / 30);
+    }, 1000 / 50);
 
     return (
         <div className={styles.receiveTableWrapper}>

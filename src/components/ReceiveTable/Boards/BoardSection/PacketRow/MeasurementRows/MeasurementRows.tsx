@@ -1,6 +1,6 @@
-import { Measurement } from "models/PodData/Measurement";
-import { MeasurementRow } from "./MeasurementRow/MeasurementRow";
 import styles from "./MeasurementRows.module.scss";
+import { Measurement } from "common";
+import { MeasurementRow } from "./MeasurementRow/MeasurementRow";
 
 type Props = {
     measurements: Record<string, Measurement>;

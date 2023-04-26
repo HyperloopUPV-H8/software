@@ -3,7 +3,7 @@ import {
     EnumDescription,
     NumericDescription,
     OrderFieldDescription,
-} from "adapters/Order";
+} from "common";
 import { Form, FormField, areFieldsValid } from "./useForm";
 
 export function createForm(

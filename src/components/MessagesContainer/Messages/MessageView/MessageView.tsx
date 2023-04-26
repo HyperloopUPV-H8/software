@@ -1,6 +1,6 @@
 import styles from "./MessageView.module.scss";
 import { Counter } from "./Counter/Counter";
-import { ProtectionMessage } from "models/ProtectionMessage";
+import { ProtectionMessage } from "common";
 import { ReactComponent as Warning } from "assets/svg/warning.svg";
 import { ReactComponent as Fault } from "assets/svg/fault.svg";
 

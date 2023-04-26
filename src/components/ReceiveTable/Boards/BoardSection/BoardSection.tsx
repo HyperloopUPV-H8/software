@@ -1,8 +1,7 @@
 import styles from "./BoardSection.module.scss";
-import { Board } from "models/PodData/Board";
+import { Board } from "common";
 import Header from "./Header/Header";
 import PacketRow from "./PacketRow/PacketRow";
-import { memo } from "react";
 import { VariableSizeList } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { useCallback, useState } from "react";
@@ -46,8 +45,8 @@ export const BoardSection = ({ board }: Props) => {
                                             30
                                         );
                                     }}
-                                    width={width}
-                                    height={height}
+                                    width={width!} // FIXME: quitar aserción
+                                    height={height!}
                                 >
                                     {({ data, index, style }) => {
                                         return (

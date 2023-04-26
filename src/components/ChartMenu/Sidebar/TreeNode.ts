@@ -1,3 +1,3 @@
 export type TreeNode = {
-  [name: string]: TreeNode | undefined;
+    [name: string]: TreeNode | undefined;
 };

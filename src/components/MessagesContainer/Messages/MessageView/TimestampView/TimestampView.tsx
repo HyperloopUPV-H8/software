@@ -1,5 +1,5 @@
 import styles from "./TimestampView.module.scss";
-import { Timestamp } from "models/ProtectionMessage";
+import { Timestamp } from "common";
 
 type Props = {
     timestamp: Timestamp;

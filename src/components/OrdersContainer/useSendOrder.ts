@@ -1,5 +1,5 @@
-import { useWebSocketBroker } from "services/WebSocketBroker/useWebSocketBroker";
+import { useBroker } from "common";
 
 export function useSendOrder() {
-    return useWebSocketBroker("order/send");
+    return useBroker("order/send");
 }
