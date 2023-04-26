@@ -20,7 +20,7 @@ type Props = {
 >;
 
 export function ToggleButton({ label, icon, onToggle, ...buttonProps }: Props) {
-    const [isOn, flip] = useToggle();
+    const [isOn, flip] = useToggle(false);
 
     useEffect(() => {
         onToggle?.(isOn);
