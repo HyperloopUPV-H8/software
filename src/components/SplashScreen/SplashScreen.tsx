@@ -13,7 +13,6 @@ export const SplashScreen = () => {
 
     return (
         <div className={styles.loadingView}>
-            {/* Chango GUI */}
             <animated.div
                 className={styles.monkey}
                 style={{ ...springs }}
