@@ -10,6 +10,7 @@ $switch-padding: 0.2rem;
     flex-direction: row;
     align-items: center;
     padding: $switch-padding;
+    flex: 0 0 auto;
 
     height: $switch-height;
     width: calc($switch-height * $switch-aspect-ratio);

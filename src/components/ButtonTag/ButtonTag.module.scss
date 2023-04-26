@@ -36,6 +36,7 @@ $inner-shadow: inset 0 2px colors.getColor("tertiary", 60);
         appearance: none;
         color: colors.getColor("primary", 60);
         background-color: colors.getColor("primary", 90);
+        margin-top: 0.5rem;
 
         width: 100%;
         height: $button-height;
