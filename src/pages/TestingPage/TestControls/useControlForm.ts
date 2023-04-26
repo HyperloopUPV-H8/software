@@ -19,6 +19,9 @@ type EnablingValue = {
 };
 
 export type FormData = Array<InputData>;
+
+export type Form = { formData: FormData; isValid: boolean };
+
 type SubmitHandler = () => void;
 type ChangeValue = (id: string, value: number) => void;
 type ChangeEnable = (id: string, enable: boolean) => void;
@@ -26,42 +29,72 @@ type ChangeEnable = (id: string, enable: boolean) => void;
 type Action =
     | { type: "CHANGE VALUE"; payload: ChangingValue }
     | { type: "CHANGE ENABLE"; payload: EnablingValue }
-    | { type: "RESET INITIAL STATE"; payload: FormData };
+    | { type: "RESET INITIAL STATE"; payload: Form };
 
-const searchId = (form: FormData, id: string): number => {
-    let index = form.findIndex((inputData) => inputData.id == id);
+const searchId = (form: Form, id: string): number => {
+    let index = form.formData.findIndex((inputData) => inputData.id == id);
     return index;
 };
 
 const checkType = (type: string, value: number): boolean => {
-    switch (
-        type
-        //TODO: which types?
-    ) {
-    }
-
+    //TODO: which types?
     return true;
 };
 
-const taskReducer = (state: FormData, action: Action) => {
+const checkIsValid = (formData: FormData): boolean => {
+    const result =
+        formData.reduce(
+            (prev, currentInput) =>
+                prev &&
+                (currentInput.validity.isValid || !currentInput.enabled),
+            true
+        ) &&
+        formData.some((input) => input.enabled) &&
+        !formData.some((input) => input.enabled && !input.value);
+    return result;
+};
+
+const checkValidityInputs = (initialState: Form): Form => {
+    const newState = [...initialState.formData];
+    newState.forEach((input) => {
+        if (input.value && checkType(input.type, input.value)) {
+            input = {
+                ...input,
+                validity: { isValid: true, msg: input.validity.msg },
+            };
+        } else {
+            input = {
+                ...input,
+                validity: { isValid: false, msg: input.validity.msg },
+            };
+        }
+    });
+
+    let isValid = checkIsValid(newState);
+    return { formData: newState, isValid: isValid };
+};
+
+const taskReducer = (state: Form, action: Action): Form => {
     switch (action.type) {
         case "CHANGE ENABLE": {
             let dataIndex = searchId(state, action.payload.id);
-            const currentValues = [...state];
+            const currentValues = [...state.formData];
 
             currentValues[dataIndex] = {
                 ...currentValues[dataIndex],
                 enabled: action.payload.enabled,
             };
 
-            return currentValues;
+            let isValid = checkIsValid(currentValues);
+
+            return { formData: currentValues, isValid: isValid };
         }
         case "CHANGE VALUE": {
             let dataIndex = searchId(state, action.payload.id);
-            const currentValues = [...state];
+            const currentValues = [...state.formData];
             if (
                 action.payload.value &&
-                checkType(state[dataIndex].type, action.payload.value)
+                checkType(state.formData[dataIndex].type, action.payload.value)
             ) {
                 currentValues[dataIndex] = {
                     ...currentValues[dataIndex],
@@ -76,7 +109,8 @@ const taskReducer = (state: FormData, action: Action) => {
                 };
             }
 
-            return currentValues;
+            let isValid = checkIsValid(currentValues);
+            return { formData: currentValues, isValid: isValid };
         }
         case "RESET INITIAL STATE": {
             return action.payload;
@@ -87,36 +121,14 @@ const taskReducer = (state: FormData, action: Action) => {
     }
 };
 
-const checkInitialIsValid = (form: FormData): boolean => {
-    let isValid = true;
-    let numDisabled = 0;
-    form.forEach((inputData) => {
-        if (inputData.enabled) {
-            if (
-                !inputData.value ||
-                !checkType(inputData.type, inputData.value)
-            ) {
-                isValid = false;
-                console.log("Hay error en los valores");
-            }
-        } else {
-            numDisabled++;
-        }
-    });
-    console.log(numDisabled);
-    console.log(form.length);
-    if (numDisabled == form.length) {
-        isValid = false;
-    }
-    console.log("checkIsValid: " + isValid);
-    return isValid;
-};
-
 export function useControlForm(
-    initialState: FormData
-): [FormData, boolean, ChangeValue, ChangeEnable, SubmitHandler] {
-    const [form, dispatch] = useReducer(taskReducer, initialState);
-    const [isValid, setIsValid] = useState(checkInitialIsValid(form));
+    initialState: Form
+): [Form, ChangeValue, ChangeEnable, SubmitHandler] {
+    const [form, dispatch] = useReducer(
+        taskReducer,
+        initialState,
+        checkValidityInputs
+    );
 
     const ChangeValue: ChangeValue = (id, value) => {
         dispatch({ type: "CHANGE VALUE", payload: { id, value } });
@@ -131,38 +143,14 @@ export function useControlForm(
     };
 
     const SubmitHandler: SubmitHandler = () => {
-        console.log(form);
-        form.forEach((inputData) => {
-            if (inputData.enabled) {
-                if (
-                    inputData.value &&
-                    checkType(inputData.type, inputData.value)
-                ) {
-                    //TODO: take the data, send FormData al backend
-                    console.log(inputData.value);
-                } else {
-                    console.log("Hay error en los valores");
-                }
-            }
-        });
+        if (form.isValid) {
+            //TODO: take the data, send FormData al backend? To be defined
+        }
     };
 
     useEffect(() => {
         ResetInitialState();
     }, [initialState]);
 
-    useEffect(() => {
-        setIsValid(true);
-        form.forEach((inputData) => {
-            if (inputData.enabled && inputData.validity.isValid == false) {
-                console.log("llega a setFalse");
-                setIsValid(false); //TODO: Sí que llega, por qué no funciona?
-            }
-            console.log(inputData.id + " " + inputData.value);
-            console.log(inputData.id + " " + inputData.validity.isValid);
-        });
-        console.log("isValid Hook: " + isValid);
-    }, [form]);
-
-    return [form, isValid, ChangeValue, ChangeEnable, SubmitHandler];
+    return [form, ChangeValue, ChangeEnable, SubmitHandler];
 }

@@ -1,6 +1,6 @@
 import { DetailedHTMLProps, InputHTMLAttributes } from "react";
 import style from "./InputTag.module.scss";
-import { isNumberValid } from "common/validation";
+import { isNumberValid } from "./validation";
 
 type Props = {
     id: string;
@@ -26,13 +26,10 @@ export function InputTag({ id, isOn, onChange, ...inputProps }: Props) {
                     );
                     if (isNumberValid(e.currentTarget.value, "int64")) {
                         onChange(currentNumber);
-                        console.log("currentNumber: " + currentNumber);
                     } else if (e.currentTarget.value == "") {
                         onChange(currentNumber);
-                        console.log("currentNumber: " + currentNumber);
                     } else {
-                        //TODO: don't print the key
-                        console.log("not a number");
+                        //TODO: don't print the key in the input
                     }
                 }}
                 {...inputProps}

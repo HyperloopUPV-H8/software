@@ -7,97 +7,94 @@ import { ReactComponent as PerturbationIcon } from "assets/svg/perturbationIcon.
 import { PlayButton } from "components/PlayButton/PlayButton";
 import { ButtonTag } from "components/ButtonTag/ButtonTag";
 import style from "./TestControls.module.scss";
-import { useEffect } from "react";
-import { useControlForm, FormData } from "./useControlForm";
+import { useControlForm, Form } from "./useControlForm";
 
-const initialFormData = [
-    {
-        id: "unit0",
-        type: "number",
-        value: null,
-        enabled: false,
-        validity: { isValid: false, msg: "xxx" },
-    },
-    {
-        id: "unit1",
-        type: "number",
-        value: null,
-        enabled: false,
-        validity: { isValid: false, msg: "xxx" },
-    },
-    {
-        id: "unit2",
-        type: "number",
-        value: null,
-        enabled: false,
-        validity: { isValid: false, msg: "xxx" },
-    },
-    {
-        id: "unit3",
-        type: "number",
-        value: null,
-        enabled: false,
-        validity: { isValid: true, msg: "xxx" },
-    },
-    {
-        id: "unit4",
-        type: "number",
-        value: null,
-        enabled: false,
-        validity: { isValid: false, msg: "xxx" },
-    },
-    {
-        id: "unit5",
-        type: "number",
-        value: null,
-        enabled: false,
-        validity: { isValid: false, msg: "xxx" },
-    },
-    {
-        id: "unit6",
-        type: "number",
-        value: null,
-        enabled: true,
-        validity: { isValid: false, msg: "xxx" },
-    },
-    {
-        id: "unit7",
-        type: "number",
-        value: 10,
-        enabled: true,
-        validity: { isValid: true, msg: "xxx" },
-    },
-    {
-        id: "unit8",
-        type: "number",
-        value: null,
-        enabled: false,
-        validity: { isValid: false, msg: "xxx" },
-    },
-    {
-        id: "unit9",
-        type: "number",
-        value: null,
-        enabled: false,
-        validity: { isValid: false, msg: "xxx" },
-    },
-    {
-        id: "unit10",
-        type: "number",
-        value: null,
-        enabled: false,
-        validity: { isValid: false, msg: "xxx" },
-    },
-];
+const initialFormData = {
+    formData: [
+        {
+            id: "unit0",
+            type: "number",
+            value: null,
+            enabled: false,
+            validity: { isValid: false, msg: "xxx" },
+        },
+        {
+            id: "unit1",
+            type: "number",
+            value: null,
+            enabled: false,
+            validity: { isValid: false, msg: "xxx" },
+        },
+        {
+            id: "unit2",
+            type: "number",
+            value: null,
+            enabled: false,
+            validity: { isValid: false, msg: "xxx" },
+        },
+        {
+            id: "unit3",
+            type: "number",
+            value: null,
+            enabled: false,
+            validity: { isValid: true, msg: "xxx" },
+        },
+        {
+            id: "unit4",
+            type: "number",
+            value: null,
+            enabled: false,
+            validity: { isValid: false, msg: "xxx" },
+        },
+        {
+            id: "unit5",
+            type: "number",
+            value: null,
+            enabled: false,
+            validity: { isValid: false, msg: "xxx" },
+        },
+        {
+            id: "unit6",
+            type: "number",
+            value: null,
+            enabled: false,
+            validity: { isValid: false, msg: "xxx" },
+        },
+        {
+            id: "unit7",
+            type: "number",
+            value: null,
+            enabled: false,
+            validity: { isValid: false, msg: "xxx" },
+        },
+        {
+            id: "unit8",
+            type: "number",
+            value: null,
+            enabled: false,
+            validity: { isValid: false, msg: "xxx" },
+        },
+        {
+            id: "unit9",
+            type: "number",
+            value: null,
+            enabled: false,
+            validity: { isValid: false, msg: "xxx" },
+        },
+        {
+            id: "unit10",
+            type: "number",
+            value: null,
+            enabled: false,
+            validity: { isValid: false, msg: "xxx" },
+        },
+    ],
+    isValid: false,
+};
 
 export const TestControls = () => {
-    const [FormData, isValid, ChangeValue, ChangeEnable, SubmitHandler] =
+    const [form, ChangeValue, ChangeEnable, SubmitHandler] =
         useControlForm(initialFormData);
-
-    useEffect(() => {
-        console.log(FormData);
-        console.log("isValid: " + isValid);
-    }, [FormData]);
 
     return (
         <div className={style.testControlsWrapper}>
@@ -120,7 +117,7 @@ export const TestControls = () => {
                         <ToggleButton label="brake" icon={<BreakIcon />} />
                     </div>
                     <form className={style.inputWrapper}>
-                        {Object.entries(FormData).map((testAttribute) => {
+                        {Object.entries(form.formData).map((testAttribute) => {
                             return (
                                 <ToggleInput
                                     key={testAttribute[0]}
@@ -151,7 +148,7 @@ export const TestControls = () => {
                         onClick={() => {
                             SubmitHandler();
                         }}
-                        disabled={!isValid}
+                        disabled={!form.isValid}
                     />
                 </div>
             </div>
