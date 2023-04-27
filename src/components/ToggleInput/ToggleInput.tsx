@@ -11,7 +11,7 @@ type Props = {
     disabled: boolean;
 } & Omit<
     DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
-    "onChange"
+    "onChange" | "disabled"
 >;
 
 export function ToggleInput({

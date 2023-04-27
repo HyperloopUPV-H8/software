@@ -1,35 +1,12 @@
 import { useEffect, useReducer, useState } from "react";
-
-type InputData = {
-    id: string;
-    type: string;
-    value: number | null;
-    enabled: boolean;
-    validity: { isValid: boolean; msg: string };
-};
-
-type ChangingValue = {
-    id: string;
-    value: number | null;
-};
-
-type EnablingValue = {
-    id: string;
-    enabled: boolean;
-};
-
-export type FormData = Array<InputData>;
-
-export type Form = { formData: FormData; isValid: boolean };
-
-type SubmitHandler = () => void;
-type ChangeValue = (id: string, value: number) => void;
-type ChangeEnable = (id: string, enable: boolean) => void;
-
-type Action =
-    | { type: "CHANGE VALUE"; payload: ChangingValue }
-    | { type: "CHANGE ENABLE"; payload: EnablingValue }
-    | { type: "RESET INITIAL STATE"; payload: Form };
+import {
+    Form,
+    FormData,
+    Action,
+    ChangeValue,
+    ChangeEnable,
+    SubmitHandler,
+} from "./TestAttributes";
 
 const searchId = (form: Form, id: string): number => {
     let index = form.formData.findIndex((inputData) => inputData.id == id);
@@ -145,6 +122,7 @@ export function useControlForm(
     const SubmitHandler: SubmitHandler = () => {
         if (form.isValid) {
             //TODO: take the data, send FormData al backend? To be defined
+            console.log(form.formData);
         }
     };
 

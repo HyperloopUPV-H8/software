@@ -11,6 +11,20 @@ type Props = {
     "onChange"
 >;
 
+const onChangeInput = (
+    e: React.FormEvent<HTMLInputElement>,
+    onChange: (state: number) => void
+) => {
+    const currentNumber = Number.parseFloat(e.currentTarget.value);
+    if (isNumberValid(e.currentTarget.value, "int64")) {
+        onChange(currentNumber);
+    } else if (e.currentTarget.value == "") {
+        onChange(currentNumber);
+    } else {
+        //TODO: don't print the key in the input
+    }
+};
+
 export function InputTag({ id, isOn, onChange, ...inputProps }: Props) {
     return (
         <fieldset
@@ -21,16 +35,7 @@ export function InputTag({ id, isOn, onChange, ...inputProps }: Props) {
             <legend className={style.testInputLabel}>{id}</legend>
             <input
                 onChange={(e: React.FormEvent<HTMLInputElement>) => {
-                    let currentNumber = Number.parseFloat(
-                        e.currentTarget.value
-                    );
-                    if (isNumberValid(e.currentTarget.value, "int64")) {
-                        onChange(currentNumber);
-                    } else if (e.currentTarget.value == "") {
-                        onChange(currentNumber);
-                    } else {
-                        //TODO: don't print the key in the input
-                    }
+                    onChangeInput(e, onChange);
                 }}
                 {...inputProps}
             ></input>

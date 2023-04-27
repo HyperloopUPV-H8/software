@@ -26,9 +26,11 @@ export function ToggleButton({ label, icon, onToggle, ...buttonProps }: Props) {
         onToggle?.(isOn);
     }, [isOn]);
 
-    const name = `${style.toggleButtonWrapper} ${isOn ? style.on : style.off}`;
+    const labelClass = `${style.toggleButtonWrapper} ${
+        isOn ? style.on : style.off
+    }`;
     return (
-        <label className={name}>
+        <label className={labelClass}>
             <button onClick={flip} {...buttonProps}>
                 {icon}
             </button>

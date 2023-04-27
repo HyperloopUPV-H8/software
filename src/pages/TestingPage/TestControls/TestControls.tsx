@@ -7,90 +7,10 @@ import { ReactComponent as PerturbationIcon } from "assets/svg/perturbationIcon.
 import { PlayButton } from "components/PlayButton/PlayButton";
 import { ButtonTag } from "components/ButtonTag/ButtonTag";
 import style from "./TestControls.module.scss";
-import { useControlForm, Form } from "./useControlForm";
-
-const initialFormData = {
-    formData: [
-        {
-            id: "unit0",
-            type: "number",
-            value: null,
-            enabled: false,
-            validity: { isValid: false, msg: "xxx" },
-        },
-        {
-            id: "unit1",
-            type: "number",
-            value: null,
-            enabled: false,
-            validity: { isValid: false, msg: "xxx" },
-        },
-        {
-            id: "unit2",
-            type: "number",
-            value: null,
-            enabled: false,
-            validity: { isValid: false, msg: "xxx" },
-        },
-        {
-            id: "unit3",
-            type: "number",
-            value: null,
-            enabled: false,
-            validity: { isValid: true, msg: "xxx" },
-        },
-        {
-            id: "unit4",
-            type: "number",
-            value: null,
-            enabled: false,
-            validity: { isValid: false, msg: "xxx" },
-        },
-        {
-            id: "unit5",
-            type: "number",
-            value: null,
-            enabled: false,
-            validity: { isValid: false, msg: "xxx" },
-        },
-        {
-            id: "unit6",
-            type: "number",
-            value: null,
-            enabled: false,
-            validity: { isValid: false, msg: "xxx" },
-        },
-        {
-            id: "unit7",
-            type: "number",
-            value: null,
-            enabled: false,
-            validity: { isValid: false, msg: "xxx" },
-        },
-        {
-            id: "unit8",
-            type: "number",
-            value: null,
-            enabled: false,
-            validity: { isValid: false, msg: "xxx" },
-        },
-        {
-            id: "unit9",
-            type: "number",
-            value: null,
-            enabled: false,
-            validity: { isValid: false, msg: "xxx" },
-        },
-        {
-            id: "unit10",
-            type: "number",
-            value: null,
-            enabled: false,
-            validity: { isValid: false, msg: "xxx" },
-        },
-    ],
-    isValid: false,
-};
+import { useControlForm } from "./useControlForm";
+import { initialFormData } from "./initialFormDataMock";
+import { ControlButtons } from "./ControlButtons/ControlButtons";
+import { ControlInputs } from "./ControlInputs/ControlInputs";
 
 export const TestControls = () => {
     const [form, ChangeValue, ChangeEnable, SubmitHandler] =
@@ -105,43 +25,12 @@ export const TestControls = () => {
             <div className={style.sectionWrapper}>
                 <div className={style.title}>Controls</div>
                 <div className={style.body}>
-                    <div className={style.controlsWrapper}>
-                        <ToggleButton
-                            label="levitation"
-                            icon={<LevitateIcon />}
-                        />
-                        <ToggleButton
-                            label="propulsion"
-                            icon={<PropulseIcon />}
-                        />
-                        <ToggleButton label="brake" icon={<BreakIcon />} />
-                    </div>
-                    <form className={style.inputWrapper}>
-                        {Object.entries(form.formData).map((testAttribute) => {
-                            return (
-                                <ToggleInput
-                                    key={testAttribute[0]}
-                                    id={testAttribute[1].id}
-                                    type={testAttribute[1].type}
-                                    disabled={!testAttribute[1].enabled}
-                                    value={
-                                        testAttribute[1].value
-                                            ? testAttribute[1].value
-                                            : ""
-                                    }
-                                    onToggle={(state) => {
-                                        ChangeEnable(
-                                            testAttribute[1].id,
-                                            state
-                                        );
-                                    }}
-                                    onChange={(state) => {
-                                        ChangeValue(testAttribute[1].id, state);
-                                    }}
-                                />
-                            );
-                        })}
-                    </form>
+                    <ControlButtons />
+                    <ControlInputs
+                        form={form}
+                        changeEnable={ChangeEnable}
+                        changeValue={ChangeValue}
+                    />
                     <ButtonTag
                         type="submit"
                         icon={<PerturbationIcon />}
