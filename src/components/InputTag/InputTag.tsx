@@ -4,11 +4,11 @@ import { isNumberValid } from "./validation";
 
 type Props = {
     id: string;
-    isOn: boolean;
+    disabled: boolean;
     onChange: (state: number) => void;
 } & Omit<
     DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
-    "onChange"
+    "onChange" | "disabled"
 >;
 
 const onChangeInput = (
@@ -25,11 +25,11 @@ const onChangeInput = (
     }
 };
 
-export function InputTag({ id, isOn, onChange, ...inputProps }: Props) {
+export function InputTag({ id, disabled, onChange, ...inputProps }: Props) {
     return (
         <fieldset
             className={
-                isOn ? style.inputTagWrapperOn : style.inputTagWrapperOff
+                disabled ? style.inputTagWrapperOff : style.inputTagWrapperOn
             }
         >
             <legend className={style.testInputLabel}>{id}</legend>

@@ -4,8 +4,7 @@ $switch-height: 1rem;
 $switch-aspect-ratio: 2;
 $switch-padding: 0.2rem;
 
-.toggleSwitchWrapperOn,
-.toggleSwitchWrapperOff {
+.toggleSwitchWrapper {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -28,7 +27,7 @@ $switch-padding: 0.2rem;
     }
 }
 
-.toggleSwitchWrapperOn {
+.on {
     padding-left: calc(
         $switch-height * ($switch-aspect-ratio - 1) + $switch-padding
     );
@@ -40,7 +39,7 @@ $switch-padding: 0.2rem;
     }
 }
 
-.toggleSwitchWrapperOff {
+.off {
     padding-left: $switch-padding;
 
     background-color: colors.getColor("neutral", 90);

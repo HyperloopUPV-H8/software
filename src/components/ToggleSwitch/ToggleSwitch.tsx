@@ -14,11 +14,9 @@ export function ToggleSwitch({ onToggle, isOn, flip }: Props) {
 
     return (
         <label
-            className={
-                isOn
-                    ? style.toggleSwitchWrapperOn
-                    : style.toggleSwitchWrapperOff
-            }
+            className={`${style.toggleSwitchWrapper} ${
+                isOn ? style.on : style.off
+            }`}
             onClick={flip}
         >
             <div></div>

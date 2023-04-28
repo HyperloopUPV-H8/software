@@ -22,20 +22,13 @@ export function ToggleInput({
 }: Props) {
     const [isOn, flip] = useToggle(!disabled);
 
-    if (onToggle) {
-        useEffect(() => {
-            onToggle(isOn);
-        }, [isOn]);
-    }
+    useEffect(() => {
+        onToggle(isOn);
+    }, [isOn]);
 
     return (
         <div className={style.toggleInputWrapper}>
-            <InputTag
-                isOn={isOn}
-                disabled={!isOn}
-                onChange={onChange}
-                {...inputProps}
-            />
+            <InputTag disabled={!isOn} onChange={onChange} {...inputProps} />
             <ToggleSwitch onToggle={onToggle} isOn={isOn} flip={flip} />
         </div>
     );

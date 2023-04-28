@@ -19,11 +19,9 @@ export function ButtonTag({
 }: Props) {
     return (
         <label
-            className={
-                disabled
-                    ? style.buttonTagWrapperDisabled
-                    : style.buttonTagWrapper
-            }
+            className={`${style.buttonTagWrapper} ${
+                disabled ? style.disabled : style.enabled
+            }`}
         >
             <button
                 {...buttonProps}

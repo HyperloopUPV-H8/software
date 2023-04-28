@@ -1,15 +1,15 @@
-export type InputValue = string | number | null;
+// export type InputValue = string | number | null;
 
-export type ToggleInputAttributes = {
-    label: string;
-    type: string;
-    min: number;
-    max: number;
-    step: number;
-    value?: InputValue;
-};
+// export type ToggleInputAttributes = {
+//     label: string;
+//     type: string;
+//     min: number;
+//     max: number;
+//     step: number;
+//     value?: InputValue;
+// };
 
-export type TestAttributes = Record<string, ToggleInputAttributes>;
+// export type TestAttributes = Record<string, ToggleInputAttributes>;
 
 export type InputData = {
     id: string;
@@ -38,6 +38,6 @@ export type ChangeValue = (id: string, value: number) => void;
 export type ChangeEnable = (id: string, enable: boolean) => void;
 
 export type Action =
-    | { type: "CHANGE VALUE"; payload: ChangingValue }
-    | { type: "CHANGE ENABLE"; payload: EnablingValue }
-    | { type: "RESET INITIAL STATE"; payload: Form };
+    | { type: "CHANGE_VALUE"; payload: ChangingValue }
+    | { type: "CHANGE_ENABLE"; payload: EnablingValue }
+    | { type: "RESET_INITIAL_STATE"; payload: Form };
