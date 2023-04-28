@@ -4,6 +4,7 @@ import { MeasurementView } from "./MeasurementView/MeasurementView";
 import { useSelector } from "react-redux";
 import { RootState } from "store";
 import { HexValue } from "./HexValue/HexValue";
+import { memo } from "react";
 
 type Props = {
     packetId: number;
@@ -14,10 +15,11 @@ function packetSelector(state: RootState, packetId: number): Packet {
     return state.podData.boards[board].packets[packetId];
 }
 
-export const PacketView = ({ packetId }: Props) => {
+export const PacketView = memo(({ packetId }: Props) => {
     const packet = useSelector((state: RootState) =>
         packetSelector(state, packetId)
     );
+
     const columns = useSelector((state: RootState) => state.columns);
 
     return (
@@ -35,7 +37,8 @@ export const PacketView = ({ packetId }: Props) => {
                         return (
                             <MeasurementView
                                 key={measurement.id}
-                                id={measurement.id}
+                                // id={measurement.id}
+                                measurement={measurement}
                             />
                         );
                     })}
@@ -43,4 +46,4 @@ export const PacketView = ({ packetId }: Props) => {
             </div>
         </div>
     );
-};
+});

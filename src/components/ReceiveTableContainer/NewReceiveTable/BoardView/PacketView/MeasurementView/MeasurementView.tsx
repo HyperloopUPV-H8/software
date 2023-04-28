@@ -4,17 +4,17 @@ import { Measurement, isNumericMeasurement } from "common";
 import { useSelector } from "react-redux";
 import { memo } from "react";
 type Props = {
-    id: string;
+    measurement: Measurement;
 };
 
 function measurementSelector(state: RootState, id: string): Measurement {
     return state.measurements[id];
 }
 
-export const MeasurementView = memo(({ id }: Props) => {
-    const measurement = useSelector((state: RootState) =>
-        measurementSelector(state, id)
-    );
+export const MeasurementView = ({ measurement }: Props) => {
+    // const measurement = useSelector((state: RootState) =>
+    //     measurementSelector(state, id)
+    // );
 
     const isNumeric = isNumericMeasurement(measurement);
 
@@ -32,10 +32,12 @@ export const MeasurementView = memo(({ id }: Props) => {
             )}
             {!isNumeric && (
                 <>
-                    <span className={styles.value}>{measurement.value}</span>
+                    <span className={styles.value}>
+                        {measurement.value.toString()}
+                    </span>
                     <span className={styles.type}>{measurement.type}</span>
                 </>
             )}
         </div>
     );
-});
+};

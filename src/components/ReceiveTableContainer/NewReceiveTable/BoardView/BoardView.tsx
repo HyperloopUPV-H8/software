@@ -4,12 +4,12 @@ import { PacketView } from "./PacketView/PacketView";
 import { Caret } from "components/Caret/Caret";
 import { useState } from "react";
 import { Header } from "./Header/Header";
-
+import { memo } from "react";
 type Props = {
     board: Board;
 };
 
-export const BoardView = ({ board }: Props) => {
+export const BoardView = memo(({ board }: Props) => {
     const [open, setOpen] = useState(false);
 
     return (
@@ -25,9 +25,10 @@ export const BoardView = ({ board }: Props) => {
                         <PacketView
                             key={packet.id}
                             packetId={packet.id}
+                            // packet={packet}
                         />
                     );
                 })}
         </div>
     );
-};
+});

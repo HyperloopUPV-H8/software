@@ -24,8 +24,15 @@ export const HexValue = ({ hex }: Props) => {
 
     return (
         <div className={styles.hexValue}>
-            {byteArr.map((byte) => {
-                return <span className={styles.byte}>{byte}</span>;
+            {byteArr.map((byte, index) => {
+                return (
+                    <span
+                        key={index}
+                        className={styles.byte}
+                    >
+                        {byte}
+                    </span>
+                );
             })}
         </div>
     );
