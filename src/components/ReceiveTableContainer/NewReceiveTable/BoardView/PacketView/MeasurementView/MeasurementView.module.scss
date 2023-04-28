@@ -1,14 +1,14 @@
-.measurementView {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-    padding: 0.4rem 0;
-    overflow: hidden;
-}
+// .measurementView {
+//     display: flex;
+//     align-items: center;
+//     gap: 2rem;
+//     padding: 0.4rem 0;
+//     overflow: hidden;
+// }
 
-.measurementView:not(:last-child) {
-    border-bottom: 1px solid var(--border-color);
-}
+// .measurementView:not(:last-child) {
+//     border-bottom: 1px solid var(--border-color);
+// }
 
 .name,
 .value {
@@ -18,14 +18,24 @@
 }
 
 .name {
+    grid-column: 1;
     color: rgb(78, 78, 78);
 }
 
 .value {
-    flex-shrink: 5;
-    width: 10rem;
+    grid-column: 2;
     text-align: right;
     color: hsl(29, 88%, 57%);
     font-family: Consolas;
     font-size: 1.2rem;
+}
+
+.units {
+    grid-column: 3;
+    text-align: center;
+}
+
+.type {
+    grid-column: 4;
+    text-align: center;
 }

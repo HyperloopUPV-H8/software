@@ -39,6 +39,8 @@
 }
 
 .measurements {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: minmax(0, 15rem) min-content min-content min-content;
+    align-items: center;
+    gap: 1rem;
 }

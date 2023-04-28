@@ -19,7 +19,8 @@ export const MeasurementView = ({ measurement }: Props) => {
     const isNumeric = isNumericMeasurement(measurement);
 
     return (
-        <div className={styles.measurementView}>
+        // <div className={styles.measurementView}>
+        <>
             <span className={styles.name}>{measurement.name}</span>
             {isNumeric && (
                 <>
@@ -38,6 +39,7 @@ export const MeasurementView = ({ measurement }: Props) => {
                     <span className={styles.type}>{measurement.type}</span>
                 </>
             )}
-        </div>
+        </>
+        // </div>
     );
 };
