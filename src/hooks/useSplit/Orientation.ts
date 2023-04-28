@@ -1,4 +1,4 @@
-export enum Direction {
+export enum Orientation {
     VERTICAL,
     HORIZONTAL,
 }
