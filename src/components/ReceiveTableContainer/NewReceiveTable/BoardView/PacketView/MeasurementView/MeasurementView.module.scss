@@ -1,0 +1,31 @@
+.measurementView {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding: 0.4rem 0;
+    overflow: hidden;
+}
+
+.measurementView:not(:last-child) {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.name,
+.value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.name {
+    color: rgb(78, 78, 78);
+}
+
+.value {
+    flex-shrink: 5;
+    width: 10rem;
+    text-align: right;
+    color: hsl(29, 88%, 57%);
+    font-family: Consolas;
+    font-size: 1.2rem;
+}

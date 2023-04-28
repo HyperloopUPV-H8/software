@@ -2,7 +2,6 @@
 
 // COLORS
 $background-color: #dce3eb;
-$island-color: #ffffff;
 $title-color: #45677d;
 $normal-text-color: #373c43;
 $alternate-text-color: #505868;
@@ -10,8 +9,6 @@ $orange: hsl(29, 88%, 57%);
 $blue: #317ae7;
 $base-color: hsl(212, 27%, 55%);
 
-//DARK THEME
-$dark-island-color: #404654;
 $dark-normal-text-color: #bec6d2;
 
 // FONTS
@@ -107,13 +104,6 @@ $background-color-transition: background-color $normal-transition-time linear;
 }
 
 // CLASSES
-
-.island {
-    padding: $normal-padding;
-    border-radius: $large-border-radius;
-    background-color: $island-color;
-    box-shadow: 0px 10px 18px -14px rgba(0, 0, 0, 0.1);
-}
 
 // FUNCTIONS
 @function transparency($color, $transparency) {
