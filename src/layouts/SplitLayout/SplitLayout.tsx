@@ -1,31 +1,32 @@
 import React from "react";
 import styles from "layouts/SplitLayout/SplitLayout.module.scss";
-import { useSplitLayoutHandler } from "layouts/SplitLayout/useSplitLayoutHandler";
+import { useSplit } from "hooks/useSplit/useSplit";
 import { Component } from "layouts/SplitLayout/Component/Component";
 import { Separator } from "layouts/SplitLayout/Separator/Separator";
-import { Direction } from "layouts/SplitLayout/Direction";
+import { Orientation } from "hooks/useSplit/Orientation";
 
 type Props = {
     components: React.ReactNode[];
-    direction?: Direction;
+    orientation?: Orientation;
 };
 
+//TODO: not rerender elements that dont resize
 export const SplitLayout = ({
     components,
-    direction = Direction.HORIZONTAL,
+    orientation = Orientation.HORIZONTAL,
 }: Props) => {
     const minSizes = components.map(() => 0.2);
-    const [splitElements, handleSeparatorMouseDown] = useSplitLayoutHandler(
-        components.length,
+    const [splitElements, onSeparatorMouseDown] = useSplit(
         minSizes,
-        direction
+        orientation
     );
+
     return (
         <div
             className={styles.wrapper}
             style={{
                 flexDirection:
-                    direction == Direction.HORIZONTAL ? "row" : "column",
+                    orientation == Orientation.HORIZONTAL ? "row" : "column",
             }}
         >
             {components.map((component, index) => {
@@ -37,10 +38,9 @@ export const SplitLayout = ({
                         />
                         {index < components.length - 1 && (
                             <Separator
-                                index={index}
-                                direction={direction}
-                                handleSeparatorMouseDown={
-                                    handleSeparatorMouseDown
+                                orientation={orientation}
+                                onMouseDown={(ev) =>
+                                    onSeparatorMouseDown(index, ev)
                                 }
                             />
                         )}
