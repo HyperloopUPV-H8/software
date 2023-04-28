@@ -52,7 +52,7 @@ export const Header = () => {
                 className={styles.cell}
                 style={{ flexBasis: columns[3] }}
             >
-                CYCLE (units)
+                CYCLE (ns)
             </div>
         </div>
     );
