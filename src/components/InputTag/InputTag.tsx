@@ -16,7 +16,7 @@ const onChangeInput = (
     onChange: (state: number) => void
 ) => {
     const currentNumber = Number.parseFloat(e.currentTarget.value);
-    if (isNumberValid(e.currentTarget.value, "int64")) {
+    if (isNumberValid(e.currentTarget.value, "float64")) {
         onChange(currentNumber);
     } else if (e.currentTarget.value == "") {
         onChange(currentNumber);
@@ -28,9 +28,9 @@ const onChangeInput = (
 export function InputTag({ id, disabled, onChange, ...inputProps }: Props) {
     return (
         <fieldset
-            className={
-                disabled ? style.inputTagWrapperOff : style.inputTagWrapperOn
-            }
+            className={`${style.inputTagWrapper} ${
+                disabled ? style.off : style.on
+            }`}
         >
             <legend className={style.testInputLabel}>{id}</legend>
             <input

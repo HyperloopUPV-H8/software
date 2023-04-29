@@ -5,7 +5,7 @@ import {
     ChangeEnable,
     SubmitHandler,
 } from "./TestAttributes";
-import { checkValidityInputs, taskReducer } from "./controlReducer";
+import { checkValidityInitialInputs, taskReducer } from "./controlReducer";
 
 export function useControlForm(
     initialState: Form
@@ -13,7 +13,7 @@ export function useControlForm(
     const [form, dispatch] = useReducer(
         taskReducer,
         initialState,
-        checkValidityInputs
+        checkValidityInitialInputs
     );
 
     const ChangeValue: ChangeValue = (id, value) => {
@@ -31,6 +31,7 @@ export function useControlForm(
     const SubmitHandler: SubmitHandler = () => {
         if (form.isValid) {
             //TODO: take the data, send FormData al backend? To be defined
+            console.log(form.formData);
         }
     };
 

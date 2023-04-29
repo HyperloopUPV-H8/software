@@ -5,9 +5,12 @@ type Props = {
     label?: string;
     icon: ReactNode;
     onClick: () => void;
-} & DetailedHTMLProps<
-    ButtonHTMLAttributes<HTMLButtonElement>,
-    HTMLButtonElement
+} & Omit<
+    DetailedHTMLProps<
+        ButtonHTMLAttributes<HTMLButtonElement>,
+        HTMLButtonElement
+    >,
+    "onClick"
 >;
 
 export function ButtonTag({

@@ -1,4 +1,4 @@
-import { Action, Form, FormData } from "./TestAttributes";
+import { Action, Form, FormData, InputData } from "./TestAttributes";
 
 const searchId = (form: Form, id: string): number => {
     return form.formData.findIndex((inputData) => inputData.id == id);
@@ -9,7 +9,7 @@ const checkType = (type: string, value: number): boolean => {
     return true;
 };
 
-const checkIsValid = (formData: FormData): boolean => {
+const isFormValid = (formData: FormData): boolean => {
     const result =
         formData.reduce(
             (prev, currentInput) =>
@@ -22,7 +22,7 @@ const checkIsValid = (formData: FormData): boolean => {
     return result;
 };
 
-export const checkValidityInputs = (initialState: Form): Form => {
+export const checkValidityInitialInputs = (initialState: Form): Form => {
     const newState = [...initialState.formData];
     newState.forEach((input) => {
         if (input.value && checkType(input.type, input.value)) {
@@ -38,7 +38,33 @@ export const checkValidityInputs = (initialState: Form): Form => {
         }
     });
 
-    return { formData: newState, isValid: checkIsValid(newState) };
+    return { formData: newState, isValid: isFormValid(newState) };
+};
+
+const changeSingleValue = (
+    inputData: InputData,
+    value: number | null
+): InputData => {
+    if (value && checkType(inputData.type, value)) {
+        inputData = {
+            ...inputData,
+            value: value,
+            validity: {
+                isValid: true,
+                msg: inputData.validity.msg,
+            },
+        };
+    } else {
+        inputData = {
+            ...inputData,
+            value: null,
+            validity: {
+                isValid: false,
+                msg: inputData.validity.msg,
+            },
+        };
+    }
+    return inputData;
 };
 
 export const taskReducer = (state: Form, action: Action): Form => {
@@ -46,53 +72,28 @@ export const taskReducer = (state: Form, action: Action): Form => {
         case "CHANGE_ENABLE": {
             const dataIndex = searchId(state, action.payload.id);
             const newFormData = [...state.formData];
-            let validity = true;
-            if (!action.payload.enabled) {
-                validity = false;
-            }
 
             newFormData[dataIndex] = {
                 ...newFormData[dataIndex],
                 enabled: action.payload.enabled,
-                validity: {
-                    isValid: validity,
-                    msg: newFormData[dataIndex].validity.msg,
-                },
             };
 
-            let isValid = checkIsValid(newFormData);
-
-            return { formData: newFormData, isValid: isValid };
+            return {
+                formData: newFormData,
+                isValid: isFormValid(newFormData),
+            };
         }
         case "CHANGE_VALUE": {
             const dataIndex = searchId(state, action.payload.id);
             const newFormData = [...state.formData];
-            if (
-                action.payload.value &&
-                checkType(state.formData[dataIndex].type, action.payload.value)
-            ) {
-                newFormData[dataIndex] = {
-                    ...newFormData[dataIndex],
-                    value: action.payload.value,
-                    validity: {
-                        isValid: true,
-                        msg: newFormData[dataIndex].validity.msg,
-                    },
-                };
-            } else {
-                newFormData[dataIndex] = {
-                    ...newFormData[dataIndex],
-                    value: null,
-                    validity: {
-                        isValid: false,
-                        msg: newFormData[dataIndex].validity.msg,
-                    },
-                };
-            }
+            newFormData[dataIndex] = changeSingleValue(
+                newFormData[dataIndex],
+                action.payload.value
+            );
 
             return {
                 formData: newFormData,
-                isValid: checkIsValid(newFormData),
+                isValid: isFormValid(newFormData),
             };
         }
         case "RESET_INITIAL_STATE": {
