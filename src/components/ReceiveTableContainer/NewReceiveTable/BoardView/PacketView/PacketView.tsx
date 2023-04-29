@@ -20,15 +20,18 @@ export const PacketView = memo(({ packetId }: Props) => {
         packetSelector(state, packetId)
     );
 
+    const items = [packet.id, packet.name, packet.count, packet.cycleTime];
+
     const columns = useSelector((state: RootState) => state.columns);
 
     return (
         <div className={styles.packetView}>
             <div className={styles.data}>
-                <div style={{ flexBasis: columns[0] }}>{packet.id}</div>
-                <div style={{ flexBasis: columns[1] }}>{packet.name}</div>
-                <div style={{ flexBasis: columns[2] }}>{packet.count}</div>
-                <div style={{ flexBasis: columns[3] }}>{packet.cycleTime}</div>
+                {items.map((item, index) => {
+                    return (
+                        <div style={{ flexBasis: columns[index] }}>{item}</div>
+                    );
+                })}
             </div>
             <div className={styles.body}>
                 <HexValue hex={packet.hexValue}></HexValue>
@@ -37,7 +40,6 @@ export const PacketView = memo(({ packetId }: Props) => {
                         return (
                             <MeasurementView
                                 key={measurement.id}
-                                // id={measurement.id}
                                 measurement={measurement}
                             />
                         );

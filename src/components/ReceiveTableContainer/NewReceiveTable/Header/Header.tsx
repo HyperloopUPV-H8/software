@@ -7,11 +7,17 @@ import { Separator } from "./Separator/Separator";
 import { useEffect } from "react";
 import { setColumnSizes } from "slices/columnsSlice";
 
-export const Header = () => {
+type Props = {
+    items: string[];
+};
+
+const MINIMUM_ITEM_SIZE = 0.05;
+
+export const Header = ({ items }: Props) => {
     const columns = useSelector((state: RootState) => state.columns);
 
     const [splitElements, handleMouseDown] = useSplit(
-        [0.05, 0.05, 0.05, 0.05],
+        new Array(items.length).fill(MINIMUM_ITEM_SIZE),
         Orientation.HORIZONTAL
     );
 
@@ -27,33 +33,32 @@ export const Header = () => {
 
     return (
         <div className={styles.header}>
-            <div
-                className={styles.cell}
-                style={{ flexBasis: columns[0] }}
-            >
-                ID
-            </div>
-            <Separator onMouseDown={(ev) => handleMouseDown(0, ev)}></Separator>
-            <div
-                className={styles.cell}
-                style={{ flexBasis: columns[1] }}
-            >
-                NAME
-            </div>
-            <Separator onMouseDown={(ev) => handleMouseDown(1, ev)}></Separator>
-            <div
-                className={styles.cell}
-                style={{ flexBasis: columns[2] }}
-            >
-                COUNT
-            </div>
-            <Separator onMouseDown={(ev) => handleMouseDown(2, ev)}></Separator>
-            <div
-                className={styles.cell}
-                style={{ flexBasis: columns[3] }}
-            >
-                CYCLE (ns)
-            </div>
+            {items.map((item, index) => {
+                if (index < items.length - 1) {
+                    return (
+                        <>
+                            <div
+                                className={styles.cell}
+                                style={{ flexBasis: columns[index] }}
+                            >
+                                {item}
+                            </div>
+                            <Separator
+                                onMouseDown={(ev) => handleMouseDown(index, ev)}
+                            ></Separator>
+                        </>
+                    );
+                } else {
+                    return (
+                        <div
+                            className={styles.cell}
+                            style={{ flexBasis: columns[index] }}
+                        >
+                            {item}
+                        </div>
+                    );
+                }
+            })}
         </div>
     );
 };

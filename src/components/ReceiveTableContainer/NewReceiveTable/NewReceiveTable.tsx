@@ -16,7 +16,7 @@ export const NewReceiveTable = () => {
 
     return (
         <div className={styles.newReceiveTable}>
-            <Header />
+            <Header items={["ID", "NAME", "COUNT", "CYCLE (ns)"]} />
             <div className={styles.boards}>
                 {Object.values(boards).map((board) => {
                     return (

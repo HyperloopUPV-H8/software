@@ -7,11 +7,9 @@ import {
 export const ReceiveTableContainer = () => {
     const requestState = useFetchPodData();
 
-    if (requestState == RequestState.PENDING) {
+    if (requestState == RequestState.PENDING)
         return <div>Loading PodData...</div>;
-    } else if (requestState == RequestState.FULFILLED) {
-        return <NewReceiveTable />;
-    } else {
-        return <div>Error fetching PodData</div>;
-    }
+    if (requestState == RequestState.FULFILLED) return <NewReceiveTable />;
+
+    return <div>Error fetching PodData</div>;
 };
