@@ -5,13 +5,14 @@ import { ChartMenu } from "components/ChartMenu/ChartMenu";
 import { RequestState, useFetchPodData } from "./useFetchPodData";
 import { ReactComponent as IncomingMessage } from "assets/svg/incoming-message.svg";
 import { ReactComponent as Chart } from "assets/svg/chart.svg";
+import { ReceiveTableContainer } from "components/ReceiveTableContainer/ReceiveTableContainer";
 
 const receiveColumnTabItem = [
     {
         id: "receiveTable",
         name: "Packets",
         icon: <IncomingMessage />,
-        component: <ReceiveTable />,
+        component: <ReceiveTableContainer />,
     },
     {
         id: "charts",

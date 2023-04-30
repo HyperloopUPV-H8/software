@@ -1,6 +1,6 @@
 import styles from "pages/HomePage/MessagesColumn/MessagesColumn.module.scss";
 import { SplitLayout } from "layouts/SplitLayout/SplitLayout";
-import { Direction } from "layouts/SplitLayout/Direction";
+import { Orientation } from "hooks/useSplit/Orientation";
 import { TabLayout } from "layouts/TabLayout/TabLayout";
 import { BiLineChart } from "react-icons/bi";
 import { nanoid } from "nanoid";
@@ -27,7 +27,7 @@ export const MessagesColumn = () => {
                     <TabLayout items={messagesTabItems.current}></TabLayout>,
                     <Connections />,
                 ]}
-                direction={Direction.VERTICAL}
+                orientation={Orientation.VERTICAL}
             ></SplitLayout>
             <Logger />
         </div>

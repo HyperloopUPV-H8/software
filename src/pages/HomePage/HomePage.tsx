@@ -1,5 +1,5 @@
 import { SplitLayout } from "layouts/SplitLayout/SplitLayout";
-import { Direction } from "layouts/SplitLayout/Direction";
+import { Orientation } from "hooks/useSplit/Orientation";
 import { ReceiveColumn } from "pages/HomePage/ReceiveColumn/ReceiveColumn";
 import { OrderColumn } from "pages/HomePage/OrderColumn/OrderColumn";
 import { MessagesColumn } from "pages/HomePage/MessagesColumn/MessagesColumn";
@@ -15,7 +15,7 @@ export const HomePage = () => {
                         <OrderColumn />,
                         <MessagesColumn />,
                     ]}
-                    direction={Direction.HORIZONTAL}
+                    orientation={Orientation.HORIZONTAL}
                 ></SplitLayout>
             </div>
         </div>

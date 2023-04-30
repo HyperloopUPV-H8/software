@@ -1,6 +1,5 @@
 import { TabLayout } from "layouts/TabLayout/TabLayout";
 import { nanoid } from "nanoid";
-import { HiInboxArrowDown } from "react-icons/hi2";
 import { OrdersContainer } from "components/OrdersContainer/OrdersContainer";
 import { useRef } from "react";
 import { ReactComponent as OutgoingMessage } from "assets/svg/outgoing-message.svg";
