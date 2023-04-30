@@ -1,82 +1,57 @@
-export const initialFormData = {
-    formData: [
-        {
-            id: "unit0",
-            type: "number",
-            value: null,
-            enabled: false,
-            validity: { isValid: false, msg: "xxx" },
-        },
-        {
-            id: "unit1",
-            type: "number",
-            value: null,
-            enabled: false,
-            validity: { isValid: false, msg: "xxx" },
-        },
-        {
-            id: "unit2",
-            type: "number",
-            value: null,
-            enabled: false,
-            validity: { isValid: false, msg: "xxx" },
-        },
-        {
-            id: "unit3",
-            type: "number",
-            value: null,
-            enabled: false,
-            validity: { isValid: true, msg: "xxx" },
-        },
-        {
-            id: "unit4",
-            type: "number",
-            value: null,
-            enabled: false,
-            validity: { isValid: false, msg: "xxx" },
-        },
-        {
-            id: "unit5",
-            type: "number",
-            value: null,
-            enabled: false,
-            validity: { isValid: false, msg: "xxx" },
-        },
-        {
-            id: "unit6",
-            type: "number",
-            value: null,
-            enabled: false,
-            validity: { isValid: false, msg: "xxx" },
-        },
-        {
-            id: "unit7",
-            type: "number",
-            value: null,
-            enabled: false,
-            validity: { isValid: false, msg: "xxx" },
-        },
-        {
-            id: "unit8",
-            type: "number",
-            value: null,
-            enabled: false,
-            validity: { isValid: false, msg: "xxx" },
-        },
-        {
-            id: "unit9",
-            type: "number",
-            value: null,
-            enabled: false,
-            validity: { isValid: false, msg: "xxx" },
-        },
-        {
-            id: "unit10",
-            type: "number",
-            value: null,
-            enabled: false,
-            validity: { isValid: false, msg: "xxx" },
-        },
-    ],
-    isValid: false,
-};
+export const initialFormDescription = [
+    {
+        id: "unit0",
+        type: "number",
+        value: null,
+    },
+    {
+        id: "unit1",
+        type: "number",
+        value: null,
+    },
+    {
+        id: "unit2",
+        type: "number",
+        value: 12,
+    },
+    {
+        id: "unit3",
+        type: "number",
+        value: null,
+    },
+    {
+        id: "unit4",
+        type: "number",
+        value: 1,
+    },
+    {
+        id: "unit5",
+        type: "number",
+        value: null,
+    },
+    {
+        id: "unit6",
+        type: "number",
+        value: null,
+    },
+    {
+        id: "unit7",
+        type: "number",
+        value: null,
+    },
+    {
+        id: "unit8",
+        type: "number",
+        value: 2.4,
+    },
+    {
+        id: "unit9",
+        type: "number",
+        value: null,
+    },
+    {
+        id: "unit10",
+        type: "number",
+        value: null,
+    },
+];

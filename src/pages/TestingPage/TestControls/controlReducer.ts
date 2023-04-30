@@ -1,4 +1,12 @@
-import { Action, Form, FormData, InputData } from "./TestAttributes";
+import { isNumberValid } from "components/InputTag/validation";
+import {
+    Action,
+    Form,
+    FormData,
+    FormDescription,
+    InputData,
+    InputDescription,
+} from "./TestAttributes";
 
 const searchId = (form: Form, id: string): number => {
     return form.formData.findIndex((inputData) => inputData.id == id);
@@ -22,19 +30,25 @@ const isFormValid = (formData: FormData): boolean => {
     return result;
 };
 
-export const checkValidityInitialInputs = (initialState: Form): Form => {
-    const newState = [...initialState.formData];
-    newState.forEach((input) => {
+export const createFormFromDescription = (
+    initialState: FormDescription
+): Form => {
+    const newState: FormData = [];
+    initialState.forEach((input) => {
         if (input.value && checkType(input.type, input.value)) {
-            input = {
+            const inputData: InputData = {
                 ...input,
-                validity: { isValid: true, msg: input.validity.msg },
+                enabled: true,
+                validity: { isValid: true, msg: "" },
             };
+            newState.push(inputData);
         } else {
-            input = {
+            const inputData: InputData = {
                 ...input,
-                validity: { isValid: false, msg: input.validity.msg },
+                enabled: false,
+                validity: { isValid: false, msg: "incorrect initial value" },
             };
+            newState.push(inputData);
         }
     });
 
@@ -51,7 +65,7 @@ const changeSingleValue = (
             value: value,
             validity: {
                 isValid: true,
-                msg: inputData.validity.msg,
+                msg: "correct onChange update",
             },
         };
     } else {
@@ -60,7 +74,7 @@ const changeSingleValue = (
             value: null,
             validity: {
                 isValid: false,
-                msg: inputData.validity.msg,
+                msg: "NOT correct onChange update",
             },
         };
     }
@@ -97,7 +111,7 @@ export const taskReducer = (state: Form, action: Action): Form => {
             };
         }
         case "RESET_INITIAL_STATE": {
-            return action.payload;
+            return createFormFromDescription(action.payload);
         }
     }
 };

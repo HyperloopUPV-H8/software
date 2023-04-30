@@ -8,13 +8,14 @@ import { PlayButton } from "components/PlayButton/PlayButton";
 import { ButtonTag } from "components/ButtonTag/ButtonTag";
 import style from "./TestControls.module.scss";
 import { useControlForm } from "./useControlForm";
-import { initialFormData } from "./initialFormDataMock";
+import { initialFormDescription } from "./initialFormDataMock";
 import { ControlButtons } from "./ControlButtons/ControlButtons";
 import { ControlInputs } from "./ControlInputs/ControlInputs";
 
 export const TestControls = () => {
-    const [form, ChangeValue, ChangeEnable, SubmitHandler] =
-        useControlForm(initialFormData);
+    const [form, ChangeValue, ChangeEnable, SubmitHandler] = useControlForm(
+        initialFormDescription
+    );
 
     return (
         <div className={style.testControlsWrapper}>
