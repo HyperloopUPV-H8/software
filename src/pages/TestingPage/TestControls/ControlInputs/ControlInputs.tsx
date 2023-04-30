@@ -11,21 +11,19 @@ type Props = {
 export const ControlInputs = ({ form, changeEnable, changeValue }: Props) => {
     return (
         <form className={style.inputWrapper}>
-            {Object.entries(form.formData).map((testAttribute) => {
+            {Object.entries(form.formData).map(([name, attributes]) => {
                 return (
                     <ToggleInput
-                        key={testAttribute[0]}
-                        id={testAttribute[1].id}
-                        type={testAttribute[1].type}
-                        disabled={!testAttribute[1].enabled}
-                        value={
-                            testAttribute[1].value ? testAttribute[1].value : ""
-                        }
+                        key={name}
+                        id={attributes.id}
+                        type={attributes.type}
+                        disabled={!attributes.enabled}
+                        value={attributes.value ? attributes.value : ""}
                         onToggle={(state) => {
-                            changeEnable(testAttribute[1].id, state);
+                            changeEnable(attributes.id, state);
                         }}
                         onChange={(state) => {
-                            changeValue(testAttribute[1].id, state);
+                            changeValue(attributes.id, state);
                         }}
                     />
                 );

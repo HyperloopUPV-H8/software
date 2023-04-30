@@ -34,7 +34,7 @@ export const createFormFromDescription = (
     initialState: FormDescription
 ): Form => {
     const newState: FormData = [];
-    initialState.forEach((input) => {
+    initialState.map((input) => {
         if (input.value && checkType(input.type, input.value)) {
             const inputData: InputData = {
                 ...input,
@@ -59,26 +59,18 @@ const changeSingleValue = (
     inputData: InputData,
     value: number | null
 ): InputData => {
-    if (value && checkType(inputData.type, value)) {
-        inputData = {
-            ...inputData,
-            value: value,
-            validity: {
-                isValid: true,
-                msg: "correct onChange update",
-            },
-        };
-    } else {
-        inputData = {
-            ...inputData,
-            value: null,
-            validity: {
-                isValid: false,
-                msg: "NOT correct onChange update",
-            },
-        };
-    }
-    return inputData;
+    const isValid = value && checkType(inputData.type, value) ? true : false;
+
+    return {
+        ...inputData,
+        value: value,
+        validity: {
+            isValid: isValid,
+            msg: isValid
+                ? "correct onChange update"
+                : "NOT correct onChange update",
+        },
+    };
 };
 
 export const taskReducer = (state: Form, action: Action): Form => {
