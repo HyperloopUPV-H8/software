@@ -1,9 +1,4 @@
-import {
-    ButtonHTMLAttributes,
-    DetailedHTMLProps,
-    HTMLInputTypeAttribute,
-    ReactNode,
-} from "react";
+import { ButtonHTMLAttributes, DetailedHTMLProps, ReactNode } from "react";
 import { FaPlay, FaPause, FaStop } from "react-icons/fa";
 import style from "./PlayButton.module.scss";
 

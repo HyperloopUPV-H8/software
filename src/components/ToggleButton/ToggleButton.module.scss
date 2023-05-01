@@ -1,9 +1,9 @@
 @use "src/styles/colors";
 
-$button-height: 3rem;
-$button-width: 3.5rem;
-$icon-size: 1.5rem;
-$label-size: 0.7rem;
+$button-height: 2rem;
+$button-width: 2.25rem;
+$icon-size: 0.7rem;
+$label-size: 0.5rem;
 
 .toggleButtonWrapper {
     display: flex;
@@ -71,7 +71,7 @@ $label-size: 0.7rem;
 
     button {
         background-color: colors.getColor("primary", 90);
-        box-shadow: 0 8px colors.getColor("primary", 60);
+        box-shadow: 0 5px colors.getColor("primary", 60);
         transform: translateY(-8px);
 
         &:hover {

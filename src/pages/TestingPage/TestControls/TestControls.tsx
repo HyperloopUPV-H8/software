@@ -7,8 +7,16 @@ import { ReactComponent as PerturbationIcon } from "assets/svg/perturbationIcon.
 import { PlayButton } from "components/PlayButton/PlayButton";
 import { ButtonTag } from "components/ButtonTag/ButtonTag";
 import style from "./TestControls.module.scss";
+import { useControlForm } from "./useControlForm";
+import { initialFormDescription } from "./initialFormDataMock";
+import { ControlButtons } from "./ControlButtons/ControlButtons";
+import { ControlInputs } from "./ControlInputs/ControlInputs";
 
 export const TestControls = () => {
+    const [form, ChangeValue, ChangeEnable, SubmitHandler] = useControlForm(
+        initialFormDescription
+    );
+
     return (
         <div className={style.testControlsWrapper}>
             <div className={style.playWrapper}>
@@ -18,86 +26,22 @@ export const TestControls = () => {
             <div className={style.sectionWrapper}>
                 <div className={style.title}>Controls</div>
                 <div className={style.body}>
-                    <div className={style.controlsWrapper}>
-                        <ToggleButton
-                            label="levitation"
-                            icon={<LevitateIcon />}
-                        />
-                        <ToggleButton
-                            label="propulsion"
-                            icon={<PropulseIcon />}
-                        />
-                        <ToggleButton label="brake" icon={<BreakIcon />} />
-                    </div>
-                    <div className={style.inputWrapper}>
-                        <ToggleInput
-                            label="unit 0"
-                            type="number"
-                            min={-10.0}
-                            max={10.0}
-                            step={0.01}
-                        />
-                        <ToggleInput
-                            label="unit 1"
-                            type="number"
-                            min={-10.0}
-                            max={10.0}
-                            step={0.01}
-                        />
-                        <ToggleInput
-                            label="unit 2"
-                            type="number"
-                            min={-10.0}
-                            max={10.0}
-                            step={0.01}
-                        />
-                        <ToggleInput
-                            label="unit 3"
-                            type="number"
-                            min={-10.0}
-                            max={10.0}
-                            step={0.01}
-                        />
-                        <ToggleInput
-                            label="unit 4"
-                            type="number"
-                            min={-10.0}
-                            max={10.0}
-                            step={0.01}
-                        />
-                        <ToggleInput
-                            label="unit 5"
-                            type="number"
-                            min={-10.0}
-                            max={10.0}
-                            step={0.01}
-                        />
-                        <ToggleInput
-                            label="unit 6"
-                            type="number"
-                            min={-10.0}
-                            max={10.0}
-                            step={0.01}
-                        />
-                        <ToggleInput
-                            label="unit 7"
-                            type="number"
-                            min={-10.0}
-                            max={10.0}
-                            step={0.01}
-                        />
-                        <ToggleInput
-                            label="force x"
-                            type="number"
-                            min={-10.0}
-                            max={10.0}
-                            step={0.01}
-                        />
-                    </div>
-                    <ButtonTag icon={<PerturbationIcon />} />
+                    <ControlButtons />
+                    <ControlInputs
+                        form={form}
+                        changeEnable={ChangeEnable}
+                        changeValue={ChangeValue}
+                    />
+                    <ButtonTag
+                        type="submit"
+                        icon={<PerturbationIcon />}
+                        onClick={() => {
+                            SubmitHandler();
+                        }}
+                        disabled={!form.isValid}
+                    />
                 </div>
             </div>
         </div>
     );
 };
-//label=""

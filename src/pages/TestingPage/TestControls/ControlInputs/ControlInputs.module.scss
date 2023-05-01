@@ -1,0 +1,8 @@
+.inputWrapper {
+    display: flex;
+    flex-flow: column;
+    overflow-y: scroll;
+    flex: 1 1 0;
+    min-height: 0;
+    gap: 0.2rem;
+}

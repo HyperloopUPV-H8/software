@@ -1,27 +1,40 @@
 import { useToggle } from "hooks/useToggle";
-import { ButtonHTMLAttributes, DetailedHTMLProps, ReactNode, useEffect, MouseEvent } from "react";
-import style from "./ToggleButton.module.scss"
+import {
+    ButtonHTMLAttributes,
+    DetailedHTMLProps,
+    ReactNode,
+    useEffect,
+} from "react";
+import style from "./ToggleButton.module.scss";
 
 type Props = {
     label: string;
     icon: ReactNode;
     onToggle?: (state: boolean) => void;
-} & Omit<DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>, "onClick">
+} & Omit<
+    DetailedHTMLProps<
+        ButtonHTMLAttributes<HTMLButtonElement>,
+        HTMLButtonElement
+    >,
+    "onClick"
+>;
 
 export function ToggleButton({ label, icon, onToggle, ...buttonProps }: Props) {
-    const [isOn, flip] = useToggle()
+    const [isOn, flip] = useToggle(false);
 
     useEffect(() => {
-        onToggle?.(isOn)
-    }, [isOn])
+        onToggle?.(isOn);
+    }, [isOn]);
 
-    const name = `${style.toggleButtonWrapper} ${isOn ? style.on : style.off}`
+    const labelClass = `${style.toggleButtonWrapper} ${
+        isOn ? style.on : style.off
+    }`;
     return (
-        <label className={name}>
+        <label className={labelClass}>
             <button onClick={flip} {...buttonProps}>
                 {icon}
             </button>
             <p>{label}</p>
         </label>
-    )
+    );
 }
