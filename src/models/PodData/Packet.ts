@@ -1,0 +1,27 @@
+import { PacketUpdate } from "../../adapters/PacketUpdate";
+import { Measurement } from "./Measurement";
+
+export type Packet = {
+    id: number;
+    name: string;
+    hexValue: string;
+    count: number;
+    cycleTime: number;
+    measurements: { [name: string]: Measurement };
+};
+
+export function updatePacket(packet: Packet, update: PacketUpdate) {
+    packet.count = update.count;
+    packet.cycleTime = update.cycleTime;
+    packet.hexValue = update.hexValue;
+    updateMeasurements(packet.measurements, update.measurementUpdates);
+}
+
+function updateMeasurements(
+    measurements: Packet["measurements"],
+    measurementUpdates: PacketUpdate["measurementUpdates"]
+): void {
+    for (const [mName, newValue] of Object.entries(measurementUpdates)) {
+        measurements[mName].value = newValue;
+    }
+}
