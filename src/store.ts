@@ -1,10 +1,10 @@
-import { alertMessagesReducer } from "./slices/alertMessagesSlice";
+import messagesReducer from "slices/messagesSlice";
 import { configureStore } from "@reduxjs/toolkit";
 import { measurementsReducer } from "slices/measurementsSlice";
 export const store = configureStore({
     reducer: {
         measurements: measurementsReducer,
-        alertMessages: alertMessagesReducer,
+        messages: messagesReducer,
     },
 });
 

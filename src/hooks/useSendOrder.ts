@@ -1,10 +1,10 @@
-import { useWebSocketBroker } from "services/WebSocketBroker/useWebSocketBroker";
+import { useBroker } from "common";
 
-import { Order } from "models/Order";
+import { Order } from "common";
 export function useSendOrder() {
-    const sendWS = useWebSocketBroker("order/send");
+    const sendWS = useBroker("order/send");
 
     return (order: Omit<Order, "name">) => {
-        sendWS(JSON.stringify(order));
+        sendWS(order);
     };
 }

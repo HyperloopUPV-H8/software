@@ -1,0 +1,16 @@
+.secondPageWrapper {
+    flex: 1 1 0;
+    align-self: stretch;
+    display: flex;
+    justify-content: center;
+    padding: 1.3rem;
+    padding-top: 0;
+    gap: 2rem;
+}
+
+.ordersColumn {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+}

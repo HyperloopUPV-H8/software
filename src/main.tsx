@@ -5,11 +5,12 @@ import { store } from "store";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { App } from "./App";
 import "./index.css";
-import { WebSocketBrokerProvider } from "services/WebSocketBroker/WebSocketBrokerContext";
+import { BrokerProvider } from "common";
 import { vehicleRoute } from "pages/VehiclePage/vehicleRoute";
 import { camerasRoute } from "pages/CamerasPage/camerasRoute";
 import { testingRoute } from "pages/TestingPage/testingRoute";
 import { tubeRoute } from "pages/TubePage/tubeRoute";
+import { BrokerLoader } from "components/BrokerLoader/BrokerLoader";
 
 const router = createBrowserRouter([
     {
@@ -19,20 +20,19 @@ const router = createBrowserRouter([
     },
 ]);
 
-const SERVER_URL = `${import.meta.env.VITE_SERVER_IP}:${
+const WS_URL = `${import.meta.env.VITE_SERVER_IP}:${
     import.meta.env.VITE_SERVER_PORT
 }${import.meta.env.VITE_BACKEND_WEBSOCKET_PATH}`;
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
         <Provider store={store}>
-            <WebSocketBrokerProvider
-                url={SERVER_URL}
-                onOpen={() => {}}
-                onClose={() => {}}
+            <BrokerLoader
+                url={WS_URL}
+                LoadingView={<div>Loading broker...</div>}
             >
                 <RouterProvider router={router}></RouterProvider>
-            </WebSocketBrokerProvider>
+            </BrokerLoader>
         </Provider>
     </React.StrictMode>
 );

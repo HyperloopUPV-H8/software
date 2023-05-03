@@ -1,0 +1,12 @@
+@use "src/styles/fonts";
+
+.title {
+    font-size: fonts.getFontSize("small");
+    font-weight: fonts.getFontWeight("bold");
+    font-style: italic;
+    color: #7ca5b2;
+    border-radius: 5rem;
+    padding: 0 0.5rem;
+    background-color: #eef6f7;
+    padding: 0.2rem 0.5rem;
+}

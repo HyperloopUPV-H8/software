@@ -1,4 +1,4 @@
-import { useWebSocketBroker } from "services/WebSocketBroker/useWebSocketBroker";
+import { useBroker } from "common";
 import { StateAndOrders } from "./StateOrdersType";
 import { useState } from "react";
 
@@ -8,7 +8,7 @@ export function useBoardStateInfo() {
         orders: [],
     });
 
-    useWebSocketBroker("vcu/state", (msg: StateAndOrders) => {
+    useBroker("vcu/state", (msg: StateAndOrders) => {
         setStateOrders(msg);
     });
 

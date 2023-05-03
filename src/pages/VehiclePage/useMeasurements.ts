@@ -1,9 +1,8 @@
 import { updateMeasurements } from "slices/measurementsSlice";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { useWebSocketBroker } from "services/WebSocketBroker/useWebSocketBroker";
+import { useBroker } from "common";
 import { useInterval } from "hooks/useInterval";
-import { PacketUpdate } from "adapters/PacketUpdate";
 import { store } from "store";
 export function useMeasurements() {
     const dispatch = useDispatch();
@@ -11,8 +10,8 @@ export function useMeasurements() {
         store.getState().measurements
     );
 
-    useWebSocketBroker("podData/update", (msg) => {
-        dispatch(updateMeasurements(msg as Record<string, PacketUpdate>));
+    useBroker("podData/update", (msg) => {
+        dispatch(updateMeasurements(msg));
     });
 
     useInterval(() => {

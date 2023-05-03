@@ -1,4 +1,4 @@
-import { Order } from "models/Order";
+import { Order } from "common";
 
 export type StateAndOrders = {
     state: string;

@@ -1,5 +1,5 @@
 import styles from "./Orders.module.scss";
-import { Order } from "models/Order"; //TODO: mover modelo a otra parte
+import { Order } from "common";
 import { Button } from "components/Button/Button";
 import { useSendOrder } from "hooks/useSendOrder";
 type Props = {

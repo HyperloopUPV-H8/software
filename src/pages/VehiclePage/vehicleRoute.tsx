@@ -1,3 +1,5 @@
+import { FirstPage } from "./FirstPage/FirstPage";
+import { SecondPage } from "./SecondPage/SecondPage";
 import { VehiclePage } from "./VehiclePage";
 import { loadPodData } from "./loadPodData";
 import { Navigate } from "react-router-dom";
@@ -7,8 +9,8 @@ export const vehicleRoute = {
     element: <VehiclePage />,
     loader: loadPodData,
     children: [
-        { path: "first", element: <div>Hello first</div> },
-        { path: "second", element: <div>Hello second</div> },
+        { path: "first", element: <FirstPage /> },
+        { path: "second", element: <SecondPage /> },
         {
             path: "",
             element: <Navigate to="first" />,

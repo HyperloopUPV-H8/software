@@ -1,6 +1,6 @@
 import { RootState } from "./../../store";
 import { useSelector } from "react-redux";
-import { useWebSocketBroker } from "services/WebSocketBroker/useWebSocketBroker";
+import { useBroker } from "common";
 import { useDispatch } from "react-redux";
 import { AlertMessage } from "models/AlertMessage";
 import { addMessage } from "slices/alertMessagesSlice";

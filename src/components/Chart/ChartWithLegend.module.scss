@@ -1,0 +1,32 @@
+.chartWrapper {
+    width: 100%;
+    flex-shrink: 0;
+
+    display: grid;
+    grid-template-rows: 4rem auto;
+
+    border: 1px solid black;
+    border-radius: 1rem;
+    overflow: hidden;
+    position: relative;
+
+    &:hover .removeBtn {
+        opacity: 1;
+    }
+}
+
+.removeBtn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.6rem;
+
+    width: min-content;
+    height: min-content;
+
+    font-size: 1.5rem;
+    color: black;
+    line-height: 60%;
+    cursor: pointer;
+    opacity: 0;
+    // transition: styles.$opacity-transition;
+}
