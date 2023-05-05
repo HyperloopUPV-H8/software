@@ -7,7 +7,6 @@ export function useUpdater(id: string, initialValue: string) {
 
     useLayoutEffect(() => {
         const valueNode = document.createTextNode(initialValue);
-
         valueRef.current?.appendChild(valueNode);
 
         updater.addMeasurement(id, {
@@ -16,7 +15,6 @@ export function useUpdater(id: string, initialValue: string) {
 
         return () => {
             updater.removeMeasurement(id);
-
             valueRef.current!.removeChild(valueNode);
         };
     }, []);

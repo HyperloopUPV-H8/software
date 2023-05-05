@@ -13,12 +13,12 @@ const receiveColumnTabItem = [
         icon: <IncomingMessage />,
         component: <ReceiveTableContainer />,
     },
-    // {
-    //     id: "charts",
-    //     name: "Charts",
-    //     icon: <Chart />,
-    //     component: <ChartMenu />,
-    // },
+    {
+        id: "charts",
+        name: "Charts",
+        icon: <Chart />,
+        component: <ChartMenu />,
+    },
 ];
 
 export const ReceiveColumn = () => {
