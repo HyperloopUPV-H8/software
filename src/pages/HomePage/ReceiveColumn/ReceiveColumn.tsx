@@ -1,5 +1,4 @@
 import styles from "./ReceiveColumn.module.scss";
-import { ReceiveTable } from "components/ReceiveTable/ReceiveTable";
 import { TabLayout } from "layouts/TabLayout/TabLayout";
 import { ChartMenu } from "components/ChartMenu/ChartMenu";
 import { RequestState, useFetchPodData } from "./useFetchPodData";
@@ -14,12 +13,12 @@ const receiveColumnTabItem = [
         icon: <IncomingMessage />,
         component: <ReceiveTableContainer />,
     },
-    {
-        id: "charts",
-        name: "Charts",
-        icon: <Chart />,
-        component: <ChartMenu />,
-    },
+    // {
+    //     id: "charts",
+    //     name: "Charts",
+    //     icon: <Chart />,
+    //     component: <ChartMenu />,
+    // },
 ];
 
 export const ReceiveColumn = () => {

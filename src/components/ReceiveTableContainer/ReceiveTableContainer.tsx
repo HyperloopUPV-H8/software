@@ -1,4 +1,5 @@
-import { NewReceiveTable } from "./NewReceiveTable/NewReceiveTable";
+import { store } from "store";
+import { ReceiveTable } from "./ReceiveTable/ReceiveTable";
 import {
     RequestState,
     useFetchPodData,
@@ -9,7 +10,8 @@ export const ReceiveTableContainer = () => {
 
     if (requestState == RequestState.PENDING)
         return <div>Loading PodData...</div>;
-    if (requestState == RequestState.FULFILLED) return <NewReceiveTable />;
+    if (requestState == RequestState.FULFILLED)
+        return <ReceiveTable boards={store.getState().podData.boards} />;
 
     return <div>Error fetching PodData</div>;
 };

@@ -6,6 +6,7 @@ import { Orientation } from "hooks/useSplit/Orientation";
 import { Separator } from "./Separator/Separator";
 import { useEffect } from "react";
 import { setColumnSizes } from "slices/columnsSlice";
+import { Fragment } from "react";
 
 type Props = {
     items: string[];
@@ -36,7 +37,7 @@ export const Header = ({ items }: Props) => {
             {items.map((item, index) => {
                 if (index < items.length - 1) {
                     return (
-                        <>
+                        <Fragment key={index}>
                             <div
                                 className={styles.cell}
                                 style={{ flexBasis: columns[index] }}
@@ -46,11 +47,12 @@ export const Header = ({ items }: Props) => {
                             <Separator
                                 onMouseDown={(ev) => handleMouseDown(index, ev)}
                             ></Separator>
-                        </>
+                        </Fragment>
                     );
                 } else {
                     return (
                         <div
+                            key={index}
                             className={styles.cell}
                             style={{ flexBasis: columns[index] }}
                         >
