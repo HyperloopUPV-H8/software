@@ -3,13 +3,12 @@ import styles from "./BoardView.module.scss";
 import { PacketView } from "./PacketView/PacketView";
 import { useState } from "react";
 import { Header } from "./Header/Header";
-import { memo } from "react";
 
 type Props = {
     board: Board;
 };
 
-export const BoardView = memo(({ board }: Props) => {
+export const BoardView = ({ board }: Props) => {
     const [open, setOpen] = useState(true);
 
     return (
@@ -30,4 +29,4 @@ export const BoardView = memo(({ board }: Props) => {
                 })}
         </div>
     );
-});
+};
