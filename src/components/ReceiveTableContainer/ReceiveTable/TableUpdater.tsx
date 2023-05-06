@@ -27,6 +27,9 @@ export const TableContext = createContext<Updater>({
 type Props = {
     children?: React.ReactNode;
 };
+
+const TICK_RATE = 60;
+
 export const TableUpdater = ({ children }: Props) => {
     const packetElements = useRef<Record<string, PacketElement>>({});
     const measurementElements = useRef<Record<string, MeasurementElement>>({});
@@ -49,7 +52,7 @@ export const TableUpdater = ({ children }: Props) => {
                     ? measurement.value.average.toFixed(3)
                     : measurement.value.toString();
         }
-    }, 1000 / 60);
+    }, 1000 / TICK_RATE);
 
     const updater: Updater = {
         addPacket: (id: number, element: PacketElement) => {

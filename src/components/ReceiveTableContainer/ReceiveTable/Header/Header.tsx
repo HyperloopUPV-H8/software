@@ -6,7 +6,6 @@ import { Orientation } from "hooks/useSplit/Orientation";
 import { Separator } from "./Separator/Separator";
 import { useEffect } from "react";
 import { setColumnSizes } from "slices/columnsSlice";
-import { Fragment } from "react";
 
 type Props = {
     items: string[];
@@ -37,30 +36,62 @@ export const Header = ({ items }: Props) => {
             {items.map((item, index) => {
                 if (index < items.length - 1) {
                     return (
-                        <Fragment key={index}>
-                            <div
-                                className={styles.cell}
-                                style={{ flexBasis: columns[index] }}
-                            >
-                                {item}
-                            </div>
-                            <Separator
-                                onMouseDown={(ev) => handleMouseDown(index, ev)}
-                            ></Separator>
-                        </Fragment>
-                    );
-                } else {
-                    return (
-                        <div
+                        <CellWithSeparator
                             key={index}
-                            className={styles.cell}
-                            style={{ flexBasis: columns[index] }}
-                        >
-                            {item}
-                        </div>
+                            label={item}
+                            flexBasis={columns[index]}
+                            onMouseDown={(ev) => handleMouseDown(index, ev)}
+                        />
                     );
                 }
+
+                return (
+                    <CellWithoutSeparator
+                        key={index}
+                        label={item}
+                        flexBasis={columns[index]}
+                    />
+                );
             })}
+        </div>
+    );
+};
+
+const CellWithSeparator = ({
+    label,
+    flexBasis,
+    onMouseDown,
+}: {
+    label: string;
+    flexBasis: string;
+    onMouseDown: (ev: React.MouseEvent) => void;
+}) => {
+    return (
+        <>
+            <div
+                className={styles.cell}
+                style={{ flexBasis: flexBasis }}
+            >
+                {label}
+            </div>
+            <Separator onMouseDown={(ev) => onMouseDown(ev)}></Separator>
+        </>
+    );
+};
+
+const CellWithoutSeparator = ({
+    label,
+    flexBasis,
+}: {
+    label: string;
+    flexBasis: string;
+}) => {
+    return (
+        <div
+            className={styles.cell}
+            style={{ flexBasis: flexBasis }}
+        >
+            {label}
         </div>
     );
 };

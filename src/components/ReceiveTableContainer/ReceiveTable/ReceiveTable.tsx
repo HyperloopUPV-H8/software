@@ -8,6 +8,8 @@ type Props = {
     boards: Record<string, Board>;
 };
 
+const RECEIVE_TABLE_HEADERS = ["ID", "NAME", "COUNT", "CYCLE (ns)"];
+
 export const ReceiveTable = ({ boards }: Props) => {
     return (
         <TableUpdater>
