@@ -7,7 +7,7 @@ export type Packet = {
     hexValue: string;
     count: number;
     cycleTime: number;
-    measurements: { [name: string]: Measurement };
+    measurements: Measurement[];
 };
 
 export function updatePacket(packet: Packet, update: PacketUpdate) {
@@ -22,6 +22,7 @@ function updateMeasurements(
     measurementUpdates: PacketUpdate["measurementUpdates"]
 ): void {
     for (const [mName, newValue] of Object.entries(measurementUpdates)) {
-        measurements[mName].value = newValue;
+        const measurement = measurements.find((item) => item.id == mName)!;
+        measurement.value = newValue;
     }
 }

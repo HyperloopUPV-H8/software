@@ -1,17 +1,15 @@
 import { Order } from "../models/Order";
-import { Connection } from "../models/Connection";
 import { MessageAdapter } from "../adapters/Message";
 import { PacketUpdate } from "../adapters/PacketUpdate";
+import { ConnectionsUpdate } from "../adapters/ConnectionUpdate";
+import { VcuStateAndOrders } from "../adapters/VcuState";
 
-type ConnectionsUpdate = Connection[];
-
-type BootloaderUploadRequest = { board: string; file: string };
-type BootloaderUploadResponse = { percentage: number; success: boolean };
-
-type BootloaderDownloadRequest = { board: string };
-type BootloaderDownloadResponse =
-    | { success: false }
-    | { success: true; file: string };
+import {
+    BootloaderDownloadRequest,
+    BootloaderDownloadResponse,
+    BootloaderUploadRequest,
+    BootloaderUploadResponse,
+} from "../adapters/Bootloader";
 
 export type BrokerStructure = {
     "podData/update": {
@@ -35,5 +33,9 @@ export type BrokerStructure = {
     "blcu/download": {
         request: BootloaderDownloadRequest;
         response: BootloaderDownloadResponse;
+    };
+    "vcu/state": {
+        request: never;
+        response: VcuStateAndOrders;
     };
 };

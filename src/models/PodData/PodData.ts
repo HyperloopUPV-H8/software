@@ -3,9 +3,9 @@ import { Board } from "./Board";
 import { Packet, updatePacket } from "./Packet";
 
 export type PodData = {
-    boards: Record<string, Board>;
-    packetToBoard: Record<number, string>;
-    lastUpdates: Record<number, PacketUpdate>;
+    boards: Board[];
+    packetToBoard: Record<number, number>;
+    lastUpdates: Record<string, PacketUpdate>;
 };
 
 export function updatePodData(
@@ -19,5 +19,7 @@ export function updatePodData(
 }
 
 export function getPacket(podData: PodData, id: number): Packet {
-    return podData.boards[podData.packetToBoard[id]].packets[id];
+    return podData.boards[podData.packetToBoard[id]].packets.find(
+        (item) => item.id == id
+    )!;
 }

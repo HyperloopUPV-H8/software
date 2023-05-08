@@ -31,7 +31,8 @@ export type Protection =
     | UpperBound
     | LowerBound
     | Equals
-    | NotEquals;
+    | NotEquals
+    | Timelimit;
 
 type OutOfBounds = {
     kind: "OUT_OF_BOUNDS";
@@ -69,6 +70,14 @@ type NotEquals = {
     data: {
         want: number;
         value: number;
+    };
+};
+
+type Timelimit = {
+    kind: "TIME_ACCUMULATION";
+    data: {
+        value: number;
+        timelimit: number;
     };
 };
 

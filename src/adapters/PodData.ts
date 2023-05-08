@@ -36,17 +36,19 @@ export type BooleanMeasurementAdapter = Omit<BooleanMeasurement, "value">;
 export type EnumMeasurementAdapter = Omit<EnumMeasurement, "value">;
 
 export function createPodDataFromAdapter(adapter: PodDataAdapter): PodData {
-    const boards: Record<string, Board> = Object.fromEntries(
-        Object.values(adapter.boards).map((boardAdapter) => {
+    const boards: Board[] = Object.values(adapter.boards).map(
+        (boardAdapter) => {
             const packets = getPackets(boardAdapter.packets);
             const measurementToPacket = getMeasurementToPacket(
                 boardAdapter.packets
             );
-            return [
-                boardAdapter.name,
-                { name: boardAdapter.name, packets, measurementToPacket },
-            ];
-        })
+
+            return {
+                name: boardAdapter.name,
+                packets,
+                measurementToPacket,
+            };
+        }
     );
 
     const packetToBoard = getPacketToBoard(adapter.boards);
@@ -54,36 +56,27 @@ export function createPodDataFromAdapter(adapter: PodDataAdapter): PodData {
     return { boards, packetToBoard, lastUpdates: {} };
 }
 
-function getPackets(
-    packets: Record<string, PacketAdapter>
-): Record<string, Packet> {
-    return Object.fromEntries(
-        Object.values(packets).map((packetAdapter) => {
-            return [
-                packetAdapter.id,
-                {
-                    ...packetAdapter,
-                    measurements: getMeasurements(packetAdapter.measurements),
-                },
-            ];
-        })
-    );
+function getPackets(packets: Record<string, PacketAdapter>): Packet[] {
+    return Object.values(packets).map((packetAdapter) => {
+        return {
+            ...packetAdapter,
+            measurements: getMeasurements(packetAdapter.measurements),
+        };
+    });
 }
 
 function getMeasurements(
     adapters: Record<string, MeasurementAdapter>
-): Record<string, Measurement> {
-    return Object.fromEntries(
-        Object.values(adapters).map((adapter) => {
-            if (isNumericAdapter(adapter)) {
-                return [adapter.id, getNumericMeasurement(adapter)];
-            } else if (adapter.type == "Enum") {
-                return [adapter.id, getEnumMeasurement(adapter)];
-            } else {
-                return [adapter.id, getBooleanMeasurement(adapter)];
-            }
-        })
-    );
+): Measurement[] {
+    return Object.values(adapters).map((adapter) => {
+        if (isNumericAdapter(adapter)) {
+            return getNumericMeasurement(adapter);
+        } else if (adapter.type == "Enum") {
+            return getEnumMeasurement(adapter);
+        } else {
+            return getBooleanMeasurement(adapter);
+        }
+    });
 }
 
 export function isNumericAdapter(
@@ -133,13 +126,15 @@ export function getBooleanMeasurement(
 
 function getPacketToBoard(
     boards: Record<string, BoardAdapter>
-): Record<number, string> {
+): Record<number, number> {
     let packetToBoard: PodData["packetToBoard"] = {};
-    Object.values(boards).forEach((board) => {
+
+    Object.values(boards).forEach((board, index) => {
         Object.values(board.packets).forEach((packet) => {
-            packetToBoard[packet.id] = board.name;
+            packetToBoard[packet.id] = index;
         });
     });
+
     return packetToBoard;
 }
 

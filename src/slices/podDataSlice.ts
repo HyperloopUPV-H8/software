@@ -10,8 +10,8 @@ export function createPodDataSlice() {
     return createSlice({
         name: "podData",
         initialState: {
-            boards: {} as Record<string, Board>,
-            packetToBoard: {} as Record<number, string>,
+            boards: [] as Board[],
+            packetToBoard: {} as Record<number, number>,
             lastUpdates: {} as Record<string, PacketUpdate>,
         } as PodData,
         reducers: {
