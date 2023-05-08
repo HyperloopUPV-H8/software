@@ -2,6 +2,7 @@ import styles from "layouts/TabLayout/TabLayout.module.scss";
 import { TabItem } from "layouts/TabLayout/TabItem";
 import { Header } from "layouts/TabLayout/Header/Header";
 import { useTabs } from "./useTabs";
+import { Island } from "components/Island/Island";
 type Props = {
     items: TabItem[];
 };
@@ -14,7 +15,7 @@ export const TabLayout = ({ items }: Props) => {
     }
 
     return (
-        <div className={`${styles.tabLayoutWrapper} island`}>
+        <Island>
             <Header
                 items={tabs}
                 visibleTab={visibleTab}
@@ -40,6 +41,6 @@ export const TabLayout = ({ items }: Props) => {
                     })}
                 </div>
             </div>
-        </div>
+        </Island>
     );
 };
