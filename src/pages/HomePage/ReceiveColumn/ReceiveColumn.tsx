@@ -1,5 +1,4 @@
 import styles from "./ReceiveColumn.module.scss";
-import { ReceiveTable } from "components/ReceiveTable/ReceiveTable";
 import { TabLayout } from "layouts/TabLayout/TabLayout";
 import { ChartMenu } from "components/ChartMenu/ChartMenu";
 import { RequestState, useFetchPodData } from "./useFetchPodData";

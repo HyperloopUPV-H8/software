@@ -14,6 +14,7 @@ export enum RequestState {
 
 export function useFetchPodData() {
     const [requestState, setRequestState] = useState(RequestState.PENDING);
+
     const dispatch = useDispatch();
 
     useEffect(() => {

@@ -30,17 +30,16 @@
     border-left: var(--border-width) solid var(--border-color);
 }
 
-.body {
-    padding: 0.5rem 1rem;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5rem;
-}
-
 .measurements {
+    padding: 0.5rem 1rem;
     display: grid;
     grid-template-columns: minmax(0, 15rem) min-content min-content min-content;
     align-items: center;
     gap: 1rem;
+}
+
+.count,
+.cycleTime {
+    font-size: 1.15rem;
+    font-family: Consolas;
 }
