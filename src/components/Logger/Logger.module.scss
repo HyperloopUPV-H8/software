@@ -1,17 +1,25 @@
 @use "src/styles/styles";
 
-.loggerWrapper {
+.logger {
+    height: min-content;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
 }
 
+.state {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: bold;
+}
+
 .buttons {
+    width: 10rem;
     display: flex;
     flex-direction: row;
     align-items: center;
-    font-size: 2rem;
     gap: 1rem;
 
     > * {
@@ -23,12 +31,4 @@
         align-items: center;
         cursor: pointer;
     }
-}
-
-.playBtn {
-    color: orange;
-}
-
-.stopBtn {
-    color: red;
 }
