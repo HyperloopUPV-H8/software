@@ -1,37 +1,34 @@
 import styles from "components/Logger/Logger.module.scss";
 import { BsFillPlayFill } from "react-icons/bs";
 import { BsFillStopFill } from "react-icons/bs";
-import { useState, useContext } from "react";
+import { useState } from "react";
 import { useLogger } from "./useLogger";
+import { Island } from "components/Island/Island";
+import { Button } from "components/FormComponents/Button/Button";
 
 export const Logger = () => {
-    const [loggingState, setLoggingState] = useState(false);
-    const [startLogging, stopLogging] = useLogger(setLoggingState);
+    const [state, startLogging, stopLogging] = useLogger();
     return (
-        <div className={`${styles.loggerWrapper} island`}>
-            <span className={styles.loggingState}>
-                Logging: {`${loggingState}`}
-            </span>
-            <div className={styles.buttons}>
-                <div
-                    className={styles.playBtn}
-                    onClick={() => {
-                        startLogging();
-                        setLoggingState(true);
-                    }}
-                >
-                    <BsFillPlayFill />
-                </div>
-                <div
-                    className={styles.stopBtn}
-                    onClick={() => {
-                        stopLogging();
-                        setLoggingState(false);
-                    }}
-                >
-                    <BsFillStopFill />
+        <Island style={{ height: "min-content" }}>
+            <div className={styles.logger}>
+                <span className={styles.state}>Logging: {`${state}`}</span>
+                <div className={styles.buttons}>
+                    <Button
+                        label="Start"
+                        color="hsl(116, 38%, 50%)"
+                        onClick={() => {
+                            startLogging();
+                        }}
+                    ></Button>
+                    <Button
+                        label="Stop"
+                        color="hsl(0, 77%, 53%)"
+                        onClick={() => {
+                            stopLogging();
+                        }}
+                    ></Button>
                 </div>
             </div>
-        </div>
+        </Island>
     );
 };

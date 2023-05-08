@@ -3,8 +3,7 @@ import styles from "./PacketView.module.scss";
 import { MeasurementView } from "./MeasurementView/MeasurementView";
 import { useSelector } from "react-redux";
 import { RootState } from "store";
-import { memo, useContext, useEffect, useLayoutEffect, useRef } from "react";
-import { TableContext } from "components/ReceiveTableContainer/ReceiveTable/TableUpdater";
+import { memo } from "react";
 import { useUpdater } from "./useUpdater";
 
 type Props = {
@@ -38,7 +37,7 @@ export const PacketView = memo(({ packet }: Props) => {
             </div>
             {Object.keys(packet.measurements).length > 0 && (
                 <div className={styles.measurements}>
-                    {Object.values(packet.measurements).map((measurement) => {
+                    {packet.measurements.map((measurement) => {
                         return (
                             <MeasurementView
                                 key={measurement.id}

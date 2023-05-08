@@ -12,8 +12,7 @@ $base-color: hsl(212, 27%, 55%);
 $dark-normal-text-color: #bec6d2;
 
 // FONTS
-//TODO: define fallbacks fonts in case some are not installed
-$sans-font: Inter, Helvetica, Arial;
+$sans-font: Inter;
 $code-font: Consolas, Cascadia Code, Cascadia Mono, Monospace;
 $alternate-code-font: Consolas, Monospace;
 

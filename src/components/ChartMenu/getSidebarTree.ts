@@ -7,15 +7,12 @@ import { isNumber } from "common";
 export function selectNumericPodDataNames(state: RootState): TreeNode {
     let boards = {};
 
-    //FIXME: remove type assertion
-    Object.values(state.podData.boards as Record<string, Board>).forEach(
-        (board) => {
-            let packets = getNumericPacketNames(board);
-            if (packets) {
-                Object.assign(boards, { [board.name]: packets });
-            }
+    state.podData.boards.forEach((board) => {
+        let packets = getNumericPacketNames(board);
+        if (packets) {
+            Object.assign(boards, { [board.name]: packets });
         }
-    );
+    });
 
     return boards;
 }
@@ -23,7 +20,7 @@ export function selectNumericPodDataNames(state: RootState): TreeNode {
 function getNumericPacketNames(board: Board): TreeNode | undefined {
     let packets = {};
 
-    Object.values(board.packets).forEach((packet) => {
+    board.packets.forEach((packet) => {
         let measurements = getNumericMeasurementNames(packet);
         if (measurements) {
             Object.assign(packets, { [packet.name]: measurements });
@@ -39,7 +36,7 @@ function getNumericPacketNames(board: Board): TreeNode | undefined {
 
 function getNumericMeasurementNames(packet: Packet): TreeNode | undefined {
     let measurements = {} as TreeNode;
-    Object.values(packet.measurements).forEach((measurement) => {
+    packet.measurements.forEach((measurement) => {
         if (isNumber(measurement.type)) {
             Object.assign(measurements, { [measurement.id]: undefined });
         }

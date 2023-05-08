@@ -19,7 +19,7 @@ export const BoardView = ({ board }: Props) => {
                 onClick={() => setOpen((prev) => !prev)}
             ></Header>
             {open &&
-                Object.values(board.packets).map((packet) => {
+                board.packets.map((packet) => {
                     return (
                         <PacketView
                             key={packet.id}

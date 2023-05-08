@@ -5,7 +5,7 @@ import { Board } from "common";
 import { TableUpdater } from "./TableUpdater";
 
 type Props = {
-    boards: Record<string, Board>;
+    boards: Board[];
 };
 
 const RECEIVE_TABLE_HEADERS = ["ID", "NAME", "COUNT", "CYCLE (ns)"];
@@ -16,7 +16,7 @@ export const ReceiveTable = ({ boards }: Props) => {
             <div className={styles.newReceiveTable}>
                 <Header items={["ID", "NAME", "COUNT", "CYCLE (ns)"]} />
                 <div className={styles.boards}>
-                    {Object.values(boards).map((board) => {
+                    {boards.map((board) => {
                         return (
                             <BoardView
                                 key={board.name}

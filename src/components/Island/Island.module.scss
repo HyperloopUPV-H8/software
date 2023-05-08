@@ -1,0 +1,11 @@
+@use "src/styles/styles";
+
+.island {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    height: 100%;
+    padding: 1rem;
+    background-color: white;
+    border-radius: 0.8rem;
+}

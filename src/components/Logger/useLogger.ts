@@ -1,8 +1,8 @@
 import { useBroker } from "common";
+import { useState } from "react";
 
-export function useLogger(cb: (state: boolean) => void) {
-    const sendWS = useBroker("logger/enable");
-    useBroker("logger/enable", (state) => cb(state));
+export function useLogger() {
+    const sendWS = useBroker("logger/enable", (state) => setState(state));
 
     function startLogging() {
         sendWS(true);
@@ -11,5 +11,7 @@ export function useLogger(cb: (state: boolean) => void) {
         sendWS(false);
     }
 
-    return [startLogging, stopLogging];
+    const [state, setState] = useState(false);
+
+    return [state, startLogging, stopLogging] as const;
 }
