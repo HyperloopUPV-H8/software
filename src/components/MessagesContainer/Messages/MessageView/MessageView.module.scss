@@ -16,7 +16,7 @@
     display: grid;
     grid-template:
         "icon kindAndOrigin counter" auto
-        "icon violation violation" auto
+        "icon content content" auto
         "icon timestamp timestamp" auto / auto 1fr auto;
 
     gap: 0.4rem 0.8rem;
@@ -46,11 +46,11 @@
     grid-area: counter;
 }
 
-.violation {
-    grid-area: violation;
+.content {
+    grid-area: content;
 }
 
-.violationKind {
+.protectionKind {
     width: fit-content;
     height: fit-content;
     text-overflow: ellipsis;
