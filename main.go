@@ -12,9 +12,9 @@ import (
 )
 
 const (
-	lip   string = "127.0.0.4"
+	lip   string = "127.0.0.2"
 	lport uint16 = 50400
-	rip   string = "127.0.0.2"
+	rip   string = "127.0.0.4"
 	rport uint16 = 50400
 )
 
@@ -38,6 +38,7 @@ func main() {
 	go func() {
 		for range ticker.C {
 			packet := packetGenerator.CreateRandomPacket()
+			// packet := []byte{10, 0, 20, 0, 20, 0, 20, 0, 20, 0}
 			fmt.Println(packet)
 
 			if packet == nil {

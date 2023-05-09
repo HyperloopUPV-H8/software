@@ -21,25 +21,18 @@ type PacketGenerator struct {
 func New() PacketGenerator {
 	excelAdapter := excelAdapter.New(excelAdapter.ExcelAdapterConfig{
 		Download: internals.DownloadConfig{
-			Id:          "1BEwASubu0el9oQA6PSwVKaNU-Q6gbJ40JR6kgqguKYE",
-			Credentials: "./secret.json",
-			Path:        ".",
-			Name:        "ade.xlsx",
+			Id:   "1BEwASubu0el9oQA6PSwVKaNU-Q6gbJ40JR6kgqguKYE",
+			Path: ".",
+			Name: "ade.xlsx",
 		},
 		Parse: internals.ParseConfig{
 			GlobalSheetPrefix: "GLOBAL ",
 			BoardSheetPrefix:  "BOARD ",
 			TablePrefix:       "[TABLE] ",
-			Global: struct {
-				AddressTable    string "toml:\"address_table\""
-				BackendEntryKey string "toml:\"backend_entry_key\""
-				UnitsTable      string "toml:\"units_table\""
-				PortsTable      string "toml:\"ports_table\""
-				BoardIdsTable   string "toml:\"board_ids_table\""
-				MessageIdsTable string "toml:\"message_ids_table\""
-			}{
+			Global: internals.GlobalParseConfig{
 				AddressTable:    "addresses",
-				BackendEntryKey: "Backend",
+				BackendKey:      "Backend",
+				BLCUAddressKey:  "BLCU",
 				UnitsTable:      "units",
 				PortsTable:      "ports",
 				BoardIdsTable:   "board_ids",
@@ -89,7 +82,7 @@ func (pg *PacketGenerator) CreateRandomPacket() []byte {
 	binary.Write(buff, binary.LittleEndian, randomPacket.ID)
 
 	for _, measurement := range randomPacket.Measurements {
-		if strings.Contains(measurement.Type, "Enum") {
+		if strings.Contains(measurement.Type, "enum") {
 			binary.Write(buff, binary.LittleEndian, uint8(1))
 		} else if measurement.Type != "string" {
 			number := mapNumberToRange(rand.Float64(), measurement.SafeRange, measurement.Type)
