@@ -1,3 +1,5 @@
 import { Message } from "../models/Message";
 
-export type MessageAdapter = Omit<Message, "id" | "count">;
+type DistributeOmit<T, K extends string> = T extends T ? Omit<T, K> : never;
+
+export type MessageAdapter = DistributeOmit<Message, "id" | "count">;

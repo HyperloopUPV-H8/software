@@ -1,7 +1,7 @@
 export type Message = FaultMessage | WarningMessage | ErrorMessage;
 
 type AbstractMessage = {
-    id: string;
+    id: string; // React key
     count: number;
     board: string;
     name: string;
@@ -10,10 +10,7 @@ type AbstractMessage = {
 
 type ErrorMessage = AbstractMessage & {
     kind: "error";
-    protection: {
-        kind: "error";
-        data: string;
-    };
+    msg: string;
 };
 
 type FaultMessage = AbstractMessage & {
@@ -77,6 +74,7 @@ type Timelimit = {
     kind: "TIME_ACCUMULATION";
     data: {
         value: number;
+        bound: number;
         timelimit: number;
     };
 };
