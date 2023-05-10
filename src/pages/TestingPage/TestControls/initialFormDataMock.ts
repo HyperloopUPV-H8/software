@@ -12,7 +12,7 @@ export const initialFormDescription = [
     {
         id: "unit2",
         type: "number",
-        value: 12,
+        value: null,
     },
     {
         id: "unit3",
@@ -22,7 +22,7 @@ export const initialFormDescription = [
     {
         id: "unit4",
         type: "number",
-        value: 1,
+        value: null,
     },
     {
         id: "unit5",
@@ -42,7 +42,7 @@ export const initialFormDescription = [
     {
         id: "unit8",
         type: "number",
-        value: 2.4,
+        value: null,
     },
     {
         id: "unit9",
