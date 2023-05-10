@@ -51,11 +51,7 @@ function areMessagesEqual(message: Message, adapter: MessageAdapter): boolean {
         message.kind == adapter.kind &&
         message.name == adapter.name
     ) {
-        if (message.kind == "error" && adapter.kind == "error") {
-            return message.msg == adapter.msg;
-        } else if (message.kind != "error" && adapter.kind != "error") {
-            return isEqual(message.protection, adapter.protection);
-        }
+        return isEqual(message.protection, adapter.protection);
     }
 
     return false;

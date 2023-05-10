@@ -1,4 +1,4 @@
-export type Message = FaultMessage | WarningMessage | ErrorMessage;
+export type Message = FaultMessage | WarningMessage;
 
 type AbstractMessage = {
     id: string; // React key
@@ -6,11 +6,6 @@ type AbstractMessage = {
     board: string;
     name: string;
     timestamp: Timestamp;
-};
-
-type ErrorMessage = AbstractMessage & {
-    kind: "error";
-    msg: string;
 };
 
 type FaultMessage = AbstractMessage & {
@@ -29,7 +24,8 @@ export type Protection =
     | LowerBound
     | Equals
     | NotEquals
-    | Timelimit;
+    | Timelimit
+    | Error;
 
 type OutOfBounds = {
     kind: "OUT_OF_BOUNDS";
@@ -77,6 +73,11 @@ type Timelimit = {
         bound: number;
         timelimit: number;
     };
+};
+
+type Error = {
+    kind: "ERROR_HANDLER";
+    data: string;
 };
 
 export type Timestamp = {
