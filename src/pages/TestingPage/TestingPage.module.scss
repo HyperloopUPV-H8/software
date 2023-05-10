@@ -13,8 +13,9 @@
 }
 
 .podRepresentation {
-    border-color: black;
-    border-style: double;
+    // border-color: black;
+    // border-style: double;
+    // border-width: medium;
     flex-grow: 1;
     display: flex;
     flex-flow: column;
@@ -23,9 +24,10 @@
 }
 
 .threeJSAndInfo {
-    border-color: red;
-    border-style: double;
-    flex-grow: 2;
+    // border-color: red;
+    // border-style: double;
+    // border-width: medium;
+    flex-basis: 20rem;
     display: flex;
     flex-flow: row;
     gap: 0.5rem;
@@ -33,16 +35,17 @@
 }
 
 .threeJS {
-    border-color: blue;
-    border-style: double;
-    flex-grow: 4;
+    //border-color: blue;
+    border-style: solid;
+    //flex: 4 1 2rem;
     border-radius: 1rem;
+    flex-basis: 45rem;
 }
 
 .info {
     border-color: yellow;
     border-style: double;
-    flex-grow: 1;
+    flex: 1 4 auto;
     border-radius: 1rem;
 }
 

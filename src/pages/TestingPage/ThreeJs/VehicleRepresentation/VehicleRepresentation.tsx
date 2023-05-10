@@ -5,7 +5,7 @@ import { Mesh, MeshPhongMaterial } from "three";
 
 export function VehicleRepresentation() {
     const meshRef = useRef<Mesh>(null!);
-    const model = useGLTF("./pod_simplified.glb"); //TODO: it doesn't exist
+    const model = useGLTF("./pod_simplified.glb");
 
     useFrame(({ clock }) => {
         const t = clock.getElapsedTime();

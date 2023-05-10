@@ -5,7 +5,7 @@ import { VehicleRepresentation } from "./VehicleRepresentation/VehicleRepresenta
 
 export function ThreeJsVehicle() {
     return (
-        <Canvas className={style.threeJsContainer}>
+        <Canvas>
             <PerspectiveCamera makeDefault position={[7, 5, 6]} fov={60} />
             <OrbitControls />
             <ambientLight intensity={0.1} />

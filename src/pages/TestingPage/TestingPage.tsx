@@ -14,7 +14,9 @@ export function TestingPage() {
                             <ThreeJsVehicle />
                         </div>
 
-                        <div className={style.info}></div>
+                        <div className={style.info}>
+                            {/* <ThreeJsVehicle /> */}
+                        </div>
                     </div>
                     <div className={style.graphics}></div>
                 </div>
