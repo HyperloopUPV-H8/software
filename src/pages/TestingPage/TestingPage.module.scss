@@ -13,7 +13,8 @@
 }
 
 .podRepresentation {
-    background-color: black;
+    border-color: black;
+    border-style: double;
     flex-grow: 1;
     display: flex;
     flex-flow: column;
@@ -22,7 +23,8 @@
 }
 
 .threeJSAndInfo {
-    background-color: red;
+    border-color: red;
+    border-style: double;
     flex-grow: 2;
     display: flex;
     flex-flow: row;
@@ -31,19 +33,22 @@
 }
 
 .threeJS {
-    background-color: blue;
+    border-color: blue;
+    border-style: double;
     flex-grow: 4;
     border-radius: 1rem;
 }
 
 .info {
-    background-color: yellow;
+    border-color: yellow;
+    border-style: double;
     flex-grow: 1;
     border-radius: 1rem;
 }
 
 .graphics {
-    background-color: green;
+    border-color: green;
+    border-style: double;
     flex-grow: 1;
     display: flex;
     flex-flow: row;

@@ -1,6 +1,7 @@
 import { PageWrapper } from "pages/PageWrapper/PageWrapper";
 import style from "./TestingPage.module.scss";
 import { TestControls } from "./TestControls/TestControls";
+import { ThreeJsVehicle } from "./ThreeJs/ThreeJsVehicle";
 
 export function TestingPage() {
     return (
@@ -9,7 +10,10 @@ export function TestingPage() {
                 <TestControls />
                 <div className={style.podRepresentation}>
                     <div className={style.threeJSAndInfo}>
-                        <div className={style.threeJS}></div>
+                        <div className={style.threeJS}>
+                            <ThreeJsVehicle />
+                        </div>
+
                         <div className={style.info}></div>
                     </div>
                     <div className={style.graphics}></div>
