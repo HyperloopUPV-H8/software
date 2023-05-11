@@ -11,7 +11,7 @@ export const Item = ({ value, onClick }: Props) => {
             className={styles.itemWrapper}
             onClick={() => onClick(value)}
         >
-            {value}
+            <span className={styles.label}>{value}</span>
         </div>
     );
 };

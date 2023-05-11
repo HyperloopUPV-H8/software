@@ -16,7 +16,7 @@ export const Header = ({ value, onClick, isOpen, isEnabled }: Props) => {
             }`}
             onClick={onClick}
         >
-            {value}{" "}
+            <span className={styles.label}>{value}</span>{" "}
             {isEnabled && (
                 <Caret
                     className={styles.caret}
