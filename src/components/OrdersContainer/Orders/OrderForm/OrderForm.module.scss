@@ -7,6 +7,8 @@
     align-items: stretch;
     @include styles.code-text;
     border: 1px solid styles.$orange;
-    border-radius: styles.$normal-border-radius;
+    border-radius: 0.5rem;
     overflow: hidden;
+
+    @include styles.shadow;
 }

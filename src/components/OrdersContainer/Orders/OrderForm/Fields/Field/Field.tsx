@@ -14,10 +14,14 @@ type Props = {
 };
 
 export const Field = ({ name, field, onChange, changeEnabled }: Props) => {
-    function handleTextInputChange(value: string) {
+    function handleTextInputChange(
+        value: string,
+        description: NumericDescription
+    ) {
         const isValid = isNumberValid(
             value,
-            (field.valueDescription as NumericDescription).value
+            description.value,
+            description.safeRange
         );
 
         onChange(Number.parseFloat(value), isValid);
@@ -37,7 +41,12 @@ export const Field = ({ name, field, onChange, changeEnabled }: Props) => {
                     isValid={field.isValid}
                     placeholder={`${field.valueDescription.value}...`}
                     defaultValue={!field.isValid ? "" : (field.value as number)}
-                    onChange={handleTextInputChange}
+                    onChange={(value) =>
+                        handleTextInputChange(
+                            value,
+                            field.valueDescription as NumericDescription
+                        )
+                    }
                 />
             ) : field.valueDescription.kind == "boolean" ? (
                 <CheckBox

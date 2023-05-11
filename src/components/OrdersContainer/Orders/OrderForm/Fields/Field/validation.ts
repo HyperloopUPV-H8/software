@@ -6,25 +6,62 @@ import {
 
 export function isNumberValid(
     valueStr: string,
-    numberType: NumericType
+    numberType: NumericType,
+    range: [number, number]
 ): boolean {
-    return (
-        checkNumberString(valueStr, numberType) &&
-        ((isUnsignedIntegerType(numberType) &&
-            checkUnsignedIntegerOverflow(
-                Number.parseInt(valueStr),
-                getBits(numberType)
-            )) ||
-            (isSignedIntegerType(numberType) &&
+    if (stringIsNumber(valueStr, numberType)) {
+        if (isUnsignedIntegerType(numberType)) {
+            let isValid = true;
+            if (Number.isFinite(range[0])) {
+                isValid &&= Number.parseInt(valueStr) >= range[0];
+            }
+
+            if (Number.isFinite(range[1])) {
+                isValid &&= Number.parseInt(valueStr) <= range[1];
+            }
+
+            return (
+                isValid &&
+                checkUnsignedIntegerOverflow(
+                    Number.parseInt(valueStr),
+                    getBits(numberType)
+                )
+            );
+        } else if (isSignedIntegerType(numberType)) {
+            let isValid = true;
+            if (Number.isFinite(range[0])) {
+                isValid &&= Number.parseInt(valueStr) >= range[0];
+            }
+
+            if (Number.isFinite(range[1])) {
+                isValid &&= Number.parseInt(valueStr) <= range[1];
+            }
+
+            return (
+                isValid &&
                 checkSignedIntegerOverflow(
                     Number.parseInt(valueStr),
                     getBits(numberType)
-                )) ||
-            checkFloatOverflow(Number.parseFloat(valueStr)))
-    );
+                )
+            );
+        } else {
+            let isValid = true;
+            if (Number.isFinite(range[0])) {
+                isValid &&= Number.parseFloat(valueStr) >= range[0];
+            }
+
+            if (Number.isFinite(range[1])) {
+                isValid &&= Number.parseFloat(valueStr) <= range[1];
+            }
+
+            return isValid && checkFloatOverflow(Number.parseFloat(valueStr));
+        }
+    } else {
+        return false;
+    }
 }
 
-function checkNumberString(valueStr: string, numberType: NumericType): boolean {
+function stringIsNumber(valueStr: string, numberType: NumericType): boolean {
     if (isUnsignedIntegerType(numberType)) {
         return /^\d+$/.test(valueStr);
     } else if (isSignedIntegerType(numberType)) {
@@ -35,7 +72,7 @@ function checkNumberString(valueStr: string, numberType: NumericType): boolean {
 }
 
 function checkUnsignedIntegerOverflow(value: number, bits: number): boolean {
-    return value >= 0 && value < 1 << bits;
+    return value >= 0 && value < 1 << bits; //FIXME: añadir unos
 }
 
 function checkSignedIntegerOverflow(value: number, bits: number): boolean {
