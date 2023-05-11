@@ -1,10 +1,10 @@
+import { Message } from "common";
 import styles from "./Messages.module.scss";
-import { ProtectionMessage } from "common";
 import { MessageView } from "./MessageView/MessageView";
 import { useAutoScroll } from "./useAutoScroll";
 
 type Props = {
-    messages: Array<ProtectionMessage>;
+    messages: Array<Message>;
 };
 
 export const Messages = ({ messages }: Props) => {

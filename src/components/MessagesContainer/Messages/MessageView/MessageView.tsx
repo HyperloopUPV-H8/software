@@ -1,31 +1,32 @@
 import styles from "./MessageView.module.scss";
+import React from "react";
 import { Counter } from "./Counter/Counter";
-import { ProtectionMessage } from "common";
+import { Message } from "common";
 import { ReactComponent as Warning } from "assets/svg/warning.svg";
 import { ReactComponent as Fault } from "assets/svg/fault.svg";
-
-import React from "react";
-import { ViolationView } from "./ViolationView/ViolationView";
 import { Origin } from "./Origin/Origin";
 import { TimestampView } from "./TimestampView/TimestampView";
+import { Content } from "./Content/Content";
 
 type Props = {
-    message: ProtectionMessage;
+    message: Message;
 };
 
 export const MessageView = React.memo(({ message }: Props) => {
     const Icon = message.kind == "warning" ? Warning : Fault;
 
+    const appearance =
+        message.kind == "fault" || message.kind == "error"
+            ? styles.fault
+            : styles.warning;
+
     return (
-        <article
-            className={`${styles.message} ${
-                message.kind == "fault" ? styles.fault : styles.warning
-            }`}
-        >
+        <article className={`${styles.message} ${appearance}`}>
             <Icon className={styles.icon} />
             <div className={styles.kindAndOrigin}>
-                <div className={styles.violationKind}>
-                    {message.violation.kind}
+                <div className={styles.protectionKind}>
+                    {message.kind == "error" && "ERROR"}
+                    {message.kind != "error" && message.protection.kind}
                 </div>
                 <Origin
                     className={styles.origin}
@@ -37,9 +38,9 @@ export const MessageView = React.memo(({ message }: Props) => {
                 className={styles.counter}
                 count={message.count}
             />
-            <ViolationView
-                className={styles.violation}
-                violation={message.violation}
+            <Content
+                message={message}
+                className={styles.content}
             />
             <TimestampView
                 className={styles.timestamp}
