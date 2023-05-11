@@ -74,5 +74,7 @@ function getProtectionText(protection: Protection) {
                     {protection.data.timelimit.toFixed(DECIMALS)} seconds
                 </span>
             );
+        case "ERROR_HANDLER":
+            return <span>{protection.data}</span>;
     }
 }

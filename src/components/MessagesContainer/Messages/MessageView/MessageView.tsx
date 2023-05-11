@@ -15,18 +15,14 @@ type Props = {
 export const MessageView = React.memo(({ message }: Props) => {
     const Icon = message.kind == "warning" ? Warning : Fault;
 
-    const appearance =
-        message.kind == "fault" || message.kind == "error"
-            ? styles.fault
-            : styles.warning;
+    const appearance = message.kind == "fault" ? styles.fault : styles.warning;
 
     return (
         <article className={`${styles.message} ${appearance}`}>
             <Icon className={styles.icon} />
             <div className={styles.kindAndOrigin}>
                 <div className={styles.protectionKind}>
-                    {message.kind == "error" && "ERROR"}
-                    {message.kind != "error" && message.protection.kind}
+                    {message.protection.kind}
                 </div>
                 <Origin
                     className={styles.origin}

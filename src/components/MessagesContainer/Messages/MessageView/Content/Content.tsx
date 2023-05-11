@@ -7,14 +7,10 @@ type Props = {
 };
 
 export const Content = ({ message, className }: Props) => {
-    if (message.kind == "fault" || message.kind == "warning") {
-        return (
-            <ProtectionView
-                className={`${className}`}
-                protection={message.protection}
-            />
-        );
-    } else {
-        return <div>{message.msg}</div>;
-    }
+    return (
+        <ProtectionView
+            className={`${className}`}
+            protection={message.protection}
+        />
+    );
 };
