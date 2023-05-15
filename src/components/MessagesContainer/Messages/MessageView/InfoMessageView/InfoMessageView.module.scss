@@ -1,0 +1,13 @@
+.infoMessageView {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.board {
+    color: var(--main-color);
+    font-weight: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

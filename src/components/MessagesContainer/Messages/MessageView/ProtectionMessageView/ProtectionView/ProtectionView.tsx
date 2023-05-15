@@ -3,19 +3,14 @@ import { Protection } from "common";
 
 type Props = {
     protection: Protection;
-    className: string;
 };
 
 const DECIMALS = 2;
 
-export const ProtectionView = ({ protection, className }: Props) => {
+export const ProtectionView = ({ protection }: Props) => {
     const ProtectionText = getProtectionText(protection);
 
-    return (
-        <div className={`${className} ${styles.protectionView}`}>
-            {ProtectionText}
-        </div>
-    );
+    return <div className={styles.protectionView}>{ProtectionText}</div>;
 };
 
 function getProtectionText(protection: Protection) {
