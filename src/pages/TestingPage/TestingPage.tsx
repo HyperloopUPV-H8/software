@@ -4,6 +4,8 @@ import { TestControls } from "./TestControls/TestControls";
 import { ThreeJsVehicle } from "./ThreeJs/ThreeJsVehicle";
 import { useEffect, useState } from "react";
 import { FormDescription } from "./TestControls/TestAttributes";
+import useWebSocket from "react-use-websocket";
+import { VehiclePage } from "pages/VehiclePage/VehiclePage";
 
 const SERVER_URL = `${import.meta.env.VITE_SERVER_IP_HIL}:${
     import.meta.env.VITE_SERVER_PORT_HIL
@@ -14,46 +16,51 @@ const WEBSOCKET_URL = `ws://${SERVER_URL}`;
 export type VehicleState = {
     xDistance: number;
     current: number;
-    duty: number; //FIXME: Check it is a correct value
+    duty: number;
     temperature: number;
 };
 
 export function TestingPage() {
-    const [socket, setSocket] = useState<WebSocket | null>(null);
+    const [vehicleState, setVehicleState] = useState<VehicleState>({
+        current: 0,
+        duty: 0,
+        temperature: 0,
+        xDistance: 0,
+    } as VehicleState);
 
-    const sendMessage = (controlForm: FormDescription) => {
-        const jsonFormDescription = JSON.stringify(controlForm);
-        socket!.send(jsonFormDescription);
-    }; //TODO: websocket as a prop to TestControl
+    const {
+        sendMessage,
+        sendJsonMessage,
+        lastJsonMessage,
+        readyState,
+        getWebSocket,
+    } = useWebSocket(WEBSOCKET_URL, {
+        onOpen: () => console.log("opened"),
+        shouldReconnect: (closeEvent) => {
+            console.log("Disconnected");
+            return true;
+        },
+    });
 
     useEffect(() => {
-        const newSocket = new WebSocket(WEBSOCKET_URL); //FIXME: It's correct?
+        if (lastJsonMessage !== null) {
+            const newVehicleState = lastJsonMessage as VehicleState;
+            if (newVehicleState.duty > 0 && newVehicleState.duty < 256) {
+                setVehicleState(newVehicleState);
+            } else {
+                console.log("Incorrect duty");
+            }
+        }
+    }, [lastJsonMessage]);
 
-        newSocket.onopen = () => {
-            console.log("Open connection");
-        };
+    useEffect(() => {
+        console.log(vehicleState);
+    }, [vehicleState]);
 
-        newSocket.onmessage = (event) => {
-            const json: VehicleState = JSON.parse(event.data); //TODO: This info to ThreeJsVehicle
-            console.log("Receive message: ", json);
-        };
-
-        newSocket.onclose = () => {
-            console.log("Conexión cerrada");
-        };
-
-        newSocket.onerror = (error) => {
-            console.error("WebSocket error: ", error);
-        };
-
-        // Actualizamos el estado del componente con la nueva instancia de WebSocket
-        setSocket(newSocket);
-
-        // TODO: Cerramos la conexión WebSocket al desmontar el componente, is it correct?
-        return () => {
-            newSocket.close();
-        };
-    }, []);
+    // const sendMessage = (controlForm: FormDescription) => {
+    //     const jsonFormDescription = JSON.stringify(controlForm);
+    //     socket!.send(jsonFormDescription);
+    //}; //TODO: websocket as a prop to TestControl
 
     return (
         <PageWrapper title="Testing">
@@ -62,7 +69,9 @@ export function TestingPage() {
                 <div className={style.podRepresentation}>
                     <div className={style.threeJSAndInfo}>
                         <div className={style.threeJS}>
-                            <ThreeJsVehicle />
+                            <ThreeJsVehicle
+                                xDistance={vehicleState.xDistance}
+                            />
                         </div>
 
                         <div className={style.info}></div>

@@ -3,7 +3,11 @@ import { Grid, OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { VehicleRepresentation } from "./VehicleRepresentation/VehicleRepresentation";
 
-export function ThreeJsVehicle() {
+type Props = {
+    xDistance: number;
+};
+
+export function ThreeJsVehicle({ xDistance }: Props) {
     return (
         <Canvas>
             <PerspectiveCamera makeDefault position={[7, 5, 6]} fov={60} />
@@ -20,7 +24,7 @@ export function ThreeJsVehicle() {
                 fadeDistance={20}
                 infiniteGrid
             />
-            <VehicleRepresentation />
+            <VehicleRepresentation xDistance={xDistance} />
         </Canvas>
     );
 }
