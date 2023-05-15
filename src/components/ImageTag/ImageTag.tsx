@@ -1,9 +1,9 @@
 import styles from "./ImageTag.module.scss";
 import { BarTag } from "components/BarTag/BarTag";
-import { Measurement } from "models/PodData/Measurement";
+import { Measurement, NumericMeasurement } from "common";
 type Props = {
     imageUrl: string;
-    measurement: Measurement;
+    measurement: NumericMeasurement;
     width?: string;
     height?: string;
 };

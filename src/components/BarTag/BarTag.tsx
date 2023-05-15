@@ -1,9 +1,10 @@
-import { Measurement } from "models/PodData/Measurement";
+import styles from "./BarTag.module.scss";
+import { NumericMeasurement } from "common";
 import { Bar, BarType } from "./Bar/Bar";
 import { ValueData } from "components/ValueData/ValueData";
-import styles from "./BarTag.module.scss";
+
 type Props = {
-    measurement: Measurement;
+    measurement: NumericMeasurement;
     barType: BarType;
     showWrapper?: boolean;
 };
@@ -21,7 +22,7 @@ export const BarTag = ({
         >
             <Bar
                 type={barType}
-                value={measurement.value as number}
+                value={measurement.value.average}
                 max={100}
                 min={0}
             />

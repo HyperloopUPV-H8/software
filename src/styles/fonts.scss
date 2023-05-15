@@ -1,7 +1,8 @@
 @use "./colors.scss";
 
 $font-families: (
-    default: "monospace",
+    sans: "Inter",
+    mono: "IBM Plex Mono, monospace",
 );
 
 $font-sizes: (
@@ -32,7 +33,7 @@ $font-weights: (
 }
 
 @mixin default-text {
-    font-family: var(--font-family-default);
+    font-family: var(--font-family-sans);
     font-size: var(--font-size-default);
     font-weight: var(--font-weight-normal);
     color: colors.getColor("primary", 20);

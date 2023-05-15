@@ -3,9 +3,22 @@
 }
 
 .radialShadowArc {
-    background: radial-gradient(#b1b1b1d4 30%, rgb(0 0 0 / 0%) 70%);
+    background: radial-gradient(hsl(0, 0%, 0%) 40%, rgb(0 0 0 / 0%) 50%);
 }
 
 .rainbowArc {
-    background: conic-gradient(from 180deg, green, yellow, orange, red);
+    background: conic-gradient(
+        from 220deg,
+        #7295ef,
+        60deg,
+        #7aefcc,
+        130deg,
+        #efe84a,
+        190deg,
+        #ffab2c,
+        240deg,
+        #ff1e1e,
+        330deg,
+        #7295ef
+    );
 }

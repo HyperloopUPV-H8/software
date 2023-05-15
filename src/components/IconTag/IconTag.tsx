@@ -1,5 +1,5 @@
 import styles from "./IconTag.module.scss";
-import { Measurement } from "models/PodData/Measurement";
+import { Measurement } from "common";
 import { ValueData } from "components/ValueData/ValueData";
 type Props = {
     icon: React.ReactNode;

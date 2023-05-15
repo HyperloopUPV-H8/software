@@ -2,10 +2,6 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    width: 100%;
     height: fit-content;
-
-    > :first-child {
-        font-size: 2rem;
-    }
+    justify-content: center;
 }

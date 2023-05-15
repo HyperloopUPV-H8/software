@@ -1,17 +1,19 @@
 import styles from "components/GaugeTag/GaugeTag.module.scss";
 import { Gauge } from "components/GaugeTag/Gauge/Gauge";
+import { NumericMeasurement } from "common";
+import { TextData } from "./TextData/TextData";
 
 type Props = {
+    measurement: NumericMeasurement;
     className: string;
     strokeWidth: number;
-    value: number;
     min: number;
     max: number;
 };
 export const GaugeTag = ({
+    measurement,
     className,
     strokeWidth,
-    value,
     min,
     max,
 }: Props) => {
@@ -21,15 +23,15 @@ export const GaugeTag = ({
                 className={styles.gauge}
                 sweep={250}
                 strokeWidth={strokeWidth}
-                value={value}
+                value={measurement.value.average}
                 min={min}
                 max={max}
             />
-            <div className={styles.measurementWrapper}>
-                <div className={styles.name}>BatteryVoltage</div>
-                <div className={styles.value}>{value.toFixed(2)}</div>
-                <div className={styles.units}>Amp</div>
-            </div>
+            <TextData
+                name={measurement.name}
+                units={measurement.units}
+                value={measurement.value.average}
+            ></TextData>
         </article>
     );
 };
