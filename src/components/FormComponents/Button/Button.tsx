@@ -1,7 +1,7 @@
 import styles from "components/FormComponents/Button/Button.module.scss";
-import { animated, useSpring, easings } from "@react-spring/web";
+import { animated, useSpring } from "@react-spring/web";
 import { lightenHSL } from "utils/color";
-import { useEffect } from "react";
+
 type Props = {
     label: string;
     onClick: (ev: React.MouseEvent) => void;
@@ -53,7 +53,7 @@ export const Button = ({
                 })
             }
         >
-            {label}
+            <span className={styles.label}>{label}</span>
         </animated.div>
     );
 };

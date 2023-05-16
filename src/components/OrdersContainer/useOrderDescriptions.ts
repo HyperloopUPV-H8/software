@@ -1,4 +1,8 @@
-import { OrderDescription } from "common";
+import {
+    OrderDescription,
+    OrderFieldDescription,
+    transformRange,
+} from "common";
 import { useState, useEffect } from "react";
 import { fetchFromBackend } from "services/fetch";
 
@@ -13,10 +17,52 @@ export function useOrderDescriptions() {
                 return res.json();
             })
             .then((descriptions: Record<string, OrderDescription>) => {
-                setOrderDescriptions(descriptions);
+                setOrderDescriptions(getCorrectDescriptions(descriptions));
             })
             .catch((reason) => console.error(reason));
     }, []);
 
     return orderDescriptions;
+}
+function getCorrectDescriptions(
+    descriptions: Record<string, OrderDescription>
+): Record<string, OrderDescription> {
+    return Object.fromEntries(
+        Object.entries(descriptions).map(([name, description]) => {
+            return [name, getDescriptionWithCorrectRange(description)];
+        })
+    );
+}
+
+function getDescriptionWithCorrectRange(
+    description: OrderDescription
+): OrderDescription {
+    return { ...description, fields: getCorrectFields(description.fields) };
+}
+
+function getCorrectFields(
+    fields: Record<string, OrderFieldDescription>
+): Record<string, OrderFieldDescription> {
+    return Object.fromEntries(
+        Object.entries(fields).map(([name, field]) => {
+            return [name, getCorrectField(field)];
+        })
+    );
+}
+
+function getCorrectField(field: OrderFieldDescription): OrderFieldDescription {
+    if (field.valueDescription.kind == "numeric") {
+        return {
+            name: field.name,
+            valueDescription: {
+                ...field.valueDescription,
+                safeRange: transformRange(field.valueDescription.safeRange),
+                warningRange: transformRange(
+                    field.valueDescription.warningRange
+                ),
+            },
+        };
+    } else {
+        return field;
+    }
 }

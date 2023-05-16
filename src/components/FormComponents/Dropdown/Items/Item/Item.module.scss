@@ -13,3 +13,8 @@
 .itemWrapper:hover {
     background-color: rgba(0, 0, 0, 0.055);
 }
+
+.label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

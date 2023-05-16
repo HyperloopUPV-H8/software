@@ -2,6 +2,7 @@ import styles from "./Dropdown.module.scss";
 import { Items } from "./Items/Items";
 import { useState } from "react";
 import { Header } from "./Header/Header";
+import { useBounds } from "hooks/useBounds";
 // import { useBounds } from "hooks/useBounds";
 
 type Props = {
@@ -14,14 +15,14 @@ export const Dropdown = ({ options, onChange }: Props) => {
     const [selectedItem, setSelectedItem] = useState(
         options[0] ?? "No options"
     );
-    // const [ref, rect] = useBounds<HTMLDivElement>();
+    const [ref, rect] = useBounds<HTMLDivElement>();
 
     const isEnabled = options.length > 0;
 
     return (
         <div
             className={styles.dropdownWrapper}
-            // ref={ref}
+            ref={ref}
         >
             <Header
                 value={selectedItem}
@@ -29,7 +30,7 @@ export const Dropdown = ({ options, onChange }: Props) => {
                 isOpen={open}
                 isEnabled={isEnabled}
             />
-            {/* {rect && isEnabled && (
+            {rect && isEnabled && (
                 <Items
                     targetRect={rect}
                     visible={open}
@@ -40,7 +41,7 @@ export const Dropdown = ({ options, onChange }: Props) => {
                         setOpen(false);
                     }}
                 />
-            )} */}
+            )}
         </div>
     );
 };

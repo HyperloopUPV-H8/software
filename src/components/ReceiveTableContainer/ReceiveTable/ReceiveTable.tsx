@@ -16,14 +16,16 @@ export const ReceiveTable = ({ boards }: Props) => {
             <div className={styles.newReceiveTable}>
                 <Header items={["ID", "NAME", "COUNT", "CYCLE (ns)"]} />
                 <div className={styles.boards}>
-                    {boards.map((board) => {
-                        return (
-                            <BoardView
-                                key={board.name}
-                                board={board}
-                            />
-                        );
-                    })}
+                    {boards
+                        .filter((item) => item.packets.length > 0)
+                        .map((board) => {
+                            return (
+                                <BoardView
+                                    key={board.name}
+                                    board={board}
+                                />
+                            );
+                        })}
                 </div>
             </div>
         </TableUpdater>

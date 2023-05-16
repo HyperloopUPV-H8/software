@@ -24,16 +24,12 @@ export const PacketView = memo(({ packet }: Props) => {
                     ref={countRef}
                     className={styles.count}
                     style={{ flexBasis: columns[2] }}
-                >
-                    {packet.count}
-                </div>
+                ></div>
                 <div
                     ref={cycleTimeRef}
                     className={styles.cycleTime}
                     style={{ flexBasis: columns[3] }}
-                >
-                    {packet.cycleTime}
-                </div>
+                ></div>
             </div>
             {Object.keys(packet.measurements).length > 0 && (
                 <div className={styles.measurements}>
