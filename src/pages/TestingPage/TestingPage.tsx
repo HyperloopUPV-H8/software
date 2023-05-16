@@ -2,7 +2,7 @@ import { PageWrapper } from "pages/PageWrapper/PageWrapper";
 import style from "./TestingPage.module.scss";
 import { TestControls } from "./TestControls/TestControls";
 import { ThreeJsVehicle } from "./ThreeJs/ThreeJsVehicle";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FormDescription } from "./TestControls/TestAttributes";
 import useWebSocket from "react-use-websocket";
 import { VehiclePage } from "pages/VehiclePage/VehiclePage";
@@ -45,7 +45,7 @@ export function TestingPage() {
     useEffect(() => {
         if (lastJsonMessage !== null) {
             const newVehicleState = lastJsonMessage as VehicleState;
-            if (newVehicleState.duty > 0 && newVehicleState.duty < 256) {
+            if (newVehicleState.duty >= 0 && newVehicleState.duty < 256) {
                 setVehicleState(newVehicleState);
             } else {
                 console.log("Incorrect duty");
@@ -57,15 +57,10 @@ export function TestingPage() {
         console.log(vehicleState);
     }, [vehicleState]);
 
-    // const sendMessage = (controlForm: FormDescription) => {
-    //     const jsonFormDescription = JSON.stringify(controlForm);
-    //     socket!.send(jsonFormDescription);
-    //}; //TODO: websocket as a prop to TestControl
-
     return (
         <PageWrapper title="Testing">
             <div className={style.testingPageWrapper}>
-                <TestControls />
+                <TestControls sendJsonMessage={sendJsonMessage} />
                 <div className={style.podRepresentation}>
                     <div className={style.threeJSAndInfo}>
                         <div className={style.threeJS}>

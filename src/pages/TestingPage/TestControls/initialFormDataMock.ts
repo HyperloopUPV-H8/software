@@ -1,5 +1,28 @@
 export const initialFormDescription = [
     {
+        id: "xDistance",
+        type: "number",
+        value: null,
+    },
+    {
+        id: "current",
+        type: "number",
+        value: null,
+    },
+    {
+        id: "duty",
+        type: "number",
+        value: null,
+    },
+    {
+        id: "temperature",
+        type: "number",
+        value: null,
+    },
+];
+
+export const initialFormDescriptionLarge = [
+    {
         id: "unit0",
         type: "number",
         value: null,

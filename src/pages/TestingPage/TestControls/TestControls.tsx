@@ -11,8 +11,13 @@ import { useControlForm } from "./useControlForm";
 import { initialFormDescription } from "./initialFormDataMock";
 import { ControlButtons } from "./ControlButtons/ControlButtons";
 import { ControlInputs } from "./ControlInputs/ControlInputs";
+import { SendJsonMessage } from "react-use-websocket/dist/lib/types";
 
-export const TestControls = () => {
+type Props = {
+    sendJsonMessage: SendJsonMessage;
+};
+
+export const TestControls = ({ sendJsonMessage }: Props) => {
     const [form, ChangeValue, ChangeEnable, SubmitHandler] = useControlForm(
         initialFormDescription
     );
@@ -36,7 +41,7 @@ export const TestControls = () => {
                         type="submit"
                         icon={<PerturbationIcon />}
                         onClick={() => {
-                            SubmitHandler();
+                            SubmitHandler(sendJsonMessage);
                         }}
                         disabled={!form.isValid}
                     />
