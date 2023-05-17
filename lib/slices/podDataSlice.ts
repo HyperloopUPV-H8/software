@@ -1,10 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { createPodDataFromAdapter } from "../adapters/PodData";
-import { PacketUpdate } from "../adapters/PacketUpdate";
-import { PodDataAdapter } from "../adapters/PodData";
-import { PodData } from "../models";
-import { updatePodData as updatePackets } from "../models/PodData/PodData";
-import { Board } from "../models";
+import { createPodDataFromAdapter } from "adapters/PodData";
+import { PacketUpdate } from "adapters/PacketUpdate";
+import { PodDataAdapter } from "adapters/PodData";
+import { PodData } from "models";
+import { updatePodData as updatePackets } from "models/PodData/PodData";
+import { Board } from "models";
 
 export function createPodDataSlice() {
     return createSlice({

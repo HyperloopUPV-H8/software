@@ -1,6 +1,6 @@
-import { PodData } from "../models/PodData/PodData";
-import { Board } from "../models/PodData/Board";
-import { Packet } from "../models/PodData/Packet";
+import { PodData } from "models/PodData/PodData";
+import { Board } from "models/PodData/Board";
+import { Packet } from "models/PodData/Packet";
 import {
     BooleanMeasurement,
     EnumMeasurement,

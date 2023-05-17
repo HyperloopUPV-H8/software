@@ -1,4 +1,4 @@
-import { PacketUpdate } from "../../adapters/PacketUpdate";
+import { PacketUpdate } from "adapters/PacketUpdate";
 import { Measurement } from "./Measurement";
 
 export type Packet = {

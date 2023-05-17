@@ -1,4 +1,4 @@
-import { Measurement } from "../models/PodData/Measurement";
+import { Measurement } from "models/PodData/Measurement";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
     getBooleanMeasurement,

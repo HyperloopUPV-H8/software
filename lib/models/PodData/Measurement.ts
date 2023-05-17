@@ -1,4 +1,4 @@
-import { NumericType, isNumericType } from "../../BackendTypes";
+import { NumericType, isNumericType } from "BackendTypes";
 
 export type Measurement =
     | NumericMeasurement

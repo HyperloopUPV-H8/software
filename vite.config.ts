@@ -7,14 +7,6 @@ import path from "path";
 
 export default defineConfig({
     plugins: [react()],
-    resolve: {
-        // alias: [
-        //     {
-        //         find: "~",
-        //         replacement: path.resolve(__dirname, "./src"),
-        //     },
-        // ],
-    },
     server: {
         port: 3000,
     },
@@ -23,22 +15,13 @@ export default defineConfig({
         minify: false,
         reportCompressedSize: true,
         lib: {
-            entry: path.resolve(__dirname, "src/index.ts"),
+            entry: path.resolve(__dirname, "lib/index.ts"),
             fileName: "index",
             formats: ["es"],
         },
         rollupOptions: {
             external: ["react", "react-dom", "@reduxjs/toolkit"],
-            plugins: [
-                // typescriptPaths({
-                //     preserveExtensions: true,
-                // }),
-                typescript({
-                    sourceMap: true,
-                    declaration: true,
-                    outDir: "dist",
-                }),
-            ],
+            plugins: [typescript()],
         },
     },
 });

@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { nanoid } from "nanoid";
 import { isEqual } from "lodash";
-import { MessageAdapter } from "../adapters/Message";
-import { Message } from "../models/Message";
+import { MessageAdapter } from "adapters/Message";
+import { Message } from "models/Message";
 
 export function createMessageSlice() {
     return createSlice({

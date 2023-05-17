@@ -1,8 +1,8 @@
-import { Order } from "../models/Order";
-import { MessageAdapter } from "../adapters/Message";
-import { PacketUpdate } from "../adapters/PacketUpdate";
-import { ConnectionsUpdate } from "../adapters/ConnectionUpdate";
-import { VcuStateAndOrders } from "../adapters/VcuState";
+import { Order } from "models/Order";
+import { MessageAdapter } from "adapters/Message";
+import { PacketUpdate } from "adapters/PacketUpdate";
+import { ConnectionsUpdate } from "adapters/ConnectionUpdate";
+import { VcuStateAndOrders } from "adapters/VcuState";
 
 import {
     BootloaderDownloadRequest,

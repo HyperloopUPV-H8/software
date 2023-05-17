@@ -1,4 +1,4 @@
-import { NumericValue } from "../models/PodData/Measurement";
+import { NumericValue } from "models/PodData/Measurement";
 
 export type PacketUpdate = {
     readonly id: number;

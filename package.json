@@ -2,10 +2,9 @@
     "name": "@hyperloop-upv/common-front",
     "version": "2.0.0",
     "type": "module",
-    "module": "dist/",
     "files": [
         "dist",
-        "src"
+        "lib"
     ],
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",

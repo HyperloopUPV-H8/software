@@ -1,4 +1,4 @@
-import { PacketUpdate } from "../../adapters/PacketUpdate";
+import { PacketUpdate } from "adapters/PacketUpdate";
 import { Board } from "./Board";
 import { Packet, updatePacket } from "./Packet";
 
