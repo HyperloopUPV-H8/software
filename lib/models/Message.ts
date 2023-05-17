@@ -1,4 +1,6 @@
-export type Message = FaultMessage | WarningMessage;
+export type Message = ProtectionMessage | InfoMessage;
+
+export type ProtectionMessage = FaultMessage | WarningMessage;
 
 type AbstractMessage = {
     id: string; // React key
@@ -16,6 +18,11 @@ type FaultMessage = AbstractMessage & {
 type WarningMessage = AbstractMessage & {
     kind: "warning";
     protection: Protection;
+};
+
+export type InfoMessage = AbstractMessage & {
+    kind: "info";
+    msg: string;
 };
 
 export type Protection =

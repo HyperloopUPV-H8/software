@@ -46,12 +46,19 @@ export function createMessageSlice() {
 }
 
 function areMessagesEqual(message: Message, adapter: MessageAdapter): boolean {
+    //TODO: this could break easily, i'm not covering the case where they are not the same kind
     if (
         message.board == adapter.board &&
         message.kind == adapter.kind &&
         message.name == adapter.name
     ) {
-        return isEqual(message.protection, adapter.protection);
+        if (message.kind == "info" && adapter.kind == "info") {
+            return message.msg == adapter.msg;
+        } else if (message.kind != "info" && adapter.kind != "info") {
+            return isEqual(message.protection, adapter.protection);
+        } else {
+            return false;
+        }
     }
 
     return false;
