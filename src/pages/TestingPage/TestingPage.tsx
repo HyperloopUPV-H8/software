@@ -14,7 +14,7 @@ const SERVER_URL = `${import.meta.env.VITE_SERVER_IP_HIL}:${
 const WEBSOCKET_URL = `ws://${SERVER_URL}`;
 
 export type VehicleState = {
-    xDistance: number;
+    yDistance: number;
     current: number;
     duty: number;
     temperature: number;
@@ -25,7 +25,7 @@ export function TestingPage() {
         current: 0,
         duty: 0,
         temperature: 0,
-        xDistance: 0,
+        yDistance: 0,
     } as VehicleState);
 
     const {
@@ -65,7 +65,7 @@ export function TestingPage() {
                     <div className={style.threeJSAndInfo}>
                         <div className={style.threeJS}>
                             <ThreeJsVehicle
-                                xDistance={vehicleState.xDistance}
+                                yDistance={vehicleState.yDistance}
                             />
                         </div>
 

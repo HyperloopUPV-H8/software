@@ -1,31 +1,38 @@
+import { animated, useSpring } from "@react-spring/three";
 import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
-import { Mesh, MeshPhongMaterial } from "three";
+import THREE, { Mesh, MeshPhongMaterial, Vector3 } from "three";
 
-const MAX_XDISTANCE = 22;
-const MIN_XDISTANCE = 10;
+const MAX_YDISTANCE = 22;
+const MIN_YDISTANCE = 10;
 const MAX_CANVAS_X = 3;
 
 type Props = {
-    xDistance: number;
+    yDistance: number;
 };
 
-function calculatePositionX(xDistance: number) {
-    if (xDistance >= 10) {
+function calculatePositionY(yDistance: number) {
+    if (yDistance >= 10) {
         return (
-            ((xDistance - MIN_XDISTANCE) * MAX_CANVAS_X) /
-            (MAX_XDISTANCE - MIN_XDISTANCE)
+            ((yDistance - MIN_YDISTANCE) * MAX_CANVAS_X) /
+            (MAX_YDISTANCE - MIN_YDISTANCE)
         );
     } else {
         return 0;
     }
 }
 
-export function VehicleRepresentation({ xDistance }: Props) {
+export function VehicleRepresentation({ yDistance }: Props) {
     const meshRef = useRef<Mesh>(null!);
-    const positionX = useRef(calculatePositionX(xDistance));
+    const positionYRef = useRef(calculatePositionY(yDistance));
+
     const model = useGLTF("./pod_simplified.glb");
+    const spring = useSpring({
+        from: { positionX: 0, positionY: 0, positionZ: 0 },
+        to: { positionX: 0, positionY: positionYRef.current, positionZ: 0 },
+        config: { duration: 1000 },
+    });
 
     useFrame(({ clock }) => {
         const t = clock.getElapsedTime();
@@ -34,22 +41,21 @@ export function VehicleRepresentation({ xDistance }: Props) {
         meshRef.current.rotation.y = amplitude * Math.sin(t * timeScale);
         meshRef.current.rotation.z = amplitude * Math.cos(t * timeScale);
         meshRef.current.rotation.x = amplitude * Math.sin(t * timeScale);
-
-        //FIXME: useSpring for the animations
-        if (meshRef.current.position.y < positionX.current) {
-            meshRef.current.translateY(0.02);
-        } else if (meshRef.current.position.y > positionX.current) {
-            meshRef.current.translateY(-0.02);
-        }
     });
 
     useEffect(() => {
-        positionX.current = calculatePositionX(xDistance);
-    }, [xDistance]);
+        positionYRef.current = calculatePositionY(yDistance);
+    }, [yDistance]);
 
     return (
-        <mesh scale={3} ref={meshRef}>
+        <animated.mesh
+            scale={3}
+            ref={meshRef}
+            position-x={spring.positionX}
+            position-y={spring.positionY}
+            position-z={spring.positionZ}
+        >
             <primitive object={model.scene} />
-        </mesh>
+        </animated.mesh>
     );
 }

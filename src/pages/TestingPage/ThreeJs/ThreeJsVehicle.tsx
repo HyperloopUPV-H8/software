@@ -4,10 +4,10 @@ import { Canvas } from "@react-three/fiber";
 import { VehicleRepresentation } from "./VehicleRepresentation/VehicleRepresentation";
 
 type Props = {
-    xDistance: number;
+    yDistance: number;
 };
 
-export function ThreeJsVehicle({ xDistance }: Props) {
+export function ThreeJsVehicle({ yDistance }: Props) {
     return (
         <Canvas>
             <PerspectiveCamera makeDefault position={[7, 5, 6]} fov={60} />
@@ -24,7 +24,7 @@ export function ThreeJsVehicle({ xDistance }: Props) {
                 fadeDistance={20}
                 infiniteGrid
             />
-            <VehicleRepresentation xDistance={xDistance} />
+            <VehicleRepresentation yDistance={yDistance} />
         </Canvas>
     );
 }

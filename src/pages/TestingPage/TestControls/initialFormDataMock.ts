@@ -1,6 +1,6 @@
 export const initialFormDescription = [
     {
-        id: "xDistance",
+        id: "yDistance",
         type: "number",
         value: null,
     },
