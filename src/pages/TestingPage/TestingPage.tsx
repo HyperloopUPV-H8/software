@@ -6,12 +6,15 @@ import { useCallback, useEffect, useState } from "react";
 import { FormDescription } from "./TestControls/TestAttributes";
 import useWebSocket from "react-use-websocket";
 import { VehiclePage } from "pages/VehiclePage/VehiclePage";
+import { WebSocketMessage } from "react-use-websocket/dist/lib/types";
 
 const SERVER_URL = `${import.meta.env.VITE_SERVER_IP_HIL}:${
     import.meta.env.VITE_SERVER_PORT_HIL
 }${import.meta.env.VITE_BACKEND_WEBSOCKET_PATH}`;
 
 const WEBSOCKET_URL = `ws://${SERVER_URL}`;
+
+const START_IDLE = "Back-end is ready!";
 
 export type VehicleState = {
     yDistance: number;
@@ -31,6 +34,7 @@ export function TestingPage() {
     const {
         sendMessage,
         sendJsonMessage,
+        lastMessage,
         lastJsonMessage,
         readyState,
         getWebSocket,
@@ -41,6 +45,14 @@ export function TestingPage() {
             return true;
         },
     });
+
+    useEffect(() => {
+        const stringData: string = lastMessage?.data;
+        if (stringData == START_IDLE) {
+            const message: WebSocketMessage = "start_simulation";
+            sendMessage(message);
+        }
+    }, [lastMessage]);
 
     useEffect(() => {
         if (lastJsonMessage !== null) {
