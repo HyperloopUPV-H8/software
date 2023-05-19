@@ -12,11 +12,18 @@ export const SecondPage = () => {
     return (
         <div className={styles.secondPageWrapper}>
             <LevitationSection data={extractLevitationData(measurements)} />
-            <MessagesContainer />
-            <div className={styles.ordersColumn}>
-                <StateOrders />
-                <EmergencyOrders />
-            </div>
+            {
+                import.meta.env.MODE != "jury" && (
+                    <>
+                        <MessagesContainer />
+                        <div className={styles.ordersColumn}>
+                            <StateOrders />
+                            <EmergencyOrders />
+                        </div>
+                    </>
+
+                )
+            }
         </div>
     );
 };
