@@ -14,8 +14,8 @@ export type NumericMeasurement = AbstractMeasurement & {
     type: NumericType;
     value: NumericValue;
     units: string;
-    safeRange: [number, number];
-    warningRange: [number, number];
+    safeRange: [number | null, number | null];
+    warningRange: [number | null, number | null];
 };
 
 export type NumericValue = { last: number; average: number };

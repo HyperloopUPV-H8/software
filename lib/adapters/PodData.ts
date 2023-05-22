@@ -24,14 +24,7 @@ export type MeasurementAdapter =
     | BooleanMeasurementAdapter
     | EnumMeasurementAdapter;
 
-export type NumericMeasurementAdapter = Omit<
-    NumericMeasurement,
-    "value" | "safeRange" | "warningRange"
-> & {
-    safeRange: [number | null, number | null];
-    warningRange: [number | null, number | null];
-};
-
+export type NumericMeasurementAdapter = Omit<NumericMeasurement, "value">;
 export type BooleanMeasurementAdapter = Omit<BooleanMeasurement, "value">;
 export type EnumMeasurementAdapter = Omit<EnumMeasurement, "value">;
 
@@ -97,8 +90,8 @@ export function getNumericMeasurement(
             last: 0,
         },
         units: adapter.units,
-        safeRange: transformRange(adapter.safeRange),
-        warningRange: transformRange(adapter.warningRange),
+        safeRange: adapter.safeRange,
+        warningRange: adapter.warningRange,
     };
 }
 
@@ -150,13 +143,4 @@ function getMeasurementToPacket(
     });
 
     return measurementToPacket;
-}
-
-export function transformRange(
-    range: [number | null, number | null]
-): [number, number] {
-    const lowerBound = range[0] ?? -Infinity;
-    const upperBound = range[1] ?? Infinity;
-
-    return [lowerBound, upperBound];
 }
