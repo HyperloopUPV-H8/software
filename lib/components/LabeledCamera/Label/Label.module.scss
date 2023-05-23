@@ -1,0 +1,16 @@
+.label {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.15rem 0.4rem;
+    background-color: var(--tertiary-70);
+    color: white;
+    border-radius: 3rem;
+}
+
+.circle {
+    width: 0.9rem;
+    height: 0.9rem;
+    background-color: white;
+    border-radius: 4rem;
+}
