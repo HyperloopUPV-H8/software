@@ -1,5 +1,5 @@
 import styles from "./LegendItem.module.scss";
-import { NumericMeasurement } from "models";
+import { NumericMeasurement } from "../../../../models";
 
 type Props = {
     measurement: NumericMeasurement;

@@ -2,12 +2,13 @@ import styles from "./ColorfulChart.module.scss";
 import { Legend } from "./Legend/Legend";
 import { Title } from "./Title/Title";
 import { useMemo } from "react";
-import { NumericMeasurement } from "models";
-import { LinesChart } from "components/LinesChart/LinesChart";
+import { NumericMeasurement } from "../../models";
+import { LinesChart } from "../LinesChart/LinesChart";
 
 const palette = ["#EE8735", "#51C6EB", "#7BEE35"];
 
 type Props = {
+    className?: string;
     title: string;
     measurements: NumericMeasurement[];
     length: number;
@@ -15,6 +16,7 @@ type Props = {
 };
 
 export const ColorfulChart = ({
+    className = "",
     title,
     measurements,
     length,
@@ -30,7 +32,7 @@ export const ColorfulChart = ({
     );
 
     return (
-        <div className={styles.colorfulChart}>
+        <div className={`${styles.colorfulChart} ${className}`}>
             <Title title={title} />
             <div className={styles.body}>
                 <LinesChart

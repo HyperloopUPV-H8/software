@@ -2,7 +2,7 @@ import styles from "./LinesChart.module.scss";
 import { useLines } from "./useLines";
 import { VerticalAxis } from "./VerticalAxis/VerticalAxis";
 import { LinesWithGrid } from "./LinesWithGrid/LinesWithGrid";
-import { NumericMeasurement } from "models";
+import { NumericMeasurement } from "../../models";
 
 type Props = {
     items: Array<{ measurement: NumericMeasurement; color: string }>;

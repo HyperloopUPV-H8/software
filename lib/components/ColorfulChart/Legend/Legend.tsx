@@ -1,6 +1,6 @@
 import styles from "./Legend.module.scss";
 import { LegendItem } from "./LegendItem/LegendItem";
-import { NumericMeasurement } from "models";
+import { NumericMeasurement } from "../../../models";
 
 type Props = {
     items: Array<{ measurement: NumericMeasurement; color: string }>;

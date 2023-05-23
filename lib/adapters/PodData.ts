@@ -1,12 +1,13 @@
-import { PodData } from "models/PodData/PodData";
-import { Board } from "models/PodData/Board";
-import { Packet } from "models/PodData/Packet";
 import {
+    PodData,
+    Board,
+    Packet,
     BooleanMeasurement,
     EnumMeasurement,
     Measurement,
     NumericMeasurement,
-} from "../models/PodData/Measurement";
+} from "../models";
+
 import { NumericType, isNumericType } from "../BackendTypes";
 
 export type PodDataAdapter = { boards: { [name: string]: BoardAdapter } };

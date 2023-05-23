@@ -1,4 +1,4 @@
-import { useInterval } from "hooks/useInterval";
+import { useInterval } from "../../hooks/useInterval";
 import { createContext, useRef } from "react";
 
 type Callback = () => void;

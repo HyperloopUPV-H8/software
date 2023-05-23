@@ -1,8 +1,8 @@
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { dataToPath } from "./path";
 import { RangeArray } from "./LineDataHandler";
-import { NumericMeasurement } from "models";
-import { useGlobalTicker } from "services/GlobalTicker/useGlobalTicker";
+import { NumericMeasurement } from "../../models";
+import { useGlobalTicker } from "../../services/GlobalTicker/useGlobalTicker";
 
 type LineDescription = {
     measurementId: string;

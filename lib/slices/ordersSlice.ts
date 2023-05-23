@@ -1,4 +1,4 @@
-import { OrderDescription } from "adapters/Order";
+import { OrderDescription } from "../adapters";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 export function createOrderSlice() {

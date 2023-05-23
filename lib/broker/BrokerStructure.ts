@@ -1,15 +1,14 @@
-import { Order } from "models/Order";
-import { MessageAdapter } from "adapters/Message";
-import { PacketUpdate } from "adapters/PacketUpdate";
-import { ConnectionsUpdate } from "adapters/ConnectionUpdate";
-import { VcuStateAndOrders } from "adapters/VcuState";
-
+import { Order } from "../models";
 import {
+    MessageAdapter,
+    PacketUpdate,
+    ConnectionsUpdate,
+    VcuStateAndOrders,
     BootloaderDownloadRequest,
     BootloaderDownloadResponse,
     BootloaderUploadRequest,
     BootloaderUploadResponse,
-} from "../adapters/Bootloader";
+} from "../adapters";
 
 export type BrokerStructure = {
     "podData/update": {

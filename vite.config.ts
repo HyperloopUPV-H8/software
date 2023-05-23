@@ -2,11 +2,12 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import typescript from "@rollup/plugin-typescript";
-// import { typescriptPaths } from "rollup-plugin-typescript-paths";
+import tsconfigPaths from "vite-tsconfig-paths";
 import path from "path";
+import postcss from "rollup-plugin-postcss";
 
 export default defineConfig({
-    plugins: [react()],
+    plugins: [react(), tsconfigPaths(), postcss()],
     server: {
         port: 3000,
     },

@@ -1,4 +1,4 @@
-import { NumericType } from "BackendTypes";
+import { NumericType } from "../BackendTypes";
 
 export type OrderDescription = {
     readonly id: number;

@@ -1,4 +1,4 @@
-import { Measurement } from "models/PodData/Measurement";
+import { Measurement } from "../models";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
     getBooleanMeasurement,
@@ -6,8 +6,8 @@ import {
     getNumericMeasurement,
     isNumericAdapter,
     PodDataAdapter,
-} from "../adapters/PodData";
-import { PacketUpdate } from "../adapters/PacketUpdate";
+    PacketUpdate,
+} from "../adapters";
 
 export type Measurements = Record<string, Measurement>;
 

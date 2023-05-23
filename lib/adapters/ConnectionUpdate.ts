@@ -1,3 +1,3 @@
-import { Connection } from "models";
+import { Connection } from "../models";
 
 export type ConnectionsUpdate = Connection[];

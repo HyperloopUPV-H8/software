@@ -4,9 +4,9 @@
         "lib": ["DOM", "DOM.Iterable", "ESNext"],
         "module": "ESNext",
         "skipLibCheck": true,
-        "baseUrl": "lib",
+
         "declaration": true,
-        "outDir": "dist/lib",
+        "outDir": "dist",
         "sourceMap": true,
         "declarationMap": true,
 
