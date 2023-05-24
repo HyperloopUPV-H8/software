@@ -14,8 +14,6 @@ const SERVER_URL = `${import.meta.env.VITE_SERVER_IP_HIL}:${
 
 const WEBSOCKET_URL = `ws://${SERVER_URL}`;
 
-const START_IDLE = "Back-end is ready!";
-
 export type VehicleState = {
     yDistance: number;
     current: number;
@@ -47,16 +45,10 @@ export function TestingPage() {
     });
 
     useEffect(() => {
-        const stringData: string = lastMessage?.data;
-        if (stringData == START_IDLE) {
-            const message: WebSocketMessage = "start_simulation";
-            sendMessage(message);
-        }
-    }, [lastMessage]);
-
-    useEffect(() => {
+        //Movement is from the previous one
         if (lastJsonMessage !== null) {
             const newVehicleState = lastJsonMessage as VehicleState;
+            console.log(newVehicleState);
             if (newVehicleState.duty >= 0 && newVehicleState.duty < 256) {
                 setVehicleState(newVehicleState);
             } else {
@@ -72,7 +64,11 @@ export function TestingPage() {
     return (
         <PageWrapper title="Testing">
             <div className={style.testingPageWrapper}>
-                <TestControls sendJsonMessage={sendJsonMessage} />
+                <TestControls
+                    sendJsonMessage={sendJsonMessage}
+                    sendMessage={sendMessage}
+                    lastMessage={lastMessage}
+                />
                 <div className={style.podRepresentation}>
                     <div className={style.threeJSAndInfo}>
                         <div className={style.threeJS}>

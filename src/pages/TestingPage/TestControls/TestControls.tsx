@@ -11,13 +11,22 @@ import { useControlForm } from "./useControlForm";
 import { initialFormDescription } from "./initialFormDataMock";
 import { ControlButtons } from "./ControlButtons/ControlButtons";
 import { ControlInputs } from "./ControlInputs/ControlInputs";
-import { SendJsonMessage } from "react-use-websocket/dist/lib/types";
+import {
+    SendJsonMessage,
+    SendMessage,
+} from "react-use-websocket/dist/lib/types";
 
 type Props = {
     sendJsonMessage: SendJsonMessage;
+    sendMessage: SendMessage;
+    lastMessage: MessageEvent<any> | null;
 };
 
-export const TestControls = ({ sendJsonMessage }: Props) => {
+export const TestControls = ({
+    sendJsonMessage,
+    sendMessage,
+    lastMessage,
+}: Props) => {
     const [form, ChangeValue, ChangeEnable, SubmitHandler] = useControlForm(
         initialFormDescription
     );
@@ -25,13 +34,18 @@ export const TestControls = ({ sendJsonMessage }: Props) => {
     return (
         <div className={style.testControlsWrapper}>
             <div className={style.playWrapper}>
-                <PlayButton variant="play" />
-                <PlayButton variant="disabled" />
+                <PlayButton
+                    variant="play"
+                    sendMessage={sendMessage}
+                    lastMessage={lastMessage}
+                />
+                <PlayButton variant="stop" />
+                {/*FIXME: Handle the disabled buttons*/}
             </div>
             <div className={style.sectionWrapper}>
                 <div className={style.title}>Controls</div>
                 <div className={style.body}>
-                    <ControlButtons />
+                    <ControlButtons sendJsonMessage={sendJsonMessage} />
                     <ControlInputs
                         form={form}
                         changeEnable={ChangeEnable}

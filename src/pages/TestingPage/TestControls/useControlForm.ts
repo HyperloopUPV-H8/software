@@ -33,8 +33,7 @@ export function useControlForm(
     const SubmitHandler: SubmitHandler = (sendJsonMessage: SendJsonMessage) => {
         if (form.isValid) {
             //TODO: take the data, send FormData al backend? To be defined
-            const jsonFormData = JSON.stringify(form.formData);
-            sendJsonMessage(JSON.parse(jsonFormData));
+            sendJsonMessage(form.formData);
             console.log("Form Data sent!");
         }
     };
