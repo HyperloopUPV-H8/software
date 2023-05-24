@@ -13,6 +13,13 @@ export function useBootloaderState() {
     );
 
     function upload(board: string, file: File) {
+        file.arrayBuffer().then((arr) => {
+            uploader({
+                board: board,
+                file: window.btoa(String.fromCharCode(...new Uint8Array(arr))),
+            });
+        });
+
         file.text().then((value) => {
             uploader({ board: board, file: value });
             setState({ kind: "awaiting" });
