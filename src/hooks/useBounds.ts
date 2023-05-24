@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from "react";
 
-export function useBoundingRect<T extends HTMLElement>() {
+export function useBounds<T extends HTMLElement>() {
     const ref = useRef<T>(null);
     const [rect, setRect] = useState<DOMRect>({
         x: 0,

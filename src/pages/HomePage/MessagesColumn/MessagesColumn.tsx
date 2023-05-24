@@ -8,6 +8,7 @@ import { MessagesContainer } from "components/MessagesContainer/MessagesContaine
 import { Logger } from "components/Logger/Logger";
 import { useRef } from "react";
 import { Connections } from "components/Connections/Connections";
+import { BootloaderContainer } from "components/BootloaderContainer/BootloaderContainer";
 
 export const MessagesColumn = () => {
     const messagesTabItems = useRef([
@@ -30,6 +31,7 @@ export const MessagesColumn = () => {
                 orientation={Orientation.VERTICAL}
             ></SplitLayout>
             <Logger />
+            <BootloaderContainer />
         </div>
     );
 };

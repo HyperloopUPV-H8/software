@@ -1,16 +1,28 @@
-import { useWebSocketBroker } from "./WebSocketBroker/useWebSocketBroker";
+import { useBroker } from "common";
 
-type BootloaderSuccess = "success";
-type BootloaderError = "failure";
+export type BootloaderUpload = { board: string; file: File };
 
-export type BootloaderResponse = BootloaderSuccess | BootloaderError;
-
-export function useBootloader(onSuccess: () => void, onFailure: () => void) {
-    return useWebSocketBroker("bootloader/upload", (msg) => {
-        if (!msg.failure) {
-            onSuccess();
+export function useBootloader(
+    onDownloadSuccess: (file: File) => void,
+    onDownloadFailure: () => void,
+    onSendSuccess: () => void,
+    onSendFailure: () => void
+) {
+    const uploader = useBroker("blcu/upload", (msg) => {
+        if (msg.success) {
+            onSendSuccess();
         } else {
-            onFailure();
+            onSendFailure();
         }
     });
+
+    const downloader = useBroker("blcu/download", (msg) => {
+        if (msg.success) {
+            onDownloadSuccess(new File([msg.file], "program"));
+        } else {
+            onDownloadFailure();
+        }
+    });
+
+    return { uploader, downloader } as const;
 }
