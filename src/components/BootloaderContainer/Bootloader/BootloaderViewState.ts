@@ -16,6 +16,7 @@ type SendState = {
 
 type AwaitingState = {
     kind: "awaiting";
+    progress: number; // Between 0 and 100
 };
 
 type SuccessState = {

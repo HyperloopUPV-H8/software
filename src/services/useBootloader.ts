@@ -6,21 +6,26 @@ export function useBootloader(
     onDownloadSuccess: (file: File) => void,
     onDownloadFailure: () => void,
     onSendSuccess: () => void,
-    onSendFailure: () => void
+    onSendFailure: () => void,
+    onProgress: (progress: number) => void // progress between 0 and 100
 ) {
     const uploader = useBroker("blcu/upload", (msg) => {
-        if (msg.success) {
+        if (msg.progress == 100) {
             onSendSuccess();
-        } else {
+        } else if (msg.failure) {
             onSendFailure();
+        } else {
+            onProgress(msg.progress);
         }
     });
 
     const downloader = useBroker("blcu/download", (msg) => {
-        if (msg.success) {
+        if (msg.progress == 100) {
             onDownloadSuccess(new File([msg.file], "program"));
-        } else {
+        } else if (msg.failure) {
             onDownloadFailure();
+        } else {
+            onProgress(msg.progress);
         }
     });
 

@@ -1,14 +1,15 @@
 import styles from "./ResponseElement.module.scss";
 import { HiCheckCircle } from "react-icons/hi";
 import { MdCancel } from "react-icons/md";
+
 type Props = {
-    response: string;
+    success: boolean;
 };
 
-export const ResponseElement = ({ response }: Props) => {
+export const ResponseElement = ({ success }: Props) => {
     return (
         <div className={styles.responseElementWrapper}>
-            {response == "success" && (
+            {success && (
                 <>
                     <HiCheckCircle
                         className={`${styles.icon} ${styles.successIcon}`}
@@ -16,7 +17,7 @@ export const ResponseElement = ({ response }: Props) => {
                     Success!
                 </>
             )}
-            {response == "failure" && (
+            {!success && (
                 <>
                     <MdCancel
                         className={`${styles.icon} ${styles.failureIcon}`}

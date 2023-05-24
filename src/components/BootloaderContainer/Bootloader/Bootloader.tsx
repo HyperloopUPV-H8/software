@@ -3,7 +3,7 @@ import { useState } from "react";
 import { DropElement } from "./DropElement/DropElement";
 import { SendElement } from "./SendElement/SendElement";
 import { useBootloaderState } from "./useBootloaderState";
-import { AwaitElement } from "./AwaitElement/AwaitElement";
+import { LoadingElement } from "./LoadingElement/LoadingElement";
 import { ResponseElement } from "./ResponseElement/ResponseElement";
 import { Controls } from "./Controls/Controls";
 import { Island } from "components/Island/Island";
@@ -22,17 +22,18 @@ export const Bootloader = ({ boards }: Props) => {
                 {state.kind == "empty" && <DropElement onFile={setFile} />}
                 {state.kind == "send" && (
                     <SendElement
-                        file={{ name: state.file.name, size: state.file.size }}
+                        file={{
+                            name: state.file.name,
+                            size: state.file.size,
+                        }}
                         onRemove={() => removeFile()}
                     />
                 )}
-                {state.kind == "awaiting" && <AwaitElement />}
-                {state.kind == "success" && (
-                    <ResponseElement response="success" />
+                {state.kind == "awaiting" && (
+                    <LoadingElement progress={state.progress} />
                 )}
-                {state.kind == "failure" && (
-                    <ResponseElement response="failure" />
-                )}
+                {state.kind == "success" && <ResponseElement success={true} />}
+                {state.kind == "failure" && <ResponseElement success={false} />}
                 {(state.kind == "empty" || state.kind == "send") && (
                     <Controls
                         options={boards}

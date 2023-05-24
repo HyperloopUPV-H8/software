@@ -22,13 +22,13 @@ export function useBootloaderState() {
 
         file.text().then((value) => {
             uploader({ board: board, file: value });
-            setState({ kind: "awaiting" });
+            setState({ kind: "awaiting", progress: 0 });
         });
     }
 
     function download(board: string) {
         downloader({ board });
-        setState({ kind: "awaiting" });
+        setState({ kind: "awaiting", progress: 0 });
     }
 
     function onSuccess() {
