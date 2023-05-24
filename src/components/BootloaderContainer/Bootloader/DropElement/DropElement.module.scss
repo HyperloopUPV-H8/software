@@ -1,0 +1,24 @@
+@use "src/styles/styles";
+
+.dropElementWrapper {
+    flex: 1 1 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    outline: 1px dashed black;
+    border-radius: styles.$large-border-radius;
+
+    text-align: center;
+    overflow: hidden;
+}
+
+.dragOver {
+    outline: 2px solid #589bff;
+    background-color: #80b3ff24;
+}
+
+.link {
+    font-weight: bold;
+    color: #66a9f6;
+}
