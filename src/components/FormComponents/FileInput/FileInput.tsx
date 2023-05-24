@@ -14,7 +14,6 @@ export const FileInput = ({ accept, className, label, onFile }: Props) => {
     return (
         <>
             <label
-                // onDragOver={(ev) => ev.preventDefault()}
                 htmlFor={id}
                 className={className}
                 style={{ cursor: "pointer" }}

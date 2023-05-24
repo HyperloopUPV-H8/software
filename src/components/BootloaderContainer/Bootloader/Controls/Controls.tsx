@@ -1,6 +1,5 @@
-import { Button } from "components/FormComponents/Button/Button";
-import { Dropdown } from "components/FormComponents/Dropdown/Dropdown";
 import styles from "./Controls.module.scss";
+import { Button } from "components/FormComponents/Button/Button";
 
 type Props = {
     options: Array<string>;
@@ -19,10 +18,15 @@ export const Controls = ({
 }: Props) => {
     return (
         <div className={styles.boardControlsWrapper}>
-            <Dropdown
-                options={options}
-                onChange={(value) => onBoardChange(value)}
-            />
+            <select
+                name="boards"
+                id="boards"
+                onChange={(ev) => onBoardChange(ev.target.value)}
+            >
+                {options.map((item) => {
+                    return <option value={item}>{item}</option>;
+                })}
+            </select>
             <Button
                 label="Download"
                 onClick={onDownloadClick}

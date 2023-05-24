@@ -1,8 +1,4 @@
-import {
-    OrderDescription,
-    OrderFieldDescription,
-    transformRange,
-} from "common";
+import { OrderDescription, OrderFieldDescription } from "common";
 import { useState, useEffect } from "react";
 import { fetchFromBackend } from "services/fetch";
 
@@ -56,10 +52,6 @@ function getCorrectField(field: OrderFieldDescription): OrderFieldDescription {
             name: field.name,
             valueDescription: {
                 ...field.valueDescription,
-                safeRange: transformRange(field.valueDescription.safeRange),
-                warningRange: transformRange(
-                    field.valueDescription.warningRange
-                ),
             },
         };
     } else {

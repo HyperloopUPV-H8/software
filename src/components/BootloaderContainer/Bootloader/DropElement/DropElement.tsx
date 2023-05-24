@@ -35,7 +35,6 @@ export const DropElement = ({ onFile }: Props) => {
             onDragOver={(ev) => ev.preventDefault()}
         >
             <div className={styles.textWrapper}>
-                {/* FIXME: MAKE TEXT ELLIPSIS TO AVOID OVERFLOW OF DROP ZONE */}
                 <span style={{ pointerEvents: "none" }}>Drop or&nbsp;</span>
                 <FileInput
                     accept=".bin"

@@ -14,7 +14,7 @@ type Props = {
 
 export const Bootloader = ({ boards }: Props) => {
     const [state, upload, download, setFile, removeFile] = useBootloaderState();
-    const [board, setBoard] = useState(boards[0]); //FIXME: poner valor por defecto correcto
+    const [board, setBoard] = useState(boards[0] ?? "Default");
 
     return (
         <Island style={{ height: "min-content" }}>

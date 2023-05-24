@@ -7,16 +7,16 @@ import {
 export function isNumberValid(
     valueStr: string,
     numberType: NumericType,
-    range: [number, number]
+    range: [number | null, number | null]
 ): boolean {
     if (stringIsNumber(valueStr, numberType)) {
         if (isUnsignedIntegerType(numberType)) {
             let isValid = true;
-            if (Number.isFinite(range[0])) {
+            if (range[0]) {
                 isValid &&= Number.parseInt(valueStr) >= range[0];
             }
 
-            if (Number.isFinite(range[1])) {
+            if (range[1]) {
                 isValid &&= Number.parseInt(valueStr) <= range[1];
             }
 
@@ -29,11 +29,11 @@ export function isNumberValid(
             );
         } else if (isSignedIntegerType(numberType)) {
             let isValid = true;
-            if (Number.isFinite(range[0])) {
+            if (range[0]) {
                 isValid &&= Number.parseInt(valueStr) >= range[0];
             }
 
-            if (Number.isFinite(range[1])) {
+            if (range[1]) {
                 isValid &&= Number.parseInt(valueStr) <= range[1];
             }
 
@@ -46,11 +46,11 @@ export function isNumberValid(
             );
         } else {
             let isValid = true;
-            if (Number.isFinite(range[0])) {
+            if (range[0]) {
                 isValid &&= Number.parseFloat(valueStr) >= range[0];
             }
 
-            if (Number.isFinite(range[1])) {
+            if (range[1]) {
                 isValid &&= Number.parseFloat(valueStr) <= range[1];
             }
 
