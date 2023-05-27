@@ -24,8 +24,8 @@ export type EnumDescription = {
 export type NumericDescription = {
     readonly kind: "numeric";
     readonly value: NumericType;
-    readonly safeRange: [number, number];
-    readonly warningRange: [number, number];
+    readonly safeRange: [number | null, number | null];
+    readonly warningRange: [number | null, number | null];
 };
 
 export type BooleanDescription = {

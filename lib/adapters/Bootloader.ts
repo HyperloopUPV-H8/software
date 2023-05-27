@@ -1,7 +1,9 @@
 export type BootloaderUploadRequest = { board: string; file: string };
-export type BootloaderUploadResponse = { percentage: number; success: boolean };
+export type BootloaderUploadResponse = { percentage: number; failure: boolean };
 
 export type BootloaderDownloadRequest = { board: string };
-export type BootloaderDownloadResponse =
-    | { success: false }
-    | { success: true; file: string };
+export type BootloaderDownloadResponse = {
+    percentage: number;
+    failure: boolean;
+    file: string;
+};
