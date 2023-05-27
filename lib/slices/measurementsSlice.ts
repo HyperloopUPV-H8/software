@@ -11,31 +11,29 @@ import {
 
 export type Measurements = Record<string, Measurement>;
 
-export function createMeasurementsSlice() {
-    return createSlice({
-        name: "measurements",
-        initialState: {} as Measurements,
-        reducers: {
-            initMeasurements: (
-                _: Measurements,
-                action: PayloadAction<PodDataAdapter>
-            ) => {
-                return createMeasurementsFromPodDataAdapter(action.payload);
-            },
-            updateMeasurements: (
-                state: Measurements,
-                action: PayloadAction<Record<string, PacketUpdate>>
-            ) => {
-                for (let packetUpdate of Object.values(action.payload)) {
-                    for (let [id, mUpdate] of Object.entries(
-                        packetUpdate.measurementUpdates
-                    ))
-                        state[id].value = mUpdate;
-                }
-            },
+export const measurementsSlice = createSlice({
+    name: "measurements",
+    initialState: {} as Measurements,
+    reducers: {
+        initMeasurements: (
+            _: Measurements,
+            action: PayloadAction<PodDataAdapter>
+        ) => {
+            return createMeasurementsFromPodDataAdapter(action.payload);
         },
-    });
-}
+        updateMeasurements: (
+            state: Measurements,
+            action: PayloadAction<Record<string, PacketUpdate>>
+        ) => {
+            for (let packetUpdate of Object.values(action.payload)) {
+                for (let [id, mUpdate] of Object.entries(
+                    packetUpdate.measurementUpdates
+                ))
+                    state[id].value = mUpdate;
+            }
+        },
+    },
+});
 
 function createMeasurementsFromPodDataAdapter(
     podDataAdapter: PodDataAdapter

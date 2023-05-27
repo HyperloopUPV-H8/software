@@ -31,6 +31,7 @@
         "@rollup/plugin-typescript": "^11.1.0",
         "@vitejs/plugin-react": "^4.0.0",
         "lodash": "^4.17.21",
+        "react-redux": "^8.0.5",
         "rollup-plugin-import-map": "^3.0.0",
         "rollup-plugin-includepaths": "^0.2.4",
         "rollup-plugin-typescript-paths": "^1.4.0",
