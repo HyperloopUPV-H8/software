@@ -24,7 +24,14 @@ export const Controls = ({
                 onChange={(ev) => onBoardChange(ev.target.value)}
             >
                 {options.map((item) => {
-                    return <option value={item}>{item}</option>;
+                    return (
+                        <option
+                            key={item}
+                            value={item}
+                        >
+                            {item}
+                        </option>
+                    );
                 })}
             </select>
             <Button

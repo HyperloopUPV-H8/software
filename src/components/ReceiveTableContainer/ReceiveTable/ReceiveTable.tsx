@@ -1,16 +1,24 @@
 import styles from "./ReceiveTable.module.scss";
 import { BoardView } from "./BoardView/BoardView";
 import { Header } from "./Header/Header";
-import { Board } from "common";
+import { Board, useSubscribe } from "common";
 import { TableUpdater } from "./TableUpdater";
+import { useDispatch } from "react-redux";
+import { updatePodData } from "slices/podDataSlice";
+import { updateMeasurements } from "slices/measurementsSlice";
 
 type Props = {
     boards: Board[];
 };
 
-const RECEIVE_TABLE_HEADERS = ["ID", "NAME", "COUNT", "CYCLE (ns)"];
-
 export const ReceiveTable = ({ boards }: Props) => {
+    const dispatch = useDispatch();
+
+    useSubscribe("podData/update", (update) => {
+        dispatch(updatePodData(update));
+        dispatch(updateMeasurements(update));
+    });
+
     return (
         <TableUpdater>
             <div className={styles.newReceiveTable}>

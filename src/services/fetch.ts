@@ -1,8 +1,9 @@
-export async function fetchFromBackend(path: string) {
+export async function fetchFromBackend(path: string, signal: AbortSignal) {
     return fetch(
         `http://${import.meta.env.VITE_SERVER_IP}:${
             import.meta.env.VITE_SERVER_PORT
-        }${path}`
+        }${path}`,
+        { signal }
     );
 }
 

@@ -6,11 +6,20 @@ export const BootloaderContainer = () => {
     const [boards, setBoards] = useState<string[]>();
 
     useEffect(() => {
-        fetchFromBackend(import.meta.env.VITE_UPLOADABLE_BOARDS_PATH)
+        const controller = new AbortController();
+
+        fetchFromBackend(
+            import.meta.env.VITE_UPLOADABLE_BOARDS_PATH,
+            controller.signal
+        )
             .then((res: Response) => res.json())
             .then((value: string[]) => {
                 setBoards(value);
             });
+
+        return () => {
+            controller.abort();
+        };
     }, []);
 
     if (boards) {
