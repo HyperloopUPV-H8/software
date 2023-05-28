@@ -1,0 +1,19 @@
+.responseElementWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    gap: 0.5rem;
+}
+
+.icon {
+    font-size: 2rem;
+}
+
+.successIcon {
+    color: #75d65d;
+}
+
+.failureIcon {
+    color: #dc5757;
+}
