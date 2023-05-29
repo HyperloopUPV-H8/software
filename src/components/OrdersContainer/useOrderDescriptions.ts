@@ -1,6 +1,7 @@
 import { OrderDescription, OrderFieldDescription } from "common";
 import { useState, useEffect } from "react";
-import { fetchFromBackend } from "services/fetch";
+import { fetchFromBackend } from "common";
+import { config } from "common";
 
 export function useOrderDescriptions() {
     const [orderDescriptions, setOrderDescriptions] = useState<
@@ -8,7 +9,9 @@ export function useOrderDescriptions() {
     >({});
 
     useEffect(() => {
-        fetchFromBackend(import.meta.env.VITE_ORDER_DESCRIPTIONS_PATH)
+        const controller = new AbortController();
+
+        fetchFromBackend(config.paths.orderDescription, controller.signal)
             .then((res) => {
                 return res.json();
             })
@@ -16,6 +19,10 @@ export function useOrderDescriptions() {
                 setOrderDescriptions(getCorrectDescriptions(descriptions));
             })
             .catch((reason) => console.error(reason));
+
+        return () => {
+            controller.abort();
+        };
     }, []);
 
     return orderDescriptions;
