@@ -13,16 +13,19 @@ export const ControlButtons = ({ sendJsonMessage }: Props) => {
     return (
         <div className={style.controlsWrapper}>
             <ToggleButton
+                id={0}
                 label="levitation"
                 icon={<LevitateIcon />}
                 sendJsonMessage={sendJsonMessage}
             />
             <ToggleButton
+                id={1}
                 label="propulsion"
                 icon={<PropulseIcon />}
                 sendJsonMessage={sendJsonMessage}
             />
             <ToggleButton
+                id={2}
                 label="brake"
                 icon={<BreakIcon />}
                 sendJsonMessage={sendJsonMessage}

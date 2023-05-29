@@ -5,8 +5,8 @@ import {
     ReactNode,
     useEffect,
 } from "react";
-import style from "./ToggleButton.module.scss";
 import { SendJsonMessage } from "react-use-websocket/dist/lib/types";
+import style from "./InstructionButton.module.scss";
 
 type ControlOrder = {
     id: number;
@@ -14,8 +14,8 @@ type ControlOrder = {
 };
 
 type Props = {
+    //label: string;
     id: number;
-    label: string;
     icon: ReactNode;
     sendJsonMessage: SendJsonMessage;
     onToggle?: (state: boolean) => void;
@@ -27,9 +27,8 @@ type Props = {
     "onClick" | "id"
 >;
 
-export function ToggleButton({
+export function InstructionButton({
     id,
-    label,
     icon,
     sendJsonMessage,
     onToggle,
@@ -49,13 +48,13 @@ export function ToggleButton({
             <button
                 onClick={() => {
                     flip();
-                    sendOrder(!isOn, id, sendJsonMessage); //FIXME, the actualization of flip hasn't effect here yet
+                    sendOrder(!isOn, id, sendJsonMessage);
                 }}
                 {...buttonProps}
             >
                 {icon}
+                <p>Custom {id}</p>
             </button>
-            <p>{label}</p>
         </label>
     );
 }

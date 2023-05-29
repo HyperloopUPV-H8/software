@@ -15,6 +15,7 @@ import {
     SendJsonMessage,
     SendMessage,
 } from "react-use-websocket/dist/lib/types";
+import { InstructionButtons } from "./InstructionButton/InstructionButtons";
 
 type Props = {
     sendJsonMessage: SendJsonMessage;
@@ -46,7 +47,7 @@ export const TestControls = ({
                 <div className={style.title}>Controls</div>
                 <div className={style.body}>
                     <ControlButtons sendJsonMessage={sendJsonMessage} />
-                    <ControlInputs
+                    {/* <ControlInputs
                         form={form}
                         changeEnable={ChangeEnable}
                         changeValue={ChangeValue}
@@ -58,7 +59,8 @@ export const TestControls = ({
                             SubmitHandler(sendJsonMessage);
                         }}
                         disabled={!form.isValid}
-                    />
+                    /> */}
+                    <InstructionButtons sendJsonMessage={sendJsonMessage} />
                 </div>
             </div>
         </div>
