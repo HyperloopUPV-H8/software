@@ -4,6 +4,9 @@ import { ChartMenu } from "components/ChartMenu/ChartMenu";
 import { RequestState, useFetchPodData } from "./useFetchPodData";
 import { ReactComponent as IncomingMessage } from "assets/svg/incoming-message.svg";
 import { ReactComponent as Chart } from "assets/svg/chart.svg";
+import { store } from "store";
+import { ReceiveTable } from "components/ReceiveTable/ReceiveTable";
+import { useMemo } from "react";
 
 const receiveColumnTabItem = [
     {
