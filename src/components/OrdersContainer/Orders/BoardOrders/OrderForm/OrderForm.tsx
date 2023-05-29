@@ -2,15 +2,15 @@ import styles from "./OrderForm.module.scss";
 import { OrderDescription } from "common";
 import { Header, HeaderInfo } from "./Header/Header";
 import { Fields } from "./Fields/Fields";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Order } from "common";
 import { FormField, useForm } from "./useForm";
 import { useSpring } from "@react-spring/web";
 import { useListenKey } from "./useListenKey";
+import { OrderContext } from "../../OrderContext";
 
 type Props = {
     description: OrderDescription;
-    sendOrder: (order: Order) => void;
 };
 
 function createOrder(id: number, fields: FormField[]): Order {
@@ -27,7 +27,8 @@ function createOrder(id: number, fields: FormField[]): Order {
     };
 }
 
-export const OrderForm = ({ description, sendOrder }: Props) => {
+export const OrderForm = ({ description }: Props) => {
+    const sendOrder = useContext(OrderContext);
     const { form, updateField, changeEnable } = useForm(description.fields);
     const [isOpen, setIsOpen] = useState(false);
     const [springs, api] = useSpring(() => ({

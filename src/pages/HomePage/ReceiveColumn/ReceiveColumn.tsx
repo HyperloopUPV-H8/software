@@ -1,38 +1,33 @@
 import styles from "./ReceiveColumn.module.scss";
 import { TabLayout } from "layouts/TabLayout/TabLayout";
 import { ChartMenu } from "components/ChartMenu/ChartMenu";
-import { RequestState, useFetchPodData } from "./useFetchPodData";
 import { ReactComponent as IncomingMessage } from "assets/svg/incoming-message.svg";
 import { ReactComponent as Chart } from "assets/svg/chart.svg";
-import { store } from "store";
 import { ReceiveTable } from "components/ReceiveTable/ReceiveTable";
 import { useMemo } from "react";
-
-const receiveColumnTabItem = [
-    {
-        id: "receiveTable",
-        name: "Packets",
-        icon: <IncomingMessage />,
-        component: <ReceiveTableContainer />,
-    },
-    {
-        id: "charts",
-        name: "Charts",
-        icon: <Chart />,
-        component: <ChartMenu />,
-    },
-];
+import { store } from "store";
 
 export const ReceiveColumn = () => {
-    const requestState = useFetchPodData();
+    const receiveColumnTabItem = useMemo(
+        () => [
+            {
+                id: "receiveTable",
+                name: "Packets",
+                icon: <IncomingMessage />,
+                component: (
+                    <ReceiveTable boards={store.getState().podData.boards} />
+                ),
+            },
+            {
+                id: "charts",
+                name: "Charts",
+                icon: <Chart />,
+                component: <ChartMenu />,
+            },
+        ],
 
-    if (requestState == RequestState.PENDING) {
-        return <div className={styles.loadingMessages}>Loading PodData...</div>;
-    } else if (requestState == RequestState.FULFILLED) {
-        return <TabLayout items={receiveColumnTabItem}></TabLayout>;
-    } else {
-        return (
-            <div className={styles.loadingMessages}>Error fetching PodData</div>
-        );
-    }
+        []
+    );
+
+    return <TabLayout items={receiveColumnTabItem}></TabLayout>;
 };
