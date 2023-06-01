@@ -12,7 +12,7 @@ export const BoardOrdersView = ({ boardOrders }: Props) => {
             <div className={styles.name}>{boardOrders.name}</div>
             {boardOrders.orders && (
                 <div className={styles.orders}>
-                    <span className={styles.title}>Orders</span>
+                    <span className={styles.title}>Permanent orders</span>
                     {boardOrders.orders.map((desc) => {
                         return (
                             <OrderForm
@@ -23,8 +23,7 @@ export const BoardOrdersView = ({ boardOrders }: Props) => {
                     })}
                 </div>
             )}
-            {boardOrders.stateOrders.filter((item) => item.enabled).length >
-                0 && (
+            {boardOrders.stateOrders.some((item) => item.enabled) && (
                 <div className={styles.stateOrders}>
                     <span className={styles.title}>State orders</span>
                     {boardOrders.stateOrders.map((desc) => {

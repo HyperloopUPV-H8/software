@@ -1,6 +1,6 @@
 import { Bootloader } from "./Bootloader/Bootloader";
 import { useEffect, useState } from "react";
-import { fetchFromBackend } from "common";
+import { fetchBack } from "common";
 import { config } from "common";
 
 export const BootloaderContainer = () => {
@@ -9,11 +9,11 @@ export const BootloaderContainer = () => {
     useEffect(() => {
         const controller = new AbortController();
 
-        fetchFromBackend(config.paths.uploadableBoards, controller.signal)
-            .then((res: Response) => res.json())
-            .then((value: string[]) => {
+        fetchBack(config.paths.uploadableBoards, controller.signal).then(
+            (value: string[]) => {
                 setBoards(value);
-            });
+            }
+        );
     }, []);
 
     if (boards) {

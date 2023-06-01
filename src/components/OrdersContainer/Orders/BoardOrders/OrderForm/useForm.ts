@@ -1,30 +1,6 @@
-import { OrderFieldDescription, ValueDescription } from "common";
-import { useEffect, useReducer } from "react";
-import { createForm } from "./form";
-
-export type FormField = {
-    id: string;
-    valueDescription: ValueDescription;
-    value: string | boolean | number;
-    isValid: boolean;
-    isEnabled: boolean;
-};
-
-export type Form = {
-    fields: FormField[];
-    isValid: boolean;
-};
-
-//TODO: move function somewhere else
-export function areFieldsValid(fields: Array<FormField>): boolean {
-    return fields.reduce((prevValid, currentField) => {
-        return (
-            prevValid &&
-            ((currentField.isEnabled && currentField.isValid) ||
-                !currentField.isEnabled)
-        );
-    }, true);
-}
+import { OrderFieldDescription } from "common";
+import { useReducer } from "react";
+import { Form, areFieldsValid, createForm, FormField } from "./form";
 
 type Action = UpdateField | ChangeEnable;
 
@@ -32,10 +8,11 @@ type UpdateField = {
     type: "update_field";
     payload: {
         id: string;
-        value: string | boolean | number;
         isValid: boolean;
+        value: number | string | boolean;
     };
 };
+
 type ChangeEnable = {
     type: "change_enable";
     payload: {
@@ -47,17 +24,16 @@ type ChangeEnable = {
 function reducer(state: Form, action: Action): Form {
     switch (action.type) {
         case "update_field": {
-            const fields = state.fields.map((field) => {
+            const fields: FormField[] = state.fields.map((field) => {
                 if (field.id == action.payload.id) {
                     return {
                         ...field,
                         value: action.payload.value,
                         isValid: action.payload.isValid,
                     };
-                } else {
-                    return field;
                 }
-            });
+                return field;
+            }) as FormField[];
 
             return {
                 fields,

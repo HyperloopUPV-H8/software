@@ -1,10 +1,10 @@
 import styles from "./Field.module.scss";
 import { CheckBox } from "components/FormComponents/CheckBox/CheckBox";
-import { Dropdown } from "components/FormComponents/old_Dropdown/Dropdown";
-import { FormField } from "components/OrdersContainer/Orders/OrderForm/useForm";
-import { NumericDescription } from "common";
+import { Dropdown } from "components/FormComponents/Dropdown/Dropdown";
+import { NumericType } from "common";
 import { isNumberValid } from "./validation";
 import { NumericInput } from "components/FormComponents/NumericInput/NumericInput";
+import { FormField } from "../../form";
 
 type Props = {
     name: string;
@@ -16,14 +16,10 @@ type Props = {
 export const Field = ({ name, field, onChange, changeEnabled }: Props) => {
     function handleTextInputChange(
         value: string,
-        description: NumericDescription
+        type: NumericType,
+        range: [number | null, number | null]
     ) {
-        const isValid = isNumberValid(
-            value,
-            description.value,
-            description.safeRange
-        );
-
+        const isValid = isNumberValid(value, type, range);
         onChange(Number.parseFloat(value), isValid);
     }
 
@@ -34,21 +30,22 @@ export const Field = ({ name, field, onChange, changeEnabled }: Props) => {
             }`}
         >
             <div className={styles.name}>{name}</div>
-            {field.valueDescription.kind == "numeric" ? (
+            {field.kind == "numeric" ? (
                 <NumericInput
                     required={field.isEnabled}
                     disabled={!field.isEnabled}
                     isValid={field.isValid}
-                    placeholder={`${field.valueDescription.value}...`}
+                    placeholder={`${field.type}...`}
                     defaultValue={!field.isValid ? "" : (field.value as number)}
                     onChange={(value) =>
                         handleTextInputChange(
                             value,
-                            field.valueDescription as NumericDescription
+                            field.type,
+                            field.safeRange
                         )
                     }
                 />
-            ) : field.valueDescription.kind == "boolean" ? (
+            ) : field.kind == "boolean" ? (
                 <CheckBox
                     isRequired={field.isEnabled}
                     disabled={!field.isEnabled}
@@ -58,8 +55,8 @@ export const Field = ({ name, field, onChange, changeEnabled }: Props) => {
                 />
             ) : (
                 <Dropdown
-                    options={field.valueDescription.value}
-                    defaultValue={field.value as string}
+                    value={field.value as string}
+                    options={field.options}
                     onChange={(newValue) => {
                         onChange(newValue, true);
                     }}

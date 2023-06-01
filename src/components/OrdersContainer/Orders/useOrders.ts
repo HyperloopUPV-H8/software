@@ -4,8 +4,8 @@ import {
     VehicleOrders,
     useWsHandler,
 } from "common";
-import { useState, useEffect } from "react";
-import { fetchFromBackend } from "common";
+import { useEffect } from "react";
+import { fetchBack } from "common";
 import { config } from "common";
 import { useDispatch, useSelector } from "react-redux";
 import { setOrders, updateStateOrders } from "slices/ordersSlice";
@@ -20,10 +20,7 @@ export function useOrders() {
     useEffect(() => {
         const controller = new AbortController();
 
-        fetchFromBackend(config.paths.orderDescription, controller.signal)
-            .then((res) => {
-                return res.json();
-            })
+        fetchBack(config.paths.orderDescription, controller.signal)
             .then((descriptions: VehicleOrders) => {
                 dispatch(setOrders(descriptions));
             })

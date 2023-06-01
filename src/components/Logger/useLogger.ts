@@ -1,17 +1,18 @@
-import { useBroker } from "common";
+import { useSubscribe, useWsHandler } from "common";
 import { useState } from "react";
 
 export function useLogger() {
-    const sendWS = useBroker("logger/enable", (state) => setState(state));
+    const handler = useWsHandler();
 
     function startLogging() {
-        sendWS(true);
+        handler.post("logger/enable", true);
     }
     function stopLogging() {
-        sendWS(false);
+        handler.post("logger/enable", false);
     }
-
     const [state, setState] = useState(false);
+
+    useSubscribe("logger/response", (state) => setState(state));
 
     return [state, startLogging, stopLogging] as const;
 }

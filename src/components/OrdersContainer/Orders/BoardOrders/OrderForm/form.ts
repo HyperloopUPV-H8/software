@@ -4,7 +4,44 @@ import {
     NumericDescription,
     OrderFieldDescription,
 } from "common";
-import { Form, FormField, areFieldsValid } from "./useForm";
+
+export type FormField = NumericField | BooleanField | EnumField;
+
+type AbstractFormField = {
+    id: string;
+    isValid: boolean;
+    isEnabled: boolean;
+};
+
+export type NumericField = AbstractFormField &
+    NumericDescription & {
+        value: number;
+    };
+
+export type BooleanField = AbstractFormField &
+    BooleanDescription & {
+        value: boolean;
+    };
+
+export type EnumField = AbstractFormField &
+    EnumDescription & {
+        value: string;
+    };
+
+export type Form = {
+    fields: FormField[];
+    isValid: boolean;
+};
+
+export function areFieldsValid(fields: Array<FormField>): boolean {
+    return fields.reduce((prevValid, currentField) => {
+        return (
+            prevValid &&
+            ((currentField.isEnabled && currentField.isValid) ||
+                !currentField.isEnabled)
+        );
+    }, true);
+}
 
 export function createForm(
     descriptions: Record<string, OrderFieldDescription>
@@ -16,54 +53,46 @@ export function createForm(
     return { fields, isValid: areFieldsValid(fields) };
 }
 
-function getFormField(description: OrderFieldDescription): FormField {
-    if (description.valueDescription.kind == "numeric") {
-        return getNumericFormField(
-            description.name,
-            description.valueDescription
-        );
-    } else if (description.valueDescription.kind == "boolean") {
-        return getBooleanFormField(
-            description.name,
-            description.valueDescription
-        );
+function getFormField(desc: OrderFieldDescription): FormField {
+    if (desc.kind == "numeric") {
+        return getNumericFormField(desc);
+    } else if (desc.kind == "boolean") {
+        return getBooleanFormField(desc);
     } else {
-        return getEnumFormField(description.name, description.valueDescription);
+        return getEnumFormField(desc);
     }
 }
 
-function getNumericFormField(
-    name: string,
-    valueDescription: NumericDescription
-): FormField {
+function getNumericFormField(desc: NumericDescription): NumericField {
     return {
-        id: name,
-        valueDescription: valueDescription,
+        id: desc.name,
+        name: desc.name,
+        kind: desc.kind,
+        type: desc.type,
+        safeRange: desc.safeRange,
+        warningRange: desc.warningRange,
         value: 0,
         isValid: false,
         isEnabled: true,
     };
 }
-function getBooleanFormField(
-    name: string,
-    valueDescription: BooleanDescription
-): FormField {
+function getBooleanFormField(desc: BooleanDescription): BooleanField {
     return {
-        id: name,
-        valueDescription: valueDescription,
+        id: desc.name,
+        name: desc.name,
+        kind: desc.kind,
         value: false,
         isValid: true,
         isEnabled: true,
     };
 }
-function getEnumFormField(
-    name: string,
-    valueDescription: EnumDescription
-): FormField {
+function getEnumFormField(desc: EnumDescription): EnumField {
     return {
-        id: name,
-        valueDescription: valueDescription,
-        value: valueDescription.value[0],
+        kind: desc.kind,
+        id: desc.name,
+        name: desc.name,
+        options: desc.options,
+        value: desc.options[0],
         isValid: true,
         isEnabled: true,
     };

@@ -3,7 +3,7 @@ import {
     WsHandler,
     WsHandlerProvider,
     createWsHandler,
-    fetchFromBackend,
+    fetchBack,
 } from "common";
 import { HomePage } from "pages/HomePage/HomePage";
 import { useDispatch } from "react-redux";
@@ -27,12 +27,12 @@ function App() {
                         () => dispatch(setWebSocketConnection(true)),
                         () => dispatch(setWebSocketConnection(false))
                     ),
-                    fetchFromBackend(config.paths.podDataDescription)
-                        .then((res) => res.json())
-                        .then((adapter) => {
+                    fetchBack(config.paths.podDataDescription).then(
+                        (adapter) => {
                             dispatch(initPodData(adapter));
                             dispatch(initMeasurements(adapter));
-                        }),
+                        }
+                    ),
                 ]}
                 LoadingView={<SplashScreen />}
             >
