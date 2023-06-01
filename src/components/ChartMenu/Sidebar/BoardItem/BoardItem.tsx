@@ -22,10 +22,12 @@ export const BoardItem = ({ name, packetNodes }: Props) => {
                 <Caret isOpen={isOpen} />
                 {name}
             </div>
-            <PacketItems
-                packetNodes={packetNodes}
-                isVisible={isOpen}
-            />
+            {isOpen && (
+                <PacketItems
+                    packetNodes={packetNodes}
+                    isVisible={isOpen}
+                />
+            )}
         </div>
     );
 };

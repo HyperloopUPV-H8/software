@@ -1,16 +1,26 @@
 import { useSubscribe, useWsHandler } from "common";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export function useLogger() {
+    const [state, setState] = useState(false);
+
     const handler = useWsHandler();
 
+    const log = (enable: boolean) => {
+        handler.post("logger/enable", enable);
+    };
+
     function startLogging() {
-        handler.post("logger/enable", true);
+        log(true);
     }
+
     function stopLogging() {
-        handler.post("logger/enable", false);
+        log(false);
     }
-    const [state, setState] = useState(false);
+
+    useSubscribe("logger/response", (result) => {
+        setState(result);
+    });
 
     useSubscribe("logger/response", (state) => setState(state));
 

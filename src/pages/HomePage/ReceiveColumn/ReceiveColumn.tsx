@@ -3,12 +3,12 @@ import { TabLayout } from "layouts/TabLayout/TabLayout";
 import { ChartMenu } from "components/ChartMenu/ChartMenu";
 import { ReactComponent as IncomingMessage } from "assets/svg/incoming-message.svg";
 import { ReactComponent as Chart } from "assets/svg/chart.svg";
-import { ReceiveTable } from "components/ReceiveTable/ReceiveTable";
-import { useMemo } from "react";
 import { store } from "store";
+import { ReceiveTable } from "components/ReceiveTableContainer/ReceiveTable/ReceiveTable";
+import { useMemo } from "react";
 
 export const ReceiveColumn = () => {
-    const receiveColumnTabItem = useMemo(
+    const receiveColumnTabItems = useMemo(
         () => [
             {
                 id: "receiveTable",
@@ -25,9 +25,8 @@ export const ReceiveColumn = () => {
                 component: <ChartMenu />,
             },
         ],
-
-        []
+        [store]
     );
 
-    return <TabLayout items={receiveColumnTabItem}></TabLayout>;
+    return <TabLayout items={receiveColumnTabItems}></TabLayout>;
 };

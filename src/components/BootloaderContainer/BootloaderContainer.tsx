@@ -14,6 +14,11 @@ export const BootloaderContainer = () => {
                 setBoards(value);
             }
         );
+            });
+
+        return () => {
+            controller.abort();
+        };
     }, []);
 
     if (boards) {

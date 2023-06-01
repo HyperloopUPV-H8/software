@@ -3,13 +3,12 @@ import { RootState } from "store";
 import { useSubscribe, useWsHandler } from "common";
 import { useDispatch } from "react-redux";
 import { updateBoardConnections } from "slices/connectionsSlice";
-import { useEffect } from "react";
 
 export function useConnections() {
     const dispatch = useDispatch();
 
-    useSubscribe("connection/update", (msg) => {
-        dispatch(updateBoardConnections(msg));
+    useSubscribe("connection/update", (update) => {
+        dispatch(updateBoardConnections(update));
     });
 
     return useSelector((state: RootState) => state.connections);

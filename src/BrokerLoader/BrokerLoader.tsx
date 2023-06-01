@@ -1,7 +1,9 @@
+import {
+    RequestState,
+    useFetchPodData,
+} from "pages/HomePage/ReceiveColumn/useFetchPodData";
 import styles from "./BrokerLoader.module.scss";
-import { Broker } from "common";
-import { BrokerProvider } from "common";
-import { createBroker } from "common";
+import { WsHandler, WsHandlerProvider, createWsHandler } from "common";
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { setWebSocketConnection } from "slices/connectionsSlice";
@@ -10,7 +12,7 @@ import { clamp } from "utils/math";
 type LoadingState = Loading | Success | Failure;
 
 type Loading = { state: "loading" };
-type Success = { state: "success"; broker: Broker };
+type Success = { state: "success"; handler: WsHandler };
 type Failure = { state: "failure" };
 
 const MAX_TITLE_TIME = 1100;
@@ -27,15 +29,15 @@ export const BrokerLoader = ({ url, LoadingView, children }: Props) => {
 
     useEffect(() => {
         const startTime = performance.now();
-        createBroker(
+        createWsHandler(
             url,
             () => dispatch(setWebSocketConnection(true)),
             () => dispatch(setWebSocketConnection(false))
         )
-            .then((broker) => {
+            .then((handler) => {
                 const elapsedTime = performance.now() - startTime;
                 setTimeout(() => {
-                    setState({ state: "success", broker });
+                    setState({ state: "success", handler });
                 }, clamp(MAX_TITLE_TIME - elapsedTime, 0, MAX_TITLE_TIME));
             })
             .catch(() => {
@@ -43,11 +45,18 @@ export const BrokerLoader = ({ url, LoadingView, children }: Props) => {
             });
     }, []);
 
+    const requestState = useFetchPodData();
+
     if (state.state == "loading") {
         return <>{LoadingView}</>;
-    } else if (state.state == "success") {
+    } else if (
+        state.state == "success" &&
+        requestState == RequestState.FULFILLED
+    ) {
         return (
-            <BrokerProvider broker={state.broker}>{children}</BrokerProvider>
+            <WsHandlerProvider handler={state.handler}>
+                {children}
+            </WsHandlerProvider>
         );
     } else {
         return (
