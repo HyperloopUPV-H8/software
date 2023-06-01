@@ -16,11 +16,17 @@ import {
     SendMessage,
 } from "react-use-websocket/dist/lib/types";
 import { InstructionButtons } from "./InstructionButton/InstructionButtons";
+import { useState } from "react";
 
 type Props = {
     sendJsonMessage: SendJsonMessage;
     sendMessage: SendMessage;
     lastMessage: MessageEvent<any> | null;
+};
+
+export type PlayButtons = {
+    play: boolean;
+    stop: boolean;
 };
 
 export const TestControls = ({
@@ -31,6 +37,14 @@ export const TestControls = ({
     const [form, ChangeValue, ChangeEnable, SubmitHandler] = useControlForm(
         initialFormDescription
     );
+    const [playButtonsState, setPlayButtonsState] = useState<PlayButtons>({
+        play: false,
+        stop: false,
+    });
+
+    const changePlayButtons = (buttonStates: PlayButtons) => {
+        setPlayButtonsState(buttonStates);
+    };
 
     return (
         <div className={style.testControlsWrapper}>
@@ -39,8 +53,15 @@ export const TestControls = ({
                     variant="play"
                     sendMessage={sendMessage}
                     lastMessage={lastMessage}
+                    state={playButtonsState.play}
+                    changeState={changePlayButtons}
                 />
-                <PlayButton variant="stop" />
+                <PlayButton
+                    variant="stop"
+                    state={playButtonsState.stop}
+                    changeState={changePlayButtons}
+                    sendMessage={sendMessage}
+                />
                 {/*FIXME: Handle the disabled buttons*/}
             </div>
             <div className={style.sectionWrapper}>

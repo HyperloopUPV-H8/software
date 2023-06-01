@@ -45,10 +45,8 @@ export function TestingPage() {
     });
 
     useEffect(() => {
-        //Movement is from the previous one
         if (lastJsonMessage !== null) {
             const newVehicleState = lastJsonMessage as VehicleState;
-            console.log(newVehicleState);
             if (newVehicleState.duty >= 0 && newVehicleState.duty < 256) {
                 setVehicleState(newVehicleState);
             } else {
@@ -58,6 +56,7 @@ export function TestingPage() {
     }, [lastJsonMessage]);
 
     useEffect(() => {
+        //TODO: Movement is from the previous one, but the print is correct, so it is from useSpring
         console.log(vehicleState);
     }, [vehicleState]);
 
