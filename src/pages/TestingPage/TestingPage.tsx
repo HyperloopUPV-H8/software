@@ -37,7 +37,7 @@ export function TestingPage() {
         readyState,
         getWebSocket,
     } = useWebSocket(WEBSOCKET_URL, {
-        onOpen: () => console.log("opened"),
+        onOpen: () => console.log("Connection opened"),
         shouldReconnect: (closeEvent) => {
             console.log("Disconnected");
             return true;
@@ -49,14 +49,11 @@ export function TestingPage() {
             const newVehicleState = lastJsonMessage as VehicleState;
             if (newVehicleState.duty >= 0 && newVehicleState.duty < 256) {
                 setVehicleState(newVehicleState);
-            } else {
-                console.log("Incorrect duty");
             }
         }
     }, [lastJsonMessage]);
 
     useEffect(() => {
-        //TODO: Movement is from the previous one, but the print is correct, so it is from useSpring
         console.log(vehicleState);
     }, [vehicleState]);
 

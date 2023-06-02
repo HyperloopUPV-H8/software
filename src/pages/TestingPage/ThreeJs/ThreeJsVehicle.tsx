@@ -1,4 +1,3 @@
-import style from "./ThreeJsVehicle.module.scss";
 import { Grid, OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { VehicleRepresentation } from "./VehicleRepresentation/VehicleRepresentation";

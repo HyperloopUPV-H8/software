@@ -49,7 +49,7 @@ export function ToggleButton({
             <button
                 onClick={() => {
                     flip();
-                    sendOrder(!isOn, id, sendJsonMessage); //FIXME, the actualization of flip hasn't effect here yet
+                    sendOrder(!isOn, id, sendJsonMessage);
                 }}
                 {...buttonProps}
             >
@@ -66,7 +66,6 @@ function sendOrder(
     sendJsonMessage: SendJsonMessage
 ) {
     const controlOrder: ControlOrder = { id: id, state: isOn };
-    console.log(controlOrder);
-    sendJsonMessage(controlOrder); //FIXME
+    sendJsonMessage(controlOrder);
     console.log("Control order sent!");
 }

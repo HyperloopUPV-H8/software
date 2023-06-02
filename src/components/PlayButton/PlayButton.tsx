@@ -39,6 +39,8 @@ const buttonVariants = {
 } as const;
 
 const START_IDLE = "Back-end is ready!";
+const START_SIMULATION = "start_simulation";
+const FINISH_SIMULTATION = "finish_simulation";
 
 type Props = {
     variant: ButtonType;
@@ -67,7 +69,6 @@ export function PlayButton({
     useEffect(() => {
         const stringData: string = lastMessage?.data;
         if (stringData == START_IDLE) {
-            console.log("Poner play a true");
             changeState({ play: true, stop: false });
         }
     }, [lastMessage]);
@@ -94,20 +95,18 @@ function handleClick(
 ) {
     switch (variant) {
         case "play":
-            console.log("play clicked");
-            sendMsgSimultation(sendMessage!, "start_simulation");
+            sendMsgSimultation(sendMessage!, START_SIMULATION);
             changeState({ play: !state, stop: state });
             break;
         case "stop":
-            console.log("stop clicked");
-            sendMsgSimultation(sendMessage!, "finish_simulation");
+            sendMsgSimultation(sendMessage!, FINISH_SIMULTATION);
             changeState({ play: state, stop: !state });
             break;
     }
 }
 
 function sendMsgSimultation(sendMessage: SendMessage, msg: string) {
-    console.log(msg);
+    console.log("Sent: ", msg);
     const message: WebSocketMessage = msg;
     sendMessage(message);
 }

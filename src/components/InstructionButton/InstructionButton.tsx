@@ -66,6 +66,6 @@ function sendOrder(
 ) {
     const controlOrder: ControlOrder = { id: id, state: isOn };
     console.log(controlOrder);
-    sendJsonMessage(controlOrder); //FIXME
+    sendJsonMessage(controlOrder);
     console.log("Control order sent!");
 }

@@ -62,25 +62,11 @@ export const TestControls = ({
                     changeState={changePlayButtons}
                     sendMessage={sendMessage}
                 />
-                {/*FIXME: Handle the disabled buttons*/}
             </div>
             <div className={style.sectionWrapper}>
                 <div className={style.title}>Controls</div>
                 <div className={style.body}>
                     <ControlButtons sendJsonMessage={sendJsonMessage} />
-                    {/* <ControlInputs
-                        form={form}
-                        changeEnable={ChangeEnable}
-                        changeValue={ChangeValue}
-                    />
-                    <ButtonTag
-                        type="submit"
-                        icon={<PerturbationIcon />}
-                        onClick={() => {
-                            SubmitHandler(sendJsonMessage);
-                        }}
-                        disabled={!form.isValid}
-                    /> */}
                     <InstructionButtons sendJsonMessage={sendJsonMessage} />
                 </div>
             </div>

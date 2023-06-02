@@ -28,11 +28,16 @@ export function VehicleRepresentation({ yDistance }: Props) {
     const positionYRef = useRef(calculatePositionY(yDistance));
 
     const model = useGLTF("./pod_simplified.glb");
-    const spring = useSpring({
-        from: { positionX: 0, positionY: 0, positionZ: 0 },
-        to: { positionX: 0, positionY: positionYRef.current, positionZ: 0 },
-        config: { duration: 1000 },
-    });
+
+    const [springProps, setSpringProps] = useSpring(() => ({
+        positionY: 0,
+        config: {
+            mass: 1,
+            tension: 15,
+            friction: 10,
+            precision: 0.0001,
+        },
+    }));
 
     useFrame(({ clock }) => {
         const t = clock.getElapsedTime();
@@ -45,15 +50,14 @@ export function VehicleRepresentation({ yDistance }: Props) {
 
     useEffect(() => {
         positionYRef.current = calculatePositionY(yDistance);
+        setSpringProps({ positionY: positionYRef.current });
     }, [yDistance]);
 
     return (
         <animated.mesh
             scale={3}
             ref={meshRef}
-            position-x={spring.positionX}
-            position-y={spring.positionY}
-            position-z={spring.positionZ}
+            position-y={springProps.positionY}
         >
             <primitive object={model.scene} />
         </animated.mesh>
