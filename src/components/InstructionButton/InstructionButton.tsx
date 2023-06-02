@@ -14,7 +14,6 @@ type ControlOrder = {
 };
 
 type Props = {
-    //label: string;
     id: number;
     icon: ReactNode;
     sendJsonMessage: SendJsonMessage;
