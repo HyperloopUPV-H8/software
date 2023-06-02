@@ -14,8 +14,8 @@ type Props = {
 };
 
 export const VerticalAxis = ({ min, max, divisions }: Props) => {
-    if (divisions < 2) {
-        console.error("divisions should be greater or equal than 2");
+    if (divisions == 0) {
+        return null;
     }
 
     const marks = useMemo(

@@ -1,9 +1,10 @@
 import { updateMeasurements } from "slices/measurementsSlice";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useBroker } from "common";
-import { useInterval } from "hooks/useInterval";
 import { store } from "store";
+import { useGlobalTicker } from "hooks/GlobalTicker/useGlobalTicker";
+
 export function useMeasurements() {
     const dispatch = useDispatch();
     const [measurements, setMeasurements] = useState(
@@ -14,9 +15,11 @@ export function useMeasurements() {
         dispatch(updateMeasurements(msg));
     });
 
-    useInterval(() => {
+    const callback = useCallback(() => {
         setMeasurements(store.getState().measurements);
-    }, 1000 / 15);
+    }, []);
+
+    useGlobalTicker(callback);
 
     return measurements;
 }

@@ -15,7 +15,7 @@ export const Orders = ({ orders }: Props) => {
                 return (
                     <Button
                         key={order.id}
-                        label={order.name}
+                        label={order.id.toString()}
                         onClick={() => {
                             sendOrder({ id: order.id, fields: {} });
                         }}

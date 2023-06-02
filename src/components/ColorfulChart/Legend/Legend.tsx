@@ -1,4 +1,3 @@
-import { LineDescription } from "components/Chart/models/ChartData";
 import styles from "./Legend.module.scss";
 import { LegendItem } from "./LegendItem/LegendItem";
 import { NumericMeasurement } from "common";

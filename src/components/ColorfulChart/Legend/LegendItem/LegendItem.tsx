@@ -1,6 +1,4 @@
-import { LineDescription } from "components/Chart/models/ChartData";
 import styles from "./LegendItem.module.scss";
-import { useTextUpdater } from "services/ImperativeUpdater/useTextUpdater";
 import { NumericMeasurement } from "common";
 
 type Props = {

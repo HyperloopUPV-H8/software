@@ -11,7 +11,7 @@ export const PageWrapper = ({ title, children }: Props) => {
             <header className={styles.header}>
                 <h1>{title}</h1>
             </header>
-            {children}
+            <div className={styles.content}>{children}</div>
         </main>
     );
 };

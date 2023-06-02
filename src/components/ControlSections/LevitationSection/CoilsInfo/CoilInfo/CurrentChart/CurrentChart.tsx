@@ -1,11 +1,9 @@
-import { Measurement } from "common";
-import styles from "./CurrentChart.module.scss";
-import { Chart } from "components/Chart/ChartWithLegend";
-import { LinesChart } from "components/Chart/LinesChart/LinesChart";
+import { NumericMeasurement } from "common";
+import { LinesChart } from "components/LinesChart/LinesChart";
 
 type Props = {
-    current: Measurement;
-    currentRef: Measurement;
+    current: NumericMeasurement;
+    currentRef: NumericMeasurement;
 };
 
 export const CurrentChart = ({ current, currentRef }: Props) => {
@@ -13,8 +11,10 @@ export const CurrentChart = ({ current, currentRef }: Props) => {
         <LinesChart
             width="8rem"
             height={"6rem"}
-            gridDivisions={3}
-            lineDescriptions={[{ id: "airgap_1", color: "#ff0000" }]}
+            divisions={3}
+            grid
+            items={[{ measurement: current, color: "red" }]}
+            length={50}
         ></LinesChart>
     );
 };

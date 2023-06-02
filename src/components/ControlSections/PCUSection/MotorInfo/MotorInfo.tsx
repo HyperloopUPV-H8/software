@@ -1,12 +1,12 @@
 import styles from "./MotorInfo.module.scss";
-import { Measurement } from "common";
-import { LinesChart } from "components/LinesChart/LinesChart";
+import { NumericMeasurement } from "common";
+import { ColorfulChart } from "components/ColorfulChart/ColorfulChart";
 
 type Props = {
-    motorCurrentU: Measurement;
-    motorCurrentV: Measurement;
-    motorCurrentW: Measurement;
-    motorTemperature: Measurement;
+    motorCurrentU: NumericMeasurement;
+    motorCurrentV: NumericMeasurement;
+    motorCurrentW: NumericMeasurement;
+    motorTemperature: NumericMeasurement;
 };
 
 export const MotorInfo = ({
@@ -17,11 +17,11 @@ export const MotorInfo = ({
 }: Props) => {
     return (
         <div className={styles.motorInfoWrapper}>
-            {/* <LinesChart
-                title="Motor 1 Currents"
+            <ColorfulChart
+                title="Motor"
+                length={100}
                 measurements={[motorCurrentU, motorCurrentV, motorCurrentW]}
-            ></LinesChart> */}
-            <div className={styles.motorTemp}>motorTempPlaceholder</div>
+            />
         </div>
     );
 };

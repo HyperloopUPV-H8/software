@@ -8,11 +8,10 @@ export const TubeData = () => {
 
     return (
         <div className={styles.tubeDataWrapper}>
-            <GaugeTag
+            {/* <GaugeTag
                 max={100}
                 min={0}
                 strokeWidth={GAUGE_WIDTH}
-                value={20}
             ></GaugeTag>
             <PumpIndicator />
             <GaugeTag
@@ -20,7 +19,7 @@ export const TubeData = () => {
                 min={0}
                 strokeWidth={GAUGE_WIDTH}
                 value={90}
-            ></GaugeTag>
+            ></GaugeTag> */}
         </div>
     );
 };

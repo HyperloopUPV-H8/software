@@ -10,7 +10,7 @@ export const FirstPage = () => {
 
     return (
         <div className={styles.firstPageWrapper}>
-            <LevitationSection data={extractLevitationData(measurements)} />
+            {/* <LevitationSection data={extractLevitationData(measurements)} /> */}
             <PCUSection data={extractPCUData(measurements)}></PCUSection>
         </div>
     );

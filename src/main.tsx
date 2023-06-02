@@ -11,6 +11,8 @@ import { camerasRoute } from "pages/CamerasPage/camerasRoute";
 import { testingRoute } from "pages/TestingPage/testingRoute";
 import { tubeRoute } from "pages/TubePage/tubeRoute";
 import { BrokerLoader } from "components/BrokerLoader/BrokerLoader";
+import { ImperativeUpdater } from "services/ImperativeUpdater/ImperativeUpdater";
+import { GlobalTicker } from "hooks/GlobalTicker/GlobalTicker";
 
 const router = createBrowserRouter([
     {
@@ -31,7 +33,11 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                 url={WS_URL}
                 LoadingView={<div>Loading broker...</div>}
             >
-                <RouterProvider router={router}></RouterProvider>
+                <GlobalTicker>
+                    <ImperativeUpdater>
+                        <RouterProvider router={router}></RouterProvider>
+                    </ImperativeUpdater>
+                </GlobalTicker>
             </BrokerLoader>
         </Provider>
     </React.StrictMode>
