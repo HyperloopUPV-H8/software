@@ -66,3 +66,16 @@ $icon-size: 0.7rem;
         background-color: colors.getColor("fault", 90);
     }
 }
+
+.disabled {
+    color: colors.getColor("neutral", 60);
+    background-color: colors.getColor("neutral", 90);
+    p {
+        color: colors.getColor("neutral", 70);
+    }
+
+    button {
+        color: colors.getColor("neutral", 70);
+        background-color: colors.getColor("neutral", 80);
+    }
+}

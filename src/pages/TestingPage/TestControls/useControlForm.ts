@@ -7,6 +7,7 @@ import {
     FormDescription,
 } from "./TestAttributes";
 import { createFormFromDescription, taskReducer } from "./controlReducer";
+import { SendJsonMessage } from "react-use-websocket/dist/lib/types";
 
 export function useControlForm(
     initialState: FormDescription
@@ -29,9 +30,9 @@ export function useControlForm(
         dispatch({ type: "RESET_INITIAL_STATE", payload: initialState });
     };
 
-    const SubmitHandler: SubmitHandler = () => {
+    const SubmitHandler: SubmitHandler = (sendJsonMessage: SendJsonMessage) => {
         if (form.isValid) {
-            //TODO: take the data, send FormData al backend? To be defined
+            sendJsonMessage(form.formData);
         }
     };
 

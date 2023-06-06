@@ -7,13 +7,10 @@
     align-items: stretch;
     gap: 0.5rem;
     border-radius: 1rem;
-    //height: 100%;
-    //overflow-y: hidden;
     flex-grow: 1;
 }
 
 .podRepresentation {
-    background-color: black;
     flex-grow: 1;
     display: flex;
     flex-flow: column;
@@ -22,8 +19,7 @@
 }
 
 .threeJSAndInfo {
-    background-color: red;
-    flex-grow: 2;
+    flex-basis: 20rem;
     display: flex;
     flex-flow: row;
     gap: 0.5rem;
@@ -31,19 +27,21 @@
 }
 
 .threeJS {
-    background-color: blue;
-    flex-grow: 4;
+    border-style: solid;
     border-radius: 1rem;
+    flex-basis: 45rem;
 }
 
 .info {
-    background-color: yellow;
-    flex-grow: 1;
+    border-color: yellow;
+    border-style: double;
+    flex: 1 4 auto;
     border-radius: 1rem;
 }
 
 .graphics {
-    background-color: green;
+    border-color: green;
+    border-style: double;
     flex-grow: 1;
     display: flex;
     flex-flow: row;

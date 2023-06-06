@@ -3,13 +3,33 @@ import { ReactComponent as BreakIcon } from "assets/svg/breakIcon.svg";
 import { ReactComponent as PropulseIcon } from "assets/svg/propulseIcon.svg";
 import { ReactComponent as LevitateIcon } from "assets/svg/levitateIcon.svg";
 import style from "./ControlButtons.module.scss";
+import { SendJsonMessage } from "react-use-websocket/dist/lib/types";
 
-export const ControlButtons = () => {
+type Props = {
+    sendJsonMessage: SendJsonMessage;
+};
+
+export const ControlButtons = ({ sendJsonMessage }: Props) => {
     return (
         <div className={style.controlsWrapper}>
-            <ToggleButton label="levitation" icon={<LevitateIcon />} />
-            <ToggleButton label="propulsion" icon={<PropulseIcon />} />
-            <ToggleButton label="brake" icon={<BreakIcon />} />
+            <ToggleButton
+                id={0}
+                label="levitation"
+                icon={<LevitateIcon />}
+                sendJsonMessage={sendJsonMessage}
+            />
+            <ToggleButton
+                id={1}
+                label="propulsion"
+                icon={<PropulseIcon />}
+                sendJsonMessage={sendJsonMessage}
+            />
+            <ToggleButton
+                id={2}
+                label="brake"
+                icon={<BreakIcon />}
+                sendJsonMessage={sendJsonMessage}
+            />
         </div>
     );
 };
