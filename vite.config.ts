@@ -5,9 +5,10 @@ import typescript from "@rollup/plugin-typescript";
 import tsconfigPaths from "vite-tsconfig-paths";
 import path from "path";
 import postcss from "rollup-plugin-postcss";
+import svgr from "vite-plugin-svgr";
 
 export default defineConfig({
-    plugins: [react(), tsconfigPaths(), postcss()],
+    plugins: [react(), tsconfigPaths(), postcss(), svgr()],
     server: {
         port: 3000,
     },

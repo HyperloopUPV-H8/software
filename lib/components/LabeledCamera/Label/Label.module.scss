@@ -1,3 +1,16 @@
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
 .label {
     display: flex;
     align-items: center;
@@ -13,4 +26,9 @@
     height: 0.9rem;
     background-color: white;
     border-radius: 4rem;
+    animation-name: blink;
+    animation-duration: 1.8s;
+    animation-direction: alternate;
+    animation-iteration-count: infinite;
+    animation-timing-function: cubic-bezier(0.44, 0.14, 0.52, 0.8);
 }

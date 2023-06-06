@@ -4,6 +4,8 @@ import { Title } from "./Title/Title";
 import { useMemo } from "react";
 import { NumericMeasurement } from "../../models";
 import { LinesChart } from "../LinesChart/LinesChart";
+import { LineDescription } from "../LinesChart/types";
+import { nanoid } from "@reduxjs/toolkit";
 
 const palette = ["#EE8735", "#51C6EB", "#7BEE35"];
 
@@ -22,11 +24,13 @@ export const ColorfulChart = ({
     length,
     getMeasurement,
 }: Props) => {
-    const measurementWithPalette = useMemo(
+    const chartItems: Array<LineDescription> = useMemo(
         () =>
             measurements.map((meas, index) => ({
-                measurement: meas,
+                id: nanoid(),
+                range: meas.safeRange,
                 color: palette[index % palette.length],
+                getUpdate: () => getMeasurement(meas.id).value.last,
             })),
         [measurements]
     );
@@ -39,11 +43,10 @@ export const ColorfulChart = ({
                     height="8rem"
                     divisions={4}
                     grid={false}
-                    items={measurementWithPalette}
+                    items={chartItems}
                     length={length}
-                    getMeasurement={getMeasurement}
                 />
-                <Legend items={measurementWithPalette} />
+                <Legend items={chartItems} />
             </div>
         </div>
     );

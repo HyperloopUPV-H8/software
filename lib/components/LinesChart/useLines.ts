@@ -1,49 +1,30 @@
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { dataToPath } from "./path";
-import { RangeArray } from "./LineDataHandler";
-import { NumericMeasurement } from "../../models";
+import { RangeArray } from "./RangeArray";
 import { useGlobalTicker } from "../../services/GlobalTicker/useGlobalTicker";
+import { Line, LineDescription } from "./types";
 
-type LineDescription = {
-    measurementId: string;
-    name: string;
-    color: string;
-};
-
-type Line = {
-    readonly id: string;
-    readonly data: RangeArray;
-    readonly range: [number | null, number | null];
-    readonly getUpdate: () => number;
-    readonly ref: SVGPathElement;
-};
-
-function getInitialLargestRange(
-    measurementsId: Array<string>,
-    getMeasurement: (id: string) => NumericMeasurement
+function getLargestRangeFromPartial(
+    ranges: ReadonlyArray<readonly [number | null, number | null]>
 ) {
-    const ranges = measurementsId.map((id) => {
-        return getMeasurement(id).warningRange;
+    const definedRanges = ranges.map((range) => {
+        return [range[0] ?? 0, range[1] ?? 0] as const;
     });
 
-    return getLargestRange(
-        ranges.map((range) => [range[0] ?? 0, range[1] ?? 0])
-    );
+    return getLargestRange(definedRanges);
 }
 
 export function useLines(
     viewBoxWidth: number,
     viewBoxHeight: number,
     maxLineLength: number,
-    lineDescriptions: Array<LineDescription>,
-    getMeasurement: (id: string) => NumericMeasurement
+    lineDescriptions: Array<LineDescription>
 ) {
     const ref = useRef<SVGSVGElement>(null);
     const initialLargestRange = useMemo(
         () =>
-            getInitialLargestRange(
-                lineDescriptions.map((line) => line.measurementId),
-                getMeasurement
+            getLargestRangeFromPartial(
+                lineDescriptions.map((line) => line.range)
             ),
         []
     );
@@ -91,8 +72,7 @@ export function useLines(
             lineInstancesRef.current,
             maxLineLength,
             viewBoxWidth,
-            viewBoxHeight,
-            getMeasurement
+            viewBoxHeight
         );
 
         ref.current?.replaceChildren(
@@ -118,12 +98,11 @@ function createLines(
     lines: Array<Line>,
     length: number,
     width: number,
-    height: number,
-    getMeasurement: (id: string) => NumericMeasurement
+    height: number
 ): Array<Line> {
     return descriptions.map((description) => {
         const newHandler =
-            lines.find((line) => description.measurementId == line.id)?.data ??
+            lines.find((line) => description.id == line.id)?.data ??
             new RangeArray([], length);
 
         const [min, max] = getLargestRange(
@@ -135,8 +114,6 @@ function createLines(
                 ];
             })
         );
-
-        console.log("Create lines:", min, max);
 
         const path = dataToPath(
             newHandler.getArr(),
@@ -150,14 +127,14 @@ function createLines(
         const pathElement = createPathElement(description.color, path);
 
         return {
-            id: description.measurementId,
+            id: description.id,
             ref: pathElement,
-            range: getMeasurement(description.measurementId).warningRange,
-            getUpdate: () =>
-                getMeasurement(description.measurementId).value.last,
+            range: description.range,
+            getUpdate: () => description.getUpdate(),
             data:
-                lines.find((line) => description.measurementId == line.id)
-                    ?.data ?? new RangeArray([], length),
+                lines.find((line) => description.id == line.id)?.data ??
+                new RangeArray([], length),
+            color: "red",
         };
     });
 }

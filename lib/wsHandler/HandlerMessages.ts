@@ -14,6 +14,7 @@ import { PostRequest, Subscription, Exchange } from "./types";
 export type HandlerMessages = {
     "podData/update": Subscription<Record<string, PacketUpdate>>;
     "order/send": PostRequest<Order, never>;
+    "order/stateOrders": Subscription<Record<string, number[]>>;
     "connection/update": Subscription<ConnectionsUpdate>;
     "message/update": Subscription<MessageAdapter>;
     "logger/enable": PostRequest<boolean, boolean>;

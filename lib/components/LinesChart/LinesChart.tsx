@@ -2,16 +2,15 @@ import styles from "./LinesChart.module.scss";
 import { useLines } from "./useLines";
 import { VerticalAxis } from "./VerticalAxis/VerticalAxis";
 import { LinesWithGrid } from "./LinesWithGrid/LinesWithGrid";
-import { NumericMeasurement } from "../../models";
+import { LineDescription } from "./types";
 
 type Props = {
-    items: Array<{ measurement: NumericMeasurement; color: string }>;
+    items: Array<LineDescription>;
     divisions: number;
     grid: boolean;
     length: number;
     width?: string;
     height?: string;
-    getMeasurement: (id: string) => NumericMeasurement;
 };
 
 const viewBoxWidth = 1000;
@@ -23,21 +22,8 @@ export const LinesChart = ({
     length,
     width,
     height,
-    getMeasurement,
 }: Props) => {
-    const { ref, range } = useLines(
-        viewBoxWidth,
-        viewBoxHeight,
-        length,
-        items.map((item) => {
-            return {
-                color: item.color,
-                measurementId: item.measurement.id,
-                name: item.measurement.name,
-            };
-        }),
-        getMeasurement
-    );
+    const { ref, range } = useLines(viewBoxWidth, viewBoxHeight, length, items);
 
     return (
         <div className={styles.imperativeChartWrapper}>

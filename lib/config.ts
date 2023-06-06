@@ -14,4 +14,8 @@ export const config = {
         websocket: "backend",
         uploadableBoards: "backend/uploadableBoards",
     },
-};
+    cameras: {
+        ip: "192.168.0.9",
+        port: 4040,
+    },
+} as const;

@@ -33,36 +33,38 @@ export type PCUData = {
     temp_6: NumericMeasurement;
 };
 
+const PCUId = "PCU";
+
 export function extractPCUData(measurements: Measurements): PCUData {
     return {
-        velocity: measurements["velocity"],
-        vel_x: measurements["vel_x"],
-        vel_y: measurements["vel_y"],
-        vel_z: measurements["vel_z"],
-        acceleration: measurements["acceleration"],
-        acc_x: measurements["acc_x"],
-        acc_y: measurements["acc_y"],
-        acc_z: measurements["acc_z"],
+        velocity: measurements.boards[PCUId]["velocity"],
+        vel_x: measurements.boards[PCUId]["vel_x"],
+        vel_y: measurements.boards[PCUId]["vel_y"],
+        vel_z: measurements.boards[PCUId]["vel_z"],
+        acceleration: measurements.boards[PCUId]["acceleration"],
+        acc_x: measurements.boards[PCUId]["acc_x"],
+        acc_y: measurements.boards[PCUId]["acc_y"],
+        acc_z: measurements.boards[PCUId]["acc_z"],
 
-        motor_1_current_u: measurements["motor_1_current_u"],
-        motor_1_current_v: measurements["motor_1_current_v"],
-        motor_1_current_w: measurements["motor_1_current_w"],
-        motor_2_current_u: measurements["motor_2_current_u"],
-        motor_2_current_v: measurements["motor_2_current_v"],
-        motor_2_current_w: measurements["motor_2_current_w"],
-        motor_1_temp: measurements["motor_1_temp"],
-        motor_2_temp: measurements["motor_2_temp"],
+        motor_1_current_u: measurements.boards[PCUId]["motor_1_current_u"],
+        motor_1_current_v: measurements.boards[PCUId]["motor_1_current_v"],
+        motor_1_current_w: measurements.boards[PCUId]["motor_1_current_w"],
+        motor_2_current_u: measurements.boards[PCUId]["motor_2_current_u"],
+        motor_2_current_v: measurements.boards[PCUId]["motor_2_current_v"],
+        motor_2_current_w: measurements.boards[PCUId]["motor_2_current_w"],
+        motor_1_temp: measurements.boards[PCUId]["motor_1_temp"],
+        motor_2_temp: measurements.boards[PCUId]["motor_2_temp"],
 
-        battery_1_voltage: measurements["battery_1_voltage"],
-        battery_1_current: measurements["battery_1_current"],
-        battery_2_voltage: measurements["battery_2_voltage"],
-        battery_2_current: measurements["battery_2_current"],
+        battery_1_voltage: measurements.boards[PCUId]["battery_1_voltage"],
+        battery_1_current: measurements.boards[PCUId]["battery_1_current"],
+        battery_2_voltage: measurements.boards[PCUId]["battery_2_voltage"],
+        battery_2_current: measurements.boards[PCUId]["battery_2_current"],
 
-        temp_1: measurements["temp_1"],
-        temp_2: measurements["temp_2"],
-        temp_3: measurements["temp_3"],
-        temp_4: measurements["temp_4"],
-        temp_5: measurements["temp_5"],
-        temp_6: measurements["temp_6"],
+        temp_1: measurements.boards[PCUId]["temp_1"],
+        temp_2: measurements.boards[PCUId]["temp_2"],
+        temp_3: measurements.boards[PCUId]["temp_3"],
+        temp_4: measurements.boards[PCUId]["temp_4"],
+        temp_5: measurements.boards[PCUId]["temp_5"],
+        temp_6: measurements.boards[PCUId]["temp_6"],
     } as PCUData;
 }

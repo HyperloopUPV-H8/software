@@ -42,6 +42,7 @@ export class WsHandler {
 
     public subscribe<T extends SubscriptionTopic>(
         topic: T,
+        id: HandlerMessages[T]["id"],
         callback: (value: HandlerMessages[T]["response"]) => void
     ) {
         const callbacks = this.topicToCallbacks.get(topic);
@@ -51,11 +52,14 @@ export class WsHandler {
             this.topicToCallbacks.set(topic, [callback]);
         }
 
-        this.ws.send(JSON.stringify({ topic, payload: true }));
+        this.ws.send(
+            JSON.stringify({ topic, id, payload: { subscribe: true, id: id } })
+        );
     }
 
     public unsubscribe<T extends SubscriptionTopic>(
         topic: T,
+        id: HandlerMessages[T]["id"],
         callback: (value: HandlerMessages[T]["response"]) => void
     ) {
         const callbacks = this.topicToCallbacks.get(topic);
@@ -72,7 +76,9 @@ export class WsHandler {
             console.warn(`Topic ${topic} doesn't exist in topicToHandlers`);
         }
 
-        this.ws.send(JSON.stringify({ topic, payload: false }));
+        this.ws.send(
+            JSON.stringify({ topic, payload: { subscribe: false, id: id } })
+        );
     }
 
     public exchange<T extends ExchangeTopic>(

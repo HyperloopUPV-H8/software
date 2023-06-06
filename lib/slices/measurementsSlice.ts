@@ -9,7 +9,12 @@ import {
     PacketUpdate,
 } from "../adapters";
 
-export type Measurements = Record<string, Measurement>;
+type BoardId = string;
+type MeasurementId = string;
+export type Measurements = {
+    boards: Record<BoardId, Record<MeasurementId, Measurement>>;
+    packetIdToBoardId: Record<string, string>;
+};
 
 export const measurementsSlice = createSlice({
     name: "measurements",
@@ -25,11 +30,26 @@ export const measurementsSlice = createSlice({
             state: Measurements,
             action: PayloadAction<Record<string, PacketUpdate>>
         ) => {
-            for (let packetUpdate of Object.values(action.payload)) {
+            for (let update of Object.values(action.payload)) {
                 for (let [id, mUpdate] of Object.entries(
-                    packetUpdate.measurementUpdates
-                ))
-                    state[id].value = mUpdate;
+                    update.measurementUpdates
+                )) {
+                    const boardId = state.packetIdToBoardId[update.id];
+
+                    if (!boardId) {
+                        console.error(
+                            `packet ${update.id} not found in packetIdToBoardId`
+                        );
+                    }
+
+                    const board = state.boards[boardId];
+
+                    if (!board) {
+                        console.error(`board ${boardId} not found`);
+                    }
+
+                    board[id].value = mUpdate;
+                }
             }
         },
     },
@@ -38,21 +58,52 @@ export const measurementsSlice = createSlice({
 function createMeasurementsFromPodDataAdapter(
     podDataAdapter: PodDataAdapter
 ): Measurements {
-    const measurements: Measurements = {};
+    const measurements: Measurements = { boards: {}, packetIdToBoardId: {} };
 
     for (const board of Object.values(podDataAdapter.boards)) {
         for (const packet of Object.values(board.packets)) {
             for (const adapter of Object.values(packet.measurements)) {
+                if (!measurements.boards[board.name]) {
+                    measurements.boards[board.name] = {};
+                }
+
+                measurements.packetIdToBoardId[packet.id] = board.name;
+
                 if (isNumericAdapter(adapter)) {
-                    measurements[adapter.id] = getNumericMeasurement(adapter);
+                    measurements.boards[board.name][adapter.id] =
+                        getNumericMeasurement(adapter);
                 } else if (adapter.type == "bool") {
-                    measurements[adapter.id] = getBooleanMeasurement(adapter);
+                    measurements.boards[board.name][adapter.id] =
+                        getBooleanMeasurement(adapter);
                 } else if (adapter.type == "Enum") {
-                    measurements[adapter.id] = getEnumMeasurement(adapter);
+                    measurements.boards[board.name][adapter.id] =
+                        getEnumMeasurement(adapter);
                 }
             }
         }
     }
 
     return measurements;
+}
+
+export function getMeasurement(
+    measurements: Measurements,
+    boardId: string,
+    measId: string
+): Measurement | undefined {
+    const board = measurements.boards[boardId];
+
+    if (!board) {
+        console.error(`board ${board} not found in store`);
+        return undefined;
+    }
+
+    const meas = board[measId];
+
+    if (!meas) {
+        console.error(`measurement ${measId} not found in store`);
+        return undefined;
+    }
+
+    return meas;
 }

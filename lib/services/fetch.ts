@@ -1,15 +1,22 @@
+import { PodDataAdapter, VehicleOrders } from "../index.ts";
 import { config } from "./../config.ts";
 
-export async function fetchFromBackend(path: string, signal?: AbortSignal) {
-    return fetch(`http://${config.server.ip}:${config.server.port}/${path}`, {
-        signal,
-    });
-}
+type Endpoints = {
+    [config.paths.podDataDescription]: PodDataAdapter;
+    [config.paths.orderDescription]: VehicleOrders;
+    [config.paths.uploadableBoards]: string[];
+};
 
-export function postToBackend(path: string, data: BodyInit) {
-    return fetch(`http://${config.server.ip}:${config.server.port}/${path}`, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain" },
-        body: data,
-    });
+export async function fetchBack<T extends keyof Endpoints>(
+    path: T,
+    signal?: AbortSignal
+) {
+    const res = await fetch(
+        `http://${config.server.ip}:${config.server.port}/${path}`,
+        {
+            signal,
+        }
+    );
+
+    return (await res.json()) as Promise<Endpoints[T]>;
 }

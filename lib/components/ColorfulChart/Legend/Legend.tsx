@@ -1,9 +1,9 @@
 import styles from "./Legend.module.scss";
 import { LegendItem } from "./LegendItem/LegendItem";
-import { NumericMeasurement } from "../../../models";
+import { LineDescription } from "../../LinesChart/types";
 
 type Props = {
-    items: Array<{ measurement: NumericMeasurement; color: string }>;
+    items: Array<LineDescription>;
 };
 
 export const Legend = ({ items }: Props) => {
@@ -12,8 +12,10 @@ export const Legend = ({ items }: Props) => {
             {items.map((item) => {
                 return (
                     <LegendItem
-                        key={item.measurement.id}
-                        measurement={item.measurement}
+                        key={item.id}
+                        name={item.id}
+                        units={"A"}
+                        value={item.getUpdate()}
                         color={item.color}
                     />
                 );

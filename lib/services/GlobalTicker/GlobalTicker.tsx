@@ -12,19 +12,18 @@ export const GlobalTickerContext = createContext<{
 });
 
 type Props = {
+    fps?: number;
     children?: React.ReactNode;
 };
 
-const FPS = 30;
-
-export const GlobalTicker = ({ children }: Props) => {
+export const GlobalTicker = ({ fps = 30, children }: Props) => {
     const callbacks = useRef<Callback[]>([]);
 
     useInterval(() => {
         for (const cb of callbacks.current) {
             cb();
         }
-    }, 1000 / FPS);
+    }, 1000 / fps);
 
     return (
         <GlobalTickerContext.Provider

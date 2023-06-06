@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { HandlerMessages } from "./HandlerMessages";
 import { SubscriptionTopic } from "./types";
 import { useWsHandler } from ".";
+import { nanoid } from "@reduxjs/toolkit";
 
 export function useSubscribe<T extends SubscriptionTopic>(
     topic: T,
@@ -10,10 +11,11 @@ export function useSubscribe<T extends SubscriptionTopic>(
     const handler = useWsHandler();
 
     useEffect(() => {
-        handler.subscribe(topic, cb);
+        const id = nanoid();
+        handler.subscribe(topic, id, cb);
 
         return () => {
-            handler.unsubscribe(topic, cb);
+            handler.unsubscribe(topic, id, cb);
         };
     }, [topic]);
 }

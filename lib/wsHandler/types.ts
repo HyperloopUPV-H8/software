@@ -14,6 +14,7 @@ export type PostRequest<Req, Res> = {
 export type Subscription<T> = {
     type: "subscription";
     subscribe: boolean;
+    id: string;
     response: T;
 };
 

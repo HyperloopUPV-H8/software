@@ -1,23 +1,23 @@
 import styles from "./LegendItem.module.scss";
-import { NumericMeasurement } from "../../../../models";
 
 type Props = {
-    measurement: NumericMeasurement;
+    name: string;
+    value: number;
+    units: string;
     color: string;
 };
 
-export const LegendItem = ({ measurement, color }: Props) => {
+export const LegendItem = ({ name, units, value, color }: Props) => {
     return (
         <div className={styles.legendItem}>
             <div
                 className={styles.name}
                 style={{ backgroundColor: color }}
             >
-                {measurement.name}
+                {name}
             </div>
             <div className={styles.value}>
-                <span>{measurement.value.average.toFixed(2)}</span>{" "}
-                <span>{measurement.units}</span>
+                <span>{value.toFixed(2)}</span> <span>{units}</span>
             </div>
         </div>
     );
