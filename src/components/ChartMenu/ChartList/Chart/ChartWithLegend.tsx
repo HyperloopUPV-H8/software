@@ -3,11 +3,17 @@ import Legend from "./Legend/Legend";
 import { ChartElement } from "components/ChartMenu/ChartElement";
 import { DragEvent } from "react";
 import { MdClose } from "react-icons/md";
-import { LinesChart } from "./LinesChart/LinesChart";
+import { LinesChart, NumericMeasurement, getMeasurement } from "common";
+import { store } from "store";
+import { parseId } from "components/ChartMenu/parseId";
 
 type Props = {
     chartElement: ChartElement;
-    handleDropOnChart: (chartId: string, measurementId: string) => void;
+    handleDropOnChart: (
+        id: string,
+        boardId: string,
+        measurementId: string
+    ) => void;
     removeElement: () => void;
     removeMeasurement: (id: string) => void;
 };
@@ -20,10 +26,20 @@ export const Chart = ({
 }: Props) => {
     function handleDrop(ev: DragEvent<HTMLDivElement>) {
         ev.stopPropagation();
-        handleDropOnChart(
-            chartElement.id,
-            ev.dataTransfer.getData("text/plain")
-        );
+
+        const itemId = ev.dataTransfer.getData("id");
+        const ids = parseId(itemId);
+        const meas = getMeasurement(
+            store.getState().measurements,
+            ids.boardId,
+            ids.measId
+        ) as NumericMeasurement;
+
+        if (!meas) {
+            return;
+        }
+
+        handleDropOnChart(chartElement.id, ids.boardId, ids.measId);
     }
     return (
         <div
@@ -37,11 +53,14 @@ export const Chart = ({
             onDrop={handleDrop}
         >
             <LinesChart
-                lineDescriptions={chartElement.lineDescriptions}
-                gridDivisions={5}
-            />
+                divisions={10}
+                grid={true}
+                items={chartElement.lines}
+                length={100}
+                height="10rem"
+            ></LinesChart>
             <Legend
-                legendItems={chartElement.lineDescriptions}
+                items={chartElement.lines}
                 removeItem={removeMeasurement}
             ></Legend>
             <MdClose

@@ -12,13 +12,6 @@ type Props = {
 };
 
 export const ReceiveTable = ({ boards }: Props) => {
-    const dispatch = useDispatch();
-
-    useSubscribe("podData/update", (update) => {
-        dispatch(updatePodData(update));
-        dispatch(updateMeasurements(update));
-    });
-
     return (
         <TableUpdater>
             <div className={styles.newReceiveTable}>

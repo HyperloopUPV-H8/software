@@ -1,20 +1,24 @@
+import { NumericMeasurement } from "common";
 import styles from "./Legend.module.scss";
 import { LegendItem } from "./LegendItem/LegendItem";
 import { memo } from "react";
-import { LineDescription } from "../LinesChart/line";
+import { ChartLine } from "components/ChartMenu/ChartElement";
+
 type Props = {
-    legendItems: Array<{ id: string; color: string }>;
+    items: ChartLine[];
     removeItem: (id: string) => void;
 };
 
-const Legend = ({ legendItems, removeItem }: Props) => {
+const Legend = ({ items, removeItem }: Props) => {
     return (
         <div className={styles.legendWrapper}>
-            {legendItems.map(({ id, color }) => {
+            {items.map(({ id, name, color, getUpdate, units }) => {
                 return (
                     <LegendItem
-                        key={id}
-                        name={id}
+                        key={id} //TODO: change, different measurements can have the same id
+                        name={name}
+                        value={getUpdate()}
+                        units={units}
                         color={color}
                         removeItem={() => {
                             removeItem(id);

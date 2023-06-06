@@ -7,10 +7,11 @@ import { memo } from "react";
 import { useUpdater } from "./useUpdater";
 
 type Props = {
+    boardId: string;
     packet: Packet;
 };
 
-export const PacketView = memo(({ packet }: Props) => {
+export const PacketView = memo(({ boardId, packet }: Props) => {
     const columns = useSelector((state: RootState) => state.columns);
 
     const { countRef, cycleTimeRef } = useUpdater(packet);
@@ -37,6 +38,7 @@ export const PacketView = memo(({ packet }: Props) => {
                         return (
                             <MeasurementView
                                 key={measurement.id}
+                                boardId={boardId}
                                 measurement={measurement}
                             />
                         );

@@ -1,4 +1,9 @@
-import { getPacket, isNumericMeasurement } from "common";
+import {
+    getMeasurement,
+    getPacket,
+    isNumericMeasurement,
+    useGlobalTicker,
+} from "common";
 import { useInterval } from "hooks/useInterval";
 import { createContext, useRef } from "react";
 import { store } from "store";
@@ -8,13 +13,13 @@ export type PacketElement = {
     cycleTime: Text;
 };
 
-type MeasurementElement = { value: Text };
+type MeasurementElement = { boardId: string; measId: string; value: Text };
 
 type Updater = {
     addPacket: (id: number, element: PacketElement) => void;
     removePacket: (id: number) => void;
-    addMeasurement: (id: string, element: MeasurementElement) => void;
-    removeMeasurement: (id: string) => void;
+    addMeasurement: (element: MeasurementElement) => void;
+    removeMeasurement: (boardId: string, measId: string) => void;
 };
 
 export const TableContext = createContext<Updater>({
@@ -32,9 +37,9 @@ const TICK_RATE = 60;
 
 export const TableUpdater = ({ children }: Props) => {
     const packetElements = useRef<Record<string, PacketElement>>({});
-    const measurementElements = useRef<Record<string, MeasurementElement>>({});
+    const measurementElements = useRef<MeasurementElement[]>([]);
 
-    useInterval(() => {
+    useGlobalTicker(() => {
         const state = store.getState();
         const podData = state.podData;
 
@@ -45,14 +50,27 @@ export const TableUpdater = ({ children }: Props) => {
             element.cycleTime.nodeValue = packet.cycleTime.toFixed(0);
         }
 
-        for (const id in measurementElements.current) {
-            const measurement = state.measurements[id];
-            measurementElements.current[id].value.nodeValue =
-                isNumericMeasurement(measurement)
-                    ? measurement.value.average.toFixed(3)
-                    : measurement.value.toString();
+        for (const item of measurementElements.current) {
+            const measurement = getMeasurement(
+                state.measurements,
+                item.boardId,
+                item.measId
+            );
+            if (!measurement) {
+                return;
+            }
+            const element = measurementElements.current.find(
+                (elem) =>
+                    elem.boardId == item.boardId && elem.measId == item.measId
+            );
+            if (!element) {
+                return;
+            }
+            element.value.nodeValue = isNumericMeasurement(measurement)
+                ? measurement.value.average.toFixed(3)
+                : measurement.value.toString();
         }
-    }, 1000 / TICK_RATE);
+    });
 
     const updater: Updater = {
         addPacket: (id: number, element: PacketElement) => {
@@ -61,11 +79,21 @@ export const TableUpdater = ({ children }: Props) => {
         removePacket(id) {
             delete packetElements.current[id];
         },
-        addMeasurement: (id: string, element: MeasurementElement) => {
-            measurementElements.current[id] = element;
+        addMeasurement: (element: MeasurementElement) => {
+            if (
+                !measurementElements.current.find(
+                    (item) =>
+                        item.boardId == element.boardId &&
+                        item.measId == element.measId
+                )
+            ) {
+                measurementElements.current.push(element);
+            }
         },
-        removeMeasurement: (id: string) => {
-            delete measurementElements.current[id];
+        removeMeasurement: (boardId: string, measId: string) => {
+            measurementElements.current = measurementElements.current.filter(
+                (item) => item.boardId != boardId && item.measId == measId
+            );
         },
     };
 

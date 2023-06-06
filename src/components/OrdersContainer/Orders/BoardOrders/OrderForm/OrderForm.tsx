@@ -4,10 +4,11 @@ import { Header, HeaderInfo } from "./Header/Header";
 import { Fields } from "./Fields/Fields";
 import { useContext, useState } from "react";
 import { Order } from "common";
-import { FormField, useForm } from "./useForm";
+import { useForm } from "./useForm";
 import { useSpring } from "@react-spring/web";
 import { useListenKey } from "./useListenKey";
 import { OrderContext } from "../../OrderContext";
+import { FormField } from "./form";
 
 type Props = {
     description: OrderDescription;

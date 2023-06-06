@@ -9,12 +9,11 @@ export const BootloaderContainer = () => {
     useEffect(() => {
         const controller = new AbortController();
 
-        fetchBack(config.paths.uploadableBoards, controller.signal).then(
-            (value: string[]) => {
-                setBoards(value);
-            }
-        );
-            });
+        // fetchBack(config.paths.uploadableBoards, controller.signal).then(
+        //     (value: string[]) => {
+        //         setBoards(value);
+        //     }
+        // );
 
         return () => {
             controller.abort();

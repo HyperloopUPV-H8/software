@@ -14,16 +14,18 @@ export const Messages = ({ messages }: Props) => {
         <section
             ref={ref}
             onScroll={handleScroll}
-            className={styles.messages}
+            className={styles.wrapper}
         >
-            {messages.map((message) => {
-                return (
-                    <MessageView
-                        key={message.id}
-                        message={message}
-                    />
-                );
-            })}
+            <div className={styles.messages}>
+                {messages.map((message) => {
+                    return (
+                        <MessageView
+                            key={message.id}
+                            message={message}
+                        />
+                    );
+                })}
+            </div>
         </section>
     );
 };

@@ -22,7 +22,5 @@ export function useLogger() {
         setState(result);
     });
 
-    useSubscribe("logger/response", (state) => setState(state));
-
     return [state, startLogging, stopLogging] as const;
 }

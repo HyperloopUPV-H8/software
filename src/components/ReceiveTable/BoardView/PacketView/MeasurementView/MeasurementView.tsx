@@ -6,13 +6,15 @@ import { TableContext } from "components/ReceiveTable/TableUpdater";
 import { useUpdater } from "./useUpdater";
 
 type Props = {
+    boardId: string;
     measurement: Measurement;
 };
 
-export const MeasurementView = ({ measurement }: Props) => {
+export const MeasurementView = ({ boardId, measurement }: Props) => {
     const isNumeric = isNumericMeasurement(measurement);
 
     const { valueRef } = useUpdater(
+        boardId,
         measurement.id,
         isNumeric
             ? measurement.value.average.toFixed(3)

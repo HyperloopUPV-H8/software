@@ -1,5 +1,6 @@
 import "./App.css";
 import {
+    PodDataAdapter,
     WsHandler,
     WsHandlerProvider,
     createWsHandler,
@@ -27,12 +28,14 @@ function App() {
                         () => dispatch(setWebSocketConnection(true)),
                         () => dispatch(setWebSocketConnection(false))
                     ),
-                    fetchBack(config.paths.podDataDescription).then(
-                        (adapter) => {
+                    fetch(
+                        `http://${config.server.ip}:${config.server.port}/${config.paths.podDataDescription}`
+                    )
+                        .then((res) => res.json())
+                        .then((adapter: PodDataAdapter) => {
                             dispatch(initPodData(adapter));
                             dispatch(initMeasurements(adapter));
-                        }
-                    ),
+                        }),
                 ]}
                 LoadingView={<SplashScreen />}
             >

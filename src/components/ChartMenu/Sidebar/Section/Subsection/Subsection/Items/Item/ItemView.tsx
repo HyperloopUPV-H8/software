@@ -1,24 +1,28 @@
-import styles from "./MeasurementItem.module.scss";
+import styles from "./ItemView.module.scss";
 import { DragEvent } from "react";
 import { FiBox } from "react-icons/fi";
-type Props = {
+
+export type Item = {
     id: string;
+    name: string;
 };
 
-const MeasurementItem = ({ id }: Props) => {
+type Props = {
+    item: Item;
+};
+
+export const ItemView = ({ item }: Props) => {
     function handleDragStart(ev: DragEvent<HTMLDivElement>) {
-        ev.dataTransfer.setData("text/plain", id);
+        ev.dataTransfer.setData("id", item.id);
     }
 
     return (
         <div
-            className={`${styles.wrapper} treeNode`}
+            className={styles.item}
             draggable="true"
             onDragStart={handleDragStart}
         >
-            <FiBox /> {id}
+            <FiBox /> {item.name}
         </div>
     );
 };
-
-export default MeasurementItem;

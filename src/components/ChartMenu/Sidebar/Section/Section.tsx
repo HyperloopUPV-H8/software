@@ -1,18 +1,22 @@
-import styles from "./BoardItem.module.scss";
-import { TreeNode } from "components/ChartMenu/Sidebar/TreeNode";
+import styles from "./Section.module.scss";
 import { Caret } from "components/Caret/Caret";
 import { useState } from "react";
-import { PacketItems } from "./PacketItems/PacketItems";
+import { SubsectionsView } from "./Subsection/Subsections";
+import { Subsection } from "./Subsection/Subsection/Subsection";
 
-type Props = {
+export type Section = {
     name: string;
-    packetNodes: TreeNode;
+    subsections: Subsection[];
 };
 
-export const BoardItem = ({ name, packetNodes }: Props) => {
+type Props = {
+    section: Section;
+};
+
+export const Section = ({ section }: Props) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
-        <div className={styles.wrapper}>
+        <div className={styles.section}>
             <div
                 className={styles.header}
                 onClick={() => {
@@ -20,11 +24,11 @@ export const BoardItem = ({ name, packetNodes }: Props) => {
                 }}
             >
                 <Caret isOpen={isOpen} />
-                {name}
+                {section.name}
             </div>
             {isOpen && (
-                <PacketItems
-                    packetNodes={packetNodes}
+                <SubsectionsView
+                    subsections={section.subsections}
                     isVisible={isOpen}
                 />
             )}

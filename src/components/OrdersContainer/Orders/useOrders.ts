@@ -20,15 +20,18 @@ export function useOrders() {
     useEffect(() => {
         const controller = new AbortController();
 
-        fetchBack(config.paths.orderDescription, controller.signal)
+        fetch(
+            `http://${config.server.ip}:${config.server.port}/${config.paths.orderDescription}`
+        )
+            .then((res) => res.json())
             .then((descriptions: VehicleOrders) => {
                 dispatch(setOrders(descriptions));
             })
             .catch((reason) => console.error(reason));
 
-        handler.subscribe("order/stateOrders", (stateOrders) => {
-            dispatch(updateStateOrders(stateOrders));
-        });
+        // handler.subscribe("order/stateOrders", (stateOrders) => {
+        //     dispatch(updateStateOrders(stateOrders));
+        // });
 
         return () => {
             controller.abort();

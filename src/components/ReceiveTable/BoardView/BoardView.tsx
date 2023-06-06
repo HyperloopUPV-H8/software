@@ -23,6 +23,7 @@ export const BoardView = ({ board }: Props) => {
                     return (
                         <PacketView
                             key={packet.id}
+                            boardId={board.name}
                             packet={packet}
                         />
                     );
