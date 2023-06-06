@@ -29,20 +29,12 @@ export function TestingPage() {
         yDistance: 0,
     } as VehicleState);
 
-    const {
-        sendMessage,
-        sendJsonMessage,
-        lastMessage,
-        lastJsonMessage,
-        readyState,
-        getWebSocket,
-    } = useWebSocket(WEBSOCKET_URL, {
-        onOpen: () => console.log("Connection opened"),
-        shouldReconnect: (closeEvent) => {
-            console.log("Disconnected");
-            return true;
-        },
-    });
+    const { sendMessage, sendJsonMessage, lastMessage, lastJsonMessage } =
+        useWebSocket(WEBSOCKET_URL, {
+            shouldReconnect: (closeEvent) => {
+                return true;
+            },
+        });
 
     useEffect(() => {
         if (lastJsonMessage !== null) {
@@ -52,10 +44,6 @@ export function TestingPage() {
             }
         }
     }, [lastJsonMessage]);
-
-    useEffect(() => {
-        console.log(vehicleState);
-    }, [vehicleState]);
 
     return (
         <PageWrapper title="Testing">

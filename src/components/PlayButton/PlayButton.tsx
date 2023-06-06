@@ -106,7 +106,6 @@ function handleClick(
 }
 
 function sendMsgSimultation(sendMessage: SendMessage, msg: string) {
-    console.log("Sent: ", msg);
     const message: WebSocketMessage = msg;
     sendMessage(message);
 }

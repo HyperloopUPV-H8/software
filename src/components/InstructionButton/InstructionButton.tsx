@@ -64,7 +64,5 @@ function sendOrder(
     sendJsonMessage: SendJsonMessage
 ) {
     const controlOrder: ControlOrder = { id: id, state: isOn };
-    console.log(controlOrder);
     sendJsonMessage(controlOrder);
-    console.log("Control order sent!");
 }

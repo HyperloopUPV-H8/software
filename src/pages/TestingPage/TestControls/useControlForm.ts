@@ -33,7 +33,6 @@ export function useControlForm(
     const SubmitHandler: SubmitHandler = (sendJsonMessage: SendJsonMessage) => {
         if (form.isValid) {
             sendJsonMessage(form.formData);
-            console.log("Form Data sent!");
         }
     };
 
