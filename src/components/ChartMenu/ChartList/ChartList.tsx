@@ -1,10 +1,18 @@
 import styles from "./ChartList.module.scss";
-import { Chart } from "./Chart/ChartWithLegend";
+import { ChartWithLegend } from "./ChartWithLegend/ChartWithLegend";
 import { DragEvent, useCallback } from "react";
 import { useCharts } from "../useCharts";
 import { store } from "store";
 import { NumericMeasurement, getMeasurement } from "common";
 import { parseId } from "../parseId";
+
+function getRandomColor() {
+    const r = Math.floor(Math.random() * 256);
+    const g = Math.floor(Math.random() * 256);
+    const b = Math.floor(Math.random() * 256);
+
+    return `rgb(${r}, ${g}, ${b})`;
+}
 
 export const ChartList = () => {
     const { charts, addChart, removeChart, addLine, removeLine } = useCharts();
@@ -41,7 +49,7 @@ export const ChartList = () => {
 
                 return meas.value.last;
             },
-            color: "red",
+            color: getRandomColor(),
         });
     }, []);
 
@@ -54,16 +62,26 @@ export const ChartList = () => {
             ) as NumericMeasurement;
 
             if (!meas) {
-                console.error(`measurement ${measId} not found in store`);
+                console.trace(`measurement ${measId} not found in store`);
                 return;
             }
 
             addLine(id, {
-                id: measId,
+                id: `${boardId}/${measId}`,
                 name: meas.name,
                 units: meas.units,
-                color: "red",
+                color: getRandomColor(),
                 getUpdate: () => {
+                    const meas = getMeasurement(
+                        store.getState().measurements,
+                        boardId,
+                        measId
+                    ) as NumericMeasurement;
+
+                    if (!meas) {
+                        return 0;
+                    }
+
                     return meas.value.last;
                 },
                 range: meas.safeRange,
@@ -85,7 +103,7 @@ export const ChartList = () => {
         >
             {charts.map((chart) => {
                 return (
-                    <Chart
+                    <ChartWithLegend
                         key={chart.id}
                         chartElement={chart}
                         handleDropOnChart={handleDropOnChart}

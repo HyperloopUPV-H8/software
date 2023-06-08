@@ -7,6 +7,7 @@ type Props = {
     onClick: (ev: React.MouseEvent) => void;
     disabled?: boolean;
     color?: string;
+    className?: string;
 };
 
 export const Button = ({
@@ -14,6 +15,7 @@ export const Button = ({
     color = "hsl(29, 88%, 57%)",
     onClick,
     disabled,
+    className = "",
 }: Props) => {
     const [springs, api] = useSpring(() => ({
         from: { backgroundColor: color },
@@ -29,7 +31,7 @@ export const Button = ({
         <animated.div
             className={`${styles.buttonWrapper} ${
                 disabled ? styles.disabled : styles.enabled
-            }`}
+            } ${className}`}
             onClick={(ev) => {
                 if (!disabled) {
                     onClick(ev);

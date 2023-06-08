@@ -7,9 +7,10 @@ import { ChartLine } from "components/ChartMenu/ChartElement";
 type Props = {
     items: ChartLine[];
     removeItem: (id: string) => void;
+    getValue: (id: string) => number;
 };
 
-const Legend = ({ items, removeItem }: Props) => {
+const Legend = ({ items, getValue, removeItem }: Props) => {
     return (
         <div className={styles.legendWrapper}>
             {items.map(({ id, name, color, getUpdate, units }) => {
@@ -17,7 +18,7 @@ const Legend = ({ items, removeItem }: Props) => {
                     <LegendItem
                         key={id} //TODO: change, different measurements can have the same id
                         name={name}
-                        value={getUpdate()}
+                        getValue={() => getValue(id)}
                         units={units}
                         color={color}
                         removeItem={() => {

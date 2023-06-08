@@ -1,11 +1,5 @@
 import "./App.css";
-import {
-    PodDataAdapter,
-    WsHandler,
-    WsHandlerProvider,
-    createWsHandler,
-    fetchBack,
-} from "common";
+import { WsHandlerProvider, createWsHandler, fetchBack } from "common";
 import { HomePage } from "pages/HomePage/HomePage";
 import { useDispatch } from "react-redux";
 import { initMeasurements } from "slices/measurementsSlice";
@@ -28,14 +22,12 @@ function App() {
                         () => dispatch(setWebSocketConnection(true)),
                         () => dispatch(setWebSocketConnection(false))
                     ),
-                    fetch(
-                        `http://${config.server.ip}:${config.server.port}/${config.paths.podDataDescription}`
-                    )
-                        .then((res) => res.json())
-                        .then((adapter: PodDataAdapter) => {
+                    fetchBack(config.paths.podDataDescription).then(
+                        (adapter) => {
                             dispatch(initPodData(adapter));
                             dispatch(initMeasurements(adapter));
-                        }),
+                        }
+                    ),
                 ]}
                 LoadingView={<SplashScreen />}
             >

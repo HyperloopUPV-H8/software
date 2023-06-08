@@ -1,22 +1,29 @@
+import { useGlobalTicker } from "common";
 import styles from "./LegendItem.module.scss";
 import { MdClose } from "react-icons/md";
-import { NumericMeasurement } from "common";
+import { useState } from "react";
 
 type Props = {
     name: string;
-    value: number;
     units: string;
     color: string;
+    getValue: () => number;
     removeItem: () => void;
 };
 
 export const LegendItem = ({
     name,
     color,
-    value,
     units,
+    getValue,
     removeItem,
 }: Props) => {
+    const [value, setValue] = useState(0);
+
+    useGlobalTicker(() => {
+        setValue(getValue());
+    });
+
     return (
         <div className={styles.legendItemWrapper}>
             <div

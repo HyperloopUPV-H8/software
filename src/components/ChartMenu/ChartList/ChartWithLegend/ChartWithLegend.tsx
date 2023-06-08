@@ -18,7 +18,7 @@ type Props = {
     removeMeasurement: (id: string) => void;
 };
 
-export const Chart = ({
+export const ChartWithLegend = ({
     chartElement,
     handleDropOnChart,
     removeElement,
@@ -52,15 +52,26 @@ export const Chart = ({
             }}
             onDrop={handleDrop}
         >
-            <LinesChart
-                divisions={10}
-                grid={true}
-                items={chartElement.lines}
-                length={100}
-                height="10rem"
-            ></LinesChart>
+            <div className={styles.chart}>
+                <LinesChart
+                    divisions={6}
+                    showGrid={true}
+                    items={chartElement.lines}
+                    length={100}
+                ></LinesChart>
+            </div>
             <Legend
                 items={chartElement.lines}
+                getValue={(id) => {
+                    const ids = parseId(id);
+                    const meas = getMeasurement(
+                        store.getState().measurements,
+                        ids.boardId,
+                        ids.measId
+                    ) as NumericMeasurement;
+
+                    return meas.value.last;
+                }}
                 removeItem={removeMeasurement}
             ></Legend>
             <MdClose

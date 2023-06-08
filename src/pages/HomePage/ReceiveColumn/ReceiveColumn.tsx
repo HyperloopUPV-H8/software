@@ -29,12 +29,12 @@ export const ReceiveColumn = () => {
                     <ReceiveTable boards={store.getState().podData.boards} />
                 ),
             },
-            // {
-            //     id: "charts",
-            //     name: "Charts",
-            //     icon: <Chart />,
-            //     component: <ChartMenu />,
-            // },
+            {
+                id: "charts",
+                name: "Charts",
+                icon: <Chart />,
+                component: <ChartMenu />,
+            },
         ],
         [store]
     );

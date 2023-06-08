@@ -1,6 +1,5 @@
 import { useReducer } from "react";
 import { ChartElement, ChartLine } from "./ChartElement";
-import { LineDescription } from "common";
 import { mustFindIndex } from "utils/array";
 
 type AddElement = {
@@ -88,6 +87,7 @@ function reducer(state: ChartElement[], action: ChartActions): ChartElement[] {
 
 export function useCharts() {
     const [charts, dispatch] = useReducer(reducer, []);
+
     return {
         charts,
         addChart: (id: string, line: ChartLine) =>
