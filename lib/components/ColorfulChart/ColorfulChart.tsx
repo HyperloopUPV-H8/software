@@ -42,7 +42,7 @@ export const ColorfulChart = ({
                 <LinesChart
                     height="8rem"
                     divisions={4}
-                    grid={false}
+                    showGrid={false}
                     items={chartItems}
                     length={length}
                 />

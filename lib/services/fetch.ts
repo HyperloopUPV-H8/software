@@ -1,16 +1,13 @@
-import { PodDataAdapter, VehicleOrders } from "../index.ts";
+// import { PodDataAdapter, VehicleOrders } from "../index.ts";
 import { config } from "./../config.ts";
 
-type Endpoints = {
-    [config.paths.podDataDescription]: PodDataAdapter;
-    [config.paths.orderDescription]: VehicleOrders;
-    [config.paths.uploadableBoards]: string[];
-};
+// type Endpoints = {
+//     [config.paths.podDataDescription]: PodDataAdapter;
+//     [config.paths.orderDescription]: VehicleOrders;
+//     [config.paths.uploadableBoards]: string[];
+// };
 
-export async function fetchBack<T extends keyof Endpoints>(
-    path: T,
-    signal?: AbortSignal
-) {
+export async function fetchBack(path: string, signal?: AbortSignal) {
     const res = await fetch(
         `http://${config.server.ip}:${config.server.port}/${path}`,
         {
@@ -18,5 +15,5 @@ export async function fetchBack<T extends keyof Endpoints>(
         }
     );
 
-    return (await res.json()) as Promise<Endpoints[T]>;
+    return await res.json();
 }

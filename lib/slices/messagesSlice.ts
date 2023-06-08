@@ -40,6 +40,9 @@ export const messageSlice = createSlice({
                 };
             },
         },
+        clearMessages: () => {
+            return [];
+        },
     },
 });
 

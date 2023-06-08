@@ -7,7 +7,7 @@ import { LineDescription } from "./types";
 type Props = {
     items: Array<LineDescription>;
     divisions: number;
-    grid: boolean;
+    showGrid?: boolean;
     length: number;
     width?: string;
     height?: string;
@@ -20,8 +20,9 @@ export const LinesChart = ({
     items,
     divisions,
     length,
-    width,
-    height,
+    showGrid = true,
+    width = "100%",
+    height = "100%",
 }: Props) => {
     const { ref, range } = useLines(viewBoxWidth, viewBoxHeight, length, items);
 
@@ -36,7 +37,7 @@ export const LinesChart = ({
                 chartRef={ref}
                 height={height}
                 width={width}
-                grid={false}
+                showGrid={showGrid}
                 viewBoxHeight={viewBoxHeight}
                 viewBoxWidth={viewBoxWidth}
                 gridDivisions={divisions}

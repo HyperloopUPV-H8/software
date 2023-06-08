@@ -94,14 +94,14 @@ export function getMeasurement(
     const board = measurements.boards[boardId];
 
     if (!board) {
-        console.error(`board ${board} not found in store`);
+        console.trace(`board ${board} not found in store`);
         return undefined;
     }
 
     const meas = board[measId];
 
     if (!meas) {
-        console.error(`measurement ${measId} not found in store`);
+        console.trace(`measurement ${measId} not found in store`);
         return undefined;
     }
 
