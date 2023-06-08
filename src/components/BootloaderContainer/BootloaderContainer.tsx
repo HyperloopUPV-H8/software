@@ -1,16 +1,23 @@
 import { Bootloader } from "./Bootloader/Bootloader";
 import { useEffect, useState } from "react";
-import { fetchFromBackend } from "services/fetch";
+import { fetchBack } from "common";
+import { config } from "common";
 
 export const BootloaderContainer = () => {
     const [boards, setBoards] = useState<string[]>();
 
     useEffect(() => {
-        fetchFromBackend(import.meta.env.VITE_UPLOADABLE_BOARDS_PATH)
-            .then((res: Response) => res.json())
-            .then((value: string[]) => {
+        const controller = new AbortController();
+
+        fetchBack(config.paths.uploadableBoards, controller.signal).then(
+            (value: string[]) => {
                 setBoards(value);
-            });
+            }
+        );
+
+        return () => {
+            controller.abort();
+        };
     }, []);
 
     if (boards) {

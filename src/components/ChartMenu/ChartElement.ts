@@ -1,5 +1,8 @@
-import { LineDescription } from "./ChartList/Chart/LinesChart/line";
+import { LineDescription } from "common";
+
+export type ChartLine = LineDescription & { name: string; units: string };
+
 export type ChartElement = {
     id: string;
-    lineDescriptions: Array<LineDescription>;
+    lines: ChartLine[];
 };

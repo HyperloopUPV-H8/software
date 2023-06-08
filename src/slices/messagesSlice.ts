@@ -1,7 +1,5 @@
-import { createMessageSlice } from "common";
+import { messageSlice } from "common";
 
-const messagesSlice = createMessageSlice();
+export const { addMessage, clearMessages } = messageSlice.actions;
 
-export const { addMessage } = messagesSlice.actions;
-
-export default messagesSlice.reducer;
+export default messageSlice.reducer;

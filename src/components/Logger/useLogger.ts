@@ -1,17 +1,26 @@
-import { useBroker } from "common";
-import { useState } from "react";
+import { useSubscribe, useWsHandler } from "common";
+import { useEffect, useState } from "react";
 
 export function useLogger() {
-    const sendWS = useBroker("logger/enable", (state) => setState(state));
+    const [state, setState] = useState(false);
+
+    const handler = useWsHandler();
+
+    const log = (enable: boolean) => {
+        handler.post("logger/enable", enable);
+    };
 
     function startLogging() {
-        sendWS(true);
-    }
-    function stopLogging() {
-        sendWS(false);
+        log(true);
     }
 
-    const [state, setState] = useState(false);
+    function stopLogging() {
+        log(false);
+    }
+
+    useSubscribe("logger/response", (result) => {
+        setState(result);
+    });
 
     return [state, startLogging, stopLogging] as const;
 }

@@ -1,25 +1,31 @@
 import styles from "./Orders.module.scss";
-import { OrderDescription } from "common";
-import { OrderForm } from "./OrderForm/OrderForm";
-import { Order } from "common";
+import { VehicleOrders } from "common";
+import { OrderContext } from "./OrderContext";
+import { useSendOrder } from "../useSendOrder";
+import { BoardOrdersView } from "./BoardOrders/BoardOrders";
 
 type Props = {
-    sendOrder: (order: Order) => void;
-    orderDescriptions: Record<string, OrderDescription>;
+    orders: VehicleOrders;
 };
 
-export const Orders = ({ orderDescriptions, sendOrder }: Props) => {
+export const Orders = ({ orders }: Props) => {
+    const sendOrder = useSendOrder();
+
     return (
-        <div className={styles.ordersWrapper}>
-            {Object.values(orderDescriptions).map((description) => {
-                return (
-                    <OrderForm
-                        key={description.id}
-                        description={description}
-                        sendOrder={sendOrder}
-                    />
-                );
-            })}
-        </div>
+        <OrderContext.Provider value={sendOrder}>
+            <div className={styles.ordersWrapper}>
+                {orders.boards.map((board) => {
+                    return (
+                        (board.orders.length > 0 ||
+                            board.stateOrders.length > 0) && (
+                            <BoardOrdersView
+                                key={board.name}
+                                boardOrders={board}
+                            />
+                        )
+                    );
+                })}
+            </div>
+        </OrderContext.Provider>
     );
 };

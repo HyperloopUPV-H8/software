@@ -9,25 +9,21 @@ export function useBootloaderState() {
         onSuccess,
         onFailure,
         onSuccess,
-        onFailure
+        onFailure,
+        onProgress
     );
 
     function upload(board: string, file: File) {
         file.arrayBuffer().then((arr) => {
-            uploader({
-                board: board,
-                file: window.btoa(String.fromCharCode(...new Uint8Array(arr))),
-            });
-        });
-
-        file.text().then((value) => {
-            uploader({ board: board, file: value });
-            setState({ kind: "awaiting", progress: 0 });
+            uploader(
+                board,
+                window.btoa(String.fromCharCode(...new Uint8Array(arr)))
+            );
         });
     }
 
     function download(board: string) {
-        downloader({ board });
+        downloader(board);
         setState({ kind: "awaiting", progress: 0 });
     }
 
@@ -47,6 +43,10 @@ export function useBootloaderState() {
                 return { kind: "empty" };
             });
         }, 1000);
+    }
+
+    function onProgress(progress: number) {
+        setState({ kind: "awaiting", progress: progress });
     }
 
     function removeFile() {

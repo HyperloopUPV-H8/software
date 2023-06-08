@@ -1,24 +1,91 @@
 import styles from "./ChartList.module.scss";
-import { Chart } from "./Chart/ChartWithLegend";
-import { useChartElements } from "components/ChartMenu/useChartElements";
+import { ChartWithLegend } from "./ChartWithLegend/ChartWithLegend";
 import { DragEvent, useCallback } from "react";
+import { useCharts } from "../useCharts";
+import { store } from "store";
+import { NumericMeasurement, getMeasurement } from "common";
+import { parseId } from "../parseId";
+
+function getRandomColor() {
+    const r = Math.floor(Math.random() * 256);
+    const g = Math.floor(Math.random() * 256);
+    const b = Math.floor(Math.random() * 256);
+
+    return `rgb(${r}, ${g}, ${b})`;
+}
 
 export const ChartList = () => {
-    const {
-        chartElements,
-        addElement,
-        addMeasurementToElement,
-        removeMeasurementFromElement,
-        removeElement,
-    } = useChartElements();
+    const { charts, addChart, removeChart, addLine, removeLine } = useCharts();
 
     const handleDrop = useCallback((ev: DragEvent<HTMLDivElement>) => {
-        addElement(ev.dataTransfer.getData("text/plain"));
+        const itemId = ev.dataTransfer.getData("id");
+        const ids = parseId(itemId);
+        const meas = getMeasurement(
+            store.getState().measurements,
+            ids.boardId,
+            ids.measId
+        ) as NumericMeasurement;
+
+        if (!meas) {
+            return;
+        }
+
+        addChart(itemId, {
+            id: itemId,
+            name: meas.name,
+            units: meas.units,
+            range: meas.safeRange,
+            getUpdate: () => {
+                //TODO: change to getNumericMeasurement and return undefined if its not numeric (olr doesnt exist)
+                const meas = getMeasurement(
+                    store.getState().measurements,
+                    ids.boardId,
+                    ids.measId
+                ) as NumericMeasurement;
+
+                if (!meas) {
+                    return 0;
+                }
+
+                return meas.value.last;
+            },
+            color: getRandomColor(),
+        });
     }, []);
 
     const handleDropOnChart = useCallback(
-        (id: string, measurementId: string) => {
-            addMeasurementToElement(id, measurementId);
+        (id: string, boardId: string, measId: string) => {
+            const meas = getMeasurement(
+                store.getState().measurements,
+                boardId,
+                measId
+            ) as NumericMeasurement;
+
+            if (!meas) {
+                console.trace(`measurement ${measId} not found in store`);
+                return;
+            }
+
+            addLine(id, {
+                id: `${boardId}/${measId}`,
+                name: meas.name,
+                units: meas.units,
+                color: getRandomColor(),
+                getUpdate: () => {
+                    const meas = getMeasurement(
+                        store.getState().measurements,
+                        boardId,
+                        measId
+                    ) as NumericMeasurement;
+
+                    if (!meas) {
+                        return 0;
+                    }
+
+                    return meas.value.last;
+                },
+                range: meas.safeRange,
+            });
         },
         []
     );
@@ -34,20 +101,17 @@ export const ChartList = () => {
                 ev.preventDefault();
             }}
         >
-            {chartElements.map((chartElement) => {
+            {charts.map((chart) => {
                 return (
-                    <Chart
-                        key={chartElement.id}
-                        chartElement={chartElement}
+                    <ChartWithLegend
+                        key={chart.id}
+                        chartElement={chart}
                         handleDropOnChart={handleDropOnChart}
                         removeElement={() => {
-                            removeElement(chartElement.id);
+                            removeChart(chart.id);
                         }}
                         removeMeasurement={(measurementId: string) => {
-                            removeMeasurementFromElement(
-                                chartElement.id,
-                                measurementId
-                            );
+                            removeLine(chart.id, measurementId);
                         }}
                     />
                 );

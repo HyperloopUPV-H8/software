@@ -3,14 +3,16 @@ import { useSelector } from "react-redux";
 import Sidebar from "components/ChartMenu/Sidebar/Sidebar";
 import lodash from "lodash";
 import { ChartList } from "components/ChartMenu/ChartList/ChartList";
-import { useMeasurements } from "./useMeasurements";
-import { selectNumericPodDataNames } from "./getSidebarTree";
+import { createSections } from "./createSidebar";
+import { useMemo } from "react";
+import { store } from "store";
 
 export const ChartMenu = () => {
-    const boardNodes = useSelector(selectNumericPodDataNames, lodash.isEqual);
-    useMeasurements();
+    const sections = useMemo(() => {
+        return createSections(store.getState().podData);
+    }, []);
 
-    if (Object.keys(boardNodes).length == 0) {
+    if (sections.length == 0) {
         return (
             <div className={styles.noValues}>
                 No available values to chart. This might happen if none of the
@@ -21,7 +23,7 @@ export const ChartMenu = () => {
     } else {
         return (
             <div className={styles.chartMenuWrapper}>
-                <Sidebar boardNodes={boardNodes} />
+                <Sidebar sections={sections} />
                 <ChartList></ChartList>
             </div>
         );

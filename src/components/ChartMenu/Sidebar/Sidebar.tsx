@@ -1,22 +1,19 @@
 import styles from "./Sidebar.module.scss";
-import "./treeNode.scss";
-import { BoardItem } from "./BoardItem/BoardItem";
+import { Section } from "./Section/Section";
 import { memo } from "react";
-import { TreeNode } from "./TreeNode";
 
 type Props = {
-    boardNodes: TreeNode;
+    sections: Section[];
 };
 
-const Sidebar = ({ boardNodes }: Props) => {
+const Sidebar = ({ sections }: Props) => {
     return (
-        <div className={styles.wrapper}>
-            {Object.entries(boardNodes).map(([name, packetNodes]) => {
+        <div className={styles.sidebar}>
+            {sections.map((section) => {
                 return (
-                    <BoardItem
-                        key={name}
-                        name={name}
-                        packetNodes={packetNodes!}
+                    <Section
+                        key={section.name}
+                        section={section}
                     />
                 );
             })}

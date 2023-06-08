@@ -1,4 +1,4 @@
-import { useBroker } from "common";
+import { MessageAdapter, useSubscribe } from "common";
 import { addMessage } from "slices/messagesSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "store";
@@ -6,7 +6,7 @@ import { RootState } from "store";
 export function useMessages() {
     const dispatch = useDispatch();
 
-    useBroker("message/update", (msg) => {
+    useSubscribe("message/update", (msg: MessageAdapter) => {
         dispatch(addMessage(msg));
     });
 
