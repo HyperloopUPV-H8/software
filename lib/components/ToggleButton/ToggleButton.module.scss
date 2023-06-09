@@ -53,7 +53,7 @@ $label-size: 0.5rem;
     }
 
     button {
-        background-color: colors.getColor("tertiary", 90);
+        background-color: var(--tertiary-90); //FIXME: Hacer esto en todos
         box-shadow: 0 4px colors.getColor("tertiary", 60);
         transform: translateY(-4px);
 
