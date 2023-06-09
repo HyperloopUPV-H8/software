@@ -1,0 +1,20 @@
+@use "./colors.scss";
+@use "./fonts.scss";
+
+:root {
+    @include fonts.fonts;
+}
+
+:root {
+    @include colors.colors;
+}
+
+body {
+    margin: 0;
+}
+
+:root {
+    font-family: var(--font-sans);
+    color: var(--secondary-30);
+    font-size: 16px;
+}

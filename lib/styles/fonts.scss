@@ -1,0 +1,16 @@
+@use "./colors.scss";
+
+@use "/src/assets/fonts/Inter/Inter.scss";
+@use "/src/assets/fonts/Consolas/Consolas.scss";
+@use "/src/assets/fonts/NotoColorEmoji/NotoColorEmoji.scss";
+
+$font-families: (
+    sans: "Inter",
+    mono: "IBM Plex Mono, monospace",
+);
+
+@mixin fonts {
+    @each $name, $font in $font-families {
+        --font-#{$name}: #{$font};
+    }
+}
