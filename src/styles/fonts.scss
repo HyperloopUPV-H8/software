@@ -20,7 +20,7 @@ $font-weights: (
 
 @mixin globalFontStyles {
     @each $name, $font in $font-families {
-        --font-family-#{$name}: #{$font};
+        --font-#{$name}: #{$font};
     }
 
     @each $name, $size in $font-sizes {
@@ -33,7 +33,7 @@ $font-weights: (
 }
 
 @mixin default-text {
-    font-family: var(--font-family-sans);
+    font-family: var(--font-sans);
     font-size: var(--font-size-default);
     font-weight: var(--font-weight-normal);
     color: colors.getColor("primary", 20);

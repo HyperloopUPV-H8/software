@@ -1,7 +1,0 @@
-@use "src/styles/fonts.scss";
-
-.name {
-    font-size: fonts.getFontSize("small");
-    font-weight: fonts.getFontWeight("light");
-    font-style: italic;
-}

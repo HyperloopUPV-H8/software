@@ -1,14 +1,14 @@
 @use "src/styles/colors";
 @use "src/styles/fonts";
 
-.windowWrapper {
-    width: fit-content;
-    flex: 1 1 0;
+.window {
     display: flex;
     min-height: 0;
     flex-direction: column;
     border-radius: 0.8rem;
     overflow: hidden;
+    height: fit-content;
+    max-height: 100%;
 
     filter: drop-shadow(16px 11px 8px rgba(189, 189, 189, 0.01))
         drop-shadow(9px 6px 7px rgba(189, 189, 189, 0.02))
@@ -26,9 +26,9 @@
 
 .content {
     background-color: colors.getColor("primary", 99);
-    padding: 1rem;
+    padding: 2rem;
     display: flex;
-    flex: 1 1 0;
     min-height: 0;
+    overflow-y: auto;
     align-items: stretch;
 }

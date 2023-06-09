@@ -1,10 +1,8 @@
-import { useBroker } from "common";
-
-import { Order } from "common";
+import { Order, useWsHandler } from "common";
 export function useSendOrder() {
-    const sendWS = useBroker("order/send");
+    const handler = useWsHandler();
 
     return (order: Omit<Order, "name">) => {
-        sendWS(order);
+        handler.post("order/send", order);
     };
 }

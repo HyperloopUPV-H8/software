@@ -9,15 +9,8 @@ export const vehicleRoute = {
     element: <VehiclePage />,
     loader: loadPodData,
     children: [
+        { path: "", element: <Navigate to={"first"} /> },
         { path: "first", element: <FirstPage /> },
         { path: "second", element: <SecondPage /> },
-        {
-            path: "",
-            element: <Navigate to="first" />,
-        },
-        {
-            path: "*",
-            element: <Navigate to="first" />,
-        },
     ],
 };

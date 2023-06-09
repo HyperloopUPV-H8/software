@@ -16,5 +16,6 @@
 .value {
     text-align: right;
     width: 6rem;
+    font-family: var(--font-mono);
     font-weight: fonts.getFontWeight("light");
 }

@@ -11,6 +11,8 @@
         "preview": "npm run build && vite preview"
     },
     "dependencies": {
+        "common": "file:../common-front",
+        "@reduxjs/toolkit": "^1.9.0",
         "@react-spring/three": "^9.7.2",
         "@react-three/drei": "^9.66.6",
         "@react-three/fiber": "^8.13.0",
@@ -37,3 +39,4 @@
         "vite": "^4.0.4"
     }
 }
+

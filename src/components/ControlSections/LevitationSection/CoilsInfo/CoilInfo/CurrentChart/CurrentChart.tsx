@@ -1,20 +1,24 @@
-import { Measurement } from "common";
-import styles from "./CurrentChart.module.scss";
-import { Chart } from "components/Chart/ChartWithLegend";
-import { LinesChart } from "components/Chart/LinesChart/LinesChart";
+import { NumericMeasurement } from "common";
+import { LinesChart } from "common";
+import { store } from "store";
 
 type Props = {
-    current: Measurement;
-    currentRef: Measurement;
+    current: NumericMeasurement;
+    currentRef: NumericMeasurement;
 };
 
 export const CurrentChart = ({ current, currentRef }: Props) => {
     return (
         <LinesChart
+            getMeasurement={(id: string) =>
+                store.getState().measurements[id] as NumericMeasurement
+            }
             width="8rem"
             height={"6rem"}
-            gridDivisions={3}
-            lineDescriptions={[{ id: "airgap_1", color: "#ff0000" }]}
+            divisions={3}
+            grid={true}
+            items={[{ measurement: current, color: "red" }]}
+            length={50}
         ></LinesChart>
     );
 };

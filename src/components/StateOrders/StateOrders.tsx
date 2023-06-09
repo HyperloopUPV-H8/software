@@ -8,7 +8,10 @@ export const StateOrders = () => {
     const stateInfo = useBoardStateInfo();
 
     return (
-        <Window title="State Actions">
+        <Window
+            title="VCU Orders"
+            height="fill"
+        >
             <main className={styles.stateOrdersWrapper}>
                 <BoardStateView
                     boardName="LCU"

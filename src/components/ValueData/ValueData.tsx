@@ -1,17 +1,34 @@
 import styles from "components/ValueData/ValueData.module.scss";
-import { ValueName } from "components/ValueData/ValueName/ValueName";
-import { Value } from "components/ValueData/Value/Value";
-import { Measurement } from "common";
-
+import { Measurement, isNumericMeasurement } from "common";
+import { useTextUpdater } from "services/ImperativeUpdater/useTextUpdater";
+import { memo } from "react";
 type Props = {
     measurement: Measurement;
 };
 
-export const ValueData = ({ measurement }: Props) => {
+export const ValueData = memo(({ measurement }: Props) => {
+    const ref = useTextUpdater(measurement.id);
+
+    const isNumeric = isNumericMeasurement(measurement);
+
     return (
         <div className={styles.valueDataWrapper}>
-            <ValueName name={measurement.name} />
-            <Value measurement={measurement} />
+            <span className={styles.name}>{measurement.name}</span>
+            {isNumeric && (
+                <>
+                    <span
+                        ref={ref}
+                        className={styles.value}
+                    ></span>
+                    <span className={styles.units}>{measurement.units}</span>
+                </>
+            )}
+            {!isNumeric && (
+                <span
+                    ref={ref}
+                    className={styles.value}
+                ></span>
+            )}
         </div>
     );
-};
+});
