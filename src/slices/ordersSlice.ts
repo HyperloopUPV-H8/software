@@ -1,6 +1,5 @@
-import { createOrderSlice } from "common";
-const ordersSlice = createOrderSlice();
+import { orderSlice } from "common";
 
-export const { setOrders } = ordersSlice.actions;
+export const { setOrders } = orderSlice.actions;
 
-export default ordersSlice.reducer;
+export default orderSlice.reducer;

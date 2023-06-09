@@ -1,5 +1,6 @@
 import { NumericMeasurement } from "common";
-import { LinesChart } from "components/LinesChart/LinesChart";
+import { LinesChart } from "common";
+import { store } from "store";
 
 type Props = {
     current: NumericMeasurement;
@@ -9,10 +10,13 @@ type Props = {
 export const CurrentChart = ({ current, currentRef }: Props) => {
     return (
         <LinesChart
+            getMeasurement={(id: string) =>
+                store.getState().measurements[id] as NumericMeasurement
+            }
             width="8rem"
             height={"6rem"}
             divisions={3}
-            grid
+            grid={true}
             items={[{ measurement: current, color: "red" }]}
             length={50}
         ></LinesChart>

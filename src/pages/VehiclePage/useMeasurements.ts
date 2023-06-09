@@ -1,9 +1,9 @@
 import { updateMeasurements } from "slices/measurementsSlice";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useBroker } from "common";
 import { store } from "store";
-import { useGlobalTicker } from "hooks/GlobalTicker/useGlobalTicker";
+import { useGlobalTicker } from "common";
+import { useSubscribe } from "common";
 
 export function useMeasurements() {
     const dispatch = useDispatch();
@@ -11,7 +11,7 @@ export function useMeasurements() {
         store.getState().measurements
     );
 
-    useBroker("podData/update", (msg) => {
+    useSubscribe("podData/update", (msg) => {
         dispatch(updateMeasurements(msg));
     });
 

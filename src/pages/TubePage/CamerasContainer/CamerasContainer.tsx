@@ -1,12 +1,13 @@
 import styles from "./CamerasContainer.module.scss";
 
-import { useWebRTC } from "hooks/WebRTC/useWebRTC";
+import { config, useWebRTC } from "common";
 import { Cameras } from "./Cameras/Cameras";
 import { AnimatedEllipsis } from "components/AnimatedEllipsis/AnimatedEllipsis";
 
-export const CamerasContainer = () => {
-    const [streams, state] = useWebRTC(import.meta.env.VITE_CAMERA_1_URL);
+const CAMERAS_URL = `ws://${config.cameras.ip}:${config.cameras.port}`;
 
+export const CamerasContainer = () => {
+    const [streams, state] = useWebRTC(CAMERAS_URL);
     if (streams) {
         return (
             <Cameras

@@ -9,7 +9,7 @@ export const VehiclePage = () => {
         <PageWrapper title="Vehicle">
             <div className={styles.contentWrapper}>
                 <Outlet />
-                <Pagination routes={["1", "2"]} />
+                <Pagination routes={["first", "second"]} />
             </div>
         </PageWrapper>
     );

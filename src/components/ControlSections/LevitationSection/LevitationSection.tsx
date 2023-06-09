@@ -31,7 +31,7 @@ export const LevitationSection = ({ data }: Props) => {
                     slave_airgap_7={data.slave_airgap_7}
                     slave_airgap_8={data.slave_airgap_8}
                 />
-                <BatteriesInfo
+                {/* <BatteriesInfo
                     className={styles.batteries}
                     batteriesData={[
                         {
@@ -51,7 +51,7 @@ export const LevitationSection = ({ data }: Props) => {
                             current: data.slave_battery_current_4,
                         },
                     ]}
-                />
+                /> */}
                 <CoilsInfo
                     className={styles.coils}
                     coilsData={[

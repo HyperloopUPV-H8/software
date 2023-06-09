@@ -1,6 +1,4 @@
-import { createMeasurementsSlice } from "common";
-
-export const measurementsSlice = createMeasurementsSlice();
+import { measurementsSlice } from "common";
 
 export const { initMeasurements, updateMeasurements } =
     measurementsSlice.actions;

@@ -10,7 +10,7 @@ export const CoilInfoLabel = ({ measurement }: Props) => {
         <div className={styles.coilInfoLabelWrapper}>
             <span className={styles.name}>{measurement.name}</span>
             <span className={styles.value}>
-                {measurement.value.average.toFixed(2) + measurement.units}
+                {measurement.value.average.toFixed(2) + " " + measurement.units}
             </span>
         </div>
     );

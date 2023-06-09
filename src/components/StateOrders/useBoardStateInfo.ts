@@ -1,4 +1,4 @@
-import { useBroker } from "common";
+import { useSubscribe } from "common";
 import { StateAndOrders } from "./StateOrdersType";
 import { useState } from "react";
 
@@ -8,7 +8,7 @@ export function useBoardStateInfo() {
         orders: [],
     });
 
-    useBroker("vcu/state", (msg: StateAndOrders) => {
+    useSubscribe("vcu/state", (msg: StateAndOrders) => {
         setStateOrders(msg);
     });
 

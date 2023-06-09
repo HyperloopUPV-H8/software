@@ -9,4 +9,5 @@
     grid-template-rows: minmax(0, 1fr);
     // align-items: stretch;
     background-color: colors.getColor("primary", 95);
+    overflow: hidden;
 }

@@ -3,7 +3,8 @@ import { Legend } from "./Legend/Legend";
 import { Title } from "./Title/Title";
 import { useMemo } from "react";
 import { NumericMeasurement } from "common";
-import { LinesChart } from "components/LinesChart/LinesChart";
+import { LinesChart } from "common";
+import { store } from "store";
 
 const palette = ["#EE8735", "#51C6EB", "#7BEE35"];
 
@@ -28,6 +29,9 @@ export const ColorfulChart = ({ title, measurements, length }: Props) => {
             <Title title={title} />
             <div className={styles.body}>
                 <LinesChart
+                    getMeasurement={(id) =>
+                        store.getState().measurements[id] as NumericMeasurement
+                    }
                     height="8rem"
                     divisions={4}
                     grid={false}

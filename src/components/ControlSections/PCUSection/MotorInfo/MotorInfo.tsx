@@ -1,6 +1,7 @@
 import styles from "./MotorInfo.module.scss";
 import { NumericMeasurement } from "common";
-import { ColorfulChart } from "components/ColorfulChart/ColorfulChart";
+import { ColorfulChart } from "common";
+import { store } from "store";
 
 type Props = {
     motorCurrentU: NumericMeasurement;
@@ -18,9 +19,13 @@ export const MotorInfo = ({
     return (
         <div className={styles.motorInfoWrapper}>
             <ColorfulChart
+                className={styles.chart}
                 title="Motor"
                 length={100}
                 measurements={[motorCurrentU, motorCurrentV, motorCurrentW]}
+                getMeasurement={(id) =>
+                    store.getState().measurements[id] as NumericMeasurement
+                }
             />
         </div>
     );

@@ -1,7 +1,7 @@
 import { store } from "store";
 import React, { createContext, useCallback, useRef } from "react";
 import { isNumericMeasurement } from "common";
-import { useGlobalTicker } from "hooks/GlobalTicker/useGlobalTicker";
+import { useGlobalTicker } from "common";
 
 export type Handler = (value: any) => void;
 
