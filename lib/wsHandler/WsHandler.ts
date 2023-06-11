@@ -6,10 +6,14 @@ import {
     WsMessage,
 } from "./types";
 
+type Callback<T> = {
+    id: string;
+    cb: (value: T) => void;
+};
+
 export class WsHandler {
     private ws: WebSocket;
-    private topicToCallbacks: Map<string, Array<(value: any) => void>> =
-        new Map();
+    private topicToCallbacks: Map<string, Array<Callback<any>>> = new Map();
 
     constructor(url: string, onOpen?: () => void, onClose?: () => void) {
         this.ws = new WebSocket(`ws://${url}`);
@@ -23,7 +27,7 @@ export class WsHandler {
             const callbacks =
                 this.topicToCallbacks.get(socketMessage.topic) ?? [];
             for (const callback of callbacks) {
-                callback(socketMessage.payload);
+                callback.cb(socketMessage.payload);
             }
         };
 
@@ -42,9 +46,9 @@ export class WsHandler {
 
     public subscribe<T extends SubscriptionTopic>(
         topic: T,
-        id: HandlerMessages[T]["id"],
-        callback: (value: HandlerMessages[T]["response"]) => void
+        callback: Callback<HandlerMessages[T]["response"]>
     ) {
+        console.log("SUBSCRIBE", topic);
         const callbacks = this.topicToCallbacks.get(topic);
         if (callbacks) {
             this.topicToCallbacks.set(topic, [...callbacks, callback]);
@@ -53,20 +57,23 @@ export class WsHandler {
         }
 
         this.ws.send(
-            JSON.stringify({ topic, id, payload: { subscribe: true, id: id } })
+            JSON.stringify({
+                topic,
+                id: callback.id,
+                payload: { subscribe: true, id: callback.id },
+            })
         );
     }
 
     public unsubscribe<T extends SubscriptionTopic>(
         topic: T,
-        id: HandlerMessages[T]["id"],
-        callback: (value: HandlerMessages[T]["response"]) => void
+        id: HandlerMessages[T]["id"]
     ) {
         const callbacks = this.topicToCallbacks.get(topic);
         if (callbacks) {
             this.topicToCallbacks.set(
                 topic,
-                callbacks.filter((element) => element != callback)
+                callbacks.filter((element) => element.id != id)
             );
 
             if (this.topicToCallbacks.get(topic)?.length == 0) {
@@ -82,30 +89,27 @@ export class WsHandler {
     }
 
     public exchange<T extends ExchangeTopic>(
-        topic: T,
-        req: HandlerMessages[T]["request"],
-        cb: (res: HandlerMessages[T]["response"], end: () => void) => void
+        _topic: T,
+        _req: HandlerMessages[T]["request"],
+        _cb: (res: HandlerMessages[T]["response"], end: () => void) => void
     ) {
-        console.log(req);
-        this.ws.send(JSON.stringify({ topic, payload: req }));
-
-        const resCallback = (value: any) => {
-            cb(value, () => {
-                const callbacks = this.topicToCallbacks.get(topic);
-                if (callbacks) {
-                    this.topicToCallbacks.set(
-                        topic,
-                        callbacks.filter((element) => element != resCallback)
-                    );
-                }
-            });
-        };
-
-        const callbacks = this.topicToCallbacks.get(topic);
-        if (callbacks) {
-            this.topicToCallbacks.set(topic, [...callbacks, resCallback]);
-        } else {
-            this.topicToCallbacks.set(topic, [resCallback]);
-        }
+        // this.ws.send(JSON.stringify({ topic, payload: req }));
+        // const resCallback = (value: any) => {
+        //     cb(value, () => {
+        //         const callbacks = this.topicToCallbacks.get(topic);
+        //         if (callbacks) {
+        //             // this.topicToCallbacks.set(
+        //             //     topic,
+        //             //     callbacks.filter((element) => element != resCallback)
+        //             // );
+        //         }
+        //     });
+        // };
+        // const callbacks = this.topicToCallbacks.get(topic);
+        // if (callbacks) {
+        //     this.topicToCallbacks.set(topic, [...callbacks, resCallback]);
+        // } else {
+        //     this.topicToCallbacks.set(topic, [resCallback]);
+        // }
     }
 }
