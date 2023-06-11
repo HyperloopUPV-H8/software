@@ -1,0 +1,13 @@
+fieldset {
+    padding: 0;
+    padding-left: 0.5rem;
+    font-size: medium;
+}
+
+.toggleInputWrapper {
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+    column-gap: 0.2rem;
+    font-size: medium;
+}
