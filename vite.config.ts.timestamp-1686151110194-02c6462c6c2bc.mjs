@@ -1,0 +1,33 @@
+// vite.config.ts
+import { defineConfig } from "file:///home/sergio/Documents/repos-hyper/common-front/node_modules/vite/dist/node/index.js";
+import react from "file:///home/sergio/Documents/repos-hyper/common-front/node_modules/@vitejs/plugin-react/dist/index.mjs";
+import typescript from "file:///home/sergio/Documents/repos-hyper/common-front/node_modules/@rollup/plugin-typescript/dist/es/index.js";
+import tsconfigPaths from "file:///home/sergio/Documents/repos-hyper/common-front/node_modules/vite-tsconfig-paths/dist/index.mjs";
+import path from "path";
+import postcss from "file:///home/sergio/Documents/repos-hyper/common-front/node_modules/rollup-plugin-postcss/dist/index.js";
+import svgr from "file:///home/sergio/Documents/repos-hyper/common-front/node_modules/vite-plugin-svgr/dist/index.js";
+var __vite_injected_original_dirname = "/home/sergio/Documents/repos-hyper/common-front";
+var vite_config_default = defineConfig({
+  plugins: [react(), tsconfigPaths(), postcss(), svgr()],
+  server: {
+    port: 3e3
+  },
+  build: {
+    manifest: true,
+    minify: false,
+    reportCompressedSize: true,
+    lib: {
+      entry: path.resolve(__vite_injected_original_dirname, "lib/index.ts"),
+      fileName: "index",
+      formats: ["es"]
+    },
+    rollupOptions: {
+      external: ["react", "react-dom", "@reduxjs/toolkit"],
+      plugins: [typescript()]
+    }
+  }
+});
+export {
+  vite_config_default as default
+};
+//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsidml0ZS5jb25maWcudHMiXSwKICAic291cmNlc0NvbnRlbnQiOiBbImNvbnN0IF9fdml0ZV9pbmplY3RlZF9vcmlnaW5hbF9kaXJuYW1lID0gXCIvaG9tZS9zZXJnaW8vRG9jdW1lbnRzL3JlcG9zLWh5cGVyL2NvbW1vbi1mcm9udFwiO2NvbnN0IF9fdml0ZV9pbmplY3RlZF9vcmlnaW5hbF9maWxlbmFtZSA9IFwiL2hvbWUvc2VyZ2lvL0RvY3VtZW50cy9yZXBvcy1oeXBlci9jb21tb24tZnJvbnQvdml0ZS5jb25maWcudHNcIjtjb25zdCBfX3ZpdGVfaW5qZWN0ZWRfb3JpZ2luYWxfaW1wb3J0X21ldGFfdXJsID0gXCJmaWxlOi8vL2hvbWUvc2VyZ2lvL0RvY3VtZW50cy9yZXBvcy1oeXBlci9jb21tb24tZnJvbnQvdml0ZS5jb25maWcudHNcIjsvLyB2aXRlLmNvbmZpZy50c1xuaW1wb3J0IHsgZGVmaW5lQ29uZmlnIH0gZnJvbSBcInZpdGVcIjtcbmltcG9ydCByZWFjdCBmcm9tIFwiQHZpdGVqcy9wbHVnaW4tcmVhY3RcIjtcbmltcG9ydCB0eXBlc2NyaXB0IGZyb20gXCJAcm9sbHVwL3BsdWdpbi10eXBlc2NyaXB0XCI7XG5pbXBvcnQgdHNjb25maWdQYXRocyBmcm9tIFwidml0ZS10c2NvbmZpZy1wYXRoc1wiO1xuaW1wb3J0IHBhdGggZnJvbSBcInBhdGhcIjtcbmltcG9ydCBwb3N0Y3NzIGZyb20gXCJyb2xsdXAtcGx1Z2luLXBvc3Rjc3NcIjtcbmltcG9ydCBzdmdyIGZyb20gXCJ2aXRlLXBsdWdpbi1zdmdyXCI7XG5cbmV4cG9ydCBkZWZhdWx0IGRlZmluZUNvbmZpZyh7XG4gICAgcGx1Z2luczogW3JlYWN0KCksIHRzY29uZmlnUGF0aHMoKSwgcG9zdGNzcygpLCBzdmdyKCldLFxuICAgIHNlcnZlcjoge1xuICAgICAgICBwb3J0OiAzMDAwLFxuICAgIH0sXG4gICAgYnVpbGQ6IHtcbiAgICAgICAgbWFuaWZlc3Q6IHRydWUsXG4gICAgICAgIG1pbmlmeTogZmFsc2UsXG4gICAgICAgIHJlcG9ydENvbXByZXNzZWRTaXplOiB0cnVlLFxuICAgICAgICBsaWI6IHtcbiAgICAgICAgICAgIGVudHJ5OiBwYXRoLnJlc29sdmUoX19kaXJuYW1lLCBcImxpYi9pbmRleC50c1wiKSxcbiAgICAgICAgICAgIGZpbGVOYW1lOiBcImluZGV4XCIsXG4gICAgICAgICAgICBmb3JtYXRzOiBbXCJlc1wiXSxcbiAgICAgICAgfSxcbiAgICAgICAgcm9sbHVwT3B0aW9uczoge1xuICAgICAgICAgICAgZXh0ZXJuYWw6IFtcInJlYWN0XCIsIFwicmVhY3QtZG9tXCIsIFwiQHJlZHV4anMvdG9vbGtpdFwiXSxcbiAgICAgICAgICAgIHBsdWdpbnM6IFt0eXBlc2NyaXB0KCldLFxuICAgICAgICB9LFxuICAgIH0sXG59KTtcbiJdLAogICJtYXBwaW5ncyI6ICI7QUFDQSxTQUFTLG9CQUFvQjtBQUM3QixPQUFPLFdBQVc7QUFDbEIsT0FBTyxnQkFBZ0I7QUFDdkIsT0FBTyxtQkFBbUI7QUFDMUIsT0FBTyxVQUFVO0FBQ2pCLE9BQU8sYUFBYTtBQUNwQixPQUFPLFVBQVU7QUFQakIsSUFBTSxtQ0FBbUM7QUFTekMsSUFBTyxzQkFBUSxhQUFhO0FBQUEsRUFDeEIsU0FBUyxDQUFDLE1BQU0sR0FBRyxjQUFjLEdBQUcsUUFBUSxHQUFHLEtBQUssQ0FBQztBQUFBLEVBQ3JELFFBQVE7QUFBQSxJQUNKLE1BQU07QUFBQSxFQUNWO0FBQUEsRUFDQSxPQUFPO0FBQUEsSUFDSCxVQUFVO0FBQUEsSUFDVixRQUFRO0FBQUEsSUFDUixzQkFBc0I7QUFBQSxJQUN0QixLQUFLO0FBQUEsTUFDRCxPQUFPLEtBQUssUUFBUSxrQ0FBVyxjQUFjO0FBQUEsTUFDN0MsVUFBVTtBQUFBLE1BQ1YsU0FBUyxDQUFDLElBQUk7QUFBQSxJQUNsQjtBQUFBLElBQ0EsZUFBZTtBQUFBLE1BQ1gsVUFBVSxDQUFDLFNBQVMsYUFBYSxrQkFBa0I7QUFBQSxNQUNuRCxTQUFTLENBQUMsV0FBVyxDQUFDO0FBQUEsSUFDMUI7QUFBQSxFQUNKO0FBQ0osQ0FBQzsiLAogICJuYW1lcyI6IFtdCn0K
