@@ -7,3 +7,7 @@ export * from "./LinesChart/types";
 export * from "./ToggleButton/ToggleButton";
 export * from "./ButtonTag/ButtonTag";
 export * from "./PlayButton/PlayButton";
+export * from "./ButtonTag/ButtonTag";
+export * from "./InputTag/InputTag";
+export * from "./ToggleInput/ToggleInput";
+export * from "./ToggleSwitch/ToggleSwitch";

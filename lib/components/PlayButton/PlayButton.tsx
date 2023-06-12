@@ -1,22 +1,15 @@
-import {
-    ButtonHTMLAttributes,
-    DetailedHTMLProps,
-    ReactNode,
-    useEffect,
-    useRef,
-    useState,
-} from "react";
-import { FaPlay, FaPause, FaStop, FaLessThanEqual } from "react-icons/fa";
+import { ButtonHTMLAttributes, DetailedHTMLProps, useEffect } from "react";
+import { FaPlay, FaPause, FaStop } from "react-icons/fa";
 import style from "./PlayButton.module.scss";
 import { SendMessage } from "react-use-websocket";
 import { WebSocketMessage } from "react-use-websocket/dist/lib/types";
 
 type ButtonType = keyof typeof buttonVariants;
 
-type Variant = {
-    icon: ReactNode;
-    colorClass: string;
-};
+// type Variant = {
+//     icon: ReactNode;
+//     colorClass: string;
+// };
 
 export type PlayButtons = {
     play: boolean;
