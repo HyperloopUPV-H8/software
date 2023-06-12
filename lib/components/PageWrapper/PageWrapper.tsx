@@ -1,4 +1,4 @@
-import styles from "pages/PageWrapper/PageWrapper.module.scss";
+import styles from "./PageWrapper.module.scss";
 
 type Props = {
     title: string;

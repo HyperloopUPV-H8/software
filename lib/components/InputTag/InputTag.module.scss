@@ -1,4 +1,4 @@
-@use "src/styles/colors";
+@use "../../styles/colors.scss";
 
 .inputTagWrapper {
     height: fit-content;
@@ -17,7 +17,7 @@
 
         font-size: 0.75rem;
 
-        color: colors.getColor("neutral", 30);
+        color: var(--neutral-30);
 
         &:focus {
             outline: none;
@@ -43,21 +43,21 @@
 }
 
 .on {
-    border-color: colors.getColor("tertiary", 70);
+    border-color: var(--tertiary-70);
     flex-grow: 1;
     height: 2rem;
 
     legend {
-        color: colors.getColor("tertiary", 70);
+        color: var(--tertiary-70);
     }
 }
 
 .off {
-    border-color: colors.getColor("neutral", 70);
+    border-color: var(--neutral-70);
     flex-grow: 1;
     height: 2rem;
 
     legend {
-        color: colors.getColor("neutral", 70);
+        color: var(--neutral-70);
     }
 }

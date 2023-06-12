@@ -1,4 +1,4 @@
-@use "src/styles/colors";
+@use "../../styles/colors.scss";
 
 $button-size: 2.5rem;
 $icon-size: 0.7rem;
@@ -28,54 +28,54 @@ $icon-size: 0.7rem;
 }
 
 .green {
-    color: colors.getColor("stable", 60);
-    background-color: colors.getColor("stable", 90);
+    color: var(--stable-60);
+    background-color: var(--stable-90);
 
     &:hover {
-        color: colors.getColor("stable", 50);
-        background-color: colors.getColor("stable", 80);
+        color: var(--stable-50);
+        background-color: var(--stable-80);
     }
 }
 
 .yellow {
-    color: colors.getColor("warning", 60);
-    background-color: colors.getColor("warning", 90);
+    color: var(--warning-60);
+    background-color: var(--warning-90);
 
     &:hover {
-        color: colors.getColor("warning", 50);
-        background-color: colors.getColor("warning", 80);
+        color: var(--warning-50);
+        background-color: var(--warning-80);
     }
 }
 
 .red {
-    color: colors.getColor("fault", 60);
-    background-color: colors.getColor("fault", 90);
+    color: var(--fault-60);
+    background-color: var(--fault-90);
 
     &:hover {
-        color: colors.getColor("fault", 50);
-        background-color: colors.getColor("fault", 80);
+        color: var(--fault-50);
+        background-color: var(--fault-80);
     }
 }
 
 .gray {
-    color: colors.getColor("neutral", 60);
-    background-color: colors.getColor("neutral", 90);
+    color: var(--neutral-60);
+    background-color: var(--neutral-90);
 
     &:hover {
-        color: colors.getColor("fault", 70);
-        background-color: colors.getColor("fault", 90);
+        color: var(--fault-70);
+        background-color: var(--fault-90);
     }
 }
 
 .disabled {
-    color: colors.getColor("neutral", 60);
-    background-color: colors.getColor("neutral", 90);
+    color: var(--neutral-60);
+    background-color: var(--neutral-90);
     p {
-        color: colors.getColor("neutral", 70);
+        color: var(--neutral-70);
     }
 
     button {
-        color: colors.getColor("neutral", 70);
-        background-color: colors.getColor("neutral", 80);
+        color: var(--neutral-70);
+        background-color: var(--neutral-80);
     }
 }

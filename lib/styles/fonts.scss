@@ -1,8 +1,8 @@
 @use "./colors.scss";
 
-@use "/src/assets/fonts/Inter/Inter.scss";
-@use "/src/assets/fonts/Consolas/Consolas.scss";
-@use "/src/assets/fonts/NotoColorEmoji/NotoColorEmoji.scss";
+@use "../assets/fonts/Inter/Inter.scss";
+@use "../assets/fonts/Consolas/Consolas.scss";
+@use "../assets/fonts/NotoColorEmoji/NotoColorEmoji.scss";
 
 $font-families: (
     sans: "Inter",

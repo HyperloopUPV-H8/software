@@ -11,3 +11,4 @@ export * from "./ButtonTag/ButtonTag";
 export * from "./InputTag/InputTag";
 export * from "./ToggleInput/ToggleInput";
 export * from "./ToggleSwitch/ToggleSwitch";
+export * from "./PageWrapper/PageWrapper";

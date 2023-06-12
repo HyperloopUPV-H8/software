@@ -1,4 +1,4 @@
-@use "src/styles/colors";
+@use "../../styles/colors.scss";
 
 $button-height: 2rem;
 $button-width: 2.25rem;
@@ -49,34 +49,34 @@ $label-size: 0.5rem;
 
 .on {
     * {
-        color: colors.getColor("tertiary", 60);
+        color: var(--tertiary-60);
     }
 
     button {
-        background-color: var(--tertiary-90); //FIXME: Hacer esto en todos
-        box-shadow: 0 4px colors.getColor("tertiary", 60);
+        background-color: var(--tertiary-90);
+        box-shadow: 0 4px var(--tertiary-60);
         transform: translateY(-4px);
 
         &:hover {
-            background-color: colors.getColor("tertiary", 80);
-            color: colors.getColor("tertiary", 50);
+            background-color: var(--tertiary-80);
+            color: var(--tertiary-50);
         }
     }
 }
 
 .off {
     * {
-        color: colors.getColor("primary", 60);
+        color: var(--primary-60);
     }
 
     button {
-        background-color: colors.getColor("primary", 90);
-        box-shadow: 0 5px colors.getColor("primary", 60);
+        background-color: var(--primary-90);
+        box-shadow: 0 5px var(--primary-60);
         transform: translateY(-8px);
 
         &:hover {
-            background-color: colors.getColor("primary", 80);
-            color: colors.getColor("primary", 50);
+            background-color: var(--primary-80);
+            color: var(--primary-50);
         }
     }
 }

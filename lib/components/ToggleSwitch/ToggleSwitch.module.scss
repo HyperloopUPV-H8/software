@@ -1,4 +1,4 @@
-@use "src/styles/colors";
+@use "../../styles/colors.scss";
 
 $switch-height: 1rem;
 $switch-aspect-ratio: 2;
@@ -32,19 +32,19 @@ $switch-padding: 0.2rem;
         $switch-height * ($switch-aspect-ratio - 1) + $switch-padding
     );
 
-    background-color: colors.getColor("tertiary", 90);
+    background-color: var(--tertiary-90);
 
     div {
-        background-color: colors.getColor("tertiary", 70);
+        background-color: var(--tertiary-90);
     }
 }
 
 .off {
     padding-left: $switch-padding;
 
-    background-color: colors.getColor("neutral", 90);
+    background-color: var(--neutral-90);
 
     div {
-        background-color: colors.getColor("neutral", 70);
+        background-color: var(--neutral-70);
     }
 }
