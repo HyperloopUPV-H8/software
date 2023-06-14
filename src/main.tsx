@@ -11,7 +11,7 @@ import { GlobalTicker } from "common";
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     // <React.StrictMode>
     <Provider store={store}>
-        <GlobalTicker>
+        <GlobalTicker fps={100}>
             <App />
         </GlobalTicker>
     </Provider>

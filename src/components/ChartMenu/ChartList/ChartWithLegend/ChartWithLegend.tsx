@@ -9,11 +9,7 @@ import { parseId } from "components/ChartMenu/parseId";
 
 type Props = {
     chartElement: ChartElement;
-    handleDropOnChart: (
-        id: string,
-        boardId: string,
-        measurementId: string
-    ) => void;
+    handleDropOnChart: (chartId: string, lineId: string) => void;
     removeElement: () => void;
     removeMeasurement: (id: string) => void;
 };
@@ -26,21 +22,10 @@ export const ChartWithLegend = ({
 }: Props) => {
     function handleDrop(ev: DragEvent<HTMLDivElement>) {
         ev.stopPropagation();
-
-        const itemId = ev.dataTransfer.getData("id");
-        const ids = parseId(itemId);
-        const meas = getMeasurement(
-            store.getState().measurements,
-            ids.boardId,
-            ids.measId
-        ) as NumericMeasurement;
-
-        if (!meas) {
-            return;
-        }
-
-        handleDropOnChart(chartElement.id, ids.boardId, ids.measId);
+        const id = ev.dataTransfer.getData("id");
+        handleDropOnChart(chartElement.id, id);
     }
+
     return (
         <div
             className={styles.chartWrapper}
@@ -57,7 +42,7 @@ export const ChartWithLegend = ({
                     divisions={6}
                     showGrid={true}
                     items={chartElement.lines}
-                    length={100}
+                    length={1000}
                 ></LinesChart>
             </div>
             <Legend

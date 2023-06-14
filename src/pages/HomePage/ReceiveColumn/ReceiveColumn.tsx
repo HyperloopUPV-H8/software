@@ -10,6 +10,7 @@ import { useSubscribe } from "common";
 import { useDispatch } from "react-redux";
 import { updateMeasurements } from "slices/measurementsSlice";
 import { updatePodData } from "slices/podDataSlice";
+import { createSidebarSections } from "components/ChartMenu/sidebar";
 
 export const ReceiveColumn = () => {
     const dispatch = useDispatch();
@@ -18,6 +19,10 @@ export const ReceiveColumn = () => {
         dispatch(updatePodData(update));
         dispatch(updateMeasurements(update));
     });
+
+    const sections = useMemo(() => {
+        return createSidebarSections(store.getState().podData);
+    }, []);
 
     const receiveColumnTabItems = useMemo(
         () => [
@@ -33,7 +38,7 @@ export const ReceiveColumn = () => {
                 id: "charts",
                 name: "Charts",
                 icon: <Chart />,
-                component: <ChartMenu />,
+                component: <ChartMenu sidebarSections={sections} />,
             },
         ],
         [store]
