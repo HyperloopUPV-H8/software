@@ -46,8 +46,10 @@ export const TableUpdater = ({ children }: Props) => {
         for (const id in packetElements.current) {
             const packet = getPacket(podData, Number.parseInt(id));
             const element = packetElements.current[id];
-            element.count.nodeValue = packet.count.toFixed(0);
-            element.cycleTime.nodeValue = packet.cycleTime.toFixed(0);
+            if (packet) {
+                element.count.nodeValue = packet.count.toFixed(0);
+                element.cycleTime.nodeValue = packet.cycleTime.toFixed(0);
+            }
         }
 
         for (const item of measurementElements.current) {
