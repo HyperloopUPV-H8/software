@@ -47,7 +47,8 @@ export function createForm(
     descriptions: Record<string, OrderFieldDescription>
 ): Form {
     const fields = Object.entries(descriptions).map(([_, fieldDescription]) => {
-        return getFormField(fieldDescription);
+        const field = getFormField(fieldDescription);
+        return field;
     });
 
     return { fields, isValid: areFieldsValid(fields) };
@@ -65,7 +66,7 @@ function getFormField(desc: OrderFieldDescription): FormField {
 
 function getNumericFormField(desc: NumericDescription): NumericField {
     return {
-        id: desc.name,
+        id: desc.id,
         name: desc.name,
         kind: desc.kind,
         type: desc.type,
@@ -78,7 +79,7 @@ function getNumericFormField(desc: NumericDescription): NumericField {
 }
 function getBooleanFormField(desc: BooleanDescription): BooleanField {
     return {
-        id: desc.name,
+        id: desc.id,
         name: desc.name,
         kind: desc.kind,
         value: false,
@@ -88,9 +89,9 @@ function getBooleanFormField(desc: BooleanDescription): BooleanField {
 }
 function getEnumFormField(desc: EnumDescription): EnumField {
     return {
-        kind: desc.kind,
-        id: desc.name,
+        id: desc.id,
         name: desc.name,
+        kind: desc.kind,
         options: desc.options,
         value: desc.options[0],
         isValid: true,

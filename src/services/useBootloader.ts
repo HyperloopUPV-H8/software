@@ -1,4 +1,5 @@
 import { useWsHandler } from "common";
+import { nanoid } from "nanoid";
 
 export type BootloaderUpload = { board: string; file: File };
 
@@ -13,7 +14,9 @@ export function useBootloader(
 
     //TODO: timeout if it takes to long
     const uploader = (board: string, file: string) => {
-        handler.exchange("blcu/upload", { board, file }, (res, end) => {
+        const id = nanoid();
+
+        handler.exchange("blcu/upload", { board, file }, id, (res, end) => {
             if (res.percentage == 100) {
                 onSendSuccess();
                 end();
@@ -28,7 +31,8 @@ export function useBootloader(
 
     //TODO: timeout if it takes to long
     const downloader = (board: string) => {
-        handler.exchange("blcu/download", { board }, (res, end) => {
+        const id = nanoid();
+        handler.exchange("blcu/download", { board }, id, (res, end) => {
             if (res.percentage == 100) {
                 onDownloadSuccess(new File([res.file], "program"));
                 end();

@@ -19,7 +19,7 @@ export const Fields = ({ fields, updateField, changeEnable }: Props) => {
                 return (
                     <Field
                         key={field.id}
-                        name={field.id}
+                        name={field.name}
                         field={field}
                         onChange={(
                             newValue: string | number | boolean,

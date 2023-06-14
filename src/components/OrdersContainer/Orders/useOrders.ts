@@ -1,4 +1,4 @@
-import { StateOrdersUpdate, VehicleOrders, useWsHandler } from "common";
+import { VehicleOrders, useWsHandler } from "common";
 import { useEffect } from "react";
 import { config } from "common";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,12 +14,7 @@ export function useOrders() {
 
     useEffect(() => {
         const controller = new AbortController();
-        const stateOrderCallback = {
-            id: nanoid(),
-            cb: (stateOrder: StateOrdersUpdate) => {
-                dispatch(updateStateOrders(stateOrder));
-            },
-        };
+        const id = nanoid();
 
         fetch(
             `http://${config.server.ip}:${config.server.port}/${config.paths.orderDescription}`
@@ -27,13 +22,18 @@ export function useOrders() {
             .then((res) => res.json())
             .then((descriptions: VehicleOrders) => {
                 dispatch(setOrders(descriptions));
-                handler.subscribe("order/stateOrders", stateOrderCallback);
+                handler.subscribe("order/stateOrders", {
+                    id: id,
+                    cb: (stateOrder) => {
+                        dispatch(updateStateOrders(stateOrder));
+                    },
+                });
             })
             .catch((reason) => console.error(reason));
 
         return () => {
             controller.abort();
-            handler.unsubscribe("order/stateOrders", stateOrderCallback.id);
+            handler.unsubscribe("order/stateOrders", id);
         };
     }, []);
 
