@@ -28,7 +28,7 @@ export function useUpdater(packet: Packet) {
             countRef.current!.removeChild(countNode);
             cycleTimeRef.current!.removeChild(cycleTimeNode);
         };
-    }, []);
+    }, [packet]);
 
     return { countRef, cycleTimeRef };
 }

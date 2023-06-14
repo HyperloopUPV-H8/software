@@ -4,7 +4,6 @@ import {
     isNumericMeasurement,
     useGlobalTicker,
 } from "common";
-import { useInterval } from "hooks/useInterval";
 import { createContext, useRef } from "react";
 import { store } from "store";
 
