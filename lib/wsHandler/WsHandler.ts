@@ -48,7 +48,6 @@ export class WsHandler {
         topic: T,
         callback: Callback<HandlerMessages[T]["response"]>
     ) {
-        console.log("SUBSCRIBE", topic);
         const callbacks = this.topicToCallbacks.get(topic);
         if (callbacks) {
             this.topicToCallbacks.set(topic, [...callbacks, callback]);
