@@ -23,9 +23,9 @@ export function updatePodData(
 export function getPacket(podData: PodData, id: number): Packet | undefined {
     const board = podData.boards[podData.packetToBoard[id]];
 
-    if (!board) {
-        return undefined;
+    if (board) {
+        return board.packets.find((item) => item.id == id);
     }
 
-    return board.packets.find((item) => item.id == id);
+    return undefined;
 }

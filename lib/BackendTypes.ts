@@ -40,5 +40,5 @@ export function isFloatingType(type: string): type is FloatingType {
     return type == "float32" || type == "float64";
 }
 
-type Enum = "Enum";
+type Enum = "enum";
 type Bool = "bool";

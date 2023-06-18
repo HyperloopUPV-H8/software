@@ -13,12 +13,14 @@ export type OrderFieldDescription =
 
 export type EnumDescription = {
     readonly kind: "enum";
+    readonly id: string;
     readonly name: string;
     readonly options: string[];
 };
 
 export type NumericDescription = {
     readonly kind: "numeric";
+    readonly id: string;
     readonly name: string;
     readonly type: NumericType;
     readonly safeRange: [number | null, number | null];
@@ -27,5 +29,6 @@ export type NumericDescription = {
 
 export type BooleanDescription = {
     readonly kind: "boolean";
+    readonly id: string;
     readonly name: string;
 };
