@@ -1,5 +1,4 @@
 @use "./colors.scss";
-
 @use "../assets/fonts/Inter/Inter.scss";
 @use "../assets/fonts/Consolas/Consolas.scss";
 @use "../assets/fonts/NotoColorEmoji/NotoColorEmoji.scss";
@@ -7,10 +6,53 @@
 $font-families: (
     sans: "Inter",
     mono: "IBM Plex Mono, monospace",
+    default: "monospace",
+);
+
+$font-sizes: (
+    large: 1.5rem,
+    default: 1.2rem,
+    small: 1rem,
+    x-small: 0.8rem,
+);
+
+$font-weights: (
+    bold: 600,
+    normal: 400,
+    light: 300,
 );
 
 @mixin fonts {
     @each $name, $font in $font-families {
         --font-#{$name}: #{$font};
     }
+}
+
+@mixin globalFontStyles {
+    @each $name, $font in $font-families {
+        --font-family-#{$name}: #{$font};
+    }
+
+    @each $name, $size in $font-sizes {
+        --font-size-#{$name}: #{$size};
+    }
+
+    @each $name, $weight in $font-weights {
+        --font-weight-#{$name}: #{$weight};
+    }
+}
+
+@function getFontSize($size) {
+    @return var(--font-size-#{$size});
+}
+
+@function getFontWeight($weight) {
+    @return var(--font-weight-#{$weight});
+}
+
+@mixin default-text {
+    font-family: var(--font-family-default);
+    font-size: var(--font-size-default);
+    font-weight: var(--font-weight-normal);
+    color: var(--primary-20);
 }

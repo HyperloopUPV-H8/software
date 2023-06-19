@@ -9,6 +9,10 @@
     @include colors.colors;
 }
 
+:root {
+    @include fonts.default-text;
+}
+
 body {
     margin: 0;
 }

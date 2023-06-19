@@ -6,6 +6,7 @@ type Props = {
 };
 
 export const PageWrapper = ({ title, children }: Props) => {
+    //FIXME: Quit from common
     return (
         <main className={styles.pageWrapper}>
             <header className={styles.header}>
