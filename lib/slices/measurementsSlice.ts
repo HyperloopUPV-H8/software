@@ -75,7 +75,7 @@ function createMeasurementsFromPodDataAdapter(
                 } else if (adapter.type == "bool") {
                     measurements.boards[board.name][adapter.id] =
                         getBooleanMeasurement(adapter);
-                } else if (adapter.type == "Enum") {
+                } else if (adapter.type == "enum") {
                     measurements.boards[board.name][adapter.id] =
                         getEnumMeasurement(adapter);
                 }

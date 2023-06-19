@@ -65,7 +65,7 @@ function getMeasurements(
     return Object.values(adapters).map((adapter) => {
         if (isNumericAdapter(adapter)) {
             return getNumericMeasurement(adapter);
-        } else if (adapter.type == "Enum") {
+        } else if (adapter.type == "enum") {
             return getEnumMeasurement(adapter);
         } else {
             return getBooleanMeasurement(adapter);
@@ -102,7 +102,7 @@ export function getEnumMeasurement(
     return {
         id: adapter.id,
         name: adapter.name,
-        type: adapter.type as "Enum",
+        type: adapter.type as "enum",
         value: "Default",
     };
 }

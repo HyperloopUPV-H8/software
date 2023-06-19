@@ -48,7 +48,6 @@ export class WsHandler {
         topic: T,
         callback: Callback<HandlerMessages[T]["response"]>
     ) {
-        console.log("SUBSCRIBE", topic);
         const callbacks = this.topicToCallbacks.get(topic);
         if (callbacks) {
             this.topicToCallbacks.set(topic, [...callbacks, callback]);
@@ -89,27 +88,31 @@ export class WsHandler {
     }
 
     public exchange<T extends ExchangeTopic>(
-        _topic: T,
-        _req: HandlerMessages[T]["request"],
-        _cb: (res: HandlerMessages[T]["response"], end: () => void) => void
+        topic: T,
+        req: HandlerMessages[T]["request"],
+        id: string,
+        cb: (res: HandlerMessages[T]["response"], end: () => void) => void
     ) {
-        // this.ws.send(JSON.stringify({ topic, payload: req }));
-        // const resCallback = (value: any) => {
-        //     cb(value, () => {
-        //         const callbacks = this.topicToCallbacks.get(topic);
-        //         if (callbacks) {
-        //             // this.topicToCallbacks.set(
-        //             //     topic,
-        //             //     callbacks.filter((element) => element != resCallback)
-        //             // );
-        //         }
-        //     });
-        // };
-        // const callbacks = this.topicToCallbacks.get(topic);
-        // if (callbacks) {
-        //     this.topicToCallbacks.set(topic, [...callbacks, resCallback]);
-        // } else {
-        //     this.topicToCallbacks.set(topic, [resCallback]);
-        // }
+        this.ws.send(JSON.stringify({ topic, payload: req }));
+        const resCallback = (value: any) => {
+            cb(value, () => {
+                const callbacks = this.topicToCallbacks.get(topic);
+                if (callbacks) {
+                    this.topicToCallbacks.set(
+                        topic,
+                        callbacks.filter((element) => element.id != id)
+                    );
+                }
+            });
+        };
+        const callbacks = this.topicToCallbacks.get(topic);
+        if (callbacks) {
+            this.topicToCallbacks.set(topic, [
+                ...callbacks,
+                { id: id, cb: resCallback },
+            ]);
+        } else {
+            this.topicToCallbacks.set(topic, [{ id: id, cb: resCallback }]);
+        }
     }
 }

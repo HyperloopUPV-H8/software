@@ -26,7 +26,7 @@ export type BooleanMeasurement = AbstractMeasurement & {
 };
 
 export type EnumMeasurement = AbstractMeasurement & {
-    type: "Enum";
+    type: "enum";
     value: string;
 };
 
