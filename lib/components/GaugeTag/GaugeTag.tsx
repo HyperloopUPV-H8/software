@@ -2,7 +2,7 @@ import styles from "./GaugeTag.module.scss";
 import { Gauge } from "./Gauge/Gauge";
 
 type Props = {
-    className: string;
+    className?: string;
     name: string;
     units: string;
     strokeWidth: number;
@@ -11,7 +11,7 @@ type Props = {
     max: number;
 };
 export const GaugeTag = ({
-    className,
+    className = "",
     name,
     units,
     strokeWidth,

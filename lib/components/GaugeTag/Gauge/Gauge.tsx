@@ -1,9 +1,8 @@
+import { useMemo } from "react";
 import { clampAndNormalize } from "../../../math";
 import { Arc } from "./Arc/Arc";
 import { BackgroundArc } from "./BackgroundArc/BackgroundArc";
 import styles from "./Gauge.module.scss";
-// const math = require("math");
-// const { clampAndNormalize } = math;
 
 type Props = {
     className: string;
@@ -23,7 +22,10 @@ export const Gauge = ({
     max,
 }: Props) => {
     const radius = 500;
-    const percentage = clampAndNormalize(value, min, max) * 100;
+    const percentage = useMemo(
+        () => clampAndNormalize(value, min, max) * 100,
+        [value, min, max]
+    );
     return (
         <svg
             className={className}
