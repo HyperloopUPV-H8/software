@@ -4,6 +4,7 @@ export type Measurement =
     | NumericMeasurement
     | BooleanMeasurement
     | EnumMeasurement;
+// | ArrayMeasurement;
 
 type AbstractMeasurement = {
     id: string;
@@ -29,6 +30,12 @@ export type EnumMeasurement = AbstractMeasurement & {
     type: "enum";
     value: string;
 };
+
+// export type ArrayMeasurement = AbstractMeasurement & {
+//     type: "array";
+//     itemType: NumericType | Bool;
+//     value: any[];
+// };
 
 export type ValueType = number | string | boolean;
 

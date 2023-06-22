@@ -10,5 +10,5 @@ export function useGlobalTicker(cb: () => void) {
         return () => {
             globalTicker.unsubscribe(cb);
         };
-    }, []);
+    }, [globalTicker]);
 }

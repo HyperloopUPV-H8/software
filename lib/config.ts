@@ -1,8 +1,6 @@
 export const config = {
-    server: {
-        ip: "127.0.0.1",
-        port: 4000,
-    },
+    devServer: { ip: "127.0.0.2", port: 4000 },
+    prodServer: { ip: "192.168.1.2", port: 4000 },
     paths: {
         podDataDescription: "backend/podDataStructure",
         orderDescription: "backend/orderStructures",

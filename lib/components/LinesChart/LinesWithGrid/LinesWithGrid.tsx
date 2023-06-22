@@ -28,7 +28,7 @@ export const LinesWithGrid = ({
                 viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
                 preserveAspectRatio="none"
                 fill="none"
-                style={{ overflow: "visible" }}
+                style={{ overflow: "hidden" }}
             >
                 {showGrid && (
                     <Grid

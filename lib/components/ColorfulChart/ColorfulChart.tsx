@@ -1,38 +1,34 @@
 import styles from "./ColorfulChart.module.scss";
 import { Legend } from "./Legend/Legend";
 import { Title } from "./Title/Title";
-import { useMemo } from "react";
-import { NumericMeasurement } from "../../models";
 import { LinesChart } from "../LinesChart/LinesChart";
 import { LineDescription } from "../LinesChart/types";
-import { nanoid } from "@reduxjs/toolkit";
+import { useMemo } from "react";
 
-const palette = ["#EE8735", "#51C6EB", "#7BEE35"];
+const palette = ["#EE8735", "#51C6EB", "#7BEE35", "#e469ca"];
 
 type Props = {
     className?: string;
     title: string;
-    measurements: NumericMeasurement[];
+    items: Array<LineDescription>;
     length: number;
-    getMeasurement: (id: string) => NumericMeasurement;
+    height?: string;
 };
 
 export const ColorfulChart = ({
     className = "",
     title,
-    measurements,
+    items,
     length,
-    getMeasurement,
+    height = "8rem",
 }: Props) => {
-    const chartItems: Array<LineDescription> = useMemo(
+    const itemsWithPalette = useMemo(
         () =>
-            measurements.map((meas, index) => ({
-                id: nanoid(),
-                range: meas.safeRange,
+            items.map((item, index) => ({
+                ...item,
                 color: palette[index % palette.length],
-                getUpdate: () => getMeasurement(meas.id).value.last,
             })),
-        [measurements]
+        [items]
     );
 
     return (
@@ -40,13 +36,13 @@ export const ColorfulChart = ({
             <Title title={title} />
             <div className={styles.body}>
                 <LinesChart
-                    height="8rem"
+                    height={height}
                     divisions={4}
                     showGrid={false}
-                    items={chartItems}
+                    items={itemsWithPalette}
                     length={length}
                 />
-                <Legend items={chartItems} />
+                <Legend items={itemsWithPalette} />
             </div>
         </div>
     );

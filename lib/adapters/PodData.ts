@@ -70,6 +70,9 @@ function getMeasurements(
         } else {
             return getBooleanMeasurement(adapter);
         }
+        // } else {
+        //     return getArrayMeasurement(adapter);
+        // }
     });
 }
 
@@ -102,7 +105,7 @@ export function getEnumMeasurement(
     return {
         id: adapter.id,
         name: adapter.name,
-        type: adapter.type as "enum",
+        type: "enum",
         value: "Default",
     };
 }
@@ -114,9 +117,21 @@ export function getBooleanMeasurement(
         id: adapter.id,
         name: adapter.name,
         type: adapter.type as "bool",
-        value: false as boolean,
+        value: false,
     };
 }
+
+// export function getArrayMeasurement(
+//     adapter: ArrayMeasurementAdapter
+// ): ArrayMeasurement {
+//     return {
+//         id: adapter.id,
+//         name: adapter.name,
+//         type: "array",
+//         itemType: adapter.itemType,
+//         value: [],
+//     };
+// }
 
 function getPacketToBoard(
     boards: Record<string, BoardAdapter>

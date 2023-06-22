@@ -7,9 +7,15 @@ import { config } from "./../config.ts";
 //     [config.paths.uploadableBoards]: string[];
 // };
 
-export async function fetchBack(path: string, signal?: AbortSignal) {
+export async function fetchBack(
+    production: boolean,
+    path: string,
+    signal?: AbortSignal
+) {
     const res = await fetch(
-        `http://${config.server.ip}:${config.server.port}/${path}`,
+        `http://${production ? config.prodServer.ip : config.devServer.ip}:${
+            production ? config.prodServer.port : config.devServer.port
+        }/${path}`,
         {
             signal,
         }
