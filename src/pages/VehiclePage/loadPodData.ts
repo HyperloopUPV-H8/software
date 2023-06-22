@@ -1,5 +1,4 @@
 import { store } from "store";
-import { LoaderFunctionArgs } from "react-router-dom";
 import { fetchFromBackend } from "services/HTTPHandler";
 import { initMeasurements } from "slices/measurementsSlice";
 

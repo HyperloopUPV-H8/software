@@ -1,5 +1,5 @@
 import { useInterval } from "hooks/useInterval";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export const AnimatedEllipsis = () => {
     const [points, setPoints] = useState(["."]);

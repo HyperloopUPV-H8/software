@@ -20,8 +20,8 @@
 .header {
     background-color: colors.getColor("tertiary", 90);
     color: colors.getColor("tertiary", 60);
-    font-weight: fonts.getFontWeight("bold");
-    padding: 0.5rem 1rem;
+    font-weight: bold;
+    padding: 0.6rem 1rem;
 }
 
 .content {

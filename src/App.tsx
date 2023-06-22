@@ -5,7 +5,6 @@ import styles from "./App.module.scss";
 import { Sidebar } from "components/Sidebar/Sidebar";
 import { ReactComponent as Wheel } from "assets/svg/wheel.svg";
 import { ReactComponent as Tube } from "assets/svg/tube.svg";
-import { ReactComponent as Testing } from "assets/svg/testing.svg";
 import { ReactComponent as Cameras } from "assets/svg/cameras.svg";
 import {
     Loader,
@@ -18,7 +17,9 @@ import { useDispatch } from "react-redux";
 import { initPodData } from "slices/podDataSlice";
 import { initMeasurements } from "slices/measurementsSlice";
 
-const SERVER_URL = `${config.server.ip}:${config.server.port}/${config.paths.websocket}`;
+const WS_URL = import.meta.env.PROD
+    ? `${config.prodServer.ip}:${config.prodServer.port}/${config.paths.websocket}`
+    : `${config.devServer.ip}:${config.devServer.port}/${config.paths.websocket}`;
 
 export const App = () => {
     const dispatch = useDispatch();
@@ -27,15 +28,17 @@ export const App = () => {
         <div className={styles.appWrapper}>
             <Loader
                 promises={[
-                    createWsHandler(SERVER_URL),
-                    fetchBack(config.paths.podDataDescription).then(
-                        (adapter) => {
-                            dispatch(initPodData(adapter));
-                            dispatch(initMeasurements(adapter));
-                        }
-                    ),
+                    createWsHandler(WS_URL),
+                    fetchBack(
+                        import.meta.env.PROD,
+                        config.paths.podDataDescription
+                    ).then((adapter) => {
+                        dispatch(initPodData(adapter));
+                        dispatch(initMeasurements(adapter));
+                    }),
                 ]}
                 LoadingView={<div>Loading</div>}
+                FailureView={<div>Failure</div>}
             >
                 {([handler]) => (
                     <WsHandlerProvider handler={handler}>

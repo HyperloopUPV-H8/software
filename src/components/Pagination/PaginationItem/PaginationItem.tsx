@@ -1,5 +1,3 @@
-import { useCallback, useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import styles from "./PaginationItem.module.scss";
 
 type Props = {

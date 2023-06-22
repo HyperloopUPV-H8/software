@@ -1,17 +1,16 @@
 import styles from "./FirstPage.module.scss";
-import { extractLevitationData } from "components/ControlSections/LevitationSection/extractLevitationData";
-import { LevitationSection } from "components/ControlSections/LevitationSection/LevitationSection";
 import { useMeasurements } from "../useMeasurements";
-import { PCUSection } from "components/ControlSections/PCUSection/PCUSection";
-import { extractPCUData } from "components/ControlSections/PCUSection/extractPCUData";
+import { selectLcuMeasurements, selectPcuMeasurements } from "common";
+import { LCU } from "../Boards/LCU/LCU";
+import { PCU } from "../Boards/PCU/PCU";
 
 export const FirstPage = () => {
     const measurements = useMeasurements();
 
     return (
         <div className={styles.firstPageWrapper}>
-            <LevitationSection data={extractLevitationData(measurements)} />
-            <PCUSection data={extractPCUData(measurements)}></PCUSection>
+            <LCU data={selectLcuMeasurements(measurements)} />
+            <PCU data={selectPcuMeasurements(measurements)} />
         </div>
     );
 };

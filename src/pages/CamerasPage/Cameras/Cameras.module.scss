@@ -4,7 +4,7 @@
     display: flex;
     justify-content: flex-end;
     position: relative;
-    flex-grow: 1;
+    flex: 1 1 0;
     background-color: colors.getColor("primary", 0);
     z-index: 0;
     min-height: 0;

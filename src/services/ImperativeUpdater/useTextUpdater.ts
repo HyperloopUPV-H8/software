@@ -1,23 +1,26 @@
-import { useContext, useLayoutEffect, useRef } from "react";
-import { ImperativeUpdaterContext } from "./ImperativeUpdater";
+import { useGlobalTicker } from "common";
+import { useLayoutEffect, useRef } from "react";
 
-export function useTextUpdater(id: string) {
+export function useTextUpdater(getText: () => string) {
     const ref = useRef<HTMLElement>(null);
-    const updater = useContext(ImperativeUpdaterContext);
-
+    const textNodeRef = useRef<Text>();
     useLayoutEffect(() => {
-        const node = document.createTextNode("");
-        ref.current?.appendChild(node);
-
-        const handler = (value: any) => (node.nodeValue = value);
-
-        updater.add(id, handler);
+        const textNode = document.createTextNode("");
+        textNodeRef.current = textNode;
+        ref.current?.appendChild(textNode);
 
         return () => {
-            updater.remove(id, handler);
-            ref.current?.removeChild(node);
+            ref.current?.removeChild(textNode);
         };
     }, []);
+
+    useGlobalTicker(() => {
+        const text = getText();
+
+        if (textNodeRef.current) {
+            textNodeRef.current.nodeValue = text;
+        }
+    });
 
     return ref;
 }

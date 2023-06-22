@@ -7,7 +7,7 @@ import { AnimatedEllipsis } from "components/AnimatedEllipsis/AnimatedEllipsis";
 const CAMERAS_URL = `ws://${config.cameras.ip}:${config.cameras.port}`;
 
 export const CamerasContainer = () => {
-    const [streams, state] = useWebRTC(CAMERAS_URL);
+    const [streams, _] = useWebRTC(CAMERAS_URL);
     if (streams) {
         return (
             <Cameras

@@ -2,12 +2,27 @@ import styles from "components/ValueData/ValueData.module.scss";
 import { Measurement, isNumericMeasurement } from "common";
 import { useTextUpdater } from "services/ImperativeUpdater/useTextUpdater";
 import { memo } from "react";
+import { store } from "store";
+
 type Props = {
     measurement: Measurement;
 };
 
 export const ValueData = memo(({ measurement }: Props) => {
-    const ref = useTextUpdater(measurement.id);
+    const ref = useTextUpdater(() => {
+        const storeMeas =
+            store.getState().measurements.measurements[measurement.id];
+
+        if (!storeMeas) {
+            return "Default";
+        }
+
+        if (isNumericMeasurement(storeMeas)) {
+            return storeMeas.value.average.toFixed(3);
+        } else {
+            return storeMeas.value.toString();
+        }
+    });
 
     const isNumeric = isNumericMeasurement(measurement);
 
