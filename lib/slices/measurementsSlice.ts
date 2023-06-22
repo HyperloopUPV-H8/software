@@ -7,7 +7,6 @@ import {
     isNumericAdapter,
     PodDataAdapter,
     PacketUpdate,
-    getArrayMeasurement,
 } from "../adapters";
 
 export type Measurements = Record<string, Measurement>;
@@ -50,10 +49,8 @@ function createMeasurementsFromPodDataAdapter(
                     measurements[id] = getNumericMeasurement(adapter);
                 } else if (adapter.type == "bool") {
                     measurements[id] = getBooleanMeasurement(adapter);
-                } else if (adapter.type == "enum") {
+                } else {
                     measurements[id] = getEnumMeasurement(adapter);
-                } else if (adapter.type == "array") {
-                    measurements[id] = getArrayMeasurement(adapter);
                 }
             }
         }
