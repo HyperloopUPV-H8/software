@@ -1,16 +1,17 @@
 @use "../../styles/colors.scss";
 
-$button-height: 2rem;
-$button-width: 2.25rem;
-$icon-size: 0.7rem;
-$label-size: 0.5rem;
+$button-height: 3rem;
+$button-width: 90%;
+$icon-size: 1rem;
+$label-size: 0.7rem;
 
 .toggleButtonWrapper {
     display: flex;
     flex-flow: column;
     align-items: center;
-    width: fit-content;
+    width: 100%;
     height: fit-content;
+    padding: 0;
 
     button {
         width: $button-width;
@@ -38,8 +39,8 @@ $label-size: 0.5rem;
     }
 
     p {
-        margin-top: 5px;
-        margin-bottom: 0px;
+        margin-top: 0;
+        margin-bottom: 0;
         font-size: $label-size;
         font-weight: 600;
         text-align: center;
