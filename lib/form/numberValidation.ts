@@ -1,36 +1,18 @@
-import {
-    NumericType,
-    isSignedIntegerType,
-    isUnsignedIntegerType,
-} from "./BackendTypes";
+import { NumericType, isSignedIntegerType, isUnsignedIntegerType } from "..";
 
-export function isNumberValid(
-    valueStr: string,
-    numberType: NumericType
-): boolean {
-    return (
-        checkNumberString(valueStr, numberType) &&
-        ((isUnsignedIntegerType(numberType) &&
-            checkUnsignedIntegerOverflow(
-                Number.parseInt(valueStr),
-                getBits(numberType)
-            )) ||
-            (isSignedIntegerType(numberType) &&
-                checkSignedIntegerOverflow(
-                    Number.parseInt(valueStr),
-                    getBits(numberType)
-                )) ||
-            checkFloatOverflow(Number.parseFloat(valueStr)))
-    );
-}
-
-function checkNumberString(valueStr: string, numberType: NumericType): boolean {
+export function isNumberValid(value: number, numberType: NumericType): boolean {
     if (isUnsignedIntegerType(numberType)) {
-        return /^\d+$/.test(valueStr);
+        return (
+            value % 1 == 0 &&
+            checkUnsignedIntegerOverflow(value, getBits(numberType))
+        );
     } else if (isSignedIntegerType(numberType)) {
-        return /^-?\d+$/.test(valueStr);
+        return (
+            value % 1 == 0 &&
+            checkSignedIntegerOverflow(value, getBits(numberType))
+        );
     } else {
-        return /^-?\d+(?:\.\d+)?$/.test(valueStr);
+        return checkFloatOverflow(value);
     }
 }
 

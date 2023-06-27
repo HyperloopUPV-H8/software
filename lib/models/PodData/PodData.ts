@@ -15,7 +15,19 @@ export function updatePodData(
     for (const update of Object.values(packetUpdates)) {
         const packet = getPacket(podData, update.id);
         if (packet) {
-            updatePacket(packet, update);
+            const boardIndex = podData.packetToBoard[packet.id];
+
+            if (!boardIndex) {
+                continue;
+            }
+
+            const board = podData.boards[boardIndex];
+
+            if (!board) {
+                continue;
+            }
+
+            updatePacket(board.name, packet, update);
         }
     }
 }

@@ -23,3 +23,7 @@ $lightnesses: 0, 10, 15, 20, 30, 40, 50, 55, 60, 65, 70, 80, 85, 90, 95, 99, 100
         }
     }
 }
+
+@function setLightness($color, $lightness) {
+    @return color.adjust($color, $lightness: $lightness);
+}

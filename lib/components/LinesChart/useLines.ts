@@ -128,6 +128,7 @@ function createLines(
 
         return {
             id: description.id,
+            name: description.name,
             ref: pathElement,
             range: description.range,
             getUpdate: () => description.getUpdate(),

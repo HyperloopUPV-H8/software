@@ -5,7 +5,7 @@ export type Order = {
     fields: Record<string, OrderField>;
 };
 
-type OrderField = {
+export type OrderField = {
     value: string | number | boolean;
     isEnabled: boolean;
 };
@@ -17,7 +17,9 @@ export type VehicleOrders = {
 export type BoardOrders = {
     name: string;
     orders: OrderDescription[];
-    stateOrders: (OrderDescription & { enabled: boolean })[];
+    stateOrders: StateOrder[];
 };
+
+export type StateOrder = OrderDescription & { enabled: boolean };
 
 export type StateOrdersUpdate = Record<string, number[]>;

@@ -13,3 +13,6 @@ export * from "./ToggleInput/ToggleInput";
 export * from "./ToggleSwitch/ToggleSwitch";
 export * from "./PageWrapper/PageWrapper";
 export * from "./GaugeTag/GaugeTag";
+export * from "./FormComponents";
+export * from "./MessagesContainer";
+export * from "./Connections";

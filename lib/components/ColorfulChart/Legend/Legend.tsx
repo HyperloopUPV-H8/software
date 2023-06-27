@@ -13,7 +13,7 @@ export const Legend = ({ items }: Props) => {
                 return (
                     <LegendItem
                         key={item.id}
-                        name={item.id}
+                        name={item.name}
                         units={"A"}
                         value={item.getUpdate()}
                         color={item.color}

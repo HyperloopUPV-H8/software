@@ -22,7 +22,7 @@ export default defineConfig({
             formats: ["es"],
         },
         rollupOptions: {
-            external: ["react", "react-dom", "@reduxjs/toolkit"],
+            external: ["react", "react-dom", "react-redux", "@reduxjs/toolkit"],
             plugins: [typescript()],
         },
     },

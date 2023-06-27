@@ -32,7 +32,7 @@ export type EnumMeasurementAdapter = Omit<EnumMeasurement, "value">;
 export function createPodDataFromAdapter(adapter: PodDataAdapter): PodData {
     const boards: Board[] = Object.values(adapter.boards).map(
         (boardAdapter) => {
-            const packets = getPackets(boardAdapter.packets);
+            const packets = getPackets(boardAdapter.name, boardAdapter.packets);
             const measurementToPacket = getMeasurementToPacket(
                 boardAdapter.packets
             );
@@ -50,25 +50,33 @@ export function createPodDataFromAdapter(adapter: PodDataAdapter): PodData {
     return { boards, packetToBoard, lastUpdates: {} };
 }
 
-function getPackets(packets: Record<string, PacketAdapter>): Packet[] {
+function getPackets(
+    boardName: string,
+    packets: Record<string, PacketAdapter>
+): Packet[] {
     return Object.values(packets).map((packetAdapter) => {
         return {
             ...packetAdapter,
-            measurements: getMeasurements(packetAdapter.measurements),
+            measurements: getMeasurements(
+                boardName,
+                packetAdapter.measurements
+            ),
         };
     });
 }
 
 function getMeasurements(
+    boardName: string,
     adapters: Record<string, MeasurementAdapter>
 ): Measurement[] {
     return Object.values(adapters).map((adapter) => {
+        const id = `${boardName}/${adapter.id}`;
         if (isNumericAdapter(adapter)) {
-            return getNumericMeasurement(adapter);
+            return getNumericMeasurement(id, adapter);
         } else if (adapter.type == "enum") {
-            return getEnumMeasurement(adapter);
+            return getEnumMeasurement(id, adapter);
         } else {
-            return getBooleanMeasurement(adapter);
+            return getBooleanMeasurement(id, adapter);
         }
         // } else {
         //     return getArrayMeasurement(adapter);
@@ -83,10 +91,11 @@ export function isNumericAdapter(
 }
 
 export function getNumericMeasurement(
+    id: string,
     adapter: NumericMeasurementAdapter
 ): NumericMeasurement {
     return {
-        id: adapter.id,
+        id: id,
         name: adapter.name,
         type: adapter.type as NumericType,
         value: {
@@ -100,10 +109,11 @@ export function getNumericMeasurement(
 }
 
 export function getEnumMeasurement(
+    id: string,
     adapter: EnumMeasurementAdapter
 ): EnumMeasurement {
     return {
-        id: adapter.id,
+        id: id,
         name: adapter.name,
         type: "enum",
         value: "Default",
@@ -111,10 +121,11 @@ export function getEnumMeasurement(
 }
 
 export function getBooleanMeasurement(
+    id: string,
     adapter: BooleanMeasurementAdapter
 ): BooleanMeasurement {
     return {
-        id: adapter.id,
+        id: id,
         name: adapter.name,
         type: adapter.type as "bool",
         value: false,

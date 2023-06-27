@@ -10,19 +10,34 @@ export type Packet = {
     measurements: Measurement[];
 };
 
-export function updatePacket(packet: Packet, update: PacketUpdate) {
+export function updatePacket(
+    boardName: string,
+    packet: Packet,
+    update: PacketUpdate
+) {
     packet.count = update.count;
     packet.cycleTime = update.cycleTime;
     packet.hexValue = update.hexValue;
-    updateMeasurements(packet.measurements, update.measurementUpdates);
+    updateMeasurements(
+        boardName,
+        packet.measurements,
+        update.measurementUpdates
+    );
 }
 
 function updateMeasurements(
+    boardName: string,
     measurements: Packet["measurements"],
     measurementUpdates: PacketUpdate["measurementUpdates"]
 ): void {
-    for (const [mName, newValue] of Object.entries(measurementUpdates)) {
-        const measurement = measurements.find((item) => item.id == mName)!;
+    for (const [mId, newValue] of Object.entries(measurementUpdates)) {
+        const id = `${boardName}/${mId}`;
+        const measurement = measurements.find((item) => item.id == id);
+
+        if (!measurement) {
+            continue;
+        }
+
         measurement.value = newValue;
     }
 }

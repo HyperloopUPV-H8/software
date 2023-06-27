@@ -1,8 +1,4 @@
-import {
-    NumericType,
-    isSignedIntegerType,
-    isUnsignedIntegerType,
-} from "./BackendTypes";
+import { NumericType, isSignedIntegerType, isUnsignedIntegerType } from "../..";
 
 //FIXME: Add in "common"
 export function isNumberValid(
