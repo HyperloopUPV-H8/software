@@ -24,12 +24,14 @@ export const PCU = ({ data }: Props) => {
                     z={data.acc_z}
                 />
                 <MotorInfo
+                    title="Motor 1"
                     motorCurrentU={data.motor_1_current_u}
                     motorCurrentV={data.motor_1_current_v}
                     motorCurrentW={data.motor_1_current_w}
                     motorTemperature={data.motor_1_temp}
                 />
                 <MotorInfo
+                    title="Motor 2"
                     motorCurrentU={data.motor_2_current_u}
                     motorCurrentV={data.motor_2_current_v}
                     motorCurrentW={data.motor_2_current_w}

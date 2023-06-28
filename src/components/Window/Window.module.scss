@@ -10,11 +10,7 @@
     height: fit-content;
     max-height: 100%;
 
-    filter: drop-shadow(16px 11px 8px rgba(189, 189, 189, 0.01))
-        drop-shadow(9px 6px 7px rgba(189, 189, 189, 0.02))
-        drop-shadow(4px 3px 5px rgba(189, 189, 189, 0.03))
-        drop-shadow(1px 1px 3px rgba(189, 189, 189, 0.04))
-        drop-shadow(0px 0px 0px rgba(189, 189, 189, 0.04));
+    filter: var(--shadow);
 }
 
 .header {
@@ -29,6 +25,6 @@
     padding: 2rem;
     display: flex;
     min-height: 0;
-    overflow-y: auto;
+    justify-content: center;
     align-items: stretch;
 }

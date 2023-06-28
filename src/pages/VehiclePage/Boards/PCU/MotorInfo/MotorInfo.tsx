@@ -4,18 +4,19 @@ import { ColorfulChart } from "common";
 import { store } from "store";
 
 type Props = {
+    title: string;
     motorCurrentU: NumericMeasurement;
     motorCurrentV: NumericMeasurement;
     motorCurrentW: NumericMeasurement;
     motorTemperature: NumericMeasurement;
 };
 
-export const MotorInfo = ({ motorCurrentU }: Props) => {
+export const MotorInfo = ({ title, motorCurrentU }: Props) => {
     return (
         <div className={styles.motorInfoWrapper}>
             <ColorfulChart
                 className={styles.chart}
-                title="Motor"
+                title={title}
                 length={100}
                 items={[
                     {

@@ -1,0 +1,11 @@
+.field {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.3125rem;
+}
+
+.name {
+    color: var(--primary-50);
+    font-size: 0.8rem;
+}

@@ -1,8 +1,26 @@
 .emergencyOrdersWrapper {
     width: fit-content;
+    height: fit-content;
+
     display: grid;
-    grid-template-columns: auto auto;
-    grid-template-rows: auto auto;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
     justify-items: stretch;
     gap: 1rem;
+    font-family: var(--font-mono);
+}
+
+$stop-color: #ff2d2d;
+$restart-color: #2d74ff;
+
+.icon {
+    font-size: 1.5rem;
+}
+
+.stopBtn {
+    background-color: $stop-color;
+}
+
+.restartBtn {
+    background-color: $restart-color;
 }

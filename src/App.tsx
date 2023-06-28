@@ -16,6 +16,7 @@ import {
 import { useDispatch } from "react-redux";
 import { initPodData } from "slices/podDataSlice";
 import { initMeasurements } from "slices/measurementsSlice";
+import { setWebSocketConnection } from "slices/connectionsSlice";
 
 const WS_URL = import.meta.env.PROD
     ? `${config.prodServer.ip}:${config.prodServer.port}/${config.paths.websocket}`
@@ -23,12 +24,15 @@ const WS_URL = import.meta.env.PROD
 
 export const App = () => {
     const dispatch = useDispatch();
-
     return (
         <div className={styles.appWrapper}>
             <Loader
                 promises={[
-                    createWsHandler(WS_URL),
+                    createWsHandler(
+                        WS_URL,
+                        () => dispatch(setWebSocketConnection(true)),
+                        () => dispatch(setWebSocketConnection(false))
+                    ),
                     fetchBack(
                         import.meta.env.PROD,
                         config.paths.podDataDescription

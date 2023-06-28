@@ -1,0 +1,25 @@
+.form {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    border: 1px solid rgba(183, 183, 183, 0.3);
+    border-radius: 10px;
+    padding: 0.625rem;
+    gap: 0.7rem;
+    box-shadow: 0px 0px 0px 0px rgba(0, 0, 0, 0.03),
+        0px 1px 2px 0px rgba(0, 0, 0, 0.03), 1px 4px 4px 0px rgba(0, 0, 0, 0.03),
+        2px 8px 5px 0px rgba(0, 0, 0, 0.02), 3px 15px 6px 0px rgba(0, 0, 0, 0),
+        5px 23px 7px 0px rgba(0, 0, 0, 0);
+}
+
+.title {
+    color: var(--primary-30);
+    font-weight: 500;
+}
+
+.fields {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+}

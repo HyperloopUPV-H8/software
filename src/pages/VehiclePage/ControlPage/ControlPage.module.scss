@@ -1,0 +1,39 @@
+.controlPage {
+    flex: 1 1 0;
+    align-self: stretch;
+
+    display: grid;
+    grid-template:
+        "orders messages connections" minmax(5rem, 1fr)
+        "orders messages logger" min-content
+        "orders messages emergencyOrders" auto
+        "orders messages bootloader" auto / 1fr 1fr minmax(auto, 25rem);
+    justify-items: stretch;
+    align-items: center;
+    gap: 1.3rem;
+}
+
+.controlPage > :nth-child(1) {
+    grid-area: orders;
+}
+
+.controlPage > :nth-child(2) {
+    grid-area: messages;
+}
+
+.controlPage > :nth-child(3) {
+    grid-area: connections;
+}
+
+.controlPage > :nth-child(4) {
+    grid-area: logger;
+}
+
+.controlPage > :nth-child(5) {
+    justify-self: center;
+
+    grid-area: emergencyOrders;
+}
+.controlPage > :nth-child(6) {
+    grid-area: bootloader;
+}
