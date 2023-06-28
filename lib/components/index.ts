@@ -16,3 +16,4 @@ export * from "./GaugeTag/GaugeTag";
 export * from "./FormComponents";
 export * from "./MessagesContainer";
 export * from "./Connections";
+export * from "./Logger";
