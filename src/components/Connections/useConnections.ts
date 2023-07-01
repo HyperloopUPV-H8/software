@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux";
 import { RootState } from "store";
-import { useSubscribe, useWsHandler } from "common";
+import { useSubscribe } from "common";
 import { useDispatch } from "react-redux";
 import { updateBoardConnections } from "slices/connectionsSlice";
 

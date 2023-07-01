@@ -5,11 +5,11 @@ type Props = {
     children: React.ReactNode;
 };
 
-export const Island = ({ children, style = {} }: Props) => {
+export const Island = ({ children, style }: Props) => {
     return (
         <div
             className={styles.island}
-            style={{ ...style }}
+            style={style}
         >
             {children}
         </div>

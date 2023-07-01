@@ -1,23 +1,17 @@
 import { Bootloader } from "./Bootloader/Bootloader";
 import { useEffect, useState } from "react";
-import { fetchBack } from "common";
-import { config } from "common";
+import { config, useFetchBack } from "common";
 
 export const BootloaderContainer = () => {
     const [boards, setBoards] = useState<string[]>();
-
+    const uploadableBoardsPromise = useFetchBack(
+        import.meta.env.PROD,
+        config.paths.uploadableBoards
+    );
     useEffect(() => {
-        const controller = new AbortController();
-
-        fetchBack(config.paths.uploadableBoards, controller.signal).then(
-            (value: string[]) => {
-                setBoards(value);
-            }
-        );
-
-        return () => {
-            controller.abort();
-        };
+        uploadableBoardsPromise.then((value: string[]) => {
+            setBoards(value);
+        });
     }, []);
 
     if (boards) {

@@ -1,4 +1,4 @@
-import { useState, DragEvent } from "react";
+import { DragEvent } from "react";
 
 function isCorrectFormat(fileName: string, fileFormat: string): boolean {
     return fileName.endsWith(`.${fileFormat}`);
@@ -13,7 +13,7 @@ export function getFile(
     if (ev.dataTransfer.items) {
         return handleFileWithDataTransferItems(ev, format);
     } else {
-        return handleFileWidthDataTransferFiles(ev, format);
+        return handleFileWidthDataTransferFiles(ev);
     }
 }
 
@@ -46,8 +46,7 @@ function handleFileWithDataTransferItems(
 }
 
 function handleFileWidthDataTransferFiles(
-    ev: DragEvent<HTMLDivElement>,
-    format: string
+    ev: DragEvent<HTMLDivElement>
 ): File | null {
     if (ev.dataTransfer.files.length > 1 || ev.dataTransfer.files.length < 1) {
         console.error("Expected one file");
@@ -55,9 +54,4 @@ function handleFileWidthDataTransferFiles(
     } else {
         return [...ev.dataTransfer.files][0];
     }
-}
-
-function dragOverHandler(ev: DragEvent<HTMLDivElement>) {
-    // Prevent default behavior (Prevent file from being opened)
-    ev.preventDefault();
 }

@@ -12,13 +12,13 @@ export type PacketElement = {
     cycleTime: Text;
 };
 
-type MeasurementElement = { boardId: string; measId: string; value: Text };
+type MeasurementElement = { id: string; value: Text };
 
 type Updater = {
     addPacket: (id: number, element: PacketElement) => void;
     removePacket: (id: number) => void;
     addMeasurement: (element: MeasurementElement) => void;
-    removeMeasurement: (boardId: string, measId: string) => void;
+    removeMeasurement: (id: string) => void;
 };
 
 export const TableContext = createContext<Updater>({
@@ -31,8 +31,6 @@ export const TableContext = createContext<Updater>({
 type Props = {
     children?: React.ReactNode;
 };
-
-const TICK_RATE = 60;
 
 export const TableUpdater = ({ children }: Props) => {
     const packetElements = useRef<Record<string, PacketElement>>({});
@@ -52,17 +50,12 @@ export const TableUpdater = ({ children }: Props) => {
         }
 
         for (const item of measurementElements.current) {
-            const measurement = getMeasurement(
-                state.measurements,
-                item.boardId,
-                item.measId
-            );
+            const measurement = getMeasurement(state.measurements, item.id);
             if (!measurement) {
                 return;
             }
             const element = measurementElements.current.find(
-                (elem) =>
-                    elem.boardId == item.boardId && elem.measId == item.measId
+                (elem) => elem.id == item.id
             );
             if (!element) {
                 return;
@@ -83,17 +76,15 @@ export const TableUpdater = ({ children }: Props) => {
         addMeasurement: (element: MeasurementElement) => {
             if (
                 !measurementElements.current.find(
-                    (item) =>
-                        item.boardId == element.boardId &&
-                        item.measId == element.measId
+                    (item) => item.id == element.id
                 )
             ) {
                 measurementElements.current.push(element);
             }
         },
-        removeMeasurement: (boardId: string, measId: string) => {
+        removeMeasurement: (id: string) => {
             measurementElements.current = measurementElements.current.filter(
-                (item) => item.boardId != boardId && item.measId == measId
+                (item) => item.id != id
             );
         },
     };

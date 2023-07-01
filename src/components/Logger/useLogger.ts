@@ -1,5 +1,5 @@
 import { useSubscribe, useWsHandler } from "common";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export function useLogger() {
     const [state, setState] = useState(false);

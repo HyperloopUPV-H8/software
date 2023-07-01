@@ -5,7 +5,6 @@ import { DragEvent } from "react";
 import { MdClose } from "react-icons/md";
 import { LinesChart, NumericMeasurement, getMeasurement } from "common";
 import { store } from "store";
-import { parseId } from "components/ChartMenu/parseId";
 
 type Props = {
     chartElement: ChartElement;
@@ -48,11 +47,9 @@ export const ChartWithLegend = ({
             <Legend
                 items={chartElement.lines}
                 getValue={(id) => {
-                    const ids = parseId(id);
                     const meas = getMeasurement(
                         store.getState().measurements,
-                        ids.boardId,
-                        ids.measId
+                        id
                     ) as NumericMeasurement;
 
                     return meas.value.last;

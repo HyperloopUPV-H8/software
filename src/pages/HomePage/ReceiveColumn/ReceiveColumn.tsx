@@ -1,4 +1,3 @@
-import styles from "./ReceiveColumn.module.scss";
 import { TabLayout } from "layouts/TabLayout/TabLayout";
 import { ChartMenu } from "components/ChartMenu/ChartMenu";
 import { ReactComponent as IncomingMessage } from "assets/svg/incoming-message.svg";

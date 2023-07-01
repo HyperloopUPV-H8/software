@@ -6,14 +6,19 @@ import "styles/fonts.scss";
 import "./index.scss";
 import { store } from "./store";
 import { Provider } from "react-redux";
-import { GlobalTicker } from "common";
+import { ConfigProvider, GlobalTicker } from "common";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-    // <React.StrictMode>
-    <Provider store={store}>
-        <GlobalTicker fps={100}>
-            <App />
-        </GlobalTicker>
-    </Provider>
-    // </React.StrictMode>
+    <React.StrictMode>
+        <Provider store={store}>
+            <ConfigProvider
+                devIp="127.0.0.1"
+                prodIp="127.0.0.1"
+            >
+                <GlobalTicker fps={100}>
+                    <App />
+                </GlobalTicker>
+            </ConfigProvider>
+        </Provider>
+    </React.StrictMode>
 );

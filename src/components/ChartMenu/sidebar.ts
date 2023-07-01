@@ -1,4 +1,3 @@
-import { RootState } from "store";
 import { Board, PodData, isNumericMeasurement } from "common";
 import { Packet } from "common";
 import { Section } from "./Sidebar/Section/Section";
@@ -22,7 +21,7 @@ function getNumericPacketSubsections(board: Board): Subsection[] {
     const packets: Subsection[] = [];
 
     board.packets.forEach((packet) => {
-        const items = getNumericMeasurementItems(packet, board.name);
+        const items = getNumericMeasurementItems(packet);
         if (items.length > 0) {
             packets.push({ name: packet.name, items });
         }
@@ -31,12 +30,12 @@ function getNumericPacketSubsections(board: Board): Subsection[] {
     return packets;
 }
 
-function getNumericMeasurementItems(packet: Packet, board: string): Item[] {
+function getNumericMeasurementItems(packet: Packet): Item[] {
     const items: Item[] = [];
     packet.measurements.forEach((measurement) => {
         if (isNumericMeasurement(measurement)) {
             items.push({
-                id: `${board}/${measurement.id}`,
+                id: measurement.id,
                 name: measurement.name,
             });
         }

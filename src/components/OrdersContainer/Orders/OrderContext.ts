@@ -1,4 +1,4 @@
 import { Order } from "common";
-import { createContext, useContext } from "react";
+import { createContext } from "react";
 
-export const OrderContext = createContext((order: Order) => {});
+export const OrderContext = createContext<(order: Order) => void>(() => {});

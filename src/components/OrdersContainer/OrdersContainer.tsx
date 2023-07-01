@@ -1,5 +1,4 @@
 import styles from "./OrdersContainer.module.scss";
-import { useSendOrder } from "./useSendOrder";
 import { Orders } from "./Orders/Orders";
 import { useOrders } from "./Orders/useOrders";
 

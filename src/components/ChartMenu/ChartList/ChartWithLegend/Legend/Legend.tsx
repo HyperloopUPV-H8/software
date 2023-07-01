@@ -1,4 +1,3 @@
-import { NumericMeasurement } from "common";
 import styles from "./Legend.module.scss";
 import { LegendItem } from "./LegendItem/LegendItem";
 import { memo } from "react";
@@ -13,7 +12,7 @@ type Props = {
 const Legend = ({ items, getValue, removeItem }: Props) => {
     return (
         <div className={styles.legendWrapper}>
-            {items.map(({ id, name, color, getUpdate, units }) => {
+            {items.map(({ id, name, color, units }) => {
                 return (
                     <LegendItem
                         key={id} //TODO: change, different measurements can have the same id

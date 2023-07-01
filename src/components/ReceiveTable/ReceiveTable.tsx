@@ -1,11 +1,8 @@
 import styles from "./ReceiveTable.module.scss";
 import { BoardView } from "./BoardView/BoardView";
 import { Header } from "./Header/Header";
-import { Board, useSubscribe } from "common";
+import { Board } from "common";
 import { TableUpdater } from "./TableUpdater";
-import { useDispatch } from "react-redux";
-import { updatePodData } from "slices/podDataSlice";
-import { updateMeasurements } from "slices/measurementsSlice";
 
 type Props = {
     boards: Board[];

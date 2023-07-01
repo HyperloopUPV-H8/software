@@ -4,7 +4,6 @@ import { ChartList } from "components/ChartMenu/ChartList/ChartList";
 import { store } from "store";
 import { Section } from "./Sidebar/Section/Section";
 import { NumericMeasurement, getMeasurement } from "common";
-import { parseId } from "./parseId";
 
 function getRandomColor() {
     const r = Math.floor(Math.random() * 256);
@@ -33,12 +32,9 @@ export const ChartMenu = ({ sidebarSections }: Props) => {
                 <Sidebar sections={sidebarSections} />
                 <ChartList
                     getLine={(id) => {
-                        const ids = parseId(id);
-
                         const meas = getMeasurement(
                             store.getState().measurements,
-                            ids.boardId,
-                            ids.measId
+                            id
                         ) as NumericMeasurement;
 
                         return {
@@ -50,8 +46,7 @@ export const ChartMenu = ({ sidebarSections }: Props) => {
                                 //TODO: change to getNumericMeasurement and return undefined if its not numeric (or doesnt exist)
                                 const meas = getMeasurement(
                                     store.getState().measurements,
-                                    ids.boardId,
-                                    ids.measId
+                                    id
                                 ) as NumericMeasurement;
 
                                 if (!meas) {

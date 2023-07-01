@@ -1,4 +1,4 @@
-import { VehicleOrders, useWsHandler } from "common";
+import { VehicleOrders, useFetchBack, useWsHandler } from "common";
 import { useEffect } from "react";
 import { config } from "common";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,15 +11,14 @@ import { nanoid } from "nanoid";
 export function useOrders() {
     const dispatch = useDispatch();
     const handler = useWsHandler();
-
+    const orderDescriptionPromise = useFetchBack(
+        import.meta.env.PROD,
+        config.paths.orderDescription
+    );
     useEffect(() => {
         const controller = new AbortController();
         const id = nanoid();
-
-        fetch(
-            `http://${config.server.ip}:${config.server.port}/${config.paths.orderDescription}`
-        )
-            .then((res) => res.json())
+        orderDescriptionPromise
             .then((descriptions: VehicleOrders) => {
                 dispatch(setOrders(descriptions));
                 handler.subscribe("order/stateOrders", {

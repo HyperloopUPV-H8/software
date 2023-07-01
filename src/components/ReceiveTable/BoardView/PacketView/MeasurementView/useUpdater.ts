@@ -2,11 +2,7 @@ import { useLayoutEffect, useRef, useContext } from "react";
 import { TableContext } from "components/ReceiveTable/TableUpdater";
 
 //TODO: receive just one id prop, or, even better, a getValue function (make it decoupled from store basically)
-export function useUpdater(
-    boardId: string,
-    measId: string,
-    initialValue: string
-) {
+export function useUpdater(id: string, initialValue: string) {
     const updater = useContext(TableContext);
     const valueRef = useRef<HTMLSpanElement>(null);
 
@@ -15,13 +11,12 @@ export function useUpdater(
         valueRef.current?.appendChild(valueNode);
 
         updater.addMeasurement({
-            boardId: boardId,
-            measId: measId,
+            id: id,
             value: valueNode,
         });
 
         return () => {
-            updater.removeMeasurement(boardId, measId);
+            updater.removeMeasurement(id);
             valueRef.current!.removeChild(valueNode);
         };
     }, []);

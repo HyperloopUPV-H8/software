@@ -1,7 +1,4 @@
 import styles from "components/Logger/Logger.module.scss";
-import { BsFillPlayFill } from "react-icons/bs";
-import { BsFillStopFill } from "react-icons/bs";
-import { useState } from "react";
 import { useLogger } from "./useLogger";
 import { Island } from "components/Island/Island";
 import { Button } from "components/FormComponents/Button/Button";
