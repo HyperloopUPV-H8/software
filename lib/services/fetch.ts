@@ -1,5 +1,6 @@
 // import { PodDataAdapter, VehicleOrders } from "../index.ts";
-import { config } from "./../config.ts";
+
+import { useConfig } from "..";
 
 // type Endpoints = {
 //     [config.paths.podDataDescription]: PodDataAdapter;
@@ -7,11 +8,14 @@ import { config } from "./../config.ts";
 //     [config.paths.uploadableBoards]: string[];
 // };
 
-export async function fetchBack(
+// Use abort controller internally with useEffect instead of exposing it.
+export async function useFetchBack(
     production: boolean,
     path: string,
     signal?: AbortSignal
 ) {
+    const config = useConfig();
+
     const res = await fetch(
         `http://${production ? config.prodServer.ip : config.devServer.ip}:${
             production ? config.prodServer.port : config.devServer.port

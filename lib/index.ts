@@ -7,6 +7,7 @@ export * from "./BackendTypes";
 export * from "./components";
 export * from "./hooks";
 export * from "./services";
-export * from "./config";
+export * from "./config/config";
 export * from "./styles";
 export * from "./form";
+export * from "./config";

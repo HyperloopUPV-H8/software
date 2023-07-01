@@ -1,6 +1,6 @@
 export const config = {
     devServer: { ip: "127.0.0.2", port: 4000 },
-    prodServer: { ip: "192.168.1.2", port: 4000 },
+    prodServer: { ip: "192.168.0.9", port: 4000 },
     paths: {
         podDataDescription: "backend/podDataStructure",
         orderDescription: "backend/orderStructures",
@@ -16,4 +16,4 @@ export const config = {
         ip: "192.168.0.9",
         port: 4040,
     },
-} as const;
+};
