@@ -11,6 +11,7 @@ type Props = {
     length: number;
     width?: string;
     height?: string;
+    className?: string;
 };
 
 const viewBoxWidth = 1000;
@@ -23,16 +24,13 @@ export const LinesChart = ({
     showGrid = true,
     width = "100%",
     height = "100%",
+    className = "",
 }: Props) => {
     const { ref, range } = useLines(viewBoxWidth, viewBoxHeight, length, items);
 
     return (
-        <div className={styles.imperativeChartWrapper}>
-            <VerticalAxis
-                divisions={divisions}
-                min={range[0]}
-                max={range[1]}
-            />
+        <div className={`${styles.imperativeChartWrapper} ${className}`}>
+            <VerticalAxis divisions={divisions} min={range[0]} max={range[1]} />
             <LinesWithGrid
                 chartRef={ref}
                 height={height}
