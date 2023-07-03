@@ -81,3 +81,14 @@ $label-size: 0.7rem;
         }
     }
 }
+
+.disabled {
+    p {
+        color: var(--neutral-60);
+    }
+
+    button {
+        color: var(--neutral-60);
+        background-color: var(--neutral-90);
+    }
+}

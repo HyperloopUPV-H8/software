@@ -23,6 +23,7 @@ export function ToggleButton({
     label = "",
     icon,
     onClick,
+    disabled,
     ...buttonProps
 }: Props) {
     const [isOn, flip] = useToggle(false);
@@ -32,14 +33,16 @@ export function ToggleButton({
     }, [isOn]);
 
     const labelClass = `${style.toggleButtonWrapper} ${
-        isOn ? style.on : style.off
+        disabled ? style.disabled : isOn ? style.on : style.off
     }`;
+
     return (
         <label className={labelClass}>
             <button
                 onClick={() => {
                     flip();
                 }}
+                disabled={disabled}
                 {...buttonProps}
             >
                 {icon}
@@ -48,45 +51,3 @@ export function ToggleButton({
         </label>
     );
 }
-
-// export function ToggleButton({
-//     id,
-//     label,
-//     icon,
-//     sendJsonMessage,
-//     onToggle,
-//     ...buttonProps
-// }: Props) {
-//     const [isOn, flip] = useToggle(false);
-
-//     useEffect(() => {
-//         onToggle?.(isOn);
-//     }, [isOn]);
-
-//     const labelClass = `${style.toggleButtonWrapper} ${
-//         isOn ? style.on : style.off
-//     }`;
-//     return (
-//         <label className={labelClass}>
-//             <button
-//                 onClick={() => {
-//                     flip();
-//                     sendOrder(!isOn, id, sendJsonMessage);
-//                 }}
-//                 {...buttonProps}
-//             >
-//                 {icon}
-//             </button>
-//             <p>{label}</p>
-//         </label>
-//     );
-// }
-
-// function sendOrder(
-//     isOn: boolean,
-//     id: number,
-//     sendJsonMessage: SendJsonMessage
-// ) {
-//     const controlOrder: ControlOrder = { id: id, state: isOn };
-//     sendJsonMessage(controlOrder);
-// }
