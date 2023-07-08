@@ -12,10 +12,21 @@ type Callback<T> = {
 };
 
 export class WsHandler {
-    private ws: WebSocket;
+    private ws!: WebSocket;
     private topicToCallbacks: Map<string, Array<Callback<any>>> = new Map();
+    private reconnect: boolean;
 
-    constructor(url: string, onOpen?: () => void, onClose?: () => void) {
+    constructor(
+        url: string,
+        reconnect: boolean,
+        onOpen?: () => void,
+        onClose?: () => void
+    ) {
+        this.reconnect = reconnect;
+        this.setupWs(url, onOpen, onClose);
+    }
+
+    private setupWs(url: string, onOpen?: () => void, onClose?: () => void) {
         this.ws = new WebSocket(`ws://${url}`);
 
         if (onOpen) {
@@ -31,9 +42,14 @@ export class WsHandler {
             }
         };
 
-        if (onClose) {
-            this.ws.onclose = onClose;
-        }
+        this.ws.onclose = () => {
+            onClose?.();
+            if (this.reconnect) {
+                setTimeout(() => {
+                    this.setupWs(url, onOpen, onClose);
+                }, 500);
+            }
+        };
     }
 
     public post<T extends PostTopic>(
