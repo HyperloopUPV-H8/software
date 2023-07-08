@@ -5,8 +5,26 @@
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    gap: 0.8rem;
 }
-.ordersWrapper > :not(:last-child)::after {
+
+.stateOrdersToggle {
+    top: 0px;
+    position: sticky;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    z-index: 1;
+    background-color: white;
+}
+
+.boardOrderList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.boardOrderList > :not(:last-child)::after {
     content: "";
     border-bottom: 1px solid rgba(165, 131, 101, 0.368);
     margin-bottom: 0.8rem;

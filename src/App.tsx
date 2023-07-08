@@ -31,6 +31,7 @@ function App() {
                 promises={[
                     createWsHandler(
                         SERVER_URL,
+                        true,
                         () => dispatch(setWebSocketConnection(true)),
                         () => dispatch(setWebSocketConnection(false))
                     ),
