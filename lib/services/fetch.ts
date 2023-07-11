@@ -15,15 +15,18 @@ export async function useFetchBack(
     signal?: AbortSignal
 ) {
     const config = useConfig();
-
-    const res = await fetch(
+    return fetchBack(
         `http://${production ? config.prodServer.ip : config.devServer.ip}:${
             production ? config.prodServer.port : config.devServer.port
         }/${path}`,
-        {
-            signal,
-        }
+        signal
     );
+}
+
+export async function fetchBack(url: string, signal?: AbortSignal) {
+    const res = await fetch(url, {
+        signal,
+    });
 
     return await res.json();
 }
