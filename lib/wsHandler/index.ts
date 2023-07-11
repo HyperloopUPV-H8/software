@@ -1,4 +1,4 @@
-export * from "./WsHandlerContext";
+export * from "./WsHandlerProvider";
 export * from "./createWsHandler";
 export * from "./useWsHandler";
 export * from "./WsHandler";

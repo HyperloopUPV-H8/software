@@ -6,37 +6,51 @@ import {
     WsMessage,
 } from "./types";
 
-type Callback<T> = {
+type Suscription<T> = {
     id: string;
     cb: (value: T) => void;
 };
 
 export class WsHandler {
+    private url: string;
+    private onOpen?: () => void;
+    private onClose?: () => void;
+
     private ws!: WebSocket;
-    private topicToCallbacks: Map<string, Array<Callback<any>>> = new Map();
-    private reconnect: boolean;
+    private topicToSuscriptions: Map<string, Suscription<any>[]>;
 
     constructor(
         url: string,
-        reconnect: boolean,
+        topicToSuscriptions?: Map<string, Suscription<any>[]>,
         onOpen?: () => void,
         onClose?: () => void
     ) {
-        this.reconnect = reconnect;
+        this.url = url;
+        this.onOpen = onOpen;
+        this.onClose = onClose;
+        this.topicToSuscriptions = topicToSuscriptions ?? new Map();
         this.setupWs(url, onOpen, onClose);
     }
 
     private setupWs(url: string, onOpen?: () => void, onClose?: () => void) {
         this.ws = new WebSocket(`ws://${url}`);
 
-        if (onOpen) {
-            this.ws.onopen = onOpen;
-        }
+        this.ws.onopen = () => {
+            for (const [
+                topic,
+                callbacks,
+            ] of this.topicToSuscriptions.entries()) {
+                for (const cb of callbacks) {
+                    this.ws.send(getSubscriptionMessage(topic, cb.id));
+                }
+            }
+            onOpen?.();
+        };
 
         this.ws.onmessage = (ev: MessageEvent<string>) => {
             const socketMessage = JSON.parse(ev.data) as WsMessage;
             const callbacks =
-                this.topicToCallbacks.get(socketMessage.topic) ?? [];
+                this.topicToSuscriptions.get(socketMessage.topic) ?? [];
             for (const callback of callbacks) {
                 callback.cb(socketMessage.payload);
             }
@@ -44,11 +58,6 @@ export class WsHandler {
 
         this.ws.onclose = () => {
             onClose?.();
-            if (this.reconnect) {
-                setTimeout(() => {
-                    this.setupWs(url, onOpen, onClose);
-                }, 500);
-            }
         };
     }
 
@@ -62,40 +71,35 @@ export class WsHandler {
 
     public subscribe<T extends SubscriptionTopic>(
         topic: T,
-        callback: Callback<HandlerMessages[T]["response"]>
+        suscription: Suscription<HandlerMessages[T]["response"]>
     ) {
-        const callbacks = this.topicToCallbacks.get(topic);
-        if (callbacks) {
-            this.topicToCallbacks.set(topic, [...callbacks, callback]);
+        const suscriptions = this.topicToSuscriptions.get(topic);
+        if (suscriptions) {
+            suscriptions.push(suscription);
+            this.topicToSuscriptions.set(topic, suscriptions);
         } else {
-            this.topicToCallbacks.set(topic, [callback]);
+            this.topicToSuscriptions.set(topic, [suscription]);
         }
 
-        this.ws.send(
-            JSON.stringify({
-                topic,
-                id: callback.id,
-                payload: { subscribe: true, id: callback.id },
-            })
-        );
+        this.ws.send(getSubscriptionMessage(topic, suscription.id));
     }
 
     public unsubscribe<T extends SubscriptionTopic>(
         topic: T,
         id: HandlerMessages[T]["id"]
     ) {
-        const callbacks = this.topicToCallbacks.get(topic);
+        const callbacks = this.topicToSuscriptions.get(topic);
         if (callbacks) {
-            this.topicToCallbacks.set(
+            this.topicToSuscriptions.set(
                 topic,
                 callbacks.filter((element) => element.id != id)
             );
 
-            if (this.topicToCallbacks.get(topic)?.length == 0) {
-                this.topicToCallbacks.delete(topic);
+            if (this.topicToSuscriptions.get(topic)?.length == 0) {
+                this.topicToSuscriptions.delete(topic);
             }
         } else {
-            console.warn(`Topic ${topic} doesn't exist in topicToHandlers`);
+            console.warn(`Topic ${topic} doesn't exist in topicToSuscriptions`);
         }
 
         this.ws.send(
@@ -112,23 +116,47 @@ export class WsHandler {
         this.ws.send(JSON.stringify({ topic, payload: req }));
         const resCallback = (value: any) => {
             cb(value, () => {
-                const callbacks = this.topicToCallbacks.get(topic);
+                const callbacks = this.topicToSuscriptions.get(topic);
                 if (callbacks) {
-                    this.topicToCallbacks.set(
+                    this.topicToSuscriptions.set(
                         topic,
                         callbacks.filter((element) => element.id != id)
                     );
                 }
             });
         };
-        const callbacks = this.topicToCallbacks.get(topic);
+        const callbacks = this.topicToSuscriptions.get(topic);
         if (callbacks) {
-            this.topicToCallbacks.set(topic, [
+            this.topicToSuscriptions.set(topic, [
                 ...callbacks,
                 { id: id, cb: resCallback },
             ]);
         } else {
-            this.topicToCallbacks.set(topic, [{ id: id, cb: resCallback }]);
+            this.topicToSuscriptions.set(topic, [{ id: id, cb: resCallback }]);
         }
     }
+
+    public getUrl() {
+        return this.url;
+    }
+
+    public getTopicToSuscriptions() {
+        return this.topicToSuscriptions;
+    }
+
+    public getOnOpen() {
+        return this.onOpen;
+    }
+
+    public getOnClose() {
+        return this.onClose;
+    }
+}
+
+function getSubscriptionMessage(topic: string, id: string) {
+    return JSON.stringify({
+        topic,
+        id: id,
+        payload: { subscribe: true, id: id },
+    });
 }

@@ -11,3 +11,4 @@ export * from "./config/config";
 export * from "./styles";
 export * from "./form";
 export * from "./config";
+export * from "./Suspense";

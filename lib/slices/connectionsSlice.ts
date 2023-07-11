@@ -25,17 +25,21 @@ export const connectionsSlice = createSlice({
             connections,
             action: PayloadAction<Array<Connection>>
         ) => {
-            action.payload.forEach(({ name, isConnected }) => {
-                const conn = connections.boards.find(
-                    (conn) => conn.name == name
+            for (const update of action.payload) {
+                const connIndex = connections.boards.findIndex(
+                    (conn) => conn.name == update.name
                 );
 
-                if (conn) {
-                    conn.isConnected = isConnected;
+                if (connIndex != -1) {
+                    connections.boards[connIndex].isConnected =
+                        update.isConnected;
                 } else {
-                    connections.boards.push({ name, isConnected });
+                    connections.boards.push({
+                        name: update.name,
+                        isConnected: update.isConnected,
+                    });
                 }
-            });
+            }
         },
     },
 });
