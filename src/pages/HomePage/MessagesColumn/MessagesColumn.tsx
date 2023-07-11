@@ -7,8 +7,9 @@ import { nanoid } from "nanoid";
 import { MessagesContainer } from "components/MessagesContainer/MessagesContainer";
 import { Logger } from "components/Logger/Logger";
 import { useRef } from "react";
-import { Connections } from "components/Connections/Connections";
+import { Connections } from "common";
 import { BootloaderContainer } from "components/BootloaderContainer/BootloaderContainer";
+import { Island } from "components/Island/Island";
 
 export const MessagesColumn = () => {
     const messagesTabItems = useRef([
@@ -26,7 +27,9 @@ export const MessagesColumn = () => {
             <SplitLayout
                 components={[
                     <TabLayout items={messagesTabItems.current}></TabLayout>,
-                    <Connections />,
+                    <Island>
+                        <Connections />
+                    </Island>,
                 ]}
                 orientation={Orientation.VERTICAL}
             ></SplitLayout>

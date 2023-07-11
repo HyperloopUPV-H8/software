@@ -4,12 +4,12 @@ import {
     createWsHandler,
     useConfig,
     useFetchBack,
+    Loader,
 } from "common";
 import { HomePage } from "pages/HomePage/HomePage";
 import { useDispatch } from "react-redux";
 import { initMeasurements } from "slices/measurementsSlice";
 import { initPodData } from "slices/podDataSlice";
-import { Loader } from "common";
 import { SplashScreen } from "components/SplashScreen/SplashScreen";
 import { setWebSocketConnection } from "slices/connectionsSlice";
 

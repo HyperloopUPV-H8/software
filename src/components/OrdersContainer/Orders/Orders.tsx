@@ -1,15 +1,15 @@
 import styles from "./Orders.module.scss";
-import { Button, VehicleOrders } from "common";
+import { BoardOrders, Button, VehicleOrders } from "common";
 import { OrderContext } from "./OrderContext";
 import { useSendOrder } from "../useSendOrder";
 import { BoardOrdersView } from "./BoardOrders/BoardOrders";
 import { useState } from "react";
 
 type Props = {
-    orders: VehicleOrders;
+    boards: BoardOrders[];
 };
 
-export const Orders = ({ orders }: Props) => {
+export const Orders = ({ boards }: Props) => {
     const sendOrder = useSendOrder();
     const [alwaysShowStateOrders, setAlwaysShowStateOrders] = useState(false);
 
@@ -26,7 +26,7 @@ export const Orders = ({ orders }: Props) => {
                     />
                 </div>
                 <div className={styles.boardOrderList}>
-                    {orders.boards.map((board) => {
+                    {boards.map((board) => {
                         return (
                             (board.orders.length > 0 ||
                                 board.stateOrders.length > 0) && (
