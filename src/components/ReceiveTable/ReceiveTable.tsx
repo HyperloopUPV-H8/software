@@ -1,8 +1,8 @@
 import styles from "./ReceiveTable.module.scss";
 import { BoardView } from "./BoardView/BoardView";
 import { Header } from "./Header/Header";
-import { Board } from "common";
 import { TableUpdater } from "./TableUpdater";
+import { Board } from "common";
 
 type Props = {
     boards: Board[];

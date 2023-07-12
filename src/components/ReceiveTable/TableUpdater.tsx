@@ -46,18 +46,22 @@ export const TableUpdater = ({ children }: Props) => {
             if (packet) {
                 element.count.nodeValue = packet.count.toFixed(0);
                 element.cycleTime.nodeValue = packet.cycleTime.toFixed(0);
+            } else {
+                console.warn(`packet ${id} not found`);
             }
         }
 
         for (const item of measurementElements.current) {
             const measurement = getMeasurement(state.measurements, item.id);
             if (!measurement) {
+                console.warn(`measurement ${item.id} not found`);
                 return;
             }
             const element = measurementElements.current.find(
                 (elem) => elem.id == item.id
             );
             if (!element) {
+                console.warn(`element of measurement ${item.id} not found`);
                 return;
             }
             element.value.nodeValue = isNumericMeasurement(measurement)
