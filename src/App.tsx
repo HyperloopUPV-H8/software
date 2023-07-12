@@ -9,21 +9,26 @@ import { ReactComponent as Cameras } from "assets/svg/cameras.svg";
 import {
     Loader,
     WsHandlerProvider,
-    config,
     createWsHandler,
-    fetchBack,
+    useConfig,
+    useFetchBack,
 } from "common";
 import { useDispatch } from "react-redux";
 import { initPodData } from "slices/podDataSlice";
 import { initMeasurements } from "slices/measurementsSlice";
 import { setWebSocketConnection } from "slices/connectionsSlice";
 
-const WS_URL = import.meta.env.PROD
-    ? `${config.prodServer.ip}:${config.prodServer.port}/${config.paths.websocket}`
-    : `${config.devServer.ip}:${config.devServer.port}/${config.paths.websocket}`;
-
 export const App = () => {
     const dispatch = useDispatch();
+    const config = useConfig();
+    const podDataDescriptionPromise = useFetchBack(
+        import.meta.env.PROD,
+        config.paths.podDataDescription
+    );
+
+    const WS_URL = import.meta.env.PROD
+        ? `${config.prodServer.ip}:${config.prodServer.port}/${config.paths.websocket}`
+        : `${config.devServer.ip}:${config.devServer.port}/${config.paths.websocket}`;
     return (
         <div className={styles.appWrapper}>
             <Loader
@@ -33,10 +38,7 @@ export const App = () => {
                         () => dispatch(setWebSocketConnection(true)),
                         () => dispatch(setWebSocketConnection(false))
                     ),
-                    fetchBack(
-                        import.meta.env.PROD,
-                        config.paths.podDataDescription
-                    ).then((adapter) => {
+                    podDataDescriptionPromise.then((adapter) => {
                         dispatch(initPodData(adapter));
                         dispatch(initMeasurements(adapter));
                     }),

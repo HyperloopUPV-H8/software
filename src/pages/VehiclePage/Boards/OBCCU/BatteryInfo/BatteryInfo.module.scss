@@ -1,0 +1,17 @@
+.batteryInfo {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 1rem;
+
+    padding: 1rem;
+    background-color: var(--primary-95);
+    border-radius: var(--border-radius);
+}
+
+.tags {
+    width: fit-content;
+
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 1rem;
+}

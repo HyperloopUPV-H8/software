@@ -1,0 +1,14 @@
+.obccu {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    background-color: white;
+    --border-radius: 1rem;
+    overflow-y: auto;
+}
+
+.batteries {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 1.5rem;
+}

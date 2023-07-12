@@ -1,6 +1,5 @@
-import { VehicleOrders, fetchBack, useWsHandler } from "common";
+import { VehicleOrders, useConfig, useFetchBack, useWsHandler } from "common";
 import { useEffect } from "react";
-import { config } from "common";
 import { useDispatch } from "react-redux";
 import { setOrders, updateStateOrders } from "slices/ordersSlice";
 import { nanoid } from "nanoid";
@@ -10,11 +9,16 @@ import { nanoid } from "nanoid";
 export function useOrders() {
     const dispatch = useDispatch();
     const handler = useWsHandler();
+    const config = useConfig();
+    const orderDescriptionPromise = useFetchBack(
+        import.meta.env.PROD,
+        config.paths.orderDescription
+    );
 
     useEffect(() => {
         const controller = new AbortController();
         const id = nanoid();
-        fetchBack(import.meta.env.PROD, config.paths.orderDescription)
+        orderDescriptionPromise
             .then((descriptions: VehicleOrders) => {
                 dispatch(setOrders(descriptions));
                 handler.subscribe("order/stateOrders", {

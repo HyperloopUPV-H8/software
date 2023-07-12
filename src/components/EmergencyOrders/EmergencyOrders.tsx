@@ -2,15 +2,25 @@ import styles from "./EmergencyOrders.module.scss";
 import { EmergencyButton } from "./EmergencyButton/EmergencyButton";
 import { ReactComponent as StopIcon } from "assets/svg/stop_icon.svg";
 import { ReactComponent as RestartIcon } from "assets/svg/restart_icon.svg";
-import { useSendOrder } from "hooks/useSendOrder";
+import { useListenKey } from "common";
 
-const haltVehicleOrder = { id: 1, fields: {} };
-const haltTubeOrder = { id: 2, fields: {} };
-const restartVehicleOrder = { id: 3, fields: {} };
-const restartTubeOrder = { id: 4, fields: {} };
+type Props = {
+    stopVehicle: () => void;
+    restartVehicle: () => void;
+    stopTube: () => void;
+    restartTube: () => void;
+};
 
-export const EmergencyOrders = () => {
-    const sendOrder = useSendOrder();
+export const EmergencyOrders = ({
+    stopVehicle,
+    restartVehicle,
+    stopTube,
+    restartTube,
+}: Props) => {
+    useListenKey("v", stopVehicle, true);
+    useListenKey("V", stopVehicle, true);
+    useListenKey("t", stopTube, true);
+    useListenKey("T", stopTube, true);
 
     const StyledStopIcon = <StopIcon className={`${styles.icon}`} />;
     const StyledRestartIcon = (
@@ -25,16 +35,14 @@ export const EmergencyOrders = () => {
                 label={"VEHICLE"}
                 icon={StyledStopIcon}
                 className={styles.stopBtn}
-                onClick={() => {
-                    sendOrder(haltVehicleOrder);
-                }}
+                onClick={stopVehicle}
             />
             <EmergencyButton
                 label={"VEHICLE"}
                 icon={StyledRestartIcon}
                 className={styles.restartBtn}
                 onClick={() => {
-                    sendOrder(restartVehicleOrder);
+                    restartVehicle;
                 }}
             />
             <EmergencyButton
@@ -42,7 +50,7 @@ export const EmergencyOrders = () => {
                 icon={StyledStopIcon}
                 className={styles.stopBtn}
                 onClick={() => {
-                    sendOrder(haltTubeOrder);
+                    stopTube;
                 }}
             />
             <EmergencyButton
@@ -50,7 +58,7 @@ export const EmergencyOrders = () => {
                 icon={StyledRestartIcon}
                 className={styles.restartBtn}
                 onClick={() => {
-                    sendOrder(restartTubeOrder);
+                    restartTube;
                 }}
             />
         </div>

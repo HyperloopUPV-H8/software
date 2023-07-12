@@ -13,7 +13,7 @@ import "./index.css";
 import { vehicleRoute } from "pages/VehiclePage/vehicleRoute";
 import { camerasRoute } from "pages/CamerasPage/camerasRoute";
 import { tubeRoute } from "pages/TubePage/tubeRoute";
-import { GlobalTicker } from "common";
+import { ConfigProvider, GlobalTicker } from "common";
 
 const router = createBrowserRouter([
     {
@@ -31,9 +31,14 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
         <Provider store={store}>
-            <GlobalTicker fps={60}>
-                <RouterProvider router={router}></RouterProvider>
-            </GlobalTicker>
+            <ConfigProvider
+                devIp="127.0.0.1"
+                prodIp="127.0.0.1"
+            >
+                <GlobalTicker fps={60}>
+                    <RouterProvider router={router}></RouterProvider>
+                </GlobalTicker>
+            </ConfigProvider>
         </Provider>
     </React.StrictMode>
 );

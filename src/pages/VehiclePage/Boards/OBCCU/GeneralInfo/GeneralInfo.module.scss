@@ -1,0 +1,35 @@
+.generalInfo {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.tags {
+    display: grid;
+    grid-template:
+        "tag1 tag2 tag3" auto
+        "temp temp temp" auto / 1fr 1fr 1fr;
+    gap: 1rem;
+}
+
+.tags > :nth-child(1) {
+    grid-area: tag1;
+}
+.tags > :nth-child(2) {
+    grid-area: tag2;
+}
+.tags > :nth-child(3) {
+    grid-area: tag3;
+}
+.tags > :nth-child(4) {
+    grid-area: temp;
+}
+
+.temps {
+    display: flex;
+    gap: 0.5rem;
+
+    background-color: var(--primary-95);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+}

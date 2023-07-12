@@ -5,51 +5,47 @@ import { MotorInfo } from "./MotorInfo/MotorInfo";
 import { PPUInfo } from "./PPUInfo/PPUInfo";
 import { PcuMeasurements } from "common";
 
-type Props = {
-    data: PcuMeasurements;
-};
-
-export const PCU = ({ data }: Props) => {
+export const PCU = (props: PcuMeasurements) => {
     return (
         <Window title="PCU">
             <section className={styles.pcuSectionWrapper}>
                 <VectorGauge
-                    x={data.vel_x}
-                    y={data.vel_y}
-                    z={data.vel_z}
+                    x={props.vel_x}
+                    y={props.vel_y}
+                    z={props.vel_z}
                 />
                 <VectorGauge
-                    x={data.acc_x}
-                    y={data.acc_y}
-                    z={data.acc_z}
+                    x={props.acc_x}
+                    y={props.acc_y}
+                    z={props.acc_z}
                 />
                 <MotorInfo
                     title="Motor 1"
-                    motorCurrentU={data.motor_1_current_u}
-                    motorCurrentV={data.motor_1_current_v}
-                    motorCurrentW={data.motor_1_current_w}
-                    motorTemperature={data.motor_1_temp}
+                    motorCurrentU={props.motor_1_current_u}
+                    motorCurrentV={props.motor_1_current_v}
+                    motorCurrentW={props.motor_1_current_w}
+                    motorTemperature={props.motor_1_temp}
                 />
                 <MotorInfo
                     title="Motor 2"
-                    motorCurrentU={data.motor_2_current_u}
-                    motorCurrentV={data.motor_2_current_v}
-                    motorCurrentW={data.motor_2_current_w}
-                    motorTemperature={data.motor_2_temp}
+                    motorCurrentU={props.motor_2_current_u}
+                    motorCurrentV={props.motor_2_current_v}
+                    motorCurrentW={props.motor_2_current_w}
+                    motorTemperature={props.motor_2_temp}
                 />
                 <PPUInfo
-                    batteryCurrent={data.battery_1_current}
-                    batteryVoltage={data.battery_1_voltage}
-                    temperature1={data.temp_1}
-                    temperature2={data.temp_2}
-                    temperature3={data.temp_3}
+                    batteryCurrent={props.battery_1_current}
+                    batteryVoltage={props.battery_1_voltage}
+                    temperature1={props.temp_1}
+                    temperature2={props.temp_2}
+                    temperature3={props.temp_3}
                 />
                 <PPUInfo
-                    batteryCurrent={data.battery_2_current}
-                    batteryVoltage={data.battery_2_voltage}
-                    temperature1={data.temp_1}
-                    temperature2={data.temp_2}
-                    temperature3={data.temp_3}
+                    batteryCurrent={props.battery_2_current}
+                    batteryVoltage={props.battery_2_voltage}
+                    temperature1={props.temp_1}
+                    temperature2={props.temp_2}
+                    temperature3={props.temp_3}
                 />
             </section>
         </Window>

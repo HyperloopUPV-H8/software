@@ -1,4 +1,4 @@
-import { FirstPage } from "./FirstPage/FirstPage";
+import { BoardsPage } from "./BoardsPage/BoardsPage";
 import { ControlPage } from "./ControlPage/ControlPage";
 import { VehiclePage } from "./VehiclePage";
 import { loadPodData } from "./loadPodData";
@@ -10,7 +10,7 @@ export const vehicleRoute = {
     loader: loadPodData,
     children: [
         { path: "", element: <Navigate to={"first"} /> },
-        { path: "first", element: <FirstPage /> },
+        { path: "first", element: <BoardsPage /> },
         { path: "second", element: <ControlPage /> },
     ],
 };
