@@ -10,7 +10,8 @@ $key-colors: (
     neutral: hsl(0, 0%, 40%),
 );
 
-$lightnesses: 0, 10, 15, 20, 30, 40, 50, 55, 60, 65, 70, 80, 85, 90, 95, 99, 100;
+$lightnesses: 0, 10, 15, 20, 30, 40, 50, 55, 60, 65, 70, 80, 85, 90, 95, 96, 99,
+    100;
 
 @mixin colors {
     @each $name, $color in $key-colors {

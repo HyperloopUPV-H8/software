@@ -15,19 +15,25 @@ export function updatePodData(
     for (const update of Object.values(packetUpdates)) {
         const packet = getPacket(podData, update.id);
         if (packet) {
-            const boardIndex = podData.packetToBoard[packet.id];
+            const boardIndex = podData.packetToBoard[update.id];
 
-            if (!boardIndex) {
+            if (boardIndex === undefined) {
+                console.warn(
+                    `packet with id ${update.id} not found in packetToBoard`
+                );
                 continue;
             }
 
             const board = podData.boards[boardIndex];
 
             if (!board) {
+                console.warn(`board with index ${boardIndex} not found`);
                 continue;
             }
 
             updatePacket(board.name, packet, update);
+        } else {
+            console.warn(`packet with id ${update.id} not found`);
         }
     }
 }

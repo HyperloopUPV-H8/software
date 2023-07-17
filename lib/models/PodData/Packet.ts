@@ -35,6 +35,7 @@ function updateMeasurements(
         const measurement = measurements.find((item) => item.id == id);
 
         if (!measurement) {
+            console.warn(`measurement with id ${id} not found`);
             continue;
         }
 

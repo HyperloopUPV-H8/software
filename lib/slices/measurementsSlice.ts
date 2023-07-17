@@ -99,3 +99,20 @@ export function getMeasurement(
 
     return meas;
 }
+
+export function getMeasurementFallback(
+    measurements: Measurements,
+    id: string
+): Measurement {
+    return (
+        getMeasurement(measurements, id) ?? {
+            id: "Default",
+            name: "Default",
+            safeRange: [null, null],
+            warningRange: [null, null],
+            type: "uint8",
+            units: "A",
+            value: { average: 0, last: 0 },
+        }
+    );
+}

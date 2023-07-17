@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { clampAndNormalize } from "../../../math";
 import { Arc } from "./Arc/Arc";
 import { BackgroundArc } from "./BackgroundArc/BackgroundArc";
@@ -22,10 +22,20 @@ export const Gauge = ({
     max,
 }: Props) => {
     const radius = 500;
-    const percentage = useMemo(
-        () => clampAndNormalize(value, min, max) * 100,
-        [value, min, max]
-    );
+    const percentage = useMemo(() => {
+        if (min >= max) {
+            return 0;
+        } else {
+            return clampAndNormalize(value, min, max) * 100;
+        }
+    }, [value, min, max]);
+
+    useEffect(() => {
+        if (min >= max) {
+            console.warn(`min (${min}) should be lower than max (${max})`);
+        }
+    }, [min, max]);
+
     return (
         <svg
             className={className}

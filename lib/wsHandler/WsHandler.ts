@@ -12,27 +12,24 @@ type Suscription<T> = {
 };
 
 export class WsHandler {
-    private url: string;
-    private onOpen?: () => void;
-    private onClose?: () => void;
-
     private ws!: WebSocket;
-    private topicToSuscriptions: Map<string, Suscription<any>[]>;
+    private topicToSuscriptions: Map<string, Suscription<any>[]> = new Map();
 
     constructor(
         url: string,
-        topicToSuscriptions?: Map<string, Suscription<any>[]>,
+        reconnect: boolean,
         onOpen?: () => void,
         onClose?: () => void
     ) {
-        this.url = url;
-        this.onOpen = onOpen;
-        this.onClose = onClose;
-        this.topicToSuscriptions = topicToSuscriptions ?? new Map();
-        this.setupWs(url, onOpen, onClose);
+        this.setupWs(url, reconnect, onOpen, onClose);
     }
 
-    private setupWs(url: string, onOpen?: () => void, onClose?: () => void) {
+    private setupWs(
+        url: string,
+        reconnect: boolean,
+        onOpen?: () => void,
+        onClose?: () => void
+    ) {
         this.ws = new WebSocket(`ws://${url}`);
 
         this.ws.onopen = () => {
@@ -58,6 +55,11 @@ export class WsHandler {
 
         this.ws.onclose = () => {
             onClose?.();
+            if (reconnect) {
+                setTimeout(() => {
+                    this.setupWs(url, reconnect, onOpen, onClose);
+                }, 500);
+            }
         };
     }
 
@@ -136,21 +138,21 @@ export class WsHandler {
         }
     }
 
-    public getUrl() {
-        return this.url;
-    }
+    // public getUrl() {
+    //     return this.url;
+    // }
 
-    public getTopicToSuscriptions() {
-        return this.topicToSuscriptions;
-    }
+    // public getTopicToSuscriptions() {
+    //     return this.topicToSuscriptions;
+    // }
 
-    public getOnOpen() {
-        return this.onOpen;
-    }
+    // public getOnOpen() {
+    //     return this.onOpen;
+    // }
 
-    public getOnClose() {
-        return this.onClose;
-    }
+    // public getOnClose() {
+    //     return this.onClose;
+    // }
 }
 
 function getSubscriptionMessage(topic: string, id: string) {

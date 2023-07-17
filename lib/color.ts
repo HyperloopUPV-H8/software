@@ -64,3 +64,9 @@ export function lightenHSL(color: string, lOffset: number): string {
     const newLightness = Math.min(parseInt(l) + lOffset, 100);
     return `hsl(${h}, ${s}%, ${newLightness}%)`;
 }
+
+// const HslExp = /^hsl\((\d{1,3}),(\d{1,3})%,(\d{1,3})%\)$/;
+// const RgbExp = /^rgb\((\d{1,3}),(\d{1,3}),(\d{1,3})\)$/;
+// const HexExp = /^#([\da-fA-F]{2})([\da-fA-F]{2})([\da-fA-F]{2})$/;
+
+// export function lighten(color: string, offset: number): string {}

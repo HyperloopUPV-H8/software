@@ -1,17 +1,19 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
 export function useListenKey(
     key: string,
-    callback: () => unknown,
+    callback: () => void,
     listen: boolean
 ) {
-    const listener = (ev: KeyboardEvent) => {
-        console.log(ev.key);
-        if (ev.key == key) {
-            ev.preventDefault();
-            callback();
-        }
-    };
+    const listener = useCallback(
+        (ev: KeyboardEvent) => {
+            if (ev.key == key) {
+                ev.preventDefault();
+                callback();
+            }
+        },
+        [key, callback, listen]
+    );
 
     useEffect(() => {
         if (listen) {
