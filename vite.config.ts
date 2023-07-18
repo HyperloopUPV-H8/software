@@ -7,6 +7,7 @@ import svgr from "vite-plugin-svgr";
 export default defineConfig({
     plugins: [react(), tsconfigPaths(), svgr()],
     build: {
-        outDir: "../dist",
+        outDir: "./control_front",
+        minify: false,
     },
 });

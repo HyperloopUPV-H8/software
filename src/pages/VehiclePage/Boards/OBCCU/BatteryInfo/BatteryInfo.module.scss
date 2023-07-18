@@ -8,6 +8,23 @@
     border-radius: var(--border-radius);
 }
 
+.icon {
+    align-self: center;
+    margin: 0 1rem;
+    height: 8rem;
+    object-fit: contain;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.title {
+    font-weight: bold;
+}
+
 .tags {
     width: fit-content;
 

@@ -3,26 +3,13 @@ import styles from "./ControlPage.module.scss";
 import { Connections, Logger, MessagesContainer } from "common";
 import { Window } from "components/Window/Window";
 import { EmergencyOrders } from "components/EmergencyOrders/EmergencyOrders";
-
-const RestartTubeOrder: Order = {
-    id: 203,
-    fields: {},
-};
-
-const RestartVehicleOrder: Order = {
-    id: 203,
-    fields: {},
-};
-
-const StopTubeOrder: Order = {
-    id: 203,
-    fields: {},
-};
-
-const StopVehicleOrder: Order = {
-    id: 203,
-    fields: {},
-};
+import {
+    BrakeOrder,
+    OpenContactorsOrder,
+    RestartOrder,
+    StopOrder,
+    hardcodedOrders,
+} from "./hardcodedOrders";
 
 export const ControlPage = () => {
     const sendOrder = useSendOrder();
@@ -33,7 +20,7 @@ export const ControlPage = () => {
                 title="Orders"
                 height="fill"
             >
-                <Orders boards={["VCU", "BLCU", "LCU_MASTER"]} />
+                <Orders orders={hardcodedOrders} />
             </Window>
             <Window
                 title="Messages"
@@ -51,10 +38,22 @@ export const ControlPage = () => {
                 <Logger />
             </Window>
             <EmergencyOrders
-                restartTube={() => sendOrder(RestartTubeOrder)}
-                restartVehicle={() => sendOrder(RestartVehicleOrder)}
-                stopTube={() => sendOrder(StopTubeOrder)}
-                stopVehicle={() => sendOrder(StopVehicleOrder)}
+                brake={() => {
+                    console.log("brake");
+                    sendOrder(BrakeOrder);
+                }}
+                openContactors={() => {
+                    console.log("open contactors");
+                    sendOrder(OpenContactorsOrder);
+                }}
+                reset={() => {
+                    console.log("reset");
+                    sendOrder(RestartOrder);
+                }}
+                stop={() => {
+                    console.log("stop");
+                    sendOrder(StopOrder);
+                }}
             />
         </div>
     );

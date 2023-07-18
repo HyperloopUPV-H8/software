@@ -35,6 +35,7 @@ export const App = () => {
                 promises={[
                     createWsHandler(
                         WS_URL,
+                        true,
                         () => dispatch(setWebSocketConnection(true)),
                         () => dispatch(setWebSocketConnection(false))
                     ),
@@ -51,7 +52,7 @@ export const App = () => {
                         <Sidebar
                             items={[
                                 { path: "/vehicle", icon: <Wheel /> },
-                                { path: "/tube", icon: <Tube /> },
+                                // { path: "/tube", icon: <Tube /> },
                                 { path: "/cameras", icon: <Cameras /> },
                             ]}
                         />

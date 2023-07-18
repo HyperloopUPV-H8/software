@@ -5,6 +5,8 @@ type Props = {
 
 export const BoolBar = ({ isOn }: Props) => {
     return (
-        <div className={`barWrapper ${isOn ? styles.on : styles.off}`}></div>
+        <div
+            className={`${styles.boolBar} ${isOn ? styles.on : styles.off}`}
+        ></div>
     );
 };

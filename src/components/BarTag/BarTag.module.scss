@@ -1,6 +1,7 @@
 .barTagWrapper {
     display: flex;
     flex-direction: row;
+    align-items: stretch;
     width: 100%;
     gap: 0.7rem;
 }

@@ -5,60 +5,57 @@ import {
     NumericMeasurement,
 } from "common";
 import styles from "./GeneralInfo.module.scss";
-import { ValueData } from "components/ValueData/ValueData";
 import { BarTag } from "components/BarTag/BarTag";
+import { ValueDataTag } from "components/ValueDataTag/ValueDataTag";
 
 type Props = {
-    chargePercentage: NumericMeasurement;
-    generalState: EnumMeasurement;
-    chargeCurrent: NumericMeasurement;
-    imd: BooleanMeasurement;
-    capacitorTemperature: NumericMeasurement;
-    inverterTemperature: NumericMeasurement;
-    rectifierTemperature: NumericMeasurement;
-    transformerTemperature: NumericMeasurement;
+    maximumCell1: NumericMeasurement;
+    maximumCell2: NumericMeasurement;
+    maximumCell3: NumericMeasurement;
+
+    minimumCell1: NumericMeasurement;
+    minimumCell2: NumericMeasurement;
+    minimumCell3: NumericMeasurement;
+
+    totalVoltageHigh: NumericMeasurement;
+    drift: NumericMeasurement;
 };
 
 export const GeneralInfo = (props: Props) => {
     return (
         <div className={styles.generalInfo}>
-            <GaugeTag
-                max={props.chargePercentage.safeRange[0] ?? 100}
-                min={props.chargePercentage.safeRange[0] ?? 0}
-                name={props.chargePercentage.name}
-                strokeWidth={150}
-                units={props.chargePercentage.units}
-                value={props.chargePercentage.value.average}
+            <BarTag
+                barType="range"
+                measurement={props.maximumCell1}
             />
-            <div className={styles.tags}>
-                <ValueData measurement={props.generalState} />
-                <BarTag
-                    barType="range"
-                    measurement={props.chargeCurrent}
-                />
-                <BarTag
-                    barType="bool"
-                    measurement={props.imd}
-                />
-                <div className={styles.temps}>
-                    <BarTag
-                        barType="temp"
-                        measurement={props.capacitorTemperature}
-                    />
-                    <BarTag
-                        barType="temp"
-                        measurement={props.inverterTemperature}
-                    />
-                    <BarTag
-                        barType="temp"
-                        measurement={props.rectifierTemperature}
-                    />
-                    <BarTag
-                        barType="temp"
-                        measurement={props.transformerTemperature}
-                    />
-                </div>
-            </div>
+            <BarTag
+                barType="range"
+                measurement={props.maximumCell2}
+            />
+            <BarTag
+                barType="range"
+                measurement={props.maximumCell3}
+            />
+            <BarTag
+                barType="range"
+                measurement={props.minimumCell1}
+            />
+            <BarTag
+                barType="range"
+                measurement={props.minimumCell2}
+            />
+            <BarTag
+                barType="range"
+                measurement={props.minimumCell3}
+            />
+            <BarTag
+                barType="range"
+                measurement={props.totalVoltageHigh}
+            />
+            <BarTag
+                barType="range"
+                measurement={props.drift}
+            />
         </div>
     );
 };

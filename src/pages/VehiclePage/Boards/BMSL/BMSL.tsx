@@ -1,27 +1,23 @@
 import { ValueData } from "components/ValueData/ValueData";
 import styles from "./BMSL.module.scss";
-import { BooleanMeasurement, NumericMeasurement } from "common";
 import { BarTag } from "components/BarTag/BarTag";
-import { BmslMeasurements } from "./selector";
 import { Window } from "components/Window/Window";
+import { BmslMeasurements } from "common";
+import { ValueDataTag } from "components/ValueDataTag/ValueDataTag";
 
 export const BMSL = (props: BmslMeasurements) => {
     return (
         <Window title="BMSL">
             <div className={styles.bmsl}>
-                <ValueData measurement={props.stateOfCharge} />
-                <ValueData measurement={props.balancing} />
+                <ValueDataTag measurement={props.low_SOC1} />
                 <BarTag
-                    barType="temp"
-                    measurement={props.temp1}
+                    barType="range"
+                    measurement={props.low_battery_temperature_1}
                 />
                 <BarTag
-                    barType="temp"
-                    measurement={props.temp2}
+                    barType="range"
+                    measurement={props.total_voltage_low}
                 />
-                <ValueData measurement={props.totalVoltage} />
-                <ValueData measurement={props.minimumVoltage} />
-                <ValueData measurement={props.maximumVoltage} />
             </div>
         </Window>
     );

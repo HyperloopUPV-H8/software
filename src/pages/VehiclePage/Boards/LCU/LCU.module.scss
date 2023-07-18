@@ -12,6 +12,12 @@
     gap: 1rem;
 }
 
+.positions {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 1rem;
+}
+
 .airgaps {
     grid-area: airgaps;
     display: grid;

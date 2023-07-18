@@ -1,6 +1,6 @@
+import styles from "./CoilsInfo.module.scss";
 import { CoilData } from "./CoilInfo/CoilData";
 import { CoilInfo } from "./CoilInfo/CoilInfo";
-import styles from "./CoilsInfo.module.scss";
 
 type Props = {
     coilsData: CoilData[];

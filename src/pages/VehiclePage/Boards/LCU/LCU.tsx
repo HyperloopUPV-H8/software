@@ -4,6 +4,7 @@ import { Rotations } from "./Rotations/Rotations";
 import { LcuMeasurements } from "common";
 import { Airgaps } from "./Airgaps/Airgaps";
 import { CoilsInfo } from "./CoilsInfo/CoilsInfo";
+import { BarTag } from "components/BarTag/BarTag";
 
 export const LCU = (props: LcuMeasurements) => {
     return (
@@ -15,6 +16,16 @@ export const LCU = (props: LcuMeasurements) => {
                     rot2={props.rot_y}
                     rot3={props.rot_z}
                 />
+                <div className={styles.positions}>
+                    <BarTag
+                        barType="range"
+                        measurement={props.rot_y}
+                    />
+                    <BarTag
+                        barType="range"
+                        measurement={props.rot_z}
+                    />
+                </div>
                 <Airgaps
                     className={styles.airgaps}
                     airgap_1={props.airgap_1}
@@ -33,42 +44,42 @@ export const LCU = (props: LcuMeasurements) => {
                         {
                             current: props.current_coil_1,
                             currentRef: props.reference_current_1,
-                            temperature: props.temperature_coil_1,
+                            temperature: props.temperature_ems_1,
                         },
                         {
                             current: props.current_coil_2,
                             currentRef: props.reference_current_2,
-                            temperature: props.temperature_coil_2,
+                            temperature: props.temperature_ems_2,
                         },
                         {
                             current: props.current_coil_3,
                             currentRef: props.reference_current_3,
-                            temperature: props.temperature_coil_3,
+                            temperature: props.temperature_ems_3,
                         },
                         {
                             current: props.current_coil_4,
                             currentRef: props.reference_current_4,
-                            temperature: props.temperature_coil_4,
+                            temperature: props.temperature_ems_4,
                         },
                         {
                             current: props.slave_current_coil_5,
                             currentRef: props.slave_reference_current_5,
-                            temperature: props.slave_temperature_coil_5,
+                            temperature: props.temperature_hems_1,
                         },
                         {
                             current: props.slave_current_coil_6,
                             currentRef: props.slave_reference_current_6,
-                            temperature: props.slave_temperature_coil_6,
+                            temperature: props.temperature_hems_2,
                         },
                         {
                             current: props.slave_current_coil_7,
                             currentRef: props.slave_reference_current_7,
-                            temperature: props.slave_temperature_coil_7,
+                            temperature: props.temperature_hems_3,
                         },
                         {
                             current: props.slave_current_coil_8,
                             currentRef: props.slave_reference_current_8,
-                            temperature: props.slave_temperature_coil_8,
+                            temperature: props.temperature_hems_4,
                         },
                     ]}
                 />

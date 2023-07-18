@@ -1,24 +1,32 @@
-import { NumericMeasurement } from "common";
+import { LinesChart, NumericMeasurement } from "common";
+import { store } from "store";
 
 type Props = {
     current: NumericMeasurement;
     currentRef: NumericMeasurement;
 };
 
-export const CurrentChart = ({}: Props) => {
+export const CurrentChart = ({ current }: Props) => {
     return (
-        <div>Hello Chart</div>
-        // <LinesChart
-
-        //     getMeasurement={(id: string) =>
-        //         store.getState().measurements[id] as NumericMeasurement
-        //     }
-        //     width="8rem"
-        //     height={"6rem"}
-        //     divisions={3}
-        //     grid={true}
-        //     items={[{ measurement: current, color: "red" }]}
-        //     length={50}
-        // ></LinesChart>
+        <LinesChart
+            width="8rem"
+            height={"6rem"}
+            divisions={3}
+            items={[
+                {
+                    id: current.id,
+                    name: current.name,
+                    range: current.safeRange,
+                    color: "red",
+                    getUpdate: () =>
+                        (
+                            store.getState().measurements.measurements[
+                                current.id
+                            ] as NumericMeasurement
+                        ).value.last,
+                },
+            ]}
+            length={50}
+        ></LinesChart>
     );
 };

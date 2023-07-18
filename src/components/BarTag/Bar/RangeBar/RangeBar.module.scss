@@ -7,31 +7,28 @@
 }
 
 .rangeBarWrapper {
+    width: 0.5rem;
+    height: 100%;
+    border-radius: 10rem;
     border: 2px solid;
+
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
     position: relative;
     overflow: hidden;
-    .content {
-        width: 100%;
-        background-color: white;
-    }
 }
 
-.range {
-    border-color: colors.getColor("stable", 60);
-    background-color: colors.getColor("stable", 60);
+.rangeBarWrapper,
+.bulb {
+    filter: contrast(1.4);
 }
 
 .content {
+    width: 100%;
+    background-color: white;
     transition: height 0.3s linear;
-}
-
-.temp {
-    border-color: colors.getColor("fault", 60);
-    background-color: colors.getColor("fault", 60);
 }
 
 .bulb {
@@ -41,9 +38,4 @@
     aspect-ratio: 1/1;
     border-radius: 50%;
     z-index: 1;
-    background-color: colors.getColor("fault", 60);
-}
-
-.wrapper {
-    height: 100%;
 }

@@ -1,6 +1,7 @@
 import "./Bar.scss";
 import { RangeBar } from "./RangeBar/RangeBar";
 import { BoolBar } from "./BoolBar/BoolBar";
+
 export type BarType = "range" | "temp" | "bool";
 
 type Props =
