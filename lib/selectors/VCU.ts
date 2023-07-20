@@ -1,11 +1,13 @@
 import {
     BooleanMeasurement,
+    EnumMeasurement,
     Measurements,
     NumericMeasurement,
     getMeasurementFallback,
 } from "..";
 
 export type VcuMeasurements = {
+    general_state: EnumMeasurement;
     reference_pressure: NumericMeasurement;
     actual_pressure: NumericMeasurement;
     valve_state: BooleanMeasurement;
@@ -19,6 +21,10 @@ export function selectVcuMeasurements(
     measurements: Measurements
 ): VcuMeasurements {
     return {
+        general_state: getMeasurementFallback(
+            measurements,
+            "VCU/general_state"
+        ),
         reference_pressure: getMeasurementFallback(
             measurements,
             "VCU/reference_pressure"
