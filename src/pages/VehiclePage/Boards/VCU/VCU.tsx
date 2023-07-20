@@ -8,6 +8,14 @@ export const VCU = (props: VcuMeasurements) => {
     return (
         <Window title="VCU">
             <div className={styles.vcu}>
+                <ValueDataTag
+                    measurement={{
+                        id: "general_state",
+                        name: "General state",
+                        type: "enum",
+                        value: "Idle",
+                    }}
+                />
                 <ValueDataTag measurement={props.valve_state} />
                 <ValueDataTag measurement={props.reed_state} />
                 <BarTag

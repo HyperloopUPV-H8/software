@@ -6,7 +6,7 @@ import { EmergencyOrders } from "components/EmergencyOrders/EmergencyOrders";
 import {
     BrakeOrder,
     OpenContactorsOrder,
-    RestartOrder,
+    RestartOrders,
     StopOrder,
     hardcodedOrders,
 } from "./hardcodedOrders";
@@ -48,7 +48,9 @@ export const ControlPage = () => {
                 }}
                 reset={() => {
                     console.log("reset");
-                    sendOrder(RestartOrder);
+                    for (const resetOrder of RestartOrders) {
+                        sendOrder(resetOrder);
+                    }
                 }}
                 stop={() => {
                     console.log("stop");
