@@ -46,6 +46,7 @@ export class WsHandler {
 
         this.ws.onmessage = (ev: MessageEvent<string>) => {
             const socketMessage = JSON.parse(ev.data) as WsMessage;
+            console.log(socketMessage)
             const callbacks =
                 this.topicToSuscriptions.get(socketMessage.topic) ?? [];
             for (const callback of callbacks) {
@@ -75,14 +76,7 @@ export class WsHandler {
         topic: T,
         suscription: Suscription<HandlerMessages[T]["response"]>
     ) {
-        const suscriptions = this.topicToSuscriptions.get(topic);
-        if (suscriptions) {
-            suscriptions.push(suscription);
-            this.topicToSuscriptions.set(topic, suscriptions);
-        } else {
-            this.topicToSuscriptions.set(topic, [suscription]);
-        }
-
+        this.addCallback(topic, suscription.id, suscription.cb);
         this.ws.send(getSubscriptionMessage(topic, suscription.id));
     }
 
@@ -90,6 +84,45 @@ export class WsHandler {
         topic: T,
         id: HandlerMessages[T]["id"]
     ) {
+        this.removeCallback(topic, id);
+        this.ws.send(
+            JSON.stringify({ topic, payload: { subscribe: false, id: id } })
+        );
+    }
+
+    public exchange<T extends ExchangeTopic>(
+        topic: T,
+        req: HandlerMessages[T]["request"],
+        id: string,
+        cb: (
+            res: HandlerMessages[T]["response"],
+            send: (req: HandlerMessages[T]["request"]) => void,
+            end: () => void
+        ) => void
+    ) {
+        this.ws.send(JSON.stringify({ topic, payload: req }));
+        const resCallback = (value: any) => {
+            cb(
+                value,
+                (req) => this.ws.send(JSON.stringify({ topic, payload: req })),
+                () => this.removeCallback(topic, id)
+            );
+        };
+
+        this.addCallback(topic, id, resCallback);
+    }
+
+    private addCallback(topic: string, id: string, cb: (v: any) => void) {
+        const suscriptions = this.topicToSuscriptions.get(topic);
+        if (suscriptions) {
+            suscriptions.push({ id, cb });
+            this.topicToSuscriptions.set(topic, suscriptions);
+        } else {
+            this.topicToSuscriptions.set(topic, [{ id, cb }]);
+        }
+    }
+
+    private removeCallback(topic: string, id: string) {
         const callbacks = this.topicToSuscriptions.get(topic);
         if (callbacks) {
             this.topicToSuscriptions.set(
@@ -103,56 +136,7 @@ export class WsHandler {
         } else {
             console.warn(`Topic ${topic} doesn't exist in topicToSuscriptions`);
         }
-
-        this.ws.send(
-            JSON.stringify({ topic, payload: { subscribe: false, id: id } })
-        );
     }
-
-    public exchange<T extends ExchangeTopic>(
-        topic: T,
-        req: HandlerMessages[T]["request"],
-        id: string,
-        cb: (res: HandlerMessages[T]["response"], end: () => void) => void
-    ) {
-        this.ws.send(JSON.stringify({ topic, payload: req }));
-        const resCallback = (value: any) => {
-            cb(value, () => {
-                const callbacks = this.topicToSuscriptions.get(topic);
-                if (callbacks) {
-                    this.topicToSuscriptions.set(
-                        topic,
-                        callbacks.filter((element) => element.id != id)
-                    );
-                }
-            });
-        };
-        const callbacks = this.topicToSuscriptions.get(topic);
-        if (callbacks) {
-            this.topicToSuscriptions.set(topic, [
-                ...callbacks,
-                { id: id, cb: resCallback },
-            ]);
-        } else {
-            this.topicToSuscriptions.set(topic, [{ id: id, cb: resCallback }]);
-        }
-    }
-
-    // public getUrl() {
-    //     return this.url;
-    // }
-
-    // public getTopicToSuscriptions() {
-    //     return this.topicToSuscriptions;
-    // }
-
-    // public getOnOpen() {
-    //     return this.onOpen;
-    // }
-
-    // public getOnClose() {
-    //     return this.onClose;
-    // }
 }
 
 function getSubscriptionMessage(topic: string, id: string) {

@@ -143,18 +143,18 @@ export function selectLcuMeasurements(
             measurements,
             "LCU_MASTER/lcu_master_slave_current_coil_hems_2"
         ),
-    slave_current_coil_6: getMeasurementFallback(
-        measurements,
-        "LCU_MASTER/lcu_master_slave_current_coil_hems_4"
-    ),
-    slave_current_coil_7: getMeasurementFallback(
-        measurements,
-        "LCU_MASTER/lcu_master_slave_current_coil_ems_2"
-    ),
-    slave_current_coil_8: getMeasurementFallback(
-        measurements,
-        "LCU_MASTER/lcu_master_slave_current_coil_ems_4"
-    ),
+        slave_current_coil_6: getMeasurementFallback(
+            measurements,
+            "LCU_MASTER/lcu_master_slave_current_coil_hems_4"
+        ),
+        slave_current_coil_7: getMeasurementFallback(
+            measurements,
+            "LCU_MASTER/lcu_master_slave_current_coil_ems_2"
+        ),
+        slave_current_coil_8: getMeasurementFallback(
+            measurements,
+            "LCU_MASTER/lcu_master_slave_current_coil_ems_4"
+        ),
 
         temperature_hems_1: getMeasurementFallback(
             measurements,
@@ -241,35 +241,35 @@ export function selectLcuMeasurements(
 
         reference_current_1: getMeasurementFallback(
             measurements,
-            "LCU_MASTER/lcu_master_reference_current_1"
+            "LCU_MASTER/lcu_master_reference_current_hems_1"
         ),
         reference_current_2: getMeasurementFallback(
             measurements,
-            "LCU_MASTER/lcu_master_reference_current_2"
+            "LCU_MASTER/lcu_master_reference_current_hems_2"
         ),
         reference_current_3: getMeasurementFallback(
             measurements,
-            "LCU_MASTER/lcu_master_reference_current_3"
+            "LCU_MASTER/lcu_master_reference_current_hems_3"
         ),
         reference_current_4: getMeasurementFallback(
             measurements,
-            "LCU_MASTER/lcu_master_reference_current_4"
+            "LCU_MASTER/lcu_master_reference_current_hems_4"
         ),
         slave_reference_current_5: getMeasurementFallback(
             measurements,
-            "LCU_MASTER/lcu_master_slave_reference_current_5"
+            "LCU_MASTER/lcu_master_reference_current_ems_1"
         ),
         slave_reference_current_6: getMeasurementFallback(
             measurements,
-            "LCU_MASTER/lcu_master_slave_reference_current_6"
+            "LCU_MASTER/lcu_master_reference_current_ems_2"
         ),
         slave_reference_current_7: getMeasurementFallback(
             measurements,
-            "LCU_MASTER/lcu_master_slave_reference_current_7"
+            "LCU_MASTER/lcu_master_reference_current_ems_3"
         ),
         slave_reference_current_8: getMeasurementFallback(
             measurements,
-            "LCU_MASTER/lcu_master_slave_reference_current_8"
+            "LCU_MASTER/lcu_master_reference_current_ems_4"
         ),
 
         rot_x: getMeasurementFallback(

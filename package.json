@@ -1,6 +1,6 @@
 {
     "name": "@hyperloop-upv/common-front",
-    "version": "2.0.15",
+    "version": "2.0.24",
     "type": "module",
     "files": [
         "dist"

@@ -10,7 +10,7 @@ export type BooleanInputData = {
 
 export type EnumInputData = {
     readonly options: string[];
-    readonly value: string;
+    readonly value?: string;
 };
 
 export type ExpandablePairsInputData = {

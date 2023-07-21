@@ -90,6 +90,7 @@ export type ObccuMeasurements = {
     totalVoltage10: NumericMeasurement;
 
     totalVoltageHigh: NumericMeasurement;
+    drift: BooleanMeasurement;
 };
 
 export function selectObccuMeasurements(
@@ -361,6 +362,10 @@ export function selectObccuMeasurements(
         battery_temperature_10: getMeasurementFallback(
             measurements,
             "OBCCU/battery_temperature_10"
+        ),
+        drift: getMeasurementFallback(
+            measurements,
+            "OBCCU/drift"
         ),
     } as ObccuMeasurements;
 }

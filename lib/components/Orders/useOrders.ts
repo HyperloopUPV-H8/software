@@ -5,10 +5,14 @@ import {
     NumericType,
     OrderDescription,
     OrderFieldDescription,
-    isNumberValid,
     orderSlice,
     useSubscribe,
 } from "../..";
+import {
+    doesNumberOverflow,
+    isNumberValid,
+    isWithinRange,
+} from "../../numberValidation";
 
 export function useOrders() {
     const dispatch = useDispatch();
@@ -26,25 +30,6 @@ export function useOrders() {
 export function createFormFromOrder(
     order: OrderDescription
 ): Omit<Form, "isValid"> {
-    if (order.id == 601) {
-        return {
-            id: order.id.toString(),
-            name: order.name,
-            fields: [
-                {
-                    id: "myId",
-                    name: "Travel path",
-                    type: "expandablePairs",
-                    value: [
-                        [null, null],
-                        [null, null],
-                        [null, null],
-                    ],
-                },
-            ],
-        };
-    }
-
     const fields = Object.values(order.fields).map((desc) => {
         return getField(desc);
     });
@@ -91,14 +76,13 @@ function getNumericValidator(
     range: [number | null, number | null]
 ): (v: number | null) => boolean {
     return (v: number | null) => {
-        if (!v) {
+        if (v === null) {
             return false;
         }
 
         let result = true;
-        result &&= isNumberValid(v, type);
-        result &&= range[0] ? range[0] <= v : result;
-        result &&= range[1] ? range[1] >= v : result;
+        result &&= doesNumberOverflow(v, type);
+        result &&= isWithinRange(v, range);
         return result;
     };
 }

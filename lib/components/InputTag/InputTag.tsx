@@ -1,11 +1,11 @@
 import { DetailedHTMLProps, InputHTMLAttributes } from "react";
 import style from "./InputTag.module.scss";
-import { isNumberValid } from "./validation";
+import { isNumberValid } from "../../numberValidation";
 
 type Props = {
     id: string;
     disabled: boolean;
-    onChange: (state: number) => void;
+    onChange: (v: number) => void;
 } & Omit<
     DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
     "onChange" | "disabled"
