@@ -16,7 +16,7 @@ export const OBCCU = (props: ObccuMeasurements) => {
                     minimumCell2={props.minimumCell2}
                     minimumCell3={props.minimumCell3}
                     totalVoltageHigh={props.totalVoltageHigh}
-                    drift={props["2BatteryTemperature1"]}
+                    drift={props.drift}
                 />
                 <div className={styles.batteries}>
                     <BatteryInfo

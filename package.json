@@ -15,7 +15,7 @@
         "@react-three/drei": "^9.74.15",
         "@react-three/fiber": "^8.13.3",
         "@reduxjs/toolkit": "^1.9.5",
-        "common": "npm:@hyperloop-upv/common-front@2.0.15",
+        "common": "file:../common-front",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-icons": "^4.7.1",

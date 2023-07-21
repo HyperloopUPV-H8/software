@@ -18,7 +18,7 @@ type Props = {
     minimumCell3: NumericMeasurement;
 
     totalVoltageHigh: NumericMeasurement;
-    drift: NumericMeasurement;
+    drift: BooleanMeasurement;
 };
 
 export const GeneralInfo = (props: Props) => {
@@ -52,10 +52,7 @@ export const GeneralInfo = (props: Props) => {
                 barType="range"
                 measurement={props.totalVoltageHigh}
             />
-            <BarTag
-                barType="range"
-                measurement={props.drift}
-            />
+            <ValueDataTag measurement={props.drift} />
         </div>
     );
 };

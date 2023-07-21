@@ -1,0 +1,15 @@
+.bootloader {
+    height: 10rem;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    font-family: var(--font-mono);
+    gap: 1rem;
+    font-size: 1.1rem;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    background-color: white;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+}

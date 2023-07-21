@@ -25,7 +25,12 @@ export const PCU = (props: PcuMeasurements) => {
                     motorCurrentU={props.motor_a_current_u}
                     motorCurrentV={props.motor_a_current_v}
                     motorCurrentW={props.motor_a_current_w}
-                    motorTemperature={props.max_motor_a_temperature}
+                />
+                <MotorInfo
+                    title="Motor 2"
+                    motorCurrentU={props.motor_b_current_u}
+                    motorCurrentV={props.motor_b_current_v}
+                    motorCurrentW={props.motor_b_current_w}
                 />
                 <TempTag
                     meas={props.max_motor_a_temperature}

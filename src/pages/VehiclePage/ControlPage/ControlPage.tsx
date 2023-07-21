@@ -1,4 +1,4 @@
-import { Order, Orders, useSendOrder } from "common";
+import { Order, Orders, useOrders, useSendOrder } from "common";
 import styles from "./ControlPage.module.scss";
 import { Connections, Logger, MessagesContainer } from "common";
 import { Window } from "components/Window/Window";
@@ -6,13 +6,15 @@ import { EmergencyOrders } from "components/EmergencyOrders/EmergencyOrders";
 import {
     BrakeOrder,
     OpenContactorsOrder,
-    RestartOrders,
+    ResetVehicleOrder,
     StopOrder,
-    hardcodedOrders,
+    getHardcodedOrders,
 } from "./hardcodedOrders";
+import { BootloaderContainer } from "components/BootloaderContainer/BootloaderContainer";
 
 export const ControlPage = () => {
     const sendOrder = useSendOrder();
+    const boardOrders = useOrders();
 
     return (
         <div className={styles.controlPage}>
@@ -20,14 +22,17 @@ export const ControlPage = () => {
                 title="Orders"
                 height="fill"
             >
-                <Orders orders={hardcodedOrders} />
+                <Orders orders={getHardcodedOrders(boardOrders)} />
             </Window>
-            <Window
-                title="Messages"
-                height="fill"
-            >
-                <MessagesContainer />
-            </Window>
+            <div className={styles.column}>
+                <Window
+                    title="Messages"
+                    height="fill"
+                >
+                    <MessagesContainer />
+                </Window>
+                <BootloaderContainer />
+            </div>
             <Window
                 title="Connections"
                 height="fill"
@@ -48,9 +53,7 @@ export const ControlPage = () => {
                 }}
                 reset={() => {
                     console.log("reset");
-                    for (const resetOrder of RestartOrders) {
-                        sendOrder(resetOrder);
-                    }
+                    sendOrder(ResetVehicleOrder);
                 }}
                 stop={() => {
                     console.log("stop");

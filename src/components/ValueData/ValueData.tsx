@@ -32,9 +32,11 @@ export const ValueData = memo(({ measurement }: Props) => {
             {isNumeric && (
                 <>
                     <span
-                        ref={ref}
+                        // ref={ref}
                         className={styles.value}
-                    ></span>
+                    >
+                        {measurement.value.average.toFixed(3)}
+                    </span>
                     <span className={styles.units}>{measurement.units}</span>
                 </>
             )}

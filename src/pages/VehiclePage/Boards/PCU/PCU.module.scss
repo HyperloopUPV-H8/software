@@ -3,7 +3,7 @@
     display: grid;
     grid-template:
         "velGauge accGauge" auto
-        "motorCurrent motorCurrent" auto
+        "motorCurrent1 motorCurrent2" auto
         "motorTemp boardTemp" auto / auto auto;
     gap: 1.5rem;
     overflow-y: auto;
@@ -15,12 +15,15 @@
         grid-area: accGauge;
     }
     > :nth-child(3) {
-        grid-area: motorCurrent;
+        grid-area: motorCurrent1;
     }
     > :nth-child(4) {
-        grid-area: motorTemp;
+        grid-area: motorCurrent2;
     }
     > :nth-child(5) {
+        grid-area: motorTemp;
+    }
+    > :nth-child(6) {
         grid-area: boardTemp;
     }
 }

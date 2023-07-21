@@ -2,8 +2,10 @@ import { ValueData } from "components/ValueData/ValueData";
 import styles from "./BMSL.module.scss";
 import { BarTag } from "components/BarTag/BarTag";
 import { Window } from "components/Window/Window";
-import { BmslMeasurements } from "common";
+import { BmslMeasurements, NumericMeasurement } from "common";
 import { ValueDataTag } from "components/ValueDataTag/ValueDataTag";
+import { useSelector } from "react-redux";
+import { RootState } from "store";
 
 export const BMSL = (props: BmslMeasurements) => {
     return (
@@ -22,3 +24,21 @@ export const BMSL = (props: BmslMeasurements) => {
         </Window>
     );
 };
+
+function addOffset(
+    meas: NumericMeasurement,
+    offset: number
+): NumericMeasurement {
+    return {
+        id: meas.id,
+        name: meas.name,
+        safeRange: meas.safeRange,
+        warningRange: meas.safeRange,
+        type: meas.type,
+        units: meas.units,
+        value: {
+            average: meas.value.average + offset,
+            last: meas.value.last + offset,
+        },
+    };
+}
