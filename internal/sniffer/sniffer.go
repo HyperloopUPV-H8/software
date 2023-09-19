@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/HyperloopUPV-H8/Backend-H8/common"
-	"github.com/HyperloopUPV-H8/Backend-H8/info"
-	"github.com/HyperloopUPV-H8/Backend-H8/packet"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/info"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/packet"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"

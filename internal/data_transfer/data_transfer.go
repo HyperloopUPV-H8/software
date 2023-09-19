@@ -4,9 +4,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/HyperloopUPV-H8/Backend-H8/common/observable"
-	"github.com/HyperloopUPV-H8/Backend-H8/update_factory/models"
-	wsModels "github.com/HyperloopUPV-H8/Backend-H8/ws_handle/models"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/common/observable"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory/models"
+	wsModels "github.com/HyperloopUPV-H8/h9-backend/internal/ws_handle/models"
 
 	"github.com/rs/zerolog"
 	trace "github.com/rs/zerolog/log"

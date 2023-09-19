@@ -3,7 +3,7 @@ package models
 import (
 	"fmt"
 
-	"github.com/HyperloopUPV-H8/Backend-H8/excel_adapter/internals"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/excel_adapter/internals"
 )
 
 type Packet struct {

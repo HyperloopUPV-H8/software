@@ -3,7 +3,7 @@ package observable
 import (
 	"encoding/json"
 
-	wsModels "github.com/HyperloopUPV-H8/Backend-H8/ws_handle/models"
+	wsModels "github.com/HyperloopUPV-H8/h9-backend/internal/ws_handle/models"
 )
 
 type SubscriptionMessage struct {

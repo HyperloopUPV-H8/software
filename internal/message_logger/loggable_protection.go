@@ -3,7 +3,7 @@ package protection_logger
 import (
 	"fmt"
 
-	vehicle_models "github.com/HyperloopUPV-H8/Backend-H8/vehicle/models"
+	vehicle_models "github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
 )
 
 type LoggableProtection vehicle_models.ProtectionMessage

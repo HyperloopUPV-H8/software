@@ -9,9 +9,9 @@ import (
 	"io"
 	"time"
 
-	"github.com/HyperloopUPV-H8/Backend-H8/common"
-	"github.com/HyperloopUPV-H8/Backend-H8/vehicle/models"
-	wsModels "github.com/HyperloopUPV-H8/Backend-H8/ws_handle/models"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
+	wsModels "github.com/HyperloopUPV-H8/h9-backend/internal/ws_handle/models"
 	"github.com/pin/tftp/v3"
 )
 

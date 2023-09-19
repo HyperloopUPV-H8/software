@@ -1,8 +1,8 @@
 package protection_logger
 
 import (
-	"github.com/HyperloopUPV-H8/Backend-H8/common"
-	"github.com/HyperloopUPV-H8/Backend-H8/file_logger"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/file_logger"
 )
 
 func NewMessageLogger(infoId string, warningId string, faultId string, config file_logger.Config) file_logger.FileLogger {

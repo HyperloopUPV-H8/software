@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/HyperloopUPV-H8/Backend-H8/common"
-	"github.com/HyperloopUPV-H8/Backend-H8/info"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/info"
 )
 
 func newPipeReaders(messageIds info.MessageIds) map[uint16]common.ReaderFrom {

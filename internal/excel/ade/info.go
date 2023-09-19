@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/HyperloopUPV-H8/Backend-H8/common"
-	doc "github.com/HyperloopUPV-H8/Backend-H8/excel/document"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
+	doc "github.com/HyperloopUPV-H8/h9-backend/internal/excel/document"
 )
 
 const (

@@ -3,9 +3,9 @@ package packet_logger
 import (
 	"strconv"
 
-	"github.com/HyperloopUPV-H8/Backend-H8/common"
-	"github.com/HyperloopUPV-H8/Backend-H8/file_logger"
-	"github.com/HyperloopUPV-H8/Backend-H8/pod_data"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/file_logger"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/pod_data"
 )
 
 func NewPacketLogger(boards []pod_data.Board, config file_logger.Config) file_logger.FileLogger {

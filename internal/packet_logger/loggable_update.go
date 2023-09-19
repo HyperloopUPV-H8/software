@@ -3,8 +3,8 @@ package packet_logger
 import (
 	"fmt"
 
-	"github.com/HyperloopUPV-H8/Backend-H8/packet"
-	vehicle_models "github.com/HyperloopUPV-H8/Backend-H8/vehicle/models"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/packet"
+	vehicle_models "github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
 )
 
 type LoggablePacket struct {

@@ -3,8 +3,8 @@ package state_space_logger
 import (
 	"strconv"
 
-	"github.com/HyperloopUPV-H8/Backend-H8/common"
-	"github.com/HyperloopUPV-H8/Backend-H8/file_logger"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/file_logger"
 )
 
 func NewStateSpaceLogger(stateSpaceId uint16) file_logger.FileLogger {

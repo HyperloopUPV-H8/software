@@ -1,6 +1,6 @@
 package models
 
-import "github.com/HyperloopUPV-H8/Backend-H8/packet"
+import "github.com/HyperloopUPV-H8/h9-backend/internal/packet"
 
 type Order struct {
 	ID     uint16           `json:"id"`

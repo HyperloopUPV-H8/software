@@ -1,7 +1,7 @@
 package document
 
 import (
-	"github.com/HyperloopUPV-H8/Backend-H8/common"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
 	"github.com/xuri/excelize/v2"
 )
 

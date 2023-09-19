@@ -6,8 +6,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/HyperloopUPV-H8/Backend-H8/common"
-	"github.com/HyperloopUPV-H8/Backend-H8/packet"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/packet"
 	"github.com/rs/zerolog"
 )
 

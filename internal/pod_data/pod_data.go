@@ -3,9 +3,9 @@ package pod_data
 import (
 	"strconv"
 
-	"github.com/HyperloopUPV-H8/Backend-H8/common"
-	"github.com/HyperloopUPV-H8/Backend-H8/excel/ade"
-	"github.com/HyperloopUPV-H8/Backend-H8/excel/utils"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/ade"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/utils"
 )
 
 func NewPodData(adeBoards map[string]ade.Board, globalUnits map[string]utils.Operations) (PodData, error) {

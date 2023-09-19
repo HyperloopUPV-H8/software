@@ -3,8 +3,8 @@ package blcu
 import (
 	"net"
 
-	"github.com/HyperloopUPV-H8/Backend-H8/vehicle/models"
-	wsModels "github.com/HyperloopUPV-H8/Backend-H8/ws_handle/models"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
+	wsModels "github.com/HyperloopUPV-H8/h9-backend/internal/ws_handle/models"
 	"github.com/rs/zerolog"
 	trace "github.com/rs/zerolog/log"
 )

@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"sync"
 
-	wsModels "github.com/HyperloopUPV-H8/Backend-H8/ws_handle/models"
+	wsModels "github.com/HyperloopUPV-H8/h9-backend/internal/ws_handle/models"
 
-	"github.com/HyperloopUPV-H8/Backend-H8/common"
-	"github.com/HyperloopUPV-H8/Backend-H8/common/observable"
-	vehicle_models "github.com/HyperloopUPV-H8/Backend-H8/vehicle/models"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/common/observable"
+	vehicle_models "github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
 	"github.com/rs/zerolog"
 	trace "github.com/rs/zerolog/log"
 )

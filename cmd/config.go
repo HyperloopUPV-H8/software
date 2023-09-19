@@ -1,16 +1,16 @@
 package main
 
 import (
-	"github.com/HyperloopUPV-H8/Backend-H8/blcu"
-	"github.com/HyperloopUPV-H8/Backend-H8/connection_transfer"
-	"github.com/HyperloopUPV-H8/Backend-H8/data_transfer"
-	"github.com/HyperloopUPV-H8/Backend-H8/excel_adapter"
-	"github.com/HyperloopUPV-H8/Backend-H8/file_logger"
-	"github.com/HyperloopUPV-H8/Backend-H8/logger_handler"
-	"github.com/HyperloopUPV-H8/Backend-H8/message_transfer"
-	"github.com/HyperloopUPV-H8/Backend-H8/server"
-	"github.com/HyperloopUPV-H8/Backend-H8/value_logger"
-	"github.com/HyperloopUPV-H8/Backend-H8/vehicle"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/blcu"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/connection_transfer"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/data_transfer"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/excel_adapter"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/file_logger"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/logger_handler"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/message_transfer"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/server"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/value_logger"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/vehicle"
 )
 
 type Config struct {

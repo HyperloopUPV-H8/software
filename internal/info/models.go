@@ -3,7 +3,7 @@ package info
 import (
 	"net"
 
-	"github.com/HyperloopUPV-H8/Backend-H8/excel/utils"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/utils"
 )
 
 type Info struct {

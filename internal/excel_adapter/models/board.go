@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/HyperloopUPV-H8/Backend-H8/excel_adapter/internals/models"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/excel_adapter/internals/models"
 )
 
 const (

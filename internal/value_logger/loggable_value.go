@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/HyperloopUPV-H8/Backend-H8/packet"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/packet"
 )
 
 type LoggableValue struct {

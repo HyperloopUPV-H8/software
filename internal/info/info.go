@@ -5,9 +5,9 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/HyperloopUPV-H8/Backend-H8/common"
-	"github.com/HyperloopUPV-H8/Backend-H8/excel/ade"
-	"github.com/HyperloopUPV-H8/Backend-H8/excel/utils"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/ade"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/utils"
 )
 
 //FIXME: get this value from config

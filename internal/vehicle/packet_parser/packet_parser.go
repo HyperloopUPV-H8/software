@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/HyperloopUPV-H8/Backend-H8/packet"
-	"github.com/HyperloopUPV-H8/Backend-H8/vehicle/models"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/packet"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
 )
 
 type PacketParser struct {

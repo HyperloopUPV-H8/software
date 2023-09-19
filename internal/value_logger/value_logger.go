@@ -5,9 +5,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/HyperloopUPV-H8/Backend-H8/common"
-	"github.com/HyperloopUPV-H8/Backend-H8/logger_handler"
-	"github.com/HyperloopUPV-H8/Backend-H8/pod_data"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/logger_handler"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/pod_data"
 	"github.com/rs/zerolog"
 	trace "github.com/rs/zerolog/log"
 )

@@ -1,15 +1,15 @@
 package vehicle
 
 import (
-	"github.com/HyperloopUPV-H8/Backend-H8/common"
-	"github.com/HyperloopUPV-H8/Backend-H8/info"
-	"github.com/HyperloopUPV-H8/Backend-H8/packet"
-	"github.com/HyperloopUPV-H8/Backend-H8/pipe"
-	"github.com/HyperloopUPV-H8/Backend-H8/pod_data"
-	"github.com/HyperloopUPV-H8/Backend-H8/sniffer"
-	"github.com/HyperloopUPV-H8/Backend-H8/unit_converter"
-	protection_parser "github.com/HyperloopUPV-H8/Backend-H8/vehicle/message_parser"
-	"github.com/HyperloopUPV-H8/Backend-H8/vehicle/packet_parser"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/info"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/packet"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/pipe"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/pod_data"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/sniffer"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/unit_converter"
+	protection_parser "github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/message_parser"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/packet_parser"
 	"github.com/rs/zerolog"
 	trace "github.com/rs/zerolog/log"
 )

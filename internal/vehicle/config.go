@@ -3,7 +3,7 @@ package vehicle
 import (
 	"time"
 
-	"github.com/HyperloopUPV-H8/Backend-H8/vehicle/packet_parser"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/packet_parser"
 	"github.com/rs/zerolog/log"
 )
 
