@@ -1,4 +1,4 @@
-module github.com/HyperloopUPV-H8/Backend-H8
+module github.com/HyperloopUPV-H8/h9-backend
 
 go 1.19
 
