@@ -1,9 +1,9 @@
 package vehicle
 
-type PacketId uint16
-type Packet interface {
-	Id() PacketId
-}
+import (
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
+)
 
 type BrokerTopic string
 type BrokerPush interface {
@@ -32,18 +32,6 @@ type Board interface {
 	Notify(BoardNotification)
 }
 
-type TransportEvent string
-type TransportNotification interface {
-	Event() TransportEvent
-}
-type TransportMessage interface {
-	Event() TransportEvent
-}
-type Transport interface {
-	GetOutput() <-chan TransportNotification
-	SendMessage(TransportMessage) error
-}
-
 type LoggerName string
 type LoggerRecord interface {
 	Name() LoggerName
@@ -60,6 +48,10 @@ type Logger interface {
 type Vehicle struct {
 	broker    Broker
 	boards    map[BoardId]Board
-	transport Transport
+	transport abstraction.Transport
 	logger    Logger
+}
+
+func (vehicle *Vehicle) sendPacket(packet abstraction.Packet) error {
+	return vehicle.transport.SendMessage(transport.NewPacketMessage(packet))
 }

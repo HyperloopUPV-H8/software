@@ -1,5 +1,7 @@
 package vehicle
 
+import "github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+
 func New() Vehicle {
 	return Vehicle{
 		boards: make(map[BoardId]Board),
@@ -22,7 +24,7 @@ func (vehicle *Vehicle) RemoveBoardId(id BoardId) {
 	delete(vehicle.boards, id)
 }
 
-func (vehicle *Vehicle) SetTransport(transport Transport) {
+func (vehicle *Vehicle) SetTransport(transport abstraction.Transport) {
 	vehicle.transport = transport
 }
 
