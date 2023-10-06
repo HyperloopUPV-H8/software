@@ -35,9 +35,10 @@ type FileWriteMessage struct {
 	target abstraction.TransportTarget
 }
 
-func NewFileWriteMessage(data io.Reader) FileWriteMessage {
+func NewFileWriteMessage(data io.Reader, target abstraction.TransportTarget) FileWriteMessage {
 	return FileWriteMessage{
-		data: data,
+		data:   data,
+		target: target,
 	}
 }
 
@@ -53,11 +54,17 @@ func (message FileWriteMessage) Read(p []byte) (n int, err error) {
 	return message.data.Read(p)
 }
 
-type FileReadMessage struct {
-	output io.Writer
+func (message FileWriteMessage) Target() abstraction.TransportTarget {
+	return message.target
 }
 
-func NewFileReadMessage(output io.Writer) FileReadMessage {
+// FileReadMessage request a file to be read from the specific target.
+type FileReadMessage struct {
+	output io.Writer
+	target abstraction.TransportTarget
+}
+
+func NewFileReadMessage(output io.Writer, target abstraction.Transport) FileReadMessage {
 	return FileReadMessage{
 		output: output,
 	}
@@ -73,4 +80,8 @@ func (message FileReadMessage) Output() io.Writer {
 
 func (message FileReadMessage) Write(p []byte) (n int, err error) {
 	return message.output.Write(p)
+}
+
+func (message FileReadMessage) Target() abstraction.TransportTarget {
+	return message.target
 }
