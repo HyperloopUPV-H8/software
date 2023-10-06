@@ -8,7 +8,7 @@ func New() Vehicle {
 	}
 }
 
-func (vehicle *Vehicle) SetBroker(broker Broker) {
+func (vehicle *Vehicle) SetBroker(broker abstraction.Broker) {
 	vehicle.broker = broker
 }
 
