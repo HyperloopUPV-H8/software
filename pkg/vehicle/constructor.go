@@ -28,6 +28,6 @@ func (vehicle *Vehicle) SetTransport(transport abstraction.Transport) {
 	vehicle.transport = transport
 }
 
-func (vehicle *Vehicle) SetLogger(logger Logger) {
+func (vehicle *Vehicle) SetLogger(logger abstraction.Logger) {
 	vehicle.logger = logger
 }
