@@ -10,3 +10,7 @@ type Vehicle struct {
 	transport abstraction.Transport
 	logger    abstraction.Logger
 }
+
+func (vehicle *Vehicle) transportNotification(notification abstraction.TransportNotification) {
+
+}

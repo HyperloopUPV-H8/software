@@ -13,6 +13,10 @@ type TransportMessage interface {
 }
 
 type Transport interface {
-	GetOutput() <-chan TransportNotification
 	SendMessage(TransportMessage) error
+	SetAPI(TransportAPI)
+}
+
+type TransportAPI interface {
+	Notification(TransportNotification)
 }
