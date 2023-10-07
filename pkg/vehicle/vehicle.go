@@ -11,8 +11,18 @@ type Vehicle struct {
 	logger    abstraction.Logger
 }
 
-func (vehicle *Vehicle) Notification(notification abstraction.TransportNotification) {
+func (vehicle *Vehicle) Notification(notification abstraction.TransportNotification) {}
 
+func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) {}
+
+func (vehicle *Vehicle) Request(abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
+	panic("TODO")
 }
 
-func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush)
+func (vehicle *Vehicle) SendMessage(abstraction.TransportMessage) error {
+	panic("TODO")
+}
+
+func (vehicle *Vehicle) SendPush(abstraction.BrokerPush) error {
+	panic("TODO")
+}
