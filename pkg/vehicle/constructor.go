@@ -9,10 +9,12 @@ func New() Vehicle {
 }
 
 func (vehicle *Vehicle) SetBroker(broker abstraction.Broker) {
+	broker.SetAPI(vehicle)
 	vehicle.broker = broker
 }
 
 func (vehicle *Vehicle) AddBoard(board abstraction.Board) {
+	board.SetAPI(vehicle)
 	vehicle.boards[board.Id()] = board
 }
 
@@ -25,6 +27,7 @@ func (vehicle *Vehicle) RemoveBoardId(id abstraction.BoardId) {
 }
 
 func (vehicle *Vehicle) SetTransport(transport abstraction.Transport) {
+	transport.SetAPI(vehicle)
 	vehicle.transport = transport
 }
 
