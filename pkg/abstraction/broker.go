@@ -17,4 +17,9 @@ type BrokerResponse interface {
 type Broker interface {
 	Push(BrokerPush) error
 	Pull(BrokerRequest) (BrokerResponse, error)
+	SetAPI(BrokerAPI)
+}
+
+type BrokerAPI interface {
+	UserPush(BrokerPush)
 }

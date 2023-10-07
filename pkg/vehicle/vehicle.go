@@ -11,6 +11,8 @@ type Vehicle struct {
 	logger    abstraction.Logger
 }
 
-func (vehicle *Vehicle) transportNotification(notification abstraction.TransportNotification) {
+func (vehicle *Vehicle) Notification(notification abstraction.TransportNotification) {
 
 }
+
+func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush)
