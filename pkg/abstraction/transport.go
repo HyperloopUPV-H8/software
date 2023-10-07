@@ -1,6 +1,7 @@
 package abstraction
 
 type TransportEvent string
+
 type TransportTarget uint16
 
 type TransportNotification interface {
