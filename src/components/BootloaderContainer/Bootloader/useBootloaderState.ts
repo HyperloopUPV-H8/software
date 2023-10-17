@@ -14,10 +14,10 @@ export function useBootloaderState() {
     );
 
     function upload(board: string, file: File) {
-        file.arrayBuffer().then((arr) => {
+        file.arrayBuffer().then((data) => {
             uploader(
                 board,
-                window.btoa(String.fromCharCode(...new Uint8Array(arr)))
+                window.btoa(Array.from(new Uint8Array(data), (x) => String.fromCodePoint(x)).join(""))
             );
         });
     }
