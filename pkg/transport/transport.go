@@ -22,9 +22,31 @@ type Transport struct {
 }
 
 func (transport *Transport) SendMessage(message abstraction.TransportMessage) error {
+	switch msg := message.(type) {
+	case PacketMessage:
+		return transport.handlePacketEvent(msg)
+	case FileWriteMessage:
+		return transport.handleFileWrite(msg)
+	case FileReadMessage:
+		return transport.handleFileRead(msg)
+	default:
+		return ErrUnrecognizedEvent{message.Event()}
+	}
+}
+
+func (transport *Transport) handlePacketEvent(message PacketMessage) error {
+	panic("TODO!")
+}
+
+func (transport *Transport) handleFileWrite(message FileWriteMessage) error {
+	panic("TODO!")
+}
+
+func (transport *Transport) handleFileRead(message FileReadMessage) error {
 	panic("TODO!")
 }
 
 func (transport *Transport) SetAPI(api abstraction.TransportAPI) {
 	transport.api = api
+	// TODO: make decoder use the api Notify method
 }

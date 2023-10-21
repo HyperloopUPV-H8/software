@@ -13,7 +13,7 @@ func NewPacketNotification(packet abstraction.Packet) PacketNotification {
 }
 
 func (notification PacketNotification) Event() abstraction.TransportEvent {
-	return "packet"
+	return PacketEvent
 }
 
 func (notification PacketNotification) Packet() abstraction.Packet {

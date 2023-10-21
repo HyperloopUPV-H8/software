@@ -6,6 +6,12 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 )
 
+const (
+	PacketEvent    abstraction.TransportEvent = "packet"
+	FileWriteEvent abstraction.TransportEvent = "file-push"
+	FileReadEvent  abstraction.TransportEvent = "file-pull"
+)
+
 // PacketMessage request a packet to be sent to the vehicle.
 type PacketMessage struct {
 	packet abstraction.Packet
@@ -18,7 +24,7 @@ func NewPacketMessage(packet abstraction.Packet) PacketMessage {
 }
 
 func (message PacketMessage) Event() abstraction.TransportEvent {
-	return "packet"
+	return PacketEvent
 }
 
 func (message PacketMessage) Packet() abstraction.Packet {
@@ -43,7 +49,7 @@ func NewFileWriteMessage(data io.Reader, target abstraction.TransportTarget) Fil
 }
 
 func (message FileWriteMessage) Event() abstraction.TransportEvent {
-	return "file-response"
+	return FileWriteEvent
 }
 
 func (message FileWriteMessage) Data() io.Reader {
@@ -71,7 +77,7 @@ func NewFileReadMessage(output io.Writer, target abstraction.Transport) FileRead
 }
 
 func (message FileReadMessage) Event() abstraction.TransportEvent {
-	return "file-request"
+	return FileReadEvent
 }
 
 func (message FileReadMessage) Output() io.Writer {
