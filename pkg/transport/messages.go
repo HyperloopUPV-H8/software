@@ -7,9 +7,12 @@ import (
 )
 
 const (
-	PacketEvent    abstraction.TransportEvent = "packet"
+	// PacketEvent is triggered when a packet is sent or received
+	PacketEvent abstraction.TransportEvent = "packet"
+	// FileWriteEvent is used to request a file write through tftp
 	FileWriteEvent abstraction.TransportEvent = "file-push"
-	FileReadEvent  abstraction.TransportEvent = "file-pull"
+	// FileReadEvent is used to request a file read through tftp
+	FileReadEvent abstraction.TransportEvent = "file-pull"
 )
 
 // PacketMessage request a packet to be sent to the vehicle.
@@ -23,14 +26,17 @@ func NewPacketMessage(packet abstraction.Packet) PacketMessage {
 	}
 }
 
+// Event always returns PacketEvent
 func (message PacketMessage) Event() abstraction.TransportEvent {
 	return PacketEvent
 }
 
+// Packet returns the packet associated with the message
 func (message PacketMessage) Packet() abstraction.Packet {
 	return message.packet
 }
 
+// Id returns the Id of the packet associated with the message
 func (message PacketMessage) Id() abstraction.PacketId {
 	return message.packet.Id()
 }
@@ -48,14 +54,17 @@ func NewFileWriteMessage(data io.Reader, target abstraction.TransportTarget) Fil
 	}
 }
 
+// Event is always FileWriteEvent
 func (message FileWriteMessage) Event() abstraction.TransportEvent {
 	return FileWriteEvent
 }
 
+// Data returns the data to be written through tftp
 func (message FileWriteMessage) Data() io.Reader {
 	return message.data
 }
 
+// Read maps the message data read method so it can be used directly
 func (message FileWriteMessage) Read(p []byte) (n int, err error) {
 	return message.data.Read(p)
 }
@@ -76,14 +85,17 @@ func NewFileReadMessage(output io.Writer, target abstraction.Transport) FileRead
 	}
 }
 
+// Event always returns FileReadEvent
 func (message FileReadMessage) Event() abstraction.TransportEvent {
 	return FileReadEvent
 }
 
+// Output returns where data read should be written
 func (message FileReadMessage) Output() io.Writer {
 	return message.output
 }
 
+// Write maps the message output write method
 func (message FileReadMessage) Write(p []byte) (n int, err error) {
 	return message.output.Write(p)
 }
