@@ -3,9 +3,6 @@ package abstraction
 // TransportEvent is an event of the Transport module
 type TransportEvent string
 
-// TransportTarget specifies who should get certain information
-type TransportTarget uint16
-
 // TransportNotification is a notification of an event being received
 type TransportNotification interface {
 	Event() TransportEvent
