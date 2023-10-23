@@ -112,11 +112,11 @@ func TestIP(t *testing.T) {
 			ip := decoder.IPv4()
 
 			if ip.SrcIP.String() != test.lip {
-				t.Fatalf("source IPIP for the packet is different (%s != %s)", ip.SrcIP, test.lip)
+				t.Fatalf("source IP for the packet is different (%s != %s)", ip.SrcIP, test.lip)
 			}
 
 			if ip.DstIP.String() != test.rip {
-				t.Fatalf("destination IPIP for the packet is different (%s != %s)", ip.DstIP, test.rip)
+				t.Fatalf("destination IP for the packet is different (%s != %s)", ip.DstIP, test.rip)
 			}
 		})
 	}
