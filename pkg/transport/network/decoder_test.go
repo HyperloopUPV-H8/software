@@ -13,6 +13,8 @@ const (
 	IPinIPCap = "../../../captures/IP_in_IP.cap"
 )
 
+// TestIPinIP checks that the decoder understand IPIP encapsulated packets, returning the address of the
+// encapsulated header.
 func TestIPinIP(t *testing.T) {
 	type testCase struct {
 		name string
@@ -41,27 +43,29 @@ func TestIPinIP(t *testing.T) {
 	decoder := network.NewDecoder(layers.LayerTypeEthernet)
 
 	for _, test := range expected {
-		data, _, err := source.ReadPacketData()
-		if err != nil {
-			t.Fatalf("error reading %s packet: %s", test.name, err)
-		}
+		t.Run(test.name, func(t *testing.T) {
+			data, _, err := source.ReadPacketData()
+			if err != nil {
+				t.Fatalf("error reading packet: %s", err)
+			}
 
-		layers, err := decoder.Decode(data)
-		if err != nil {
-			t.Fatalf("error decoding %s packet: %s", test.name, err)
-		}
+			layers, err := decoder.Decode(data)
+			if err != nil {
+				t.Fatalf("error decoding packet: %s", err)
+			}
 
-		log.Printf("%v\n", layers)
+			log.Printf("%v\n", layers)
 
-		ip := decoder.IPv4()
+			ipip := decoder.IPIPv4()
 
-		if ip.SrcIP.String() != test.lip {
-			t.Fatalf("source IP for the %s packet is different from expected (%s != %s)", test.name, ip.SrcIP, test.lip)
-		}
+			if ipip.SrcIP.String() != test.lip {
+				t.Fatalf("source IPIP for the packet is different (%s != %s)", ipip.SrcIP, test.lip)
+			}
 
-		if ip.DstIP.String() != test.rip {
-			t.Fatalf("destination IP for the %s packet is different from expected (%s != %s)", test.name, ip.DstIP, test.rip)
-		}
+			if ipip.DstIP.String() != test.rip {
+				t.Fatalf("destination IPIP for the packet is different (%s != %s)", ipip.DstIP, test.rip)
+			}
+		})
 	}
 
 }
