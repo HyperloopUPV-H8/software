@@ -35,10 +35,6 @@ func (decoder *Decoder) Eth() layers.Ethernet {
 }
 
 func (decoder *Decoder) IPv4() layers.IPv4 {
-	return decoder.ipv4
-}
-
-func (decoder *Decoder) IPIPv4() layers.IPv4 {
 	return decoder.ipipv4
 }
 
