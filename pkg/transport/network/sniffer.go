@@ -146,6 +146,11 @@ layerLoop:
 	return socket, sniffer.decoder.Payload(), nil
 }
 
+// Close closes the underlying packet capture handle and cleans up any left over data.
+func (sniffer *Sniffer) Close() {
+	sniffer.source.Close()
+}
+
 type Decoder struct {
 	eth     layers.Ethernet
 	ipv4    layers.IPv4
