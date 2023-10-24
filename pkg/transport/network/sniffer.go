@@ -9,13 +9,8 @@ import (
 	"github.com/google/gopacket/pcap"
 )
 
-type Socket struct {
-	SrcIP   net.IP
-	SrcPort uint16
-	DstIP   net.IP
-	DstPort uint16
-}
-
+// Sniffer provides a way to capture packets from the wire. It handles both capture
+// and analysis to provide only the payload of the packets, instead of the raw bytes.
 type Sniffer struct {
 	source  *pcap.Handle
 	decoder *Decoder
@@ -103,6 +98,17 @@ func NewLiveSniffer(device string, firstLayer *gopacket.LayerType, opts ...LiveS
 	}, nil
 }
 
+// Socket defines a unique conversation over a network by using the source and destination
+// IP addresses and TCP/UDP ports.
+type Socket struct {
+	SrcIP   net.IP
+	SrcPort uint16
+	DstIP   net.IP
+	DstPort uint16
+}
+
+// ReadNext pulls the next packet from the wire, decodes it and returns the socket it belongs to,
+// its TCP or UDP payload and any errors encountered.
 func (sniffer *Sniffer) ReadNext() (Socket, []byte, error) {
 	data, _, err := sniffer.source.ReadPacketData()
 	if err != nil {
