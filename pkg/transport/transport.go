@@ -3,6 +3,7 @@ package transport
 import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/session"
 )
@@ -19,7 +20,7 @@ type Transport struct {
 
 	conversations map[network.Socket]*session.SocketBuffer
 
-	sniffer *network.Sniffer
+	sniffer *sniffer.Sniffer
 	boards  map[abstraction.BoardId]*network.TCPConn
 
 	tftp *network.TFTPConn
