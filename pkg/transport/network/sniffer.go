@@ -22,15 +22,20 @@ type Sniffer struct {
 }
 
 // NewOfflineSniffer creates a new sniffer that opens and reads from the specified file.
-// Since this does not provide a way to auto detect the packets first layer, the caller
-// should manually provide the first layer to be decoded (usualy layers.LayerTypeEthernet).
-func NewOfflineSniffer(file string, firstLayer gopacket.LayerType) (*Sniffer, error) {
+// When firstLayer is set to nil the program tries to auto detect the link type for the connection, otherwise
+// the specified value is used.
+func NewOfflineSniffer(file string, firstLayer *gopacket.LayerType) (*Sniffer, error) {
 	source, err := pcap.OpenOffline(file)
 	if err != nil {
 		return nil, err
 	}
 
-	decoder := NewDecoder(firstLayer)
+	first := source.LinkType().LayerType()
+	if firstLayer != nil {
+		first = *firstLayer
+	}
+
+	decoder := NewDecoder(first)
 
 	return &Sniffer{
 		source:  source,
@@ -39,15 +44,20 @@ func NewOfflineSniffer(file string, firstLayer gopacket.LayerType) (*Sniffer, er
 }
 
 // NewOfflineFileSniffer creates a new sniffer that reads from the specified file.
-// Since this does not provide a way to auto detect the packets first layer, the caller
-// should manually provide the first layer to be decoded (usualy layers.LayerTypeEthernet).
-func NewOfflineFileSniffer(file *os.File, firstLayer gopacket.LayerType) (*Sniffer, error) {
+// When firstLayer is set to nil the program tries to auto detect the link type for the connection, otherwise
+// the specified value is used.
+func NewOfflineFileSniffer(file *os.File, firstLayer *gopacket.LayerType) (*Sniffer, error) {
 	source, err := pcap.OpenOfflineFile(file)
 	if err != nil {
 		return nil, err
 	}
 
-	decoder := NewDecoder(firstLayer)
+	first := source.LinkType().LayerType()
+	if firstLayer != nil {
+		first = *firstLayer
+	}
+
+	decoder := NewDecoder(first)
 
 	return &Sniffer{
 		source:  source,
