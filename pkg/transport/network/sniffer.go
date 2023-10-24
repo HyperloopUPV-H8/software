@@ -2,6 +2,7 @@ package network
 
 import (
 	"net"
+	"os"
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
@@ -20,8 +21,28 @@ type Sniffer struct {
 	decoder *Decoder
 }
 
+// NewOfflineSniffer creates a new sniffer that opens and reads from the specified file.
+// Since this does not provide a way to auto detect the packets first layer, the caller
+// should manually provide the first layer to be decoded (usualy layers.LayerTypeEthernet).
 func NewOfflineSniffer(file string, firstLayer gopacket.LayerType) (*Sniffer, error) {
 	source, err := pcap.OpenOffline(file)
+	if err != nil {
+		return nil, err
+	}
+
+	decoder := NewDecoder(firstLayer)
+
+	return &Sniffer{
+		source:  source,
+		decoder: &decoder,
+	}, nil
+}
+
+// NewOfflineFileSniffer creates a new sniffer that reads from the specified file.
+// Since this does not provide a way to auto detect the packets first layer, the caller
+// should manually provide the first layer to be decoded (usualy layers.LayerTypeEthernet).
+func NewOfflineFileSniffer(file *os.File, firstLayer gopacket.LayerType) (*Sniffer, error) {
+	source, err := pcap.OpenOfflineFile(file)
 	if err != nil {
 		return nil, err
 	}
