@@ -20,8 +20,18 @@ type Sniffer struct {
 	decoder *Decoder
 }
 
-func NewSniffer() Sniffer {
-	return Sniffer{}
+func NewOfflineSniffer(file string, firstLayer gopacket.LayerType) (*Sniffer, error) {
+	source, err := pcap.OpenOffline(file)
+	if err != nil {
+		return nil, err
+	}
+
+	decoder := NewDecoder(firstLayer)
+
+	return &Sniffer{
+		source:  source,
+		decoder: &decoder,
+	}, nil
 }
 
 func (sniffer *Sniffer) ReadNext() (Socket, []byte, error) {
