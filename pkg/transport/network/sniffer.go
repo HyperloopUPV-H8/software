@@ -55,6 +55,44 @@ func NewOfflineFileSniffer(file *os.File, firstLayer gopacket.LayerType) (*Sniff
 	}, nil
 }
 
+type LiveSnifferOpt func(*pcap.InactiveHandle) error
+
+// NewLiveSniffer creates a new live sniffer capturing packets arriving on the specified device
+// When firstLayer is set to nil the program tries to auto detect the link type for the connection, otherwise
+// the specified value is used.
+// Multiple opts may also be provided, these will apply configuration options to the sniffer before
+// creating it.
+func NewLiveSniffer(device string, firstLayer *gopacket.LayerType, opts ...LiveSnifferOpt) (*Sniffer, error) {
+	handle, err := pcap.NewInactiveHandle(device)
+	defer handle.CleanUp()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, opt := range opts {
+		if err = opt(handle); err != nil {
+			return nil, err
+		}
+	}
+
+	source, err := handle.Activate()
+	if err != nil {
+		return nil, err
+	}
+
+	first := source.LinkType().LayerType()
+	if firstLayer != nil {
+		first = *firstLayer
+	}
+
+	decoder := NewDecoder(first)
+
+	return &Sniffer{
+		source:  source,
+		decoder: &decoder,
+	}, nil
+}
+
 func (sniffer *Sniffer) ReadNext() (Socket, []byte, error) {
 	data, _, err := sniffer.source.ReadPacketData()
 	if err != nil {
