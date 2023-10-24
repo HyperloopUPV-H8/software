@@ -23,11 +23,6 @@ type Sniffer struct {
 //
 // The provided source should be already configured and ready to use, with the appropiate filters.
 func New(source *pcap.Handle, firstLayer *gopacket.LayerType) (*Sniffer, error) {
-	err := source.SetDirection(pcap.DirectionIn)
-	if err != nil {
-		return nil, err
-	}
-
 	first := source.LinkType().LayerType()
 	if firstLayer != nil {
 		first = *firstLayer
