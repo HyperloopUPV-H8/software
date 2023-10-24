@@ -21,8 +21,13 @@ type Sniffer struct {
 // firstLayer, when set to something, will be used as the firstLayer for the packet decoder. When this
 // value is nil, the program tries to automatically detect the first layer from the source.
 //
-// opts are a list of options to be applied to the sniffer used to configure the capture options.
-func New(source *pcap.Handle, firstLayer *gopacket.LayerType, opts ...options) (*Sniffer, error) {
+// The provided source should be already configured and ready to use, with the appropiate filters.
+func New(source *pcap.Handle, firstLayer *gopacket.LayerType) (*Sniffer, error) {
+	err := source.SetDirection(pcap.DirectionIn)
+	if err != nil {
+		return nil, err
+	}
+
 	first := source.LinkType().LayerType()
 	if firstLayer != nil {
 		first = *firstLayer
@@ -32,12 +37,6 @@ func New(source *pcap.Handle, firstLayer *gopacket.LayerType, opts ...options) (
 	sniffer := &Sniffer{
 		source:  source,
 		decoder: decoder,
-	}
-
-	for _, opt := range opts {
-		if err := opt.Apply(sniffer); err != nil {
-			return sniffer, err
-		}
 	}
 
 	return sniffer, nil
