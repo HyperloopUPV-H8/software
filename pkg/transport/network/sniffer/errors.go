@@ -1,4 +1,4 @@
-package network
+package sniffer
 
 import "github.com/google/gopacket"
 
