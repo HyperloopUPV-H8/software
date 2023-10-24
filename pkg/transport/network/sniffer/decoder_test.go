@@ -9,12 +9,12 @@ import (
 )
 
 const (
-	IPinIPCap = "../../../captures/IP_in_IP.cap"
-	IPCap     = "../../../captures/path_MTU_discovery.cap"
+	IPinIPCap = "../../../../captures/IP_in_IP.cap"
+	IPCap     = "../../../../captures/path_MTU_discovery.cap"
 )
 
-// TestIPinIP checks that the decoder understand IPIP encapsulated packets, returning the address of the
-// encapsulated header.
+// TestIPinIP tests that IPinIP packets are handled correctly, returning the addresses
+// of the inner IP packet (the original one)
 func TestIPinIP(t *testing.T) {
 	type testCase struct {
 		name string
@@ -69,6 +69,8 @@ func TestIPinIP(t *testing.T) {
 	}
 }
 
+// TestIp tests that regular IP packets, with just one IP header, are also read correctly and the intended
+// addresses are read from it.
 func TestIP(t *testing.T) {
 	type testCase struct {
 		name string

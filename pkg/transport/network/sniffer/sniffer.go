@@ -31,7 +31,7 @@ func New(source *pcap.Handle, firstLayer *gopacket.LayerType, opts ...options) (
 
 	sniffer := &Sniffer{
 		source:  source,
-		decoder: &decoder,
+		decoder: decoder,
 	}
 
 	for _, opt := range opts {

@@ -16,11 +16,11 @@ type decoder struct {
 	parser *gopacket.DecodingLayerParser
 }
 
-func newDecoder(first gopacket.LayerType) decoder {
+func newDecoder(first gopacket.LayerType) *decoder {
 	dec := new(decoder)
 	dec.parser = gopacket.NewDecodingLayerParser(first, &dec.eth, &dec.ipv4, &dec.ipipv4, &dec.tcp, &dec.udp, &dec.payload)
 	dec.parser.IgnoreUnsupported = true
-	return *dec
+	return dec
 
 }
 
