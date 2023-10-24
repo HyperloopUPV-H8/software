@@ -1,7 +1,6 @@
 package network
 
 import (
-	"net"
 	"os"
 
 	"github.com/google/gopacket"
@@ -13,7 +12,7 @@ import (
 // and analysis to provide only the payload of the packets, instead of the raw bytes.
 type Sniffer struct {
 	source  *pcap.Handle
-	decoder *Decoder
+	decoder *decoder
 }
 
 // NewOfflineSniffer creates a new sniffer that opens and reads from the specified file.
@@ -30,7 +29,7 @@ func NewOfflineSniffer(file string, firstLayer *gopacket.LayerType) (*Sniffer, e
 		first = *firstLayer
 	}
 
-	decoder := NewDecoder(first)
+	decoder := newDecoder(first)
 
 	return &Sniffer{
 		source:  source,
@@ -52,7 +51,7 @@ func NewOfflineFileSniffer(file *os.File, firstLayer *gopacket.LayerType) (*Snif
 		first = *firstLayer
 	}
 
-	decoder := NewDecoder(first)
+	decoder := newDecoder(first)
 
 	return &Sniffer{
 		source:  source,
@@ -90,7 +89,7 @@ func NewLiveSniffer(device string, firstLayer *gopacket.LayerType, opts ...LiveS
 		first = *firstLayer
 	}
 
-	decoder := NewDecoder(first)
+	decoder := newDecoder(first)
 
 	return &Sniffer{
 		source:  source,
@@ -101,9 +100,9 @@ func NewLiveSniffer(device string, firstLayer *gopacket.LayerType, opts ...LiveS
 // Socket defines a unique conversation over a network by using the source and destination
 // IP addresses and TCP/UDP ports.
 type Socket struct {
-	SrcIP   net.IP
+	SrcIP   string
 	SrcPort uint16
-	DstIP   net.IP
+	DstIP   string
 	DstPort uint16
 }
 
@@ -115,7 +114,7 @@ func (sniffer *Sniffer) ReadNext() (Socket, []byte, error) {
 		return Socket{}, nil, err
 	}
 
-	packetLayers, err := sniffer.decoder.Decode(data)
+	packetLayers, err := sniffer.decoder.decode(data)
 	if err != nil {
 		return Socket{}, data, err
 	}
@@ -123,9 +122,9 @@ func (sniffer *Sniffer) ReadNext() (Socket, []byte, error) {
 	ip := sniffer.decoder.IPv4()
 
 	socket := Socket{
-		SrcIP:   ip.SrcIP,
+		SrcIP:   ip.SrcIP.String(),
 		SrcPort: 0,
-		DstIP:   ip.DstIP,
+		DstIP:   ip.DstIP.String(),
 		DstPort: 0,
 	}
 
@@ -155,49 +154,4 @@ layerLoop:
 // Close closes the underlying packet capture handle and cleans up any left over data.
 func (sniffer *Sniffer) Close() {
 	sniffer.source.Close()
-}
-
-type Decoder struct {
-	eth     layers.Ethernet
-	ipv4    layers.IPv4
-	ipipv4  layers.IPv4
-	tcp     layers.TCP
-	udp     layers.UDP
-	payload gopacket.Payload
-
-	parser *gopacket.DecodingLayerParser
-}
-
-func NewDecoder(first gopacket.LayerType) Decoder {
-	dec := new(Decoder)
-	dec.parser = gopacket.NewDecodingLayerParser(first, &dec.eth, &dec.ipv4, &dec.ipipv4, &dec.tcp, &dec.udp, &dec.payload)
-	dec.parser.IgnoreUnsupported = true
-	return *dec
-
-}
-
-func (decoder *Decoder) Decode(data []byte) ([]gopacket.LayerType, error) {
-	decoded := []gopacket.LayerType{}
-	err := decoder.parser.DecodeLayers(data, &decoded)
-	return decoded, err
-}
-
-func (decoder *Decoder) Eth() layers.Ethernet {
-	return decoder.eth
-}
-
-func (decoder *Decoder) IPv4() layers.IPv4 {
-	return decoder.ipipv4
-}
-
-func (decoder *Decoder) TCP() layers.TCP {
-	return decoder.tcp
-}
-
-func (decoder *Decoder) UDP() layers.UDP {
-	return decoder.udp
-}
-
-func (decoder *Decoder) Payload() []byte {
-	return decoder.payload
 }

@@ -1,10 +1,9 @@
-package network_test
+package network
 
 import (
 	"log"
 	"testing"
 
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
 )
@@ -41,7 +40,7 @@ func TestIPinIP(t *testing.T) {
 		t.Fatalf("error opening capture: %s", err)
 	}
 
-	decoder := network.NewDecoder(layers.LayerTypeEthernet)
+	decoder := newDecoder(layers.LayerTypeEthernet)
 
 	for _, test := range expected {
 		t.Run(test.name, func(t *testing.T) {
@@ -50,7 +49,7 @@ func TestIPinIP(t *testing.T) {
 				t.Fatalf("error reading packet: %s", err)
 			}
 
-			layers, err := decoder.Decode(data)
+			layers, err := decoder.decode(data)
 			if err != nil {
 				t.Fatalf("error decoding packet: %s", err)
 			}
@@ -93,7 +92,7 @@ func TestIP(t *testing.T) {
 		t.Fatalf("error opening capture: %s", err)
 	}
 
-	decoder := network.NewDecoder(layers.LayerTypeEthernet)
+	decoder := newDecoder(layers.LayerTypeEthernet)
 
 	for _, test := range expected {
 		t.Run(test.name, func(t *testing.T) {
@@ -102,7 +101,7 @@ func TestIP(t *testing.T) {
 				t.Fatalf("error reading packet: %s", err)
 			}
 
-			layers, err := decoder.Decode(data)
+			layers, err := decoder.decode(data)
 			if err != nil {
 				t.Fatalf("error decoding packet: %s", err)
 			}
