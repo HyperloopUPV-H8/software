@@ -6,8 +6,13 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 )
 
+type connectionCallback = func(abstraction.TransportTarget, *net.TCPConn)
+type errorCallback = func(abstraction.TransportTarget, error)
+
 type TCPSource interface {
-	SetOnConnection(func(*TCPConn))
+	Run()
+	SetOnConnection(connectionCallback)
+	SetOnError(errorCallback)
 }
 
 type TCPConn struct {
