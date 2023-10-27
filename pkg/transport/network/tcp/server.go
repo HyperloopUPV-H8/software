@@ -2,6 +2,7 @@ package tcp
 
 import (
 	"net"
+	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 )
@@ -14,6 +15,7 @@ type TCPServer struct {
 	name         abstraction.TransportTarget
 	targets      serverTargets
 	listener     *net.TCPListener
+	keepalive    time.Duration
 	onConnection connectionCallback
 	onError      errorCallback
 }
@@ -30,10 +32,15 @@ func NewServer(name abstraction.TransportTarget, laddr string, targets serverTar
 	}
 
 	return &TCPServer{
-		name:     name,
-		targets:  targets,
-		listener: listener,
+		name:      name,
+		targets:   targets,
+		listener:  listener,
+		keepalive: 0,
 	}, nil
+}
+
+func (server *TCPServer) SetKeepalive(keepalive time.Duration) {
+	server.keepalive = keepalive
 }
 
 func (server *TCPServer) SetOnConnection(callback connectionCallback) {
@@ -49,13 +56,30 @@ func (server *TCPServer) Run() {
 		conn, err := server.listener.AcceptTCP()
 		if err != nil {
 			server.onError(server.name, err)
+			continue
 		}
 
-		if target, ok := server.targets[Address(conn.RemoteAddr().String())]; ok {
-			server.onConnection(target, conn)
+		target, ok := server.targets[Address(conn.RemoteAddr().String())]
+		if !ok {
+			conn.Close()
+			continue
 		}
 
-		conn.Close()
+		err = conn.SetKeepAlive(server.keepalive > 0)
+		if err != nil {
+			server.onError(server.name, err)
+			conn.Close()
+			continue
+		}
+
+		err = conn.SetKeepAlivePeriod(server.keepalive)
+		if err != nil {
+			server.onError(server.name, err)
+			conn.Close()
+			continue
+		}
+
+		server.onConnection(target, conn)
 	}
 }
 
