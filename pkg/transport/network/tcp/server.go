@@ -51,9 +51,31 @@ func (server *TCPServer) SetOnError(callback errorCallback) {
 	server.onError = callback
 }
 
-func (server *TCPServer) Run() {
+type acceptResult struct {
+	conn *net.TCPConn
+	err  error
+}
+
+func (server *TCPServer) Run(cancel <-chan struct{}) {
+	defer server.listener.Close()
 	for {
-		conn, err := server.listener.AcceptTCP()
+		acceptChan := make(chan acceptResult)
+
+		go func(acceptChan chan<- acceptResult) {
+			conn, err := server.listener.AcceptTCP()
+			acceptChan <- acceptResult{conn, err}
+		}(acceptChan)
+
+		var conn *net.TCPConn
+		var err error
+		select {
+		case result := <-acceptChan:
+			conn = result.conn
+			err = result.err
+		case <-cancel:
+			return
+		}
+
 		if err != nil {
 			server.onError(server.name, err)
 			continue
@@ -65,17 +87,10 @@ func (server *TCPServer) Run() {
 			continue
 		}
 
-		err = conn.SetKeepAlive(server.keepalive > 0)
+		err = server.configureConn(conn)
 		if err != nil {
-			server.onError(server.name, err)
 			conn.Close()
-			continue
-		}
-
-		err = conn.SetKeepAlivePeriod(server.keepalive)
-		if err != nil {
 			server.onError(server.name, err)
-			conn.Close()
 			continue
 		}
 
@@ -83,6 +98,11 @@ func (server *TCPServer) Run() {
 	}
 }
 
-func (server *TCPServer) Close() error {
-	return server.listener.Close()
+func (server *TCPServer) configureConn(conn *net.TCPConn) error {
+	err := conn.SetKeepAlive(server.keepalive > 0)
+	if err != nil {
+		return err
+	}
+
+	return conn.SetKeepAlivePeriod(server.keepalive)
 }
