@@ -10,7 +10,7 @@ type connectionCallback = func(abstraction.TransportTarget, *net.TCPConn)
 type errorCallback = func(abstraction.TransportTarget, error)
 
 type TCPSource interface {
-	Run()
+	Run(<-chan struct{})
 	SetOnConnection(connectionCallback)
 	SetOnError(errorCallback)
 }

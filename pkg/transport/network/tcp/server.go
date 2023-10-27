@@ -11,6 +11,9 @@ type Address string
 
 type serverTargets = map[Address]abstraction.TransportTarget
 
+// Assertion to check the TCPServer is a TCPSource
+var _ TCPSource = &TCPServer{}
+
 type TCPServer struct {
 	name         abstraction.TransportTarget
 	targets      serverTargets

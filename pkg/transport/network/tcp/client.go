@@ -37,6 +37,9 @@ func (b *backoff) increase() {
 	}
 }
 
+// Assertion to check the TCPClient is a TCPSource
+var _ TCPSource = &TCPClient{}
+
 type TCPClient struct {
 	target       abstraction.TransportTarget
 	raddr        net.Addr
