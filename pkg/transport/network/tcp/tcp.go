@@ -8,39 +8,38 @@ import (
 
 type connectionCallback = func(abstraction.TransportTarget, *net.TCPConn)
 type errorCallback = func(abstraction.TransportTarget, error)
+type stateCallback = func(abstraction.TransportTarget, bool)
 
-type TCPSource interface {
+type Source interface {
 	Run(<-chan struct{})
 	SetOnConnection(connectionCallback)
 	SetOnError(errorCallback)
 }
 
-type TCPConn struct {
+type Conn struct {
 	target       abstraction.TransportTarget
 	conn         *net.TCPConn
 	onConnUpdate stateCallback
 }
 
-type stateCallback = func(abstraction.TransportTarget, bool)
-
-func NewConn(target abstraction.TransportTarget, conn *net.TCPConn, callback stateCallback) *TCPConn {
+func NewConn(target abstraction.TransportTarget, conn *net.TCPConn, callback stateCallback) *Conn {
 	callback(target, true)
-	return &TCPConn{
+	return &Conn{
 		target:       target,
 		conn:         conn,
 		onConnUpdate: callback,
 	}
 }
 
-func (tcp *TCPConn) Read(p []byte) (n int, err error) {
+func (tcp *Conn) Read(p []byte) (n int, err error) {
 	return tcp.conn.Read(p)
 }
 
-func (tcp *TCPConn) Write(p []byte) (n int, err error) {
+func (tcp *Conn) Write(p []byte) (n int, err error) {
 	return tcp.conn.Write(p)
 }
 
-func (tcp *TCPConn) Close() error {
+func (tcp *Conn) Close() error {
 	tcp.onConnUpdate(tcp.target, false)
 	return tcp.conn.Close()
 }
