@@ -6,14 +6,40 @@ import (
 	"github.com/pin/tftp/v3"
 )
 
+type transferMode string
+
+const (
+	BinaryMode transferMode = "binary"
+	AsciiMode  transferMode = "netascii"
+)
+
 type Client struct {
-	mode       string
 	conn       *tftp.Client
 	onProgress progressCallback
 }
 
-func (client *Client) ReadFile(filename string, output io.Writer) (int64, error) {
-	recv, err := client.conn.Receive(filename, client.mode)
+func NewClient(addr string, opts ...clientOption) (*Client, error) {
+	conn, err := tftp.NewClient(addr)
+	if err != nil {
+		return nil, err
+	}
+
+	client := &Client{
+		conn: conn,
+	}
+
+	for _, opt := range opts {
+		err = opt(client)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return client, nil
+}
+
+func (client *Client) ReadFile(filename string, mode transferMode, output io.Writer) (int64, error) {
+	recv, err := client.conn.Receive(filename, string(mode))
 	if err != nil {
 		return 0, err
 	}
@@ -25,8 +51,8 @@ func (client *Client) ReadFile(filename string, output io.Writer) (int64, error)
 	return n, err
 }
 
-func (client *Client) WriteFile(filename string, input io.Reader) (int64, error) {
-	send, err := client.conn.Send(filename, client.mode)
+func (client *Client) WriteFile(filename string, mode transferMode, input io.Reader) (int64, error) {
+	send, err := client.conn.Send(filename, string(mode))
 	if err != nil {
 		return 0, err
 	}
