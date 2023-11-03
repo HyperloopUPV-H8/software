@@ -1,5 +1,9 @@
 package abstraction
 
+// TransportTarget uniquely identifies a target resource for the Transport
+// module operations
+type TransportTarget string
+
 // TransportEvent is an event of the Transport module
 type TransportEvent string
 
