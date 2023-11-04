@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"strings"
 
-	excelAdapter "github.com/HyperloopUPV-H8/Backend-H8/excel_adapter"
-	"github.com/HyperloopUPV-H8/Backend-H8/excel_adapter/internals"
-	"github.com/HyperloopUPV-H8/Backend-H8/excel_adapter/models"
+	excelAdapter "github.com/HyperloopUPV-H8/h9-backend/pkg/excel_adapter"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/excel_adapter/internals"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/excel_adapter/models"
 )
 
 type PacketGenerator struct {
@@ -21,7 +21,7 @@ type PacketGenerator struct {
 func New() PacketGenerator {
 	excelAdapter := excelAdapter.New(excelAdapter.ExcelAdapterConfig{
 		Download: internals.DownloadConfig{
-			Id:   "1BEwASubu0el9oQA6PSwVKaNU-Q6gbJ40JR6kgqguKYE",
+			Id:   "1b_nOrWqjMLOSEFIV9dMUObnJ15J7ypmF-KVJ4qztAtw",
 			Path: ".",
 			Name: "ade.xlsx",
 		},

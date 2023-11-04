@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	lip   string = "127.0.0.2"
+	lip   string = "127.0.0.3"
 	lport uint16 = 50400
 	rip   string = "127.0.0.4"
 	rport uint16 = 50400
@@ -33,7 +33,7 @@ func main() {
 	fmt.Println("Sending packets")
 
 	count := make(chan struct{}, 10000)
-	ticker := time.NewTicker(time.Millisecond * 10)
+	ticker := time.NewTicker(time.Millisecond * 1)
 	start := time.Now()
 	go func() {
 		for range ticker.C {
