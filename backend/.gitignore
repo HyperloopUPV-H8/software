@@ -1,0 +1,21 @@
+# GOOGLE API KEY
+secret.json
+
+log
+trace.json
+
+# Windows build
+*.exe
+# Linux build
+Backend-H8
+
+# EXCEL
+*.xlsx
+
+static
+
+.vscode
+
+downloads
+
+audience_static

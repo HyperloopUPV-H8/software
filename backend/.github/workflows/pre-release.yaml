@@ -1,0 +1,47 @@
+name: Create Release
+
+on:
+  push:
+    branches:
+    - main
+    - develop
+
+jobs:
+  build:
+    name: "Build"
+    uses: ./.github/workflows/build.yaml
+    secrets:
+      SECRET: ${{ secrets.GOOGLE_DRIVE_API }}
+
+  release:
+    name: "Release"
+    needs: [build]
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: "Checkout"
+      uses: actions/checkout@v2
+
+    - name: "Download linux release"
+      uses: actions/download-artifact@v2
+      with:
+        name: backend-linux
+        path: ./output
+
+    - name: "Download windows release"
+      uses: actions/download-artifact@v2
+      with:
+        name: backend-windows
+        path: ./output
+
+    - name: "Create release"
+      uses: marvinpinto/action-automatic-releases@latest
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        title: preview
+        prerelease: true
+        automatic_release_tag: latest
+        files: |
+          output/backend-linux-64
+          output/backend-windows-64.exe
+          examples/config.toml
