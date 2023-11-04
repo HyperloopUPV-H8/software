@@ -31,7 +31,9 @@ func newProgressReader(file string, callback progressCallback, reader io.Reader)
 // Read maps the unerlying reader Read method and calls the progress callback after reading
 func (progress progressReader) Read(p []byte) (n int, err error) {
 	n, err = progress.reader.Read(p)
-	progress.callback(progress.file, n)
+	if progress.callback != nil {
+		progress.callback(progress.file, n)
+	}
 	return
 }
 
@@ -55,6 +57,8 @@ func newProgressWriter(file string, callback progressCallback, writer io.Writer)
 // Write maps the underlying writer Write method and calls the progress callback after writing
 func (progress progressWriter) Write(p []byte) (n int, err error) {
 	n, err = progress.writer.Write(p)
-	progress.callback(progress.file, n)
+	if progress.callback != nil {
+		progress.callback(progress.file, n)
+	}
 	return
 }
