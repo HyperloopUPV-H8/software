@@ -1,0 +1,34 @@
+@use "src/styles/colors";
+
+.pageWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1.3rem;
+    padding: 1.3rem;
+}
+
+.header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.header::after {
+    content: " ";
+    width: 100%;
+    height: 3px;
+    margin-left: 1.3rem;
+    background-color: colors.getColor("primary", 90);
+    border-radius: 1rem;
+}
+
+.content {
+    flex: 1 1 0;
+    align-self: stretch;
+    display: flex;
+    justify-content: center;
+    padding-top: 0;
+    gap: 2rem;
+    min-height: 0;
+    max-height: 100%;
+}

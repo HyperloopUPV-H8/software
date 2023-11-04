@@ -1,0 +1,22 @@
+@use "src/styles/colors.scss";
+
+.paginationItemWrapper {
+    min-width: 4rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background-color: white;
+    cursor: pointer;
+    transition: background-color 0.1s linear;
+}
+
+.active {
+    color: white;
+    background-color: colors.getColor("tertiary", 60);
+}
+
+.paginationItemWrapper:not(.active):hover {
+    color: white;
+    background-color: colors.getColor("tertiary", 80);
+}

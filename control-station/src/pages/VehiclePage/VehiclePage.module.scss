@@ -1,0 +1,7 @@
+.contentWrapper {
+    max-height: 100%;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    justify-items: center;
+    gap: 1rem;
+}

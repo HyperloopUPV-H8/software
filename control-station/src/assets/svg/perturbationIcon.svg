@@ -1,0 +1,9 @@
+<svg width="2em" height="2em" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+<line x1="20.5" y1="1.5" x2="20.5" y2="6.5" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+<line x1="39.549" y1="3.12085" x2="37.049" y2="7.45097" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+<line x1="1.5" y1="-1.5" x2="6.5" y2="-1.5" transform="matrix(0.5 0.866025 0.866025 -0.5 3 1.07181)" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+<rect x="1" y="13.5" width="40" height="15" rx="7.5" fill="currentColor"/>
+<line x1="1.5" y1="-1.5" x2="6.5" y2="-1.5" transform="matrix(0 -1 -1 0 19 42)" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+<line x1="1.5" y1="-1.5" x2="6.5" y2="-1.5" transform="matrix(-0.5 -0.866025 -0.866025 0.5 39 40.9282)" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+<line x1="2.45096" y1="38.8792" x2="4.95096" y2="34.549" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+</svg>
