@@ -18,7 +18,6 @@ export function useWebRTC(signalUrl: string, configuration?: RTCConfiguration) {
 
 
     function handleTrack(ev: RTCTrackEvent) {
-        console.log(ev)
         setMediaStreams(prevStreams => prevStreams ? [...prevStreams, ...ev.streams] : [...ev.streams]);
     }
 

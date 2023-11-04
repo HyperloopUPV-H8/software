@@ -32,9 +32,6 @@ export function useForm(initialForm: Omit<Form, "isValid">) {
                             isValid: field.validator?.(ev.ev.value) ?? true,
                         };
                     } else {
-                        console.log(
-                            `field ${field.id} type (${field.type}) and event type (${ev.ev.type}) don't match`
-                        );
                     }
                 }
                 return field;

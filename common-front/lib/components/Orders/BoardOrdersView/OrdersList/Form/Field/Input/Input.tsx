@@ -45,7 +45,7 @@ export const Input = <I extends InputData>({ input, onChange }: Props<I>) => {
                     {...input}
                     leftColumnName="Position"
                     rightColumnName="Velocity"
-                    onChange={(v) => console.log(v)}
+                    onChange={(v) => {}}
                 />
             );
     }
