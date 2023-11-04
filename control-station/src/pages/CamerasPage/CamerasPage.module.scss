@@ -1,0 +1,16 @@
+@use "src/styles/colors.scss";
+
+.camerasPageWrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    color: colors.getColor("primary", 30);
+}

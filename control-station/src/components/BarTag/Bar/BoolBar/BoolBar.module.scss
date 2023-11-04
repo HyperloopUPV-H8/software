@@ -1,0 +1,18 @@
+@use "src/styles/colors";
+
+.boolBar {
+    width: 0.5rem;
+    border-radius: 10rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    height: 100%;
+}
+
+.on {
+    background-color: colors.getColor("stable", 60);
+}
+
+.off {
+    background-color: colors.getColor("fault", 60);
+}

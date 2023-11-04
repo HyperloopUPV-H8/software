@@ -1,0 +1,48 @@
+@use "./colors.scss";
+
+$font-families: (
+    sans: "Inter",
+    mono: "JetBrains Mono, IBM Plex Mono, monospace",
+);
+
+$font-sizes: (
+    large: 1.5rem,
+    default: 1.2rem,
+    small: 1rem,
+    x-small: 0.8rem,
+);
+
+$font-weights: (
+    bold: 600,
+    normal: 400,
+    light: 300,
+);
+
+@mixin globalFontStyles {
+    @each $name, $font in $font-families {
+        --font-#{$name}: #{$font};
+    }
+
+    @each $name, $size in $font-sizes {
+        --font-size-#{$name}: #{$size};
+    }
+
+    @each $name, $weight in $font-weights {
+        --font-weight-#{$name}: #{$weight};
+    }
+}
+
+@mixin default-text {
+    font-family: var(--font-sans);
+    font-size: var(--font-size-default);
+    font-weight: var(--font-weight-normal);
+    color: colors.getColor("primary", 20);
+}
+
+@function getFontSize($size) {
+    @return var(--font-size-#{$size});
+}
+
+@function getFontWeight($weight) {
+    @return var(--font-weight-#{$weight});
+}
