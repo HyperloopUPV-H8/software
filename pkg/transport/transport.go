@@ -5,6 +5,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tcp"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tftp"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/session"
 )
@@ -24,7 +25,7 @@ type Transport struct {
 	sniffer *sniffer.Sniffer
 	boards  map[abstraction.BoardId]*tcp.Conn
 
-	tftp *network.TFTPConn
+	tftp *tftp.Client
 
 	api abstraction.TransportAPI
 }
