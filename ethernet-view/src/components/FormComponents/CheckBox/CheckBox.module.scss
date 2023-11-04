@@ -1,0 +1,7 @@
+@use "src/styles/styles";
+
+#checkBox {
+    width: 1rem;
+    height: 1rem;
+    border: 1px solid styles.$alternate-text-color;
+}

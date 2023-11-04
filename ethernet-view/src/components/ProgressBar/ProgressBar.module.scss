@@ -1,0 +1,12 @@
+.progressBar {
+    height: 1rem;
+    display: flex;
+    align-items: stretch;
+    border-radius: 0.25rem;
+    overflow: hidden;
+    background-color: rgb(231, 231, 231);
+}
+
+.fill {
+    background-color: rgb(81, 206, 81);
+}

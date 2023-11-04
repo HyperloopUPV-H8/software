@@ -1,0 +1,63 @@
+@use "src/styles/styles";
+
+input {
+    margin: 0;
+}
+
+td {
+    padding: 0;
+}
+
+ul {
+    padding-left: 0;
+    margin: 0;
+}
+
+hr {
+    margin-top: 0rem;
+    margin-bottom: 0rem;
+    height: 1px;
+    border: none;
+    background-color: black;
+}
+
+code {
+    @include styles.alternate-code-text;
+    font-weight: bold;
+    background-color: rgb(221, 221, 221);
+    padding: 0.1rem 0.2rem;
+    border-radius: 0.3rem;
+}
+
+//If it's only :root, font-size changes the base rem. If it's :root *, it affects everything, skipping inheritance.
+:root > * {
+    box-sizing: border-box;
+    @include styles.normal-text;
+    scrollbar-track-color: transparent;
+    scrollbar-color: rgb(68, 68, 68) none;
+    user-select: none;
+}
+
+:root > * input {
+    outline: none;
+    border-style: solid;
+}
+
+::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+    background-color: #f0f0f0;
+}
+
+::-webkit-scrollbar-track {
+    background-color: none;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgb(202, 202, 202);
+    border-radius: 1rem;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgb(180, 180, 180);
+}

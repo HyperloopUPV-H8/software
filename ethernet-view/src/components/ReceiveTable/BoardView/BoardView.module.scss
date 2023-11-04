@@ -1,0 +1,13 @@
+@use "src/styles/styles";
+
+.boardView {
+    display: flex;
+    flex-direction: column;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    overflow-x: auto;
+    flex: 0 0 auto;
+    border: 1px solid var(--main-color);
+    color: var(--light-main-color);
+    @include styles.shadow;
+}
