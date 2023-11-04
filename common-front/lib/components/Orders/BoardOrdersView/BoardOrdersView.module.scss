@@ -1,0 +1,17 @@
+.boardOrdersView {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.name {
+    font-family: Inter;
+    font-weight: 600;
+    color: hsl(29, 88%, 70%);
+}
+
+.orders {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}

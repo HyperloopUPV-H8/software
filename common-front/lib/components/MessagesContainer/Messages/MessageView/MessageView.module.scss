@@ -1,0 +1,56 @@
+//TODO: increase contrast info
+.message.info {
+    --main-color: #61c04b;
+    --light-color: #b8e3ae;
+    --background-color: #d3efcd;
+}
+
+.message.fault {
+    --main-color: #fc3535;
+    --light-color: #ffb3b3;
+    --background-color: #ffdcdc;
+}
+
+.message.warning {
+    --main-color: #ffba0a;
+    --light-color: #ffdd86;
+    --background-color: #fff0ba;
+}
+
+.message {
+    display: grid;
+    grid-template:
+        "icon content counter" auto
+        "icon content counter" auto
+        "icon timestamp timestamp" auto / auto 1fr auto;
+
+    gap: 0.4rem 0.8rem;
+
+    padding: 0.6rem;
+    background-color: var(--background-color);
+    border-radius: 1rem;
+    filter: (--shadow);
+}
+
+.icon {
+    grid-area: icon;
+    color: var(--main-color);
+}
+
+.counter {
+    grid-area: counter;
+}
+
+.content {
+    grid-area: content;
+}
+
+.idAndCounter {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.timestamp {
+    grid-area: timestamp;
+}

@@ -1,0 +1,14 @@
+.connectionsWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.boards {
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+}

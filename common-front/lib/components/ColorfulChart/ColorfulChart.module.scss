@@ -1,0 +1,18 @@
+.colorfulChart {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+
+    --bg-color: var(--primary-99);
+}
+
+.body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+
+    padding: 1rem 0.5rem 0.5rem;
+    border-radius: 1rem;
+    background-color: var(--bg-color);
+    box-shadow: var(--shadow);
+}

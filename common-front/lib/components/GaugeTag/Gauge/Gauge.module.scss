@@ -1,0 +1,11 @@
+.backgroundArc {
+    stroke: rgba(0, 0, 0, 0.049);
+}
+
+.radialShadowArc {
+    background: radial-gradient(#b1b1b1d4 30%, rgb(0 0 0 / 0%) 70%);
+}
+
+.rainbowArc {
+    background: conic-gradient(from 180deg, green, yellow, orange, red);
+}

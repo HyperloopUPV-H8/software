@@ -1,0 +1,13 @@
+.verticalAxisWrapper {
+    width: auto;
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin: -8px 0;
+}
+
+.value {
+    font-size: 0.8rem;
+    font-family: var(--font-mono);
+}
