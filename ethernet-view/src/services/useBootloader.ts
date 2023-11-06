@@ -16,7 +16,7 @@ export function useBootloader(
     const uploader = (board: string, file: string) => {
         const id = nanoid();
 
-        handler.exchange("blcu/upload", { board, file }, id, (res, end) => {
+        handler.exchange("blcu/upload", { board, file }, id, (res, _, end) => {
             if (res.percentage == 100) {
                 onSendSuccess();
                 end();
@@ -32,7 +32,7 @@ export function useBootloader(
     //TODO: timeout if it takes to long
     const downloader = (board: string) => {
         const id = nanoid();
-        handler.exchange("blcu/download", { board }, id, (res, end) => {
+        handler.exchange("blcu/download", { board }, id, (res, _, end) => {
             if (res.percentage == 100) {
                 onDownloadSuccess(new File([res.file], "program"));
                 end();

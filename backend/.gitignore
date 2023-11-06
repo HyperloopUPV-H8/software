@@ -8,6 +8,7 @@ trace.json
 *.exe
 # Linux build
 Backend-H8
+backend
 
 # EXCEL
 *.xlsx

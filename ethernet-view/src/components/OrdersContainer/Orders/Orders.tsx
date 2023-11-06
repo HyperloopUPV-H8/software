@@ -1,5 +1,5 @@
 import styles from "./Orders.module.scss";
-import { BoardOrders, Button, VehicleOrders } from "common";
+import { BoardOrders, Button } from "common";
 import { OrderContext } from "./OrderContext";
 import { useSendOrder } from "../useSendOrder";
 import { BoardOrdersView } from "./BoardOrders/BoardOrders";
