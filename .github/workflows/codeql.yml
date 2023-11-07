@@ -70,7 +70,10 @@ jobs:
 
     - if: matrix.language == 'go'
       name: Build go
+      env:
+        GOOGLE_DRIVE_API: ${{ secrets.GOOGLE_DRIVE_API }}
       run: |
+        ./load-secret.sh "$GOOGLE_DRIVE_API"
         make backend
 
     - name: Perform CodeQL Analysis
