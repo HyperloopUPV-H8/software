@@ -73,6 +73,7 @@ jobs:
       env:
         GOOGLE_DRIVE_API: ${{ secrets.GOOGLE_DRIVE_API }}
       run: |
+        sudo apt-get update && sudo apt-get install libpcap-dev
         ./load-secret.sh "$GOOGLE_DRIVE_API"
         make backend
 
