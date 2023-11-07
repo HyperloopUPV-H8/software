@@ -1,3 +1,11 @@
+.PHONY: all
+all: backend packet-sender ethernet-view control-station common-front
+	@echo "" && \
+	echo "#===================#" && \
+	echo "|   Building all    |" && \
+	echo "#===================#" && \
+	echo ""
+
 backend: backend-tidy
 	@echo "" && \
 	echo "#=======================#" && \
@@ -5,6 +13,14 @@ backend: backend-tidy
 	echo "#=======================#" && \
 	echo ""
 	@cd backend && go build -C cmd -o backend
+
+packet-sender: packet-sender-tidy
+	@echo "" && \
+	echo "#=============================#" && \
+	echo "|   Building packet sender    |" && \
+	echo "#=============================#" && \
+	echo ""
+	@cd packet-sender && go build -o packet-sender
 
 ethernet-view: common-front ethernet-view-deps
 	@echo "" && \
@@ -85,6 +101,15 @@ backend-tidy:
 	echo ""
 	@cd backend && go mod tidy
 
+.PHONY: packet-sender-tidy
+packet-sender-tidy:
+	@echo "" && \
+	echo "#====================================#" && \
+	echo "|   Updating packet sender module    |" && \
+	echo "#====================================#" && \
+	echo ""
+	@cd packet-sender && go mod tidy
+
 .PHONY: clear
 clear:
 	rm -r build
@@ -92,3 +117,4 @@ clear:
 	rm -r ethernet-view/static
 	rm -r control-station/static
 	rm -r backend/cmd/backend
+	rm -r packet-sender/packet-sender
