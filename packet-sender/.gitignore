@@ -4,7 +4,7 @@
 *.dll
 *.so
 *.dylib
-packet_sender
+packet-sender
 
 # Test binary, built with `go test -c`
 *.test
