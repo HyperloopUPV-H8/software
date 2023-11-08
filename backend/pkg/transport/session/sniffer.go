@@ -18,6 +18,13 @@ type SnifferDemux struct {
 	conversations  map[network.Socket]*bytes.Buffer
 }
 
+func NewSnifferDemux(onConversation conversationCallback) *SnifferDemux {
+	return &SnifferDemux{
+		conversations:  make(map[network.Socket]*bytes.Buffer),
+		onConversation: onConversation,
+	}
+}
+
 func (demux *SnifferDemux) ReadPackets(reader PacketReader) error {
 	for {
 		socket, data, err := reader.ReadNext()
