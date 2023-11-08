@@ -1,3 +1,4 @@
 package session
 
-type SocketBuffer struct{}
+type SocketReader struct {
+}
