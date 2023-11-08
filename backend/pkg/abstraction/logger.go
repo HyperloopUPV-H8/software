@@ -20,7 +20,4 @@ type Logger interface {
 	PushRecord(LoggerRecord) error
 	// PullRecord will retrieve a record from disk
 	PullRecord(LoggerRequest) (LoggerRecord, error)
-
-	Start(StartParams)
-	Stop()
 }
