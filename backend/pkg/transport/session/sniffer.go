@@ -1,6 +1,7 @@
 package session
 
 import (
+	"bytes"
 	"io"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network"
@@ -14,7 +15,7 @@ type PacketReader interface {
 
 type SnifferDemux struct {
 	onConversation conversationCallback
-	conversations  map[network.Socket]*SocketReader
+	conversations  map[network.Socket]*bytes.Buffer
 }
 
 func (demux *SnifferDemux) ReadPackets(reader PacketReader) error {
@@ -26,7 +27,7 @@ func (demux *SnifferDemux) ReadPackets(reader PacketReader) error {
 
 		conversation, ok := demux.conversations[socket]
 		if !ok {
-			demux.conversations[socket] = newConversation()
+			demux.conversations[socket] = new(bytes.Buffer)
 			conversation = demux.conversations[socket]
 			demux.onConversation(socket, conversation)
 		}
