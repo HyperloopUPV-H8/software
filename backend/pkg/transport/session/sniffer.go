@@ -1,8 +1,12 @@
 package session
 
-import "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network"
+import (
+	"io"
 
-type conversationCallback = func(socket network.Socket, reader *SocketReader)
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network"
+)
+
+type conversationCallback = func(socket network.Socket, reader io.Reader)
 
 type PacketReader interface {
 	ReadNext() (network.Socket, []byte, error)
