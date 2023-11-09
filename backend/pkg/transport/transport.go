@@ -2,7 +2,6 @@ package transport
 
 import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tcp"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tftp"
@@ -20,7 +19,7 @@ type Transport struct {
 	decoder *presentation.PacketDecoder
 	encoder *presentation.PacketEncoder
 
-	conversations map[network.Socket]*session.SocketBuffer
+	snifferDemux *session.SnifferDemux
 
 	sniffer *sniffer.Sniffer
 	boards  map[abstraction.BoardId]*tcp.Conn
