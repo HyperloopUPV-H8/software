@@ -1,26 +1,21 @@
 import styles from "./ChartList.module.scss";
-import { ChartWithLegend } from "./ChartWithLegend/ChartWithLegend";
+import { ChartElement } from "./ChartWithLegend/ChartElement";
 import { DragEvent, useCallback } from "react";
 import { useCharts } from "../useCharts";
-import { nanoid } from "nanoid";
-import { ChartLine } from "../ChartElement";
+import { ChartLine } from "../ChartTypes";
+import { Chart } from "canvasjs";
 
 type Props = {
     getLine: (id: string) => ChartLine;
 };
 
 export const ChartList = ({ getLine }: Props) => {
-    const { charts, addChart, removeChart, addLine, removeLine } = useCharts();
+    const { charts, addChart, removeChart, setCanvas } = useCharts();
 
     const handleDrop = useCallback((ev: DragEvent<HTMLDivElement>) => {
         const id = ev.dataTransfer.getData("id");
         const line = getLine(id);
-        addChart(nanoid(), line);
-    }, []);
-
-    const handleDropOnChart = useCallback((chartId: string, id: string) => {
-        const line = getLine(id);
-        addLine(chartId, line);
+        addChart(id, line);
     }, []);
 
     return (
@@ -36,16 +31,11 @@ export const ChartList = ({ getLine }: Props) => {
         >
             {charts.map((chart) => {
                 return (
-                    <ChartWithLegend
+                    <ChartElement
                         key={chart.id}
                         chartElement={chart}
-                        handleDropOnChart={handleDropOnChart}
-                        removeElement={() => {
-                            removeChart(chart.id);
-                        }}
-                        removeMeasurement={(measurementId: string) => {
-                            removeLine(chart.id, measurementId);
-                        }}
+                        removeElement={() => removeChart(chart.id) }
+                        setCanvas={(canvas: Chart) => setCanvas(chart.id, canvas)}
                     />
                 );
             })}

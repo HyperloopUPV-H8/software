@@ -1,7 +1,7 @@
 import styles from "./Legend.module.scss";
 import { LegendItem } from "./LegendItem/LegendItem";
 import { memo } from "react";
-import { ChartLine } from "components/ChartMenu/ChartElement";
+import { ChartLine } from "components/ChartMenu/ChartTypes";
 
 type Props = {
     items: ChartLine[];
