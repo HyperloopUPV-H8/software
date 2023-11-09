@@ -1,35 +1,32 @@
 import { useReducer } from "react";
-import { ChartElement, ChartLine } from "./ChartElement";
-import { mustFindIndex } from "utils/array";
 
-type AddElement = {
-    type: "add_element";
-    payload: { id: string; line: ChartLine };
+export type ChartInfo = {
+    readonly id: string;
+    readonly name: string;
+    readonly range: [number | null, number | null];
+    readonly color: string;
+    readonly units: string;
+    readonly getUpdate: () => number;
 };
 
-type RemoveElement = {
+type AddChart = {
+    type: "add_element";
+    payload: ChartInfo;
+};
+
+type RemoveChart = {
     type: "remove_element";
     payload: string;
 };
 
-type AddLine = {
-    type: "add_line";
-    payload: { chartId: string; line: ChartLine };
-};
+type ChartActions = AddChart | RemoveChart
 
-type RemoveLine = {
-    type: "remove_line";
-    payload: { chartId: string; lineId: string };
-};
-
-type ChartActions = AddElement | RemoveElement | AddLine | RemoveLine;
-
-function reducer(state: ChartElement[], action: ChartActions): ChartElement[] {
+function reducer(state: ChartInfo[], action: ChartActions): ChartInfo[] {
     switch (action.type) {
         case "add_element":
             return [
                 ...state,
-                { id: action.payload.id, lines: [action.payload.line] },
+                action.payload,
             ];
         case "remove_element": {
             const newElements = [...state];
@@ -37,75 +34,19 @@ function reducer(state: ChartElement[], action: ChartActions): ChartElement[] {
                 (element) => element.id != action.payload
             );
         }
-        case "add_line": {
-            const newElements = [...state];
-            const elementIndex = mustFindIndex(
-                newElements,
-                (element) => element.id == action.payload.chartId
-            );
-
-            newElements[elementIndex] = {
-                ...newElements[elementIndex],
-            };
-
-            newElements[elementIndex].lines = [
-                ...newElements[elementIndex].lines,
-            ];
-
-            if (
-                newElements[elementIndex].lines.findIndex(
-                    (description) => description.id == action.payload.line.id
-                ) == -1
-            ) {
-                newElements[elementIndex].lines.push(action.payload.line);
-            }
-
-            return newElements;
-        }
-        case "remove_line": {
-            const newElements = [...state];
-
-            const elementIndex = mustFindIndex(
-                newElements,
-                (element) => element.id == action.payload.chartId
-            );
-
-            newElements[elementIndex] = { ...newElements[elementIndex] };
-
-            newElements[elementIndex].lines = newElements[
-                elementIndex
-            ].lines.filter((line) => line.id != action.payload.lineId);
-
-            if (newElements[elementIndex].lines.length == 0) {
-                newElements.splice(elementIndex, 1);
-            }
-
-            return newElements;
-        }
     }
 }
 
+// Custom hook that keeps the information of the charts and methods to add and remove them.
+// It doesn't return charts out of the box, but it returns information to create them.
 export function useCharts() {
     const [charts, dispatch] = useReducer(reducer, []);
 
     return {
         charts,
-        addChart: (id: string, line: ChartLine) =>
-            dispatch({ type: "add_element", payload: { id, line } }),
+        addChart: (chartInfo: ChartInfo) =>
+            dispatch({ type: "add_element", payload: chartInfo }),
         removeChart: (id: string) =>
             dispatch({ type: "remove_element", payload: id }),
-        addLine: (chartId: string, line: ChartLine) =>
-            dispatch({
-                type: "add_line",
-                payload: { chartId: chartId, line: line },
-            }),
-        removeLine: (chartId: string, lineId: string) =>
-            dispatch({
-                type: "remove_line",
-                payload: {
-                    chartId: chartId,
-                    lineId: lineId,
-                },
-            }),
     };
 }
