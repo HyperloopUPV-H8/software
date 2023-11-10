@@ -12,38 +12,24 @@ type Decoder interface {
 	Decode(id abstraction.PacketId, reader io.Reader) (abstraction.Packet, error)
 }
 
-type packetCallback = func(abstraction.Packet)
-
 type PacketDecoder struct {
 	idToDecoder map[abstraction.PacketId]Decoder
-	onPacket    packetCallback
 	endianness  binary.ByteOrder
 }
 
-func (decoder *PacketDecoder) DecodeFrom(reader io.Reader) error {
+func (decoder *PacketDecoder) DecodeNext(reader io.Reader) (abstraction.Packet, error) {
 	var id abstraction.PacketId
-	idBuf := make([]byte, binary.Size(id))
-	n, err := reader.Read(idBuf)
-	if n < 2 {
-		return io.ErrUnexpectedEOF
-	}
-
-	id = abstraction.PacketId(decoder.endianness.Uint16(idBuf[:n]))
-
+	err := binary.Read(reader, decoder.endianness, &id)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	dec, ok := decoder.idToDecoder[id]
 	if !ok {
-		return presentation.ErrUnexpectedId{Id: id}
+		return nil, presentation.ErrUnexpectedId{Id: id}
 	}
 
 	packet, err := dec.Decode(id, reader)
-	if err != nil {
-		return err
-	}
 
-	decoder.onPacket(packet)
-	return nil
+	return packet, err
 }
