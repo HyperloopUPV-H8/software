@@ -1,4 +1,4 @@
-package ord
+package state
 
 import (
 	"encoding/csv"
@@ -9,12 +9,12 @@ import (
 	"time"
 )
 
-type OrdRecord struct {
+type StateRecord struct {
 	Timestamp  string
 	RecordData string
 }
 
-type OrdReq struct {
+type StateReq struct {
 	Timestamp string
 }
 
@@ -22,22 +22,22 @@ type csvLogger struct {
 	file    *os.File
 	writer  *csv.Writer
 	mu      sync.Mutex
-	records chan *OrdRecord
+	records chan *StateRecord
 	ticker  *time.Ticker
 	done    chan bool
 }
 
 var dataLogger = &csvLogger{
-	records: make(chan *OrdRecord),
+	records: make(chan *StateRecord),
 	ticker:  time.NewTicker(5 * time.Second),
 	done:    make(chan bool),
 }
 
-func initializeCSVLogger(logger *csvLogger, record *OrdRecord) error {
+func initializeCSVLogger(logger *csvLogger, record *StateRecord) error {
 	logger.mu.Lock()
 	defer logger.mu.Unlock()
 
-	filename := fmt.Sprintf("ord_%s.csv", record.Timestamp)
+	filename := fmt.Sprintf("sus_%s.csv", record.Timestamp)
 
 	var err error
 	logger.file, err = os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
@@ -73,10 +73,10 @@ func initializeCSVLogger(logger *csvLogger, record *OrdRecord) error {
 	return nil
 }
 
-func OrdLog(record interface{}) error {
-	r, ok := record.(*OrdRecord)
+func StateLog(record interface{}) error {
+	r, ok := record.(*StateRecord)
 	if !ok {
-		return errors.New("record type assertion to *OrdRecord failed")
+		return errors.New("record type assertion to *StateRecord failed")
 	}
 
 	if dataLogger.writer == nil {
@@ -88,8 +88,8 @@ func OrdLog(record interface{}) error {
 	return nil
 }
 
-func OrdRequest(request interface{}) (interface{}, error) {
-	r, ok := request.(*OrdReq)
+func StateRequest(request interface{}) (interface{}, error) {
+	r, ok := request.(*StateReq)
 	if !ok {
 		return nil, errors.New("request type assertion to *DataRequest failed")
 	}

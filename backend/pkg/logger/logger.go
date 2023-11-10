@@ -10,38 +10,42 @@ system.
 package logger
 
 import (
-	"errors"
 	"time"
+
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger/data"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger/msg"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger/ord"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger/state"
 )
 
 type LoggerName string
 
-type DataRecord struct {
+type DataL struct {
+	Timestamp string
+	Data      string
+	Logger    LoggerName
+}
+
+func (dl *DataL) Name() LoggerName {
+	return dl.Logger
+}
+
+type DataR struct {
 	Timestamp time.Time
 	Data      string
-	logger    LoggerName
+	Logger    LoggerName
 }
 
-func (dr *DataRecord) Name() LoggerName {
-	return dr.logger
+func (dr *DataR) Name() LoggerName {
+	return dr.Logger
 }
 
-type DataRequest struct {
-	Timestamp time.Time
-	Data      string
-	logger    LoggerName
-}
-
-func (dr *DataRequest) Name() LoggerName {
-	return dr.logger
-}
-
-type LoggerFunc func(*DataRecord) error
-type RequestFunc func(*DataRequest) (*DataRecord, error)
+type LoggerFunc func(record interface{}) error
+type RequestFunc func(request interface{}) (interface{}, error)
 
 type Logger interface {
-	PushRecord(*DataRecord) error
-	PullRecord(*DataRequest) (*DataRecord, error)
+	PushRecord(interface{}) error
+	PullRecord(interface{}) (interface{}, error)
 }
 
 type BaseLogger struct {
@@ -52,30 +56,16 @@ type BaseLogger struct {
 func NewBaseLogger() *BaseLogger {
 	return &BaseLogger{
 		logFuncs: map[LoggerName]LoggerFunc{
-			"datalogger": DataLog,
-			"msglogger":  MsgLog,
-			"ordlogger":  OrdLog,
-			"suslogger":  SusLog,
+			"datalogger":  data.DataLog,
+			"msglogger":   msg.MsgLog,
+			"ordlogger":   ord.OrdLog,
+			"statelogger": state.StateLog,
 		},
 		requestFuncs: map[LoggerName]RequestFunc{
-			"datalogger": DataRequest,
-			"msglogger":  MsgRequest,
-			"ordlogger":  OrdRequest,
-			"suslogger":  SusRequest,
+			"datalogger":  data.DataRequest,
+			"msglogger":   msg.MsgRequest,
+			"ordlogger":   ord.OrdRequest,
+			"statelogger": state.StateRequest,
 		},
 	}
-}
-
-func (bl *BaseLogger) PushRecord(record *DataRecord) error {
-	if logFunc, ok := bl.logFuncs[record.Name()]; ok {
-		return logFunc(record)
-	}
-	return errors.New("unknown logger name")
-}
-
-func (bl *BaseLogger) PullRecord(request *DataRequest) (*DataRecord, error) {
-	if requestFunc, ok := bl.requestFuncs[request.Name()]; ok {
-		return requestFunc(request)
-	}
-	return nil, errors.New("unknown logger name")
 }
