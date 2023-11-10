@@ -12,12 +12,12 @@ type Decoder interface {
 	Decode(id abstraction.PacketId, reader io.Reader) (abstraction.Packet, error)
 }
 
-type PacketDecoder struct {
+type Packet struct {
 	idToDecoder map[abstraction.PacketId]Decoder
 	endianness  binary.ByteOrder
 }
 
-func (decoder *PacketDecoder) DecodeNext(reader io.Reader) (abstraction.Packet, error) {
+func (decoder *Packet) DecodeNext(reader io.Reader) (abstraction.Packet, error) {
 	var id abstraction.PacketId
 	err := binary.Read(reader, decoder.endianness, &id)
 	if err != nil {

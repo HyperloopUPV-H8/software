@@ -17,7 +17,7 @@ import (
 // or notification has an associated event which is used to determine the
 // action to take.
 type Transport struct {
-	decoder *decoder.PacketDecoder
+	decoder *decoder.Packet
 	encoder *presentation.PacketEncoder
 
 	snifferDemux *session.SnifferDemux

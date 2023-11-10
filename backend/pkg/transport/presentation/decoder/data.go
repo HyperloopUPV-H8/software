@@ -11,14 +11,16 @@ import (
 
 type valueDecoder func(name packet.ValueName, endianness binary.ByteOrder, reader io.Reader) (packet.Value, error)
 
-type Data struct {
+var _ Decoder = &data{}
+
+type data struct {
 	endianness       binary.ByteOrder
 	idToDescription  map[abstraction.PacketId]packet.DataDescriptor
 	enumDescriptions map[packet.ValueName]packet.EnumDescriptor
 	valueDecoders    map[packet.ValueType]valueDecoder
 }
 
-func (decoder *Data) Decode(id abstraction.PacketId, reader io.Reader) (abstraction.Packet, error) {
+func (decoder *data) Decode(id abstraction.PacketId, reader io.Reader) (abstraction.Packet, error) {
 	descriptor, ok := decoder.idToDescription[id]
 	if !ok {
 		return nil, presentation.ErrUnexpectedId{Id: id}
@@ -70,9 +72,9 @@ func decodeBool(name packet.ValueName, endianness binary.ByteOrder, reader io.Re
 	return packet.NewBooleanValue(val), err
 }
 
-var _ valueDecoder = (&Data{}).decodeEnum
+var _ valueDecoder = (&data{}).decodeEnum
 
-func (decoder *Data) decodeEnum(name packet.ValueName, endianness binary.ByteOrder, reader io.Reader) (packet.Value, error) {
+func (decoder *data) decodeEnum(name packet.ValueName, endianness binary.ByteOrder, reader io.Reader) (packet.Value, error) {
 	enum, ok := decoder.enumDescriptions[name]
 	if !ok {
 		return nil, presentation.ErrUndefinedEnum{Name: name}
