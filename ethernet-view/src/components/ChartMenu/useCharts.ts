@@ -1,13 +1,5 @@
 import { useReducer } from "react";
-
-export type ChartInfo = {
-    readonly id: string;
-    readonly name: string;
-    readonly range: [number | null, number | null];
-    readonly color: string;
-    readonly units: string;
-    readonly getUpdate: () => number;
-};
+import { ChartInfo } from "./types";
 
 type AddChart = {
     type: "add_element";
@@ -23,6 +15,7 @@ type ChartActions = AddChart | RemoveChart
 
 function reducer(state: ChartInfo[], action: ChartActions): ChartInfo[] {
     switch (action.type) {
+        //TODO: Check if is already in the list
         case "add_element":
             return [
                 ...state,

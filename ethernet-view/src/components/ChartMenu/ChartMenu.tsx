@@ -31,11 +31,8 @@ export const ChartMenu = ({ sidebarSections }: Props) => {
             <div className={styles.chartMenuWrapper}>
                 <Sidebar sections={sidebarSections} />
                 <ChartList
-                    getLine={(id) => {
-                        const meas = getMeasurement(
-                            store.getState().measurements,
-                            id
-                        ) as NumericMeasurement;
+                    getChartInfo={(id) => {
+                        const meas = getMeasurement(store.getState().measurements, id) as NumericMeasurement;
 
                         return {
                             id: id,
@@ -43,16 +40,8 @@ export const ChartMenu = ({ sidebarSections }: Props) => {
                             units: meas.units,
                             range: meas.safeRange,
                             getUpdate: () => {
-                                //TODO: change to getNumericMeasurement and return undefined if its not numeric (or doesnt exist)
-                                const meas = getMeasurement(
-                                    store.getState().measurements,
-                                    id
-                                ) as NumericMeasurement;
-
-                                if (!meas) {
-                                    return 0;
-                                }
-
+                                const meas = getMeasurement(store.getState().measurements, id) as NumericMeasurement;
+                                if (!meas) return 0
                                 return meas.value.last;
                             },
                             color: getRandomColor(),

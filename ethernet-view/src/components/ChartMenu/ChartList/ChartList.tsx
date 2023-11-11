@@ -1,50 +1,39 @@
 import styles from "./ChartList.module.scss";
-import { ChartWithLegend } from "./ChartWithLegend/ChartWithLegend";
+import { ChartElement } from "./ChartElement/ChartElement";
 import { DragEvent, useCallback } from "react";
 import { useCharts } from "../useCharts";
-import { nanoid } from "nanoid";
-import { ChartLine } from "../ChartElement";
+import { ChartInfo } from "../types";
 
 type Props = {
-    getLine: (id: string) => ChartLine;
+    getChartInfo: (id: string) => ChartInfo;
 };
 
-export const ChartList = ({ getLine }: Props) => {
-    const { charts, addChart, removeChart, addLine, removeLine } = useCharts();
+export const ChartList = ({ getChartInfo }: Props) => {
+    const { charts, addChart, removeChart } = useCharts();
 
     const handleDrop = useCallback((ev: DragEvent<HTMLDivElement>) => {
         const id = ev.dataTransfer.getData("id");
-        const line = getLine(id);
-        addChart(nanoid(), line);
-    }, []);
-
-    const handleDropOnChart = useCallback((chartId: string, id: string) => {
-        const line = getLine(id);
-        addLine(chartId, line);
+        const chartInfo = getChartInfo(id);
+        addChart(chartInfo);
     }, []);
 
     return (
         <div
             className={styles.chartListWrapper}
             onDrop={handleDrop}
-            onDragEnter={(ev) => {
-                ev.preventDefault();
-            }}
-            onDragOver={(ev) => {
-                ev.preventDefault();
-            }}
+            onDragEnter={(ev) => ev.preventDefault()}
+            onDragOver={(ev) => ev.preventDefault()}
         >
             {charts.map((chart) => {
                 return (
-                    <ChartWithLegend
+                    <ChartElement
                         key={chart.id}
-                        chartElement={chart}
-                        handleDropOnChart={handleDropOnChart}
+                        chartInfo={chart}
                         removeElement={() => {
                             removeChart(chart.id);
                         }}
-                        removeMeasurement={(measurementId: string) => {
-                            removeLine(chart.id, measurementId);
+                        removeMeasurement={() => {
+                            removeChart(chart.id);
                         }}
                     />
                 );
