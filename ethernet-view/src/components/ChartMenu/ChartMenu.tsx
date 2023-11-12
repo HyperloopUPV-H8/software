@@ -31,7 +31,7 @@ export const ChartMenu = ({ sidebarSections }: Props) => {
             <div className={styles.chartMenuWrapper}>
                 <Sidebar sections={sidebarSections} />
                 <ChartList
-                    getChartInfo={(id) => {
+                    getMeasurementInfo={(id) => {
                         const meas = getMeasurement(store.getState().measurements, id) as NumericMeasurement;
 
                         return {

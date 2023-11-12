@@ -2,19 +2,20 @@ import styles from "./ChartList.module.scss";
 import { ChartElement } from "./ChartElement/ChartElement";
 import { DragEvent, useCallback } from "react";
 import { useCharts } from "../useCharts";
-import { ChartInfo } from "../types";
+import { MeasurementInfo } from "../types";
+import { nanoid } from "nanoid";
 
 type Props = {
-    getChartInfo: (id: string) => ChartInfo;
+    getMeasurementInfo: (id: string) => MeasurementInfo;
 };
 
-export const ChartList = ({ getChartInfo }: Props) => {
-    const { charts, addChart, removeChart } = useCharts();
+export const ChartList = ({ getMeasurementInfo }: Props) => {
+    const { charts, addChart, removeChart, addMeasurementToChart, removeMeasurementFromChart } = useCharts();
 
     const handleDrop = useCallback((ev: DragEvent<HTMLDivElement>) => {
         const id = ev.dataTransfer.getData("id");
-        const chartInfo = getChartInfo(id);
-        addChart(chartInfo);
+        const measurementInfo = getMeasurementInfo(id);
+        addChart(nanoid(), measurementInfo);
     }, []);
 
     return (
@@ -27,9 +28,12 @@ export const ChartList = ({ getChartInfo }: Props) => {
             {charts.map((chart) => {
                 return (
                     <ChartElement
-                        key={chart.id}
-                        chartInfo={chart}
-                        removeElement={() => removeChart(chart.id)}
+                        key={chart.chartId}
+                        chart={chart}
+                        getMeasurementInfo={getMeasurementInfo}
+                        removeElement={removeChart}
+                        addMeasurementToChart={addMeasurementToChart}
+                        removeMeasurementFromChart={removeMeasurementFromChart}
                     />
                 );
             })}

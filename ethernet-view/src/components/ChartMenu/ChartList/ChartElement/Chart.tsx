@@ -1,14 +1,15 @@
 // @ts-ignore
 import CanvasJSReact from '@canvasjs/react-charts';
 import { useGlobalTicker } from 'common';
-import { ChartInfo } from "components/ChartMenu/types"
+import { ChartId, MeasurementInfo } from "components/ChartMenu/types"
 import { MutableRefObject, useRef, useState } from 'react';
  
 var CanvasJSChart = CanvasJSReact.CanvasJSChart;
 
 type Props = {
-    chartInfo: ChartInfo;
-    removeElement: (id: string) => void;
+    chartId: ChartId,
+    measurements: MeasurementInfo[],
+    removeMeasurementFromChart: (chartId: string, measurementId: string) => void,
 }
 
 interface Point {
@@ -18,68 +19,65 @@ interface Point {
 
 const MAX_VALUES = 1000;
 
-const insertPoint = (points: Point[], value: number) : Point[] => {
-    if(points.length == 0) {
-        points.push({x: 0, y: value})
-        return points
+const insertPoint = (pointsMap: Map<string, Point[]>, measurementId: string, value: number) : Point[] => {
+    let points = pointsMap.get(measurementId)
+    if(points) {
+        if(points.length == 0) {
+            points.push({x: 0, y: value})
+            return points
+        }
+        const lastx = points[points.length - 1].x
+        points.push({x: lastx + 1, y: value})
+        if(points.length >= MAX_VALUES) {
+            points.shift()
+        }
     }
-    const lastx = points[points.length - 1].x
-    points.push({x: lastx + 1, y: value})
-    if(points.length >= MAX_VALUES) {
-        points.shift()
-    }
-    return points
+    return points || [];
 }
 
-export const Chart = ({ chartInfo, removeElement } : Props) => {
+export const Chart = ({ chartId, measurements, removeMeasurementFromChart } : Props) => {
 
-    const [points, setPoints] = useState<Point[]>([])
+    const [points, setPoints] = useState<Map<string, Point[]>>(new Map<string, Point[]>());
 
     let chartRef = useRef<MutableRefObject<undefined>>();
 
+    // let chartData;
+
+    // chartData = measurements.map((measurement) => {
+    //     return {
+    //         type: "line",
+    //         showInLegend: true,
+    //         name: measurement.name,
+    //         color: measurement.color,
+    //         dataPoints: points.get(measurement.id)
+    //     }
+    // });
+
     useGlobalTicker(() => {
-        const newPointsList = insertPoint(points, chartInfo.getUpdate())
-        setPoints(newPointsList)
-        if (chartRef.current) {
-            (chartRef.current as any).render();
+        for(let measurement of measurements) {
+            const newPointsList = insertPoint(points, measurement.id, measurement.getUpdate());
+            points.set(measurement.id, newPointsList)
+            setPoints(points)
+            if (chartRef.current) {
+                (chartRef.current as any).render();
+            }
         }
     })
 
-    const chartOptions = {
-        height: 300,
-        data: [
-            {
-                type: "line",
-                showInLegend: true,
-                name: chartInfo.name,
-                color: chartInfo.color,
-                dataPoints: points
-            }
-        ],
-        legend: {
-            fontSize: 16,
-            cursor: "pointer",
-            itemclick: (event: any) => {
-                event.chart.data[event.dataSeriesIndex].remove();
-                removeElement(chartInfo.name)
-            }
-            // itemclick: function (e: any) {
-            //     //console.log("legend click: " + e.dataPointIndex);
-            //     //console.log(e);
-            //     if (typeof (e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
-            //         e.dataSeries.visible = false;
-            //     } else {
-            //         e.dataSeries.visible = true;
-            //     }
- 
-            //     e.chart.render();
-            // }
-        },
-    }
-
     return (
             <CanvasJSChart
-                options={chartOptions}
+                options={{
+                    height: 300,
+                    data: [],
+                    legend: {
+                        fontSize: 16,
+                        cursor: "pointer",
+                        itemclick: (event: any) => {
+                            removeMeasurementFromChart(chartId, event.dataSeries.name);
+                            event.chart.data[event.dataSeriesIndex].remove();
+                        }
+                    },
+                }}
                 onRef={(ref: MutableRefObject<undefined>) => {chartRef.current = ref;}}
             />
     )
