@@ -31,7 +31,7 @@ export const ChartList = ({ getMeasurementInfo }: Props) => {
                         key={chart.chartId}
                         chart={chart}
                         getMeasurementInfo={getMeasurementInfo}
-                        removeElement={removeChart}
+                        removeChart={removeChart}
                         addMeasurementToChart={addMeasurementToChart}
                         removeMeasurementFromChart={removeMeasurementFromChart}
                     />
