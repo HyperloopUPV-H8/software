@@ -29,12 +29,7 @@ export const ChartList = ({ getChartInfo }: Props) => {
                     <ChartElement
                         key={chart.id}
                         chartInfo={chart}
-                        removeElement={() => {
-                            removeChart(chart.id);
-                        }}
-                        removeMeasurement={() => {
-                            removeChart(chart.id);
-                        }}
+                        removeElement={() => removeChart(chart.id)}
                     />
                 );
             })}

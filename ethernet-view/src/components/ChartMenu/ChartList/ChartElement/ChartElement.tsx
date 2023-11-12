@@ -1,19 +1,18 @@
 import { ChartInfo } from "components/ChartMenu/types";
 import styles from "./ChartElement.module.scss";
 import { Chart } from "./Chart";
+import { AiOutlineCloseCircle } from 'react-icons/ai'
 
 type Props = {
     chartInfo: ChartInfo;
-    removeElement: () => void;
-    removeMeasurement: (id: string) => void;
+    removeElement: (id: string) => void;
 };
 
-export const ChartElement = ({ chartInfo, removeElement, removeMeasurement }: Props) => {
+export const ChartElement = ({ chartInfo, removeElement }: Props) => {
 
     // function handleDrop(ev: DragEvent<HTMLDivElement>) {
     //     ev.stopPropagation();
     //     const id = ev.dataTransfer.getData("id");
-    //     console.log(id)
     // }
 
     return (
@@ -25,8 +24,14 @@ export const ChartElement = ({ chartInfo, removeElement, removeMeasurement }: Pr
         >
 
             <div className={styles.chart}>
+                <AiOutlineCloseCircle 
+                    size={30}
+                    cursor="pointer"
+                    onClick={() => removeElement(chartInfo.name)}
+                />
                 <Chart
                     chartInfo={chartInfo}
+                    removeElement={removeElement}
                 />
             </div>
         </div>

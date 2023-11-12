@@ -8,6 +8,7 @@ var CanvasJSChart = CanvasJSReact.CanvasJSChart;
 
 type Props = {
     chartInfo: ChartInfo;
+    removeElement: (id: string) => void;
 }
 
 interface Point {
@@ -30,7 +31,7 @@ const insertPoint = (points: Point[], value: number) : Point[] => {
     return points
 }
 
-export const Chart = ({ chartInfo } : Props) => {
+export const Chart = ({ chartInfo, removeElement } : Props) => {
 
     const [points, setPoints] = useState<Point[]>([])
 
@@ -46,15 +47,34 @@ export const Chart = ({ chartInfo } : Props) => {
 
     const chartOptions = {
         height: 300,
-        title: {
-            text: chartInfo.name,
-        },
         data: [
             {
-                type: "spline",
+                type: "line",
+                showInLegend: true,
+                name: chartInfo.name,
+                color: chartInfo.color,
                 dataPoints: points
             }
-        ]
+        ],
+        legend: {
+            fontSize: 16,
+            cursor: "pointer",
+            itemclick: (event: any) => {
+                event.chart.data[event.dataSeriesIndex].remove();
+                removeElement(chartInfo.name)
+            }
+            // itemclick: function (e: any) {
+            //     //console.log("legend click: " + e.dataPointIndex);
+            //     //console.log(e);
+            //     if (typeof (e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+            //         e.dataSeries.visible = false;
+            //     } else {
+            //         e.dataSeries.visible = true;
+            //     }
+ 
+            //     e.chart.render();
+            // }
+        },
     }
 
     return (
