@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
 )
 
@@ -12,6 +13,9 @@ import (
 type Decoder interface {
 	Decode(id abstraction.PacketId, reader io.Reader) (abstraction.Packet, error)
 }
+
+// Type assertion to check data follows the Decoder interface
+var _ Decoder = &data.Decoder{}
 
 // Packet is the root decoder, it takes the id of the packet and decodes the rest of it
 type Packet struct {

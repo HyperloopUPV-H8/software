@@ -1,37 +1,33 @@
-package packet
+package data
 
-import "reflect"
-
-// ValueType is the variable type of a data packet value
-type ValueType string
-
-const (
-	Uint8Type   ValueType = "uint8"
-	Uint16Type  ValueType = "uint16"
-	Uint32Type  ValueType = "uint32"
-	Uint64Type  ValueType = "uint64"
-	Int8Type    ValueType = "int8"
-	Int16Type   ValueType = "int16"
-	Int32Type   ValueType = "int32"
-	Int64Type   ValueType = "int64"
-	Float32Type ValueType = "float32"
-	Float64Type ValueType = "float64"
-	BoolType    ValueType = "bool"
-	EnumType    ValueType = "enum"
+import (
+	"reflect"
 )
 
 // ValueName is the name of the value
 type ValueName string
 
-// ValueDescriptor describes a value of a packet
-type ValueDescriptor struct {
-	Name ValueName
-	Type ValueType
-}
+// valueType is the variable type of a data packet value
+type valueType string
+
+const (
+	Uint8Type   valueType = "uint8"
+	Uint16Type  valueType = "uint16"
+	Uint32Type  valueType = "uint32"
+	Uint64Type  valueType = "uint64"
+	Int8Type    valueType = "int8"
+	Int16Type   valueType = "int16"
+	Int32Type   valueType = "int32"
+	Int64Type   valueType = "int64"
+	Float32Type valueType = "float32"
+	Float64Type valueType = "float64"
+	BoolType    valueType = "bool"
+	EnumType    valueType = "enum"
+)
 
 // Value is an interface over all kinds of values
 type Value interface {
-	Type() ValueType
+	Type() valueType
 }
 
 // numeric is a helper interface to group any kind of numeric variable
@@ -69,8 +65,8 @@ func (value NumericValue[N]) Value() float64 {
 }
 
 // Type returns the type of the numeric value
-func (value NumericValue[N]) Type() ValueType {
-	return ValueType(reflect.TypeOf(value.inner).Name())
+func (value NumericValue[N]) Type() valueType {
+	return valueType(reflect.TypeOf(value.inner).Name())
 }
 
 // type assertion to check BooleanValue follows the Value interface
@@ -94,7 +90,7 @@ func (value BooleanValue) Value() bool {
 }
 
 // Type returns the type of the boolean value
-func (value BooleanValue) Type() ValueType {
+func (value BooleanValue) Type() valueType {
 	return BoolType
 }
 
@@ -125,6 +121,6 @@ func (value EnumValue) Variant() EnumVariant {
 }
 
 // Type returns the type of the enum value
-func (value EnumValue) Type() ValueType {
+func (value EnumValue) Type() valueType {
 	return EnumType
 }
