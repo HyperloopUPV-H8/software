@@ -18,6 +18,9 @@ type Record struct {
 	Timestamp time.Time
 }
 
+// Type Request
+//TODO!
+
 func (r *Record) Name() abstraction.LoggerName {
 	return r.NameValue
 }
