@@ -24,7 +24,7 @@ export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChar
     const [measurements, setMeasurements] = useState<MeasurementInfo[]>([]);
 
     let currentX = useRef(0);
-    let chartRef = useRef<typeof CanvasJSChart>();
+    let chartRef = useRef<typeof CanvasJSReact.CanvasJSChart>();
 
     // Event handler that adds a new line to the chart when the user
     // drops a measurementId on the chart.
