@@ -4,10 +4,11 @@ import { ChartInfo, MeasurementInfo, Point } from "components/ChartMenu/types";
 import styles from "./ChartElement.module.scss";
 import { AiOutlineCloseCircle } from 'react-icons/ai'
 import { MutableRefObject, useCallback, useRef } from "react";
+import { useInterval } from 'common';
 
 var CanvasJSChart = CanvasJSReact.CanvasJSChart;
 
-const MAX_VALUE = 1000;
+const MAX_VALUE = 300;
 
 type Props = {
     chart: ChartInfo;
@@ -26,7 +27,7 @@ export const ChartElement = ({ chart, removeChart, getMeasurementInfo, addMeasur
         addMeasurementToChart(chart.chartId, measurement);
     }, []);
 
-    let chartData = chart.measurements.map((measurement) => {
+    const chartData = chart.measurements.map((measurement) => {
         return {
             type: "line",
             showInLegend: true,
@@ -36,7 +37,25 @@ export const ChartElement = ({ chart, removeChart, getMeasurementInfo, addMeasur
         }
     });
 
-    const currentX = useRef(0);
+    let {current: currentX} = useRef(0);
+
+    useInterval(() => {
+        for(let measurement of chart.measurements) {
+            const dataPoints = chartData.find((data) => data.name === measurement.name)?.dataPoints;
+            if(dataPoints) {
+                const point = {
+                    x: currentX,
+                    y: measurement.getUpdate(),
+                };
+                dataPoints.push(point);
+                if(dataPoints.length > MAX_VALUE) {
+                    dataPoints.shift();
+                }
+            }
+        }
+        chartRef.current?.render();
+        currentX++;
+    }, 5);
 
     let chartRef = useRef<typeof CanvasJSChart>();
 
@@ -64,6 +83,9 @@ export const ChartElement = ({ chart, removeChart, getMeasurementInfo, addMeasur
                             itemclick: (event: any) => {
                                 removeMeasurementFromChart(chart.chartId, event.dataSeries.name);
                                 event.chart.data[event.dataSeriesIndex].remove();
+                                if(event.chart.data.length === 0) {
+                                    removeChart(chart.chartId);
+                                }
                             }
                         },
                     }}
