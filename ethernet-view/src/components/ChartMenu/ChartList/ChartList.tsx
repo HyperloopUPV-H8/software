@@ -1,8 +1,7 @@
 import styles from "./ChartList.module.scss";
 import { ChartElement } from "./ChartElement/ChartElement";
-import { DragEvent, useCallback } from "react";
-import { useCharts } from "../useCharts";
-import { MeasurementInfo } from "../types";
+import { DragEvent, useCallback, useState } from "react";
+import { MeasurementInfo, ChartInfo, ChartId, MeasurementId } from "../types";
 import { nanoid } from "nanoid";
 
 type Props = {
@@ -10,8 +9,18 @@ type Props = {
 };
 
 export const ChartList = ({ getMeasurementInfo }: Props) => {
-    const { charts, addChart, removeChart } = useCharts();
-    const memoRemoveChart = useCallback((id: string) => removeChart(id), []);
+    const [charts, setCharts] = useState<ChartInfo[]>([])
+
+    const addChart = useCallback((chartId: ChartId, measurementId: MeasurementId) => {
+            setCharts((prev) => [...prev, {
+                chartId: chartId,
+                measurementId: measurementId, 
+            }]);
+    }, []);
+
+    const removeChart = useCallback((id: ChartId) => {
+        setCharts((prev) => prev.filter((chart) => chart.chartId !== id));
+    }, []);
 
     const handleDrop = useCallback((ev: DragEvent<HTMLDivElement>) => {
         const id = ev.dataTransfer.getData("id");
@@ -32,7 +41,8 @@ export const ChartList = ({ getMeasurementInfo }: Props) => {
                         <ChartElement
                             key={chart.chartId}
                             chartId={chart.chartId}
-                            removeChart={memoRemoveChart}
+                            maxValue={300}
+                            removeChart={removeChart}
                             measurementId={chart.measurementId}
                             getMeasurementInfo={getMeasurementInfo}
                         />
