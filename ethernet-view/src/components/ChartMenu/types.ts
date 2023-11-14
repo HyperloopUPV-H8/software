@@ -1,12 +1,15 @@
 export type ChartId = string;
 export type MeasurementId = string;
+export type MeasurementName = string;
+export type MeasurementColor = string;
+export type MeasurementUnits = string;
 
 export type MeasurementInfo = {
-    readonly id: string,
-    readonly name: string,
+    readonly id: MeasurementId,
+    readonly name: MeasurementName,
     readonly range: [number | null, number | null],
-    readonly color: string,
-    readonly units: string,
+    readonly color: MeasurementColor,
+    readonly units: MeasurementUnits,
     readonly getUpdate: () => number,
 };
 

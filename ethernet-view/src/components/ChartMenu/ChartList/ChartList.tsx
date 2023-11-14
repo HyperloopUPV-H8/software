@@ -5,7 +5,7 @@ import { MeasurementInfo, ChartInfo, ChartId, MeasurementId } from "../types";
 import { nanoid } from "nanoid";
 
 type Props = {
-    getMeasurementInfo: (id: string) => MeasurementInfo;
+    getMeasurementInfo: (id: MeasurementId) => MeasurementInfo;
 };
 
 export const ChartList = ({ getMeasurementInfo }: Props) => {

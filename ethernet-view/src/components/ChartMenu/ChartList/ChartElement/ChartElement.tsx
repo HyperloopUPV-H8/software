@@ -3,7 +3,7 @@ import CanvasJSReact from '@canvasjs/react-charts';
 import { ChartId, MeasurementId, MeasurementInfo, Point } from "components/ChartMenu/types";
 import styles from "./ChartElement.module.scss";
 import { AiOutlineCloseCircle } from 'react-icons/ai'
-import { MutableRefObject, memo, useCallback, useEffect, useRef, useState } from "react";
+import { MutableRefObject, memo, useCallback, useEffect, useRef, useState, DragEvent } from "react";
 import { useInterval } from 'common';
 
 var CanvasJSChart = CanvasJSReact.CanvasJSChart;
@@ -13,7 +13,7 @@ type Props = {
     measurementId: MeasurementId;
     maxValue: number;
     removeChart: (id: ChartId) => void;
-    getMeasurementInfo: (id: string) => MeasurementInfo;
+    getMeasurementInfo: (id: MeasurementId) => MeasurementInfo;
 };
 
 // React component that keeps the chart render and measurements represented on it.
@@ -28,7 +28,7 @@ export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChar
 
     // Event handler that adds a new line to the chart when the user
     // drops a measurementId on the chart.
-    const handleDropOnChart = useCallback((ev: any) => {
+    const handleDropOnChart = useCallback((ev: DragEvent<HTMLDivElement>) => {
         ev.stopPropagation();
         const measurementId = ev.dataTransfer.getData("id");
         const measurement = getMeasurementInfo(measurementId);
@@ -98,6 +98,7 @@ export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChar
                                 setMeasurements(prev => prev.filter(measurement =>
                                     (measurement.name !== event.dataSeries.name)
                                 ));
+                                // TODO: If there are no more measurements, remove the chart.
                             }
                         },
                     }}
