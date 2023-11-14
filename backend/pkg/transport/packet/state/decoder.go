@@ -12,7 +12,7 @@ type Decoder struct {
 }
 
 func (decoder *Decoder) Decode(id abstraction.PacketId, reader io.Reader) (abstraction.Packet, error) {
-	stateSpace := Packet{
+	stateSpace := Space{
 		id: id,
 	}
 
