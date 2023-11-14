@@ -8,19 +8,26 @@ import { useInterval } from 'common';
 
 var CanvasJSChart = CanvasJSReact.CanvasJSChart;
 
-const MAX_VALUE = 300;
-
 type Props = {
     chartId: ChartId;
     measurementId: MeasurementId;
+    maxValue: number;
     removeChart: (id: ChartId) => void;
     getMeasurementInfo: (id: string) => MeasurementInfo;
 };
 
-export const ChartElement = memo(({ chartId, measurementId, removeChart, getMeasurementInfo }: Props) => {
+// React component that keeps the chart render and measurements represented on it.
+export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChart, getMeasurementInfo }: Props) => {
 
+    // Different measurements on this chart.
+    // Each one is represented by a line.
     const [measurements, setMeasurements] = useState<MeasurementInfo[]>([]);
 
+    let currentX = useRef(0);
+    let chartRef = useRef<typeof CanvasJSChart>();
+
+    // Event handler that adds a new line to the chart when the user
+    // drops a measurementId on the chart.
     const handleDropOnChart = useCallback((ev: any) => {
         ev.stopPropagation();
         const measurementId = ev.dataTransfer.getData("id");
@@ -28,16 +35,13 @@ export const ChartElement = memo(({ chartId, measurementId, removeChart, getMeas
         setMeasurements((prev) => [...prev, measurement]);
     }, []);
 
-    let currentX = useRef(0);
-    let chartRef = useRef<typeof CanvasJSChart>();
-
-
     useEffect(() => {
         const measurement = getMeasurementInfo(measurementId);
         setMeasurements((prev) => [...prev, measurement]);
     }, [])
-    
 
+    // ChartData keeps all the dataSeries objects that are passed
+    // to CanvasJSChart options
     const chartData = measurements.map((measurement) => {
         return {
             type: "line",
@@ -48,6 +52,8 @@ export const ChartElement = memo(({ chartId, measurementId, removeChart, getMeas
         }
     });
 
+    // Interval that gets the updated values for all the measurements every 5ms
+    // in this chart and add them to it.
     useInterval(() => {
         for(let measurement of measurements) {
             const dataPoints = chartData.find((data) => data.name === measurement.name)?.dataPoints;
@@ -57,7 +63,7 @@ export const ChartElement = memo(({ chartId, measurementId, removeChart, getMeas
                     y: measurement.getUpdate(),
                 };
                 dataPoints.push(point);
-                if(dataPoints.length > MAX_VALUE) {
+                if(dataPoints.length > maxValue) {
                     dataPoints.shift();
                 }
             }
@@ -89,7 +95,7 @@ export const ChartElement = memo(({ chartId, measurementId, removeChart, getMeas
                             cursor: "pointer",
                             itemclick: (event: any) => {
                                 event.chart.data[event.dataSeriesIndex].remove();
-                                setMeasurements((prev) => prev.filter((measurement) => 
+                                setMeasurements(prev => prev.filter(measurement =>
                                     (measurement.name !== event.dataSeries.name)
                                 ));
                             }
