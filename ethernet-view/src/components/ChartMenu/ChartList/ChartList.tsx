@@ -10,12 +10,13 @@ type Props = {
 };
 
 export const ChartList = ({ getMeasurementInfo }: Props) => {
-    const { charts, addChart, removeChart, addMeasurementToChart, removeMeasurementFromChart } = useCharts();
+    const { charts, addChart, removeChart } = useCharts();
+    const memoRemoveChart = useCallback((id: string) => removeChart(id), []);
 
     const handleDrop = useCallback((ev: DragEvent<HTMLDivElement>) => {
         const id = ev.dataTransfer.getData("id");
-        const measurementInfo = getMeasurementInfo(id);
-        addChart(nanoid(), measurementInfo);
+        const measurementId = getMeasurementInfo(id).id;
+        addChart(nanoid(), measurementId);
     }, []);
 
     return (
@@ -27,14 +28,15 @@ export const ChartList = ({ getMeasurementInfo }: Props) => {
         >
             {charts.map((chart) => {
                 return (
-                    <ChartElement
-                        key={chart.chartId}
-                        chart={chart}
-                        getMeasurementInfo={getMeasurementInfo}
-                        removeChart={removeChart}
-                        addMeasurementToChart={addMeasurementToChart}
-                        removeMeasurementFromChart={removeMeasurementFromChart}
-                    />
+                    <>
+                        <ChartElement
+                            key={chart.chartId}
+                            chartId={chart.chartId}
+                            removeChart={memoRemoveChart}
+                            measurementId={chart.measurementId}
+                            getMeasurementInfo={getMeasurementInfo}
+                        />
+                    </>
                 );
             })}
         </div>

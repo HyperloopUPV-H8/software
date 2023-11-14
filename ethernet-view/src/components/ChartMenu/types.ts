@@ -1,3 +1,6 @@
+export type ChartId = string;
+export type MeasurementId = string;
+
 export type MeasurementInfo = {
     readonly id: string,
     readonly name: string,
@@ -7,12 +10,12 @@ export type MeasurementInfo = {
     readonly getUpdate: () => number,
 };
 
-export type ChartId = string;
-
 export type ChartInfo = {
     chartId: ChartId,
-    measurements: MeasurementInfo[],
+    measurementId: MeasurementId,
 };
+
+export type Measurements = MeasurementInfo[];
 
 export interface Point {
     x: number,
