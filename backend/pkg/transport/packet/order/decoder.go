@@ -16,6 +16,19 @@ type Decoder struct {
 	endianness binary.ByteOrder
 }
 
+// TODO: improve constructor
+// NewDecoder creates a new Decoder
+func NewDecoder(endianness binary.ByteOrder) *Decoder {
+	return &Decoder{
+		endianness: endianness,
+	}
+}
+
+// SetActionId sets the action decoder for the specified id
+func (decoder *Decoder) SetActionId(id abstraction.PacketId, action actionDecoder) {
+	decoder.idToAction[id] = action
+}
+
 // Decode decodes the next state order action from the reader.
 //
 // it uses the id to determine the kind of action.

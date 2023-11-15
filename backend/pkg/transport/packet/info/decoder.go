@@ -10,6 +10,11 @@ import (
 // Decoder is a decoder for info packets. It uses json to decode the information
 type Decoder struct{}
 
+// NewDecoder creates a new Decoder
+func NewDecoder() *Decoder {
+	return &Decoder{}
+}
+
 // Decode decodes the next packet from the provided reader
 func (decoder *Decoder) Decode(id abstraction.PacketId, reader io.Reader) (abstraction.Packet, error) {
 	packet := Packet{

@@ -32,7 +32,23 @@ type Decoder struct {
 	endianness  binary.ByteOrder
 }
 
+// TODO: improve constructor
+// NewDecoder creates a new decoder with the given endianness
+func NewDecoder(endianness binary.ByteOrder) Decoder {
+	return Decoder{
+		idToDecoder: make(map[abstraction.PacketId]PacketDecoder),
+		endianness:  endianness,
+	}
+}
+
+// SetPacketDecoder sets the decoder for the specified id
+func (decoder *Decoder) SetPacketDecoder(id abstraction.PacketId, dec PacketDecoder) {
+	decoder.idToDecoder[id] = dec
+}
+
 // DecodeNext reads and decodes the next packet from the input stream, returning any errors encountered
+//
+// the decoder should have all the id decoders set before calling DecodeNext
 func (decoder *Decoder) DecodeNext(reader io.Reader) (abstraction.Packet, error) {
 	var id abstraction.PacketId
 	err := binary.Read(reader, decoder.endianness, &id)

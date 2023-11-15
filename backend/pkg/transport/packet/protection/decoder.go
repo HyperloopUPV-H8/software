@@ -52,6 +52,19 @@ type Decoder struct {
 	idToSeverity map[abstraction.PacketId]severity
 }
 
+// TODO: improve constructor
+// NewDecoder creates a new Decoder
+func NewDecoder() *Decoder {
+	return &Decoder{
+		idToSeverity: make(map[abstraction.PacketId]severity),
+	}
+}
+
+// SetSeverity sets the severity level for the given ID
+func (decoder *Decoder) SetSeverity(id abstraction.PacketId, severity severity) {
+	decoder.idToSeverity[id] = severity
+}
+
 // Decode decodes the next protection message from the reader using json
 func (decoder *Decoder) Decode(id abstraction.PacketId, reader io.Reader) (abstraction.Packet, error) {
 	severity, ok := decoder.idToSeverity[id]

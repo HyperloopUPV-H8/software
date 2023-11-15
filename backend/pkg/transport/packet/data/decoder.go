@@ -13,6 +13,20 @@ type Decoder struct {
 	idToDescription map[abstraction.PacketId]Descriptor
 }
 
+// TODO: improve constructor
+// NewDecoder creates a new Decoder
+func NewDecoder(endianness binary.ByteOrder) *Decoder {
+	return &Decoder{
+		endianness:      endianness,
+		idToDescription: make(map[abstraction.PacketId]Descriptor),
+	}
+}
+
+// SetDescriptor sets the descriptor for the given id
+func (decoder *Decoder) SetDescriptor(id abstraction.PacketId, descriptor Descriptor) {
+	decoder.idToDescription[id] = descriptor
+}
+
 // Decode decodes the next packet for the given id
 func (decoder *Decoder) Decode(id abstraction.PacketId, reader io.Reader) (abstraction.Packet, error) {
 	descriptor, ok := decoder.idToDescription[id]

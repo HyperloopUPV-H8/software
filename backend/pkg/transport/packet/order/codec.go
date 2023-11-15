@@ -7,8 +7,9 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 )
 
-// decodeAdd decodes the next stateOrderAdd request from the reader
-func (decoder *Decoder) decodeAdd(id abstraction.PacketId, reader io.Reader) (abstraction.Packet, error) {
+// TODO: make private
+// DecodeAdd decodes the next stateOrderAdd request from the reader
+func (decoder *Decoder) DecodeAdd(id abstraction.PacketId, reader io.Reader) (abstraction.Packet, error) {
 	orders, err := decodeSlice[abstraction.PacketId](decoder.endianness, reader)
 	return &Add{
 		id:     id,
@@ -16,8 +17,9 @@ func (decoder *Decoder) decodeAdd(id abstraction.PacketId, reader io.Reader) (ab
 	}, err
 }
 
-// decodeRemove decodes the next stateOrderRemove request from the reader
-func (decoder *Decoder) decodeRemove(id abstraction.PacketId, reader io.Reader) (abstraction.Packet, error) {
+// TODO: make private
+// DecodeRemove decodes the next stateOrderRemove request from the reader
+func (decoder *Decoder) DecodeRemove(id abstraction.PacketId, reader io.Reader) (abstraction.Packet, error) {
 	orders, err := decodeSlice[abstraction.PacketId](decoder.endianness, reader)
 	return &Remove{
 		id:     id,
