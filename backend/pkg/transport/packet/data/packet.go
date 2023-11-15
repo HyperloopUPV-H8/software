@@ -21,7 +21,7 @@ func NewPacket(id abstraction.PacketId) *Packet {
 	}
 }
 
-// NewPacketWithValues creates a new data packte with the given values
+// NewPacketWithValues creates a new data packet with the given values
 func NewPacketWithValues(id abstraction.PacketId, values map[ValueName]Value) *Packet {
 	return &Packet{
 		id:     id,
