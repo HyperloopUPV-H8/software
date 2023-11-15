@@ -12,12 +12,13 @@ type Props = {
     chartId: ChartId;
     measurementId: MeasurementId;
     maxValue: number;
+    refreshRate: number;
     removeChart: (id: ChartId) => void;
     getMeasurementInfo: (id: MeasurementId) => MeasurementInfo;
 };
 
 // React component that keeps the chart render and measurements represented on it.
-export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChart, getMeasurementInfo }: Props) => {
+export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChart, getMeasurementInfo, refreshRate }: Props) => {
 
     // Ref to the CanvasJS chart render
     let chartRef = useRef<typeof CanvasJSReact.CanvasJSChart>();
@@ -65,7 +66,7 @@ export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChar
         }
         chartRef.current?.render();
         currentX.current = currentX.current + 1;
-    }, 5);
+    }, refreshRate);
 
     return (
         <div

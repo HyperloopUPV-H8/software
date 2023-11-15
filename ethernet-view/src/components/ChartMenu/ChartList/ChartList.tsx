@@ -42,6 +42,7 @@ export const ChartList = ({ getMeasurementInfo }: Props) => {
                             key={chart.chartId}
                             chartId={chart.chartId}
                             maxValue={300}
+                            refreshRate={5}
                             removeChart={removeChart}
                             measurementId={chart.measurementId}
                             getMeasurementInfo={getMeasurementInfo}
