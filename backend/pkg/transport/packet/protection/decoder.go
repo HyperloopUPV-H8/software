@@ -7,12 +7,14 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 )
 
+// protectionAdapter is used as an intermediate step when decoding the protection messages
 type protectionAdapter struct {
 	Name ProtectionName   `json:"name"`
 	Type kind             `json:"type"`
 	Data *json.RawMessage `json:"data"`
 }
 
+// UnmarshalJSON unmarshals the data in two passes to directly get the ProtectionData field
 func (protection *Protection) UnmarshalJSON(data []byte) error {
 	var adapter protectionAdapter
 	err := json.Unmarshal(data, &adapter)
@@ -45,10 +47,12 @@ func (protection *Protection) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(*adapter.Data, &protection.Data)
 }
 
+// Decoder decodes protection messages
 type Decoder struct {
 	idToSeverity map[abstraction.PacketId]severity
 }
 
+// Decode decodes the next protection message from the reader using json
 func (decoder *Decoder) Decode(id abstraction.PacketId, reader io.Reader) (abstraction.Packet, error) {
 	severity, ok := decoder.idToSeverity[id]
 	if !ok {
