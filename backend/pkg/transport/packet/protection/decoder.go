@@ -47,9 +47,12 @@ func (protection *Protection) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(*adapter.Data, &protection.Data)
 }
 
+type delimiter = byte
+
 // Decoder decodes protection messages
 type Decoder struct {
-	idToSeverity map[abstraction.PacketId]severity
+	idToSeverity    map[abstraction.PacketId]severity
+	packetDelimiter delimiter
 }
 
 // TODO: improve constructor
@@ -72,13 +75,24 @@ func (decoder *Decoder) Decode(id abstraction.PacketId, reader io.Reader) (abstr
 		return nil, ErrUnknownSeverity{Id: id}
 	}
 
-	packet := Packet{
-		id:       id,
-		severity: severity,
+	packet := NewPacket(id, severity)
+
+	// Read exactly up to the delimiter
+	packetBuf := make([]byte, 0)
+	readbuf := make([]byte, 1)
+	var readErr error
+	var n int
+	for {
+		n, readErr = reader.Read(readbuf)
+		if n < 1 || readbuf[0] == decoder.packetDelimiter {
+			break
+		}
+		packetBuf = append(packetBuf, readbuf[0])
 	}
 
-	jsonDecoder := json.NewDecoder(reader)
-
-	err := jsonDecoder.Decode(&packet)
-	return &packet, err
+	err := json.Unmarshal(packetBuf, &packet)
+	if err != nil {
+		return packet, err
+	}
+	return packet, readErr
 }

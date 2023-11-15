@@ -16,5 +16,5 @@ func NewDecoder() *Decoder {
 
 // Decode decodes the next packet on reader and returns the corresponding blcuAck.
 func (decoder *Decoder) Decode(id abstraction.PacketId, reader io.Reader) (abstraction.Packet, error) {
-	return &Ack{id: id}, nil
+	return NewAck(id), nil
 }

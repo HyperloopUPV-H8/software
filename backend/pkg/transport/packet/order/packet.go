@@ -16,6 +16,14 @@ type Add struct {
 	orders []abstraction.PacketId
 }
 
+// NewAdd creates a new Add packet
+func NewAdd(id abstraction.PacketId, orders []abstraction.PacketId) *Add {
+	return &Add{
+		id:     id,
+		orders: orders,
+	}
+}
+
 // Id returns the packet id
 func (packet *Add) Id() abstraction.PacketId {
 	return packet.id
@@ -35,6 +43,14 @@ func (packet *Add) Action() action {
 type Remove struct {
 	id     abstraction.PacketId
 	orders []abstraction.PacketId
+}
+
+// NewRemove creates a new Add packet
+func NewRemove(id abstraction.PacketId, orders []abstraction.PacketId) *Remove {
+	return &Remove{
+		id:     id,
+		orders: orders,
+	}
 }
 
 // Id returns the packet id

@@ -10,6 +10,13 @@ type Space struct {
 	state [8][15]float32
 }
 
+func NewSpace(id abstraction.PacketId, state [8][15]float32) *Space {
+	return &Space{
+		id:    id,
+		state: state,
+	}
+}
+
 // Id returns the packet id
 func (packet *Space) Id() abstraction.PacketId {
 	return packet.id

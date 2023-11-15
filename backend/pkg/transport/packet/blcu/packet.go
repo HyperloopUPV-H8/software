@@ -9,6 +9,13 @@ type Ack struct {
 	id abstraction.PacketId
 }
 
+// NewAck creates a new blcu ack packet with the given id
+func NewAck(id abstraction.PacketId) *Ack {
+	return &Ack{
+		id: id,
+	}
+}
+
 // Id returns the ID of the packet
 func (packet *Ack) Id() abstraction.PacketId {
 	return packet.id

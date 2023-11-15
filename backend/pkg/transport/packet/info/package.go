@@ -18,6 +18,13 @@ type Packet struct {
 	Msg       infoData            `json:"msg"`
 }
 
+// NewPacket creates a new info packet with the given ID
+func NewPacket(id abstraction.PacketId) *Packet {
+	return &Packet{
+		id: id,
+	}
+}
+
 // Id returns the packet id
 func (packet *Packet) Id() abstraction.PacketId {
 	return packet.id

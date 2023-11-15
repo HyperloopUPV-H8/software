@@ -4,7 +4,6 @@ package protection
 type severity string
 
 const (
-	SeverityInfo    severity = "info"
 	SeverityWarning severity = "warning"
 	SeverityFault   severity = "fault"
 	SeverityError   severity = "error"

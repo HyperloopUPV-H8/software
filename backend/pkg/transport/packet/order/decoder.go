@@ -21,6 +21,7 @@ type Decoder struct {
 func NewDecoder(endianness binary.ByteOrder) *Decoder {
 	return &Decoder{
 		endianness: endianness,
+		idToAction: make(map[abstraction.PacketId]actionDecoder),
 	}
 }
 

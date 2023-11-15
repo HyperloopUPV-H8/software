@@ -16,6 +16,13 @@ type Packet struct {
 	severity   severity
 }
 
+func NewPacket(id abstraction.PacketId, severity severity) *Packet {
+	return &Packet{
+		id:       id,
+		severity: severity,
+	}
+}
+
 // Severity returns the protection severity
 func (packet *Packet) Severity() severity {
 	return packet.severity
