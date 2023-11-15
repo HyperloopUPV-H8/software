@@ -1,122 +1,76 @@
 package logger
 
 import (
-	"encoding/csv"
+	"errors"
 	"fmt"
-	"os"
 	"sync"
-	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 )
 
-var _ abstraction.Logger = &Logger{}
-
-type Record struct {
-	NameValue abstraction.LoggerName
-	Data      interface{}
-	Timestamp time.Time
-}
-
-// Type Request
-//TODO!
-
-func (r *Record) Name() abstraction.LoggerName {
-	return r.NameValue
-}
-
 type Logger struct {
-	buffer        []Record
-	flushInterval time.Duration
-	mu            sync.Mutex
-	ticker        *time.Ticker
-	running       bool
+	running      bool
+	lock         sync.Mutex
+	subloggerMap map[abstraction.LoggerName]abstraction.Logger
 }
 
-func NewLogger(flushInterval time.Duration) *Logger {
-	if flushInterval == 0 {
-		flushInterval = 5 * time.Second
-	}
-	return &Logger{
-		flushInterval: flushInterval,
-	}
-}
+func (logger *Logger) Start(startKeys []abstraction.LoggerName) {
+	logger.lock.Lock()
+	defer logger.lock.Unlock()
 
-func (l *Logger) Start() {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	if l.running {
+	if logger.running {
+		fmt.Printf("Logger already running")
 		return
 	}
 
-	l.running = true
-	l.ticker = time.NewTicker(l.flushInterval)
-
-	go func() {
-		for {
-			select {
-			case <-l.ticker.C:
-				l.flush()
+	for reference, sublogger := range logger.subloggerMap {
+		for _, name := range startKeys {
+			if reference == name {
+				go sublogger.Start()
 			}
 		}
-	}()
+
+		logger.running = true
+		fmt.Printf("Logger started")
+	}
 }
 
-func (l *Logger) Stop() {
-	l.mu.Lock()
-	defer l.mu.Unlock()
+func (logger *Logger) PushRecord(record abstraction.LoggerRecord) error {
+	if logger.running {
+		logger.subloggerMap[record.Name()].PushRecord(record)
+		return nil
+	}
+	return errors.New("Logger not running")
+}
 
-	if !l.running {
+// Same as upper but with a pull
+func (logger *Logger) PullRecord(request abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
+	if logger.running {
+		return logger.subloggerMap[request.Name()].PullRecord(request)
+	}
+	return nil, errors.New("Logger not running")
+}
+
+func (logger *Logger) Stop(stopKeys []abstraction.LoggerName) {
+	logger.lock.Lock()
+	defer logger.lock.Unlock()
+
+	if !logger.running {
+		fmt.Printf("Logger already stopped")
 		return
 	}
 
-	l.running = false
-	l.ticker.Stop()
-	l.flush()
-}
+	var wg sync.WaitGroup
+	for _, sublogger := range logger.subloggerMap {
+		wg.Add(1)
 
-func (l *Logger) PushRecord(record abstraction.LoggerRecord) error {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-
-	if !l.running {
-		return fmt.Errorf("logger is not running")
+		go func(sublogger abstraction.Logger) {
+			defer wg.Done()
+			go sublogger.Stop()
+		}(sublogger)
 	}
-	if simpleRecord, ok := record.(*Record); ok {
-		l.buffer = append(l.buffer, *simpleRecord)
-	} else {
-		return fmt.Errorf("invalid record type")
-	}
-	return nil
-}
+	wg.Wait()
 
-func (l *Logger) PullRecord(request abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
-	panic("TODO!")
-}
-
-func (l *Logger) flush() {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-
-	if len(l.buffer) == 0 {
-		return
-	}
-
-	filename := fmt.Sprintf("%s-%v.csv", l.buffer[0].Name(), time.Now().Format("20060102150405"))
-
-	file, err := os.Create(filename)
-	if err != nil {
-		return
-	}
-	defer file.Close()
-
-	writer := csv.NewWriter(file)
-
-	for _, record := range l.buffer {
-		if err := writer.Write([]string{fmt.Sprintf("%v", record.Data)}); err != nil {
-			return
-		}
-	}
-	writer.Flush()
-	l.buffer = []Record{}
+	logger.running = false
+	fmt.Printf("Logger stopped")
 }
