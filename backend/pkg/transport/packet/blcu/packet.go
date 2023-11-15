@@ -9,6 +9,7 @@ type Ack struct {
 	id abstraction.PacketId
 }
 
+// Id returns the ID of the packet
 func (packet *Ack) Id() abstraction.PacketId {
 	return packet.id
 }

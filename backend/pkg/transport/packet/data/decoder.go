@@ -14,8 +14,6 @@ type Decoder struct {
 }
 
 // Decode decodes the next packet for the given id
-//
-// the value decoders should be set before calling this method
 func (decoder *Decoder) Decode(id abstraction.PacketId, reader io.Reader) (abstraction.Packet, error) {
 	descriptor, ok := decoder.idToDescription[id]
 	if !ok {
