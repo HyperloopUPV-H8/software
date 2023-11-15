@@ -7,6 +7,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 )
 
+// decodeAdd decodes the next stateOrderAdd request from the reader
 func (decoder *Decoder) decodeAdd(id abstraction.PacketId, reader io.Reader) (abstraction.Packet, error) {
 	orders, err := decodeSlice[abstraction.PacketId](decoder.endianness, reader)
 	return &Add{
@@ -15,6 +16,7 @@ func (decoder *Decoder) decodeAdd(id abstraction.PacketId, reader io.Reader) (ab
 	}, err
 }
 
+// decodeRemove decodes the next stateOrderRemove request from the reader
 func (decoder *Decoder) decodeRemove(id abstraction.PacketId, reader io.Reader) (abstraction.Packet, error) {
 	orders, err := decodeSlice[abstraction.PacketId](decoder.endianness, reader)
 	return &Remove{
@@ -23,8 +25,12 @@ func (decoder *Decoder) decodeRemove(id abstraction.PacketId, reader io.Reader) 
 	}, err
 }
 
+// sliceLength represents the encoded length of an slice
 type sliceLength uint16
 
+// decodeSlice decodes the next slice from the reader
+//
+// to know the length of the slice, first the `sliceLength` is readed and used to read the rest of values
 func decodeSlice[T any](endianness binary.ByteOrder, reader io.Reader) ([]T, error) {
 	var length sliceLength
 	err := binary.Read(reader, endianness, &length)
