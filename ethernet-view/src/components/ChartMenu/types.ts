@@ -20,6 +20,15 @@ export type ChartInfo = {
 
 export type Measurements = MeasurementInfo[];
 
+export type DataSeries = {
+    type: string,
+    showInLegend: boolean,
+    name: MeasurementName,
+    color: MeasurementColor,
+    dataPoints: Point[],
+    updateFunction: () => void,
+};
+
 export interface Point {
     x: number,
     y: number,

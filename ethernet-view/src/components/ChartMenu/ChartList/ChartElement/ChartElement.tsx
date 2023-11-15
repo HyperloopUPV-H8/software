@@ -1,9 +1,9 @@
 // @ts-ignore
 import CanvasJSReact from '@canvasjs/react-charts';
-import { ChartId, MeasurementId, MeasurementInfo, Point } from "components/ChartMenu/types";
+import { ChartId, DataSeries, MeasurementId, MeasurementInfo, Point } from "components/ChartMenu/types";
 import styles from "./ChartElement.module.scss";
 import { AiOutlineCloseCircle } from 'react-icons/ai'
-import { MutableRefObject, memo, useCallback, useEffect, useRef, useState, DragEvent } from "react";
+import { MutableRefObject, memo, useCallback, useRef, DragEvent, useEffect } from "react";
 import { useInterval } from 'common';
 
 var CanvasJSChart = CanvasJSReact.CanvasJSChart;
@@ -19,12 +19,22 @@ type Props = {
 // React component that keeps the chart render and measurements represented on it.
 export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChart, getMeasurementInfo }: Props) => {
 
-    // Different measurements on this chart.
-    // Each one is represented by a line.
-    const [measurements, setMeasurements] = useState<MeasurementInfo[]>([]);
-
-    let currentX = useRef(0);
+    // Ref to the CanvasJS chart render
     let chartRef = useRef<typeof CanvasJSReact.CanvasJSChart>();
+    let currentX = useRef(0);
+
+    // Adds the first measurement passed by props to the chart when it is created.
+    useEffect(() => {
+        const measurement = getMeasurementInfo(measurementId);
+        chartRef.current?.options.data.push({
+            type: "line",
+            showInLegend: true,
+            name: measurement.name,
+            color: measurement.color,
+            dataPoints: [] as Point[],
+            updateFunction: measurement.getUpdate,
+        });
+    }, []);
 
     // Event handler that adds a new line to the chart when the user
     // drops a measurementId on the chart.
@@ -32,40 +42,25 @@ export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChar
         ev.stopPropagation();
         const measurementId = ev.dataTransfer.getData("id");
         const measurement = getMeasurementInfo(measurementId);
-        setMeasurements((prev) => [...prev, measurement]);
-    }, []);
-
-    useEffect(() => {
-        const measurement = getMeasurementInfo(measurementId);
-        setMeasurements((prev) => [...prev, measurement]);
-    }, [])
-
-    // ChartData keeps all the dataSeries objects that are passed
-    // to CanvasJSChart options
-    const chartData = measurements.map((measurement) => {
-        return {
+        chartRef.current?.options.data.push({
             type: "line",
             showInLegend: true,
             name: measurement.name,
             color: measurement.color,
             dataPoints: [] as Point[],
-        }
-    });
+            updateFunction: measurement.getUpdate,
+        });
+    }, []);
 
     // Interval that gets the updated values for all the measurements every 5ms
     // in this chart and add them to it.
     useInterval(() => {
-        for(let measurement of measurements) {
-            const dataPoints = chartData.find((data) => data.name === measurement.name)?.dataPoints;
-            if(dataPoints) {
-                const point = {
-                    x: currentX.current,
-                    y: measurement.getUpdate(),
-                };
-                dataPoints.push(point);
-                if(dataPoints.length > maxValue) {
-                    dataPoints.shift();
-                }
+        const chartDataSeries = chartRef.current?.options.data;
+        for(let chartDs of chartDataSeries) {
+            const newValue = chartDs.updateFunction();
+            chartDs.dataPoints.push({ x: currentX.current, y: newValue });
+            if (chartDs.dataPoints.length > maxValue) {
+                chartDs.dataPoints.shift();
             }
         }
         chartRef.current?.render();
@@ -89,16 +84,18 @@ export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChar
                 <CanvasJSChart
                     options={{
                         height: 300,
-                        data: chartData,
+                        data: [] as DataSeries[],
+                        axisX: {
+                            labelFormatter: () => "",
+                        },
                         legend: {
                             fontSize: 16,
                             cursor: "pointer",
                             itemclick: (event: any) => {
                                 event.chart.data[event.dataSeriesIndex].remove();
-                                setMeasurements(prev => prev.filter(measurement =>
-                                    (measurement.name !== event.dataSeries.name)
-                                ));
-                                // TODO: If there are no more measurements, remove the chart.
+                                if(event.chart.data.length === 0) {
+                                    removeChart(chartId);
+                                }
                             }
                         },
                     }}

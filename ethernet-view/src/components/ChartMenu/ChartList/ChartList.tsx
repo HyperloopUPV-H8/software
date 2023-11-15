@@ -11,22 +11,22 @@ type Props = {
 export const ChartList = ({ getMeasurementInfo }: Props) => {
     const [charts, setCharts] = useState<ChartInfo[]>([])
 
-    const addChart = useCallback((chartId: ChartId, measurementId: MeasurementId) => {
-            setCharts((prev) => [...prev, {
-                chartId: chartId,
-                measurementId: measurementId, 
-            }]);
-    }, []);
+    const addChart = (chartId: ChartId, measurementId: MeasurementId) => {
+        setCharts((prev) => [...prev, {
+            chartId: chartId,
+            measurementId: measurementId, 
+        }]);
+    };
 
     const removeChart = useCallback((id: ChartId) => {
         setCharts((prev) => prev.filter((chart) => chart.chartId !== id));
     }, []);
 
-    const handleDrop = useCallback((ev: DragEvent<HTMLDivElement>) => {
+    const handleDrop = (ev: DragEvent<HTMLDivElement>) => {
         const id = ev.dataTransfer.getData("id");
         const measurementId = getMeasurementInfo(id).id;
         addChart(nanoid(), measurementId);
-    }, []);
+    };
 
     return (
         <div
