@@ -1,4 +1,4 @@
-package decoder
+package presentation
 
 import (
 	"encoding/binary"
@@ -6,7 +6,6 @@ import (
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
 )
 
 // Decoder is a common interface for packet-specific decoders
@@ -33,7 +32,7 @@ func (decoder *Packet) DecodeNext(reader io.Reader) (abstraction.Packet, error) 
 
 	dec, ok := decoder.idToDecoder[id]
 	if !ok {
-		return nil, presentation.ErrUnexpectedId{Id: id}
+		return nil, ErrUnexpectedId{Id: id}
 	}
 
 	packet, err := dec.Decode(id, reader)
