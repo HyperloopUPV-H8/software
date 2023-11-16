@@ -1,5 +1,6 @@
 package packet
 
+// Timestamp is a timestamp generated and sent by the boards
 type Timestamp struct {
 	Counter uint16 `json:"counter"`
 	Second  uint8  `json:"second"`
