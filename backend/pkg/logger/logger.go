@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"errors"
 	"fmt"
 	"sync"
 
@@ -9,9 +8,9 @@ import (
 )
 
 type Logger struct {
-	running      bool
-	lock         sync.Mutex
-	subloggerMap map[abstraction.LoggerName]abstraction.Logger
+	running    bool
+	lock       sync.Mutex
+	subloggers map[abstraction.LoggerName]abstraction.Logger
 }
 
 func (logger *Logger) Start(startKeys []abstraction.LoggerName) {
@@ -23,32 +22,32 @@ func (logger *Logger) Start(startKeys []abstraction.LoggerName) {
 		return
 	}
 
-	for reference, sublogger := range logger.subloggerMap {
-		for _, name := range startKeys {
-			if reference == name {
-				go sublogger.Start()
-			}
+	for _, name := range startKeys {
+		if sublogger, ok := logger.subloggers[name]; ok {
+			go sublogger.Start()
 		}
-
-		logger.running = true
-		fmt.Printf("Logger started")
 	}
+
+	logger.running = true
+	fmt.Printf("Logger started")
 }
 
 func (logger *Logger) PushRecord(record abstraction.LoggerRecord) error {
-	if logger.running {
-		logger.subloggerMap[record.Name()].PushRecord(record)
+	loggerChecked, exists := logger.subloggers[record.Name()]
+	if exists {
+		loggerChecked.PushRecord(record)
 		return nil
 	}
-	return errors.New("Logger not running")
+	return NewLoggerNotFoundError(record.Name())
 }
 
 // Same as upper but with a pull
 func (logger *Logger) PullRecord(request abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
-	if logger.running {
-		return logger.subloggerMap[request.Name()].PullRecord(request)
+	loggerChecked, exists := logger.subloggers[request.Name()]
+	if exists {
+		return loggerChecked.PullRecord(request)
 	}
-	return nil, errors.New("Logger not running")
+	return nil, NewLoggerNotFoundError(request.Name())
 }
 
 func (logger *Logger) Stop(stopKeys []abstraction.LoggerName) {
@@ -61,13 +60,13 @@ func (logger *Logger) Stop(stopKeys []abstraction.LoggerName) {
 	}
 
 	var wg sync.WaitGroup
-	for _, sublogger := range logger.subloggerMap {
+	for _, sublogger := range stopKeys {
 		wg.Add(1)
 
 		go func(sublogger abstraction.Logger) {
 			defer wg.Done()
 			go sublogger.Stop()
-		}(sublogger)
+		}(logger.subloggers[sublogger])
 	}
 	wg.Wait()
 

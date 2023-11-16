@@ -6,6 +6,8 @@ import (
 	"os"
 	"sync"
 	"time"
+
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 )
 
 type Sublogger struct {
@@ -26,11 +28,11 @@ func (sublog *Sublogger) Start() {
 	fmt.Printf("Logger started")
 }
 
-func PushRecord(data any, timestamp time.Time) {
+func PushRecord(record abstraction.LoggerRecord) {
 	panic("TODO!")
 }
 
-func PullRecord(data any, timestamp time.Time) {
+func PullRecord(request abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
 	panic("TODO!")
 }
 
