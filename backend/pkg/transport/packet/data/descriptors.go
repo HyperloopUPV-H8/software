@@ -7,38 +7,48 @@ import (
 )
 
 // Descriptor describes the structure of a data packet as an array of values
-type Descriptor []ValueDescriptor
+type Descriptor []valueDescriptor
 
-// ValueDescriptor describes a value of a packet
-type ValueDescriptor struct {
+// valueDescriptor describes a value of a packet
+type valueDescriptor struct {
 	Name   ValueName
 	Type   valueType
 	decode valueDecoder
 }
 
-func (descriptor *ValueDescriptor) Decode(endianness binary.ByteOrder, reader io.Reader) (Value, error) {
+// Decode decodes the next value from the reader using its decoding method
+func (descriptor *valueDescriptor) Decode(endianness binary.ByteOrder, reader io.Reader) (Value, error) {
 	return descriptor.decode(endianness, reader)
 }
 
-func NewNumericDescriptor[N numeric](name ValueName) ValueDescriptor {
+// NewNumericDescriptor creates a new NumericDescriptor
+//
+// name is the name for the value
+func NewNumericDescriptor[N numeric](name ValueName) valueDescriptor {
 	var n N
-	return ValueDescriptor{
+	return valueDescriptor{
 		Name:   name,
 		Type:   valueType(reflect.TypeOf(n).Name()),
 		decode: decodeNumeric[N],
 	}
 }
 
-func NewBooleanDescriptor(name ValueName) ValueDescriptor {
-	return ValueDescriptor{
+// NewBooleanDescriptor creates a new BooleanDescriptor
+//
+// name is the name for the value
+func NewBooleanDescriptor(name ValueName) valueDescriptor {
+	return valueDescriptor{
 		Name:   name,
 		Type:   BoolType,
 		decode: decodeBool,
 	}
 }
 
-func NewEnumDescriptor(name ValueName, descriptor EnumDescriptor) ValueDescriptor {
-	return ValueDescriptor{
+// NewEnumDescriptor creates a new EnumDescriptor
+//
+// name is the name for the value and descriptor is the variants the enum has
+func NewEnumDescriptor(name ValueName, descriptor EnumDescriptor) valueDescriptor {
+	return valueDescriptor{
 		Name:   name,
 		Type:   EnumType,
 		decode: newDecodeEnum(name, descriptor),

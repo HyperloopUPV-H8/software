@@ -17,7 +17,7 @@ func (err ErrUnexpectedId) Error() string {
 
 // ErrUnexpectedValue is returned when a codec is not found for a value
 type ErrUnexpectedValue struct {
-	Value ValueDescriptor
+	Value valueDescriptor
 }
 
 func (err ErrUnexpectedValue) Error() string {
