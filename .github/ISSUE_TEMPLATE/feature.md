@@ -3,7 +3,7 @@ name: Feature
 about: Propose a feature to be added to the application.
 title: ''
 labels: Feature
-assignees: jmaralo
+assignees: ''
 
 ---
 

@@ -9,6 +9,7 @@ trace.json
 # Linux build
 Backend-H8
 backend
+!build
 
 # EXCEL
 *.xlsx

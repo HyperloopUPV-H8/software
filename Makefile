@@ -14,6 +14,16 @@ backend: backend-tidy
 	echo ""
 	@cd backend && go build -C cmd -o backend
 
+.PHONY: backend-static
+backend-static: backend-build-container
+	@echo "" && \
+	echo "#==============================#" && \
+	echo "|   Building static backend    |" && \
+	echo "#==============================#" && \
+	echo ""
+	@docker run --name="backend-build" hlupv-backend-build
+	@$(MAKE) backend-static-cleanup
+
 packet-sender: packet-sender-tidy
 	@echo "" && \
 	echo "#=============================#" && \
@@ -47,15 +57,15 @@ common-front: common-front-deps
 	@cd common-front && npm run build
 
 .PHONY: release-ethernet-view
-release-ethernet-view: backend ethernet-view
+release-ethernet-view: backend-static ethernet-view
 	@echo "" && \
 	echo "#=====================================#" && \
 	echo "|   Creating ethernet view release    |" && \
 	echo "#=====================================#" && \
 	echo ""
 	mkdir -p build/ethernet-view
-	cp backend/cmd/backend build/ethernet-view/ethernet-view
-	cp backend/examples/config/ethernet-view.toml build/ethernet-view/config.toml
+	cp backend/build/backend build/ethernet-view/ethernet-view
+	cp backend/build/config/ethernet-view.toml build/ethernet-view/config.toml
 	rm -r build/ethernet-view/static
 	cp -r ethernet-view/static build/ethernet-view/static
 
@@ -90,7 +100,14 @@ control-station-deps:
 	echo ""
 	@cd control-station && npm install
 
-
+.PHONY: backend-build-container
+backend-build-container:
+	@echo "" && \
+	echo "#=================================#" && \
+	echo "|   Building backend container    |" && \
+	echo "#=================================#" && \
+	echo ""
+	docker build -t "hlupv-backend-build" -f "./backend/build/Dockerfile" "./backend" 
 
 .PHONY: backend-tidy
 backend-tidy:
@@ -110,6 +127,10 @@ packet-sender-tidy:
 	echo ""
 	@cd packet-sender && go mod tidy
 
+.PHONY: backend-static-cleanup
+backend-static-cleanup:
+	docker rm --volumes "backend-build"
+
 .PHONY: clear
 clear:
 	rm -r build
@@ -118,3 +139,4 @@ clear:
 	rm -r control-station/static
 	rm -r backend/cmd/backend
 	rm -r packet-sender/packet-sender
+	docker rm --volumes "backend-build"
