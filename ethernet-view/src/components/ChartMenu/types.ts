@@ -20,16 +20,17 @@ export type ChartInfo = {
 
 export type Measurements = MeasurementInfo[];
 
+export interface Point {
+    x: number,
+    y: number,
+};
+
 export type DataSeries = {
     type: string,
+    legendText: string,
     showInLegend: boolean,
     name: MeasurementName,
     color: MeasurementColor,
     dataPoints: Point[],
     updateFunction: () => void,
-};
-
-export interface Point {
-    x: number,
-    y: number,
 };
