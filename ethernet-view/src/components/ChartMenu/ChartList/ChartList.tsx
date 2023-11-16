@@ -17,7 +17,7 @@ export const ChartList = ({ getMeasurementInfo }: Props) => {
             measurementId: measurementId, 
         }]);
     };
-
+    
     const removeChart = useCallback((id: ChartId) => {
         setCharts((prev) => prev.filter((chart) => chart.chartId !== id));
     }, []);
@@ -35,21 +35,17 @@ export const ChartList = ({ getMeasurementInfo }: Props) => {
             onDragEnter={(ev) => ev.preventDefault()}
             onDragOver={(ev) => ev.preventDefault()}
         >
-            {charts.map((chart) => {
-                return (
-                    <>
-                        <ChartElement
-                            key={chart.chartId}
-                            chartId={chart.chartId}
-                            maxValue={300}
-                            refreshRate={5}
-                            removeChart={removeChart}
-                            measurementId={chart.measurementId}
-                            getMeasurementInfo={getMeasurementInfo}
-                        />
-                    </>
-                );
-            })}
+            {charts.map((chart) => (
+                <ChartElement
+                    key={chart.chartId}
+                    chartId={chart.chartId}
+                    maxValue={300}
+                    refreshRate={5}
+                    removeChart={removeChart}
+                    measurementId={chart.measurementId}
+                    getMeasurementInfo={getMeasurementInfo}
+                />
+            ))}
         </div>
     );
 };

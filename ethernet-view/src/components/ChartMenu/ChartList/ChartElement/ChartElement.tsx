@@ -6,8 +6,6 @@ import { AiOutlineCloseCircle } from 'react-icons/ai'
 import { MutableRefObject, memo, useCallback, useRef, DragEvent, useEffect } from "react";
 import { useInterval } from 'common';
 
-var CanvasJSChart = CanvasJSReact.CanvasJSChart;
-
 type Props = {
     chartId: ChartId;
     measurementId: MeasurementId;
@@ -82,7 +80,7 @@ export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChar
                     cursor="pointer"
                     onClick={() => removeChart(chartId)}
                 />
-                <CanvasJSChart
+                <CanvasJSReact.CanvasJSChart
                     options={{
                         height: 300,
                         data: [] as DataSeries[],
@@ -100,8 +98,8 @@ export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChar
                             }
                         },
                     }}
-                onRef={(ref: MutableRefObject<undefined>) => {chartRef.current = ref;}}
-            />
+                    onRef={(ref: MutableRefObject<undefined>) => {chartRef.current = ref;}}
+                />
             </div>
         </div>
     );
