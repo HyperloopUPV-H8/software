@@ -25,9 +25,11 @@ export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChar
     // Adds the first measurement passed by props to the chart when it is created.
     useEffect(() => {
         const measurement = getMeasurementInfo(measurementId);
+        const legendText = measurement.units ? `${measurement.name} (${measurement.units})` : measurement.name;
         chartRef.current?.options.data.push({
             type: "line",
             showInLegend: true,
+            legendText,
             name: measurement.name,
             color: measurement.color,
             dataPoints: [] as Point[],
@@ -41,9 +43,11 @@ export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChar
         ev.stopPropagation();
         const measurementId = ev.dataTransfer.getData("id");
         const measurement = getMeasurementInfo(measurementId);
+        const legendText = measurement.units ? `${measurement.name} (${measurement.units})` : measurement.name;
         chartRef.current?.options.data.push({
             type: "line",
             showInLegend: true,
+            legendText,
             name: measurement.name,
             color: measurement.color,
             dataPoints: [] as Point[],
@@ -92,9 +96,7 @@ export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChar
                             cursor: "pointer",
                             itemclick: (event: any) => {
                                 event.chart.data[event.dataSeriesIndex].remove();
-                                if(event.chart.data.length === 0) {
-                                    removeChart(chartId);
-                                }
+                                if(event.chart.data.length === 0) removeChart(chartId)
                             }
                         },
                     }}
