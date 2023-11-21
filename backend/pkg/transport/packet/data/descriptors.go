@@ -22,7 +22,7 @@ func (descriptor *valueDescriptor) Decode(endianness binary.ByteOrder, reader io
 	return descriptor.decode(endianness, reader)
 }
 
-// Encode encodes the provided value into the reader using its encoding method
+// Encode encodes the provided value into the writer using its encoding method
 func (descriptor *valueDescriptor) Encode(endianness binary.ByteOrder, value Value, writer io.Writer) error {
 	return descriptor.encode(endianness, value, writer)
 }

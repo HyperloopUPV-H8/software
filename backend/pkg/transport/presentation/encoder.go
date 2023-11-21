@@ -31,6 +31,7 @@ func (encoder *Encoder) SetPacketEncoder(id abstraction.PacketId, enc PacketEnco
 	encoder.idToEncoder[id] = enc
 }
 
+// Encode encodes the provided packet into a byte slice, returning any errors
 func (encoder *Encoder) Encode(packet abstraction.Packet) ([]byte, error) {
 	enc, ok := encoder.idToEncoder[packet.Id()]
 	if !ok {
