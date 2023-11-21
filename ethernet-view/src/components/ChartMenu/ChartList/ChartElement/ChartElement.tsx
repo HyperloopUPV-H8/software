@@ -4,7 +4,6 @@ import styles from "./ChartElement.module.scss";
 import { AiOutlineCloseCircle } from 'react-icons/ai'
 import { MutableRefObject, memo, useCallback, useRef, DragEvent, useEffect } from "react";
 import { useInterval } from 'common';
-import { createDataSeries } from 'components/ChartMenu/utils';
 import { ChartId, MeasurementColor, MeasurementId, MeasurementInfo, MeasurementName } from '../ChartList';
 
 export interface Point {
@@ -106,3 +105,15 @@ export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChar
         </div>
     );
 });
+
+export function createDataSeries(measurement: MeasurementInfo): DataSeries {
+    return {
+        type: "line",
+        legendText: measurement.units ? `${measurement.name} (${measurement.units})` : measurement.name,
+        showInLegend: true,
+        name: measurement.name,
+        color: measurement.color,
+        dataPoints: [] as Point[],
+        updateFunction: measurement.getUpdate,
+    };
+}
