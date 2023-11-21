@@ -2,9 +2,11 @@ package data
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
@@ -12,55 +14,57 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 )
 
-type ValueName string
-
 const (
-	name abstraction.LoggerName = "data"
+	Name abstraction.LoggerName = "data"
 )
 
 type Logger struct {
-	running    bool
-	lock       sync.Mutex
-	valueFiles map[data.ValueName]*os.File
+	running     *atomic.Bool
+	valueFiles  map[data.ValueName]*io.WriteCloser
+	lock        sync.RWMutex
+	initialTime time.Time
 }
 
-type DataRecord struct {
+type Record struct {
 	packet *data.Packet
 }
 
-func (data *DataRecord) Name() abstraction.LoggerName {
-	return name
+func (data *Record) Name() abstraction.LoggerName {
+	return Name
 }
 
 func (sublogger *Logger) Start() error {
+	sublogger.initialTime = time.Now()
+
 	sublogger.lock.Lock()
 	defer sublogger.lock.Unlock()
 
-	if sublogger.running {
+	if sublogger.running.Load() {
 		fmt.Printf("Logger already running")
 		return nil
 	}
-	sublogger.newFiles()
 
-	sublogger.running = true
+	sublogger.running.Store(true)
 	fmt.Printf("Logger started")
 	return nil
 }
 
-type num interface {
+type numeric interface {
 	Value() float64
 }
 
-func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) {
-	valueMap := record.(*DataRecord).packet.GetValues()
+func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
+	sublogger.lock.Lock()
+	defer sublogger.lock.Unlock()
 
-	for key, value := range valueMap {
-		dataPointer := record.(*DataRecord).packet
+	valueMap := record.(*Record).packet.GetValues()
 
+	for valueName, value := range valueMap {
+		var packet *data.Packet
 		var val string
 
 		switch v := value.(type) {
-		case num:
+		case numeric:
 			val = strconv.FormatFloat(v.Value(), 'f', -1, 64)
 
 		case data.BooleanValue:
@@ -69,47 +73,35 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) {
 		case data.EnumValue:
 			val = string(v.Variant())
 		}
-		sublogger.valueFiles[key].WriteString(dataPointer.Timestamp().Format(time.RFC3339) + "," + val)
-	}
 
+		file, err := os.OpenFile(string(valueName)+"_"+sublogger.initialTime.Format(time.RFC3339)+".csv", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			return &logger.ErrCreatingFile{
+				Name:      Name,
+				Timestamp: time.Now(),
+				Inner:     err,
+			}
+		}
+
+		file.Write([]byte((packet.Timestamp().Format(time.RFC3339) + "," + val + "\n")))
+	}
+	sublogger.lock.Unlock()
+	return nil
 }
 
-func PullRecord(request abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
+func (sublogger *Logger) PullRecord(request abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
 	panic("TODO!")
 }
 
-func Stop(sublog *Logger) {
-	sublog.lock.Lock()
-	defer sublog.lock.Unlock()
+func Stop(sublogger *Logger) {
+	sublogger.lock.Lock()
+	defer sublogger.lock.Unlock()
 
-	if !sublog.running {
+	if !sublogger.running.Load() {
 		fmt.Printf("Logger already stopped")
 		return
 	}
 
-	sublog.running = false
+	sublogger.running.Store(false)
 	fmt.Printf("Logger stopped")
-}
-
-func (sublogger *Logger) newFiles() error {
-	setTime := time.Now().Format(time.RFC3339) + ".csv"
-
-	numericFile, err := os.Create("/numeric/numeric_" + setTime)
-	if err != nil {
-		return logger.NewErrCreatingFile("numeric", time.Now())
-	}
-	sublogger.valueFiles["numeric"] = numericFile
-
-	booleanFile, err := os.Create("/boolean/boolean_" + setTime)
-	if err != nil {
-		return logger.NewErrCreatingFile("boolean", time.Now())
-	}
-	sublogger.valueFiles["boolean"] = booleanFile
-
-	enumFile, err := os.Create("/enum/enum_" + setTime)
-	if err != nil {
-		return logger.NewErrCreatingFile("enum", time.Now())
-	}
-	sublogger.valueFiles["enum"] = enumFile
-	return nil
 }

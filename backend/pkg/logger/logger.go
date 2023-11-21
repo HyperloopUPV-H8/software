@@ -3,6 +3,7 @@ package logger
 import (
 	"fmt"
 	"sync"
+	"sync/atomic"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 )
@@ -12,27 +13,27 @@ const (
 )
 
 type Logger struct {
-	running    bool
-	lock       sync.Mutex
-	subloggers map[abstraction.LoggerName]abstraction.Logger
+	running        *atomic.Bool
+	subloggersLock sync.RWMutex
+	subloggers     map[abstraction.LoggerName]abstraction.Logger
 }
 
 func (logger *Logger) Start(startKeys []abstraction.LoggerName) {
-	logger.lock.Lock()
-	defer logger.lock.Unlock()
+	logger.subloggersLock.Lock()
+	defer logger.subloggersLock.Unlock()
 
-	if logger.running {
+	if logger.running.Load() {
 		fmt.Printf("Logger already running")
 		return
 	}
 
 	for _, name := range startKeys {
 		if sublogger, ok := logger.subloggers[name]; ok {
-			go sublogger.Start()
+			go sublogger.Start(nil)
 		}
 	}
 
-	logger.running = true
+	logger.running.Store(true)
 	fmt.Printf("Logger started")
 }
 
@@ -42,7 +43,7 @@ func (logger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		loggerChecked.PushRecord(record)
 		return nil
 	}
-	return NewLoggerNotFoundError(record.Name())
+	return ErrLoggerNotFound{record.Name()}
 }
 
 // Same as upper but with a pull
@@ -51,14 +52,14 @@ func (logger *Logger) PullRecord(request abstraction.LoggerRequest) (abstraction
 	if exists {
 		return loggerChecked.PullRecord(request)
 	}
-	return nil, NewLoggerNotFoundError(request.Name())
+	return nil, ErrLoggerNotFound{request.Name()}
 }
 
 func (logger *Logger) Stop(stopKeys []abstraction.LoggerName) {
-	logger.lock.Lock()
-	defer logger.lock.Unlock()
+	logger.subloggersLock.Lock()
+	defer logger.subloggersLock.Unlock()
 
-	if !logger.running {
+	if !logger.running.Load() {
 		fmt.Printf("Logger already stopped")
 		return
 	}
@@ -69,11 +70,11 @@ func (logger *Logger) Stop(stopKeys []abstraction.LoggerName) {
 
 		go func(sublogger abstraction.Logger) {
 			defer wg.Done()
-			go sublogger.Stop()
+			go sublogger.Stop(nil)
 		}(logger.subloggers[sublogger])
 	}
 	wg.Wait()
 
-	logger.running = false
+	logger.running.Store(false)
 	fmt.Printf("Logger stopped")
 }

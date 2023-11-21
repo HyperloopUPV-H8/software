@@ -16,8 +16,8 @@ type LoggerRequest interface {
 // Logger is the module in charge of storing and retrieving information from the
 // hard drive, making it persistent.
 type Logger interface {
-	Start() error
-	Stop() error
+	Start(startKeys map[LoggerName]Logger) error
+	Stop(stopKeys map[LoggerName]Logger) error
 	// PushRecord will store a record to disk
 	PushRecord(LoggerRecord) error
 	// PullRecord will retrieve a record from disk
