@@ -1,11 +1,26 @@
 // @ts-ignore
 import CanvasJSReact from '@canvasjs/react-charts';
-import { ChartId, DataSeries, MeasurementId, MeasurementInfo } from "components/ChartMenu/types";
 import styles from "./ChartElement.module.scss";
 import { AiOutlineCloseCircle } from 'react-icons/ai'
 import { MutableRefObject, memo, useCallback, useRef, DragEvent, useEffect } from "react";
 import { useInterval } from 'common';
 import { createDataSeries } from 'components/ChartMenu/utils';
+import { ChartId, MeasurementColor, MeasurementId, MeasurementInfo, MeasurementName } from '../ChartList';
+
+export interface Point {
+    x: number,
+    y: number,
+};
+
+export type DataSeries = {
+    type: string,
+    legendText: string,
+    showInLegend: boolean,
+    name: MeasurementName,
+    color: MeasurementColor,
+    dataPoints: Point[],
+    updateFunction: () => void,
+};
 
 type Props = {
     chartId: ChartId;
