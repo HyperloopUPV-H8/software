@@ -8,10 +8,6 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 )
 
-const (
-	dataLogger abstraction.LoggerName = "data"
-)
-
 type Logger struct {
 	running        *atomic.Bool
 	subloggersLock sync.RWMutex
