@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { HandlerMessages } from "./HandlerMessages";
 import { SubscriptionTopic } from "./types";
 import { useWsHandler } from ".";
-import { nanoid } from "@reduxjs/toolkit";
+import { nanoid } from "nanoid";
 
 export function useSubscribe<T extends SubscriptionTopic>(
     topic: T,
