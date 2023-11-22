@@ -38,8 +38,8 @@ func (logger *Logger) Start(startKeys []abstraction.LoggerName) {
 }
 
 func (logger *Logger) PushRecord(record abstraction.LoggerRecord) error {
-	loggerChecked, exists := logger.subloggers[record.Name()]
-	if exists {
+	loggerChecked, ok := logger.subloggers[record.Name()]
+	if ok {
 		loggerChecked.PushRecord(record)
 		return nil
 	}
@@ -48,8 +48,8 @@ func (logger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 // Same as upper but with a pull
 func (logger *Logger) PullRecord(request abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
-	loggerChecked, exists := logger.subloggers[request.Name()]
-	if exists {
+	loggerChecked, ok := logger.subloggers[request.Name()]
+	if ok {
 		return loggerChecked.PullRecord(request)
 	}
 	return nil, ErrLoggerNotFound{request.Name()}
