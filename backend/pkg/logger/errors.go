@@ -10,8 +10,8 @@ type ErrLoggerNotFound struct {
 	Name abstraction.LoggerName
 }
 
-func (e ErrLoggerNotFound) Error() string {
-	return "Logger not found: " + string(e.Name)
+func (err ErrLoggerNotFound) Error() string {
+	return "Logger " + string(err.Name) + " not found"
 }
 
 type ErrCreatingFile struct {
@@ -26,4 +26,13 @@ func (err *ErrCreatingFile) Error() string {
 
 func (err *ErrCreatingFile) Unwrap() error {
 	return err.Inner
+}
+
+type ErrLoggerNotRunning struct {
+	Name      abstraction.LoggerName
+	Timestamp time.Time
+}
+
+func (err *ErrLoggerNotRunning) Error() string {
+	return "Logger " + string(err.Name) + " not running at " + err.Timestamp.Format(time.RFC3339)
 }

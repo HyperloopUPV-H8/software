@@ -49,6 +49,13 @@ type numeric interface {
 }
 
 func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
+	if !sublogger.running.Load() {
+		return &logger.ErrLoggerNotRunning{
+			Name:      Name,
+			Timestamp: time.Now(),
+		}
+	}
+
 	valueMap := record.(*Record).packet.GetValues()
 
 	sublogger.runningLock.Lock()
