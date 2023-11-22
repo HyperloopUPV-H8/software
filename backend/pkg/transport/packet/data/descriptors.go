@@ -14,11 +14,17 @@ type valueDescriptor struct {
 	Name   ValueName
 	Type   valueType
 	decode valueDecoder
+	encode valueEncoder
 }
 
 // Decode decodes the next value from the reader using its decoding method
 func (descriptor *valueDescriptor) Decode(endianness binary.ByteOrder, reader io.Reader) (Value, error) {
 	return descriptor.decode(endianness, reader)
+}
+
+// Encode encodes the provided value into the writer using its encoding method
+func (descriptor *valueDescriptor) Encode(endianness binary.ByteOrder, value Value, writer io.Writer) error {
+	return descriptor.encode(endianness, value, writer)
 }
 
 // NewNumericDescriptor creates a new NumericDescriptor
@@ -30,6 +36,7 @@ func NewNumericDescriptor[N numeric](name ValueName) valueDescriptor {
 		Name:   name,
 		Type:   valueType(reflect.TypeOf(n).Name()),
 		decode: decodeNumeric[N],
+		encode: encodeNumeric[N],
 	}
 }
 
@@ -41,6 +48,7 @@ func NewBooleanDescriptor(name ValueName) valueDescriptor {
 		Name:   name,
 		Type:   BoolType,
 		decode: decodeBool,
+		encode: encodeBool,
 	}
 }
 
@@ -52,5 +60,6 @@ func NewEnumDescriptor(name ValueName, descriptor EnumDescriptor) valueDescripto
 		Name:   name,
 		Type:   EnumType,
 		decode: newDecodeEnum(name, descriptor),
+		encode: newEncodeEnum(name, descriptor),
 	}
 }

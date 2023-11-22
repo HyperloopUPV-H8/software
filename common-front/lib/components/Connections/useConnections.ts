@@ -1,18 +1,18 @@
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import { useSubscribe } from "../..";
-import { connectionsSlice } from "../../slices/connectionsSlice";
+import { useConnectionsStore, useSubscribe } from "../..";
 
 export function useConnections() {
-    const dispatch = useDispatch();
+
+    // const setBoardConnections = useStore(state => state.setConnections);
+    // const connections = useStore(state => state.connections);
+
+    const setBoardConnections = useConnectionsStore(state => state.setConnections);
+    const connections = useConnectionsStore(state => state.connections)
 
     useSubscribe("connection/update", (update) => {
-        dispatch(connectionsSlice.actions.updateBoardConnections(update));
+        setBoardConnections(update)
     });
 
-    return useSelector(
-        (state: {
-            connections: ReturnType<typeof connectionsSlice.getInitialState>;
-        }) => state.connections
-    );
+    return connections;
 }

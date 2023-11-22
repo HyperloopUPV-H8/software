@@ -286,6 +286,6 @@ export function selectLcuMeasurements(
         ),
 
         control_state:
-            measurements.measurements["LCU_MASTER/lcu_master_control_state"],
+            measurements["LCU_MASTER/lcu_master_control_state"],
     } as LcuMeasurements;
 }

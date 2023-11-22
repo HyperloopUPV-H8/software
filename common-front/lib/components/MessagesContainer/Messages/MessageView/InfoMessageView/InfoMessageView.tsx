@@ -10,7 +10,7 @@ export const InfoMessageView = ({ message, className }: Props) => {
     return (
         <div className={`${styles.infoMessageView} ${className}`}>
             <div className={styles.board}>{message.board}</div>
-            <div>{message.msg}</div>
+            <div>{message.payload}</div>
         </div>
     );
 };
