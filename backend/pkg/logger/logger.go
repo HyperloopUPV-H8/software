@@ -46,7 +46,6 @@ func (logger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	return ErrLoggerNotFound{record.Name()}
 }
 
-// Same as upper but with a pull
 func (logger *Logger) PullRecord(request abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
 	loggerChecked, ok := logger.subloggers[request.Name()]
 	if ok {

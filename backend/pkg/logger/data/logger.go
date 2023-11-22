@@ -1,7 +1,9 @@
 package data
 
 import (
+	"encoding/csv"
 	"fmt"
+	"io"
 	"os"
 	"reflect"
 	"strconv"
@@ -19,10 +21,10 @@ const (
 )
 
 type Logger struct {
-	running     *atomic.Bool
-	runningLock sync.RWMutex
-	initialTime time.Time
-	valueFile   map[data.ValueName]*os.File
+	running        *atomic.Bool
+	runningLock    sync.RWMutex
+	initialTime    time.Time
+	valueFileSlice map[data.ValueName]io.WriteCloser
 }
 
 type Record struct {
@@ -65,13 +67,16 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 			Received:  record,
 		}
 	}
+
 	valueMap := record.(*Record).packet.GetValues()
 
 	sublogger.runningLock.Lock()
 	defer sublogger.runningLock.Unlock()
 
 	for valueName, value := range valueMap {
-		var packet *data.Packet
+		var packet *Record
+		timestamp := packet.packet.Timestamp()
+
 		var val string
 
 		switch v := value.(type) {
@@ -85,16 +90,24 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 			val = string(v.Variant())
 		}
 
-		file, err := os.OpenFile(string(valueName)+"_"+sublogger.initialTime.Format(time.RFC3339)+".csv", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			return &logger.ErrCreatingFile{
-				Name:      Name,
-				Timestamp: time.Now(),
-				Inner:     err,
+		file, ok := sublogger.valueFileSlice[valueName]
+		if !ok {
+			f, err := os.Create("./" + string(valueName) + "/" + string(valueName) + "_" + packet.packet.Timestamp().Format("3339") + ".csv")
+			if err != nil {
+				return &logger.ErrCreatingFile{
+					Name:      Name,
+					Timestamp: time.Now(),
+					Inner:     err,
+				}
 			}
+			sublogger.valueFileSlice[valueName] = f
+			file = f
 		}
+		writer := csv.NewWriter(file)
+		defer writer.Flush()
 
-		//TODO! use CSV encoder
+		writer.Write([]string{timestamp.Format("3339"), val})
+		return nil
 	}
 	return nil
 }
@@ -114,4 +127,8 @@ func Stop(sublogger *Logger) {
 
 	sublogger.running.Store(false)
 	fmt.Printf("Logger stopped")
+}
+
+func log(file *os.File, value string, timestamp time.Time) {
+
 }
