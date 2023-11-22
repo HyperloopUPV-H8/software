@@ -37,10 +37,10 @@ export const TableUpdater = ({ children }: Props) => {
     const packetElements = useRef<Record<string, PacketElement>>({});
     const measurementElements = useRef<MeasurementElement[]>([]);
 
-    useGlobalTicker(() => {
+    const podData = usePodDataStore(state => state.podData)
+    const measurements = useMeasurementsStore(state => state.measurements)
 
-        const podData = usePodDataStore(state => state.podData)
-        const measurements = useMeasurementsStore(state => state.measurements)
+    useGlobalTicker(() => {
         
         for (const id in packetElements.current) {
             const packet = getPacket(podData, Number.parseInt(id));
