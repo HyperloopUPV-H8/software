@@ -43,3 +43,41 @@ type ErrInvalidVariant struct {
 func (err ErrInvalidVariant) Error() string {
 	return fmt.Sprintf("enum %s has %d variants, but tried to access the %d variant", err.Name, err.Len, err.Idx+1)
 }
+
+// ErrUnexpectedPacket is returned when a packet is given to an incorrect encoder
+type ErrUnexpectedPacket struct {
+	Packet abstraction.Packet
+}
+
+func (err ErrUnexpectedPacket) Error() string {
+	return fmt.Sprintf("expected data packet, got %T instead", err.Packet)
+}
+
+// ErrValueNotFound is returned when the provided packet is meassing a value that should be present
+type ErrValueNotFound struct {
+	Value  valueDescriptor
+	Packet abstraction.Packet
+}
+
+func (err ErrValueNotFound) Error() string {
+	return fmt.Sprintf("could not find value %s in packet %v", err.Value.Name, err.Packet)
+}
+
+// ErrMismatchedTypes is returned when the provided value does not match the encoder type
+type ErrMismatchedTypes struct {
+	Value Value
+}
+
+func (err ErrMismatchedTypes) Error() string {
+	return fmt.Sprintf("type of value type %T does not match the one of the encoder", err.Value)
+}
+
+type ErrUnexpectedVariant struct {
+	Name       ValueName
+	Variant    EnumVariant
+	Descriptor EnumDescriptor
+}
+
+func (err ErrUnexpectedVariant) Error() string {
+	return fmt.Sprintf("tried to encode %s variant for %s enum, but possibilities are only %v", err.Variant, err.Name, err.Descriptor)
+}
