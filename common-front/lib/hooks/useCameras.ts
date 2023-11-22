@@ -6,12 +6,12 @@ export type CameraData = {
 };
 
 //TODO: use MediaStream id instead
-function streamsToCameras(streams: Array<MediaStream>): Array<CameraData> {
+function streamsToCameras(streams: MediaStream[]): CameraData[] {
     return streams.map((stream, index) => ({ id: index, stream }));
 }
 
-export function useCameras(streams: Array<MediaStream>) {
-    const [cameras, setCameras] = useState<Array<CameraData>>(
+export function useCameras(streams: MediaStream[]) {
+    const [cameras, setCameras] = useState<CameraData[]>(
         streamsToCameras(streams)
     );
     // When streams change, initialize cameras

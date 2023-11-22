@@ -5,7 +5,7 @@ import { LinesWithGrid } from "./LinesWithGrid/LinesWithGrid";
 import { LineDescription } from "./types";
 
 type Props = {
-    items: Array<LineDescription>;
+    items: LineDescription[];
     divisions: number;
     showGrid?: boolean;
     length: number;

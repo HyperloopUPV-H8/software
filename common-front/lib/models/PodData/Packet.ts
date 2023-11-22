@@ -23,6 +23,8 @@ export function updatePacket(
         packet.measurements,
         update.measurementUpdates
     );
+
+    return packet;
 }
 
 function updateMeasurements(

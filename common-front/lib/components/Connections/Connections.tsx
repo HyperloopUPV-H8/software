@@ -7,7 +7,7 @@ export const Connections = () => {
 
     return (
         <div className={styles.connectionsWrapper}>
-            <ConnectionView connection={connections.websocket} />
+            <ConnectionView connection={connections.backend} />
             <div className={styles.boards}>
                 {Object.values(connections.boards).map((conn) => {
                     return (

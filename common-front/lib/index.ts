@@ -2,7 +2,7 @@ export * from "./adapters";
 export * from "./broker";
 export * from "./wsHandler";
 export * from "./models";
-export * from "./slices";
+export * from "./store";
 export * from "./BackendTypes";
 export * from "./components";
 export * from "./hooks";

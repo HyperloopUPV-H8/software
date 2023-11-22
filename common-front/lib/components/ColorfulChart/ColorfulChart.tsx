@@ -10,7 +10,7 @@ const palette = ["#EE8735", "#51C6EB", "#7BEE35", "#e469ca"];
 type Props = {
     className?: string;
     title: string;
-    items: Array<LineDescription>;
+    items: LineDescription[];
     length: number;
     height?: string;
 };

@@ -1,5 +1,4 @@
 import { Measurement } from "../models";
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
     getBooleanMeasurement,
     getEnumMeasurement,
@@ -8,52 +7,69 @@ import {
     PodDataAdapter,
     PacketUpdate,
 } from "../adapters";
+import { create } from "zustand";
 
-export type Measurements = {
-    measurements: Record<string, Measurement>;
+export type Measurements = Record<string, Measurement>
+
+export interface MeasurementsStore {
+    measurements: Measurements;
     packetIdToBoard: Record<number, string>;
-};
+    initMeasurements: (podDataAdapter: PodDataAdapter) => void;
+    updateMeasurements: (measurements: Record<string, PacketUpdate>) => void
+}
 
-export const measurementsSlice = createSlice({
-    name: "measurements",
-    initialState: { measurements: {}, packetIdToBoard: {} } as Measurements,
-    reducers: {
-        initMeasurements: (
-            _: Measurements,
-            action: PayloadAction<PodDataAdapter>
-        ) => {
-            return {
-                measurements: createMeasurementsFromPodDataAdapter(
-                    action.payload
-                ),
-                packetIdToBoard: getPacketIdToBoard(action.payload),
-            };
-        },
-        updateMeasurements: (
-            state: Measurements,
-            action: PayloadAction<Record<string, PacketUpdate>>
-        ) => {
-            for (const update of Object.values(action.payload)) {
-                for (const [id, mUpdate] of Object.entries(
-                    update.measurementUpdates
-                )) {
-                    const boardName = state.packetIdToBoard[update.id];
+export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
+    measurements: {},
+    packetIdToBoard: {},
 
-                    if (!boardName) {
-                        continue;
-                    }
+    /**
+     * Reducer that receives a PodDataAdapter and initializes the measurements
+     * and packetIdToBoard map in state.
+     * @param {PodDataAdapter} podDataAdapter 
+     * @returns {Measurements}
+     */
+    initMeasurements: (podDataAdapter: PodDataAdapter) => {
 
-                    const measId = `${boardName}/${id}`;
-                    state.measurements[measId].value = mUpdate;
-                }
-            }
-        },
+        set(state => ({
+            ...state,
+            measurements: createMeasurementsFromPodDataAdapter(podDataAdapter),
+            packetIdToBoard: getPacketIdToBoard(podDataAdapter),
+        }))
     },
-});
+
+    /**
+     * Reducer that updates the measurements in the state.
+     * It receives a measurements map with PacketUpdates, extract the measurements
+     * from each of them and updates the measurements.
+     * @param {Record<string, PacketUpdate>} measurements 
+     */
+    updateMeasurements: (measurements: Record<string, PacketUpdate>) => {
+        for(const update of Object.values(measurements)) {
+            for (const [id, mUpdate] of Object.entries(update.measurementUpdates)) {
+                const boardName = get().packetIdToBoard[update.id];
+                if (!boardName) {
+                    continue;
+                }
+
+                const measurementId = `${boardName}/${id}`;
+                set(state => ({
+                    ...state,
+                    measurements: {
+                        ...measurements,
+                        [measurementId]: {
+                            ...state.measurements[measurementId],
+                            value: mUpdate
+                        }
+                    }
+                } as MeasurementsStore))
+            }
+        }
+    }
+}))
 
 function createMeasurementsFromPodDataAdapter(
     podDataAdapter: PodDataAdapter
-): Record<string, Measurement> {
+): Measurements {
     const measurements: Record<string, Measurement> = {};
 
     for (const board of Object.values(podDataAdapter.boards)) {
@@ -90,7 +106,7 @@ export function getMeasurement(
     measurements: Measurements,
     id: string
 ): Measurement | undefined {
-    const meas = measurements.measurements[id];
+    const meas = measurements[id];
 
     if (!meas) {
         console.trace(`measurement ${id} not found in store`);

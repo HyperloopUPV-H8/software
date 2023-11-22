@@ -50,7 +50,7 @@ export function createPodDataFromAdapter(adapter: PodDataAdapter): PodData {
     return { boards, packetToBoard, lastUpdates: {} };
 }
 
-function getPackets(
+export function getPackets(
     boardName: string,
     packets: Record<string, PacketAdapter>
 ): Packet[] {
@@ -144,7 +144,7 @@ export function getBooleanMeasurement(
 //     };
 // }
 
-function getPacketToBoard(
+export function getPacketToBoard(
     boards: Record<string, BoardAdapter>
 ): Record<number, number> {
     let packetToBoard: PodData["packetToBoard"] = {};
@@ -158,7 +158,7 @@ function getPacketToBoard(
     return packetToBoard;
 }
 
-function getMeasurementToPacket(
+export function getMeasurementToPacket(
     packets: Record<string, PacketAdapter>
 ): Record<string, number> {
     let measurementToPacket: Board["measurementToPacket"] = {};
