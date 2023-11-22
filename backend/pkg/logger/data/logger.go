@@ -3,6 +3,7 @@ package data
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -56,6 +57,14 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		}
 	}
 
+	if reflect.TypeOf(record) != reflect.TypeOf(&Record{}) {
+		return &logger.ErrWrongRecordType{
+			Name:      Name,
+			Timestamp: time.Now(),
+			Expected:  &Record{},
+			Received:  record,
+		}
+	}
 	valueMap := record.(*Record).packet.GetValues()
 
 	sublogger.runningLock.Lock()

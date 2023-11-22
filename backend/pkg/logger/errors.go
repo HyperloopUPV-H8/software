@@ -36,3 +36,14 @@ type ErrLoggerNotRunning struct {
 func (err *ErrLoggerNotRunning) Error() string {
 	return "Logger " + string(err.Name) + " not running at " + err.Timestamp.Format(time.RFC3339)
 }
+
+type ErrWrongRecordType struct {
+	Name      abstraction.LoggerName
+	Timestamp time.Time
+	Expected  abstraction.LoggerRecord
+	Received  abstraction.LoggerRecord
+}
+
+func (err *ErrWrongRecordType) Error() string {
+	return "Wrong record type for logger " + string(err.Name) + " at " + err.Timestamp.Format(time.RFC3339) + ". Expected " + string(err.Expected.Name()) + " but received " + string(err.Received.Name())
+}
