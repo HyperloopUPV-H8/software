@@ -1,8 +1,7 @@
-package dataSublogger
+package data
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"strconv"
 	"sync"
@@ -20,9 +19,9 @@ const (
 
 type Logger struct {
 	running     *atomic.Bool
-	valueFiles  map[data.ValueName]*io.WriteCloser
-	lock        sync.RWMutex
+	runningLock sync.RWMutex
 	initialTime time.Time
+	valueFile   map[data.ValueName]*os.File
 }
 
 type Record struct {
@@ -34,15 +33,11 @@ func (data *Record) Name() abstraction.LoggerName {
 }
 
 func (sublogger *Logger) Start() error {
-	sublogger.initialTime = time.Now()
-
-	sublogger.lock.Lock()
-	defer sublogger.lock.Unlock()
-
 	if sublogger.running.Load() {
 		fmt.Printf("Logger already running")
 		return nil
 	}
+	sublogger.initialTime = time.Now()
 
 	sublogger.running.Store(true)
 	fmt.Printf("Logger started")
@@ -54,10 +49,10 @@ type numeric interface {
 }
 
 func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
-	sublogger.lock.Lock()
-	defer sublogger.lock.Unlock()
-
 	valueMap := record.(*Record).packet.GetValues()
+
+	sublogger.runningLock.Lock()
+	defer sublogger.runningLock.Unlock()
 
 	for valueName, value := range valueMap {
 		var packet *data.Packet
@@ -83,9 +78,8 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 			}
 		}
 
-		file.Write([]byte((packet.Timestamp().Format(time.RFC3339) + "," + val + "\n")))
+		//TODO! use CSV encoder
 	}
-	sublogger.lock.Unlock()
 	return nil
 }
 
@@ -94,8 +88,8 @@ func (sublogger *Logger) PullRecord(request abstraction.LoggerRequest) (abstract
 }
 
 func Stop(sublogger *Logger) {
-	sublogger.lock.Lock()
-	defer sublogger.lock.Unlock()
+	sublogger.runningLock.Lock()
+	defer sublogger.runningLock.Unlock()
 
 	if !sublogger.running.Load() {
 		fmt.Printf("Logger already stopped")
