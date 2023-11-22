@@ -10,3 +10,11 @@
 - Data sublogger implementation
   - Add constants
   - Add map of valueTypes
+
+## v0.3.2
+
+- Errors and name publicity fixed
+
+## v0.3.3
+
+- Change from map to list
