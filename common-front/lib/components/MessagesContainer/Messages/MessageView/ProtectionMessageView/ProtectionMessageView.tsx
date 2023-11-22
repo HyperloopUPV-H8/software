@@ -13,7 +13,7 @@ export const ProtectionMessageView = ({ message, className }: Props) => {
         <div className={`${styles.protectionMessage} ${className}`}>
             <div className={styles.kindAndOrigin}>
                 <div className={styles.protectionKind}>
-                    {message.protection.kind}
+                    {message.payload.kind}
                 </div>
                 <Origin
                     className={styles.origin}
@@ -21,7 +21,7 @@ export const ProtectionMessageView = ({ message, className }: Props) => {
                     name={message.name}
                 />
             </div>
-            <ProtectionView protection={message.protection} />
+            <ProtectionView protection={message.payload} />
         </div>
     );
 };

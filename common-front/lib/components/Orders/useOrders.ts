@@ -5,7 +5,6 @@ import {
     NumericType,
     OrderDescription,
     OrderFieldDescription,
-    orderSlice,
     useSubscribe,
 } from "../..";
 import {
@@ -13,18 +12,17 @@ import {
     isNumberValid,
     isWithinRange,
 } from "../../numberValidation";
+import { useOrdersStore } from "../..";
 
 export function useOrders() {
-    const dispatch = useDispatch();
+    const updateStateOrders = useOrdersStore((state) => state.updateStateOrders);
+    const ordersBoards = useOrdersStore((state) => state.vehicleOrders.boards);
 
     useSubscribe("order/stateOrders", (msg) => {
-        dispatch(orderSlice.actions.updateStateOrders(msg));
+        updateStateOrders(msg);
     });
 
-    return useSelector(
-        (state: { orders: ReturnType<typeof orderSlice.getInitialState> }) =>
-            state.orders.boards
-    );
+    return ordersBoards;
 }
 
 export function createFormFromOrder(

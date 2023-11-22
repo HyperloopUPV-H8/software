@@ -3,7 +3,7 @@ import { BackendMessage, Callback, Request, Topic } from "./types";
 
 export class Broker {
     private webSocket!: WebSocket;
-    private typeToCallbacks: Map<string, Array<Callback<Topic>>> = new Map();
+    private typeToCallbacks: Map<string, Callback<Topic>[]> = new Map();
 
     constructor(url: string, onOpen?: () => void, onClose?: () => void) {
         this.webSocket = new WebSocket(`ws://${url}`);

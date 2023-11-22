@@ -3,7 +3,7 @@ import { LegendItem } from "./LegendItem/LegendItem";
 import { LineDescription } from "../../LinesChart/types";
 
 type Props = {
-    items: Array<LineDescription>;
+    items: LineDescription[];
 };
 
 export const Legend = ({ items }: Props) => {
