@@ -6,7 +6,7 @@ import { Button } from "components/FormComponents/Button/Button";
 import { useMessagesStore } from "common";
 
 type Props = {
-    messages: Array<Message>;
+    messages: Message[];
 };
 
 export const Messages = ({ messages }: Props) => {
@@ -20,14 +20,13 @@ export const Messages = ({ messages }: Props) => {
                 onScroll={handleScroll}
                 className={styles.messages}
             >
-                {messages.map((message) => {
-                    return (
+
+                { messages.map((message) => (
                         <MessageView
                             key={message.id}
                             message={message}
                         />
-                    );
-                })}
+                )) }
             </section>
             <div className={styles.buttons}>
                 <Button
