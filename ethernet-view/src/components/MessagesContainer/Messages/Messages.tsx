@@ -3,8 +3,7 @@ import styles from "./Messages.module.scss";
 import { MessageView } from "./MessageView/MessageView";
 import { useAutoScroll } from "./useAutoScroll";
 import { Button } from "components/FormComponents/Button/Button";
-import { useDispatch } from "react-redux";
-import { clearMessages } from "slices/messagesSlice";
+import { useMessagesStore } from "common";
 
 type Props = {
     messages: Array<Message>;
@@ -12,7 +11,7 @@ type Props = {
 
 export const Messages = ({ messages }: Props) => {
     const { ref, handleScroll } = useAutoScroll(messages);
-    const dispatch = useDispatch();
+    const clearMessages = useMessagesStore((state) => state.clearMessages);
 
     return (
         <section className={styles.messagesWrapper}>
@@ -42,7 +41,7 @@ export const Messages = ({ messages }: Props) => {
                 <Button
                     className={styles.clearBtn}
                     label="Clear"
-                    onClick={() => dispatch(clearMessages())}
+                    onClick={() => clearMessages()}
                 />
             </div>
         </section>
