@@ -22,8 +22,8 @@ func (logger *Logger) Start(startKeys []abstraction.LoggerName) {
 	logger.subloggersLock.Lock()
 	defer logger.subloggersLock.Unlock()
 
-	if logger.running.Load() {
-		fmt.Printf("Logger already running")
+	if logger.running.CompareAndSwap(false, true) {
+		fmt.Println("Logger already running")
 		return
 	}
 
@@ -33,8 +33,7 @@ func (logger *Logger) Start(startKeys []abstraction.LoggerName) {
 		}
 	}
 
-	logger.running.Store(true)
-	fmt.Printf("Logger started")
+	fmt.Println("Logger started")
 }
 
 func (logger *Logger) PushRecord(record abstraction.LoggerRecord) error {
@@ -58,7 +57,7 @@ func (logger *Logger) Stop(stopKeys []abstraction.LoggerName) {
 	logger.subloggersLock.Lock()
 	defer logger.subloggersLock.Unlock()
 
-	if !logger.running.Load() {
+	if !logger.running.CompareAndSwap(true, false) {
 		fmt.Printf("Logger already stopped")
 		return
 	}
@@ -74,6 +73,5 @@ func (logger *Logger) Stop(stopKeys []abstraction.LoggerName) {
 	}
 	wg.Wait()
 
-	logger.running.Store(false)
 	fmt.Printf("Logger stopped")
 }

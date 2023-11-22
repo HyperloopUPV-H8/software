@@ -36,14 +36,13 @@ func (data *Record) Name() abstraction.LoggerName {
 }
 
 func (sublogger *Logger) Start() error {
-	if sublogger.running.Load() {
-		fmt.Printf("Logger already running")
+	if !sublogger.running.CompareAndSwap(false, true) {
+		fmt.Println("Logger already running")
 		return nil
 	}
 	sublogger.initialTime = time.Now()
 
-	sublogger.running.Store(true)
-	fmt.Printf("Logger started")
+	fmt.Println("Logger started")
 	return nil
 }
 
@@ -103,7 +102,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 			sublogger.valueFileSlice[valueName] = f
 			file = f
 		}
-		writer := csv.NewWriter(file)
+		writer := csv.NewWriter(file) // TODO! use map/slice of writers
 		defer writer.Flush()
 
 		writer.Write([]string{timestamp.Format("3339"), val})
@@ -120,15 +119,10 @@ func Stop(sublogger *Logger) {
 	sublogger.runningLock.Lock()
 	defer sublogger.runningLock.Unlock()
 
-	if !sublogger.running.Load() {
-		fmt.Printf("Logger already stopped")
+	if !sublogger.running.CompareAndSwap(true, false) {
+		fmt.Println("Logger already stopped")
 		return
 	}
 
-	sublogger.running.Store(false)
-	fmt.Printf("Logger stopped")
-}
-
-func log(file *os.File, value string, timestamp time.Time) {
-
+	fmt.Println("Logger stopped")
 }
