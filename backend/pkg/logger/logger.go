@@ -8,7 +8,9 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 )
 
+// Logger is a struct that implements the abstraction.Logger interface
 type Logger struct {
+	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
 	running        *atomic.Bool
 	subloggersLock sync.RWMutex
 	subloggers     map[abstraction.LoggerName]abstraction.Logger
@@ -32,6 +34,7 @@ func (logger *Logger) Start(startKeys []abstraction.LoggerName) {
 	fmt.Println("Logger started")
 }
 
+// PushRecord works as a proxy for the PushRecord method of the subloggers
 func (logger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	loggerChecked, ok := logger.subloggers[record.Name()]
 	if ok {
@@ -41,6 +44,7 @@ func (logger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	return ErrLoggerNotFound{record.Name()}
 }
 
+// PullRecord works as a proxy for the PullRecord method of the subloggers
 func (logger *Logger) PullRecord(request abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
 	loggerChecked, ok := logger.subloggers[request.Name()]
 	if ok {
@@ -67,6 +71,8 @@ func (logger *Logger) Stop(stopKeys []abstraction.LoggerName) {
 			go sublogger.Stop(nil)
 		}(logger.subloggers[sublogger])
 	}
+	// The waitgroup is used in order to wait for all the subloggers to stop
+	// before closing the main logger
 	wg.Wait()
 
 	fmt.Printf("Logger stopped")

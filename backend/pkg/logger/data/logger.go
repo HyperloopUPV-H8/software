@@ -20,13 +20,18 @@ const (
 	Name abstraction.LoggerName = "data"
 )
 
+// Logger is a struct that implements the abstraction.Logger interface
 type Logger struct {
-	running        *atomic.Bool
-	runningLock    sync.RWMutex
-	initialTime    time.Time
+	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
+	running     *atomic.Bool
+	runningLock sync.RWMutex
+	// initialTime fixes the starting time of the log
+	initialTime time.Time
+	// valueFileSlice is a map that contains the file of each value
 	valueFileSlice map[data.ValueName]io.WriteCloser
 }
 
+// Record is a struct that implements the abstraction.LoggerRecord interface
 type Record struct {
 	packet *data.Packet
 }
@@ -46,6 +51,7 @@ func (sublogger *Logger) Start() error {
 	return nil
 }
 
+// numeric is an interface that allows to get the value of any numeric format
 type numeric interface {
 	Value() float64
 }
@@ -111,6 +117,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	return nil
 }
 
+// The pull logic is still not implemented
 func (sublogger *Logger) PullRecord(request abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
 	panic("TODO!")
 }
