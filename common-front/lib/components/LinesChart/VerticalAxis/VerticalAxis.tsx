@@ -43,8 +43,8 @@ function getAxisMarks(
     min: number,
     max: number,
     divisions: number
-): Array<AxisMark> {
-    const marks: Array<AxisMark> = [];
+): AxisMark[] {
+    const marks: AxisMark[] = [];
 
     for (let i = 0; i < divisions + 1; i++) {
         marks.push({

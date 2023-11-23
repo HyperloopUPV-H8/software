@@ -1,8 +1,28 @@
 import styles from "./ChartList.module.scss";
 import { ChartElement } from "./ChartElement/ChartElement";
 import { DragEvent, useCallback, useState } from "react";
-import { MeasurementInfo, ChartInfo, ChartId, MeasurementId } from "../types";
 import { nanoid } from "nanoid";
+
+export type ChartId = string;
+export type MeasurementId = string;
+export type MeasurementName = string;
+export type MeasurementColor = string;
+export type MeasurementUnits = string;
+
+export type ChartInfo = {
+    chartId: ChartId,
+    measurementId: MeasurementId,
+};
+
+export type MeasurementInfo = {
+    readonly id: MeasurementId,
+    readonly name: MeasurementName,
+    readonly range: [number | null, number | null],
+    readonly color: MeasurementColor,
+    readonly units: MeasurementUnits,
+    readonly getUpdate: () => number,
+};
+
 
 type Props = {
     getMeasurementInfo: (id: MeasurementId) => MeasurementInfo;

@@ -17,7 +17,7 @@ import (
 // action to take.
 type Transport struct {
 	decoder *presentation.Decoder
-	encoder *presentation.PacketEncoder
+	encoder *presentation.Encoder
 
 	snifferDemux *session.SnifferDemux
 

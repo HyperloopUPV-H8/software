@@ -12,17 +12,17 @@ type AbstractMessage = {
 
 type FaultMessage = AbstractMessage & {
     kind: "fault";
-    protection: Protection;
+    payload: Protection;
 };
 
 type WarningMessage = AbstractMessage & {
     kind: "warning";
-    protection: Protection;
+    payload: Protection;
 };
 
 export type InfoMessage = AbstractMessage & {
     kind: "info";
-    msg: string;
+    payload: string;
 };
 
 export type Protection =

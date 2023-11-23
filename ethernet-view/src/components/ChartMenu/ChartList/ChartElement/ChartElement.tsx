@@ -1,10 +1,25 @@
 // @ts-ignore
 import CanvasJSReact from '@canvasjs/react-charts';
-import { ChartId, DataSeries, MeasurementId, MeasurementInfo, Point } from "components/ChartMenu/types";
 import styles from "./ChartElement.module.scss";
 import { AiOutlineCloseCircle } from 'react-icons/ai'
 import { MutableRefObject, memo, useCallback, useRef, DragEvent, useEffect } from "react";
 import { useInterval } from 'common';
+import { ChartId, MeasurementColor, MeasurementId, MeasurementInfo, MeasurementName } from '../ChartList';
+
+export interface Point {
+    x: number,
+    y: number,
+};
+
+export type DataSeries = {
+    type: string,
+    legendText: string,
+    showInLegend: boolean,
+    name: MeasurementName,
+    color: MeasurementColor,
+    dataPoints: Point[],
+    updateFunction: () => void,
+};
 
 type Props = {
     chartId: ChartId;
@@ -25,14 +40,8 @@ export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChar
     // Adds the first measurement passed by props to the chart when it is created.
     useEffect(() => {
         const measurement = getMeasurementInfo(measurementId);
-        chartRef.current?.options.data.push({
-            type: "line",
-            showInLegend: true,
-            name: measurement.name,
-            color: measurement.color,
-            dataPoints: [] as Point[],
-            updateFunction: measurement.getUpdate,
-        });
+        const dataSeries = createDataSeries(measurement);
+        chartRef.current?.options.data.push(dataSeries);
     }, []);
 
     // Event handler that adds a new line to the chart when the user
@@ -41,14 +50,8 @@ export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChar
         ev.stopPropagation();
         const measurementId = ev.dataTransfer.getData("id");
         const measurement = getMeasurementInfo(measurementId);
-        chartRef.current?.options.data.push({
-            type: "line",
-            showInLegend: true,
-            name: measurement.name,
-            color: measurement.color,
-            dataPoints: [] as Point[],
-            updateFunction: measurement.getUpdate,
-        });
+        const dataSeries = createDataSeries(measurement);
+        chartRef.current?.options.data.push(dataSeries);
     }, []);
 
     // Interval that gets the updated values for all the measurements every 5ms
@@ -92,9 +95,7 @@ export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChar
                             cursor: "pointer",
                             itemclick: (event: any) => {
                                 event.chart.data[event.dataSeriesIndex].remove();
-                                if(event.chart.data.length === 0) {
-                                    removeChart(chartId);
-                                }
+                                if(event.chart.data.length === 0) removeChart(chartId)
                             }
                         },
                     }}
@@ -104,3 +105,15 @@ export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChar
         </div>
     );
 });
+
+export function createDataSeries(measurement: MeasurementInfo): DataSeries {
+    return {
+        type: "line",
+        legendText: measurement.units ? `${measurement.name} (${measurement.units})` : measurement.name,
+        showInLegend: true,
+        name: measurement.name,
+        color: measurement.color,
+        dataPoints: [] as Point[],
+        updateFunction: measurement.getUpdate,
+    };
+}
