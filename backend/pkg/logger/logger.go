@@ -12,7 +12,7 @@ import (
 type Logger struct {
 	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
 	running        *atomic.Bool
-	subloggersLock sync.RWMutex
+	subloggersLock *sync.RWMutex
 	subloggers     map[abstraction.LoggerName]abstraction.Logger
 }
 

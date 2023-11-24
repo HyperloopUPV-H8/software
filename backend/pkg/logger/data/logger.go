@@ -23,8 +23,8 @@ const (
 // Logger is a struct that implements the abstraction.Logger interface
 type Logger struct {
 	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
-	running     *atomic.Bool
-	runningLock sync.RWMutex
+	running  *atomic.Bool
+	fileLock *sync.RWMutex
 	// initialTime fixes the starting time of the log
 	initialTime time.Time
 	// valueFileSlice is a map that contains the file of each value
