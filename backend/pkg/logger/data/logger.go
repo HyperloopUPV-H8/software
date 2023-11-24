@@ -76,8 +76,8 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 	valueMap := dataRecord.packet.GetValues()
 
-	sublogger.runningLock.Lock()
-	defer sublogger.runningLock.Unlock()
+	sublogger.fileLock.Lock()
+	defer sublogger.fileLock.Unlock()
 
 	writerErr := error(nil)
 	for valueName, value := range valueMap {
