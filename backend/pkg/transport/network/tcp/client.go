@@ -47,12 +47,14 @@ type ClientConfig struct {
 
 	// MaxRetries defines how many times might this client attempt to connect after a failed attempt
 	MaxRetries int
+	// CurrentRetries is how many times the client has tried to reconnect
+	CurrentRetries int
 	// Backoff specifies the backoff algorithm for this client
 	Backoff backoffFunction
 }
 
 // NewClient inits a ClientConfig with good defaults and the provided information
-func NewClient(target abstraction.TransportTarget, local net.Addr) ClientConfig {
+func NewClient(local net.Addr) ClientConfig {
 	return ClientConfig{
 		Dialer: net.Dialer{
 			Timeout:   time.Second,
@@ -70,7 +72,7 @@ func NewClient(target abstraction.TransportTarget, local net.Addr) ClientConfig 
 // Dial attempts to create a connection with the specified remote using the client configuration.
 func (config ClientConfig) Dial(network, remote string) (net.Conn, error) {
 	var err error
-	for retries := 0; retries != config.MaxRetries; retries++ {
+	for ; config.CurrentRetries != config.MaxRetries; config.CurrentRetries++ {
 		var conn net.Conn
 		conn, err = config.DialContext(config.Context, network, remote)
 		if err == nil {
@@ -83,7 +85,7 @@ func (config ClientConfig) Dial(network, remote string) (net.Conn, error) {
 		if netErr, ok := err.(net.Error); !ok || !netErr.Timeout() {
 			return nil, err
 		}
-		time.Sleep(config.Backoff(retries))
+		time.Sleep(config.Backoff(config.CurrentRetries))
 	}
 
 	return nil, ErrTooManyRetries{

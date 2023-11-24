@@ -32,4 +32,5 @@ type Transport interface {
 type TransportAPI interface {
 	// Notification notifies the back-end that an event has been received
 	Notification(TransportNotification)
+	ConnectionUpdate(TransportTarget, bool)
 }

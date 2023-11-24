@@ -7,7 +7,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 )
 
-type connectionCallback = func(target abstraction.TransportTarget, conn net.Conn)
+type connectionCallback = func(target abstraction.TransportTarget, conn net.Conn) error
 
 type address = string
 
@@ -21,12 +21,10 @@ type ServerConfig struct {
 
 	// Targets is a list of connections which this server accepts and their related transport targets
 	Targets map[address]abstraction.TransportTarget
-
-	onConnection connectionCallback
 }
 
 // NewServer inits a new ServerConfig with good defaults and the provided values
-func NewServer(targets map[address]abstraction.TransportTarget, onConnection connectionCallback) ServerConfig {
+func NewServer(targets map[address]abstraction.TransportTarget) ServerConfig {
 	return ServerConfig{
 		ListenConfig: net.ListenConfig{
 			KeepAlive: -1,
@@ -35,16 +33,14 @@ func NewServer(targets map[address]abstraction.TransportTarget, onConnection con
 		Context: context.TODO(),
 
 		Targets: targets,
-
-		onConnection: onConnection,
 	}
 }
 
 // Listen listens for incoming TCP connections based on the server configuration.
 //
-// connections are notified through the config connection callback set previously.
-// any errors encountered are returned, stopping the listener in the process.
-func (config ServerConfig) Listen(network string, local string) error {
+// connections are notified through the config connection callback. Any errors encountered
+// are returned, stopping the listener in the process.
+func (config ServerConfig) Listen(network string, local string, onConnection connectionCallback) error {
 	listener, err := config.ListenConfig.Listen(config.Context, network, local)
 	if err != nil {
 		return err
@@ -63,6 +59,6 @@ func (config ServerConfig) Listen(network string, local string) error {
 			continue
 		}
 
-		config.onConnection(target, conn)
+		onConnection(target, conn) // TODO: handle error
 	}
 }

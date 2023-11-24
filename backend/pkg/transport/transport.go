@@ -1,10 +1,13 @@
 package transport
 
 import (
+	"errors"
 	"net"
+	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tcp"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tftp"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/session"
@@ -22,12 +25,67 @@ type Transport struct {
 
 	snifferDemux *session.SnifferDemux
 
-	sniffer *sniffer.Sniffer
-	boards  map[abstraction.BoardId]net.Conn
+	sniffer     *sniffer.Sniffer
+	connections map[abstraction.TransportTarget]net.Conn
 
 	tftp *tftp.Client
 
 	api abstraction.TransportAPI
+}
+
+func (transport *Transport) HandleClient(config tcp.ClientConfig, target abstraction.TransportTarget, network, remote string) error {
+	for {
+		conn, err := config.Dial(network, remote)
+		if err != nil {
+			if !errors.Is(err, error(tcp.ErrTooManyRetries{})) {
+				return err
+			}
+
+			continue
+		}
+
+		err = transport.handleTCPConn(target, conn)
+		if errors.Is(err, error(ErrTargetAlreadyConnected{})) {
+			return err
+		}
+
+		// Wait before trying to reconnect
+		config.CurrentRetries = 5
+		time.Sleep(config.Backoff(config.CurrentRetries))
+	}
+}
+
+func (transport *Transport) HandleServer(config tcp.ServerConfig, network, local string) error {
+	return config.Listen(network, local, transport.handleTCPConn)
+}
+
+func (transport *Transport) handleTCPConn(target abstraction.TransportTarget, conn net.Conn) error {
+	if _, ok := transport.connections[target]; ok {
+		conn.Close()
+		return ErrTargetAlreadyConnected{Target: target}
+	}
+
+	conn, errChan := tcp.WithErrChan(conn)
+	defer conn.Close()
+
+	transport.connections[target] = conn
+	defer delete(transport.connections, target)
+
+	transport.api.ConnectionUpdate(target, true)
+	defer transport.api.ConnectionUpdate(target, false)
+
+	go func() {
+		for {
+			packet, err := transport.decoder.DecodeNext(conn)
+			if err != nil {
+				break
+			}
+
+			transport.api.Notification(NewPacketNotification(packet))
+		}
+	}()
+
+	return <-errChan
 }
 
 // SendMessage triggers an event to send something to the vehicle. Some messages

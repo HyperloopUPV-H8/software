@@ -15,3 +15,11 @@ type ErrUnrecognizedEvent struct {
 func (err ErrUnrecognizedEvent) Error() string {
 	return fmt.Sprintf("unrecognized event %s", err.event)
 }
+
+type ErrTargetAlreadyConnected struct {
+	Target abstraction.TransportTarget
+}
+
+func (err ErrTargetAlreadyConnected) Error() string {
+	return fmt.Sprintf("%s is already connected", err.Target)
+}
