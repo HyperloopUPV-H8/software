@@ -28,6 +28,8 @@ type Transport struct {
 	sniffer     *sniffer.Sniffer
 	connections map[abstraction.TransportTarget]net.Conn
 
+	idToTarget map[abstraction.PacketId]abstraction.TransportTarget
+
 	tftp *tftp.Client
 
 	api abstraction.TransportAPI
@@ -104,7 +106,31 @@ func (transport *Transport) SendMessage(message abstraction.TransportMessage) er
 }
 
 func (transport *Transport) handlePacketEvent(message PacketMessage) error {
-	panic("TODO!")
+	target, ok := transport.idToTarget[message.Id()]
+	if !ok {
+		return ErrUnrecognizedId{Id: message.Id()}
+	}
+
+	conn, ok := transport.connections[target]
+	if !ok {
+		return ErrConnClosed{Target: target}
+	}
+
+	data, err := transport.encoder.Encode(message.Packet())
+	if err != nil {
+		return err
+	}
+
+	totalWritten := 0
+	for totalWritten < len(data) {
+		n, err := conn.Write(data[totalWritten:])
+		totalWritten += n
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (transport *Transport) handleFileWrite(message FileWriteMessage) error {
