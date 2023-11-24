@@ -2,7 +2,7 @@ import { useEffect, useReducer } from "react";
 import styles from "./ExpandablePairs.module.scss";
 import { Pair, PairType } from "./Pair/Pair";
 import { Button } from "..";
-import { nanoid } from "@reduxjs/toolkit";
+import { nanoid } from "nanoid";
 
 type Props = {
     leftColumnName: string;

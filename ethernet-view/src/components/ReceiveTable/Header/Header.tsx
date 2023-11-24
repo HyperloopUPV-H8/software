@@ -1,11 +1,9 @@
-import { useDispatch, useSelector } from "react-redux";
 import styles from "./Header.module.scss";
-import { RootState } from "store";
 import { useSplit } from "hooks/useSplit/useSplit";
 import { Orientation } from "hooks/useSplit/Orientation";
 import { Separator } from "./Separator/Separator";
 import { useEffect } from "react";
-import { setColumnSizes } from "slices/columnsSlice";
+import { useColumnsStore } from "store/columnsStore";
 
 type Props = {
     items: string[];
@@ -14,21 +12,16 @@ type Props = {
 const MINIMUM_ITEM_SIZE = 0.05;
 
 export const Header = ({ items }: Props) => {
-    const columns = useSelector((state: RootState) => state.columns);
+    const columnSizes = useColumnsStore((state) => state.columnSizes);
+    const setColumnSizes = useColumnsStore((state) => state.setColumnSizes);
 
     const [splitElements, handleMouseDown] = useSplit(
         new Array(items.length).fill(MINIMUM_ITEM_SIZE),
         Orientation.HORIZONTAL
     );
 
-    const dispatch = useDispatch();
-
     useEffect(() => {
-        dispatch(
-            setColumnSizes(
-                splitElements.map((element) => `${element.length * 100}%`)
-            )
-        );
+        setColumnSizes(splitElements.map((element) => `${element.length * 100}%`));
     }, [splitElements]);
 
     return (
@@ -39,7 +32,7 @@ export const Header = ({ items }: Props) => {
                         <CellWithSeparator
                             key={index}
                             label={item}
-                            flexBasis={columns[index]}
+                            flexBasis={columnSizes[index]}
                             onMouseDown={(ev) => handleMouseDown(index, ev)}
                         />
                     );
@@ -49,7 +42,7 @@ export const Header = ({ items }: Props) => {
                     <CellWithoutSeparator
                         key={index}
                         label={item}
-                        flexBasis={columns[index]}
+                        flexBasis={columnSizes[index]}
                     />
                 );
             })}

@@ -18,7 +18,7 @@
         "dotenv": "^16.0.3",
         "events": "^3.3.0",
         "lodash": "^4.17.21",
-        "nanoid": "^4.0.0",
+        "nanoid": "^4.0.2",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-icons": "^4.6.0",
@@ -27,7 +27,8 @@
         "react-virtualized-auto-sizer": "^1.0.7",
         "react-window": "^1.8.8",
         "vite-plugin-svgr": "^2.4.0",
-        "vite-tsconfig-paths": "^4.0.5"
+        "vite-tsconfig-paths": "^4.0.5",
+        "zustand": "^4.4.6"
     },
     "devDependencies": {
         "@testing-library/jest-dom": "^5.16.5",
