@@ -16,13 +16,15 @@ type Logger struct {
 	subloggers     map[abstraction.LoggerName]abstraction.Logger
 }
 
-func (logger *Logger) Start(startKeys []abstraction.LoggerName) {
+var _ abstraction.Logger = &Logger{}
+
+func (logger *Logger) Start(startKeys []abstraction.LoggerName) error {
 	logger.subloggersLock.Lock()
 	defer logger.subloggersLock.Unlock()
 
 	if logger.running.CompareAndSwap(false, true) {
 		fmt.Println("Logger already running")
-		return
+		return nil
 	}
 
 	for _, name := range startKeys {
@@ -32,6 +34,7 @@ func (logger *Logger) Start(startKeys []abstraction.LoggerName) {
 	}
 
 	fmt.Println("Logger started")
+	return nil
 }
 
 // PushRecord works as a proxy for the PushRecord method of the subloggers
@@ -53,13 +56,13 @@ func (logger *Logger) PullRecord(request abstraction.LoggerRequest) (abstraction
 	return nil, ErrLoggerNotFound{request.Name()}
 }
 
-func (logger *Logger) Stop(stopKeys []abstraction.LoggerName) {
+func (logger *Logger) Stop(stopKeys []abstraction.LoggerName) error {
 	logger.subloggersLock.Lock()
 	defer logger.subloggersLock.Unlock()
 
 	if !logger.running.CompareAndSwap(true, false) {
 		fmt.Printf("Logger already stopped")
-		return
+		return nil
 	}
 
 	var wg sync.WaitGroup
@@ -76,4 +79,5 @@ func (logger *Logger) Stop(stopKeys []abstraction.LoggerName) {
 	wg.Wait()
 
 	fmt.Printf("Logger stopped")
+	return nil
 }
