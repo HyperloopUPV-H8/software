@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"reflect"
+	"path"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -64,7 +64,8 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		}
 	}
 
-	if reflect.TypeOf(record) != reflect.TypeOf(&Record{}) {
+	dataRecord, ok := record.(*Record)
+	if !ok {
 		return &logger.ErrWrongRecordType{
 			Name:      Name,
 			Timestamp: time.Now(),
@@ -73,11 +74,12 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		}
 	}
 
-	valueMap := record.(*Record).packet.GetValues()
+	valueMap := dataRecord.packet.GetValues()
 
 	sublogger.runningLock.Lock()
 	defer sublogger.runningLock.Unlock()
 
+	writerErr := error(nil)
 	for valueName, value := range valueMap {
 		var packet *Record
 		timestamp := packet.packet.Timestamp()
@@ -97,7 +99,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 		file, ok := sublogger.valueFileSlice[valueName]
 		if !ok {
-			f, err := os.Create("./" + string(valueName) + "/" + string(valueName) + "_" + packet.packet.Timestamp().Format("3339") + ".csv")
+			f, err := os.Create(path.Join(string(valueName), fmt.Sprintf("%s_%s.csv", valueName, packet.packet.Timestamp().Format("3339"))))
 			if err != nil {
 				return &logger.ErrCreatingFile{
 					Name:      Name,
@@ -111,21 +113,19 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		writer := csv.NewWriter(file) // TODO! use map/slice of writers
 		defer writer.Flush()
 
-		writer.Write([]string{timestamp.Format("3339"), val})
-		return nil
+		err := writer.Write([]string{timestamp.Format("3339"), val})
+		if err != nil {
+			writerErr = err
+		}
 	}
-	return nil
+	return writerErr
 }
 
-// The pull logic is still not implemented
 func (sublogger *Logger) PullRecord(request abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
 	panic("TODO!")
 }
 
 func Stop(sublogger *Logger) {
-	sublogger.runningLock.Lock()
-	defer sublogger.runningLock.Unlock()
-
 	if !sublogger.running.CompareAndSwap(true, false) {
 		fmt.Println("Logger already stopped")
 		return

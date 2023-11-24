@@ -26,3 +26,5 @@
 - Change type check logic
 - Handle writer errors
 - Fix error printing
+- Fix error handling logic
+- Prevent concurrency-related errors

@@ -40,20 +40,19 @@ func (logger *Logger) Start(startKeys []abstraction.LoggerName) error {
 // PushRecord works as a proxy for the PushRecord method of the subloggers
 func (logger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	loggerChecked, ok := logger.subloggers[record.Name()]
-	if ok {
-		loggerChecked.PushRecord(record)
-		return nil
+	if !ok {
+		return ErrLoggerNotFound{record.Name()}
 	}
-	return ErrLoggerNotFound{record.Name()}
+	return loggerChecked.PushRecord(record)
 }
 
 // PullRecord works as a proxy for the PullRecord method of the subloggers
 func (logger *Logger) PullRecord(request abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
 	loggerChecked, ok := logger.subloggers[request.Name()]
-	if ok {
-		return loggerChecked.PullRecord(request)
+	if !ok {
+		return nil, ErrLoggerNotFound{request.Name()}
 	}
-	return nil, ErrLoggerNotFound{request.Name()}
+	return loggerChecked.PullRecord(request)
 }
 
 func (logger *Logger) Stop(stopKeys []abstraction.LoggerName) error {
@@ -71,7 +70,7 @@ func (logger *Logger) Stop(stopKeys []abstraction.LoggerName) error {
 
 		go func(sublogger abstraction.Logger) {
 			defer wg.Done()
-			go sublogger.Stop(nil)
+			sublogger.Stop(nil)
 		}(logger.subloggers[sublogger])
 	}
 	// The waitgroup is used in order to wait for all the subloggers to stop
