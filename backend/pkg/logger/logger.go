@@ -19,13 +19,13 @@ type Logger struct {
 var _ abstraction.Logger = &Logger{}
 
 func (logger *Logger) Start(startKeys []abstraction.LoggerName) error {
-	logger.subloggersLock.Lock()
-	defer logger.subloggersLock.Unlock()
-
 	if logger.running.CompareAndSwap(false, true) {
 		fmt.Println("Logger already running")
 		return nil
 	}
+
+	logger.subloggersLock.Lock()
+	defer logger.subloggersLock.Unlock()
 
 	for _, name := range startKeys {
 		if sublogger, ok := logger.subloggers[name]; ok {
