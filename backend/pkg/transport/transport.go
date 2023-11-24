@@ -1,9 +1,10 @@
 package transport
 
 import (
+	"net"
+
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tcp"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tftp"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/session"
@@ -22,7 +23,7 @@ type Transport struct {
 	snifferDemux *session.SnifferDemux
 
 	sniffer *sniffer.Sniffer
-	boards  map[abstraction.BoardId]*tcp.Conn
+	boards  map[abstraction.BoardId]net.Conn
 
 	tftp *tftp.Client
 
