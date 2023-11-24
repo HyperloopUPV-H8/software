@@ -24,3 +24,5 @@
 ## v0.3.4
 
 - Change type check logic
+- Handle writer errors
+- Fix error printing

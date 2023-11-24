@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
@@ -11,7 +12,7 @@ type ErrLoggerNotFound struct {
 }
 
 func (err ErrLoggerNotFound) Error() string {
-	return "Logger " + string(err.Name) + " not found"
+	return fmt.Sprintf("Logger %s not found", err.Name)
 }
 
 type ErrCreatingFile struct {
@@ -21,7 +22,7 @@ type ErrCreatingFile struct {
 }
 
 func (err *ErrCreatingFile) Error() string {
-	return "Error creating file for logger " + string(err.Name) + " at " + err.Timestamp.Format(time.RFC3339)
+	return fmt.Sprintf("Error creating file for %s logger at %s", err.Name, err.Timestamp.Format(time.RFC3339))
 }
 
 func (err *ErrCreatingFile) Unwrap() error {
@@ -34,7 +35,7 @@ type ErrLoggerNotRunning struct {
 }
 
 func (err *ErrLoggerNotRunning) Error() string {
-	return "Logger " + string(err.Name) + " not running at " + err.Timestamp.Format(time.RFC3339)
+	return fmt.Sprintf("Logger %s not running at %s", err.Name, err.Timestamp.Format(time.RFC3339))
 }
 
 type ErrWrongRecordType struct {
@@ -45,5 +46,5 @@ type ErrWrongRecordType struct {
 }
 
 func (err *ErrWrongRecordType) Error() string {
-	return "Wrong record type for logger " + string(err.Name) + " at " + err.Timestamp.Format(time.RFC3339) + ". Expected " + string(err.Expected.Name()) + " but received " + string(err.Received.Name())
+	return fmt.Sprintf("Wrong record type for logger %s at %s, expected %T, got %T", err.Name, err.Timestamp.Format(time.RFC3339), err.Expected.Name(), err.Received.Name())
 }
