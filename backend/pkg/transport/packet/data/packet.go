@@ -1,6 +1,8 @@
 package data
 
 import (
+	"time"
+
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 )
 
@@ -9,8 +11,9 @@ var _ abstraction.Packet = &Packet{}
 
 // Packet is a data packet containing multiple values
 type Packet struct {
-	id     abstraction.PacketId
-	values map[ValueName]Value
+	id        abstraction.PacketId
+	values    map[ValueName]Value
+	timestamp time.Time
 }
 
 // NewPacket creates a new data packet
@@ -32,6 +35,10 @@ func NewPacketWithValues(id abstraction.PacketId, values map[ValueName]Value) *P
 // Id returns the id of the data packet
 func (packet *Packet) Id() abstraction.PacketId {
 	return packet.id
+}
+
+func (packet *Packet) Timestamp() time.Time {
+	return packet.timestamp
 }
 
 // SetValue updates the value with the given name to the new value. It overwrites a value if it is already set
