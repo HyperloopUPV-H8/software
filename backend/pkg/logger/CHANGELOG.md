@@ -19,3 +19,8 @@
 
 - Change from map to list
 - Use more descriptive names
+- Fix constants
+
+## v0.3.4
+
+- Change type check logic
