@@ -115,7 +115,7 @@ func (transport *Transport) handlePacketEvent(message PacketMessage) error {
 		return ErrConnClosed{Target: target}
 	}
 
-	data, err := transport.encoder.Encode(message.Packet())
+	data, err := transport.encoder.Encode(message)
 	if err != nil {
 		return err
 	}

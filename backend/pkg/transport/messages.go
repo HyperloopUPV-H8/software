@@ -17,28 +17,18 @@ const (
 
 // PacketMessage request a packet to be sent to the vehicle.
 type PacketMessage struct {
-	packet abstraction.Packet
+	abstraction.Packet
 }
 
 func NewPacketMessage(packet abstraction.Packet) PacketMessage {
 	return PacketMessage{
-		packet: packet,
+		Packet: packet,
 	}
 }
 
 // Event always returns PacketEvent
 func (message PacketMessage) Event() abstraction.TransportEvent {
 	return PacketEvent
-}
-
-// Packet returns the packet associated with the message
-func (message PacketMessage) Packet() abstraction.Packet {
-	return message.packet
-}
-
-// Id returns the Id of the packet associated with the message
-func (message PacketMessage) Id() abstraction.PacketId {
-	return message.packet.Id()
 }
 
 // FileWriteMessage request a file to be written to a specific target
