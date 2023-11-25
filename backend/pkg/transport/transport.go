@@ -2,10 +2,12 @@ package transport
 
 import (
 	"errors"
+	"io"
 	"net"
 	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tcp"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tftp"
@@ -23,9 +25,6 @@ type Transport struct {
 	decoder *presentation.Decoder
 	encoder *presentation.Encoder
 
-	snifferDemux *session.SnifferDemux
-
-	sniffer     *sniffer.Sniffer
 	connections map[abstraction.TransportTarget]net.Conn
 
 	idToTarget map[abstraction.PacketId]abstraction.TransportTarget
@@ -139,6 +138,23 @@ func (transport *Transport) handleFileWrite(message FileWriteMessage) error {
 
 func (transport *Transport) handleFileRead(message FileReadMessage) error {
 	panic("TODO!")
+}
+
+func (transport *Transport) HandleSniffer(sniffer *sniffer.Sniffer) error {
+	return session.NewSnifferDemux(transport.handleConversation).ReadPackets(sniffer)
+}
+
+func (transport *Transport) handleConversation(socket network.Socket, reader io.Reader) {
+	go func() {
+		for {
+			packet, err := transport.decoder.DecodeNext(reader)
+			if err != nil {
+				return // TODO: handle error
+			}
+
+			transport.api.Notification(NewPacketMessage(packet))
+		}
+	}()
 }
 
 // SetAPI sets the API that the Transport will use
