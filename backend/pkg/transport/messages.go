@@ -43,12 +43,14 @@ func (message PacketMessage) Id() abstraction.PacketId {
 
 // FileWriteMessage request a file to be written to a specific target
 type FileWriteMessage struct {
-	data io.Reader
+	filename string
+	io.Reader
 }
 
-func NewFileWriteMessage(data io.Reader) FileWriteMessage {
+func NewFileWriteMessage(filename string, input io.Reader) FileWriteMessage {
 	return FileWriteMessage{
-		data: data,
+		filename: filename,
+		Reader:   input,
 	}
 }
 
@@ -57,24 +59,20 @@ func (message FileWriteMessage) Event() abstraction.TransportEvent {
 	return FileWriteEvent
 }
 
-// Data returns the data to be written through tftp
-func (message FileWriteMessage) Data() io.Reader {
-	return message.data
-}
-
-// Read maps the message data read method so it can be used directly
-func (message FileWriteMessage) Read(p []byte) (n int, err error) {
-	return message.data.Read(p)
+func (message FileWriteMessage) Filename() string {
+	return message.filename
 }
 
 // FileReadMessage request a file to be read from the specific target.
 type FileReadMessage struct {
-	output io.Writer
+	filename string
+	io.Writer
 }
 
-func NewFileReadMessage(output io.Writer) FileReadMessage {
+func NewFileReadMessage(filename string, output io.Writer) FileReadMessage {
 	return FileReadMessage{
-		output: output,
+		filename: filename,
+		Writer:   output,
 	}
 }
 
@@ -83,12 +81,6 @@ func (message FileReadMessage) Event() abstraction.TransportEvent {
 	return FileReadEvent
 }
 
-// Output returns where data read should be written
-func (message FileReadMessage) Output() io.Writer {
-	return message.output
-}
-
-// Write maps the message output write method
-func (message FileReadMessage) Write(p []byte) (n int, err error) {
-	return message.output.Write(p)
+func (message FileReadMessage) Filename() string {
+	return message.filename
 }

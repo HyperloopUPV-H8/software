@@ -133,11 +133,13 @@ func (transport *Transport) handlePacketEvent(message PacketMessage) error {
 }
 
 func (transport *Transport) handleFileWrite(message FileWriteMessage) error {
-	panic("TODO!")
+	_, err := transport.tftp.WriteFile(message.Filename(), tftp.BinaryMode, message)
+	return err
 }
 
 func (transport *Transport) handleFileRead(message FileReadMessage) error {
-	panic("TODO!")
+	_, err := transport.tftp.ReadFile(message.Filename(), tftp.BinaryMode, message)
+	return err
 }
 
 func (transport *Transport) HandleSniffer(sniffer *sniffer.Sniffer) error {
@@ -160,5 +162,4 @@ func (transport *Transport) handleConversation(socket network.Socket, reader io.
 // SetAPI sets the API that the Transport will use
 func (transport *Transport) SetAPI(api abstraction.TransportAPI) {
 	transport.api = api
-	// TODO: make decoder use the api Notify method
 }
