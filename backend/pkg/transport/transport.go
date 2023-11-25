@@ -34,6 +34,9 @@ type Transport struct {
 	api abstraction.TransportAPI
 }
 
+// HandleClient connects to the specified client and handles its messages. This method blocks.
+// This method will try to reconnect to the client if it disconnects mid way through, but after
+// enough retries, it will stop.
 func (transport *Transport) HandleClient(config tcp.ClientConfig, target abstraction.TransportTarget, network, remote string) error {
 	for {
 		conn, err := config.Dial(network, remote)
@@ -56,10 +59,14 @@ func (transport *Transport) HandleClient(config tcp.ClientConfig, target abstrac
 	}
 }
 
+// HandleServer creates a server on the specified address, listening for all incoming connections and
+// handles them.
 func (transport *Transport) HandleServer(config tcp.ServerConfig, network, local string) error {
 	return config.Listen(network, local, transport.handleTCPConn)
 }
 
+// handleTCPConn is used to handle the specific TCP connections to the boards. It detects errors caused
+// on concurrent reads and writes, so other routines should not worry about closing or handling errors
 func (transport *Transport) handleTCPConn(target abstraction.TransportTarget, conn net.Conn) error {
 	if _, ok := transport.connections[target]; ok {
 		conn.Close()
@@ -104,6 +111,7 @@ func (transport *Transport) SendMessage(message abstraction.TransportMessage) er
 	}
 }
 
+// handlePacketEvent is used to send an order to one of the connected boards
 func (transport *Transport) handlePacketEvent(message PacketMessage) error {
 	target, ok := transport.idToTarget[message.Id()]
 	if !ok {
@@ -132,20 +140,24 @@ func (transport *Transport) handlePacketEvent(message PacketMessage) error {
 	return nil
 }
 
+// handleFileWrite writes a file through tftp to the blcu
 func (transport *Transport) handleFileWrite(message FileWriteMessage) error {
 	_, err := transport.tftp.WriteFile(message.Filename(), tftp.BinaryMode, message)
 	return err
 }
 
+// handleFileRead reads a file through tftp from the blcu
 func (transport *Transport) handleFileRead(message FileReadMessage) error {
 	_, err := transport.tftp.ReadFile(message.Filename(), tftp.BinaryMode, message)
 	return err
 }
 
+// HandleSniffer starts listening for packets on the provided sniffer and handles them.
 func (transport *Transport) HandleSniffer(sniffer *sniffer.Sniffer) error {
 	return session.NewSnifferDemux(transport.handleConversation).ReadPackets(sniffer)
 }
 
+// handleConversation is called when the sniffer detects a new conversation and handles its specific packets
 func (transport *Transport) handleConversation(socket network.Socket, reader io.Reader) {
 	go func() {
 		for {
