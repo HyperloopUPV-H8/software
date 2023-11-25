@@ -59,8 +59,8 @@ export const usePodDataStore = create<PodDataStore>((set, get) => ({
      * @param {Record<number, PacketUpdate>} packetUpdates 
      */
     updatePodData: (packetUpdates: Record<number, PacketUpdate>) => {
-2
         const podData = get().podData;
+        const updatedBoards = [...podData.boards];
 
         for (const update of Object.values(packetUpdates)) {
             const packet = getPacket(podData, update.id);
@@ -84,16 +84,7 @@ export const usePodDataStore = create<PodDataStore>((set, get) => ({
                 const updatedBoard = {...board}
                 updatedBoard.packets[packetIndexInBoard] = updatePacket(board.name, packet, update)
 
-                const updatedBoards = [...podData.boards]
-                updatedBoards[boardIndex] = updatedBoard
-
-                set(state => ({
-                    ...state,
-                    podData: {
-                        ...state.podData,
-                        boards: updatedBoards
-                    }
-                }))
+                updatedBoards[boardIndex] = updatedBoard;
                 
             } else {
                 console.warn(`packet with id ${update.id} not found`);
@@ -105,6 +96,7 @@ export const usePodDataStore = create<PodDataStore>((set, get) => ({
             ...state,
             podData: {
                 ...state.podData,
+                boards: updatedBoards,
                 lastUpdates: packetUpdates
             }
         }))

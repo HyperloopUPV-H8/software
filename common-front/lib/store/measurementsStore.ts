@@ -29,7 +29,6 @@ export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
      * @returns {Measurements}
      */
     initMeasurements: (podDataAdapter: PodDataAdapter) => {
-
         set(state => ({
             ...state,
             measurements: createMeasurementsFromPodDataAdapter(podDataAdapter),
@@ -44,6 +43,9 @@ export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
      * @param {Record<string, PacketUpdate>} measurements 
      */
     updateMeasurements: (measurements: Record<string, PacketUpdate>) => {
+
+        const measurementsCopy = get().measurements;
+
         for(const update of Object.values(measurements)) {
             for (const [id, mUpdate] of Object.entries(update.measurementUpdates)) {
                 const boardName = get().packetIdToBoard[update.id];
@@ -52,18 +54,13 @@ export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
                 }
 
                 const measurementId = `${boardName}/${id}`;
-                set(state => ({
-                    ...state,
-                    measurements: {
-                        ...measurements,
-                        [measurementId]: {
-                            ...state.measurements[measurementId],
-                            value: mUpdate
-                        }
-                    }
-                } as MeasurementsStore))
+                measurementsCopy[measurementId].value = mUpdate;
             }
         }
+        set(state => ({
+            ...state,
+            measurements: measurementsCopy
+        }))
     }
 }))
 
