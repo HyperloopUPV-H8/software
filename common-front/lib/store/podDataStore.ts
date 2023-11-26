@@ -45,7 +45,7 @@ export const usePodDataStore = create<PodDataStore>((set, get) => ({
         );
     
         const packetToBoard = getPacketToBoard(podDataAdapter.boards);
-    
+
         const podDataResult = { boards, packetToBoard, lastUpdates: {} };
 
         set(state => ({
@@ -67,14 +67,14 @@ export const usePodDataStore = create<PodDataStore>((set, get) => ({
             if (packet) {
                 const boardIndex = podData.packetToBoard[update.id];
     
-                if (!boardIndex) {
+                if (boardIndex == undefined) {
                     console.warn(`packet with id ${update.id} not found in packetToBoard`);
                     continue;
                 }
     
                 const board = podData.boards[boardIndex];
     
-                if (!board) {
+                if (board == undefined) {
                     console.warn(`board with index ${boardIndex} not found`);
                     continue;
                 }
