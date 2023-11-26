@@ -3,7 +3,7 @@ import CanvasJSReact from '@canvasjs/react-charts';
 import styles from "./ChartElement.module.scss";
 import { AiOutlineCloseCircle } from 'react-icons/ai'
 import { MutableRefObject, memo, useCallback, useRef, DragEvent, useEffect } from "react";
-import { useGlobalTicker, useInterval } from 'common';
+import { useGlobalTicker } from 'common';
 import { ChartId, MeasurementColor, MeasurementId, MeasurementInfo, MeasurementName } from '../ChartList';
 
 export interface Point {
