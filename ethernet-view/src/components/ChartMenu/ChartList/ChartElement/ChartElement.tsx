@@ -35,12 +35,13 @@ export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChar
     // Ref to the CanvasJS chart render
     const chartRef = useRef<typeof CanvasJSReact.CanvasJSChart>();
     const currentX = useRef(0);
+    const chartDataSeries = useRef<DataSeries[]>([]);
 
     // Adds the first measurement passed by props to the chart when it is created.
     useEffect(() => {
         const measurement = getMeasurementInfo(measurementId);
         const dataSeries = createDataSeries(measurement);
-        chartRef.current?.options.data.push(dataSeries);
+        chartDataSeries.current.push(dataSeries);
     }, []);
 
     // Event handler that adds a new line to the chart when the user
@@ -50,14 +51,13 @@ export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChar
         const measurementId = ev.dataTransfer.getData("id");
         const measurement = getMeasurementInfo(measurementId);
         const dataSeries = createDataSeries(measurement);
-        chartRef.current?.options.data.push(dataSeries);
+        chartDataSeries.current.push(dataSeries);
     }, []);
 
     // Interval that gets the updated values for all the measurements at GlobalTicker refresh rate
     // in this chart and add them to it.
     useGlobalTicker(() => {
-        const chartDataSeries = chartRef.current?.options.data as DataSeries[];
-        for(let chartDs of chartDataSeries) {
+        for(let chartDs of chartDataSeries.current) {
             const newValue = chartDs.updateFunction();
             chartDs.dataPoints.push({ x: currentX.current, y: newValue } as Point);
             if (chartDs.dataPoints.length > maxValue) {
@@ -85,7 +85,7 @@ export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChar
                 <CanvasJSReact.CanvasJSChart
                     options={{
                         height: 300,
-                        data: [] as DataSeries[],
+                        data: chartDataSeries.current,
                         axisX: {
                             labelFormatter: () => "",
                         },
