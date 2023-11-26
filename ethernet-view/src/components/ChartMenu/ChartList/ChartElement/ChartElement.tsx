@@ -34,14 +34,16 @@ export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChar
 
     // Ref to the CanvasJS chart render
     const chartRef = useRef<typeof CanvasJSReact.CanvasJSChart>();
-    const currentX = useRef(0);
+    // Ref to the data series of the CanvasJS chart render
     const chartDataSeries = useRef<DataSeries[]>([]);
+    // Ref to the current axis x value
+    const currentX = useRef(0);
 
     // Adds the first measurement passed by props to the chart when it is created.
     useEffect(() => {
         const measurement = getMeasurementInfo(measurementId);
         const dataSeries = createDataSeries(measurement);
-        chartDataSeries.current.push(dataSeries);
+        appendToChart(dataSeries, chartDataSeries.current);
     }, []);
 
     // Event handler that adds a new line to the chart when the user
@@ -51,7 +53,7 @@ export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChar
         const measurementId = ev.dataTransfer.getData("id");
         const measurement = getMeasurementInfo(measurementId);
         const dataSeries = createDataSeries(measurement);
-        chartDataSeries.current.push(dataSeries);
+        appendToChart(dataSeries, chartDataSeries.current);
     }, []);
 
     // Interval that gets the updated values for all the measurements at GlobalTicker refresh rate
@@ -115,4 +117,11 @@ export function createDataSeries(measurement: MeasurementInfo): DataSeries {
         dataPoints: [] as Point[],
         updateFunction: measurement.getUpdate,
     };
+}
+
+function appendToChart(dataSeries: DataSeries, chartDataSeries: DataSeries[]) {
+    const dataSeriesInChart = chartDataSeries.find((ds: DataSeries) => ds.name === dataSeries.name);
+        if(!dataSeriesInChart) {
+            chartDataSeries.push(dataSeries);
+    }
 }
