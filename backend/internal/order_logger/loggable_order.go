@@ -4,26 +4,29 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 )
 
-type LoggableOrder models.Order
+type LoggableOrder data.Packet
 
 func (lo LoggableOrder) Id() string {
-	return fmt.Sprint(lo.ID)
+	packet := data.Packet(lo)
+	return fmt.Sprint(packet.Id())
 }
 
 func (lo LoggableOrder) Log() []string {
-	return []string{"[GUI]", time.Now().String(), "", "", "", fmt.Sprint(lo.ID), fmt.Sprint(lo.Fields)}
+	packet := data.Packet(lo)
+	return []string{"[GUI]", time.Now().String(), "", "", "", lo.Id(), fmt.Sprint(packet.GetValues())}
 }
 
-type LoggableTransmittedOrder models.PacketUpdate
+type LoggableTransmittedOrder data.Packet
 
 func (lto LoggableTransmittedOrder) Id() string {
-	return fmt.Sprint(lto.Metadata.ID)
+	packet := data.Packet(lto)
+	return fmt.Sprint(packet.Id())
 }
 
 func (lto LoggableTransmittedOrder) Log() []string {
-
-	return []string{"[TRANSMITTED]", fmt.Sprint(lto.Metadata.Timestamp), fmt.Sprint(lto.Metadata.From), fmt.Sprint(lto.Metadata.To), fmt.Sprint(lto.Metadata.SeqNum), fmt.Sprint(lto.Metadata.ID), fmt.Sprint(lto.Values)}
+	packet := data.Packet(lto)
+	return []string{"[TRANSMITTED]", fmt.Sprint(packet.Timestamp()), "--from--", "--to--", "--seq num--", lto.Id(), fmt.Sprint(packet.GetValues)}
 }
