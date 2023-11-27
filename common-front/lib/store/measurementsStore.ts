@@ -44,7 +44,7 @@ export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
      */
     updateMeasurements: (measurements: Record<string, PacketUpdate>) => {
 
-        const measurementsCopy = get().measurements;
+        const measurementsDraft = get().measurements;
 
         for(const update of Object.values(measurements)) {
             for (const [id, mUpdate] of Object.entries(update.measurementUpdates)) {
@@ -54,12 +54,12 @@ export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
                 }
 
                 const measurementId = `${boardName}/${id}`;
-                measurementsCopy[measurementId].value = mUpdate;
+                measurementsDraft[measurementId].value = mUpdate;
             }
         }
         set(state => ({
             ...state,
-            measurements: measurementsCopy
+            measurements: measurementsDraft
         }))
     }
 }))
