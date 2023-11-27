@@ -2,33 +2,31 @@ package packet_logger
 
 import (
 	"fmt"
+	"time"
 
-	"github.com/HyperloopUPV-H8/h9-backend/internal/packet"
-	vehicle_models "github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 )
 
 type LoggablePacket struct {
-	Metadata packet.Metadata
-	HexValue []byte
+	Packet abstraction.Packet
 }
 
 func (packet LoggablePacket) Id() string {
-	return fmt.Sprint(packet.Metadata.ID)
+	return fmt.Sprint(packet.Packet.Id())
 }
 
 func (packet LoggablePacket) Log() []string {
 	return []string{
-		packet.Metadata.Timestamp.String(),
-		packet.Metadata.From,
-		packet.Metadata.To,
-		fmt.Sprintf("%d", packet.Metadata.ID),
-		fmt.Sprintf("%X", packet.HexValue),
+		time.Now().Format(time.RFC3339), // TODO: fetch timestamp
+		"--from--",                      // TODO: fetch from
+		"--to--",                        // TODO: fetch to
+		fmt.Sprint(packet.Id()),
+		"--hex--", // TODO: fetch hex vaue
 	}
 }
 
-func ToLoggablePacket(update vehicle_models.PacketUpdate) LoggablePacket {
+func ToLoggablePacket(update abstraction.Packet) LoggablePacket {
 	return LoggablePacket{
-		Metadata: update.Metadata,
-		HexValue: update.HexValue,
+		Packet: update,
 	}
 }

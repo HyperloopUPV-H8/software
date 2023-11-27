@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/HyperloopUPV-H8/h9-backend/internal/packet"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 )
 
 type LoggableValue struct {
 	ValueId   string
-	Value     packet.Value
+	Value     data.Packet
 	Timestamp time.Time
 }
 
@@ -24,7 +24,7 @@ func (value LoggableValue) Log() []string {
 	}
 }
 
-func ToLoggableValue(id string, value packet.Value, timestamp time.Time) LoggableValue {
+func ToLoggableValue(id string, value data.Packet, timestamp time.Time) LoggableValue {
 	return LoggableValue{
 		ValueId:   id,
 		Value:     value,
