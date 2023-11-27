@@ -20,16 +20,20 @@ type Packet struct {
 // NewPacket creates a new data packet
 func NewPacket(id abstraction.PacketId) *Packet {
 	return &Packet{
-		id:     id,
-		values: make(map[ValueName]Value),
+		id:        id,
+		values:    make(map[ValueName]Value),
+		enabled:   make(map[ValueName]bool),
+		timestamp: time.Now(),
 	}
 }
 
 // NewPacketWithValues creates a new data packet with the given values
-func NewPacketWithValues(id abstraction.PacketId, values map[ValueName]Value) *Packet {
+func NewPacketWithValues(id abstraction.PacketId, values map[ValueName]Value, enabled map[ValueName]bool) *Packet {
 	return &Packet{
-		id:     id,
-		values: values,
+		id:        id,
+		values:    values,
+		enabled:   enabled,
+		timestamp: time.Now(),
 	}
 }
 
@@ -52,4 +56,9 @@ func (packet *Packet) SetValue(name ValueName, value Value, enable bool) *Packet
 // GetValues returns all values associated with the packet
 func (packet *Packet) GetValues() map[ValueName]Value {
 	return packet.values
+}
+
+func (packet *Packet) SetTimestamp(timestamp time.Time) *Packet {
+	packet.timestamp = timestamp
+	return packet
 }
