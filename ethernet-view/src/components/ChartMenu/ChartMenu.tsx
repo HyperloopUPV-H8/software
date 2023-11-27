@@ -42,7 +42,7 @@ export const ChartMenu = ({ sidebarSections }: Props) => {
                             range: meas.safeRange,
                             getUpdate: () => {
                                 const meas = getMeasurement(measurements, id) as NumericMeasurement;
-                                if (!meas) return 0
+                                if (meas == undefined) return 0
                                 return meas.value.last;
                             },
                             color: getRandomColor(),

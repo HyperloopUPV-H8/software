@@ -3,7 +3,7 @@ import CanvasJSReact from '@canvasjs/react-charts';
 import styles from "./ChartElement.module.scss";
 import { AiOutlineCloseCircle } from 'react-icons/ai'
 import { MutableRefObject, memo, useCallback, useRef, DragEvent, useEffect } from "react";
-import { useInterval } from 'common';
+import { useGlobalTicker } from 'common';
 import { ChartId, MeasurementColor, MeasurementId, MeasurementInfo, MeasurementName } from '../ChartList';
 
 export interface Point {
@@ -18,30 +18,32 @@ export type DataSeries = {
     name: MeasurementName,
     color: MeasurementColor,
     dataPoints: Point[],
-    updateFunction: () => void,
+    updateFunction: () => number,
 };
 
 type Props = {
     chartId: ChartId;
     measurementId: MeasurementId;
     maxValue: number;
-    refreshRate: number;
     removeChart: (id: ChartId) => void;
     getMeasurementInfo: (id: MeasurementId) => MeasurementInfo;
 };
 
 // React component that keeps the chart render and measurements represented on it.
-export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChart, getMeasurementInfo, refreshRate }: Props) => {
+export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChart, getMeasurementInfo }: Props) => {
 
     // Ref to the CanvasJS chart render
-    let chartRef = useRef<typeof CanvasJSReact.CanvasJSChart>();
-    let currentX = useRef(0);
+    const chartRef = useRef<typeof CanvasJSReact.CanvasJSChart>();
+    // Ref to the data series of the CanvasJS chart render
+    const chartDataSeries = useRef<DataSeries[]>([]);
+    // Ref to the current axis x value
+    const currentX = useRef(0);
 
     // Adds the first measurement passed by props to the chart when it is created.
     useEffect(() => {
         const measurement = getMeasurementInfo(measurementId);
         const dataSeries = createDataSeries(measurement);
-        chartRef.current?.options.data.push(dataSeries);
+        appendToChart(dataSeries, chartDataSeries.current);
     }, []);
 
     // Event handler that adds a new line to the chart when the user
@@ -51,23 +53,22 @@ export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChar
         const measurementId = ev.dataTransfer.getData("id");
         const measurement = getMeasurementInfo(measurementId);
         const dataSeries = createDataSeries(measurement);
-        chartRef.current?.options.data.push(dataSeries);
+        appendToChart(dataSeries, chartDataSeries.current);
     }, []);
 
-    // Interval that gets the updated values for all the measurements every 5ms
+    // Interval that gets the updated values for all the measurements at GlobalTicker refresh rate
     // in this chart and add them to it.
-    useInterval(() => {
-        const chartDataSeries = chartRef.current?.options.data;
-        for(let chartDs of chartDataSeries) {
+    useGlobalTicker(() => {
+        for(let chartDs of chartDataSeries.current) {
             const newValue = chartDs.updateFunction();
-            chartDs.dataPoints.push({ x: currentX.current, y: newValue });
+            chartDs.dataPoints.push({ x: currentX.current, y: newValue } as Point);
             if (chartDs.dataPoints.length > maxValue) {
                 chartDs.dataPoints.shift();
             }
         }
         chartRef.current?.render();
         currentX.current = currentX.current + 1;
-    }, refreshRate);
+    });
 
     return (
         <div
@@ -86,7 +87,7 @@ export const ChartElement = memo(({ chartId, measurementId, maxValue, removeChar
                 <CanvasJSReact.CanvasJSChart
                     options={{
                         height: 300,
-                        data: [] as DataSeries[],
+                        data: chartDataSeries.current,
                         axisX: {
                             labelFormatter: () => "",
                         },
@@ -116,4 +117,11 @@ export function createDataSeries(measurement: MeasurementInfo): DataSeries {
         dataPoints: [] as Point[],
         updateFunction: measurement.getUpdate,
     };
+}
+
+function appendToChart(dataSeries: DataSeries, chartDataSeries: DataSeries[]) {
+    const dataSeriesInChart = chartDataSeries.find((ds: DataSeries) => ds.name === dataSeries.name);
+        if(!dataSeriesInChart) {
+            chartDataSeries.push(dataSeries);
+    }
 }
