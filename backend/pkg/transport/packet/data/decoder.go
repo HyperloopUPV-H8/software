@@ -40,7 +40,7 @@ func (decoder *Decoder) Decode(id abstraction.PacketId, reader io.Reader) (abstr
 		if err != nil {
 			return packet, err
 		}
-		packet.SetValue(value.Name, val)
+		packet.SetValue(value.Name, val, true)
 	}
 
 	return packet, nil
