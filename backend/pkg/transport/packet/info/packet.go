@@ -1,6 +1,8 @@
 package info
 
 import (
+	"time"
+
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet"
 )
@@ -28,4 +30,10 @@ func NewPacket(id abstraction.PacketId) *Packet {
 // Id returns the packet id
 func (packet *Packet) Id() abstraction.PacketId {
 	return packet.id
+}
+
+// GetTimestamp returns the timestamp as a time.Time object
+func (p *Packet) GetTimestamp() time.Time {
+	t := p.Timestamp
+	return time.Date(int(t.Year), time.Month(int(t.Month)), int(t.Day), int(t.Hour), int(t.Minute), int(t.Second), int(t.Counter), time.UTC)
 }
