@@ -1,10 +1,15 @@
 package transport
 
 import (
+	"errors"
+	"io"
 	"net"
+	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tcp"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tftp"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/session"
@@ -20,14 +25,75 @@ type Transport struct {
 	decoder *presentation.Decoder
 	encoder *presentation.Encoder
 
-	snifferDemux *session.SnifferDemux
+	connections map[abstraction.TransportTarget]net.Conn
 
-	sniffer *sniffer.Sniffer
-	boards  map[abstraction.BoardId]net.Conn
+	idToTarget map[abstraction.PacketId]abstraction.TransportTarget
 
 	tftp *tftp.Client
 
 	api abstraction.TransportAPI
+}
+
+// HandleClient connects to the specified client and handles its messages. This method blocks.
+// This method will try to reconnect to the client if it disconnects mid way through, but after
+// enough retries, it will stop.
+func (transport *Transport) HandleClient(config tcp.ClientConfig, target abstraction.TransportTarget, network, remote string) error {
+	for {
+		conn, err := config.Dial(network, remote)
+		if err != nil {
+			if !errors.Is(err, error(tcp.ErrTooManyRetries{})) {
+				return err
+			}
+
+			continue
+		}
+
+		err = transport.handleTCPConn(target, conn)
+		if errors.Is(err, error(ErrTargetAlreadyConnected{})) {
+			return err
+		}
+
+		// Wait before trying to reconnect
+		config.CurrentRetries = 5
+		time.Sleep(config.Backoff(config.CurrentRetries))
+	}
+}
+
+// HandleServer creates a server on the specified address, listening for all incoming connections and
+// handles them.
+func (transport *Transport) HandleServer(config tcp.ServerConfig, network, local string) error {
+	return config.Listen(network, local, transport.handleTCPConn)
+}
+
+// handleTCPConn is used to handle the specific TCP connections to the boards. It detects errors caused
+// on concurrent reads and writes, so other routines should not worry about closing or handling errors
+func (transport *Transport) handleTCPConn(target abstraction.TransportTarget, conn net.Conn) error {
+	if _, ok := transport.connections[target]; ok {
+		conn.Close()
+		return ErrTargetAlreadyConnected{Target: target}
+	}
+
+	conn, errChan := tcp.WithErrChan(conn)
+	defer conn.Close()
+
+	transport.connections[target] = conn
+	defer delete(transport.connections, target)
+
+	transport.api.ConnectionUpdate(target, true)
+	defer transport.api.ConnectionUpdate(target, false)
+
+	go func() {
+		for {
+			packet, err := transport.decoder.DecodeNext(conn)
+			if err != nil {
+				break
+			}
+
+			transport.api.Notification(NewPacketNotification(packet))
+		}
+	}()
+
+	return <-errChan
 }
 
 // SendMessage triggers an event to send something to the vehicle. Some messages
@@ -45,20 +111,67 @@ func (transport *Transport) SendMessage(message abstraction.TransportMessage) er
 	}
 }
 
+// handlePacketEvent is used to send an order to one of the connected boards
 func (transport *Transport) handlePacketEvent(message PacketMessage) error {
-	panic("TODO!")
+	target, ok := transport.idToTarget[message.Id()]
+	if !ok {
+		return ErrUnrecognizedId{Id: message.Id()}
+	}
+
+	conn, ok := transport.connections[target]
+	if !ok {
+		return ErrConnClosed{Target: target}
+	}
+
+	data, err := transport.encoder.Encode(message)
+	if err != nil {
+		return err
+	}
+
+	totalWritten := 0
+	for totalWritten < len(data) {
+		n, err := conn.Write(data[totalWritten:])
+		totalWritten += n
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
+// handleFileWrite writes a file through tftp to the blcu
 func (transport *Transport) handleFileWrite(message FileWriteMessage) error {
-	panic("TODO!")
+	_, err := transport.tftp.WriteFile(message.Filename(), tftp.BinaryMode, message)
+	return err
 }
 
+// handleFileRead reads a file through tftp from the blcu
 func (transport *Transport) handleFileRead(message FileReadMessage) error {
-	panic("TODO!")
+	_, err := transport.tftp.ReadFile(message.Filename(), tftp.BinaryMode, message)
+	return err
+}
+
+// HandleSniffer starts listening for packets on the provided sniffer and handles them.
+func (transport *Transport) HandleSniffer(sniffer *sniffer.Sniffer) error {
+	return session.NewSnifferDemux(transport.handleConversation).ReadPackets(sniffer)
+}
+
+// handleConversation is called when the sniffer detects a new conversation and handles its specific packets
+func (transport *Transport) handleConversation(socket network.Socket, reader io.Reader) {
+	go func() {
+		for {
+			packet, err := transport.decoder.DecodeNext(reader)
+			if err != nil {
+				return // TODO: handle error
+			}
+
+			transport.api.Notification(NewPacketMessage(packet))
+		}
+	}()
 }
 
 // SetAPI sets the API that the Transport will use
 func (transport *Transport) SetAPI(api abstraction.TransportAPI) {
 	transport.api = api
-	// TODO: make decoder use the api Notify method
 }
