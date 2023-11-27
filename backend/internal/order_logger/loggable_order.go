@@ -28,5 +28,5 @@ func (lto LoggableTransmittedOrder) Id() string {
 
 func (lto LoggableTransmittedOrder) Log() []string {
 	packet := data.Packet(lto)
-	return []string{"[TRANSMITTED]", fmt.Sprint(packet.Timestamp()), "--from--", "--to--", "--seq num--", lto.Id(), fmt.Sprint(packet.GetValues)}
+	return []string{"[TRANSMITTED]", fmt.Sprint(packet.Timestamp()), "--from--", "--to--", "--seq num--", lto.Id(), fmt.Sprint(packet.GetValues())}
 }
