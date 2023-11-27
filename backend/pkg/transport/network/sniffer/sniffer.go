@@ -22,7 +22,7 @@ type Sniffer struct {
 // value is nil, the program tries to automatically detect the first layer from the source.
 //
 // The provided source should be already configured and ready to use, with the appropiate filters.
-func New(source *pcap.Handle, firstLayer *gopacket.LayerType) (*Sniffer, error) {
+func New(source *pcap.Handle, firstLayer *gopacket.LayerType) *Sniffer {
 	first := source.LinkType().LayerType()
 	if firstLayer != nil {
 		first = *firstLayer
@@ -34,7 +34,7 @@ func New(source *pcap.Handle, firstLayer *gopacket.LayerType) (*Sniffer, error) 
 		decoder: decoder,
 	}
 
-	return sniffer, nil
+	return sniffer
 }
 
 // ReadNext pulls the next packet from the wire, decodes it and returns the socket it belongs to,
