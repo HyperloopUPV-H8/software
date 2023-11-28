@@ -5,12 +5,15 @@ import (
 	"encoding/binary"
 	"flag"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"os/signal"
 	"path"
 	"runtime"
+	"runtime/pprof"
 	"strings"
+	"time"
 
 	blcuPackage "github.com/HyperloopUPV-H8/h9-backend/internal/blcu"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
@@ -44,6 +47,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/state"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
 	"github.com/fatih/color"
+	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
 	"github.com/pelletier/go-toml/v2"
 	trace "github.com/rs/zerolog/log"
@@ -51,8 +55,10 @@ import (
 
 var traceLevel = flag.String("trace", "info", "set the trace level (\"fatal\", \"error\", \"warn\", \"info\", \"debug\", \"trace\")")
 var traceFile = flag.String("log", "trace.json", "set the trace log file")
+var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 
 func main() {
+	flag.Parse()
 	traceFile := initTrace(*traceLevel, *traceFile)
 	defer traceFile.Close()
 
@@ -62,8 +68,14 @@ func main() {
 	defer RemovePid(pidPath)
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
-	flag.Parse()
-
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
 	config := getConfig("./config.toml")
 
 	file, err := excel.Download(excel.DownloadConfig(config.Excel.Download))
@@ -152,11 +164,14 @@ func main() {
 
 	transp := transport.NewTransport()
 
+	prev := time.Now()
 	transp.SetAPI(&TransportAPI{
 		OnNotification: func(notification abstraction.TransportNotification) {
 			packet := notification.(transport.PacketNotification)
 			switch p := packet.Packet.(type) {
 			case *data.Packet:
+				fmt.Println(time.Since(prev))
+				prev = time.Now()
 				if _, ok := orders[p.Id()]; ok {
 					loggerHandler.Log(order_logger.LoggableOrder(*p))
 					return
@@ -211,9 +226,12 @@ func main() {
 		panic("Failed to resolve local backend TCP client address")
 	}
 	serverTargets := make(map[string]abstraction.TransportTarget)
-	for _, board := range config.Vehicle.Boards {
-		go transp.HandleClient(tcp.NewClient(backendTcpClientAddr), abstraction.TransportTarget(board), "tcp", string(info.Addresses.Boards[board]))
-		serverTargets[fmt.Sprintf("%s:%d", info.Addresses.Boards[board], info.Ports.TcpClient)] = abstraction.TransportTarget(board)
+	for _, board := range podData.Boards {
+		if !common.Contains(config.Vehicle.Boards, board.Name) {
+			serverTargets[fmt.Sprintf("%s:%d", info.Addresses.Boards[board.Name], info.Ports.TcpClient)] = abstraction.TransportTarget(board.Name)
+			continue
+		}
+		go transp.HandleClient(tcp.NewClient(backendTcpClientAddr), abstraction.TransportTarget(board.Name), "tcp", string(info.Addresses.Boards[board.Name]))
 	}
 
 	// Start handling TCP server connections
@@ -222,7 +240,7 @@ func main() {
 	// Start handling the sniffer
 	source, err := pcap.OpenLive(dev.Name, 1500, true, pcap.BlockForever)
 	if err != nil {
-		panic("failed to obtain sniffer source")
+		panic("failed to obtain sniffer source: " + err.Error())
 	}
 	boardIps := make([]net.IP, 0)
 	for _, board := range info.Addresses.Boards {
@@ -232,18 +250,17 @@ func main() {
 	if err != nil {
 		panic("failed to compile bpf filter")
 	}
-	go transp.HandleSniffer(sniffer.New(source, nil))
+	go transp.HandleSniffer(sniffer.New(source, &layers.LayerTypeEthernet))
 
 	// <--- order transfer --->
 	go func() {
 		for order := range orderChannel {
-			err := transp.SendMessage(transport.NewPacketMessage(order))
-
+			err := transp.SendMessage(transport.NewPacketMessage(&order))
 			if err != nil {
-				trace.Error().Any("order", order).Msg("error sending order")
+				trace.Error().Any("order", order).Err(err).Msg("error sending order")
 			}
 
-			loggerHandler.Log(order_logger.LoggableOrder(*order))
+			loggerHandler.Log(order_logger.LoggableOrder(order))
 		}
 	}()
 
@@ -423,36 +440,36 @@ func getTransportDecEnc(info info.Info, podData pod_data.PodData) (*presentation
 				case pod_data.NumericMeasurement:
 					switch meas.Type {
 					case "uint8":
-						descriptor[i] = data.NewNumericDescriptor[uint8](data.ValueName(meas.Name))
+						descriptor[i] = data.NewNumericDescriptor[uint8](data.ValueName(meas.Id))
 					case "uint16":
-						descriptor[i] = data.NewNumericDescriptor[uint16](data.ValueName(meas.Name))
+						descriptor[i] = data.NewNumericDescriptor[uint16](data.ValueName(meas.Id))
 					case "uint32":
-						descriptor[i] = data.NewNumericDescriptor[uint32](data.ValueName(meas.Name))
+						descriptor[i] = data.NewNumericDescriptor[uint32](data.ValueName(meas.Id))
 					case "uint64":
-						descriptor[i] = data.NewNumericDescriptor[uint64](data.ValueName(meas.Name))
+						descriptor[i] = data.NewNumericDescriptor[uint64](data.ValueName(meas.Id))
 					case "int8":
-						descriptor[i] = data.NewNumericDescriptor[int8](data.ValueName(meas.Name))
+						descriptor[i] = data.NewNumericDescriptor[int8](data.ValueName(meas.Id))
 					case "int16":
-						descriptor[i] = data.NewNumericDescriptor[int16](data.ValueName(meas.Name))
+						descriptor[i] = data.NewNumericDescriptor[int16](data.ValueName(meas.Id))
 					case "int32":
-						descriptor[i] = data.NewNumericDescriptor[int32](data.ValueName(meas.Name))
+						descriptor[i] = data.NewNumericDescriptor[int32](data.ValueName(meas.Id))
 					case "int64":
-						descriptor[i] = data.NewNumericDescriptor[int64](data.ValueName(meas.Name))
+						descriptor[i] = data.NewNumericDescriptor[int64](data.ValueName(meas.Id))
 					case "float32":
-						descriptor[i] = data.NewNumericDescriptor[float32](data.ValueName(meas.Name))
+						descriptor[i] = data.NewNumericDescriptor[float32](data.ValueName(meas.Id))
 					case "float64":
-						descriptor[i] = data.NewNumericDescriptor[float64](data.ValueName(meas.Name))
+						descriptor[i] = data.NewNumericDescriptor[float64](data.ValueName(meas.Id))
 					default:
-						panic(fmt.Sprintf("unexpected numeric type for %s: %s", meas.Name, meas.Type))
+						panic(fmt.Sprintf("unexpected numeric type for %s: %s", meas.Id, meas.Type))
 					}
 				case pod_data.BooleanMeasurement:
-					descriptor[i] = data.NewBooleanDescriptor(data.ValueName(meas.Name))
+					descriptor[i] = data.NewBooleanDescriptor(data.ValueName(meas.Id))
 				case pod_data.EnumMeasurement:
 					enumDescriptor := make(data.EnumDescriptor, len(meas.Options))
 					for j, option := range meas.Options {
 						enumDescriptor[j] = data.EnumVariant(option)
 					}
-					descriptor[i] = data.NewEnumDescriptor(data.ValueName(meas.Name), enumDescriptor)
+					descriptor[i] = data.NewEnumDescriptor(data.ValueName(meas.Id), enumDescriptor)
 				default:
 					panic(fmt.Sprintf("unexpected measurement type: %T", measurement))
 				}

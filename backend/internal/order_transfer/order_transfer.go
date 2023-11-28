@@ -28,13 +28,13 @@ type OrderTransfer struct {
 	idToBoard             map[uint16]string
 	stateOrders           map[string][]uint16
 	stateOrdersObservable observable.ReplayObservable[map[string][]uint16]
-	channel               chan<- *data.Packet
+	channel               chan<- data.Packet
 	trace                 zerolog.Logger
 }
 
-func New(idToBoard map[uint16]string) (OrderTransfer, <-chan *data.Packet) {
+func New(idToBoard map[uint16]string) (OrderTransfer, <-chan data.Packet) {
 	trace.Info().Msg("new order transfer")
-	channel := make(chan *data.Packet, ORDER_CHAN_BUFFER)
+	channel := make(chan data.Packet, ORDER_CHAN_BUFFER)
 	stateOrders := make(map[string][]uint16)
 	return OrderTransfer{
 		stateOrdersMx:         &sync.Mutex{},
@@ -119,7 +119,7 @@ func (orderTransfer *OrderTransfer) handleOrder(topic string, payload json.RawMe
 			panic("unknown field type " + field.Type)
 		}
 	}
-	orderTransfer.channel <- data.NewPacketWithValues(abstraction.PacketId(order.Id), values, enabled)
+	orderTransfer.channel <- *data.NewPacketWithValues(abstraction.PacketId(order.Id), values, enabled)
 }
 
 func (orderTransfer *OrderTransfer) HandlerName() string {

@@ -1,6 +1,8 @@
 package sniffer
 
 import (
+	"fmt"
+
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
@@ -76,6 +78,7 @@ layerLoop:
 	}
 
 	if socket.SrcPort == 0 && socket.DstPort == 0 {
+		fmt.Println(packetLayers)
 		return network.Socket{}, data, ErrMissingPayload{packetLayers}
 	}
 

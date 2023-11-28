@@ -1,7 +1,7 @@
 package session
 
 import (
-	"bytes"
+	"fmt"
 	"io"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network"
@@ -20,13 +20,13 @@ type packetReader interface {
 // contents onto buffers based on the source and destination IPs and ports
 type SnifferDemux struct {
 	onConversation conversationCallback
-	conversations  map[network.Socket]*bytes.Buffer
+	conversations  map[network.Socket]io.ReadWriter
 }
 
 // NewSnifferDemux creates a new SnifferDemux with the provided onConversation callback
 func NewSnifferDemux(onConversation conversationCallback) *SnifferDemux {
 	return &SnifferDemux{
-		conversations:  make(map[network.Socket]*bytes.Buffer),
+		conversations:  make(map[network.Socket]io.ReadWriter),
 		onConversation: onConversation,
 	}
 }
@@ -39,18 +39,20 @@ func (demux *SnifferDemux) ReadPackets(reader packetReader) error {
 	for {
 		socket, data, err := reader.ReadNext()
 		if err != nil {
+			fmt.Println(err)
 			return err
 		}
 
 		conversation, ok := demux.conversations[socket]
 		if !ok {
-			demux.conversations[socket] = new(bytes.Buffer) // TODO: this reader implementation does not exactly work as we want
+			demux.conversations[socket] = NewBuffer(1500) // TODO: this reader implementation does not exactly work as we want
 			conversation = demux.conversations[socket]
 			demux.onConversation(socket, conversation)
 		}
 
 		_, err = conversation.Write(data)
 		if err != nil {
+			fmt.Println(err)
 			return err
 		}
 	}
