@@ -25,7 +25,7 @@ type Logger struct {
 	// initialTime fixes the starting time of the log
 	initialTime time.Time
 	// infoIdMap is a map that contains the file of each info packet
-	infoIdMap map[string]io.WriteCloser
+	infoIdMap map[abstraction.BoardId]io.WriteCloser
 }
 
 // Record is a struct that implements the abstraction.LoggerRecord interface
@@ -36,6 +36,8 @@ type Record struct {
 func (info *Record) Name() abstraction.LoggerName {
 	return Name
 }
+
+var boardNames map[abstraction.BoardId]string
 
 func (sublogger *Logger) Start() error {
 	if !sublogger.running.CompareAndSwap(false, true) {
@@ -66,7 +68,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		}
 	}
 
-	boardId := string(infoRecord.packet.GetBoardId())
+	boardId := infoRecord.packet.GetBoardId()
 	timestamp := infoRecord.packet.ToTime(infoRecord.packet.GetTimestamp()).Format(time.RFC3339)
 	msg := string(infoRecord.packet.Msg)
 
@@ -74,9 +76,27 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	defer sublogger.fileLock.Unlock()
 
 	writerErr := error(nil)
+
+	// This map gets the common name of the board from its ID
+	boardNames = map[abstraction.BoardId]string{
+		0: "VCU",
+		1: "BLCU",
+		2: "TBLCU",
+		3: "TCU",
+		4: "LCU_MASTER",
+		5: "LCU_SLAVE",
+		6: "PCU",
+		7: "BMSL",
+		8: "OBCCU",
+		9: "EncoderBoard",
+	}
+	boardName := boardNames[boardId]
+
+	// The existence check is performed with the board ID
 	file, ok := sublogger.infoIdMap[boardId]
 	if !ok {
-		f, err := os.Create(fmt.Sprintf(boardId + "_" + timestamp + ".csv"))
+		// Notice that the files use the common board name
+		f, err := os.Create(fmt.Sprintf(boardName + "_" + timestamp + ".csv"))
 		if err != nil {
 			return &logger.ErrCreatingFile{
 				Name:      Name,
