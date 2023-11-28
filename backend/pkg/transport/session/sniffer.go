@@ -44,7 +44,7 @@ func (demux *SnifferDemux) ReadPackets(reader packetReader) error {
 
 		conversation, ok := demux.conversations[socket]
 		if !ok {
-			demux.conversations[socket] = new(bytes.Buffer)
+			demux.conversations[socket] = new(bytes.Buffer) // TODO: this reader implementation does not exactly work as we want
 			conversation = demux.conversations[socket]
 			demux.onConversation(socket, conversation)
 		}

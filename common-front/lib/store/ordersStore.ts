@@ -28,28 +28,19 @@ export const useOrdersStore= create<OrdersStore>((set, get) => ({
      * @param {StateOrdersUpdate} stateOrdersUpdate 
      */
     updateStateOrders: (stateOrdersUpdate: StateOrdersUpdate) => {
+        const vehicleOrdersDraft = get().vehicleOrders;
         Object.entries(stateOrdersUpdate).forEach(([name, ids]) => {
             const index = get().vehicleOrders.boards.findIndex( (board) => board.name == name );
             if (index == -1) return
 
-            set(state => ({
-                ...state,
-                vehicleOrders: {
-                    ...state.vehicleOrders,
-                    boards: {
-                        ...state.vehicleOrders.boards,
-                        [index]: {
-                            ...state.vehicleOrders.boards[index],
-                            stateOrders: state.vehicleOrders.boards[index].stateOrders.map(item => {
-                                return {
-                                    ...item,
-                                    enabled: ids.includes(item.id),
-                                };
-                            }),
-                        }
-                    }
-                }
-            } as OrdersStore))
+            vehicleOrdersDraft.boards[index].stateOrders.map(item => {
+                item.enabled = ids.includes(item.id);
+            })
         })
+        set(state => ({
+            ...state,
+            vehicleOrders: vehicleOrdersDraft
+        }))
+
     },
 }))

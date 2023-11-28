@@ -46,7 +46,6 @@ export class WsHandler {
 
         this.ws.onmessage = (ev: MessageEvent<string>) => {
             const socketMessage = JSON.parse(ev.data) as WsMessage;
-            console.log(socketMessage)
             const callbacks =
                 this.topicToSuscriptions.get(socketMessage.topic) ?? [];
             for (const callback of callbacks) {
