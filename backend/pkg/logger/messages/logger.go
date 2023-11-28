@@ -19,12 +19,16 @@ const (
 )
 
 type Logger struct {
-	running     *atomic.Bool
-	fileLock    *sync.RWMutex
+	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
+	running  *atomic.Bool
+	fileLock *sync.RWMutex
+	// initialTime fixes the starting time of the log
 	initialTime time.Time
-	infoIdMap   map[string]io.WriteCloser
+	// infoIdMap is a map that contains the file of each info packet
+	infoIdMap map[string]io.WriteCloser
 }
 
+// Record is a struct that implements the abstraction.LoggerRecord interface
 type Record struct {
 	packet *info.Packet
 }
