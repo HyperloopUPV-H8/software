@@ -38,8 +38,12 @@ func (packet *Packet) GetBoardId() string {
 	return fmt.Sprint(packet.BoardId)
 }
 
-// GetTimestamp returns the timestamp as a time.Time object
-func (packet *Packet) GetTimestamp() time.Time {
-	t := packet.Timestamp
-	return time.Date(int(t.Year), time.Month(int(t.Month)), int(t.Day), int(t.Hour), int(t.Minute), int(t.Second), int(t.Counter), time.UTC)
+// GetTimestamp returns the timestamp as a packet.Timestamp object
+func (packet *Packet) GetTimestamp() packet.Timestamp {
+	return packet.Timestamp
+}
+
+// ToTime returns the timestamp as a time.Time object
+func (packet *Packet) ToTime(timestamp packet.Timestamp) time.Time {
+	return time.Date(int(timestamp.Year), time.Month(int(timestamp.Month)), int(timestamp.Day), int(timestamp.Hour), int(timestamp.Minute), int(timestamp.Second), int(timestamp.Counter), time.UTC)
 }

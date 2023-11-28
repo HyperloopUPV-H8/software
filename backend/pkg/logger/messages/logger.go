@@ -66,10 +66,9 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		}
 	}
 
-	var packet *Record
 	boardId := string(infoRecord.packet.GetBoardId())
-	timestamp := infoRecord.packet.GetTimestamp().Format(time.RFC3339)
-	msg := string(packet.packet.Msg)
+	timestamp := infoRecord.packet.ToTime(infoRecord.packet.GetTimestamp()).Format(time.RFC3339)
+	msg := string(infoRecord.packet.Msg)
 
 	sublogger.fileLock.Lock()
 	defer sublogger.fileLock.Unlock()
