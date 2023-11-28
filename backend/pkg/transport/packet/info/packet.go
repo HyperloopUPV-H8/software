@@ -1,6 +1,7 @@
 package info
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
@@ -30,6 +31,11 @@ func NewPacket(id abstraction.PacketId) *Packet {
 // Id returns the packet id
 func (packet *Packet) Id() abstraction.PacketId {
 	return packet.id
+}
+
+// GetBoardId returns the board id
+func (p *Packet) GetBoardId() string {
+	return fmt.Sprint(p.BoardId)
 }
 
 // GetTimestamp returns the timestamp as a time.Time object
