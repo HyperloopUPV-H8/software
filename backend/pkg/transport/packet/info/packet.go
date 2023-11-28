@@ -34,12 +34,12 @@ func (packet *Packet) Id() abstraction.PacketId {
 }
 
 // GetBoardId returns the board id
-func (p *Packet) GetBoardId() string {
-	return fmt.Sprint(p.BoardId)
+func (packet *Packet) GetBoardId() string {
+	return fmt.Sprint(packet.BoardId)
 }
 
 // GetTimestamp returns the timestamp as a time.Time object
-func (p *Packet) GetTimestamp() time.Time {
-	t := p.Timestamp
+func (packet *Packet) GetTimestamp() time.Time {
+	t := packet.Timestamp
 	return time.Date(int(t.Year), time.Month(int(t.Month)), int(t.Day), int(t.Hour), int(t.Minute), int(t.Second), int(t.Counter), time.UTC)
 }
