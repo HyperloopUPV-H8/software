@@ -29,8 +29,3 @@ func NewPacket(id abstraction.PacketId) *Packet {
 func (packet *Packet) Id() abstraction.PacketId {
 	return packet.id
 }
-
-// GetBoardId returns the board id
-func (packet *Packet) GetBoardId() abstraction.BoardId {
-	return packet.BoardId
-}
