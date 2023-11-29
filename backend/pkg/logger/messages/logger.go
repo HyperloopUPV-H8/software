@@ -18,6 +18,11 @@ const (
 	Name abstraction.LoggerName = "messages"
 )
 
+// Record is a struct that implements the abstraction.LoggerRecord interface
+type Record struct {
+	packet *info.Packet
+}
+
 type Logger struct {
 	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
 	running  *atomic.Bool
@@ -26,25 +31,31 @@ type Logger struct {
 	initialTime time.Time
 	// infoIdMap is a map that contains the file of each info packet
 	infoIdMap map[abstraction.BoardId]io.WriteCloser
+	// BoardNames is a map that contains the common name of each board
+	BoardNames map[abstraction.BoardId]string
 }
 
-// Record is a struct that implements the abstraction.LoggerRecord interface
-type Record struct {
-	packet *info.Packet
+func NewLogger(boardMap map[abstraction.BoardId]string) *Logger {
+	return &Logger{
+		running:    &atomic.Bool{},
+		fileLock:   &sync.RWMutex{},
+		infoIdMap:  make(map[abstraction.BoardId]io.WriteCloser),
+		BoardNames: boardMap,
+	}
 }
 
 func (info *Record) Name() abstraction.LoggerName {
 	return Name
 }
 
-var boardNames map[abstraction.BoardId]string
-
-func (sublogger *Logger) Start() error {
+func (sublogger *Logger) Start(boardMap map[abstraction.BoardId]string) error {
 	if !sublogger.running.CompareAndSwap(false, true) {
 		fmt.Println("Logger already running")
 		return nil
 	}
 	sublogger.initialTime = time.Now()
+
+	NewLogger(boardMap)
 
 	fmt.Println("Logger started")
 	return nil
@@ -68,8 +79,8 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		}
 	}
 
-	boardId := infoRecord.packet.GetBoardId()
-	timestamp := infoRecord.packet.ToTime(infoRecord.packet.GetTimestamp()).Format(time.RFC3339)
+	boardId := infoRecord.packet.BoardId
+	timestamp := infoRecord.packet.ToTime(infoRecord.packet.Timestamp).Format(time.RFC3339)
 	msg := string(infoRecord.packet.Msg)
 
 	sublogger.fileLock.Lock()
@@ -77,26 +88,10 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 	writerErr := error(nil)
 
-	// This map gets the common name of the board from its ID
-	boardNames = map[abstraction.BoardId]string{
-		0: "VCU",
-		1: "BLCU",
-		2: "TBLCU",
-		3: "TCU",
-		4: "LCU_MASTER",
-		5: "LCU_SLAVE",
-		6: "PCU",
-		7: "BMSL",
-		8: "OBCCU",
-		9: "EncoderBoard",
-	}
-	boardName := boardNames[boardId]
-
 	// The existence check is performed with the board ID
 	file, ok := sublogger.infoIdMap[boardId]
 	if !ok {
-		// Notice that the files use the common board name
-		f, err := os.Create(fmt.Sprintf(boardName + "_" + timestamp + ".csv"))
+		f, err := os.Create(fmt.Sprintf(sublogger.BoardNames[boardId] + "_" + timestamp + ".csv"))
 		if err != nil {
 			return &logger.ErrCreatingFile{
 				Name:      Name,
