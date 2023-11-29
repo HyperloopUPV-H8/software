@@ -1,8 +1,6 @@
 package info
 
 import (
-	"time"
-
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	transport_packet "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet"
 )
@@ -35,9 +33,4 @@ func (packet *Packet) Id() abstraction.PacketId {
 // GetBoardId returns the board id
 func (packet *Packet) GetBoardId() abstraction.BoardId {
 	return packet.BoardId
-}
-
-// ToTime returns the timestamp as a time.Time object
-func (packet *Packet) ToTime(timestamp transport_packet.Timestamp) time.Time {
-	return time.Date(int(timestamp.Year), time.Month(int(timestamp.Month)), int(timestamp.Day), int(timestamp.Hour), int(timestamp.Minute), int(timestamp.Second), int(timestamp.Counter), time.UTC)
 }
