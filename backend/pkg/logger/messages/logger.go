@@ -32,7 +32,7 @@ type Logger struct {
 	// infoIdMap is a map that contains the file of each info packet
 	infoIdMap map[abstraction.BoardId]io.WriteCloser
 	// BoardNames is a map that contains the common name of each board
-	BoardNames map[abstraction.BoardId]string
+	boardNames map[abstraction.BoardId]string
 }
 
 func NewLogger(boardMap map[abstraction.BoardId]string) *Logger {
@@ -40,7 +40,7 @@ func NewLogger(boardMap map[abstraction.BoardId]string) *Logger {
 		running:    &atomic.Bool{},
 		fileLock:   &sync.RWMutex{},
 		infoIdMap:  make(map[abstraction.BoardId]io.WriteCloser),
-		BoardNames: boardMap,
+		boardNames: boardMap,
 	}
 }
 
@@ -91,7 +91,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	// The existence check is performed with the board ID
 	file, ok := sublogger.infoIdMap[boardId]
 	if !ok {
-		f, err := os.Create(fmt.Sprintf(sublogger.BoardNames[boardId] + "_" + timestamp + ".csv"))
+		f, err := os.Create(fmt.Sprintf(sublogger.boardNames[boardId] + "_" + timestamp + ".csv"))
 		if err != nil {
 			return &logger.ErrCreatingFile{
 				Name:      Name,
