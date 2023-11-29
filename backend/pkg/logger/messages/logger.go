@@ -91,7 +91,11 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	// The existence check is performed with the board ID
 	file, ok := sublogger.infoIdMap[boardId]
 	if !ok {
-		f, err := os.Create(fmt.Sprintf(sublogger.boardNames[boardId] + "_" + timestamp + ".csv"))
+		boardName, ok := sublogger.boardNames[boardId]
+		if !ok {
+			boardName = fmt.Sprint(boardId)
+		}
+		f, err := os.Create(fmt.Sprintf(boardName + "_" + timestamp + ".csv"))
 		if err != nil {
 			return &logger.ErrCreatingFile{
 				Name:      Name,
