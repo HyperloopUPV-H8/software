@@ -2,7 +2,7 @@ package info
 
 import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet"
+	transport_packet "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet"
 )
 
 // infoData is the contents of an info Packet
@@ -13,9 +13,9 @@ type infoData string
 // info packets are used to send arbitrary strings for debugging purposes.
 type Packet struct {
 	id        abstraction.PacketId
-	BoardId   abstraction.BoardId `json:"boardId"`
-	Timestamp packet.Timestamp    `json:"timestamp"`
-	Msg       infoData            `json:"msg"`
+	BoardId   abstraction.BoardId        `json:"boardId"`
+	Timestamp transport_packet.Timestamp `json:"timestamp"`
+	Msg       infoData                   `json:"msg"`
 }
 
 // NewPacket creates a new info packet with the given ID
