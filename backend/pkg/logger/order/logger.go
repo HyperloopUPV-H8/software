@@ -69,6 +69,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 			Name:      Name,
 			Timestamp: time.Now(),
 			Expected:  &Record{},
+			Received:  record,
 		}
 	}
 
