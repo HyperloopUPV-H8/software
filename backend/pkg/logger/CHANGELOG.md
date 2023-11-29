@@ -42,4 +42,4 @@
 
 #### v1.1.2
 
-- Order messages
+- Order sublogger

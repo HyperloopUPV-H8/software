@@ -1,18 +1,29 @@
 package order
 
 import (
+	"encoding/csv"
 	"fmt"
-	"io"
+	"os"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 )
 
 const (
 	Name abstraction.LoggerName = "order"
 )
+
+type Record struct {
+	packet *data.Packet
+}
+
+func (order *Record) Name() abstraction.LoggerName {
+	return Name
+}
 
 type Logger struct {
 	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
@@ -20,12 +31,7 @@ type Logger struct {
 	fileLock *sync.RWMutex
 	// initialTime fixes the starting time of the log
 	initialTime time.Time
-	// infoIdMap is a map that contains the file of each order packet
-	orderIdMap map[abstraction.BoardId]io.WriteCloser
-}
-
-func (sublogger *Logger) Name() abstraction.LoggerName {
-	return Name
+	writer      *csv.Writer
 }
 
 func (sublogger *Logger) Start() error {
@@ -35,12 +41,46 @@ func (sublogger *Logger) Start() error {
 	}
 	sublogger.initialTime = time.Now()
 
+	file, err := os.Create(fmt.Sprintf("order_" + sublogger.initialTime.Format(time.RFC3339) + ".csv"))
+	if err != nil {
+		return &logger.ErrCreatingFile{
+			Name:      Name,
+			Timestamp: time.Now(),
+			Inner:     err,
+		}
+	}
+	sublogger.writer = csv.NewWriter(file)
+
 	fmt.Println("Logger started")
 	return nil
 }
 
 func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
+	if !sublogger.running.Load() {
+		return &logger.ErrLoggerNotRunning{
+			Name:      Name,
+			Timestamp: time.Now(),
+		}
+	}
 
+	orderRecord, ok := record.(*Record)
+	if !ok {
+		return &logger.ErrWrongRecordType{
+			Name:      Name,
+			Timestamp: time.Now(),
+			Expected:  &Record{},
+		}
+	}
+
+	sublogger.fileLock.Lock()
+	defer sublogger.fileLock.Unlock()
+
+	err := sublogger.writer.Write([]string{fmt.Sprint(orderRecord.packet.GetValues())})
+	if err != nil {
+		return err
+	}
+
+	sublogger.writer.Flush()
 	return nil
 }
 
