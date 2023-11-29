@@ -43,3 +43,7 @@
 #### v1.1.2
 
 - Order sublogger
+
+#### v1.1.3
+
+- State sublogger
