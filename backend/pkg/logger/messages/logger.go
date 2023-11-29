@@ -80,7 +80,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	}
 
 	boardId := infoRecord.packet.BoardId
-	timestamp := infoRecord.packet.ToTime(infoRecord.packet.Timestamp).Format(time.RFC3339)
+	timestamp := infoRecord.packet.Timestamp.ToTime().Format(time.RFC3339)
 	msg := string(infoRecord.packet.Msg)
 
 	sublogger.fileLock.Lock()
