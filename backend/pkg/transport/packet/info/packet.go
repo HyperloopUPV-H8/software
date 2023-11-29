@@ -37,11 +37,6 @@ func (packet *Packet) GetBoardId() abstraction.BoardId {
 	return packet.BoardId
 }
 
-// GetTimestamp returns the timestamp as a packet.Timestamp object
-func (packet *Packet) GetTimestamp() transport_packet.Timestamp {
-	return packet.Timestamp
-}
-
 // ToTime returns the timestamp as a time.Time object
 func (packet *Packet) ToTime(timestamp transport_packet.Timestamp) time.Time {
 	return time.Date(int(timestamp.Year), time.Month(int(timestamp.Month)), int(timestamp.Day), int(timestamp.Hour), int(timestamp.Minute), int(timestamp.Second), int(timestamp.Counter), time.UTC)
