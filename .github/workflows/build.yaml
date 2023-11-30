@@ -130,7 +130,7 @@ jobs:
         GOARCH: amd64
         GOOS: darwin
       run: |
-        go build -o ../output/backend-linux-64
+        go build -o ../output/backend-macos-64
       
     - name: "Uplaod artifacts"
       uses: actions/upload-artifact@v3
