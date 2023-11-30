@@ -85,7 +85,7 @@ jobs:
         go build -ldflags '-linkmode external -extldflags "-static"' -o ..\output\backend-windows-64.exe
 
     - name: "Uplaod artifacts"
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: backend-windows
         path: ./output/backend-windows-64.exe
