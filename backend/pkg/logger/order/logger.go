@@ -81,7 +81,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		return err
 	}
 
-	sublogger.writer.Flush()
+	defer sublogger.writer.Flush()
 	return nil
 }
 
