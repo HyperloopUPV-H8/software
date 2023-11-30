@@ -77,3 +77,17 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 	return nil
 }
+
+func (sublogger *Logger) PullRecord() (abstraction.LoggerRecord, error) {
+	panic("TODO!")
+}
+
+func (sublogger *Logger) Stop() error {
+	if !sublogger.running.CompareAndSwap(true, false) {
+		fmt.Println("Logger already stopped")
+		return nil
+	}
+
+	fmt.Println("Logger stopped")
+	return nil
+}
