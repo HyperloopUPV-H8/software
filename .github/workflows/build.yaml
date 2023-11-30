@@ -71,7 +71,7 @@ jobs:
     - name: "Load secret"
       working-directory: "${{env.BACKEND_DIR}}"
       run: |
-        bash "${{env.BACKEND_DIR}}\\load-secret.sh" "${{env.SECRET}}"
+        bash "${{env.BACKEND_DIR}}\load-secret.sh" "${{env.SECRET}}"
 
     - name: "Create output path"
       working-directory: "${{env.BACKEND_DIR}}"
