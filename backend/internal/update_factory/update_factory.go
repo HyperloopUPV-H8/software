@@ -1,17 +1,14 @@
 package update_factory
 
 import (
-	"fmt"
 	"math"
-	"math/rand"
 	"sync"
 	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/packet"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory/models"
-	vehicle_models "github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
 	"github.com/rs/zerolog"
 	trace "github.com/rs/zerolog/log"
 )
@@ -54,18 +51,18 @@ func NewFactory() *UpdateFactory {
 	return factory
 }
 
-func (factory *UpdateFactory) NewUpdate(packetUpdate vehicle_models.PacketUpdate) models.Update {
-	factory.updateCount(packetUpdate.Metadata.ID)
+func (factory *UpdateFactory) NewUpdate(packet *data.Packet) models.Update {
+	factory.updateCount(uint16(packet.Id()))
 
 	factory.averageMx.Lock()
 	defer factory.averageMx.Unlock()
 
 	return models.Update{
-		Id:        packetUpdate.Metadata.ID,
-		HexValue:  fmt.Sprintf("%x", packetUpdate.HexValue),
-		Values:    factory.getFields(packetUpdate.Metadata.ID, packetUpdate.Values),
-		Count:     factory.getCount(packetUpdate.Metadata.ID),
-		CycleTime: factory.getCycleTime(packetUpdate.Metadata.ID, uint64(packetUpdate.Metadata.Timestamp.UnixNano())),
+		Id:        uint16(packet.Id()),
+		HexValue:  "",
+		Values:    factory.getFields(uint16(packet.Id()), packet.GetValues()),
+		Count:     factory.getCount(uint16(packet.Id())),
+		CycleTime: factory.getCycleTime(uint16(packet.Id()), uint64(packet.Timestamp().UnixNano())),
 	}
 }
 
@@ -129,39 +126,21 @@ func (factory *UpdateFactory) getCount(id uint16) uint64 {
 	return factory.count[id]
 }
 
-func (factory *UpdateFactory) getFields(id uint16, fields map[string]packet.Value) map[string]models.UpdateValue {
+type numeric interface {
+	Value() float64
+}
+
+func (factory *UpdateFactory) getFields(id uint16, fields map[data.ValueName]data.Value) map[string]models.UpdateValue {
 	updateFields := make(map[string]models.UpdateValue, len(fields))
 
 	for name, value := range fields {
 		switch value := value.(type) {
-		case packet.Numeric:
-			switch name {
-			case "low_battery_temperature_1":
-				randOffset := (rand.Float64()*2 - 1) * 0.1
-				randResult := float64(value) + 67 + randOffset
-				updateFields[name] = factory.getNumericField(id, name, packet.Numeric(randResult))
-			// case "battery_temperature_1":
-			// 	randOffset := (rand.Float64()*2 - 1) * 0.1
-			// 	randResult := float64(value) + 5 + randOffset
-			// 	updateFields[name] = factory.getNumericField(id, name, packet.Numeric(randResult))
-
-			// case "battery_temperature_2":
-			// 	randOffset := (rand.Float64()*2 - 1) * 0.1
-			// 	randResult := float64(value) + 5 + randOffset
-			// 	updateFields[name] = factory.getNumericField(id, name, packet.Numeric(randResult))
-
-			// case "battery_temperature_3":
-			// 	randOffset := (rand.Float64()*2 - 1) * 0.1
-			// 	randResult := float64(value) + 5 + randOffset
-			// 	updateFields[name] = factory.getNumericField(id, name, packet.Numeric(randResult))
-			default:
-				updateFields[name] = factory.getNumericField(id, name, packet.Numeric(value))
-			}
-
-		case packet.Boolean:
-			updateFields[name] = models.BooleanValue(value)
-		case packet.Enum:
-			updateFields[name] = models.EnumValue(value)
+		case numeric:
+			updateFields[string(name)] = factory.getNumericField(id, string(name), value)
+		case data.BooleanValue:
+			updateFields[string(name)] = models.BooleanValue(value.Value())
+		case data.EnumValue:
+			updateFields[string(name)] = models.EnumValue(value.Variant())
 		}
 	}
 
@@ -194,8 +173,8 @@ func replaceNaN() float64 {
 	return 0
 }
 
-func (factory *UpdateFactory) getNumericField(id uint16, name string, value packet.Numeric) models.NumericValue {
-	lastVal := replaceInvalidNumber(float64(value))
+func (factory *UpdateFactory) getNumericField(id uint16, name string, value numeric) models.NumericValue {
+	lastVal := replaceInvalidNumber(value.Value())
 	avg := factory.getAverage(id, name)
 	lastAvg := avg.Add(lastVal)
 

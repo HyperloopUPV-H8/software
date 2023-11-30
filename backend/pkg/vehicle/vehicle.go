@@ -35,3 +35,8 @@ func (vehicle *Vehicle) SendMessage(abstraction.TransportMessage) error {
 func (vehicle *Vehicle) SendPush(abstraction.BrokerPush) error {
 	panic("TODO")
 }
+
+// ConnectionUpdate is the method invoked by transport to signal a connection state has changed
+func (vehicle *Vehicle) ConnectionUpdate(target abstraction.TransportTarget, isConnected bool) {
+	panic("TODO")
+}

@@ -23,8 +23,9 @@ func NewDecoder(endianness binary.ByteOrder) *Decoder {
 }
 
 // SetDescriptor sets the descriptor for the given id
-func (decoder *Decoder) SetDescriptor(id abstraction.PacketId, descriptor Descriptor) {
+func (decoder *Decoder) SetDescriptor(id abstraction.PacketId, descriptor Descriptor) *Decoder {
 	decoder.idToDescription[id] = descriptor
+	return decoder
 }
 
 // Decode decodes the next packet for the given id
@@ -40,7 +41,7 @@ func (decoder *Decoder) Decode(id abstraction.PacketId, reader io.Reader) (abstr
 		if err != nil {
 			return packet, err
 		}
-		packet.SetValue(value.Name, val)
+		packet.SetValue(value.Name, val, true)
 	}
 
 	return packet, nil
