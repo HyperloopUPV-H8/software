@@ -50,7 +50,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: backend-linux
-        path: "${{env.BACKEND_DIR}}/output/backend-linux-64"
+        path: "${{env.BACKEND_DIR}}/output/*"
 
   build-backend-windows:
     name: "Build backend for windows"
@@ -93,7 +93,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: backend-windows
-        path: "${{env.BACKEND_DIR}}\\output\\backend-windows-64.exe"
+        path: "${{env.BACKEND_DIR}}\\output\\*"
       
   build-backend-mac:
     name: "Build backend for macOS"
@@ -131,9 +131,18 @@ jobs:
         GOOS: darwin
       run: |
         go build -o ../output/backend-macos-64
+    
+    - name: "Build (apple 64 bit)"
+      working-directory: "${{env.BACKEND_DIR}}/cmd"
+      env:
+        CGO_ENABLED: 1
+        GOARCH: arm64
+        GOOS: darwin
+      run: |
+        go build -o ../output/backend-macos-m1-64
       
     - name: "Uplaod artifacts"
       uses: actions/upload-artifact@v3
       with:
         name: backend-macos
-        path: "${{env.BACKEND_DIR}}/output/backend-macos-64"
+        path: "${{env.BACKEND_DIR}}/output/*"
