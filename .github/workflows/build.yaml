@@ -94,3 +94,46 @@ jobs:
       with:
         name: backend-windows
         path: "${{env.BACKEND_DIR}}\\output\\backend-windows-64.exe"
+      
+  build-backend-mac:
+    name: "Build backend for linux"
+    runs-on: macos-latest
+      
+    env:
+      BACKEND_DIR: ./backend
+      
+    steps:
+    - name: "Install packages"
+      run: brew install libpcap
+    
+    - name: "Setup Go"
+      uses: actions/setup-go@v4
+      with:
+        go-version: "1.19"
+        cache-dependency-path: "${{env.BACKEND_DIR}}/go.sum"
+    
+    - uses: actions/checkout@v3
+      
+    - name: "Create output path"
+      working-directory: "${{env.BACKEND_DIR}}"
+      run: mkdir ./output
+      
+    - name: "Load secret"
+      working-directory: "${{env.BACKEND_DIR}}"
+      run: |
+        ./load-secret.sh "$SECRET"
+      
+    - name: "Build (64 bit)"
+      working-directory: "${{env.BACKEND_DIR}}/cmd"
+      env:
+        CGO_ENABLED: 1
+        GOARCH: amd64
+        GOOS: linux
+      run: |
+        go build -ldflags '-linkmode external -extldflags "-static"' -o ../output/backend-linux-64
+      
+    - name: "Uplaod artifacts"
+      uses: actions/upload-artifact@v2
+      with:
+        name: backend-macos
+        path: "${{env.BACKEND_DIR}}/output/backend-macos-64"
