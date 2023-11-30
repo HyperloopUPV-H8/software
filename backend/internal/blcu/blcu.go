@@ -3,8 +3,8 @@ package blcu
 import (
 	"net"
 
-	"github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
 	wsModels "github.com/HyperloopUPV-H8/h9-backend/internal/ws_handle/models"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 	"github.com/rs/zerolog"
 	trace "github.com/rs/zerolog/log"
 )
@@ -14,7 +14,7 @@ type BLCU struct {
 	boardToId  map[string]uint16
 	ackChannel chan struct{}
 
-	sendOrder func(models.Order) error
+	sendOrder func(*data.Packet) error
 
 	config BLCUConfig
 
@@ -30,7 +30,7 @@ func NewBLCU(laddr net.TCPAddr, boardIds map[string]uint16, config BLCUConfig) B
 		ackChannel: make(chan struct{}, BLCU_ACK_CHAN_BUF),
 		trace:      trace.With().Str("component", BLCU_COMPONENT_NAME).Logger(),
 		config:     config,
-		sendOrder:  func(o models.Order) error { return nil },
+		sendOrder:  func(o *data.Packet) error { return nil },
 	}
 }
 
@@ -38,7 +38,7 @@ func (blcu *BLCU) HandlerName() string {
 	return BLCU_HANDLER_NAME
 }
 
-func (blcu *BLCU) SetSendOrder(sendOrder func(o models.Order) error) {
+func (blcu *BLCU) SetSendOrder(sendOrder func(o *data.Packet) error) {
 	blcu.sendOrder = sendOrder
 }
 

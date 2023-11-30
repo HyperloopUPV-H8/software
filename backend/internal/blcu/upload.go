@@ -10,8 +10,9 @@ import (
 	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
 	wsModels "github.com/HyperloopUPV-H8/h9-backend/internal/ws_handle/models"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 	"github.com/pin/tftp/v3"
 )
 
@@ -68,23 +69,19 @@ func (blcu *BLCU) requestUpload(board string) error {
 	return nil
 }
 
-func (blcu *BLCU) createUploadOrder(board string) (models.Order, error) {
+func (blcu *BLCU) createUploadOrder(board string) (*data.Packet, error) {
 	boardId, ok := blcu.boardToId[board]
 
 	if !ok {
 		blcu.trace.Error().Str("board", board).Msg("board id not found")
-		return models.Order{}, fmt.Errorf("missing id for board %s", board)
+		return data.NewPacket(0), fmt.Errorf("missing id for board %s", board)
 	}
 
-	return models.Order{
-		ID: blcu.config.Packets.Upload.Id,
-		Fields: map[string]models.Field{
-			blcu.config.Packets.Upload.Field: {
-				Value:     boardId,
-				IsEnabled: true,
-			},
-		},
-	}, nil
+	return data.NewPacketWithValues(abstraction.PacketId(blcu.config.Packets.Upload.Id), map[data.ValueName]data.Value{
+		data.ValueName(blcu.config.Packets.Upload.Field): data.NewNumericValue[uint16](boardId),
+	}, map[data.ValueName]bool{
+		data.ValueName(blcu.config.Packets.Upload.Field): true,
+	}), nil
 }
 
 func (blcu *BLCU) WriteTFTP(reader io.Reader, size int, onProgress func(float64)) error {

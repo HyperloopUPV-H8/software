@@ -19,8 +19,8 @@ type Encoder struct {
 
 // TODO: improve constructor
 // NewEncoder creates a new encoder with the given endianness
-func NewEncoder(endianness binary.ByteOrder) Encoder {
-	return Encoder{
+func NewEncoder(endianness binary.ByteOrder) *Encoder {
+	return &Encoder{
 		idToEncoder: make(map[abstraction.PacketId]PacketEncoder),
 		endianness:  endianness,
 	}

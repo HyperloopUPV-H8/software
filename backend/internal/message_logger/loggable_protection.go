@@ -3,13 +3,14 @@ package protection_logger
 import (
 	"fmt"
 
-	vehicle_models "github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/protection"
 )
 
-type LoggableProtection vehicle_models.ProtectionMessage
+type LoggableProtection protection.Packet
 
 func (lp LoggableProtection) Id() string {
-	return lp.Kind
+	packet := protection.Packet(lp)
+	return string(packet.Severity())
 }
 
 func (lp LoggableProtection) Log() []string {
@@ -18,24 +19,25 @@ func (lp LoggableProtection) Log() []string {
 	datetime := fmt.Sprintf("%s %s", date, time)
 	data := getDataString(lp.Protection.Data)
 
-	return []string{datetime, lp.Kind, lp.Board, lp.Name, lp.Protection.Kind, data}
+	packet := protection.Packet(lp)
+	return []string{datetime, string(packet.Severity()), fmt.Sprint(lp.BoardId), string(lp.Protection.Name), string(lp.Protection.Type), data}
 }
 
 func getDataString(data any) string {
 	switch castedData := data.(type) {
-	case vehicle_models.OutOfBounds:
+	case protection.OutOfBounds:
 		return fmt.Sprintf("Got: %f Want: %f", castedData.Value, castedData.Bounds)
-	case vehicle_models.LowerBound:
+	case protection.LowerBound:
 		return fmt.Sprintf("Got: %f Want: > %f", castedData.Value, castedData.Bound)
-	case vehicle_models.UpperBound:
+	case protection.UpperBound:
 		return fmt.Sprintf("Got: %f Want: < %f", castedData.Value, castedData.Bound)
-	case vehicle_models.Equals:
+	case protection.Equals:
 		return fmt.Sprintf("%f is not allowed", castedData.Value)
-	case vehicle_models.NotEquals:
+	case protection.NotEquals:
 		return fmt.Sprintf("%f should be %f", castedData.Value, castedData.Want)
-	case vehicle_models.TimeLimit:
+	case protection.TimeAccumulation:
 		return fmt.Sprintf("Value (%f) surpassed bound (%f) for %f", castedData.Value, castedData.Bound, castedData.TimeLimit)
-	case vehicle_models.Error:
+	case protection.ErrorHandler:
 		return fmt.Sprint(castedData)
 	default:
 		return fmt.Sprintf("UNRECOGNIZED VIOLATION: %v", data)

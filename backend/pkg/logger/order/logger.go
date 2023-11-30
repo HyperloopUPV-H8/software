@@ -76,12 +76,12 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	sublogger.fileLock.Lock()
 	defer sublogger.fileLock.Unlock()
 
-	err := sublogger.writer.Write([]string{fmt.Sprint(orderRecord.packet.GetValues())})
+	err := sublogger.writer.Write([]string{time.Now().Format(time.RFC3339), fmt.Sprint(orderRecord.packet.GetValues())})
 	if err != nil {
 		return err
 	}
 
-	sublogger.writer.Flush()
+	defer sublogger.writer.Flush()
 	return nil
 }
 

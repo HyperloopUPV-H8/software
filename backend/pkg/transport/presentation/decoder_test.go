@@ -7,6 +7,7 @@ import (
 	"math"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet"
@@ -859,22 +860,39 @@ func TestDecoder(t *testing.T) {
 					"uint16": data.NewNumericValue[uint16](8),
 					"uint32": data.NewNumericValue[uint32](8),
 					"uint64": data.NewNumericValue[uint64](8),
+				}, map[data.ValueName]bool{
+					"uint8":  true,
+					"uint16": true,
+					"uint32": true,
+					"uint64": true,
 				}),
 				data.NewPacketWithValues(10, map[data.ValueName]data.Value{
 					"int8":  data.NewNumericValue[int8](8),
 					"int16": data.NewNumericValue[int16](8),
 					"int32": data.NewNumericValue[int32](8),
 					"int64": data.NewNumericValue[int64](8),
+				}, map[data.ValueName]bool{
+					"int8":  true,
+					"int16": true,
+					"int32": true,
+					"int64": true,
 				}),
 				data.NewPacketWithValues(11, map[data.ValueName]data.Value{
 					"float32": data.NewNumericValue[float32](8),
 					"float64": data.NewNumericValue[float64](8),
+				}, map[data.ValueName]bool{
+					"float32": true,
+					"float64": true,
 				}),
 				data.NewPacketWithValues(12, map[data.ValueName]data.Value{
 					"bool": data.NewBooleanValue(true),
+				}, map[data.ValueName]bool{
+					"bool": true,
 				}),
 				data.NewPacketWithValues(13, map[data.ValueName]data.Value{
 					"enum": data.NewEnumValue("c"),
+				}, map[data.ValueName]bool{
+					"enum": true,
 				}),
 				data.NewPacketWithValues(14, map[data.ValueName]data.Value{
 					"uint8_1": data.NewNumericValue[uint8](8),
@@ -882,11 +900,21 @@ func TestDecoder(t *testing.T) {
 					"float64": data.NewNumericValue[float64](8),
 					"bool":    data.NewBooleanValue(true),
 					"enum":    data.NewEnumValue("a"),
+				}, map[data.ValueName]bool{
+					"uint8_1": true,
+					"uint8_2": true,
+					"float64": true,
+					"bool":    true,
+					"enum":    true,
 				}),
 				data.NewPacketWithValues(15, map[data.ValueName]data.Value{
 					"bool_1": data.NewBooleanValue(true),
 					"bool_2": data.NewBooleanValue(false),
 					"bool_3": data.NewBooleanValue(false),
+				}, map[data.ValueName]bool{
+					"bool_1": true,
+					"bool_2": true,
+					"bool_3": true,
 				}),
 				data.NewPacketWithValues(16, map[data.ValueName]data.Value{
 					"enum_1": data.NewEnumValue("b"),
@@ -894,6 +922,12 @@ func TestDecoder(t *testing.T) {
 					"enum_3": data.NewEnumValue("d"),
 					"enum_4": data.NewEnumValue("c"),
 					"enum_5": data.NewEnumValue("h"),
+				}, map[data.ValueName]bool{
+					"enum_1": true,
+					"enum_2": true,
+					"enum_3": true,
+					"enum_4": true,
+					"enum_5": true,
 				}),
 				data.NewPacketWithValues(17, map[data.ValueName]data.Value{
 					"uint8_1":  data.NewNumericValue[uint8](8),
@@ -906,6 +940,17 @@ func TestDecoder(t *testing.T) {
 					"uint8_8":  data.NewNumericValue[uint8](8),
 					"uint8_9":  data.NewNumericValue[uint8](8),
 					"uint8_10": data.NewNumericValue[uint8](8),
+				}, map[data.ValueName]bool{
+					"uint8_1":  true,
+					"uint8_2":  true,
+					"uint8_3":  true,
+					"uint8_4":  true,
+					"uint8_5":  true,
+					"uint8_6":  true,
+					"uint8_7":  true,
+					"uint8_8":  true,
+					"uint8_9":  true,
+					"uint8_10": true,
 				}),
 				data.NewPacketWithValues(18, map[data.ValueName]data.Value{
 					"uint64_1":  data.NewNumericValue[uint64](8),
@@ -926,6 +971,25 @@ func TestDecoder(t *testing.T) {
 					"uint64_6":  data.NewNumericValue[uint64](8),
 					"int64_6":   data.NewNumericValue[int64](8),
 					"float64_6": data.NewNumericValue[float64](8),
+				}, map[data.ValueName]bool{
+					"uint64_1":  true,
+					"int64_1":   true,
+					"float64_1": true,
+					"uint64_2":  true,
+					"int64_2":   true,
+					"float64_2": true,
+					"uint64_3":  true,
+					"int64_3":   true,
+					"float64_3": true,
+					"uint64_4":  true,
+					"int64_4":   true,
+					"float64_4": true,
+					"uint64_5":  true,
+					"int64_5":   true,
+					"float64_5": true,
+					"uint64_6":  true,
+					"int64_6":   true,
+					"float64_6": true,
 				}),
 			},
 		},
@@ -939,6 +1003,14 @@ func TestDecoder(t *testing.T) {
 				packet, err := decoder.DecodeNext(test.input)
 				if err != nil {
 					t.Fatalf("\nError decoding next (%d) packet: %s\n", i+1, err)
+				}
+
+				if data, ok := test.output[i].(*data.Packet); ok {
+					data.SetTimestamp(time.Date(0, 0, 0, 0, 0, 0, 0, time.UTC))
+				}
+
+				if data, ok := packet.(*data.Packet); ok {
+					data.SetTimestamp(time.Date(0, 0, 0, 0, 0, 0, 0, time.UTC))
 				}
 
 				if !reflect.DeepEqual(packet, test.output[i]) {
@@ -959,7 +1031,7 @@ func TestDecoder(t *testing.T) {
 // 7 - protection fault
 // 8 - state space
 // 9:=18 - data
-func getDecoder(endianness binary.ByteOrder) presentation.Decoder {
+func getDecoder(endianness binary.ByteOrder) *presentation.Decoder {
 	decoder := presentation.NewDecoder(endianness)
 
 	decoder.SetPacketDecoder(1, blcu.NewDecoder())

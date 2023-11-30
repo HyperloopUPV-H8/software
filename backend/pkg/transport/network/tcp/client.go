@@ -64,7 +64,7 @@ func NewClient(local net.Addr) ClientConfig {
 
 		Context: context.TODO(),
 
-		MaxRetries: 15,
+		MaxRetries: 30,
 		Backoff:    NewExponBackoff(defaultBackoffMin, defaultBackoffExp, defaultBackoffMax),
 	}
 }

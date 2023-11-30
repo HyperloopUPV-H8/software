@@ -34,8 +34,8 @@ type Decoder struct {
 
 // TODO: improve constructor
 // NewDecoder creates a new decoder with the given endianness
-func NewDecoder(endianness binary.ByteOrder) Decoder {
-	return Decoder{
+func NewDecoder(endianness binary.ByteOrder) *Decoder {
+	return &Decoder{
 		idToDecoder: make(map[abstraction.PacketId]PacketDecoder),
 		endianness:  endianness,
 	}

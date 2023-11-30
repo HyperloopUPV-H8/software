@@ -10,17 +10,6 @@ programable_boards = "/uploadableBoards"
 connections = "/backend"
 file_server = "/"
 
-[server.audience]
-address = "192.168.0.9:4000"
-static = "./mobile_front"
-
-[server.audience.endpoints]
-pod_data = "/podDataStructure"
-order_data = "/orderStructures"
-programable_boards = "/uploadableBoards"
-connections = "/backend"
-file_server = "/"
-
 [vehicle]
 boards = ["BLCU"]
 
@@ -46,9 +35,7 @@ add_state_orders_id_key = "add_state_orders"
 remove_state_orders_id_key = "remove_state_orders"
 
 [excel.download]
-#id = "1XE9V2PI0hwSdAC8P6MePnSLyzADqsdWCOlx_kct7dps"
-id="1b_nOrWqjMLOSEFIV9dMUObnJ15J7ypmF-KVJ4qztAtw"
-#id = "1BEwASubu0el9oQA6PSwVKaNU-Q6gbJ40JR6kgqguKYE"
+id="1NyNaAOw_6iWtnCpEg73AtSSFx1fMdhPRmmdOhjgjCZI"
 name = "ade.xlsx"
 path = "."
 

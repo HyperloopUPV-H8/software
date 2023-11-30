@@ -57,10 +57,7 @@ func TestSniffer(t *testing.T) {
 	}
 
 	first := layers.LayerTypeEthernet
-	sniffer, err := sniffer.New(source, &first)
-	if err != nil {
-		t.Fatalf("error creating sniffer: %s", err)
-	}
+	sniffer := sniffer.New(source, &first)
 	defer sniffer.Close()
 
 	for _, test := range expected {
