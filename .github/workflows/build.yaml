@@ -5,6 +5,7 @@ on:
     secrets:
       SECRET:
         required: true
+  workflow_dispatch:
 
 env:
   SECRET: ${{ secrets.SECRET }}
