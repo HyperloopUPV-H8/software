@@ -76,7 +76,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	sublogger.fileLock.Lock()
 	defer sublogger.fileLock.Unlock()
 
-	err := sublogger.writer.Write([]string{fmt.Sprint(orderRecord.packet.GetValues()) + time.Now().Format(time.RFC3339)})
+	err := sublogger.writer.Write([]string{fmt.Sprint(orderRecord.packet.GetValues()), time.Now().Format(time.RFC3339)})
 	if err != nil {
 		return err
 	}
