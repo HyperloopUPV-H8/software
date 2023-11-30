@@ -2,6 +2,7 @@ package transport
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"net"
 	"time"
@@ -123,7 +124,7 @@ func (transport *Transport) handlePacketEvent(message PacketMessage) error {
 		return ErrConnClosed{Target: target}
 	}
 
-	data, err := transport.encoder.Encode(message)
+	data, err := transport.encoder.Encode(message.Packet)
 	if err != nil {
 		return err
 	}
@@ -154,6 +155,20 @@ func (transport *Transport) handleFileRead(message FileReadMessage) error {
 
 // HandleSniffer starts listening for packets on the provided sniffer and handles them.
 func (transport *Transport) HandleSniffer(sniffer *sniffer.Sniffer) error {
+	// for {
+	// 	_, data, err := sniffer.ReadNext()
+	// 	if err != nil {
+	// 		return err
+	// 	}
+
+	// 	packet, err := transport.decoder.DecodeNext(bytes.NewReader(data))
+	// 	if err != nil {
+	// 		fmt.Println(err)
+	// 		continue
+	// 	}
+
+	// 	transport.api.Notification(NewPacketNotification(packet))
+	// }
 	return session.NewSnifferDemux(transport.handleConversation).ReadPackets(sniffer)
 }
 
@@ -163,10 +178,11 @@ func (transport *Transport) handleConversation(socket network.Socket, reader io.
 		for {
 			packet, err := transport.decoder.DecodeNext(reader)
 			if err != nil {
+				fmt.Println(err)
 				return // TODO: handle error
 			}
 
-			transport.api.Notification(NewPacketMessage(packet))
+			transport.api.Notification(NewPacketNotification(packet))
 		}
 	}()
 }

@@ -28,7 +28,7 @@ func TestEncoder(t *testing.T) {
 					"uint16": data.NewNumericValue[uint16](8),
 					"uint32": data.NewNumericValue[uint32](8),
 					"uint64": data.NewNumericValue[uint64](8),
-				}),
+				}, make(map[data.ValueName]bool)),
 			},
 			output: (join(
 				[]byte{0x09, 0x00},
@@ -46,7 +46,7 @@ func TestEncoder(t *testing.T) {
 					"int16": data.NewNumericValue[int16](8),
 					"int32": data.NewNumericValue[int32](8),
 					"int64": data.NewNumericValue[int64](8),
-				}),
+				}, make(map[data.ValueName]bool)),
 			},
 			output: (join(
 				[]byte{0x0a, 0x00},
@@ -62,7 +62,7 @@ func TestEncoder(t *testing.T) {
 				data.NewPacketWithValues(11, map[data.ValueName]data.Value{
 					"float32": data.NewNumericValue[float32](8),
 					"float64": data.NewNumericValue[float64](8),
-				}),
+				}, make(map[data.ValueName]bool)),
 			},
 			output: (join(
 				[]byte{0x0b, 0x00},
@@ -75,7 +75,7 @@ func TestEncoder(t *testing.T) {
 			input: []abstraction.Packet{
 				data.NewPacketWithValues(12, map[data.ValueName]data.Value{
 					"bool": data.NewBooleanValue(true),
-				}),
+				}, make(map[data.ValueName]bool)),
 			},
 			output: (join(
 				[]byte{0x0c, 0x00},
@@ -87,7 +87,7 @@ func TestEncoder(t *testing.T) {
 			input: []abstraction.Packet{
 				data.NewPacketWithValues(13, map[data.ValueName]data.Value{
 					"enum": data.NewEnumValue("c"),
-				}),
+				}, make(map[data.ValueName]bool)),
 			},
 			output: (join(
 				[]byte{0x0d, 0x00},
@@ -103,7 +103,7 @@ func TestEncoder(t *testing.T) {
 					"float64": data.NewNumericValue[float64](8),
 					"bool":    data.NewBooleanValue(true),
 					"enum":    data.NewEnumValue("a"),
-				}),
+				}, make(map[data.ValueName]bool)),
 			},
 			output: (join(
 				[]byte{0x0e, 0x00},
@@ -121,7 +121,7 @@ func TestEncoder(t *testing.T) {
 					"bool_1": data.NewBooleanValue(true),
 					"bool_2": data.NewBooleanValue(false),
 					"bool_3": data.NewBooleanValue(false),
-				}),
+				}, make(map[data.ValueName]bool)),
 			},
 			output: (join(
 				[]byte{0x0f, 0x00},
@@ -139,7 +139,7 @@ func TestEncoder(t *testing.T) {
 					"enum_3": data.NewEnumValue("d"),
 					"enum_4": data.NewEnumValue("c"),
 					"enum_5": data.NewEnumValue("h"),
-				}),
+				}, make(map[data.ValueName]bool)),
 			},
 			output: (join(
 				[]byte{0x10, 0x00},
@@ -164,7 +164,7 @@ func TestEncoder(t *testing.T) {
 					"uint8_8":  data.NewNumericValue[uint8](8),
 					"uint8_9":  data.NewNumericValue[uint8](8),
 					"uint8_10": data.NewNumericValue[uint8](8),
-				}),
+				}, make(map[data.ValueName]bool)),
 			},
 			output: (join(
 				[]byte{0x11, 0x00},
@@ -202,7 +202,7 @@ func TestEncoder(t *testing.T) {
 					"uint64_6":  data.NewNumericValue[uint64](8),
 					"int64_6":   data.NewNumericValue[int64](8),
 					"float64_6": data.NewNumericValue[float64](8),
-				}),
+				}, make(map[data.ValueName]bool)),
 			},
 			output: (join(
 				[]byte{0x12, 0x00},
@@ -234,42 +234,42 @@ func TestEncoder(t *testing.T) {
 					"uint16": data.NewNumericValue[uint16](8),
 					"uint32": data.NewNumericValue[uint32](8),
 					"uint64": data.NewNumericValue[uint64](8),
-				}),
+				}, make(map[data.ValueName]bool)),
 				data.NewPacketWithValues(10, map[data.ValueName]data.Value{
 					"int8":  data.NewNumericValue[int8](8),
 					"int16": data.NewNumericValue[int16](8),
 					"int32": data.NewNumericValue[int32](8),
 					"int64": data.NewNumericValue[int64](8),
-				}),
+				}, make(map[data.ValueName]bool)),
 				data.NewPacketWithValues(11, map[data.ValueName]data.Value{
 					"float32": data.NewNumericValue[float32](8),
 					"float64": data.NewNumericValue[float64](8),
-				}),
+				}, make(map[data.ValueName]bool)),
 				data.NewPacketWithValues(12, map[data.ValueName]data.Value{
 					"bool": data.NewBooleanValue(true),
-				}),
+				}, make(map[data.ValueName]bool)),
 				data.NewPacketWithValues(13, map[data.ValueName]data.Value{
 					"enum": data.NewEnumValue("c"),
-				}),
+				}, make(map[data.ValueName]bool)),
 				data.NewPacketWithValues(14, map[data.ValueName]data.Value{
 					"uint8_1": data.NewNumericValue[uint8](8),
 					"uint8_2": data.NewNumericValue[uint8](8),
 					"float64": data.NewNumericValue[float64](8),
 					"bool":    data.NewBooleanValue(true),
 					"enum":    data.NewEnumValue("a"),
-				}),
+				}, make(map[data.ValueName]bool)),
 				data.NewPacketWithValues(15, map[data.ValueName]data.Value{
 					"bool_1": data.NewBooleanValue(true),
 					"bool_2": data.NewBooleanValue(false),
 					"bool_3": data.NewBooleanValue(false),
-				}),
+				}, make(map[data.ValueName]bool)),
 				data.NewPacketWithValues(16, map[data.ValueName]data.Value{
 					"enum_1": data.NewEnumValue("b"),
 					"enum_2": data.NewEnumValue("a"),
 					"enum_3": data.NewEnumValue("d"),
 					"enum_4": data.NewEnumValue("c"),
 					"enum_5": data.NewEnumValue("h"),
-				}),
+				}, make(map[data.ValueName]bool)),
 				data.NewPacketWithValues(17, map[data.ValueName]data.Value{
 					"uint8_1":  data.NewNumericValue[uint8](8),
 					"uint8_2":  data.NewNumericValue[uint8](8),
@@ -281,7 +281,7 @@ func TestEncoder(t *testing.T) {
 					"uint8_8":  data.NewNumericValue[uint8](8),
 					"uint8_9":  data.NewNumericValue[uint8](8),
 					"uint8_10": data.NewNumericValue[uint8](8),
-				}),
+				}, make(map[data.ValueName]bool)),
 				data.NewPacketWithValues(18, map[data.ValueName]data.Value{
 					"uint64_1":  data.NewNumericValue[uint64](8),
 					"int64_1":   data.NewNumericValue[int64](8),
@@ -301,7 +301,7 @@ func TestEncoder(t *testing.T) {
 					"uint64_6":  data.NewNumericValue[uint64](8),
 					"int64_6":   data.NewNumericValue[int64](8),
 					"float64_6": data.NewNumericValue[float64](8),
-				}),
+				}, make(map[data.ValueName]bool)),
 			},
 			output: (join(
 				[]byte{0x09, 0x00},
@@ -385,6 +385,7 @@ func TestEncoder(t *testing.T) {
 				output = append(output, encoded...)
 
 			}
+
 			if !reflect.DeepEqual(output, test.output) {
 				t.Fatalf("\nGot %#v\nExpected %#v\n", output, test.output)
 			}
@@ -394,7 +395,7 @@ func TestEncoder(t *testing.T) {
 
 // getEncoder generates a mock Encoder with the following packet IDs:
 // 9:=18 - data
-func getEncoder(endianness binary.ByteOrder) presentation.Encoder {
+func getEncoder(endianness binary.ByteOrder) *presentation.Encoder {
 	encoder := presentation.NewEncoder(endianness)
 
 	dataDecoder := data.NewEncoder(endianness)

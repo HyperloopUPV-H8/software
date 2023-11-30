@@ -23,8 +23,9 @@ func NewEncoder(endianness binary.ByteOrder) *Encoder {
 }
 
 // SetDescriptor sets the descriptor for the given id
-func (encoder *Encoder) SetDescriptor(id abstraction.PacketId, descriptor Descriptor) {
+func (encoder *Encoder) SetDescriptor(id abstraction.PacketId, descriptor Descriptor) *Encoder {
 	encoder.idToDescription[id] = descriptor
+	return encoder
 }
 
 // Encode encodes the given packet to the output Writer, returning any errors it encounters
