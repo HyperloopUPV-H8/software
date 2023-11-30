@@ -96,7 +96,7 @@ jobs:
         path: "${{env.BACKEND_DIR}}\\output\\backend-windows-64.exe"
       
   build-backend-mac:
-    name: "Build backend for linux"
+    name: "Build backend for macOS"
     runs-on: macos-latest
       
     env:
@@ -128,12 +128,12 @@ jobs:
       env:
         CGO_ENABLED: 1
         GOARCH: amd64
-        GOOS: linux
+        GOOS: darwin
       run: |
         go build -ldflags '-linkmode external -extldflags "-static"' -o ../output/backend-linux-64
       
     - name: "Uplaod artifacts"
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: backend-macos
         path: "${{env.BACKEND_DIR}}/output/backend-macos-64"
