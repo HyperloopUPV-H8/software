@@ -68,10 +68,8 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	slice := make([]string, 15)
-	for index, item := range stateRecord.packet.State() {
-		slice[index] = fmt.Sprint(item)
-		err = writer.Write(slice)
+	for _, item := range stateRecord.packet.State() {
+		err = writer.Write([]string{fmt.Sprint(item)})
 		if err != nil {
 			return err
 		}
