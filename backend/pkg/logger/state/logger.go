@@ -71,11 +71,10 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	slice := make([]string, 15)
 	for index, item := range stateRecord.packet.State() {
 		slice[index] = fmt.Sprint(item)
-	}
-
-	err = writer.Write(slice)
-	if err != nil {
-		return err
+		err = writer.Write(slice)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
