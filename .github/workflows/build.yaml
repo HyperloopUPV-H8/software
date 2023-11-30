@@ -87,7 +87,7 @@ jobs:
         GOARCH: amd64
         GOOS: windows
       run: |
-        go build -ldflags '-linkmode external -extldflags "-static"' -o ..\output\backend-windows-64.exe
+        go build -o ..\output\backend-windows-64.exe
 
     - name: "Uplaod artifacts"
       uses: actions/upload-artifact@v3
@@ -130,7 +130,7 @@ jobs:
         GOARCH: amd64
         GOOS: darwin
       run: |
-        go build -ldflags '-linkmode external -extldflags "-static"' -o ../output/backend-linux-64
+        go build -o ../output/backend-linux-64
       
     - name: "Uplaod artifacts"
       uses: actions/upload-artifact@v3
