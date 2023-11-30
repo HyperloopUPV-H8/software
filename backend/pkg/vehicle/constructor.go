@@ -33,7 +33,7 @@ func (vehicle *Vehicle) RemoveBoardId(id abstraction.BoardId) {
 
 // SetTransport sets the Vehicle Transport to the provided one
 func (vehicle *Vehicle) SetTransport(transport abstraction.Transport) {
-	//transport.SetAPI(vehicle)
+	transport.SetAPI(vehicle)
 	vehicle.transport = transport
 }
 
