@@ -39,3 +39,7 @@
 
 - Messages sublogger
 - Handle json timestamp
+
+#### v1.1.2
+
+- Order sublogger
