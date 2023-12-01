@@ -1,4 +1,4 @@
-name: Build backend
+name: Build ethernet view
 
 on:
   workflow_call:
