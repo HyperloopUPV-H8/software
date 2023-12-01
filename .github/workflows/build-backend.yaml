@@ -1,4 +1,4 @@
-name: Build
+name: Build backend
 
 on:
   workflow_call:
@@ -46,8 +46,8 @@ jobs:
       run: |
         go build -ldflags '-linkmode external -extldflags "-static"' -o ../output/backend-linux-64
 
-    - name: "Uplaod artifacts"
-      uses: actions/upload-artifact@v2
+    - name: "Upload build"
+      uses: actions/upload-artifact@v3
       with:
         name: backend-linux
         path: "${{env.BACKEND_DIR}}/output/*"
@@ -89,7 +89,7 @@ jobs:
       run: |
         go build -o ..\output\backend-windows-64.exe
 
-    - name: "Uplaod artifacts"
+    - name: "Upload build"
       uses: actions/upload-artifact@v3
       with:
         name: backend-windows
@@ -141,7 +141,7 @@ jobs:
       run: |
         go build -o ../output/backend-macos-m1-64
       
-    - name: "Uplaod artifacts"
+    - name: "Upload build"
       uses: actions/upload-artifact@v3
       with:
         name: backend-macos
