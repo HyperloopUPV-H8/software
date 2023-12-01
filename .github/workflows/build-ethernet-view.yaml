@@ -1,0 +1,42 @@
+name: Build backend
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  build-ethernet-view:
+    name: "Build ethernet view"
+    runs-on: ubuntu-latest
+
+    env:
+      FRONTEND_DIR: ./ethernet-view
+      COMMON_DIR: ./common-front
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: "Install common front dependencies"
+      working-directory: "${{env.COMMON_DIR}}"
+      run: npm install
+
+
+    - name: "Build common front"
+      working-directory: "${{env.COMMON_DIR}}"
+      run: npm run build
+
+    - name: "Install ethernet view dependencies"
+      working-directory: "${{env.FRONTEND_DIR}}"
+      run: npm install
+
+
+    - name: "Build ethernet view"
+      working-directory: "${{env.FRONTEND_DIR}}"
+      run: npm run build
+
+
+    - name: "Upload build"
+      uses: actions/upload-artifact@v3
+      with:
+        name: ethernet-view
+        path: "${{env.FRONTEND_DIR}}/static/*"
