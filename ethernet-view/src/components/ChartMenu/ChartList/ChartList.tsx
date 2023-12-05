@@ -1,70 +1,54 @@
 import styles from "./ChartList.module.scss";
-import { ChartElement } from "./ChartElement/ChartElement";
-import { DragEvent, useCallback, useState } from "react";
+import { ChartWithLegend } from "./ChartWithLegend/ChartWithLegend";
+import { DragEvent, useCallback } from "react";
+import { useCharts } from "../useCharts";
 import { nanoid } from "nanoid";
-
-export type ChartId = string;
-export type MeasurementId = string;
-export type MeasurementName = string;
-export type MeasurementColor = string;
-export type MeasurementUnits = string;
-
-export type ChartInfo = {
-    chartId: ChartId,
-    measurementId: MeasurementId,
-};
-
-export type MeasurementInfo = {
-    readonly id: MeasurementId,
-    readonly name: MeasurementName,
-    readonly range: [number | null, number | null],
-    readonly color: MeasurementColor,
-    readonly units: MeasurementUnits,
-    readonly getUpdate: () => number,
-};
-
+import { ChartLine } from "../ChartElement";
 
 type Props = {
-    getMeasurementInfo: (id: MeasurementId) => MeasurementInfo;
+    getLine: (id: string) => ChartLine;
 };
 
-export const ChartList = ({ getMeasurementInfo }: Props) => {
-    const [charts, setCharts] = useState<ChartInfo[]>([])
+export const ChartList = ({ getLine }: Props) => {
+    const { charts, addChart, removeChart, addLine, removeLine } = useCharts();
 
-    const addChart = (chartId: ChartId, measurementId: MeasurementId) => {
-        setCharts((prev) => [...prev, {
-            chartId: chartId,
-            measurementId: measurementId, 
-        }]);
-    };
-    
-    const removeChart = useCallback((id: ChartId) => {
-        setCharts((prev) => prev.filter((chart) => chart.chartId !== id));
+    const handleDrop = useCallback((ev: DragEvent<HTMLDivElement>) => {
+        const id = ev.dataTransfer.getData("id");
+        const line = getLine(id);
+        addChart(nanoid(), line);
     }, []);
 
-    const handleDrop = (ev: DragEvent<HTMLDivElement>) => {
-        const id = ev.dataTransfer.getData("id");
-        const measurementId = getMeasurementInfo(id).id;
-        addChart(nanoid(), measurementId);
-    };
+    const handleDropOnChart = useCallback((chartId: string, id: string) => {
+        const line = getLine(id);
+        addLine(chartId, line);
+    }, []);
 
     return (
         <div
             className={styles.chartListWrapper}
             onDrop={handleDrop}
-            onDragEnter={(ev) => ev.preventDefault()}
-            onDragOver={(ev) => ev.preventDefault()}
+            onDragEnter={(ev) => {
+                ev.preventDefault();
+            }}
+            onDragOver={(ev) => {
+                ev.preventDefault();
+            }}
         >
-            {charts.map((chart) => (
-                <ChartElement
-                    key={chart.chartId}
-                    chartId={chart.chartId}
-                    maxValue={300}
-                    removeChart={removeChart}
-                    measurementId={chart.measurementId}
-                    getMeasurementInfo={getMeasurementInfo}
-                />
-            ))}
+            {charts.map((chart) => {
+                return (
+                    <ChartWithLegend
+                        key={chart.id}
+                        chartElement={chart}
+                        handleDropOnChart={handleDropOnChart}
+                        removeElement={() => {
+                            removeChart(chart.id);
+                        }}
+                        removeMeasurement={(measurementId: string) => {
+                            removeLine(chart.id, measurementId);
+                        }}
+                    />
+                );
+            })}
         </div>
     );
 };
