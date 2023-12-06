@@ -13,7 +13,6 @@ import (
 	"runtime"
 	"runtime/pprof"
 	"strings"
-	"time"
 
 	blcuPackage "github.com/HyperloopUPV-H8/h9-backend/internal/blcu"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
@@ -164,14 +163,11 @@ func main() {
 
 	transp := transport.NewTransport()
 
-	prev := time.Now()
 	transp.SetAPI(&TransportAPI{
 		OnNotification: func(notification abstraction.TransportNotification) {
 			packet := notification.(transport.PacketNotification)
 			switch p := packet.Packet.(type) {
 			case *data.Packet:
-				fmt.Println(time.Since(prev))
-				prev = time.Now()
 				if _, ok := orders[p.Id()]; ok {
 					loggerHandler.Log(order_logger.LoggableOrder(*p))
 					return
