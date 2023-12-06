@@ -2,8 +2,10 @@ package tcp
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
+	"syscall"
 	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
@@ -64,7 +66,7 @@ func NewClient(local net.Addr) ClientConfig {
 
 		Context: context.TODO(),
 
-		MaxRetries: 30,
+		MaxRetries: -1,
 		Backoff:    NewExponBackoff(defaultBackoffMin, defaultBackoffExp, defaultBackoffMax),
 	}
 }
@@ -82,7 +84,7 @@ func (config ClientConfig) Dial(network, remote string) (net.Conn, error) {
 			return nil, config.Context.Err()
 		}
 
-		if netErr, ok := err.(net.Error); !ok || !netErr.Timeout() {
+		if netErr, ok := err.(net.Error); !errors.Is(err, syscall.ECONNREFUSED) && (!ok || !netErr.Timeout()) {
 			return nil, err
 		}
 		time.Sleep(config.Backoff(config.CurrentRetries))
