@@ -3,9 +3,10 @@ import {
     getPacket,
     isNumericMeasurement,
     useGlobalTicker,
+    useMeasurementsStore,
+    usePodDataStore,
 } from "common";
 import { createContext, useRef } from "react";
-import { store } from "store";
 
 export type PacketElement = {
     count: Text;
@@ -36,10 +37,11 @@ export const TableUpdater = ({ children }: Props) => {
     const packetElements = useRef<Record<string, PacketElement>>({});
     const measurementElements = useRef<MeasurementElement[]>([]);
 
-    useGlobalTicker(() => {
-        const state = store.getState();
-        const podData = state.podData;
+    const podData = usePodDataStore(state => state.podData)
+    const measurements = useMeasurementsStore(state => state.measurements)
 
+    useGlobalTicker(() => {
+        
         for (const id in packetElements.current) {
             const packet = getPacket(podData, Number.parseInt(id));
             const element = packetElements.current[id];
@@ -52,7 +54,7 @@ export const TableUpdater = ({ children }: Props) => {
         }
 
         for (const item of measurementElements.current) {
-            const measurement = getMeasurement(state.measurements, item.id);
+            const measurement = getMeasurement(measurements, item.id);
             if (!measurement) {
                 console.warn(`measurement ${item.id} not found`);
                 return;

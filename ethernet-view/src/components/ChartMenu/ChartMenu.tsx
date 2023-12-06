@@ -1,7 +1,7 @@
 import styles from "components/ChartMenu/ChartMenu.module.scss";
 import Sidebar from "components/ChartMenu/Sidebar/Sidebar";
 import { ChartList } from "components/ChartMenu/ChartList/ChartList";
-import { store } from "store";
+import { useMeasurementsStore } from "common";
 import { Section } from "./Sidebar/Section/Section";
 import { NumericMeasurement, getMeasurement } from "common";
 
@@ -18,6 +18,9 @@ type Props = {
 };
 
 export const ChartMenu = ({ sidebarSections }: Props) => {
+
+    const measurements = useMeasurementsStore((state) => state.measurements);
+
     if (sidebarSections.length == 0) {
         return (
             <div className={styles.noValues}>
@@ -33,7 +36,7 @@ export const ChartMenu = ({ sidebarSections }: Props) => {
                 <ChartList
                     getLine={(id) => {
                         const meas = getMeasurement(
-                            store.getState().measurements,
+                            measurements,
                             id
                         ) as NumericMeasurement;
 
@@ -45,7 +48,7 @@ export const ChartMenu = ({ sidebarSections }: Props) => {
                             getUpdate: () => {
                                 //TODO: change to getNumericMeasurement and return undefined if its not numeric (or doesnt exist)
                                 const meas = getMeasurement(
-                                    store.getState().measurements,
+                                    measurements,
                                     id
                                 ) as NumericMeasurement;
 

@@ -18,7 +18,7 @@ export function useLines(
     viewBoxWidth: number,
     viewBoxHeight: number,
     maxLineLength: number,
-    lineDescriptions: Array<LineDescription>
+    lineDescriptions: LineDescription[]
 ) {
     const ref = useRef<SVGSVGElement>(null);
     const initialLargestRange = useMemo(
@@ -31,7 +31,7 @@ export function useLines(
 
     const [collectiveRange, setCollectiveRange] = useState(initialLargestRange);
 
-    const lineInstancesRef = useRef<Array<Line>>([]);
+    const lineInstancesRef = useRef<Line[]>([]);
 
     const updateLines = useCallback(() => {
         const [min, max] = getLargestRange(
@@ -94,12 +94,12 @@ export function useLines(
 }
 
 function createLines(
-    descriptions: Array<LineDescription>,
-    lines: Array<Line>,
+    descriptions: LineDescription[],
+    lines: Line[],
     length: number,
     width: number,
     height: number
-): Array<Line> {
+): Line[] {
     return descriptions.map((description) => {
         const newHandler =
             lines.find((line) => description.id == line.id)?.data ??

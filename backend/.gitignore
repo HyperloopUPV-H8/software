@@ -10,6 +10,8 @@ trace.json
 Backend-H8
 backend
 !build
+# MacOS build
+cmd
 
 # EXCEL
 *.xlsx

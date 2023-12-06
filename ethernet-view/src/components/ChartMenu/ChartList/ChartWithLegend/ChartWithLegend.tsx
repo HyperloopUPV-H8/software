@@ -3,8 +3,7 @@ import Legend from "./Legend/Legend";
 import { ChartElement } from "components/ChartMenu/ChartElement";
 import { DragEvent } from "react";
 import { MdClose } from "react-icons/md";
-import { LinesChart, NumericMeasurement, getMeasurement } from "common";
-import { store } from "store";
+import { LinesChart, NumericMeasurement, getMeasurement, useMeasurementsStore } from "common";
 
 type Props = {
     chartElement: ChartElement;
@@ -24,6 +23,8 @@ export const ChartWithLegend = ({
         const id = ev.dataTransfer.getData("id");
         handleDropOnChart(chartElement.id, id);
     }
+
+    const measurements = useMeasurementsStore((state) => state.measurements);
 
     return (
         <div
@@ -48,7 +49,7 @@ export const ChartWithLegend = ({
                 items={chartElement.lines}
                 getValue={(id) => {
                     const meas = getMeasurement(
-                        store.getState().measurements,
+                        measurements,
                         id
                     ) as NumericMeasurement;
 

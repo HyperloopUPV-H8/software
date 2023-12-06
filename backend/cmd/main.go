@@ -2,14 +2,18 @@ package main
 
 import (
 	"bufio"
+	"encoding/binary"
 	"flag"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"os/signal"
 	"path"
 	"runtime"
+	"runtime/pprof"
 	"strings"
+	"time"
 
 	blcuPackage "github.com/HyperloopUPV-H8/h9-backend/internal/blcu"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
@@ -29,11 +33,21 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/internal/state_space_logger"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/value_logger"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/vehicle"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/message_parser"
 	vehicle_models "github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/ws_handle"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tcp"
+	blcu_packet "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/blcu"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
+	info_packet "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/info"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/order"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/protection"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/state"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
 	"github.com/fatih/color"
+	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
 	"github.com/pelletier/go-toml/v2"
 	trace "github.com/rs/zerolog/log"
@@ -41,8 +55,10 @@ import (
 
 var traceLevel = flag.String("trace", "info", "set the trace level (\"fatal\", \"error\", \"warn\", \"info\", \"debug\", \"trace\")")
 var traceFile = flag.String("log", "trace.json", "set the trace log file")
+var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 
 func main() {
+	flag.Parse()
 	traceFile := initTrace(*traceLevel, *traceFile)
 	defer traceFile.Close()
 
@@ -52,40 +68,36 @@ func main() {
 	defer RemovePid(pidPath)
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
-	flag.Parse()
-
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
 	config := getConfig("./config.toml")
 
-	// excelAdapter := excel_adapter.New(config.Excel)
-	// boards := excelAdapter.GetBoards()
-	// globalInfo := excelAdapter.GetGlobalInfo()
-
 	file, err := excel.Download(excel.DownloadConfig(config.Excel.Download))
-
 	if err != nil {
 		trace.Fatal().Err(err).Msg("downloading file")
 	}
 
 	ade, err := ade.CreateADE(file)
-
 	if err != nil {
 		trace.Fatal().Err(err).Msg("creating ade")
 	}
 
 	info, err := info.NewInfo(ade.Info)
-
 	if err != nil {
 		trace.Fatal().Err(err).Msg("creating info")
 	}
 
 	podData, err := pod_data.NewPodData(ade.Boards, info.Units)
-
 	if err != nil {
 		fmt.Println(err)
 		trace.Fatal().Err(err).Msg("creating podData")
 	}
-
-	dataOnlyPodData := pod_data.GetDataOnlyPodData(podData)
 
 	dev, err := selectDev()
 	if err != nil {
@@ -97,50 +109,21 @@ func main() {
 	connectionTransfer := connection_transfer.New(config.Connections)
 
 	vehicleOrders, err := vehicle_models.NewVehicleOrders(podData.Boards, config.Excel.Parse.Global.BLCUAddressKey)
-
 	if err != nil {
 		trace.Fatal().Err(err).Msg("creating vehicleOrders")
 	}
 
-	orderTransfer, orderChannel := order_transfer.New()
-
-	vehicle := vehicle.New(vehicle.VehicleConstructorArgs{
-		PodData: podData,
-		Config:  config.Vehicle,
-		Boards:  podData.Boards,
-		Info:    info,
-		OnConnectionChange: func(board string, isConnected bool) {
-			if !isConnected {
-				orderTransfer.ClearOrders(board)
-			}
-			connectionTransfer.Update(board, isConnected)
-		},
-	})
-
-	var blcu blcuPackage.BLCU
-	blcuAddr, useBlcu := info.Addresses.Boards["BLCU"]
-
-	if useBlcu {
-		blcu = blcuPackage.NewBLCU(net.TCPAddr{
-			IP:   blcuAddr,
-			Port: int(info.Ports.TFTP),
-		}, info.BoardIds, config.BLCU)
-
-		blcu.SetSendOrder(vehicle.SendOrder)
-	}
-
-	vehicleUpdates := make(chan vehicle_models.PacketUpdate, 1)
-	vehicleProtections := make(chan any)
-	vehicleTransmittedOrders := make(chan vehicle_models.PacketUpdate)
-	blcuAckChan := make(chan struct{})
-	stateOrdersChan := make(chan message_parser.StateOrdersAdapter)
-	stateSpaceChan := make(chan vehicle_models.StateSpace)
-
+	// <--- data transfer --->
 	dataTransfer := data_transfer.New(config.DataTransfer)
 	go dataTransfer.Run()
 
+	// <--- message transfer --->
 	messageTransfer := message_transfer.New(config.Messages)
 
+	// <--- update factory --->
+	updateFactory := update_factory.NewFactory()
+
+	// <--- logger --->
 	packetLogger := packet_logger.NewPacketLogger(podData.Boards, config.PacketLogger)
 	valueLogger := value_logger.NewValueLogger(podData.Boards, config.ValueLogger)
 	orderLogger := order_logger.NewOrderLogger(podData.Boards, config.OrderLogger)
@@ -154,9 +137,146 @@ func main() {
 		"protections": &protectionLogger,
 		"stateSpace":  &stateSpaceLogger,
 	}
-
 	loggerHandler := logger_handler.NewLoggerHandler(loggers, config.LoggerHandler)
 
+	// <--- order transfer --->
+	idToBoard := make(map[uint16]string)
+	for _, board := range podData.Boards {
+		for _, packet := range board.Packets {
+			idToBoard[packet.Id] = board.Name
+		}
+	}
+	orderTransfer, orderChannel := order_transfer.New(idToBoard)
+
+	// <--- blcu --->
+	var blcu blcuPackage.BLCU
+	blcuAddr, useBlcu := info.Addresses.Boards["BLCU"]
+
+	// <--- transport --->
+	orders := make(map[abstraction.PacketId]struct{})
+	for _, board := range podData.Boards {
+		for _, packet := range board.Packets {
+			if packet.Type == "order" {
+				orders[abstraction.PacketId(packet.Id)] = struct{}{}
+			}
+		}
+	}
+
+	transp := transport.NewTransport()
+
+	prev := time.Now()
+	transp.SetAPI(&TransportAPI{
+		OnNotification: func(notification abstraction.TransportNotification) {
+			packet := notification.(transport.PacketNotification)
+			switch p := packet.Packet.(type) {
+			case *data.Packet:
+				fmt.Println(time.Since(prev))
+				prev = time.Now()
+				if _, ok := orders[p.Id()]; ok {
+					loggerHandler.Log(order_logger.LoggableOrder(*p))
+					return
+				}
+
+				update := updateFactory.NewUpdate(p)
+				dataTransfer.Update(update)
+
+				loggerHandler.Log(packet_logger.ToLoggablePacket(p))
+
+				for id, value := range p.GetValues() {
+					loggerHandler.Log(value_logger.ToLoggableValue(string(id), value, p.Timestamp()))
+				}
+			case *info_packet.Packet:
+				messageTransfer.SendMessage(p)
+				loggerHandler.Log(protection_logger.LoggableInfo(*p))
+			case *protection.Packet:
+				messageTransfer.SendMessage(p)
+				loggerHandler.Log(protection_logger.LoggableProtection(*p))
+			case *blcu_packet.Ack:
+				if useBlcu {
+					blcu.NotifyAck()
+				}
+			case *state.Space:
+				for _, row := range p.State() {
+					loggerHandler.Log(state_space_logger.LoggableStateSpaceRow(row))
+				}
+			case *order.Add:
+				orderTransfer.AddStateOrders(*p)
+			case *order.Remove:
+				orderTransfer.RemoveStateOrders(*p)
+			}
+		},
+
+		OnConnectionUpdate: func(target abstraction.TransportTarget, isConnected bool) {},
+	})
+
+	// Load and set packet decoder and encoder
+	decoder, encoder := getTransportDecEnc(info, podData)
+	transp.WithDecoder(decoder).WithEncoder(encoder)
+
+	// Set package id to target map
+	for _, board := range podData.Boards {
+		for _, packet := range board.Packets {
+			transp.SetIdTarget(abstraction.PacketId(packet.Id), abstraction.TransportTarget(board.Name))
+		}
+	}
+
+	// Start handling TCP client connections
+	backendTcpClientAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", info.Addresses.Backend, info.Ports.TcpClient))
+	if err != nil {
+		panic("Failed to resolve local backend TCP client address")
+	}
+	serverTargets := make(map[string]abstraction.TransportTarget)
+	for _, board := range podData.Boards {
+		if !common.Contains(config.Vehicle.Boards, board.Name) {
+			serverTargets[fmt.Sprintf("%s:%d", info.Addresses.Boards[board.Name], info.Ports.TcpClient)] = abstraction.TransportTarget(board.Name)
+			continue
+		}
+		go transp.HandleClient(tcp.NewClient(backendTcpClientAddr), abstraction.TransportTarget(board.Name), "tcp", string(info.Addresses.Boards[board.Name]))
+	}
+
+	// Start handling TCP server connections
+	go transp.HandleServer(tcp.NewServer(serverTargets), "tcp", fmt.Sprintf("%s:%d", info.Addresses.Backend, info.Ports.TcpServer))
+
+	// Start handling the sniffer
+	source, err := pcap.OpenLive(dev.Name, 1500, true, pcap.BlockForever)
+	if err != nil {
+		panic("failed to obtain sniffer source: " + err.Error())
+	}
+	boardIps := make([]net.IP, 0)
+	for _, board := range info.Addresses.Boards {
+		boardIps = append(boardIps, board)
+	}
+	err = source.SetBPFFilter(getFilter(boardIps, info.Addresses.Backend, info.Ports.UDP, info.Ports.TcpClient, info.Ports.TcpServer))
+	if err != nil {
+		panic("failed to compile bpf filter")
+	}
+	go transp.HandleSniffer(sniffer.New(source, &layers.LayerTypeEthernet))
+
+	// <--- order transfer --->
+	go func() {
+		for order := range orderChannel {
+			err := transp.SendMessage(transport.NewPacketMessage(&order))
+			if err != nil {
+				trace.Error().Any("order", order).Err(err).Msg("error sending order")
+			}
+
+			loggerHandler.Log(order_logger.LoggableOrder(order))
+		}
+	}()
+
+	// <--- blcu --->
+	if useBlcu {
+		blcu = blcuPackage.NewBLCU(net.TCPAddr{
+			IP:   blcuAddr,
+			Port: int(info.Ports.TFTP),
+		}, info.BoardIds, config.BLCU)
+
+		blcu.SetSendOrder(func(o *data.Packet) error {
+			return transp.SendMessage(transport.NewPacketMessage(o))
+		})
+	}
+
+	// <--- websocket broker --->
 	websocketBroker := ws_handle.New()
 	defer websocketBroker.Close()
 
@@ -170,53 +290,12 @@ func main() {
 	websocketBroker.RegisterHandle(&messageTransfer, "message/update")
 	websocketBroker.RegisterHandle(&orderTransfer, config.Orders.SendTopic, "order/stateOrders")
 
-	go vehicle.Listen(vehicleUpdates, vehicleTransmittedOrders, vehicleProtections, blcuAckChan, stateOrdersChan, stateSpaceChan)
-
-	go startPacketUpdateRoutine(vehicleUpdates, &dataTransfer, &loggerHandler)
-	go startMessagesRoutine(vehicleProtections, &messageTransfer, &loggerHandler)
-	go startOrderRoutine(orderChannel, &vehicle, &loggerHandler)
-
-	go func() {
-		for order := range vehicleTransmittedOrders {
-			loggable := order_logger.LoggableTransmittedOrder(order)
-			loggerHandler.Log(loggable)
-		}
-	}()
-
-	if useBlcu {
-		go func() {
-			for range blcuAckChan {
-				blcu.NotifyAck()
-			}
-		}()
-	}
-
-	go func() {
-		for stateSpace := range stateSpaceChan {
-			for _, row := range stateSpace {
-				loggerHandler.Log(state_space_logger.LoggableStateSpaceRow(row))
-			}
-
-		}
-	}()
-
-	go func() {
-		for stateOrders := range stateOrdersChan {
-			switch stateOrders.Action {
-			case message_parser.AddStateOrderKind:
-				orderTransfer.AddStateOrders(stateOrders.StateOrders)
-			case message_parser.RemoveStateOrderKind:
-				orderTransfer.RemoveStateOrders(stateOrders.StateOrders)
-			}
-		}
-	}()
-
 	uploadableBords := common.Filter(common.Keys(info.Addresses.Boards), func(item string) bool {
 		return item != config.Excel.Parse.Global.BLCUAddressKey
 	})
 
 	endpointData := server.EndpointData{
-		PodData:           dataOnlyPodData,
+		PodData:           pod_data.GetDataOnlyPodData(podData),
 		OrderData:         vehicleOrders,
 		ProgramableBoards: uploadableBords,
 	}
@@ -345,42 +424,144 @@ func getConfig(path string) Config {
 	return config
 }
 
-func startPacketUpdateRoutine(vehicleUpdates <-chan vehicle_models.PacketUpdate, dataTransfer *data_transfer.DataTransfer, loggerHandler *logger_handler.LoggerHandler) {
-	updateFactory := update_factory.NewFactory()
+func getTransportDecEnc(info info.Info, podData pod_data.PodData) (*presentation.Decoder, *presentation.Encoder) {
+	decoder := presentation.NewDecoder(binary.LittleEndian)
+	encoder := presentation.NewEncoder(binary.LittleEndian)
 
-	for packetUpdate := range vehicleUpdates {
-		update := updateFactory.NewUpdate(packetUpdate)
-		dataTransfer.Update(update)
+	dataDecoder := data.NewDecoder(binary.LittleEndian)
+	dataEncoder := data.NewEncoder(binary.LittleEndian)
 
-		loggerHandler.Log(packet_logger.ToLoggablePacket(packetUpdate))
-
-		for id, value := range packetUpdate.Values {
-			loggerHandler.Log(value_logger.ToLoggableValue(id, value, packetUpdate.Metadata.Timestamp))
+	ids := make([]abstraction.PacketId, 0)
+	for _, board := range podData.Boards {
+		for _, packet := range board.Packets {
+			descriptor := make(data.Descriptor, len(packet.Measurements))
+			for i, measurement := range packet.Measurements {
+				switch meas := measurement.(type) {
+				case pod_data.NumericMeasurement:
+					switch meas.Type {
+					case "uint8":
+						descriptor[i] = data.NewNumericDescriptor[uint8](data.ValueName(meas.Id))
+					case "uint16":
+						descriptor[i] = data.NewNumericDescriptor[uint16](data.ValueName(meas.Id))
+					case "uint32":
+						descriptor[i] = data.NewNumericDescriptor[uint32](data.ValueName(meas.Id))
+					case "uint64":
+						descriptor[i] = data.NewNumericDescriptor[uint64](data.ValueName(meas.Id))
+					case "int8":
+						descriptor[i] = data.NewNumericDescriptor[int8](data.ValueName(meas.Id))
+					case "int16":
+						descriptor[i] = data.NewNumericDescriptor[int16](data.ValueName(meas.Id))
+					case "int32":
+						descriptor[i] = data.NewNumericDescriptor[int32](data.ValueName(meas.Id))
+					case "int64":
+						descriptor[i] = data.NewNumericDescriptor[int64](data.ValueName(meas.Id))
+					case "float32":
+						descriptor[i] = data.NewNumericDescriptor[float32](data.ValueName(meas.Id))
+					case "float64":
+						descriptor[i] = data.NewNumericDescriptor[float64](data.ValueName(meas.Id))
+					default:
+						panic(fmt.Sprintf("unexpected numeric type for %s: %s", meas.Id, meas.Type))
+					}
+				case pod_data.BooleanMeasurement:
+					descriptor[i] = data.NewBooleanDescriptor(data.ValueName(meas.Id))
+				case pod_data.EnumMeasurement:
+					enumDescriptor := make(data.EnumDescriptor, len(meas.Options))
+					for j, option := range meas.Options {
+						enumDescriptor[j] = data.EnumVariant(option)
+					}
+					descriptor[i] = data.NewEnumDescriptor(data.ValueName(meas.Id), enumDescriptor)
+				default:
+					panic(fmt.Sprintf("unexpected measurement type: %T", measurement))
+				}
+			}
+			dataDecoder.SetDescriptor(abstraction.PacketId(packet.Id), descriptor)
+			dataEncoder.SetDescriptor(abstraction.PacketId(packet.Id), descriptor)
+			ids = append(ids, abstraction.PacketId(packet.Id))
 		}
 	}
+
+	for _, id := range ids {
+		decoder.SetPacketDecoder(id, dataDecoder)
+		encoder.SetPacketEncoder(id, dataEncoder)
+	}
+
+	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds.BlcuAck), blcu_packet.NewDecoder())
+
+	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds.Info), info_packet.NewDecoder(0))
+
+	stateOrdersDecoder := order.NewDecoder(binary.LittleEndian)
+	stateOrdersDecoder.SetActionId(abstraction.PacketId(info.MessageIds.AddStateOrder), stateOrdersDecoder.DecodeAdd)
+	stateOrdersDecoder.SetActionId(abstraction.PacketId(info.MessageIds.RemoveStateOrder), stateOrdersDecoder.DecodeRemove)
+	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds.AddStateOrder), stateOrdersDecoder)
+	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds.RemoveStateOrder), stateOrdersDecoder)
+
+	protectionDecoder := protection.NewDecoder()
+	protectionDecoder.SetSeverity(abstraction.PacketId(info.MessageIds.Warning), protection.SeverityWarning)
+	protectionDecoder.SetSeverity(abstraction.PacketId(info.MessageIds.Fault), protection.SeverityFault)
+
+	return decoder, encoder
 }
 
-func startMessagesRoutine(vehicleMessages <-chan any, messageTransfer *message_transfer.MessageTransfer, loggerHandler *logger_handler.LoggerHandler) {
-	for message := range vehicleMessages {
-		messageTransfer.SendMessage(message)
-
-		switch msg := message.(type) {
-		case vehicle_models.InfoMessage:
-			loggerHandler.Log(protection_logger.LoggableInfo(msg))
-		case vehicle_models.ProtectionMessage:
-			loggerHandler.Log(protection_logger.LoggableProtection(msg))
-		}
-	}
+type TransportAPI struct {
+	OnNotification     func(abstraction.TransportNotification)
+	OnConnectionUpdate func(abstraction.TransportTarget, bool)
 }
 
-func startOrderRoutine(orderChannel <-chan vehicle_models.Order, vehicle *vehicle.Vehicle, loggerHandler *logger_handler.LoggerHandler) {
-	for ord := range orderChannel {
-		err := vehicle.SendOrder(ord)
+func (api *TransportAPI) Notification(notification abstraction.TransportNotification) {
+	api.OnNotification(notification)
+}
 
-		if err != nil {
-			trace.Error().Any("order", ord).Msg("error sending order")
-		}
+func (api *TransportAPI) ConnectionUpdate(target abstraction.TransportTarget, isConnected bool) {
+	api.OnConnectionUpdate(target, isConnected)
+}
 
-		loggerHandler.Log(order_logger.LoggableOrder(ord))
-	}
+func getFilter(boardAddrs []net.IP, backendAddr net.IP, udpPort uint16, tcpClientPort uint16, tcpServerPort uint16) string {
+	ipipFilter := getIPIPfilter()
+	udpFilter := getUDPFilter(boardAddrs, udpPort)
+	tcpFilter := getTCPFilter(boardAddrs, tcpServerPort, tcpClientPort)
+	// noBackend := "not host 192.168.0.9"
+
+	// filter := fmt.Sprintf("((%s) or (%s) or (%s)) and (%s)", ipipFilter, udpFilter, tcpFilter, noBackend)
+
+	filter := fmt.Sprintf("(%s) or (%s) or (%s)", ipipFilter, udpFilter, tcpFilter)
+
+	trace.Trace().Any("addrs", boardAddrs).Str("filter", filter).Msg("new filter")
+	return filter
+}
+
+func getIPIPfilter() string {
+	return "ip[9] == 4"
+}
+
+func getUDPFilter(addrs []net.IP, port uint16) string {
+	udpPort := fmt.Sprintf("udp port %d", port)
+	udpAddrs := common.Map(addrs, func(addr net.IP) string {
+		return fmt.Sprintf("(src host %s)", addr)
+	})
+
+	udpAddrsStr := strings.Join(udpAddrs, " or ")
+
+	return fmt.Sprintf("(%s) and (%s)", udpPort, udpAddrsStr)
+}
+
+func getTCPFilter(addrs []net.IP, serverPort uint16, clientPort uint16) string {
+	ports := fmt.Sprintf("tcp port %d or %d", serverPort, clientPort)
+	notSynFinRst := "tcp[tcpflags] & (tcp-fin | tcp-syn | tcp-rst) == 0"
+	notJustAck := "tcp[tcpflags] | tcp-ack != 16"
+	nonZeroPayload := "tcp[tcpflags] & tcp-push != 0"
+
+	srcAddresses := common.Map(addrs, func(addr net.IP) string {
+		return fmt.Sprintf("(src host %s)", addr)
+	})
+
+	srcAddressesStr := strings.Join(srcAddresses, " or ")
+
+	dstAddresses := common.Map(addrs, func(addr net.IP) string {
+		return fmt.Sprintf("(dst host %s)", addr)
+	})
+
+	dstAddressesStr := strings.Join(dstAddresses, " or ")
+
+	filter := fmt.Sprintf("(%s) and (%s) and (%s) and (%s) and (%s) and (%s)", ports, notSynFinRst, notJustAck, nonZeroPayload, srcAddressesStr, dstAddressesStr)
+	return filter
 }

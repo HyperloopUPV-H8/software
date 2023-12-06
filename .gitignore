@@ -1,2 +1,7 @@
 build
+
+# GOOGLE API KEY
 secret.json
+
+# MacOS Files
+.DS_Store
