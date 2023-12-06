@@ -11,7 +11,7 @@ connections = "/backend"
 file_server = "/"
 
 [vehicle]
-boards = ["BLCU"]
+boards = ["VCU"]
 
 [vehicle.network]
 tcp_client_tag = "TCP_CLIENT"

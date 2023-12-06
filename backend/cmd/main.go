@@ -13,7 +13,6 @@ import (
 	"runtime"
 	"runtime/pprof"
 	"strings"
-	"time"
 
 	blcuPackage "github.com/HyperloopUPV-H8/h9-backend/internal/blcu"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
@@ -164,14 +163,11 @@ func main() {
 
 	transp := transport.NewTransport()
 
-	prev := time.Now()
 	transp.SetAPI(&TransportAPI{
 		OnNotification: func(notification abstraction.TransportNotification) {
 			packet := notification.(transport.PacketNotification)
 			switch p := packet.Packet.(type) {
 			case *data.Packet:
-				fmt.Println(time.Since(prev))
-				prev = time.Now()
 				if _, ok := orders[p.Id()]; ok {
 					loggerHandler.Log(order_logger.LoggableOrder(*p))
 					return
@@ -206,7 +202,9 @@ func main() {
 			}
 		},
 
-		OnConnectionUpdate: func(target abstraction.TransportTarget, isConnected bool) {},
+		OnConnectionUpdate: func(target abstraction.TransportTarget, isConnected bool) {
+			connectionTransfer.Update(string(target), isConnected)
+		},
 	})
 
 	// Load and set packet decoder and encoder
@@ -221,7 +219,7 @@ func main() {
 	}
 
 	// Start handling TCP client connections
-	backendTcpClientAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", info.Addresses.Backend, info.Ports.TcpClient))
+	backendTcpClientAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", info.Addresses.Backend.String(), info.Ports.TcpClient))
 	if err != nil {
 		panic("Failed to resolve local backend TCP client address")
 	}
@@ -231,7 +229,7 @@ func main() {
 			serverTargets[fmt.Sprintf("%s:%d", info.Addresses.Boards[board.Name], info.Ports.TcpClient)] = abstraction.TransportTarget(board.Name)
 			continue
 		}
-		go transp.HandleClient(tcp.NewClient(backendTcpClientAddr), abstraction.TransportTarget(board.Name), "tcp", string(info.Addresses.Boards[board.Name]))
+		go transp.HandleClient(tcp.NewClient(backendTcpClientAddr), abstraction.TransportTarget(board.Name), "tcp", fmt.Sprintf("%s:%d", info.Addresses.Boards[board.Name], info.Ports.TcpServer))
 	}
 
 	// Start handling TCP server connections

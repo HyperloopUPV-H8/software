@@ -45,7 +45,10 @@ export const useConnectionsStore = create<ConnectionsStore>((set) => ({
     setConnections: (connections: Connection[]) => {
         set(state => ({
             ...state,
-            boards: connections
+            connections: {
+                ...state.connections,
+                boards: connections
+            }
         }))
     }
 }))
