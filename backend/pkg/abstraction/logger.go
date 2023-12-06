@@ -1,5 +1,8 @@
 package abstraction
 
+type LoggerConfig struct {
+}
+
 // LoggerName is the name of the logger that manages a piece of data
 type LoggerName string
 
@@ -16,8 +19,8 @@ type LoggerRequest interface {
 // Logger is the module in charge of storing and retrieving information from the
 // hard drive, making it persistent.
 type Logger interface {
-	Start(startKeys []LoggerName) error
-	Stop(stopKeys []LoggerName) error
+	Start() error
+	Stop() error
 	// PushRecord will store a record to disk
 	PushRecord(LoggerRecord) error
 	// PullRecord will retrieve a record from disk

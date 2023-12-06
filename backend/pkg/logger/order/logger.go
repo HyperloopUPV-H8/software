@@ -34,6 +34,10 @@ type Logger struct {
 	writer      *csv.Writer
 }
 
+func NewLogger() *Logger {
+	return &Logger{}
+}
+
 func (sublogger *Logger) Start() error {
 	if !sublogger.running.CompareAndSwap(false, true) {
 		fmt.Println("Logger already running")
@@ -85,7 +89,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	return nil
 }
 
-func (sublogger *Logger) PullRecord() (abstraction.LoggerRecord, error) {
+func (sublogger *Logger) PullRecord(abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
 	panic("TODO!")
 }
 

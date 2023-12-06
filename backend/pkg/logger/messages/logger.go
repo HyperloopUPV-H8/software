@@ -48,14 +48,12 @@ func (info *Record) Name() abstraction.LoggerName {
 	return Name
 }
 
-func (sublogger *Logger) Start(boardMap map[abstraction.BoardId]string) error {
+func (sublogger *Logger) Start() error {
 	if !sublogger.running.CompareAndSwap(false, true) {
 		fmt.Println("Logger already running")
 		return nil
 	}
 	sublogger.initialTime = time.Now()
-
-	NewLogger(boardMap)
 
 	fmt.Println("Logger started")
 	return nil
@@ -116,7 +114,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	return writerErr
 }
 
-func (sublogger *Logger) PullRecords() ([]abstraction.LoggerRecord, error) {
+func (sublogger *Logger) PullRecord(abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
 	panic("TODO!")
 }
 

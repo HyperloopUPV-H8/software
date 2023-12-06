@@ -24,6 +24,10 @@ func (record *Record) Name() abstraction.LoggerName {
 	return Name
 }
 
+func NewLogger() *Logger {
+	return &Logger{}
+}
+
 type Logger struct {
 	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
 	running *atomic.Bool
@@ -78,7 +82,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	return nil
 }
 
-func (sublogger *Logger) PullRecord() (abstraction.LoggerRecord, error) {
+func (sublogger *Logger) PullRecord(abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
 	panic("TODO!")
 }
 

@@ -40,6 +40,10 @@ func (data *Record) Name() abstraction.LoggerName {
 	return Name
 }
 
+func NewLogger() *Logger {
+	return &Logger{}
+}
+
 func (sublogger *Logger) Start() error {
 	if !sublogger.running.CompareAndSwap(false, true) {
 		fmt.Println("Logger already running")
@@ -125,11 +129,12 @@ func (sublogger *Logger) PullRecord(request abstraction.LoggerRequest) (abstract
 	panic("TODO!")
 }
 
-func Stop(sublogger *Logger) {
+func (sublogger *Logger) Stop() error {
 	if !sublogger.running.CompareAndSwap(true, false) {
 		fmt.Println("Logger already stopped")
-		return
+		return nil
 	}
 
 	fmt.Println("Logger stopped")
+	return nil
 }

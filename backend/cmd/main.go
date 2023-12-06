@@ -13,7 +13,6 @@ import (
 	"runtime"
 	"runtime/pprof"
 	"strings"
-	"time"
 
 	blcuPackage "github.com/HyperloopUPV-H8/h9-backend/internal/blcu"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
@@ -22,10 +21,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/internal/excel"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/ade"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/info"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/logger_handler"
-	protection_logger "github.com/HyperloopUPV-H8/h9-backend/internal/message_logger"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/message_transfer"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/order_logger"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/order_transfer"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/packet_logger"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/pod_data"
@@ -51,6 +47,12 @@ import (
 	"github.com/google/gopacket/pcap"
 	"github.com/pelletier/go-toml/v2"
 	trace "github.com/rs/zerolog/log"
+
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
+	data_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/data"
+	messages_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/messages"
+	order_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/order"
+	state_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/state"
 )
 
 var traceLevel = flag.String("trace", "info", "set the trace level (\"fatal\", \"error\", \"warn\", \"info\", \"debug\", \"trace\")")
@@ -124,20 +126,14 @@ func main() {
 	updateFactory := update_factory.NewFactory()
 
 	// <--- logger --->
-	packetLogger := packet_logger.NewPacketLogger(podData.Boards, config.PacketLogger)
-	valueLogger := value_logger.NewValueLogger(podData.Boards, config.ValueLogger)
-	orderLogger := order_logger.NewOrderLogger(podData.Boards, config.OrderLogger)
-	protectionLogger := protection_logger.NewMessageLogger(config.Vehicle.Messages.InfoIdKey, config.Vehicle.Messages.FaultIdKey, config.Vehicle.Messages.WarningIdKey, config.ProtectionLogger)
-	stateSpaceLogger := state_space_logger.NewStateSpaceLogger(info.MessageIds.StateSpace)
-
-	loggers := map[string]logger_handler.Logger{
-		"packets":     &packetLogger,
-		"values":      &valueLogger,
-		"orders":      &orderLogger,
-		"protections": &protectionLogger,
-		"stateSpace":  &stateSpaceLogger,
+	var boardMap map[abstraction.BoardId]string
+	var keys = map[abstraction.LoggerName]abstraction.Logger{
+		"data":     data_logger.NewLogger(),
+		"messages": messages_logger.NewLogger(boardMap),
+		"order":    order_logger.NewLogger(),
+		"state":    state_logger.NewLogger(),
 	}
-	loggerHandler := logger_handler.NewLoggerHandler(loggers, config.LoggerHandler)
+	logger.NewLogger(keys)
 
 	// <--- order transfer --->
 	idToBoard := make(map[uint16]string)
@@ -164,14 +160,11 @@ func main() {
 
 	transp := transport.NewTransport()
 
-	prev := time.Now()
 	transp.SetAPI(&TransportAPI{
 		OnNotification: func(notification abstraction.TransportNotification) {
 			packet := notification.(transport.PacketNotification)
 			switch p := packet.Packet.(type) {
 			case *data.Packet:
-				fmt.Println(time.Since(prev))
-				prev = time.Now()
 				if _, ok := orders[p.Id()]; ok {
 					loggerHandler.Log(order_logger.LoggableOrder(*p))
 					return

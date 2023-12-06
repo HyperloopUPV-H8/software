@@ -13,25 +13,32 @@ type Logger struct {
 	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
 	running        *atomic.Bool
 	subloggersLock *sync.RWMutex
-	subloggers     map[abstraction.LoggerName]abstraction.Logger
+	// The keys are only the loggers selected at the start of the log
+	keys map[abstraction.LoggerName]abstraction.Logger
 }
 
 var _ abstraction.Logger = &Logger{}
 
-func (logger *Logger) Start(startKeys []abstraction.LoggerName) error {
+func NewLogger(keys map[abstraction.LoggerName]abstraction.Logger) *Logger {
+	return &Logger{
+		running:        &atomic.Bool{},
+		subloggersLock: &sync.RWMutex{},
+		keys:           keys,
+	}
+}
+
+func (logger *Logger) Start() error {
 	if logger.running.CompareAndSwap(false, true) {
 		fmt.Println("Logger already running")
 		return nil
 	}
 
+	for _, key := range logger.keys {
+		go key.Start()
+	}
+
 	logger.subloggersLock.Lock()
 	defer logger.subloggersLock.Unlock()
-
-	for _, name := range startKeys {
-		if sublogger, ok := logger.subloggers[name]; ok {
-			go sublogger.Start(nil)
-		}
-	}
 
 	fmt.Println("Logger started")
 	return nil
@@ -39,7 +46,7 @@ func (logger *Logger) Start(startKeys []abstraction.LoggerName) error {
 
 // PushRecord works as a proxy for the PushRecord method of the subloggers
 func (logger *Logger) PushRecord(record abstraction.LoggerRecord) error {
-	loggerChecked, ok := logger.subloggers[record.Name()]
+	loggerChecked, ok := logger.keys[record.Name()]
 	if !ok {
 		return ErrLoggerNotFound{record.Name()}
 	}
@@ -48,14 +55,14 @@ func (logger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 // PullRecord works as a proxy for the PullRecord method of the subloggers
 func (logger *Logger) PullRecord(request abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
-	loggerChecked, ok := logger.subloggers[request.Name()]
+	loggerChecked, ok := logger.keys[request.Name()]
 	if !ok {
 		return nil, ErrLoggerNotFound{request.Name()}
 	}
 	return loggerChecked.PullRecord(request)
 }
 
-func (logger *Logger) Stop(stopKeys []abstraction.LoggerName) error {
+func (logger *Logger) Stop() error {
 	logger.subloggersLock.Lock()
 	defer logger.subloggersLock.Unlock()
 
@@ -64,17 +71,17 @@ func (logger *Logger) Stop(stopKeys []abstraction.LoggerName) error {
 		return nil
 	}
 
+	// The waitgroup is used in order to wait for all the subloggers to stop
+	// before closing the main logger
 	var wg sync.WaitGroup
-	for _, sublogger := range stopKeys {
+	for name := range logger.keys {
 		wg.Add(1)
 
 		go func(sublogger abstraction.Logger) {
 			defer wg.Done()
-			sublogger.Stop(nil)
-		}(logger.subloggers[sublogger])
+			sublogger.Stop()
+		}(logger.keys[name])
 	}
-	// The waitgroup is used in order to wait for all the subloggers to stop
-	// before closing the main logger
 	wg.Wait()
 
 	fmt.Printf("Logger stopped")
