@@ -23,12 +23,9 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/internal/info"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/message_transfer"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/order_transfer"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/packet_logger"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/pod_data"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/server"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/state_space_logger"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/value_logger"
 	vehicle_models "github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/ws_handle"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
@@ -133,7 +130,8 @@ func main() {
 		"order":    order_logger.NewLogger(),
 		"state":    state_logger.NewLogger(),
 	}
-	logger.NewLogger(keys)
+
+	loggerHandler := logger.NewLogger(keys)
 
 	// <--- order transfer --->
 	idToBoard := make(map[uint16]string)
@@ -165,35 +163,41 @@ func main() {
 			packet := notification.(transport.PacketNotification)
 			switch p := packet.Packet.(type) {
 			case *data.Packet:
-				if _, ok := orders[p.Id()]; ok {
-					loggerHandler.Log(order_logger.LoggableOrder(*p))
-					return
-				}
-
 				update := updateFactory.NewUpdate(p)
 				dataTransfer.Update(update)
 
-				loggerHandler.Log(packet_logger.ToLoggablePacket(p))
+				(*data_logger.Logger).PushRecord(&data_logger.Logger{}, &data_logger.Record{
+					Packet: p,
+				})
 
-				for id, value := range p.GetValues() {
-					loggerHandler.Log(value_logger.ToLoggableValue(string(id), value, p.Timestamp()))
-				}
 			case *info_packet.Packet:
 				messageTransfer.SendMessage(p)
-				loggerHandler.Log(protection_logger.LoggableInfo(*p))
+
+				(*messages_logger.Logger).PushRecord(&messages_logger.Logger{}, &messages_logger.Record{
+					Packet: p,
+				})
+
 			case *protection.Packet:
 				messageTransfer.SendMessage(p)
-				loggerHandler.Log(protection_logger.LoggableProtection(*p))
+
+				// TODO! wrong packet type
+				(*messages_logger.Logger).PushRecord(&messages_logger.Logger{}, &messages_logger.Record{
+					Packet: nil,
+				})
+
 			case *blcu_packet.Ack:
 				if useBlcu {
 					blcu.NotifyAck()
 				}
+
 			case *state.Space:
-				for _, row := range p.State() {
-					loggerHandler.Log(state_space_logger.LoggableStateSpaceRow(row))
-				}
+				(*state_logger.Logger).PushRecord(&state_logger.Logger{}, &state_logger.Record{
+					Packet: p,
+				})
+
 			case *order.Add:
 				orderTransfer.AddStateOrders(*p)
+
 			case *order.Remove:
 				orderTransfer.RemoveStateOrders(*p)
 			}
@@ -255,7 +259,9 @@ func main() {
 				trace.Error().Any("order", order).Err(err).Msg("error sending order")
 			}
 
-			loggerHandler.Log(order_logger.LoggableOrder(order))
+			(*order_logger.Logger).PushRecord(&order_logger.Logger{}, &order_logger.Record{
+				Packet: &order,
+			})
 		}
 	}()
 
@@ -281,7 +287,7 @@ func main() {
 
 	websocketBroker.RegisterHandle(&connectionTransfer, config.Connections.UpdateTopic, "connection/update")
 	websocketBroker.RegisterHandle(&dataTransfer, "podData/update")
-	websocketBroker.RegisterHandle(&loggerHandler, config.LoggerHandler.Topics.Enable)
+	websocketBroker.RegisterHandle(loggerHandler, config.LoggerHandler.Topics.Enable)
 	websocketBroker.RegisterHandle(&messageTransfer, "message/update")
 	websocketBroker.RegisterHandle(&orderTransfer, config.Orders.SendTopic, "order/stateOrders")
 
