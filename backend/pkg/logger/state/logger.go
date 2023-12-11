@@ -16,8 +16,13 @@ const (
 	Name abstraction.LoggerName = "state"
 )
 
+type Logger struct {
+	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
+	running *atomic.Bool
+}
+
 type Record struct {
-	packet *state.Space
+	Packet *state.Space
 }
 
 func (record *Record) Name() abstraction.LoggerName {
@@ -26,11 +31,6 @@ func (record *Record) Name() abstraction.LoggerName {
 
 func NewLogger() *Logger {
 	return &Logger{}
-}
-
-type Logger struct {
-	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
-	running *atomic.Bool
 }
 
 func (sublogger *Logger) Start() error {
@@ -72,7 +72,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	for _, item := range stateRecord.packet.State() {
+	for _, item := range stateRecord.Packet.State() {
 		err = writer.Write([]string{fmt.Sprint(item)})
 		if err != nil {
 			return err
