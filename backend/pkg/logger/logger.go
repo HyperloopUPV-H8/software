@@ -1,11 +1,17 @@
 package logger
 
 import (
+	"encoding/json"
 	"fmt"
 	"sync"
 	"sync/atomic"
 
+	wsModels "github.com/HyperloopUPV-H8/h9-backend/internal/ws_handle/models"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+)
+
+const (
+	HandlerName = "logger"
 )
 
 // Logger is a struct that implements the abstraction.Logger interface
@@ -18,6 +24,26 @@ type Logger struct {
 }
 
 var _ abstraction.Logger = &Logger{}
+
+func (*Logger) HandlerName() string {
+	return HandlerName
+}
+
+func (logger *Logger) UpdateMessage(client wsModels.Client, message wsModels.Message) {
+	var enable bool
+	err := json.Unmarshal(message.Payload, &enable)
+	if err != nil {
+		logger.Stop()
+		fmt.Printf("Error unmarshalling enable message")
+		return
+	} else {
+		if enable {
+			logger.Start()
+		} else {
+			logger.Stop()
+		}
+	}
+}
 
 func NewLogger(keys map[abstraction.LoggerName]abstraction.Logger) *Logger {
 	return &Logger{
