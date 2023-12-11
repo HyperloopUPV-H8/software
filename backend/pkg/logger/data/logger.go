@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	Name abstraction.LoggerName = "data"
+	SubloggerName abstraction.LoggerName = "data"
 )
 
 // Logger is a struct that implements the abstraction.Logger interface
@@ -33,11 +33,11 @@ type Logger struct {
 
 // Record is a struct that implements the abstraction.LoggerRecord interface
 type Record struct {
-	packet *data.Packet
+	Packet *data.Packet
 }
 
-func (data *Record) Name() abstraction.LoggerName {
-	return Name
+func (record *Record) Name() abstraction.LoggerName {
+	return SubloggerName
 }
 
 func NewLogger() *Logger {
@@ -63,7 +63,7 @@ type numeric interface {
 func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	if !sublogger.running.Load() {
 		return &logger.ErrLoggerNotRunning{
-			Name:      Name,
+			Name:      SubloggerName,
 			Timestamp: time.Now(),
 		}
 	}
@@ -71,14 +71,14 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	dataRecord, ok := record.(*Record)
 	if !ok {
 		return &logger.ErrWrongRecordType{
-			Name:      Name,
+			Name:      SubloggerName,
 			Timestamp: time.Now(),
 			Expected:  &Record{},
 			Received:  record,
 		}
 	}
 
-	valueMap := dataRecord.packet.GetValues()
+	valueMap := dataRecord.Packet.GetValues()
 
 	sublogger.fileLock.Lock()
 	defer sublogger.fileLock.Unlock()
@@ -86,7 +86,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	writerErr := error(nil)
 	for valueName, value := range valueMap {
 		var packet *Record
-		timestamp := packet.packet.Timestamp()
+		timestamp := packet.Packet.Timestamp()
 
 		var val string
 
@@ -103,10 +103,10 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 		file, ok := sublogger.valueFileSlice[valueName]
 		if !ok {
-			f, err := os.Create(path.Join(string(valueName), fmt.Sprintf("%s_%s.csv", valueName, packet.packet.Timestamp().Format("3339"))))
+			f, err := os.Create(path.Join(string(valueName), fmt.Sprintf("%s_%s.csv", valueName, packet.Packet.Timestamp().Format("3339"))))
 			if err != nil {
 				return &logger.ErrCreatingFile{
-					Name:      Name,
+					Name:      SubloggerName,
 					Timestamp: time.Now(),
 					Inner:     err,
 				}
