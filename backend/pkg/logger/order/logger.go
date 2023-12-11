@@ -17,14 +17,6 @@ const (
 	Name abstraction.LoggerName = "order"
 )
 
-type Record struct {
-	packet *data.Packet
-}
-
-func (order *Record) Name() abstraction.LoggerName {
-	return Name
-}
-
 type Logger struct {
 	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
 	running  *atomic.Bool
@@ -32,6 +24,14 @@ type Logger struct {
 	// initialTime fixes the starting time of the log
 	initialTime time.Time
 	writer      *csv.Writer
+}
+
+type Record struct {
+	Packet *data.Packet
+}
+
+func (order *Record) Name() abstraction.LoggerName {
+	return Name
 }
 
 func NewLogger() *Logger {
@@ -80,7 +80,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	sublogger.fileLock.Lock()
 	defer sublogger.fileLock.Unlock()
 
-	err := sublogger.writer.Write([]string{time.Now().Format(time.RFC3339), fmt.Sprint(orderRecord.packet.GetValues())})
+	err := sublogger.writer.Write([]string{time.Now().Format(time.RFC3339), fmt.Sprint(orderRecord.Packet.GetValues())})
 	if err != nil {
 		return err
 	}
