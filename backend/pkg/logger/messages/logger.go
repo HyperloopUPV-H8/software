@@ -18,11 +18,6 @@ const (
 	Name abstraction.LoggerName = "messages"
 )
 
-// Record is a struct that implements the abstraction.LoggerRecord interface
-type Record struct {
-	packet *info.Packet
-}
-
 type Logger struct {
 	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
 	running  *atomic.Bool
@@ -35,6 +30,15 @@ type Logger struct {
 	boardNames map[abstraction.BoardId]string
 }
 
+// Record is a struct that implements the abstraction.LoggerRecord interface
+type Record struct {
+	Packet *info.Packet
+}
+
+func (info *Record) Name() abstraction.LoggerName {
+	return Name
+}
+
 func NewLogger(boardMap map[abstraction.BoardId]string) *Logger {
 	return &Logger{
 		running:    &atomic.Bool{},
@@ -42,10 +46,6 @@ func NewLogger(boardMap map[abstraction.BoardId]string) *Logger {
 		infoIdMap:  make(map[abstraction.BoardId]io.WriteCloser),
 		boardNames: boardMap,
 	}
-}
-
-func (info *Record) Name() abstraction.LoggerName {
-	return Name
 }
 
 func (sublogger *Logger) Start() error {
@@ -77,9 +77,9 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		}
 	}
 
-	boardId := infoRecord.packet.BoardId
-	timestamp := infoRecord.packet.Timestamp.ToTime().Format(time.RFC3339)
-	msg := string(infoRecord.packet.Msg)
+	boardId := infoRecord.Packet.BoardId
+	timestamp := infoRecord.Packet.Timestamp.ToTime().Format(time.RFC3339)
+	msg := string(infoRecord.Packet.Msg)
 
 	sublogger.fileLock.Lock()
 	defer sublogger.fileLock.Unlock()
