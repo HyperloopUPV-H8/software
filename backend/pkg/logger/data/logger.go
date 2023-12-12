@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	SubloggerName abstraction.LoggerName = "data"
+	Name abstraction.LoggerName = "data"
 )
 
 // Logger is a struct that implements the abstraction.Logger interface
@@ -37,7 +37,7 @@ type Record struct {
 }
 
 func (record *Record) Name() abstraction.LoggerName {
-	return SubloggerName
+	return Name
 }
 
 func NewLogger() *Logger {
@@ -63,7 +63,7 @@ type numeric interface {
 func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	if !sublogger.running.Load() {
 		return &logger.ErrLoggerNotRunning{
-			Name:      SubloggerName,
+			Name:      Name,
 			Timestamp: time.Now(),
 		}
 	}
@@ -71,7 +71,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	dataRecord, ok := record.(*Record)
 	if !ok {
 		return &logger.ErrWrongRecordType{
-			Name:      SubloggerName,
+			Name:      Name,
 			Timestamp: time.Now(),
 			Expected:  &Record{},
 			Received:  record,
@@ -106,7 +106,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 			f, err := os.Create(path.Join(string(valueName), fmt.Sprintf("%s_%s.csv", valueName, packet.Packet.Timestamp().Format("3339"))))
 			if err != nil {
 				return &logger.ErrCreatingFile{
-					Name:      SubloggerName,
+					Name:      Name,
 					Timestamp: time.Now(),
 					Inner:     err,
 				}
