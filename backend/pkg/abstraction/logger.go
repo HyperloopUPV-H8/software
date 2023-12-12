@@ -1,8 +1,5 @@
 package abstraction
 
-type LoggerConfig struct {
-}
-
 // LoggerName is the name of the logger that manages a piece of data
 type LoggerName string
 
