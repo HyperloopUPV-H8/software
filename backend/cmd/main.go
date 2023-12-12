@@ -124,14 +124,14 @@ func main() {
 
 	// <--- logger --->
 	var boardMap map[abstraction.BoardId]string
-	var keys = map[abstraction.LoggerName]abstraction.Logger{
-		"data":     data_logger.NewLogger(),
-		"messages": messages_logger.NewLogger(boardMap),
-		"order":    order_logger.NewLogger(),
-		"state":    state_logger.NewLogger(),
+	var subloggers = map[abstraction.LoggerName]abstraction.Logger{
+		data_logger.Name:     data_logger.NewLogger(),
+		messages_logger.Name: messages_logger.NewLogger(boardMap),
+		order_logger.Name:    order_logger.NewLogger(),
+		state_logger.Name:    state_logger.NewLogger(),
 	}
 
-	loggerHandler := logger.NewLogger(keys)
+	loggerHandler := logger.NewLogger(subloggers)
 
 	// <--- order transfer --->
 	idToBoard := make(map[uint16]string)
@@ -180,9 +180,13 @@ func main() {
 			case *protection.Packet:
 				messageTransfer.SendMessage(p)
 
-				// TODO! wrong packet type
+				packet := info_packet.NewPacket(p.Id())
+				packet.BoardId = p.BoardId
+				packet.Timestamp = p.Timestamp
+				packet.Msg = info_packet.InfoData(fmt.Sprint(p))
+
 				(*messages_logger.Logger).PushRecord(&messages_logger.Logger{}, &messages_logger.Record{
-					Packet: nil,
+					Packet: packet,
 				})
 
 			case *blcu_packet.Ack:
