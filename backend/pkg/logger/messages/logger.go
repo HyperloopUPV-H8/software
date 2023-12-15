@@ -124,6 +124,10 @@ func (sublogger *Logger) Stop() error {
 		return nil
 	}
 
+	for _, file := range sublogger.infoIdMap {
+		file.Close()
+	}
+
 	fmt.Println("Logger stopped")
 	return nil
 }

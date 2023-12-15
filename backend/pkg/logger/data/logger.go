@@ -135,6 +135,10 @@ func (sublogger *Logger) Stop() error {
 		return nil
 	}
 
+	for _, file := range sublogger.valueFileSlice {
+		file.Close()
+	}
+
 	fmt.Println("Logger stopped")
 	return nil
 }

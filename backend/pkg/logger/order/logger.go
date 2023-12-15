@@ -3,6 +3,7 @@ package order
 import (
 	"encoding/csv"
 	"fmt"
+	"io"
 	"os"
 	"sync"
 	"sync/atomic"
@@ -23,7 +24,7 @@ type Logger struct {
 	fileLock *sync.RWMutex
 	// initialTime fixes the starting time of the log
 	initialTime time.Time
-	writer      *csv.Writer
+	writer      io.WriteCloser
 }
 
 type Record struct {
@@ -53,7 +54,7 @@ func (sublogger *Logger) Start() error {
 			Inner:     err,
 		}
 	}
-	sublogger.writer = csv.NewWriter(file)
+	sublogger.writer = file
 
 	fmt.Println("Logger started")
 	return nil
@@ -80,12 +81,13 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	sublogger.fileLock.Lock()
 	defer sublogger.fileLock.Unlock()
 
-	err := sublogger.writer.Write([]string{time.Now().Format(time.RFC3339), fmt.Sprint(orderRecord.Packet.GetValues())})
+	csvWriter := csv.NewWriter(sublogger.writer)
+	err := csvWriter.Write([]string{time.Now().Format(time.RFC3339), fmt.Sprint(orderRecord.Packet.GetValues())})
 	if err != nil {
 		return err
 	}
 
-	defer sublogger.writer.Flush()
+	defer csvWriter.Flush()
 	return nil
 }
 
@@ -98,6 +100,8 @@ func (sublogger *Logger) Stop() error {
 		fmt.Println("Logger already stopped")
 		return nil
 	}
+
+	sublogger.writer.Close()
 
 	fmt.Println("Logger stopped")
 	return nil
