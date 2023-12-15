@@ -36,7 +36,10 @@ func (order *Record) Name() abstraction.LoggerName {
 }
 
 func NewLogger() *Logger {
-	return &Logger{}
+	return &Logger{
+		running:  &atomic.Bool{},
+		fileLock: &sync.RWMutex{},
+	}
 }
 
 func (sublogger *Logger) Start() error {

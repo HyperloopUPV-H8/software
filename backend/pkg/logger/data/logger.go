@@ -41,7 +41,11 @@ func (record *Record) Name() abstraction.LoggerName {
 }
 
 func NewLogger() *Logger {
-	return &Logger{}
+	return &Logger{
+		valueFileSlice: make(map[data.ValueName]io.WriteCloser),
+		running:        &atomic.Bool{},
+		fileLock:       &sync.RWMutex{},
+	}
 }
 
 func (sublogger *Logger) Start() error {

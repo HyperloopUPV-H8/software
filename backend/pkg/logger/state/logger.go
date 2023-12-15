@@ -30,7 +30,9 @@ func (record *Record) Name() abstraction.LoggerName {
 }
 
 func NewLogger() *Logger {
-	return &Logger{}
+	return &Logger{
+		running: &atomic.Bool{},
+	}
 }
 
 func (sublogger *Logger) Start() error {
