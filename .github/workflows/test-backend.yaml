@@ -20,7 +20,7 @@ jobs:
       - name: Load Secret.json
         working-directory: ./backend
         run: |
-          ./load-secret.sh "${{ secrets.SECRET }}"
+          bash -e ./load-secret.sh "${{ secrets.SECRET }}"
 
       - name: Test with Go
         working-directory: ./backend
