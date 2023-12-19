@@ -21,9 +21,7 @@ jobs:
           cache-dependency-path: ./backend/go.sum
 
       - name: Install dependencies
-        working-directory: ./backend
-        run: go get .
+        run: go get ./backend
 
       - name: Test with Go
-        working-directory: ./backend
-        run: go test -v ./...
+        run: go test -v ./backend/...
