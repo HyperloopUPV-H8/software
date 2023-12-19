@@ -25,7 +25,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          apt-get update && apt-get install -y libpcap-dev
+          sudo apt-get update && sudo apt-get install -y libpcap-dev
 
       - name: "Load secret"
         working-directory: "${{env.BACKEND_DIR}}"
