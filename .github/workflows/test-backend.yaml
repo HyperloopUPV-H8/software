@@ -16,11 +16,11 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: 1.21
-          cache-dependency-path: ./backend/go.sum
 
-      - name: Install dependencies
+      - name: Load Secret.json
         working-directory: ./backend
-        run: go mod download
+        run: |
+          ./load-secret.sh "${{ secrets.SECRET }}"
 
       - name: Test with Go
         working-directory: ./backend
