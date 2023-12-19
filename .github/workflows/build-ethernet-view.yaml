@@ -14,7 +14,11 @@ jobs:
       COMMON_DIR: ./common-front
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+      with:
+        sparse-checkout: |
+          ethernet-view
+          common-front
 
     - name: "Install common front dependencies"
       working-directory: "${{env.COMMON_DIR}}"
