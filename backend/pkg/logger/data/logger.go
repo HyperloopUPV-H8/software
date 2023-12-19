@@ -41,11 +41,14 @@ func (record *Record) Name() abstraction.LoggerName {
 }
 
 func NewLogger() *Logger {
-	return &Logger{
+	logger := &Logger{
 		valueFileSlice: make(map[data.ValueName]io.WriteCloser),
 		running:        &atomic.Bool{},
 		fileLock:       &sync.RWMutex{},
 	}
+
+	logger.running.Store(false)
+	return logger
 }
 
 func (sublogger *Logger) Start() error {
@@ -89,8 +92,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 	writerErr := error(nil)
 	for valueName, value := range valueMap {
-		var packet *Record
-		timestamp := packet.Packet.Timestamp()
+		timestamp := dataRecord.Packet.Timestamp()
 
 		var val string
 
@@ -107,7 +109,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 		file, ok := sublogger.valueFileSlice[valueName]
 		if !ok {
-			f, err := os.Create(path.Join(string(valueName), fmt.Sprintf("%s_%s.csv", valueName, packet.Packet.Timestamp().Format("3339"))))
+			f, err := os.Create(path.Join(string(valueName), fmt.Sprintf("%s_%s.csv", valueName, dataRecord.Packet.Timestamp().Format("3339"))))
 			if err != nil {
 				return &logger.ErrCreatingFile{
 					Name:      Name,

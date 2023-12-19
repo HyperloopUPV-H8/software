@@ -161,19 +161,20 @@ func main() {
 	transp.SetAPI(&TransportAPI{
 		OnNotification: func(notification abstraction.TransportNotification) {
 			packet := notification.(transport.PacketNotification)
+			fmt.Println(packet.Id())
 			switch p := packet.Packet.(type) {
 			case *data.Packet:
 				update := updateFactory.NewUpdate(p)
 				dataTransfer.Update(update)
 
-				(*data_logger.Logger).PushRecord(&data_logger.Logger{}, &data_logger.Record{
+				loggerHandler.PushRecord(&data_logger.Record{
 					Packet: p,
 				})
 
 			case *info_packet.Packet:
 				messageTransfer.SendMessage(p)
 
-				(*messages_logger.Logger).PushRecord(&messages_logger.Logger{}, &messages_logger.Record{
+				loggerHandler.PushRecord(&messages_logger.Record{
 					Packet: p,
 				})
 
@@ -185,7 +186,7 @@ func main() {
 				packet.Timestamp = p.Timestamp
 				packet.Msg = info_packet.InfoData(fmt.Sprint(p))
 
-				(*messages_logger.Logger).PushRecord(&messages_logger.Logger{}, &messages_logger.Record{
+				loggerHandler.PushRecord(&messages_logger.Record{
 					Packet: packet,
 				})
 
@@ -195,7 +196,7 @@ func main() {
 				}
 
 			case *state.Space:
-				(*state_logger.Logger).PushRecord(&state_logger.Logger{}, &state_logger.Record{
+				loggerHandler.PushRecord(&state_logger.Record{
 					Packet: p,
 				})
 
@@ -253,7 +254,7 @@ func main() {
 	if err != nil {
 		panic("failed to compile bpf filter")
 	}
-	go transp.HandleSniffer(sniffer.New(source, &layers.LayerTypeEthernet))
+	go transp.HandleSniffer(sniffer.New(source, &layers.LayerTypeLoopback))
 
 	// <--- order transfer --->
 	go func() {
@@ -263,7 +264,7 @@ func main() {
 				trace.Error().Any("order", order).Err(err).Msg("error sending order")
 			}
 
-			(*order_logger.Logger).PushRecord(&order_logger.Logger{}, &order_logger.Record{
+			loggerHandler.PushRecord(&order_logger.Record{
 				Packet: &order,
 			})
 		}

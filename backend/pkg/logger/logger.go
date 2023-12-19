@@ -72,11 +72,18 @@ func (logger *Logger) Start() error {
 
 // PushRecord works as a proxy for the PushRecord method of the subloggers
 func (logger *Logger) PushRecord(record abstraction.LoggerRecord) error {
-	loggerChecked, ok := logger.subloggers[record.Name()]
-	if !ok {
-		return ErrLoggerNotFound{record.Name()}
+	objectiveLogger := record.Name()
+
+	for name, logger := range logger.subloggers {
+		if name == objectiveLogger {
+			logger.PushRecord(record)
+			return nil
+		} else {
+			return ErrLoggerNotFound{objectiveLogger}
+		}
 	}
-	return loggerChecked.PushRecord(record)
+
+	return ErrParsingLoggerMap{objectiveLogger}
 }
 
 // PullRecord works as a proxy for the PullRecord method of the subloggers
