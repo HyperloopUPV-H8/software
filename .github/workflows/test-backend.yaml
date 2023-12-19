@@ -4,9 +4,15 @@ on:
     push:
     workflow_dispatch:
 
+env:
+  SECRET: ${{ secrets.SECRET }}
+
 jobs:
   test-backend:
     runs-on: ubuntu-latest
+
+    env:
+      BACKEND_DIR: ./backend
 
     steps:
       - name: Checkout
@@ -17,11 +23,11 @@ jobs:
         with:
           go-version: 1.21
 
-      - name: Load Secret.json
-        working-directory: ./backend
+      - name: "Load secret"
+        working-directory: "${{env.BACKEND_DIR}}"
         run: |
-          bash -e ./load-secret.sh "${{ secrets.SECRET }}"
+          ./load-secret.sh "$SECRET"
 
       - name: Test with Go
-        working-directory: ./backend
+        working-directory: "${{env.BACKEND_DIR}}"
         run: go test -v ./...
