@@ -3,6 +3,10 @@ name: Build ethernet view
 on:
   workflow_call:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - ethernet-view/**
+      - common-front/**
 
 jobs:
   build-ethernet-view:
@@ -44,3 +48,4 @@ jobs:
       with:
         name: ethernet-view
         path: "${{env.FRONTEND_DIR}}/static/*"
+        retention-days: 3
