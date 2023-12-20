@@ -9,6 +9,7 @@ env:
 
 jobs:
   test-backend:
+    name: "Test backend"
     runs-on: ubuntu-latest
 
     env:
