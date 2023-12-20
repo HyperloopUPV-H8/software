@@ -164,6 +164,8 @@ func main() {
 			fmt.Println(packet.Id())
 			switch p := packet.Packet.(type) {
 			case *data.Packet:
+				fmt.Println("DATA REACHED")
+
 				update := updateFactory.NewUpdate(p)
 				dataTransfer.Update(update)
 
@@ -172,6 +174,8 @@ func main() {
 				})
 
 			case *info_packet.Packet:
+				fmt.Println("INFO REACHED")
+
 				messageTransfer.SendMessage(p)
 
 				loggerHandler.PushRecord(&messages_logger.Record{
@@ -179,6 +183,8 @@ func main() {
 				})
 
 			case *protection.Packet:
+				fmt.Println("PROTECTION REACHED")
+
 				messageTransfer.SendMessage(p)
 
 				packet := info_packet.NewPacket(p.Id())
@@ -196,6 +202,8 @@ func main() {
 				}
 
 			case *state.Space:
+				fmt.Println("STATE REACHED")
+
 				loggerHandler.PushRecord(&state_logger.Record{
 					Packet: p,
 				})
@@ -264,6 +272,7 @@ func main() {
 				trace.Error().Any("order", order).Err(err).Msg("error sending order")
 			}
 
+			fmt.Println("ORDER REACHED")
 			loggerHandler.PushRecord(&order_logger.Record{
 				Packet: &order,
 			})

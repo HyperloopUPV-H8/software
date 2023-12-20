@@ -92,24 +92,30 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 	writerErr := error(nil)
 	for valueName, value := range valueMap {
+
 		timestamp := dataRecord.Packet.Timestamp()
 
 		var val string
+		var valType string
 
 		switch v := value.(type) {
 		case numeric:
 			val = strconv.FormatFloat(v.Value(), 'f', -1, 64)
+			valType = "numeric"
 
 		case data.BooleanValue:
 			val = strconv.FormatBool(v.Value())
+			valType = "boolean"
 
 		case data.EnumValue:
 			val = string(v.Variant())
+			valType = "enum"
 		}
 
 		file, ok := sublogger.valueFileSlice[valueName]
 		if !ok {
-			f, err := os.Create(path.Join(string(valueName), fmt.Sprintf("%s_%s.csv", valueName, dataRecord.Packet.Timestamp().Format("3339"))))
+			filename := fmt.Sprintf("%s_%s.csv", valueName, dataRecord.Packet.Timestamp().Format(time.RFC3339))
+			f, err := os.Create(path.Join("../pkg/logger/data", valType, filename))
 			if err != nil {
 				return &logger.ErrCreatingFile{
 					Name:      Name,

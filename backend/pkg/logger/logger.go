@@ -25,11 +25,11 @@ type Logger struct {
 
 var _ abstraction.Logger = &Logger{}
 
-func (*Logger) HandlerName() string {
+func (Logger) HandlerName() string {
 	return HandlerName
 }
 
-func (logger *Logger) UpdateMessage(client wsModels.Client, message wsModels.Message) {
+func (logger Logger) UpdateMessage(client wsModels.Client, message wsModels.Message) {
 	var enable bool
 	err := json.Unmarshal(message.Payload, &enable)
 	if err != nil {
@@ -46,25 +46,28 @@ func (logger *Logger) UpdateMessage(client wsModels.Client, message wsModels.Mes
 }
 
 func NewLogger(keys map[abstraction.LoggerName]abstraction.Logger) *Logger {
-	return &Logger{
+	logger := &Logger{
 		running:        &atomic.Bool{},
 		subloggersLock: &sync.RWMutex{},
 		subloggers:     keys,
 	}
+
+	logger.running.Store(false)
+	return logger
 }
 
 func (logger *Logger) Start() error {
-	if logger.running.CompareAndSwap(false, true) {
+	if !logger.running.CompareAndSwap(false, true) {
 		fmt.Println("Logger already running")
 		return nil
 	}
 
+	logger.subloggersLock.Lock()
+	defer logger.subloggersLock.Unlock()
+
 	for _, key := range logger.subloggers {
 		go key.Start()
 	}
-
-	logger.subloggersLock.Lock()
-	defer logger.subloggersLock.Unlock()
 
 	fmt.Println("Logger started")
 	return nil
@@ -78,12 +81,10 @@ func (logger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		if name == objectiveLogger {
 			logger.PushRecord(record)
 			return nil
-		} else {
-			return ErrLoggerNotFound{objectiveLogger}
 		}
 	}
 
-	return ErrParsingLoggerMap{objectiveLogger}
+	return ErrLoggerNotFound{objectiveLogger}
 }
 
 // PullRecord works as a proxy for the PullRecord method of the subloggers
@@ -117,6 +118,6 @@ func (logger *Logger) Stop() error {
 	}
 	wg.Wait()
 
-	fmt.Printf("Logger stopped")
+	fmt.Println("Logger stopped")
 	return nil
 }
