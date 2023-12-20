@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -49,7 +50,8 @@ func (sublogger *Logger) Start() error {
 	}
 	sublogger.initialTime = time.Now()
 
-	file, err := os.Create(fmt.Sprintf("order_" + sublogger.initialTime.Format(time.RFC3339) + ".csv"))
+	filename := fmt.Sprintf("order_" + sublogger.initialTime.Format(time.RFC3339) + ".csv")
+	file, err := os.Create(path.Join("../pkg/logger/order", filename))
 	if err != nil {
 		return &logger.ErrCreatingFile{
 			Name:      Name,

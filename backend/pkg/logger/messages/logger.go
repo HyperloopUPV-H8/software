@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -93,7 +94,9 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		if !ok {
 			boardName = fmt.Sprint(boardId)
 		}
-		f, err := os.Create(fmt.Sprintf(boardName + "_" + timestamp + ".csv"))
+
+		filename := fmt.Sprintf(boardName + "_" + timestamp + ".csv")
+		f, err := os.Create(path.Join("../pkg/logger/messages", filename))
 		if err != nil {
 			return &logger.ErrCreatingFile{
 				Name:      Name,
