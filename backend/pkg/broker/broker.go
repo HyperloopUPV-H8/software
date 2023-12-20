@@ -1,21 +1,48 @@
 package broker
 
-import "github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+import (
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics"
+)
 
 var _ abstraction.Broker = &Broker{}
 
 type Broker struct {
-	api abstraction.BrokerAPI
+	topics map[abstraction.BrokerTopic]topics.Handler
+	api    abstraction.BrokerAPI
 }
 
 func (broker *Broker) Push(push abstraction.BrokerPush) error {
-	panic("TODO!")
+	topic, ok := broker.topics[push.Topic()]
+	if !ok {
+		return ErrTopicNotFound{
+			Topic: push.Topic(),
+		}
+	}
+
+	return topic.Push(push)
 }
 
-func (broker *Broker) Pull(req abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
-	panic("TODO!")
+func (broker *Broker) Pull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
+	topic, ok := broker.topics[request.Topic()]
+	if !ok {
+		return nil, ErrTopicNotFound{
+			Topic: request.Topic(),
+		}
+	}
+
+	return topic.Pull(request)
 }
 
 func (broker *Broker) SetAPI(api abstraction.BrokerAPI) {
 	broker.api = api
+}
+
+func (broker *Broker) AddTopic(topic abstraction.BrokerTopic, handler topics.Handler) {
+	handler.SetAPI(broker)
+	broker.topics[topic] = handler
+}
+
+func (broker *Broker) UserPush(push abstraction.BrokerPush) {
+	broker.api.UserPush(push)
 }
