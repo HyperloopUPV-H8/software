@@ -5,6 +5,7 @@ import (
 	"io"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/session"
@@ -216,19 +217,40 @@ func TestSnifferDemux(t *testing.T) {
 				go func(socket network.Socket, reader io.Reader) {
 					defer wg.Done()
 					buf := make([]byte, 65536)
+					timeout := time.After(time.Millisecond)
+					readChan := make(chan []byte)
 					for {
-						n, err := reader.Read(buf)
-						if err != nil {
+						go func() {
+							for {
+								n, err := reader.Read(buf)
+								if err != nil {
+									close(readChan)
+									return
+								}
+								if n > 0 {
+									readChan <- buf[:n]
+									return
+								}
+							}
+						}()
+
+						select {
+						case <-timeout:
 							return
+						case buf, ok := <-readChan:
+							if !ok {
+								return
+							}
+							mapMx.Lock()
+							data := string(buf)
+							prev, ok := outputMap[socket]
+							if ok {
+								data = prev + data
+							}
+							outputMap[socket] = data
+							mapMx.Unlock()
 						}
-						mapMx.Lock()
-						data := string(buf[:n])
-						prev, ok := outputMap[socket]
-						if ok {
-							data = prev + data
-						}
-						outputMap[socket] = data
-						mapMx.Unlock()
+
 					}
 				}(socket, reader)
 			}
