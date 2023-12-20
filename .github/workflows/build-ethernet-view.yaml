@@ -44,8 +44,9 @@ jobs:
 
 
     - name: "Upload build"
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ethernet-view
         path: "${{env.FRONTEND_DIR}}/static/*"
         retention-days: 3
+        compression-level: 9
