@@ -6,6 +6,9 @@ on:
       SECRET:
         required: true
   workflow_dispatch:
+  pull_request:
+    paths:
+      - backend/**
 
 env:
   SECRET: ${{ secrets.SECRET }}
@@ -26,7 +29,9 @@ jobs:
     - name: "Install packages"
       run: apk update && apk add --no-cache libpcap-dev musl-dev gcc go
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+      with:
+        sparse-checkout: backend
 
     - name: "Create output path"
       working-directory: "${{env.BACKEND_DIR}}"
@@ -47,10 +52,12 @@ jobs:
         go build -ldflags '-linkmode external -extldflags "-static"' -o ../output/backend-linux-64
 
     - name: "Upload build"
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: backend-linux
         path: "${{env.BACKEND_DIR}}/output/*"
+        retention-days: 3
+        compression-level: 9
 
   build-backend-windows:
     name: "Build backend for windows"
@@ -90,10 +97,12 @@ jobs:
         go build -o ..\output\backend-windows-64.exe
 
     - name: "Upload build"
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: backend-windows
         path: "${{env.BACKEND_DIR}}\\output\\*"
+        retention-days: 3
+        compression-level: 9
       
   build-backend-mac:
     name: "Build backend for macOS"
@@ -142,7 +151,9 @@ jobs:
         go build -o ../output/backend-macos-m1-64
       
     - name: "Upload build"
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: backend-macos
         path: "${{env.BACKEND_DIR}}/output/*"
+        retention-days: 3
+        compression-level: 9
