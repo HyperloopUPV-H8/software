@@ -20,6 +20,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/internal/data_transfer"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/excel"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/ade"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/utils"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/info"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/message_transfer"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/order_transfer"
@@ -445,27 +446,29 @@ func getTransportDecEnc(info info.Info, podData pod_data.PodData) (*presentation
 			for i, measurement := range packet.Measurements {
 				switch meas := measurement.(type) {
 				case pod_data.NumericMeasurement:
+					podOps := getOps(meas.PodUnits)
+					displayOps := getOps(meas.DisplayUnits)
 					switch meas.Type {
 					case "uint8":
-						descriptor[i] = data.NewNumericDescriptor[uint8](data.ValueName(meas.Id))
+						descriptor[i] = data.NewNumericDescriptor[uint8](data.ValueName(meas.Id), podOps, displayOps)
 					case "uint16":
-						descriptor[i] = data.NewNumericDescriptor[uint16](data.ValueName(meas.Id))
+						descriptor[i] = data.NewNumericDescriptor[uint16](data.ValueName(meas.Id), podOps, displayOps)
 					case "uint32":
-						descriptor[i] = data.NewNumericDescriptor[uint32](data.ValueName(meas.Id))
+						descriptor[i] = data.NewNumericDescriptor[uint32](data.ValueName(meas.Id), podOps, displayOps)
 					case "uint64":
-						descriptor[i] = data.NewNumericDescriptor[uint64](data.ValueName(meas.Id))
+						descriptor[i] = data.NewNumericDescriptor[uint64](data.ValueName(meas.Id), podOps, displayOps)
 					case "int8":
-						descriptor[i] = data.NewNumericDescriptor[int8](data.ValueName(meas.Id))
+						descriptor[i] = data.NewNumericDescriptor[int8](data.ValueName(meas.Id), podOps, displayOps)
 					case "int16":
-						descriptor[i] = data.NewNumericDescriptor[int16](data.ValueName(meas.Id))
+						descriptor[i] = data.NewNumericDescriptor[int16](data.ValueName(meas.Id), podOps, displayOps)
 					case "int32":
-						descriptor[i] = data.NewNumericDescriptor[int32](data.ValueName(meas.Id))
+						descriptor[i] = data.NewNumericDescriptor[int32](data.ValueName(meas.Id), podOps, displayOps)
 					case "int64":
-						descriptor[i] = data.NewNumericDescriptor[int64](data.ValueName(meas.Id))
+						descriptor[i] = data.NewNumericDescriptor[int64](data.ValueName(meas.Id), podOps, displayOps)
 					case "float32":
-						descriptor[i] = data.NewNumericDescriptor[float32](data.ValueName(meas.Id))
+						descriptor[i] = data.NewNumericDescriptor[float32](data.ValueName(meas.Id), podOps, displayOps)
 					case "float64":
-						descriptor[i] = data.NewNumericDescriptor[float64](data.ValueName(meas.Id))
+						descriptor[i] = data.NewNumericDescriptor[float64](data.ValueName(meas.Id), podOps, displayOps)
 					default:
 						panic(fmt.Sprintf("unexpected numeric type for %s: %s", meas.Id, meas.Type))
 					}
@@ -507,6 +510,17 @@ func getTransportDecEnc(info info.Info, podData pod_data.PodData) (*presentation
 	protectionDecoder.SetSeverity(abstraction.PacketId(info.MessageIds.Fault), protection.SeverityFault)
 
 	return decoder, encoder
+}
+
+func getOps(units utils.Units) data.ConversionDescriptor {
+	output := make(data.ConversionDescriptor, len(units.Operations))
+	for i, operation := range units.Operations {
+		output[i] = data.Operation{
+			Operator: operation.Operator,
+			Operand:  operation.Operand,
+		}
+	}
+	return output
 }
 
 type TransportAPI struct {

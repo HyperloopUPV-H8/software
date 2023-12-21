@@ -400,20 +400,20 @@ func getEncoder(endianness binary.ByteOrder) *presentation.Encoder {
 
 	dataDecoder := data.NewEncoder(endianness)
 	dataDecoder.SetDescriptor(9, data.Descriptor{
-		data.NewNumericDescriptor[uint8]("uint8"),
-		data.NewNumericDescriptor[uint16]("uint16"),
-		data.NewNumericDescriptor[uint32]("uint32"),
-		data.NewNumericDescriptor[uint64]("uint64"),
+		data.NewNumericDescriptor[uint8]("uint8", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[uint16]("uint16", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[uint32]("uint32", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[uint64]("uint64", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
 	})
 	dataDecoder.SetDescriptor(10, data.Descriptor{
-		data.NewNumericDescriptor[int8]("int8"),
-		data.NewNumericDescriptor[int16]("int16"),
-		data.NewNumericDescriptor[int32]("int32"),
-		data.NewNumericDescriptor[int64]("int64"),
+		data.NewNumericDescriptor[int8]("int8", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[int16]("int16", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[int32]("int32", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[int64]("int64", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
 	})
 	dataDecoder.SetDescriptor(11, data.Descriptor{
-		data.NewNumericDescriptor[float32]("float32"),
-		data.NewNumericDescriptor[float64]("float64"),
+		data.NewNumericDescriptor[float32]("float32", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[float64]("float64", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
 	})
 	dataDecoder.SetDescriptor(12, data.Descriptor{
 		data.NewBooleanDescriptor("bool"),
@@ -422,9 +422,9 @@ func getEncoder(endianness binary.ByteOrder) *presentation.Encoder {
 		data.NewEnumDescriptor("enum", data.EnumDescriptor{"a", "b", "c", "d"}),
 	})
 	dataDecoder.SetDescriptor(14, data.Descriptor{
-		data.NewNumericDescriptor[uint8]("uint8_1"),
-		data.NewNumericDescriptor[uint8]("uint8_2"),
-		data.NewNumericDescriptor[float64]("float64"),
+		data.NewNumericDescriptor[uint8]("uint8_1", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[uint8]("uint8_2", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[float64]("float64", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
 		data.NewBooleanDescriptor("bool"),
 		data.NewEnumDescriptor("enum", data.EnumDescriptor{"a", "b", "c"}),
 	})
@@ -441,36 +441,36 @@ func getEncoder(endianness binary.ByteOrder) *presentation.Encoder {
 		data.NewEnumDescriptor("enum_5", data.EnumDescriptor{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j"}),
 	})
 	dataDecoder.SetDescriptor(17, data.Descriptor{
-		data.NewNumericDescriptor[uint8]("uint8_1"),
-		data.NewNumericDescriptor[uint8]("uint8_2"),
-		data.NewNumericDescriptor[uint8]("uint8_3"),
-		data.NewNumericDescriptor[uint8]("uint8_4"),
-		data.NewNumericDescriptor[uint8]("uint8_5"),
-		data.NewNumericDescriptor[uint8]("uint8_6"),
-		data.NewNumericDescriptor[uint8]("uint8_7"),
-		data.NewNumericDescriptor[uint8]("uint8_8"),
-		data.NewNumericDescriptor[uint8]("uint8_9"),
-		data.NewNumericDescriptor[uint8]("uint8_10"),
+		data.NewNumericDescriptor[uint8]("uint8_1", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[uint8]("uint8_2", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[uint8]("uint8_3", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[uint8]("uint8_4", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[uint8]("uint8_5", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[uint8]("uint8_6", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[uint8]("uint8_7", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[uint8]("uint8_8", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[uint8]("uint8_9", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[uint8]("uint8_10", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
 	})
 	dataDecoder.SetDescriptor(18, data.Descriptor{
-		data.NewNumericDescriptor[uint64]("uint64_1"),
-		data.NewNumericDescriptor[int64]("int64_1"),
-		data.NewNumericDescriptor[float64]("float64_1"),
-		data.NewNumericDescriptor[uint64]("uint64_2"),
-		data.NewNumericDescriptor[int64]("int64_2"),
-		data.NewNumericDescriptor[float64]("float64_2"),
-		data.NewNumericDescriptor[uint64]("uint64_3"),
-		data.NewNumericDescriptor[int64]("int64_3"),
-		data.NewNumericDescriptor[float64]("float64_3"),
-		data.NewNumericDescriptor[uint64]("uint64_4"),
-		data.NewNumericDescriptor[int64]("int64_4"),
-		data.NewNumericDescriptor[float64]("float64_4"),
-		data.NewNumericDescriptor[uint64]("uint64_5"),
-		data.NewNumericDescriptor[int64]("int64_5"),
-		data.NewNumericDescriptor[float64]("float64_5"),
-		data.NewNumericDescriptor[uint64]("uint64_6"),
-		data.NewNumericDescriptor[int64]("int64_6"),
-		data.NewNumericDescriptor[float64]("float64_6"),
+		data.NewNumericDescriptor[uint64]("uint64_1", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[int64]("int64_1", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[float64]("float64_1", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[uint64]("uint64_2", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[int64]("int64_2", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[float64]("float64_2", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[uint64]("uint64_3", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[int64]("int64_3", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[float64]("float64_3", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[uint64]("uint64_4", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[int64]("int64_4", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[float64]("float64_4", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[uint64]("uint64_5", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[int64]("int64_5", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[float64]("float64_5", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[uint64]("uint64_6", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[int64]("int64_6", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
+		data.NewNumericDescriptor[float64]("float64_6", make(data.ConversionDescriptor, 0), make(data.ConversionDescriptor, 0)),
 	})
 	encoder.SetPacketEncoder(9, dataDecoder)
 	encoder.SetPacketEncoder(10, dataDecoder)
