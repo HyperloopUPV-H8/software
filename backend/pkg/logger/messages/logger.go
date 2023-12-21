@@ -107,7 +107,6 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	}
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
-	defer file.Close()
 
 	err := writer.Write([]string{timestamp, msg})
 	if err != nil {

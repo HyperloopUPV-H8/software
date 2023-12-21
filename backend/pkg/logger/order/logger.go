@@ -86,7 +86,6 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 	csvWriter := csv.NewWriter(sublogger.writer)
 	defer csvWriter.Flush()
-	defer sublogger.writer.Close()
 
 	err := csvWriter.Write([]string{time.Now().Format(time.RFC3339), fmt.Sprint(orderRecord.Packet.GetValues())})
 	if err != nil {
