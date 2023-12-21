@@ -92,8 +92,9 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 			boardName = fmt.Sprint(boardId)
 		}
 
-		filename := path.Join("logger/messages", fmt.Sprintf(boardName+"_"+logger.Timestamp.Format(time.RFC3339)+".csv"))
+		filename := path.Join("logger/messages", fmt.Sprintf("messages_%s", logger.Timestamp.Format(time.RFC3339)), fmt.Sprintf("%s.csv", boardName))
 		os.MkdirAll(path.Dir(filename), os.ModePerm)
+
 		f, err := os.Create(filename)
 		if err != nil {
 			return &logger.ErrCreatingFile{

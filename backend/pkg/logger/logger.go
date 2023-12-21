@@ -68,8 +68,8 @@ func (logger *Logger) Start() error {
 	}
 
 	// Create log folders
-	for l := range logger.subloggers {
-		os.MkdirAll(path.Join("logger", fmt.Sprintf("%s_%s", l, time.Now().Format(time.RFC3339))), os.ModePerm)
+	for logger := range logger.subloggers {
+		os.MkdirAll(path.Join("logger", fmt.Sprint(logger), fmt.Sprintf("%s_%s", logger, Timestamp.Format(time.RFC3339))), os.ModePerm)
 	}
 
 	logger.subloggersLock.Lock()
