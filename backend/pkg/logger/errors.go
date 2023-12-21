@@ -48,3 +48,11 @@ type ErrWrongRecordType struct {
 func (err *ErrWrongRecordType) Error() string {
 	return fmt.Sprintf("Wrong record type for logger %s at %s, expected %T, got %T", err.Name, err.Timestamp.Format(time.RFC3339), err.Expected.Name(), err.Received.Name())
 }
+
+type ErrParsingLoggerMap struct {
+	Name abstraction.LoggerName
+}
+
+func (err ErrParsingLoggerMap) Error() string {
+	return fmt.Sprintf("Error parsing logger map for logger %s", err.Name)
+}

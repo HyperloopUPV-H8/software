@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"path"
 	"sync/atomic"
 	"time"
 
@@ -16,17 +17,23 @@ const (
 	Name abstraction.LoggerName = "state"
 )
 
+type Logger struct {
+	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
+	running *atomic.Bool
+}
+
 type Record struct {
-	packet *state.Space
+	Packet *state.Space
 }
 
 func (record *Record) Name() abstraction.LoggerName {
 	return Name
 }
 
-type Logger struct {
-	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
-	running *atomic.Bool
+func NewLogger() *Logger {
+	return &Logger{
+		running: &atomic.Bool{},
+	}
 }
 
 func (sublogger *Logger) Start() error {
@@ -57,7 +64,10 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		}
 	}
 
-	file, err := os.Create(fmt.Sprintf("state_" + time.Now().Format(time.RFC3339) + ".csv"))
+	filepath := path.Join("logger/state", fmt.Sprintf("state_%s", logger.Timestamp.Format(time.RFC3339)), fmt.Sprintf("state_%s.csv", time.Now().Format(time.RFC3339)))
+	os.MkdirAll(path.Dir(filepath), os.ModePerm)
+
+	file, err := os.Create(filepath)
 	if err != nil {
 		return &logger.ErrCreatingFile{
 			Name:      Name,
@@ -67,8 +77,9 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	}
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
+	defer file.Close()
 
-	for _, item := range stateRecord.packet.State() {
+	for _, item := range stateRecord.Packet.State() {
 		err = writer.Write([]string{fmt.Sprint(item)})
 		if err != nil {
 			return err
@@ -78,7 +89,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	return nil
 }
 
-func (sublogger *Logger) PullRecord() (abstraction.LoggerRecord, error) {
+func (sublogger *Logger) PullRecord(abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
 	panic("TODO!")
 }
 

@@ -22,17 +22,11 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/ade"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/utils"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/info"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/logger_handler"
-	protection_logger "github.com/HyperloopUPV-H8/h9-backend/internal/message_logger"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/message_transfer"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/order_logger"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/order_transfer"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/packet_logger"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/pod_data"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/server"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/state_space_logger"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/value_logger"
 	vehicle_models "github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/ws_handle"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
@@ -51,6 +45,12 @@ import (
 	"github.com/google/gopacket/pcap"
 	"github.com/pelletier/go-toml/v2"
 	trace "github.com/rs/zerolog/log"
+
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
+	data_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/data"
+	messages_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/messages"
+	order_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/order"
+	state_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/state"
 )
 
 var traceLevel = flag.String("trace", "info", "set the trace level (\"fatal\", \"error\", \"warn\", \"info\", \"debug\", \"trace\")")
@@ -124,20 +124,15 @@ func main() {
 	updateFactory := update_factory.NewFactory()
 
 	// <--- logger --->
-	packetLogger := packet_logger.NewPacketLogger(podData.Boards, config.PacketLogger)
-	valueLogger := value_logger.NewValueLogger(podData.Boards, config.ValueLogger)
-	orderLogger := order_logger.NewOrderLogger(podData.Boards, config.OrderLogger)
-	protectionLogger := protection_logger.NewMessageLogger(config.Vehicle.Messages.InfoIdKey, config.Vehicle.Messages.FaultIdKey, config.Vehicle.Messages.WarningIdKey, config.ProtectionLogger)
-	stateSpaceLogger := state_space_logger.NewStateSpaceLogger(info.MessageIds.StateSpace)
-
-	loggers := map[string]logger_handler.Logger{
-		"packets":     &packetLogger,
-		"values":      &valueLogger,
-		"orders":      &orderLogger,
-		"protections": &protectionLogger,
-		"stateSpace":  &stateSpaceLogger,
+	var boardMap map[abstraction.BoardId]string
+	var subloggers = map[abstraction.LoggerName]abstraction.Logger{
+		data_logger.Name:     data_logger.NewLogger(),
+		messages_logger.Name: messages_logger.NewLogger(boardMap),
+		order_logger.Name:    order_logger.NewLogger(),
+		state_logger.Name:    state_logger.NewLogger(),
 	}
-	loggerHandler := logger_handler.NewLoggerHandler(loggers, config.LoggerHandler)
+
+	loggerHandler := logger.NewLogger(subloggers)
 
 	// <--- order transfer --->
 	idToBoard := make(map[uint16]string)
@@ -167,37 +162,64 @@ func main() {
 	transp.SetAPI(&TransportAPI{
 		OnNotification: func(notification abstraction.TransportNotification) {
 			packet := notification.(transport.PacketNotification)
+
 			switch p := packet.Packet.(type) {
 			case *data.Packet:
-				if _, ok := orders[p.Id()]; ok {
-					loggerHandler.Log(order_logger.LoggableOrder(*p))
-					return
-				}
-
 				update := updateFactory.NewUpdate(p)
 				dataTransfer.Update(update)
 
-				loggerHandler.Log(packet_logger.ToLoggablePacket(p))
+				err = loggerHandler.PushRecord(&data_logger.Record{
+					Packet: p,
+				})
 
-				for id, value := range p.GetValues() {
-					loggerHandler.Log(value_logger.ToLoggableValue(string(id), value, p.Timestamp()))
+				if err != nil {
+					fmt.Println("Error pushing record to logger: ", err)
 				}
+
 			case *info_packet.Packet:
 				messageTransfer.SendMessage(p)
-				loggerHandler.Log(protection_logger.LoggableInfo(*p))
+
+				err = loggerHandler.PushRecord(&messages_logger.Record{
+					Packet: p,
+				})
+
+				if err != nil {
+					fmt.Println("Error pushing record to logger: ", err)
+				}
+
 			case *protection.Packet:
 				messageTransfer.SendMessage(p)
-				loggerHandler.Log(protection_logger.LoggableProtection(*p))
+
+				packet := info_packet.NewPacket(p.Id())
+				packet.BoardId = p.BoardId
+				packet.Timestamp = p.Timestamp
+				packet.Msg = info_packet.InfoData(fmt.Sprint(p))
+
+				err = loggerHandler.PushRecord(&messages_logger.Record{
+					Packet: packet,
+				})
+
+				if err != nil {
+					fmt.Println("Error pushing record to logger: ", err)
+				}
+
 			case *blcu_packet.Ack:
 				if useBlcu {
 					blcu.NotifyAck()
 				}
+
 			case *state.Space:
-				for _, row := range p.State() {
-					loggerHandler.Log(state_space_logger.LoggableStateSpaceRow(row))
+				err = loggerHandler.PushRecord(&state_logger.Record{
+					Packet: p,
+				})
+
+				if err != nil {
+					fmt.Println("Error pushing record to logger: ", err)
 				}
+
 			case *order.Add:
 				orderTransfer.AddStateOrders(*p)
+
 			case *order.Remove:
 				orderTransfer.RemoveStateOrders(*p)
 			}
@@ -259,7 +281,13 @@ func main() {
 				trace.Error().Any("order", order).Err(err).Msg("error sending order")
 			}
 
-			loggerHandler.Log(order_logger.LoggableOrder(order))
+			err = loggerHandler.PushRecord(&order_logger.Record{
+				Packet: &order,
+			})
+
+			if err != nil {
+				fmt.Println("Error pushing record to logger: ", err)
+			}
 		}
 	}()
 
@@ -285,7 +313,7 @@ func main() {
 
 	websocketBroker.RegisterHandle(&connectionTransfer, config.Connections.UpdateTopic, "connection/update")
 	websocketBroker.RegisterHandle(&dataTransfer, "podData/update")
-	websocketBroker.RegisterHandle(&loggerHandler, config.LoggerHandler.Topics.Enable)
+	websocketBroker.RegisterHandle(loggerHandler, config.LoggerHandler.Topics.Enable)
 	websocketBroker.RegisterHandle(&messageTransfer, "message/update")
 	websocketBroker.RegisterHandle(&orderTransfer, config.Orders.SendTopic, "order/stateOrders")
 

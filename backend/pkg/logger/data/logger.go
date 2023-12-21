@@ -25,19 +25,28 @@ type Logger struct {
 	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
 	running  *atomic.Bool
 	fileLock *sync.RWMutex
-	// initialTime fixes the starting time of the log
-	initialTime time.Time
 	// valueFileSlice is a map that contains the file of each value
 	valueFileSlice map[data.ValueName]io.WriteCloser
 }
 
 // Record is a struct that implements the abstraction.LoggerRecord interface
 type Record struct {
-	packet *data.Packet
+	Packet *data.Packet
 }
 
-func (data *Record) Name() abstraction.LoggerName {
+func (record *Record) Name() abstraction.LoggerName {
 	return Name
+}
+
+func NewLogger() *Logger {
+	logger := &Logger{
+		valueFileSlice: make(map[data.ValueName]io.WriteCloser),
+		running:        &atomic.Bool{},
+		fileLock:       &sync.RWMutex{},
+	}
+
+	logger.running.Store(false)
+	return logger
 }
 
 func (sublogger *Logger) Start() error {
@@ -45,7 +54,6 @@ func (sublogger *Logger) Start() error {
 		fmt.Println("Logger already running")
 		return nil
 	}
-	sublogger.initialTime = time.Now()
 
 	fmt.Println("Logger started")
 	return nil
@@ -74,15 +82,15 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		}
 	}
 
-	valueMap := dataRecord.packet.GetValues()
+	valueMap := dataRecord.Packet.GetValues()
 
 	sublogger.fileLock.Lock()
 	defer sublogger.fileLock.Unlock()
 
 	writerErr := error(nil)
 	for valueName, value := range valueMap {
-		var packet *Record
-		timestamp := packet.packet.Timestamp()
+
+		timestamp := dataRecord.Packet.Timestamp()
 
 		var val string
 
@@ -99,7 +107,10 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 		file, ok := sublogger.valueFileSlice[valueName]
 		if !ok {
-			f, err := os.Create(path.Join(string(valueName), fmt.Sprintf("%s_%s.csv", valueName, packet.packet.Timestamp().Format("3339"))))
+			filename := path.Join("logger/data", fmt.Sprintf("data_%s", logger.Timestamp.Format(time.RFC3339)), fmt.Sprintf("%s.csv", valueName))
+			os.MkdirAll(path.Dir(filename), os.ModePerm)
+
+			f, err := os.Create(path.Join(filename))
 			if err != nil {
 				return &logger.ErrCreatingFile{
 					Name:      Name,
@@ -125,11 +136,16 @@ func (sublogger *Logger) PullRecord(request abstraction.LoggerRequest) (abstract
 	panic("TODO!")
 }
 
-func Stop(sublogger *Logger) {
+func (sublogger *Logger) Stop() error {
 	if !sublogger.running.CompareAndSwap(true, false) {
 		fmt.Println("Logger already stopped")
-		return
+		return nil
+	}
+
+	for _, file := range sublogger.valueFileSlice {
+		file.Close()
 	}
 
 	fmt.Println("Logger stopped")
+	return nil
 }

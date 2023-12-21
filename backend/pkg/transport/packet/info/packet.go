@@ -5,8 +5,8 @@ import (
 	transport_packet "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet"
 )
 
-// infoData is the contents of an info Packet
-type infoData string
+// InfoData is the contents of an info Packet
+type InfoData string
 
 // Packet is an info packet.
 //
@@ -15,7 +15,7 @@ type Packet struct {
 	id        abstraction.PacketId
 	BoardId   abstraction.BoardId        `json:"boardId"`
 	Timestamp transport_packet.Timestamp `json:"timestamp"`
-	Msg       infoData                   `json:"msg"`
+	Msg       InfoData                   `json:"msg"`
 }
 
 // NewPacket creates a new info packet with the given ID
