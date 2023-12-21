@@ -25,8 +25,6 @@ type Logger struct {
 	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
 	running  *atomic.Bool
 	fileLock *sync.RWMutex
-	// initialTime fixes the starting time of the log
-	initialTime time.Time
 	// valueFileSlice is a map that contains the file of each value
 	valueFileSlice map[data.ValueName]io.WriteCloser
 }
@@ -56,7 +54,6 @@ func (sublogger *Logger) Start() error {
 		fmt.Println("Logger already running")
 		return nil
 	}
-	sublogger.initialTime = time.Now()
 
 	fmt.Println("Logger started")
 	return nil
@@ -96,26 +93,22 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		timestamp := dataRecord.Packet.Timestamp()
 
 		var val string
-		var valType string
 
 		switch v := value.(type) {
 		case numeric:
 			val = strconv.FormatFloat(v.Value(), 'f', -1, 64)
-			valType = "numeric"
 
 		case data.BooleanValue:
 			val = strconv.FormatBool(v.Value())
-			valType = "boolean"
 
 		case data.EnumValue:
 			val = string(v.Variant())
-			valType = "enum"
 		}
 
 		file, ok := sublogger.valueFileSlice[valueName]
 		if !ok {
-			filename := fmt.Sprintf("%s_%s.csv", valueName, dataRecord.Packet.Timestamp().Format(time.RFC3339))
-			f, err := os.Create(path.Join("../pkg/logger/data", valType, filename))
+			filename := fmt.Sprintf("%s_%s.csv", valueName, logger.Timestamp.Format(time.RFC3339))
+			f, err := os.Create(path.Join("logger/data", filename))
 			if err != nil {
 				return &logger.ErrCreatingFile{
 					Name:      Name,

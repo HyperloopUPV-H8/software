@@ -23,9 +23,7 @@ type Logger struct {
 	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
 	running  *atomic.Bool
 	fileLock *sync.RWMutex
-	// initialTime fixes the starting time of the log
-	initialTime time.Time
-	writer      io.WriteCloser
+	writer   io.WriteCloser
 }
 
 type Record struct {
@@ -48,10 +46,10 @@ func (sublogger *Logger) Start() error {
 		fmt.Println("Logger already running")
 		return nil
 	}
-	sublogger.initialTime = time.Now()
 
-	filename := fmt.Sprintf("order_" + sublogger.initialTime.Format(time.RFC3339) + ".csv")
-	file, err := os.Create(path.Join("../pkg/logger/order", filename))
+	filepath := path.Join("logger/order", fmt.Sprint(logger.Timestamp.Format(time.RFC3339)+".csv"))
+	os.MkdirAll(path.Dir(filepath), os.ModePerm)
+	file, err := os.Create(filepath)
 	if err != nil {
 		return &logger.ErrCreatingFile{
 			Name:      Name,
@@ -87,12 +85,14 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	defer sublogger.fileLock.Unlock()
 
 	csvWriter := csv.NewWriter(sublogger.writer)
+	defer csvWriter.Flush()
+	defer sublogger.writer.Close()
+
 	err := csvWriter.Write([]string{time.Now().Format(time.RFC3339), fmt.Sprint(orderRecord.Packet.GetValues())})
 	if err != nil {
 		return err
 	}
 
-	defer csvWriter.Flush()
 	return nil
 }
 

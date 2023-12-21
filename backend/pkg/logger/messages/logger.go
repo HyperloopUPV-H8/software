@@ -23,8 +23,6 @@ type Logger struct {
 	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
 	running  *atomic.Bool
 	fileLock *sync.RWMutex
-	// initialTime fixes the starting time of the log
-	initialTime time.Time
 	// infoIdMap is a map that contains the file of each info packet
 	infoIdMap map[abstraction.BoardId]io.WriteCloser
 	// BoardNames is a map that contains the common name of each board
@@ -54,7 +52,6 @@ func (sublogger *Logger) Start() error {
 		fmt.Println("Logger already running")
 		return nil
 	}
-	sublogger.initialTime = time.Now()
 
 	fmt.Println("Logger started")
 	return nil
@@ -95,8 +92,9 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 			boardName = fmt.Sprint(boardId)
 		}
 
-		filename := fmt.Sprintf(boardName + "_" + timestamp + ".csv")
-		f, err := os.Create(path.Join("../pkg/logger/messages", filename))
+		filename := path.Join("logger/messages", fmt.Sprintf(boardName+"_"+logger.Timestamp.Format(time.RFC3339)+".csv"))
+		os.MkdirAll(path.Dir(filename), os.ModePerm)
+		f, err := os.Create(filename)
 		if err != nil {
 			return &logger.ErrCreatingFile{
 				Name:      Name,
@@ -109,11 +107,13 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	}
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
+	defer file.Close()
 
 	err := writer.Write([]string{timestamp, msg})
 	if err != nil {
 		writerErr = err
 	}
+
 	return writerErr
 }
 

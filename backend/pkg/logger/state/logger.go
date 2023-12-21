@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"path"
 	"sync/atomic"
 	"time"
 
@@ -63,7 +64,9 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		}
 	}
 
-	file, err := os.Create(fmt.Sprintf("state_" + time.Now().Format(time.RFC3339) + ".csv"))
+	filepath := fmt.Sprint("logger/state/state_" + logger.Timestamp.Format(time.RFC3339) + ".csv")
+	os.MkdirAll(path.Dir(filepath), os.ModePerm)
+	file, err := os.Create(filepath)
 	if err != nil {
 		return &logger.ErrCreatingFile{
 			Name:      Name,

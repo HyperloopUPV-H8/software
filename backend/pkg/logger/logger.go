@@ -3,8 +3,11 @@ package logger
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"path"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	wsModels "github.com/HyperloopUPV-H8/h9-backend/internal/ws_handle/models"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
@@ -24,6 +27,8 @@ type Logger struct {
 }
 
 var _ abstraction.Logger = &Logger{}
+
+var Timestamp time.Time = time.Now()
 
 func (Logger) HandlerName() string {
 	return HandlerName
@@ -60,6 +65,11 @@ func (logger *Logger) Start() error {
 	if !logger.running.CompareAndSwap(false, true) {
 		fmt.Println("Logger already running")
 		return nil
+	}
+
+	// Create log folders
+	for l := range logger.subloggers {
+		os.MkdirAll(path.Join("logger", fmt.Sprintf("%s_%s", l, time.Now().Format(time.RFC3339))), os.ModePerm)
 	}
 
 	logger.subloggersLock.Lock()
