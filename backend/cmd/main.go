@@ -161,22 +161,30 @@ func main() {
 	transp.SetAPI(&TransportAPI{
 		OnNotification: func(notification abstraction.TransportNotification) {
 			packet := notification.(transport.PacketNotification)
-			fmt.Println(packet.Id())
+
 			switch p := packet.Packet.(type) {
 			case *data.Packet:
 				update := updateFactory.NewUpdate(p)
 				dataTransfer.Update(update)
 
-				loggerHandler.PushRecord(&data_logger.Record{
+				err = loggerHandler.PushRecord(&data_logger.Record{
 					Packet: p,
 				})
+
+				if err != nil {
+					fmt.Println("Error pushing record to logger: ", err)
+				}
 
 			case *info_packet.Packet:
 				messageTransfer.SendMessage(p)
 
-				loggerHandler.PushRecord(&messages_logger.Record{
+				err = loggerHandler.PushRecord(&messages_logger.Record{
 					Packet: p,
 				})
+
+				if err != nil {
+					fmt.Println("Error pushing record to logger: ", err)
+				}
 
 			case *protection.Packet:
 				messageTransfer.SendMessage(p)
@@ -186,9 +194,13 @@ func main() {
 				packet.Timestamp = p.Timestamp
 				packet.Msg = info_packet.InfoData(fmt.Sprint(p))
 
-				loggerHandler.PushRecord(&messages_logger.Record{
+				err = loggerHandler.PushRecord(&messages_logger.Record{
 					Packet: packet,
 				})
+
+				if err != nil {
+					fmt.Println("Error pushing record to logger: ", err)
+				}
 
 			case *blcu_packet.Ack:
 				if useBlcu {
@@ -196,9 +208,13 @@ func main() {
 				}
 
 			case *state.Space:
-				loggerHandler.PushRecord(&state_logger.Record{
+				err = loggerHandler.PushRecord(&state_logger.Record{
 					Packet: p,
 				})
+
+				if err != nil {
+					fmt.Println("Error pushing record to logger: ", err)
+				}
 
 			case *order.Add:
 				orderTransfer.AddStateOrders(*p)
@@ -254,7 +270,7 @@ func main() {
 	if err != nil {
 		panic("failed to compile bpf filter")
 	}
-	go transp.HandleSniffer(sniffer.New(source, &layers.LayerTypeLoopback))
+	go transp.HandleSniffer(sniffer.New(source, &layers.LayerTypeEthernet))
 
 	// <--- order transfer --->
 	go func() {
@@ -264,10 +280,13 @@ func main() {
 				trace.Error().Any("order", order).Err(err).Msg("error sending order")
 			}
 
-			fmt.Println("ORDER REACHED")
-			loggerHandler.PushRecord(&order_logger.Record{
+			err = loggerHandler.PushRecord(&order_logger.Record{
 				Packet: &order,
 			})
+
+			if err != nil {
+				fmt.Println("Error pushing record to logger: ", err)
+			}
 		}
 	}()
 
