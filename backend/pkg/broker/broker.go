@@ -40,8 +40,16 @@ func (broker *Broker) SetAPI(api abstraction.BrokerAPI) {
 	broker.api = api
 }
 
+func (broker *Broker) SetPool(pool *websocket.Pool) {
+	broker.clients = pool
+	for _, topic := range broker.topics {
+		topic.SetPool(pool)
+	}
+}
+
 func (broker *Broker) AddTopic(topic abstraction.BrokerTopic, handler topics.Handler) {
 	handler.SetAPI(broker)
+	handler.SetPool(broker.clients)
 	broker.topics[topic] = handler
 }
 
