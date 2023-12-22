@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"fmt"
 	"net/http"
 
 	ws "github.com/gorilla/websocket"
@@ -14,6 +15,7 @@ type Upgrader struct {
 func (upgrader *Upgrader) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	conn, err := upgrader.Upgrade(writer, request, nil)
 	if err != nil {
+		fmt.Printf("connection upgrade error: %s\n", err) // TODO: better error logging
 		return
 	}
 

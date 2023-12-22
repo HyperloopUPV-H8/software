@@ -14,11 +14,16 @@ func NewPool(connections <-chan *Client) *Pool {
 	handler := &Pool{
 		clients:     make(map[ClientId]*Client),
 		connections: connections,
+		onMessage:   func(ClientId, ClientMessage) {},
 	}
 
 	go handler.listen()
 
 	return handler
+}
+
+func (pool *Pool) SetOnMessage(onMessage func(ClientId, ClientMessage)) {
+	pool.onMessage = onMessage
 }
 
 func (pool *Pool) listen() {
