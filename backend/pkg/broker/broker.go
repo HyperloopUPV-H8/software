@@ -3,13 +3,15 @@ package broker
 import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
 )
 
 var _ abstraction.Broker = &Broker{}
 
 type Broker struct {
-	topics map[abstraction.BrokerTopic]topics.Handler
-	api    abstraction.BrokerAPI
+	topics  map[abstraction.BrokerTopic]topics.Handler
+	clients *websocket.Pool
+	api     abstraction.BrokerAPI
 }
 
 func (broker *Broker) Push(push abstraction.BrokerPush) error {
@@ -36,10 +38,14 @@ func (broker *Broker) Pull(request abstraction.BrokerRequest) (abstraction.Broke
 
 func (broker *Broker) SetAPI(api abstraction.BrokerAPI) {
 	broker.api = api
+	for _, topic := range broker.topics {
+		topic.SetAPI(broker)
+	}
 }
 
 func (broker *Broker) AddTopic(topic abstraction.BrokerTopic, handler topics.Handler) {
 	handler.SetAPI(broker)
+	handler.SetPool(broker.clients)
 	broker.topics[topic] = handler
 }
 

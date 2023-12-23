@@ -2,7 +2,7 @@ package topics
 
 import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker/websocket"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
 )
 
 type Handler interface {
