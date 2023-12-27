@@ -60,7 +60,7 @@ func NewClient(local net.Addr) ClientConfig {
 	return ClientConfig{
 		Dialer: net.Dialer{
 			Timeout:   time.Second,
-			KeepAlive: -1,
+			KeepAlive: 1,
 			LocalAddr: local,
 		},
 
