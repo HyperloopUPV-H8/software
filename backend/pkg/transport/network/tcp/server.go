@@ -27,7 +27,7 @@ type ServerConfig struct {
 func NewServer(targets map[address]abstraction.TransportTarget) ServerConfig {
 	return ServerConfig{
 		ListenConfig: net.ListenConfig{
-			KeepAlive: -1,
+			KeepAlive: 1,
 		},
 
 		Context: context.TODO(),
