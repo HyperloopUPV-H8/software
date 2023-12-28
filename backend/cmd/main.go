@@ -37,6 +37,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/internal/ws_handle"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker"
+	connection_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/connection"
 	data_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/data"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
@@ -161,10 +162,12 @@ func main() {
 		OnUserPush: func(push abstraction.BrokerPush) {},
 	})
 
-	dataTopic := data_topic.NewUpdateTopic(time.Second / 60)
+	dataTopic := data_topic.NewUpdateTopic(time.Second / 10)
 	defer dataTopic.Stop()
+	connectionTopic := connection_topic.NewUpdateTopic()
 
 	broker.AddTopic(data_topic.UpdateName, dataTopic)
+	broker.AddTopic(connection_topic.UpdateName, connectionTopic)
 
 	connections := make(chan *websocket.Client)
 	upgrader := websocket.NewUpgrader(connections)
@@ -226,7 +229,7 @@ func main() {
 		},
 
 		OnConnectionUpdate: func(target abstraction.TransportTarget, isConnected bool) {
-			connectionTransfer.Update(string(target), isConnected)
+			connectionTopic.Push(connection_topic.NewConnection(string(target), isConnected))
 		},
 	})
 
