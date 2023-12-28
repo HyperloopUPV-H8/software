@@ -35,6 +35,8 @@ import (
 	vehicle_models "github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/ws_handle"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker"
+	data_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/data"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tcp"
@@ -45,6 +47,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/protection"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/state"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
 	"github.com/fatih/color"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
@@ -151,6 +154,23 @@ func main() {
 	var blcu blcuPackage.BLCU
 	blcuAddr, useBlcu := info.Addresses.Boards["BLCU"]
 
+	// <--- broker --->
+	broker := broker.New()
+	broker.SetAPI(&brokerAPI{
+		OnUserPush: func(push abstraction.BrokerPush) {
+
+		},
+	})
+
+	dataTopic := data_topic.NewUpdateTopic()
+
+	broker.AddTopic(data_topic.UpdateName, dataTopic)
+
+	connections := make(chan *websocket.Client)
+	upgrader := websocket.NewUpgrader(connections)
+	pool := websocket.NewPool(connections)
+	broker.SetPool(pool)
+
 	// <--- transport --->
 	orders := make(map[abstraction.PacketId]struct{})
 	for _, board := range podData.Boards {
@@ -163,7 +183,7 @@ func main() {
 
 	transp := transport.NewTransport()
 
-	transp.SetAPI(&TransportAPI{
+	transp.SetAPI(&transportAPI{
 		OnNotification: func(notification abstraction.TransportNotification) {
 			packet := notification.(transport.PacketNotification)
 			switch p := packet.Packet.(type) {
@@ -174,7 +194,10 @@ func main() {
 				}
 
 				update := updateFactory.NewUpdate(p)
-				dataTransfer.Update(update)
+				err := broker.Push(data_topic.NewPush(&update))
+				if err != nil {
+					fmt.Println(err)
+				}
 
 				loggerHandler.Log(packet_logger.ToLoggablePacket(p))
 
@@ -298,7 +321,7 @@ func main() {
 		ProgramableBoards: uploadableBords,
 	}
 
-	serverHandler, err := server.New(&websocketBroker, endpointData, config.Server)
+	serverHandler, err := server.New(upgrader, endpointData, config.Server)
 	if err != nil {
 		trace.Fatal().Err(err).Msg("Error creating server")
 		panic(err)
@@ -500,16 +523,16 @@ func getTransportDecEnc(info info.Info, podData pod_data.PodData) (*presentation
 	return decoder, encoder
 }
 
-type TransportAPI struct {
+type transportAPI struct {
 	OnNotification     func(abstraction.TransportNotification)
 	OnConnectionUpdate func(abstraction.TransportTarget, bool)
 }
 
-func (api *TransportAPI) Notification(notification abstraction.TransportNotification) {
+func (api *transportAPI) Notification(notification abstraction.TransportNotification) {
 	api.OnNotification(notification)
 }
 
-func (api *TransportAPI) ConnectionUpdate(target abstraction.TransportTarget, isConnected bool) {
+func (api *transportAPI) ConnectionUpdate(target abstraction.TransportTarget, isConnected bool) {
 	api.OnConnectionUpdate(target, isConnected)
 }
 
@@ -562,4 +585,12 @@ func getTCPFilter(addrs []net.IP, serverPort uint16, clientPort uint16) string {
 
 	filter := fmt.Sprintf("(%s) and (%s) and (%s) and (%s) and (%s) and (%s)", ports, notSynFinRst, notJustAck, nonZeroPayload, srcAddressesStr, dstAddressesStr)
 	return filter
+}
+
+type brokerAPI struct {
+	OnUserPush func(abstraction.BrokerPush)
+}
+
+func (api *brokerAPI) UserPush(push abstraction.BrokerPush) {
+	api.OnUserPush(push)
 }

@@ -68,7 +68,10 @@ func (pool *Pool) Broadcast(message Message) {
 }
 
 func (pool *Pool) Disconnect(id ClientId, code int, reason string) error {
-	return pool.clients[id].Close(code, reason)
+	if client, ok := pool.clients[id]; ok {
+		return client.Close(code, reason)
+	}
+	return nil
 }
 
 func (pool *Pool) onClose(id ClientId) func() {

@@ -2,10 +2,13 @@ package data
 
 import (
 	"encoding/json"
+	"fmt"
 
+	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory/models"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
+	"github.com/google/uuid"
 	ws "github.com/gorilla/websocket"
 )
 
@@ -18,6 +21,12 @@ type Update struct {
 	api         abstraction.BrokerAPI
 }
 
+func NewUpdateTopic() *Update {
+	return &Update{
+		subscribers: make(map[websocket.ClientId]struct{}),
+	}
+}
+
 func (update *Update) Topic() abstraction.BrokerTopic {
 	return UpdateName
 }
@@ -28,9 +37,9 @@ func (update *Update) Push(push abstraction.BrokerPush) error {
 		return topics.ErrUnexpectedPush{Push: push}
 	}
 
-	payload := data.ToPayload()
+	payload := data.Update()
 
-	rawPayload, err := json.Marshal(payload)
+	rawPayload, err := json.Marshal(map[uint16]*models.Update{payload.Id: payload})
 	if err != nil {
 		return err
 	}
@@ -44,6 +53,8 @@ func (update *Update) Push(push abstraction.BrokerPush) error {
 		err := update.pool.Write(id, message)
 		if err != nil {
 			update.pool.Disconnect(id, ws.CloseInternalServerErr, err.Error())
+			delete(update.subscribers, id)
+			fmt.Printf("unsubscribed %s\n", uuid.UUID(id).String())
 		}
 	}
 
@@ -57,9 +68,12 @@ func (update *Update) Pull(request abstraction.BrokerRequest) (abstraction.Broke
 func (update *Update) ClientMessage(id websocket.ClientId, message *websocket.Message) {
 	switch message.Topic {
 	case SubscribeName:
+		fmt.Printf("subscribed %s\n", uuid.UUID(id).String())
 		update.subscribers[id] = struct{}{}
 	default:
 		update.pool.Disconnect(id, ws.CloseUnsupportedData, "unsupported topic")
+		delete(update.subscribers, id)
+		fmt.Printf("unsubscribed %s\n", uuid.UUID(id).String())
 	}
 }
 

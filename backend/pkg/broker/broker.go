@@ -14,6 +14,12 @@ type Broker struct {
 	api     abstraction.BrokerAPI
 }
 
+func New() *Broker {
+	return &Broker{
+		topics: make(map[abstraction.BrokerTopic]topics.Handler),
+	}
+}
+
 func (broker *Broker) Push(push abstraction.BrokerPush) error {
 	topic, ok := broker.topics[push.Topic()]
 	if !ok {
