@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory/models"
@@ -21,6 +22,7 @@ type Update struct {
 	connectionMx *sync.Mutex
 	subscribers  map[websocket.ClientId]struct{}
 	updatesMx    *sync.Mutex
+	newData      *atomic.Bool
 	updates      map[uint16]*models.Update
 	pool         *websocket.Pool
 	api          abstraction.BrokerAPI
@@ -33,10 +35,13 @@ func NewUpdateTopic(delay time.Duration) *Update {
 		connectionMx: &sync.Mutex{},
 		subscribers:  make(map[websocket.ClientId]struct{}),
 		updatesMx:    &sync.Mutex{},
+		newData:      &atomic.Bool{},
 		updates:      make(map[uint16]*models.Update),
 		done:         make(chan struct{}),
 		delay:        delay,
 	}
+
+	topic.newData.Store(false)
 
 	go topic.run()
 
@@ -60,6 +65,7 @@ func (update *Update) Push(push abstraction.BrokerPush) error {
 
 	update.updates[payload.Id] = payload
 
+	update.newData.Store(true)
 	return nil
 }
 
@@ -80,6 +86,10 @@ loop:
 }
 
 func (update *Update) send() error {
+	if !update.newData.CompareAndSwap(true, false) {
+		return nil
+	}
+
 	update.updatesMx.Lock()
 	defer update.updatesMx.Unlock()
 	update.connectionMx.Lock()
@@ -95,19 +105,21 @@ func (update *Update) send() error {
 		Payload: rawPayload,
 	}
 
-	flaged := make([]websocket.ClientId, 0)
+	flaged := make([]websocket.ClientId, 0, len(update.subscribers))
 	for id := range update.subscribers {
 		err := update.pool.Write(id, message)
 		if err != nil {
-			update.pool.Disconnect(id, ws.CloseInternalServerErr, err.Error())
 			flaged = append(flaged, id)
 		}
 	}
 
 	for _, id := range flaged {
+		update.pool.Disconnect(id, ws.CloseInternalServerErr, err.Error())
 		delete(update.subscribers, id)
-		fmt.Printf("unsubscribed %s\n", uuid.UUID(id).String())
+		fmt.Printf("podData/update unsubscribed %s\n", uuid.UUID(id).String())
 	}
+
+	update.updates = make(map[uint16]*models.Update, len(update.updates))
 
 	return nil
 }
@@ -127,12 +139,12 @@ func (update *Update) ClientMessage(id websocket.ClientId, message *websocket.Me
 
 	switch message.Topic {
 	case SubscribeName:
-		fmt.Printf("subscribed %s\n", uuid.UUID(id).String())
+		fmt.Printf("podData/update subscribed %s\n", uuid.UUID(id).String())
 		update.subscribers[id] = struct{}{}
 	default:
 		update.pool.Disconnect(id, ws.CloseUnsupportedData, "unsupported topic")
 		delete(update.subscribers, id)
-		fmt.Printf("unsubscribed %s\n", uuid.UUID(id).String())
+		fmt.Printf("podData/update unsubscribed %s\n", uuid.UUID(id).String())
 	}
 }
 
