@@ -1,12 +1,10 @@
 package transport
 
 import (
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
 	"net"
-	"strconv"
 	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
@@ -92,13 +90,10 @@ func (transport *Transport) handleTCPConn(target abstraction.TransportTarget, co
 				break
 			}
 
-			raw := make([]byte, 8)
-			binary.LittleEndian.PutUint16(raw, uint16(packet.Id()))
-
 			from := conn.LocalAddr().String()
 			to := string(target)
 
-			transport.api.Notification(NewPacketNotification(packet, raw, from, to, time.Now()))
+			transport.api.Notification(NewPacketNotification(packet, from, to, time.Now()))
 		}
 	}()
 
@@ -190,13 +185,10 @@ func (transport *Transport) handleConversation(socket network.Socket, reader io.
 				return // TODO: handle error
 			}
 
-			raw := make([]byte, 8)
-			binary.LittleEndian.PutUint16(raw, uint16(packet.Id()))
+			from := fmt.Sprintf("%s:%d", socket.SrcIP, socket.SrcPort)
+			to := fmt.Sprintf("%s:%d", socket.DstIP, socket.DstPort)
 
-			from := fmt.Sprintf("%s:%s", socket.SrcIP, strconv.Itoa(int(socket.SrcPort)))
-			to := fmt.Sprintf("%s:%s", socket.DstIP, strconv.Itoa(int(socket.DstPort)))
-
-			transport.api.Notification(NewPacketNotification(packet, raw, from, to, time.Now()))
+			transport.api.Notification(NewPacketNotification(packet, from, to, time.Now()))
 		}
 	}()
 }
