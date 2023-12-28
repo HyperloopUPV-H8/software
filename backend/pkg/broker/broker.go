@@ -43,10 +43,27 @@ func (broker *Broker) SetAPI(api abstraction.BrokerAPI) {
 	}
 }
 
+func (broker *Broker) SetPool(pool *websocket.Pool) {
+	broker.clients = pool
+	pool.SetOnMessage(broker.onMessage)
+	for _, topic := range broker.topics {
+		topic.SetPool(pool)
+	}
+}
+
 func (broker *Broker) AddTopic(topic abstraction.BrokerTopic, handler topics.Handler) {
 	handler.SetAPI(broker)
 	handler.SetPool(broker.clients)
 	broker.topics[topic] = handler
+}
+
+func (broker *Broker) onMessage(id websocket.ClientId, message *websocket.Message) {
+	topic, ok := broker.topics[message.Topic]
+	if !ok {
+		return //TODO: handle error
+	}
+
+	topic.ClientMessage(id, message)
 }
 
 func (broker *Broker) UserPush(push abstraction.BrokerPush) {

@@ -31,33 +31,33 @@ func (client *Client) SetOnClose(onClose func()) {
 	client.onClose = onClose
 }
 
-type ClientMessage struct {
+type Message struct {
 	Topic   abstraction.BrokerTopic `json:"topic"`
 	Payload json.RawMessage         `json:"payload"`
 }
 
-func (client *Client) Read() (ClientMessage, error) {
+func (client *Client) Read() (Message, error) {
 	client.readMx.Lock()
 	defer client.readMx.Unlock()
 
-	var message ClientMessage
+	var message Message
 	err := client.conn.ReadJSON(&message)
 	return message, err
 }
 
-func (client *Client) Write(message ClientMessage) error {
+func (client *Client) Write(message Message) error {
 	client.writeMx.Lock()
 	defer client.writeMx.Unlock()
 
 	return client.conn.WriteJSON(message)
 }
 
-func (client *Client) Close() error {
+func (client *Client) Close(code int, reason string) error {
 	client.writeMx.Lock()
 	defer client.writeMx.Unlock()
 	client.conn.WriteControl(
 		ws.CloseMessage,
-		ws.FormatCloseMessage(ws.CloseNormalClosure, ""),
+		ws.FormatCloseMessage(code, reason),
 		time.Now().Add(time.Second),
 	)
 	client.onClose()

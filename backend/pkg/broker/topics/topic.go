@@ -8,6 +8,7 @@ import (
 type Handler interface {
 	Push(abstraction.BrokerPush) error
 	Pull(abstraction.BrokerRequest) (abstraction.BrokerResponse, error)
+	ClientMessage(websocket.ClientId, *websocket.Message)
 	SetPool(*websocket.Pool)
 	SetAPI(abstraction.BrokerAPI)
 }
