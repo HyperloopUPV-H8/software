@@ -10,24 +10,28 @@ import (
 )
 
 type Client struct {
-	readMx  *sync.Mutex
-	writeMx *sync.Mutex
-	conn    *ws.Conn
-	onClose func()
+	readMx    *sync.Mutex
+	writeMx   *sync.Mutex
+	conn      *ws.Conn
+	onCloseMx *sync.Mutex
+	onClose   func()
 }
 
 func NewClient(conn *ws.Conn) *Client {
 	client := &Client{
-		readMx:  &sync.Mutex{},
-		writeMx: &sync.Mutex{},
-		conn:    conn,
-		onClose: func() {},
+		readMx:    &sync.Mutex{},
+		writeMx:   &sync.Mutex{},
+		conn:      conn,
+		onCloseMx: &sync.Mutex{},
+		onClose:   func() {},
 	}
 
 	return client
 }
 
 func (client *Client) SetOnClose(onClose func()) {
+	client.onCloseMx.Lock()
+	defer client.onCloseMx.Unlock()
 	client.onClose = onClose
 }
 
@@ -60,6 +64,8 @@ func (client *Client) Close(code int, reason string) error {
 		ws.FormatCloseMessage(code, reason),
 		time.Now().Add(time.Second),
 	)
+	client.onCloseMx.Lock()
+	defer client.onCloseMx.Unlock()
 	client.onClose()
 	return client.conn.Close()
 }
