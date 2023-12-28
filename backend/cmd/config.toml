@@ -21,8 +21,6 @@ udp_tag = "UDP"
 mtu = 1500
 interface = "lo"
 # blcu_ack_id = "blcu_ack"
-keep_alive_interval = "1s"
-keep_alive_probes = 3
 timeout = "1s"
 
 [vehicle.messages]

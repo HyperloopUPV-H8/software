@@ -3,7 +3,9 @@ package order
 import (
 	"encoding/csv"
 	"fmt"
+	"io"
 	"os"
+	"path"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -17,21 +19,27 @@ const (
 	Name abstraction.LoggerName = "order"
 )
 
+type Logger struct {
+	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
+	running  *atomic.Bool
+	fileLock *sync.RWMutex
+	writer   io.WriteCloser
+}
+
 type Record struct {
-	packet *data.Packet
+	Packet *data.Packet
 }
 
 func (order *Record) Name() abstraction.LoggerName {
 	return Name
 }
 
-type Logger struct {
-	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
-	running  *atomic.Bool
-	fileLock *sync.RWMutex
-	// initialTime fixes the starting time of the log
-	initialTime time.Time
-	writer      *csv.Writer
+func NewLogger() *Logger {
+	return &Logger{
+		running:  &atomic.Bool{},
+		fileLock: &sync.RWMutex{},
+		writer:   nil,
+	}
 }
 
 func (sublogger *Logger) Start() error {
@@ -39,17 +47,6 @@ func (sublogger *Logger) Start() error {
 		fmt.Println("Logger already running")
 		return nil
 	}
-	sublogger.initialTime = time.Now()
-
-	file, err := os.Create(fmt.Sprintf("order_" + sublogger.initialTime.Format(time.RFC3339) + ".csv"))
-	if err != nil {
-		return &logger.ErrCreatingFile{
-			Name:      Name,
-			Timestamp: time.Now(),
-			Inner:     err,
-		}
-	}
-	sublogger.writer = csv.NewWriter(file)
 
 	fmt.Println("Logger started")
 	return nil
@@ -76,16 +73,33 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	sublogger.fileLock.Lock()
 	defer sublogger.fileLock.Unlock()
 
-	err := sublogger.writer.Write([]string{time.Now().Format(time.RFC3339), fmt.Sprint(orderRecord.packet.GetValues())})
+	if sublogger.writer == nil {
+		filename := path.Join("logger/order", fmt.Sprintf("order_%s", logger.Timestamp.Format(time.RFC3339)), "order.csv")
+		os.MkdirAll(path.Dir(filename), os.ModePerm)
+
+		file, err := os.Create(filename)
+		if err != nil {
+			return &logger.ErrCreatingFile{
+				Name:      Name,
+				Timestamp: time.Now(),
+				Inner:     err,
+			}
+		}
+		sublogger.writer = file
+	}
+
+	csvWriter := csv.NewWriter(sublogger.writer)
+	defer csvWriter.Flush()
+
+	err := csvWriter.Write([]string{orderRecord.Packet.Timestamp().Format(time.RFC3339), fmt.Sprint(orderRecord.Packet.GetValues())})
 	if err != nil {
 		return err
 	}
 
-	defer sublogger.writer.Flush()
 	return nil
 }
 
-func (sublogger *Logger) PullRecord() (abstraction.LoggerRecord, error) {
+func (sublogger *Logger) PullRecord(abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
 	panic("TODO!")
 }
 
@@ -94,6 +108,8 @@ func (sublogger *Logger) Stop() error {
 		fmt.Println("Logger already stopped")
 		return nil
 	}
+
+	sublogger.writer.Close()
 
 	fmt.Println("Logger stopped")
 	return nil

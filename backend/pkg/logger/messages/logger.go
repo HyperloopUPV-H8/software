@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -18,21 +19,23 @@ const (
 	Name abstraction.LoggerName = "messages"
 )
 
-// Record is a struct that implements the abstraction.LoggerRecord interface
-type Record struct {
-	packet *info.Packet
-}
-
 type Logger struct {
 	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
 	running  *atomic.Bool
 	fileLock *sync.RWMutex
-	// initialTime fixes the starting time of the log
-	initialTime time.Time
 	// infoIdMap is a map that contains the file of each info packet
 	infoIdMap map[abstraction.BoardId]io.WriteCloser
 	// BoardNames is a map that contains the common name of each board
 	boardNames map[abstraction.BoardId]string
+}
+
+// Record is a struct that implements the abstraction.LoggerRecord interface
+type Record struct {
+	Packet *info.Packet
+}
+
+func (info *Record) Name() abstraction.LoggerName {
+	return Name
 }
 
 func NewLogger(boardMap map[abstraction.BoardId]string) *Logger {
@@ -44,18 +47,11 @@ func NewLogger(boardMap map[abstraction.BoardId]string) *Logger {
 	}
 }
 
-func (info *Record) Name() abstraction.LoggerName {
-	return Name
-}
-
-func (sublogger *Logger) Start(boardMap map[abstraction.BoardId]string) error {
+func (sublogger *Logger) Start() error {
 	if !sublogger.running.CompareAndSwap(false, true) {
 		fmt.Println("Logger already running")
 		return nil
 	}
-	sublogger.initialTime = time.Now()
-
-	NewLogger(boardMap)
 
 	fmt.Println("Logger started")
 	return nil
@@ -79,9 +75,9 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		}
 	}
 
-	boardId := infoRecord.packet.BoardId
-	timestamp := infoRecord.packet.Timestamp.ToTime().Format(time.RFC3339)
-	msg := string(infoRecord.packet.Msg)
+	boardId := infoRecord.Packet.BoardId
+	timestamp := infoRecord.Packet.Timestamp.ToTime().Format(time.RFC3339)
+	msg := string(infoRecord.Packet.Msg)
 
 	sublogger.fileLock.Lock()
 	defer sublogger.fileLock.Unlock()
@@ -95,7 +91,11 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		if !ok {
 			boardName = fmt.Sprint(boardId)
 		}
-		f, err := os.Create(fmt.Sprintf(boardName + "_" + timestamp + ".csv"))
+
+		filename := path.Join("logger/messages", fmt.Sprintf("messages_%s", logger.Timestamp.Format(time.RFC3339)), fmt.Sprintf("%s.csv", boardName))
+		os.MkdirAll(path.Dir(filename), os.ModePerm)
+
+		f, err := os.Create(filename)
 		if err != nil {
 			return &logger.ErrCreatingFile{
 				Name:      Name,
@@ -113,10 +113,11 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	if err != nil {
 		writerErr = err
 	}
+
 	return writerErr
 }
 
-func (sublogger *Logger) PullRecords() ([]abstraction.LoggerRecord, error) {
+func (sublogger *Logger) PullRecord(abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
 	panic("TODO!")
 }
 
@@ -124,6 +125,10 @@ func (sublogger *Logger) Stop() error {
 	if !sublogger.running.CompareAndSwap(true, false) {
 		fmt.Println("Logger already stopped")
 		return nil
+	}
+
+	for _, file := range sublogger.infoIdMap {
+		file.Close()
 	}
 
 	fmt.Println("Logger stopped")

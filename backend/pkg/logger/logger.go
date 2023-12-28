@@ -1,11 +1,20 @@
 package logger
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
+	"path"
 	"sync"
 	"sync/atomic"
+	"time"
 
+	wsModels "github.com/HyperloopUPV-H8/h9-backend/internal/ws_handle/models"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+)
+
+const (
+	HandlerName = "logger"
 )
 
 // Logger is a struct that implements the abstraction.Logger interface
@@ -13,24 +22,61 @@ type Logger struct {
 	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
 	running        *atomic.Bool
 	subloggersLock *sync.RWMutex
-	subloggers     map[abstraction.LoggerName]abstraction.Logger
+	// The subloggers are only the loggers selected at the start of the log
+	subloggers map[abstraction.LoggerName]abstraction.Logger
 }
 
 var _ abstraction.Logger = &Logger{}
 
-func (logger *Logger) Start(startKeys []abstraction.LoggerName) error {
-	if logger.running.CompareAndSwap(false, true) {
+var Timestamp time.Time = time.Now()
+
+func (Logger) HandlerName() string {
+	return HandlerName
+}
+
+func (logger Logger) UpdateMessage(client wsModels.Client, message wsModels.Message) {
+	var enable bool
+	err := json.Unmarshal(message.Payload, &enable)
+	if err != nil {
+		logger.Stop()
+		fmt.Printf("Error unmarshalling enable message")
+		return
+	} else {
+		if enable {
+			logger.Start()
+		} else {
+			logger.Stop()
+		}
+	}
+}
+
+func NewLogger(keys map[abstraction.LoggerName]abstraction.Logger) *Logger {
+	logger := &Logger{
+		running:        &atomic.Bool{},
+		subloggersLock: &sync.RWMutex{},
+		subloggers:     keys,
+	}
+
+	logger.running.Store(false)
+	return logger
+}
+
+func (logger *Logger) Start() error {
+	if !logger.running.CompareAndSwap(false, true) {
 		fmt.Println("Logger already running")
 		return nil
+	}
+
+	// Create log folders
+	for logger := range logger.subloggers {
+		os.MkdirAll(path.Join("logger", fmt.Sprint(logger), fmt.Sprintf("%s_%s", logger, Timestamp.Format(time.RFC3339))), os.ModePerm)
 	}
 
 	logger.subloggersLock.Lock()
 	defer logger.subloggersLock.Unlock()
 
-	for _, name := range startKeys {
-		if sublogger, ok := logger.subloggers[name]; ok {
-			go sublogger.Start(nil)
-		}
+	for _, key := range logger.subloggers {
+		go key.Start()
 	}
 
 	fmt.Println("Logger started")
@@ -39,11 +85,16 @@ func (logger *Logger) Start(startKeys []abstraction.LoggerName) error {
 
 // PushRecord works as a proxy for the PushRecord method of the subloggers
 func (logger *Logger) PushRecord(record abstraction.LoggerRecord) error {
-	loggerChecked, ok := logger.subloggers[record.Name()]
-	if !ok {
-		return ErrLoggerNotFound{record.Name()}
+	objectiveLogger := record.Name()
+
+	for name, logger := range logger.subloggers {
+		if name == objectiveLogger {
+			logger.PushRecord(record)
+			return nil
+		}
 	}
-	return loggerChecked.PushRecord(record)
+
+	return ErrLoggerNotFound{objectiveLogger}
 }
 
 // PullRecord works as a proxy for the PullRecord method of the subloggers
@@ -55,7 +106,7 @@ func (logger *Logger) PullRecord(request abstraction.LoggerRequest) (abstraction
 	return loggerChecked.PullRecord(request)
 }
 
-func (logger *Logger) Stop(stopKeys []abstraction.LoggerName) error {
+func (logger *Logger) Stop() error {
 	logger.subloggersLock.Lock()
 	defer logger.subloggersLock.Unlock()
 
@@ -64,19 +115,19 @@ func (logger *Logger) Stop(stopKeys []abstraction.LoggerName) error {
 		return nil
 	}
 
+	// The waitgroup is used in order to wait for all the subloggers to stop
+	// before closing the main logger
 	var wg sync.WaitGroup
-	for _, sublogger := range stopKeys {
+	for name := range logger.subloggers {
 		wg.Add(1)
 
 		go func(sublogger abstraction.Logger) {
 			defer wg.Done()
-			sublogger.Stop(nil)
-		}(logger.subloggers[sublogger])
+			sublogger.Stop()
+		}(logger.subloggers[name])
 	}
-	// The waitgroup is used in order to wait for all the subloggers to stop
-	// before closing the main logger
 	wg.Wait()
 
-	fmt.Printf("Logger stopped")
+	fmt.Println("Logger stopped")
 	return nil
 }
