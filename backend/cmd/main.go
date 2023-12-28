@@ -13,6 +13,7 @@ import (
 	"runtime"
 	"runtime/pprof"
 	"strings"
+	"time"
 
 	blcuPackage "github.com/HyperloopUPV-H8/h9-backend/internal/blcu"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
@@ -157,12 +158,11 @@ func main() {
 	// <--- broker --->
 	broker := broker.New()
 	broker.SetAPI(&brokerAPI{
-		OnUserPush: func(push abstraction.BrokerPush) {
-
-		},
+		OnUserPush: func(push abstraction.BrokerPush) {},
 	})
 
-	dataTopic := data_topic.NewUpdateTopic()
+	dataTopic := data_topic.NewUpdateTopic(time.Second / 60)
+	defer dataTopic.Stop()
 
 	broker.AddTopic(data_topic.UpdateName, dataTopic)
 

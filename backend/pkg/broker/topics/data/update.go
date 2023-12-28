@@ -3,6 +3,8 @@ package data
 import (
 	"encoding/json"
 	"fmt"
+	"sync"
+	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory/models"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
@@ -16,15 +18,29 @@ const UpdateName abstraction.BrokerTopic = "podData/update"
 const SubscribeName abstraction.BrokerTopic = "podData/update"
 
 type Update struct {
-	subscribers map[websocket.ClientId]struct{}
-	pool        *websocket.Pool
-	api         abstraction.BrokerAPI
+	connectionMx *sync.Mutex
+	subscribers  map[websocket.ClientId]struct{}
+	updatesMx    *sync.Mutex
+	updates      map[uint16]*models.Update
+	pool         *websocket.Pool
+	api          abstraction.BrokerAPI
+	done         chan struct{}
+	delay        time.Duration
 }
 
-func NewUpdateTopic() *Update {
-	return &Update{
-		subscribers: make(map[websocket.ClientId]struct{}),
+func NewUpdateTopic(delay time.Duration) *Update {
+	topic := &Update{
+		connectionMx: &sync.Mutex{},
+		subscribers:  make(map[websocket.ClientId]struct{}),
+		updatesMx:    &sync.Mutex{},
+		updates:      make(map[uint16]*models.Update),
+		done:         make(chan struct{}),
+		delay:        delay,
 	}
+
+	go topic.run()
+
+	return topic
 }
 
 func (update *Update) Topic() abstraction.BrokerTopic {
@@ -39,7 +55,37 @@ func (update *Update) Push(push abstraction.BrokerPush) error {
 
 	payload := data.Update()
 
-	rawPayload, err := json.Marshal(map[uint16]*models.Update{payload.Id: payload})
+	update.updatesMx.Lock()
+	defer update.updatesMx.Unlock()
+
+	update.updates[payload.Id] = payload
+
+	return nil
+}
+
+func (update *Update) run() error {
+loop:
+	for {
+		select {
+		case <-update.done:
+			break loop
+		case <-time.After(update.delay):
+			err := update.send()
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (update *Update) send() error {
+	update.updatesMx.Lock()
+	defer update.updatesMx.Unlock()
+	update.connectionMx.Lock()
+	defer update.connectionMx.Unlock()
+
+	rawPayload, err := json.Marshal(update.updates)
 	if err != nil {
 		return err
 	}
@@ -49,16 +95,26 @@ func (update *Update) Push(push abstraction.BrokerPush) error {
 		Payload: rawPayload,
 	}
 
+	flaged := make([]websocket.ClientId, 0)
 	for id := range update.subscribers {
 		err := update.pool.Write(id, message)
 		if err != nil {
 			update.pool.Disconnect(id, ws.CloseInternalServerErr, err.Error())
-			delete(update.subscribers, id)
-			fmt.Printf("unsubscribed %s\n", uuid.UUID(id).String())
+			flaged = append(flaged, id)
 		}
 	}
 
+	for _, id := range flaged {
+		delete(update.subscribers, id)
+		fmt.Printf("unsubscribed %s\n", uuid.UUID(id).String())
+	}
+
 	return nil
+}
+
+func (update *Update) Stop() {
+	update.done <- struct{}{}
+	close(update.done)
 }
 
 func (update *Update) Pull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
@@ -66,6 +122,9 @@ func (update *Update) Pull(request abstraction.BrokerRequest) (abstraction.Broke
 }
 
 func (update *Update) ClientMessage(id websocket.ClientId, message *websocket.Message) {
+	update.connectionMx.Lock()
+	defer update.connectionMx.Unlock()
+
 	switch message.Topic {
 	case SubscribeName:
 		fmt.Printf("subscribed %s\n", uuid.UUID(id).String())
