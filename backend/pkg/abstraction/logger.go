@@ -1,11 +1,16 @@
 package abstraction
 
+import "time"
+
 // LoggerName is the name of the logger that manages a piece of data
 type LoggerName string
 
 // LoggerRecord is a piece of data stored by a logger
 type LoggerRecord interface {
 	Name() LoggerName
+	GetFrom() string
+	GetTo() string
+	GetTimestamp() time.Time
 }
 
 // LoggerRequest is a request made to a logger for a piece of data
