@@ -5,16 +5,16 @@ import (
 	"net/http"
 	"sync/atomic"
 
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/websocket"
 )
 
 type WebServer struct {
-	name        string
-	router      *mux.Router
-	connHandler ConnectionHandler
-	connected   *atomic.Int32
-	config      ServerConfig
+	name      string
+	router    *mux.Router
+	upgrader  *websocket.Upgrader
+	connected *atomic.Int32
+	config    ServerConfig
 }
 
 func NoCacheMiddleware(next http.Handler) http.Handler {
@@ -25,13 +25,13 @@ func NoCacheMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func NewWebServer(name string, connectionHandle ConnectionHandler, staticData EndpointData, config ServerConfig) (*WebServer, error) {
+func NewWebServer(name string, upgrader *websocket.Upgrader, staticData EndpointData, config ServerConfig) (*WebServer, error) {
 	server := &WebServer{
-		name:        name,
-		router:      mux.NewRouter(),
-		connHandler: connectionHandle,
-		connected:   &atomic.Int32{},
-		config:      config,
+		name:      name,
+		router:    mux.NewRouter(),
+		upgrader:  upgrader,
+		connected: &atomic.Int32{},
+		config:    config,
 	}
 
 	headers := map[string]string{
@@ -53,10 +53,7 @@ func NewWebServer(name string, connectionHandle ConnectionHandler, staticData En
 		return nil, err
 	}
 
-	upgrader := &websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool { return true },
-	}
-	server.serveWebsocket(config.Endpoints.Connections, upgrader, headers)
+	server.router.Handle(config.Endpoints.Connections, server.upgrader)
 	server.serveFiles(config.Endpoints.Files, config.StaticPath)
 
 	if err != nil {

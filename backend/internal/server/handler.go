@@ -3,6 +3,8 @@ package server
 import (
 	"fmt"
 	"sync"
+
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
 )
 
 type Handler struct {
@@ -11,7 +13,7 @@ type Handler struct {
 	servers  map[string]*WebServer
 }
 
-func New(connections ConnectionHandler, data EndpointData, config Config) (*Handler, error) {
+func New(upgrader *websocket.Upgrader, data EndpointData, config Config) (*Handler, error) {
 	handler := &Handler{
 		config:   config,
 		serverMx: &sync.Mutex{},
@@ -19,7 +21,7 @@ func New(connections ConnectionHandler, data EndpointData, config Config) (*Hand
 	}
 
 	for name, serverConfig := range config {
-		server, err := NewWebServer(name, connections, data, serverConfig)
+		server, err := NewWebServer(name, upgrader, data, serverConfig)
 		if err != nil {
 			return nil, err
 		}
