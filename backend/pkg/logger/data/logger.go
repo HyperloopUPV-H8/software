@@ -31,12 +31,18 @@ type Logger struct {
 
 // Record is a struct that implements the abstraction.LoggerRecord interface
 type Record struct {
-	Packet *data.Packet
+	Packet    *data.Packet
+	From      string
+	To        string
+	Timestamp time.Time
 }
 
-func (record *Record) Name() abstraction.LoggerName {
+func (*Record) Name() abstraction.LoggerName {
 	return Name
 }
+func (record *Record) GetFrom() string         { return record.From }
+func (record *Record) GetTo() string           { return record.To }
+func (record *Record) GetTimestamp() time.Time { return record.Timestamp }
 
 func NewLogger() *Logger {
 	logger := &Logger{
@@ -44,7 +50,6 @@ func NewLogger() *Logger {
 		running:        &atomic.Bool{},
 		fileLock:       &sync.RWMutex{},
 	}
-
 	logger.running.Store(false)
 	return logger
 }
@@ -124,7 +129,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		writer := csv.NewWriter(file) // TODO! use map/slice of writers
 		defer writer.Flush()
 
-		err := writer.Write([]string{timestamp.Format(time.RFC3339), val})
+		err := writer.Write([]string{timestamp.Format(time.RFC3339), val, record.GetFrom(), record.GetTo(), record.GetTimestamp().Format(time.RFC3339)})
 		if err != nil {
 			writerErr = err
 		}
