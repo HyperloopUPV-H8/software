@@ -23,12 +23,18 @@ type Logger struct {
 }
 
 type Record struct {
-	Packet *state.Space
+	Packet    *state.Space
+	From      string
+	To        string
+	Timestamp time.Time
 }
 
-func (record *Record) Name() abstraction.LoggerName {
+func (*Record) Name() abstraction.LoggerName {
 	return Name
 }
+func (record *Record) GetFrom() string         { return record.From }
+func (record *Record) GetTo() string           { return record.To }
+func (record *Record) GetTimestamp() time.Time { return record.Timestamp }
 
 func NewLogger() *Logger {
 	return &Logger{

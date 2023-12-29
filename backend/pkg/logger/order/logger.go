@@ -27,12 +27,18 @@ type Logger struct {
 }
 
 type Record struct {
-	Packet *data.Packet
+	Packet    *data.Packet
+	From      string
+	To        string
+	Timestamp time.Time
 }
 
-func (order *Record) Name() abstraction.LoggerName {
+func (*Record) Name() abstraction.LoggerName {
 	return Name
 }
+func (record *Record) GetFrom() string         { return record.From }
+func (record *Record) GetTo() string           { return record.To }
+func (record *Record) GetTimestamp() time.Time { return record.Timestamp }
 
 func NewLogger() *Logger {
 	return &Logger{
@@ -98,7 +104,9 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	csvWriter := csv.NewWriter(sublogger.writer)
 	defer csvWriter.Flush()
 
-	err := csvWriter.Write([]string{orderRecord.Packet.Timestamp().Format(time.RFC3339), fmt.Sprint(orderRecord.Packet.GetValues())})
+	timestamp := orderRecord.Packet.Timestamp().Format(time.RFC3339)
+	val := fmt.Sprint(orderRecord.Packet.GetValues())
+	err := csvWriter.Write([]string{timestamp, val, record.GetFrom(), record.GetTo(), record.GetTimestamp().Format(time.RFC3339)})
 	if err != nil {
 		return logger.ErrWritingFile{
 			Name:      Name,

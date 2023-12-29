@@ -39,7 +39,6 @@ func (logger Logger) UpdateMessage(_ wsModels.Client, message wsModels.Message) 
 	var enable bool
 	err := json.Unmarshal(message.Payload, &enable)
 	if err != nil {
-		err := logger.Stop()
 		if err != nil {
 			fmt.Printf(ErrStoppingLogger{
 				Name:      Name,
@@ -48,25 +47,25 @@ func (logger Logger) UpdateMessage(_ wsModels.Client, message wsModels.Message) 
 		}
 		fmt.Printf("Error unmarshalling enable message")
 		return
+	}
+
+	if enable {
+		err := logger.Start()
+		if err != nil {
+			fmt.Printf(ErrStartingLogger{
+				Name:      Name,
+				Timestamp: time.Now(),
+			}.Error())
+			return
+		}
 	} else {
-		if enable {
-			err := logger.Start()
-			if err != nil {
-				fmt.Printf(ErrStartingLogger{
-					Name:      Name,
-					Timestamp: time.Now(),
-				}.Error())
-				return
-			}
-		} else {
-			err := logger.Stop()
-			if err != nil {
-				fmt.Printf(ErrStoppingLogger{
-					Name:      Name,
-					Timestamp: time.Now(),
-				}.Error())
-				return
-			}
+		err := logger.Stop()
+		if err != nil {
+			fmt.Printf(ErrStoppingLogger{
+				Name:      Name,
+				Timestamp: time.Now(),
+			}.Error())
+			return
 		}
 	}
 }

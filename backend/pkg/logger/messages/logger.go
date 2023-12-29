@@ -31,12 +31,18 @@ type Logger struct {
 
 // Record is a struct that implements the abstraction.LoggerRecord interface
 type Record struct {
-	Packet *info.Packet
+	Packet    *info.Packet
+	From      string
+	To        string
+	Timestamp time.Time
 }
 
-func (info *Record) Name() abstraction.LoggerName {
+func (*Record) Name() abstraction.LoggerName {
 	return Name
 }
+func (record *Record) GetFrom() string         { return record.From }
+func (record *Record) GetTo() string           { return record.To }
+func (record *Record) GetTimestamp() time.Time { return record.Timestamp }
 
 func NewLogger(boardMap map[abstraction.BoardId]string) *Logger {
 	return &Logger{
@@ -116,7 +122,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	err := writer.Write([]string{timestamp, msg})
+	err := writer.Write([]string{timestamp, msg, record.GetFrom(), record.GetTo(), record.GetTimestamp().Format(time.RFC3339)})
 	if err != nil {
 		writerErr = err
 	}
@@ -137,10 +143,10 @@ func (sublogger *Logger) Stop() error {
 	for _, file := range sublogger.infoIdMap {
 		err := file.Close()
 		if err != nil {
-			return logger.ErrClosingFile{
+			fmt.Printf(logger.ErrClosingFile{
 				Name:      Name,
 				Timestamp: time.Now(),
-			}
+			}.Error())
 		}
 	}
 
