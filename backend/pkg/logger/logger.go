@@ -31,9 +31,7 @@ var _ abstraction.Logger = &Logger{}
 
 var Timestamp = time.Now()
 
-func (Logger) HandlerName() string {
-	return HandlerName
-}
+func (Logger) HandlerName() string { return HandlerName }
 
 func (logger Logger) UpdateMessage(_ wsModels.Client, message wsModels.Message) {
 	var enable bool
@@ -89,7 +87,11 @@ func (logger *Logger) Start() error {
 
 	// Create log folders
 	for logger := range logger.subloggers {
-		loggerPath := path.Join("logger", fmt.Sprint(logger), fmt.Sprintf("%s_%s", logger, Timestamp.Format(time.RFC3339)))
+		loggerPath := path.Join(
+			"logger",
+			fmt.Sprint(logger),
+			fmt.Sprintf("%s_%s", logger, Timestamp.Format(time.RFC3339)),
+		)
 		err := os.MkdirAll(loggerPath, os.ModePerm)
 		if err != nil {
 			return ErrCreatingAllDir{

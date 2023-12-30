@@ -32,9 +32,6 @@ type Record struct {
 func (*Record) Name() abstraction.LoggerName {
 	return Name
 }
-func (record *Record) GetFrom() string         { return record.From }
-func (record *Record) GetTo() string           { return record.To }
-func (record *Record) GetTimestamp() time.Time { return record.Timestamp }
 
 func NewLogger() *Logger {
 	return &Logger{
@@ -70,7 +67,11 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		}
 	}
 
-	filename := path.Join("logger/state", fmt.Sprintf("state_%s", logger.Timestamp.Format(time.RFC3339)), fmt.Sprintf("state_%s.csv", time.Now().Format(time.RFC3339)))
+	filename := path.Join(
+		"logger/state",
+		fmt.Sprintf("state_%s", logger.Timestamp.Format(time.RFC3339)),
+		fmt.Sprintf("state_%s.csv", time.Now().Format(time.RFC3339)),
+	)
 	err := os.MkdirAll(path.Dir(filename), os.ModePerm)
 	if err != nil {
 		return logger.ErrCreatingAllDir{

@@ -36,9 +36,6 @@ type Record struct {
 func (*Record) Name() abstraction.LoggerName {
 	return Name
 }
-func (record *Record) GetFrom() string         { return record.From }
-func (record *Record) GetTo() string           { return record.To }
-func (record *Record) GetTimestamp() time.Time { return record.Timestamp }
 
 func NewLogger() *Logger {
 	return &Logger{
@@ -80,7 +77,11 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	defer sublogger.fileLock.Unlock()
 
 	if sublogger.writer == nil {
-		filename := path.Join("logger/order", fmt.Sprintf("order_%s", logger.Timestamp.Format(time.RFC3339)), "order.csv")
+		filename := path.Join(
+			"logger/order",
+			fmt.Sprintf("order_%s", logger.Timestamp.Format(time.RFC3339)),
+			"order.csv",
+		)
 		err := os.MkdirAll(path.Dir(filename), os.ModePerm)
 		if err != nil {
 			return logger.ErrCreatingAllDir{
@@ -106,7 +107,13 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 	timestamp := orderRecord.Packet.Timestamp().Format(time.RFC3339)
 	val := fmt.Sprint(orderRecord.Packet.GetValues())
-	err := csvWriter.Write([]string{timestamp, val, record.GetFrom(), record.GetTo(), record.GetTimestamp().Format(time.RFC3339)})
+	err := csvWriter.Write([]string{
+		timestamp,
+		val,
+		orderRecord.From,
+		orderRecord.To,
+		orderRecord.Timestamp.Format(time.RFC3339),
+	})
 	if err != nil {
 		return logger.ErrWritingFile{
 			Name:      Name,

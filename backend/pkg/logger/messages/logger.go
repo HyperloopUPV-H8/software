@@ -37,12 +37,7 @@ type Record struct {
 	Timestamp time.Time
 }
 
-func (*Record) Name() abstraction.LoggerName {
-	return Name
-}
-func (record *Record) GetFrom() string         { return record.From }
-func (record *Record) GetTo() string           { return record.To }
-func (record *Record) GetTimestamp() time.Time { return record.Timestamp }
+func (*Record) Name() abstraction.LoggerName { return Name }
 
 func NewLogger(boardMap map[abstraction.BoardId]string) *Logger {
 	return &Logger{
@@ -98,7 +93,11 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 			boardName = fmt.Sprint(boardId)
 		}
 
-		filename := path.Join("logger/messages", fmt.Sprintf("messages_%s", logger.Timestamp.Format(time.RFC3339)), fmt.Sprintf("%s.csv", boardName))
+		filename := path.Join(
+			"logger/messages",
+			fmt.Sprintf("messages_%s", logger.Timestamp.Format(time.RFC3339)),
+			fmt.Sprintf("%s.csv", boardName),
+		)
 		err := os.MkdirAll(path.Dir(filename), os.ModePerm)
 		if err != nil {
 			return logger.ErrCreatingAllDir{
@@ -122,7 +121,11 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	err := writer.Write([]string{timestamp, msg, record.GetFrom(), record.GetTo(), record.GetTimestamp().Format(time.RFC3339)})
+	err := writer.Write([]string{
+		timestamp,
+		msg,
+		infoRecord.From, infoRecord.To, infoRecord.Timestamp.Format(time.RFC3339),
+	})
 	if err != nil {
 		writerErr = err
 	}

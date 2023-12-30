@@ -37,12 +37,7 @@ type Record struct {
 	Timestamp time.Time
 }
 
-func (*Record) Name() abstraction.LoggerName {
-	return Name
-}
-func (record *Record) GetFrom() string         { return record.From }
-func (record *Record) GetTo() string           { return record.To }
-func (record *Record) GetTimestamp() time.Time { return record.Timestamp }
+func (*Record) Name() abstraction.LoggerName { return Name }
 
 func NewLogger() *Logger {
 	logger := &Logger{
@@ -113,7 +108,11 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 		file, ok := sublogger.valueFileSlice[valueName]
 		if !ok {
-			filename := path.Join("loggerHandler/data", fmt.Sprintf("data_%s", loggerHandler.Timestamp.Format(time.RFC3339)), fmt.Sprintf("%s.csv", valueName))
+			filename := path.Join(
+				"loggerHandler/data",
+				fmt.Sprintf("data_%s", loggerHandler.Timestamp.Format(time.RFC3339)),
+				fmt.Sprintf("%s.csv", valueName),
+			)
 			err := os.MkdirAll(path.Dir(filename), os.ModePerm)
 			if err != nil {
 				return loggerHandler.ErrCreatingAllDir{
@@ -136,7 +135,13 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		}
 		writer := csv.NewWriter(file) // TODO! use map/slice of writer
 
-		err := writer.Write([]string{timestamp.Format(time.RFC3339), val, record.GetFrom(), record.GetTo(), record.GetTimestamp().Format(time.RFC3339)})
+		err := writer.Write([]string{
+			timestamp.Format(time.RFC3339),
+			val,
+			dataRecord.From,
+			dataRecord.To,
+			dataRecord.Timestamp.Format(time.RFC3339),
+		})
 		if err != nil {
 			writerErr = loggerHandler.ErrWritingFile{
 				Name:      Name,
