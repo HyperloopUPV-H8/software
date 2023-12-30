@@ -21,7 +21,7 @@ function createOrder(id: number, fields: FormField[]): Order {
             fields.map((field) => {
                 return [
                     field.id,
-                    { value: field.value, isEnabled: field.isEnabled },
+                    { value: field.value, isEnabled: field.isEnabled, type: field.type },
                 ];
             })
         ),
