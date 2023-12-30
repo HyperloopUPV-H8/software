@@ -14,6 +14,7 @@ import (
 )
 
 const (
+	Name        = "loggerHandler"
 	HandlerName = "logger"
 )
 
@@ -28,24 +29,43 @@ type Logger struct {
 
 var _ abstraction.Logger = &Logger{}
 
-var Timestamp time.Time = time.Now()
+var Timestamp = time.Now()
 
 func (Logger) HandlerName() string {
 	return HandlerName
 }
 
-func (logger Logger) UpdateMessage(client wsModels.Client, message wsModels.Message) {
+func (logger Logger) UpdateMessage(_ wsModels.Client, message wsModels.Message) {
 	var enable bool
 	err := json.Unmarshal(message.Payload, &enable)
 	if err != nil {
-		logger.Stop()
+		if err != nil {
+			fmt.Printf(ErrStoppingLogger{
+				Name:      Name,
+				Timestamp: time.Now(),
+			}.Error())
+		}
 		fmt.Printf("Error unmarshalling enable message")
 		return
+	}
+
+	if enable {
+		err := logger.Start()
+		if err != nil {
+			fmt.Printf(ErrStartingLogger{
+				Name:      Name,
+				Timestamp: time.Now(),
+			}.Error())
+			return
+		}
 	} else {
-		if enable {
-			logger.Start()
-		} else {
-			logger.Stop()
+		err := logger.Stop()
+		if err != nil {
+			fmt.Printf(ErrStoppingLogger{
+				Name:      Name,
+				Timestamp: time.Now(),
+			}.Error())
+			return
 		}
 	}
 }
@@ -69,14 +89,28 @@ func (logger *Logger) Start() error {
 
 	// Create log folders
 	for logger := range logger.subloggers {
-		os.MkdirAll(path.Join("logger", fmt.Sprint(logger), fmt.Sprintf("%s_%s", logger, Timestamp.Format(time.RFC3339))), os.ModePerm)
+		loggerPath := path.Join("logger", fmt.Sprint(logger), fmt.Sprintf("%s_%s", logger, Timestamp.Format(time.RFC3339)))
+		err := os.MkdirAll(loggerPath, os.ModePerm)
+		if err != nil {
+			return ErrCreatingAllDir{
+				Name:      Name,
+				Timestamp: time.Now(),
+				Path:      loggerPath,
+			}
+		}
 	}
 
 	logger.subloggersLock.Lock()
 	defer logger.subloggersLock.Unlock()
 
 	for _, key := range logger.subloggers {
-		go key.Start()
+		err := key.Start()
+		if err != nil {
+			fmt.Printf(ErrStartingLogger{
+				Name:      Name,
+				Timestamp: time.Now(),
+			}.Error())
+		}
 	}
 
 	fmt.Println("Logger started")
@@ -89,7 +123,14 @@ func (logger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 	for name, logger := range logger.subloggers {
 		if name == objectiveLogger {
-			logger.PushRecord(record)
+			err := logger.PushRecord(record)
+			if err != nil {
+				return ErrPushingRecord{
+					Name:      Name,
+					Timestamp: time.Now(),
+					Inner:     err,
+				}
+			}
 			return nil
 		}
 	}
@@ -115,7 +156,7 @@ func (logger *Logger) Stop() error {
 		return nil
 	}
 
-	// The waitgroup is used in order to wait for all the subloggers to stop
+	// The wait group is used in order to wait for all the subloggers to stop
 	// before closing the main logger
 	var wg sync.WaitGroup
 	for name := range logger.subloggers {
@@ -123,7 +164,7 @@ func (logger *Logger) Stop() error {
 
 		go func(sublogger abstraction.Logger) {
 			defer wg.Done()
-			sublogger.Stop()
+			_ = sublogger.Stop()
 		}(logger.subloggers[name])
 	}
 	wg.Wait()
