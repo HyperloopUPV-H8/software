@@ -17,12 +17,10 @@ import (
 
 	blcuPackage "github.com/HyperloopUPV-H8/h9-backend/internal/blcu"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/data_transfer"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/excel"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/ade"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/utils"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/info"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/message_transfer"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/pod_data"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/server"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
@@ -33,6 +31,7 @@ import (
 	connection_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/connection"
 	data_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/data"
 	logger_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/logger"
+	message_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/message"
 	order_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/order"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
@@ -116,13 +115,6 @@ func main() {
 		trace.Fatal().Err(err).Msg("creating vehicleOrders")
 	}
 
-	// <--- data transfer --->
-	dataTransfer := data_transfer.New(config.DataTransfer)
-	go dataTransfer.Run()
-
-	// <--- message transfer --->
-	messageTransfer := message_transfer.New(config.Messages)
-
 	// <--- update factory --->
 	updateFactory := update_factory.NewFactory()
 
@@ -157,11 +149,17 @@ func main() {
 	connectionTopic := connection_topic.NewUpdateTopic()
 	orderTopic := order_topic.NewSendTopic()
 	loggerTopic := logger_topic.NewEnableTopic()
+	boardIdToBoard := make(map[abstraction.BoardId]string)
+	for name, id := range info.BoardIds {
+		boardIdToBoard[abstraction.BoardId(id)] = name
+	}
+	messageTopic := message_topic.NewUpdateTopic(boardIdToBoard)
 
 	broker.AddTopic(data_topic.UpdateName, dataTopic)
 	broker.AddTopic(connection_topic.UpdateName, connectionTopic)
 	broker.AddTopic(order_topic.SendName, orderTopic)
 	broker.AddTopic(logger_topic.EnableName, loggerTopic)
+	broker.AddTopic(message_topic.UpdateName, messageTopic)
 
 	connections := make(chan *websocket.Client)
 	upgrader := websocket.NewUpgrader(connections)
@@ -201,7 +199,10 @@ func main() {
 				}
 
 			case *info_packet.Packet:
-				messageTransfer.SendMessage(p)
+				err := broker.Push(message_topic.Push(p))
+				if err != nil {
+					fmt.Println(err)
+				}
 
 				err = loggerHandler.PushRecord(&messages_logger.Record{
 					Packet: p,
@@ -212,7 +213,10 @@ func main() {
 				}
 
 			case *protection.Packet:
-				messageTransfer.SendMessage(p)
+				err := broker.Push(message_topic.Push(p))
+				if err != nil {
+					fmt.Println(err)
+				}
 
 				packet := info_packet.NewPacket(p.Id())
 				packet.BoardId = p.BoardId
@@ -371,9 +375,6 @@ func main() {
 	if useBlcu {
 		websocketBroker.RegisterHandle(&blcu, config.BLCU.Topics.Upload, config.BLCU.Topics.Download)
 	}
-
-	websocketBroker.RegisterHandle(loggerHandler, config.LoggerHandler.Topics.Enable)
-	websocketBroker.RegisterHandle(&messageTransfer, "message/update")
 
 	uploadableBords := common.Filter(common.Keys(info.Addresses.Boards), func(item string) bool {
 		return item != config.Excel.Parse.Global.BLCUAddressKey
@@ -585,6 +586,8 @@ func getTransportDecEnc(info info.Info, podData pod_data.PodData) (*presentation
 	protectionDecoder := protection.NewDecoder()
 	protectionDecoder.SetSeverity(abstraction.PacketId(info.MessageIds.Warning), protection.SeverityWarning)
 	protectionDecoder.SetSeverity(abstraction.PacketId(info.MessageIds.Fault), protection.SeverityFault)
+	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds.Warning), protectionDecoder)
+	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds.Fault), protectionDecoder)
 
 	return decoder, encoder
 }
