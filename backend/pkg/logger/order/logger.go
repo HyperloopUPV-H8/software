@@ -27,10 +27,13 @@ type Logger struct {
 }
 
 type Record struct {
-	Packet *data.Packet
+	Packet    *data.Packet
+	From      string
+	To        string
+	Timestamp time.Time
 }
 
-func (order *Record) Name() abstraction.LoggerName {
+func (*Record) Name() abstraction.LoggerName {
 	return Name
 }
 
@@ -54,7 +57,7 @@ func (sublogger *Logger) Start() error {
 
 func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	if !sublogger.running.Load() {
-		return &logger.ErrLoggerNotRunning{
+		return logger.ErrLoggerNotRunning{
 			Name:      Name,
 			Timestamp: time.Now(),
 		}
@@ -62,7 +65,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 	orderRecord, ok := record.(*Record)
 	if !ok {
-		return &logger.ErrWrongRecordType{
+		return logger.ErrWrongRecordType{
 			Name:      Name,
 			Timestamp: time.Now(),
 			Expected:  &Record{},
@@ -74,12 +77,23 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	defer sublogger.fileLock.Unlock()
 
 	if sublogger.writer == nil {
-		filename := path.Join("logger/order", fmt.Sprintf("order_%s", logger.Timestamp.Format(time.RFC3339)), "order.csv")
-		os.MkdirAll(path.Dir(filename), os.ModePerm)
+		filename := path.Join(
+			"logger/order",
+			fmt.Sprintf("order_%s", logger.Timestamp.Format(time.RFC3339)),
+			"order.csv",
+		)
+		err := os.MkdirAll(path.Dir(filename), os.ModePerm)
+		if err != nil {
+			return logger.ErrCreatingAllDir{
+				Name:      Name,
+				Timestamp: time.Now(),
+				Path:      filename,
+			}
+		}
 
 		file, err := os.Create(filename)
 		if err != nil {
-			return &logger.ErrCreatingFile{
+			return logger.ErrCreatingFile{
 				Name:      Name,
 				Timestamp: time.Now(),
 				Inner:     err,
@@ -91,9 +105,21 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	csvWriter := csv.NewWriter(sublogger.writer)
 	defer csvWriter.Flush()
 
-	err := csvWriter.Write([]string{orderRecord.Packet.Timestamp().Format(time.RFC3339), fmt.Sprint(orderRecord.Packet.GetValues())})
+	timestamp := orderRecord.Packet.Timestamp().Format(time.RFC3339)
+	val := fmt.Sprint(orderRecord.Packet.GetValues())
+	err := csvWriter.Write([]string{
+		timestamp,
+		val,
+		orderRecord.From,
+		orderRecord.To,
+		orderRecord.Timestamp.Format(time.RFC3339),
+	})
 	if err != nil {
-		return err
+		return logger.ErrWritingFile{
+			Name:      Name,
+			Timestamp: time.Now(),
+			Inner:     err,
+		}
 	}
 
 	return nil
@@ -109,7 +135,13 @@ func (sublogger *Logger) Stop() error {
 		return nil
 	}
 
-	sublogger.writer.Close()
+	err := sublogger.writer.Close()
+	if err != nil {
+		return logger.ErrClosingFile{
+			Name:      Name,
+			Timestamp: time.Now(),
+		}
+	}
 
 	fmt.Println("Logger stopped")
 	return nil
