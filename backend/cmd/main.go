@@ -32,6 +32,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker"
 	connection_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/connection"
 	data_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/data"
+	logger_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/logger"
 	order_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/order"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
@@ -155,10 +156,12 @@ func main() {
 	defer dataTopic.Stop()
 	connectionTopic := connection_topic.NewUpdateTopic()
 	orderTopic := order_topic.NewSendTopic()
+	loggerTopic := logger_topic.NewEnableTopic()
 
 	broker.AddTopic(data_topic.UpdateName, dataTopic)
 	broker.AddTopic(connection_topic.UpdateName, connectionTopic)
 	broker.AddTopic(order_topic.SendName, orderTopic)
+	broker.AddTopic(logger_topic.EnableName, loggerTopic)
 
 	connections := make(chan *websocket.Client)
 	upgrader := websocket.NewUpgrader(connections)
@@ -279,6 +282,26 @@ func main() {
 
 				if err != nil {
 					fmt.Println("Error pushing record to logger: ", err)
+				}
+			case logger_topic.EnableName:
+				status, ok := push.(*logger_topic.Status)
+				if !ok {
+					trace.Error().Any("push", push).Msg("error casting push to enable")
+					fmt.Printf("Push Type: %v\n", push)
+					return
+				}
+
+				var err error
+				if status.Enable() {
+					err = loggerHandler.Start()
+				} else {
+					err = loggerHandler.Stop()
+				}
+
+				if err != nil {
+					status.Fulfill(!status.Enable())
+				} else {
+					status.Fulfill(status.Enable())
 				}
 			default:
 				fmt.Printf("unknow topic %s\n", push.Topic())
