@@ -107,7 +107,10 @@ func (transport *Transport) handleTCPConn(target abstraction.TransportTarget, co
 				break
 			}
 
-			transport.api.Notification(NewPacketNotification(packet))
+			from := conn.LocalAddr().String()
+			to := string(target)
+
+			transport.api.Notification(NewPacketNotification(packet, from, to, time.Now()))
 		}
 	}()
 
@@ -207,7 +210,10 @@ func (transport *Transport) handleConversation(socket network.Socket, reader io.
 				return // TODO: handle error
 			}
 
-			transport.api.Notification(NewPacketNotification(packet))
+			from := fmt.Sprintf("%s:%d", socket.SrcIP, socket.SrcPort)
+			to := fmt.Sprintf("%s:%d", socket.DstIP, socket.DstPort)
+
+			transport.api.Notification(NewPacketNotification(packet, from, to, time.Now()))
 		}
 	}()
 }

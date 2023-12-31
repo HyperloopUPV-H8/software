@@ -191,11 +191,14 @@ func main() {
 				}
 
 				err = loggerHandler.PushRecord(&data_logger.Record{
-					Packet: p,
+					Packet:    p,
+					From:      packet.From,
+					To:        packet.To,
+					Timestamp: packet.Timestamp,
 				})
 
 				if err != nil {
-					fmt.Println("Error pushing record to logger: ", err)
+					fmt.Println("Error pushing record to data logger: ", err)
 				}
 
 			case *info_packet.Packet:
@@ -205,11 +208,14 @@ func main() {
 				}
 
 				err = loggerHandler.PushRecord(&messages_logger.Record{
-					Packet: p,
+					Packet:    p,
+					From:      packet.From,
+					To:        packet.To,
+					Timestamp: packet.Timestamp,
 				})
 
 				if err != nil {
-					fmt.Println("Error pushing record to logger: ", err)
+					fmt.Println("Error pushing record to info logger: ", err)
 				}
 
 			case *protection.Packet:
@@ -218,17 +224,20 @@ func main() {
 					fmt.Println(err)
 				}
 
-				packet := info_packet.NewPacket(p.Id())
-				packet.BoardId = p.BoardId
-				packet.Timestamp = p.Timestamp
-				packet.Msg = info_packet.InfoData(fmt.Sprint(p))
+				newPacket := info_packet.NewPacket(p.Id())
+				newPacket.BoardId = p.BoardId
+				newPacket.Timestamp = p.Timestamp
+				newPacket.Msg = info_packet.InfoData(fmt.Sprint(p))
 
 				err = loggerHandler.PushRecord(&messages_logger.Record{
-					Packet: packet,
+					Packet:    newPacket,
+					From:      packet.From,
+					To:        packet.To,
+					Timestamp: packet.Timestamp,
 				})
 
 				if err != nil {
-					fmt.Println("Error pushing record to logger: ", err)
+					fmt.Println("Error pushing record to info logger: ", err)
 				}
 
 			case *blcu_packet.Ack:
@@ -238,11 +247,14 @@ func main() {
 
 			case *state.Space:
 				err = loggerHandler.PushRecord(&state_logger.Record{
-					Packet: p,
+					Packet:    p,
+					From:      packet.From,
+					To:        packet.To,
+					Timestamp: packet.Timestamp,
 				})
 
 				if err != nil {
-					fmt.Println("Error pushing record to logger: ", err)
+					fmt.Println("Error pushing record to state logger: ", err)
 				}
 
 			case *order.Add:
@@ -281,7 +293,10 @@ func main() {
 				}
 
 				err = loggerHandler.PushRecord(&order_logger.Record{
-					Packet: packet,
+					Packet:    packet,
+					From:      "backend",
+					To:        idToBoard[uint16(packet.Id())],
+					Timestamp: packet.Timestamp(),
 				})
 
 				if err != nil {
