@@ -164,16 +164,19 @@ func (sublogger *Logger) Stop() error {
 		return nil
 	}
 
+	closeErr := error(nil)
 	for _, file := range sublogger.valueFileSlice {
 		err := file.Close()
 		if err != nil {
-			return loggerHandler.ErrClosingFile{
+			closeErr = loggerHandler.ErrClosingFile{
 				Name:      Name,
 				Timestamp: time.Now(),
 			}
+
+			fmt.Println(closeErr.Error())
 		}
 	}
 
 	fmt.Println("Logger stopped")
-	return nil
+	return closeErr
 }
