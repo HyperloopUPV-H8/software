@@ -109,6 +109,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	val := fmt.Sprint(orderRecord.Packet.GetValues())
 	err := csvWriter.Write([]string{
 		timestamp,
+		fmt.Sprint(orderRecord.Packet.Id()),
 		val,
 		orderRecord.From,
 		orderRecord.To,
