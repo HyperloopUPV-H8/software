@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/binary"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -197,7 +198,7 @@ func main() {
 					Timestamp: packet.Timestamp,
 				})
 
-				if err != nil {
+				if err != nil && !errors.Is(err, logger.ErrLoggerNotRunning{}) {
 					fmt.Println("Error pushing record to data logger: ", err)
 				}
 
@@ -214,7 +215,7 @@ func main() {
 					Timestamp: packet.Timestamp,
 				})
 
-				if err != nil {
+				if err != nil && !errors.Is(err, logger.ErrLoggerNotRunning{}) {
 					fmt.Println("Error pushing record to info logger: ", err)
 				}
 
@@ -236,7 +237,7 @@ func main() {
 					Timestamp: packet.Timestamp,
 				})
 
-				if err != nil {
+				if err != nil && !errors.Is(err, logger.ErrLoggerNotRunning{}) {
 					fmt.Println("Error pushing record to info logger: ", err)
 				}
 
@@ -253,7 +254,7 @@ func main() {
 					Timestamp: packet.Timestamp,
 				})
 
-				if err != nil {
+				if err != nil && !errors.Is(err, logger.ErrLoggerNotRunning{}) {
 					fmt.Println("Error pushing record to state logger: ", err)
 				}
 
@@ -299,7 +300,7 @@ func main() {
 					Timestamp: packet.Timestamp(),
 				})
 
-				if err != nil {
+				if err != nil && !errors.Is(err, logger.ErrLoggerNotRunning{}) {
 					fmt.Println("Error pushing record to logger: ", err)
 				}
 			case logger_topic.EnableName:

@@ -40,6 +40,12 @@ func (err ErrLoggerNotRunning) Error() string {
 	return fmt.Sprintf("Error %s logger not running at %s", err.Name, err.Timestamp.Format(time.RFC3339))
 }
 
+func (err ErrLoggerNotRunning) Is(other error) bool {
+	_, ok := other.(ErrLoggerNotRunning)
+	_, okPtr := other.(*ErrLoggerNotRunning)
+	return ok || okPtr
+}
+
 type ErrWrongRecordType struct {
 	Name      abstraction.LoggerName
 	Timestamp time.Time
