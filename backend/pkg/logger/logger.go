@@ -154,7 +154,7 @@ func (logger *Logger) Stop() error {
 	defer logger.subloggersLock.Unlock()
 
 	if !logger.running.CompareAndSwap(true, false) {
-		fmt.Printf("Logger already stopped")
+		fmt.Println("Logger already stopped")
 		return nil
 	}
 

@@ -27,11 +27,13 @@ export type NumericDescription = AbstractFieldDescription & {
 
 export type BooleanDescription = AbstractFieldDescription & {
     readonly kind: "boolean";
+    readonly type: "bool";
 };
 
 export type EnumDescription = AbstractFieldDescription & {
     readonly kind: "enum";
     readonly options: string[];
+    readonly type: "enum";
 };
 
 // export type ArrayDescription = AbstractFieldDescription & {

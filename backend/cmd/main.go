@@ -17,14 +17,10 @@ import (
 
 	blcuPackage "github.com/HyperloopUPV-H8/h9-backend/internal/blcu"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/connection_transfer"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/data_transfer"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/excel"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/ade"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/utils"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/info"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/message_transfer"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/order_transfer"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/pod_data"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/server"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
@@ -34,6 +30,9 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker"
 	connection_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/connection"
 	data_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/data"
+	logger_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/logger"
+	message_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/message"
+	order_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/order"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tcp"
@@ -111,19 +110,10 @@ func main() {
 	}
 	config.Vehicle.Network.Interface = dev.Name
 
-	connectionTransfer := connection_transfer.New(config.Connections)
-
 	vehicleOrders, err := vehicle_models.NewVehicleOrders(podData.Boards, config.Excel.Parse.Global.BLCUAddressKey)
 	if err != nil {
 		trace.Fatal().Err(err).Msg("creating vehicleOrders")
 	}
-
-	// <--- data transfer --->
-	dataTransfer := data_transfer.New(config.DataTransfer)
-	go dataTransfer.Run()
-
-	// <--- message transfer --->
-	messageTransfer := message_transfer.New(config.Messages)
 
 	// <--- update factory --->
 	updateFactory := update_factory.NewFactory()
@@ -146,7 +136,6 @@ func main() {
 			idToBoard[packet.Id] = board.Name
 		}
 	}
-	orderTransfer, orderChannel := order_transfer.New(idToBoard)
 
 	// <--- blcu --->
 	var blcu blcuPackage.BLCU
@@ -154,16 +143,23 @@ func main() {
 
 	// <--- broker --->
 	broker := broker.New()
-	broker.SetAPI(&brokerAPI{
-		OnUserPush: func(push abstraction.BrokerPush) {},
-	})
 
 	dataTopic := data_topic.NewUpdateTopic(time.Second / 10)
 	defer dataTopic.Stop()
 	connectionTopic := connection_topic.NewUpdateTopic()
+	orderTopic := order_topic.NewSendTopic()
+	loggerTopic := logger_topic.NewEnableTopic()
+	boardIdToBoard := make(map[abstraction.BoardId]string)
+	for name, id := range info.BoardIds {
+		boardIdToBoard[abstraction.BoardId(id)] = name
+	}
+	messageTopic := message_topic.NewUpdateTopic(boardIdToBoard)
 
 	broker.AddTopic(data_topic.UpdateName, dataTopic)
 	broker.AddTopic(connection_topic.UpdateName, connectionTopic)
+	broker.AddTopic(order_topic.SendName, orderTopic)
+	broker.AddTopic(logger_topic.EnableName, loggerTopic)
+	broker.AddTopic(message_topic.UpdateName, messageTopic)
 
 	connections := make(chan *websocket.Client)
 	upgrader := websocket.NewUpgrader(connections)
@@ -206,7 +202,10 @@ func main() {
 				}
 
 			case *info_packet.Packet:
-				messageTransfer.SendMessage(p)
+				err := broker.Push(message_topic.Push(p))
+				if err != nil {
+					fmt.Println(err)
+				}
 
 				err = loggerHandler.PushRecord(&messages_logger.Record{
 					Packet:    p,
@@ -220,7 +219,10 @@ func main() {
 				}
 
 			case *protection.Packet:
-				messageTransfer.SendMessage(p)
+				err := broker.Push(message_topic.Push(p))
+				if err != nil {
+					fmt.Println(err)
+				}
 
 				newPacket := info_packet.NewPacket(p.Id())
 				newPacket.BoardId = p.BoardId
@@ -256,15 +258,73 @@ func main() {
 				}
 
 			case *order.Add:
-				orderTransfer.AddStateOrders(*p)
-
+				trace.Debug().Msg("adding order")
 			case *order.Remove:
-				orderTransfer.RemoveStateOrders(*p)
+				trace.Debug().Msg("removing order")
 			}
 		},
 
 		OnConnectionUpdate: func(target abstraction.TransportTarget, isConnected bool) {
 			connectionTopic.Push(connection_topic.NewConnection(string(target), isConnected))
+		},
+	})
+
+	// this is here because we need to use transport to send messages
+	broker.SetAPI(&brokerAPI{
+		OnUserPush: func(push abstraction.BrokerPush) {
+			switch push.Topic() {
+			case order_topic.SendName:
+				order, ok := push.(*order_topic.Order)
+				if !ok {
+					trace.Error().Any("push", push).Msg("error casting push to order")
+					return
+				}
+
+				packet, err := order.ToPacket()
+				if err != nil {
+					trace.Error().Any("order", order).Err(err).Msg("error converting order to packet")
+					return
+				}
+
+				err = transp.SendMessage(transport.NewPacketMessage(packet))
+				if err != nil {
+					trace.Error().Any("order", order).Err(err).Msg("error sending order")
+					return
+				}
+
+				err = loggerHandler.PushRecord(&order_logger.Record{
+					Packet:    packet,
+					From:      "backend",
+					To:        idToBoard[uint16(packet.Id())],
+					Timestamp: packet.Timestamp(),
+				})
+
+				if err != nil {
+					fmt.Println("Error pushing record to logger: ", err)
+				}
+			case logger_topic.EnableName:
+				status, ok := push.(*logger_topic.Status)
+				if !ok {
+					trace.Error().Any("push", push).Msg("error casting push to enable")
+					fmt.Printf("Push Type: %v\n", push)
+					return
+				}
+
+				var err error
+				if status.Enable() {
+					err = loggerHandler.Start()
+				} else {
+					err = loggerHandler.Stop()
+				}
+
+				if err != nil {
+					status.Fulfill(!status.Enable())
+				} else {
+					status.Fulfill(status.Enable())
+				}
+			default:
+				fmt.Printf("unknow topic %s\n", push.Topic())
+			}
 		},
 	})
 
@@ -311,27 +371,6 @@ func main() {
 	}
 	go transp.HandleSniffer(sniffer.New(source, &layers.LayerTypeEthernet))
 
-	// <--- order transfer --->
-	go func() {
-		for order := range orderChannel {
-			err := transp.SendMessage(transport.NewPacketMessage(&order))
-			if err != nil {
-				trace.Error().Any("order", order).Err(err).Msg("error sending order")
-			}
-
-			err = loggerHandler.PushRecord(&order_logger.Record{
-				Packet:    &order,
-				From:      "backend",
-				To:        idToBoard[uint16(order.Id())],
-				Timestamp: order.Timestamp(),
-			})
-
-			if err != nil {
-				fmt.Println("Error pushing record to logger: ", err)
-			}
-		}
-	}()
-
 	// <--- blcu --->
 	if useBlcu {
 		blcu = blcuPackage.NewBLCU(net.TCPAddr{
@@ -351,12 +390,6 @@ func main() {
 	if useBlcu {
 		websocketBroker.RegisterHandle(&blcu, config.BLCU.Topics.Upload, config.BLCU.Topics.Download)
 	}
-
-	websocketBroker.RegisterHandle(&connectionTransfer, config.Connections.UpdateTopic, "connection/update")
-	websocketBroker.RegisterHandle(&dataTransfer, "podData/update")
-	websocketBroker.RegisterHandle(loggerHandler, config.LoggerHandler.Topics.Enable)
-	websocketBroker.RegisterHandle(&messageTransfer, "message/update")
-	websocketBroker.RegisterHandle(&orderTransfer, config.Orders.SendTopic, "order/stateOrders")
 
 	uploadableBords := common.Filter(common.Keys(info.Addresses.Boards), func(item string) bool {
 		return item != config.Excel.Parse.Global.BLCUAddressKey
@@ -568,6 +601,8 @@ func getTransportDecEnc(info info.Info, podData pod_data.PodData) (*presentation
 	protectionDecoder := protection.NewDecoder()
 	protectionDecoder.SetSeverity(abstraction.PacketId(info.MessageIds.Warning), protection.SeverityWarning)
 	protectionDecoder.SetSeverity(abstraction.PacketId(info.MessageIds.Fault), protection.SeverityFault)
+	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds.Warning), protectionDecoder)
+	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds.Fault), protectionDecoder)
 
 	return decoder, encoder
 }
