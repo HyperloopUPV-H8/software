@@ -51,6 +51,30 @@ func (sublogger *Logger) Start() error {
 		return nil
 	}
 
+	filename := path.Join(
+		"logger/order",
+		fmt.Sprintf("order_%s", logger.Timestamp.Format(time.RFC3339)),
+		"order.csv",
+	)
+	err := os.MkdirAll(path.Dir(filename), os.ModePerm)
+	if err != nil {
+		return logger.ErrCreatingAllDir{
+			Name:      Name,
+			Timestamp: time.Now(),
+			Path:      filename,
+		}
+	}
+
+	file, err := os.Create(filename)
+	if err != nil {
+		return logger.ErrCreatingFile{
+			Name:      Name,
+			Timestamp: time.Now(),
+			Inner:     err,
+		}
+	}
+	sublogger.writer = file
+
 	fmt.Println("Logger started")
 	return nil
 }
@@ -76,32 +100,6 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	sublogger.fileLock.Lock()
 	defer sublogger.fileLock.Unlock()
 
-	if sublogger.writer == nil {
-		filename := path.Join(
-			"logger/order",
-			fmt.Sprintf("order_%s", logger.Timestamp.Format(time.RFC3339)),
-			"order.csv",
-		)
-		err := os.MkdirAll(path.Dir(filename), os.ModePerm)
-		if err != nil {
-			return logger.ErrCreatingAllDir{
-				Name:      Name,
-				Timestamp: time.Now(),
-				Path:      filename,
-			}
-		}
-
-		file, err := os.Create(filename)
-		if err != nil {
-			return logger.ErrCreatingFile{
-				Name:      Name,
-				Timestamp: time.Now(),
-				Inner:     err,
-			}
-		}
-		sublogger.writer = file
-	}
-
 	csvWriter := csv.NewWriter(sublogger.writer)
 	defer csvWriter.Flush()
 
@@ -109,10 +107,10 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	val := fmt.Sprint(orderRecord.Packet.GetValues())
 	err := csvWriter.Write([]string{
 		timestamp,
-		fmt.Sprint(orderRecord.Packet.Id()),
-		val,
 		orderRecord.From,
 		orderRecord.To,
+		fmt.Sprint(orderRecord.Packet.Id()),
+		val,
 		orderRecord.Timestamp.Format(time.RFC3339),
 	})
 	if err != nil {

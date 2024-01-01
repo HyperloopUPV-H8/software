@@ -122,9 +122,11 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	defer writer.Flush()
 
 	err := writer.Write([]string{
+		infoRecord.Timestamp.Format(time.RFC3339),
+		infoRecord.From,
+		infoRecord.To,
 		timestamp,
 		msg,
-		infoRecord.From, infoRecord.To, infoRecord.Timestamp.Format(time.RFC3339),
 	})
 	if err != nil {
 		writerErr = err

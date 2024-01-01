@@ -38,19 +38,19 @@ func (logger Logger) UpdateMessage(_ wsModels.Client, message wsModels.Message) 
 	err := json.Unmarshal(message.Payload, &enable)
 	if err != nil {
 		if err != nil {
-			fmt.Printf(ErrStoppingLogger{
+			fmt.Println(ErrStoppingLogger{
 				Name:      Name,
 				Timestamp: time.Now(),
 			}.Error())
 		}
-		fmt.Printf("Error unmarshalling enable message")
+		fmt.Println("Error unmarshalling enable message")
 		return
 	}
 
 	if enable {
 		err := logger.Start()
 		if err != nil {
-			fmt.Printf(ErrStartingLogger{
+			fmt.Println(ErrStartingLogger{
 				Name:      Name,
 				Timestamp: time.Now(),
 			}.Error())
@@ -59,7 +59,7 @@ func (logger Logger) UpdateMessage(_ wsModels.Client, message wsModels.Message) 
 	} else {
 		err := logger.Stop()
 		if err != nil {
-			fmt.Printf(ErrStoppingLogger{
+			fmt.Println(ErrStoppingLogger{
 				Name:      Name,
 				Timestamp: time.Now(),
 			}.Error())
@@ -108,7 +108,7 @@ func (logger *Logger) Start() error {
 	for _, key := range logger.subloggers {
 		err := key.Start()
 		if err != nil {
-			fmt.Printf(ErrStartingLogger{
+			fmt.Println(ErrStartingLogger{
 				Name:      Name,
 				Timestamp: time.Now(),
 			}.Error())
@@ -121,23 +121,12 @@ func (logger *Logger) Start() error {
 
 // PushRecord works as a proxy for the PushRecord method of the subloggers
 func (logger *Logger) PushRecord(record abstraction.LoggerRecord) error {
-	objectiveLogger := record.Name()
-
-	for name, logger := range logger.subloggers {
-		if name == objectiveLogger {
-			err := logger.PushRecord(record)
-			if err != nil {
-				return ErrPushingRecord{
-					Name:      Name,
-					Timestamp: time.Now(),
-					Inner:     err,
-				}
-			}
-			return nil
-		}
+	sublogger, ok := logger.subloggers[record.Name()]
+	if !ok {
+		return ErrLoggerNotFound{record.Name()}
 	}
 
-	return ErrLoggerNotFound{objectiveLogger}
+	return sublogger.PushRecord(record)
 }
 
 // PullRecord works as a proxy for the PullRecord method of the subloggers

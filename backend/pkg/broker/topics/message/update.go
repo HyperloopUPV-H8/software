@@ -66,7 +66,7 @@ func (update *Update) Push(p abstraction.BrokerPush) error {
 	}
 
 	for _, id := range flagged {
-		update.pool.Disconnect(id, ws.CloseUnsupportedData, "unsupported topic")
+		update.pool.Disconnect(id, ws.CloseUnsupportedData, "client disconnected")
 		delete(update.subscribers, id)
 		fmt.Printf("message/update unsubscribed %s\n", uuid.UUID(id).String())
 	}

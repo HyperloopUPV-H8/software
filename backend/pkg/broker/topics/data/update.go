@@ -114,7 +114,7 @@ func (update *Update) send() error {
 	}
 
 	for _, id := range flaged {
-		update.pool.Disconnect(id, ws.CloseInternalServerErr, err.Error())
+		update.pool.Disconnect(id, ws.CloseInternalServerErr, "client disconnected")
 		delete(update.subscribers, id)
 		fmt.Printf("podData/update unsubscribed %s\n", uuid.UUID(id).String())
 	}
