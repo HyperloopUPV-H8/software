@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"path"
 	"sync/atomic"
 	"time"
 
@@ -16,17 +17,26 @@ const (
 	Name abstraction.LoggerName = "state"
 )
 
-type Record struct {
-	packet *state.Space
-}
-
-func (record *Record) Name() abstraction.LoggerName {
-	return Name
-}
-
 type Logger struct {
 	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
 	running *atomic.Bool
+}
+
+type Record struct {
+	Packet    *state.Space
+	From      string
+	To        string
+	Timestamp time.Time
+}
+
+func (*Record) Name() abstraction.LoggerName {
+	return Name
+}
+
+func NewLogger() *Logger {
+	return &Logger{
+		running: &atomic.Bool{},
+	}
 }
 
 func (sublogger *Logger) Start() error {
@@ -41,7 +51,7 @@ func (sublogger *Logger) Start() error {
 
 func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	if !sublogger.running.Load() {
-		return &logger.ErrLoggerNotRunning{
+		return logger.ErrLoggerNotRunning{
 			Name:      Name,
 			Timestamp: time.Now(),
 		}
@@ -49,7 +59,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 	stateRecord, ok := record.(*Record)
 	if !ok {
-		return &logger.ErrWrongRecordType{
+		return logger.ErrWrongRecordType{
 			Name:      Name,
 			Timestamp: time.Now(),
 			Expected:  &Record{},
@@ -57,9 +67,23 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		}
 	}
 
-	file, err := os.Create(fmt.Sprintf("state_" + time.Now().Format(time.RFC3339) + ".csv"))
+	filename := path.Join(
+		"logger/state",
+		fmt.Sprintf("state_%s", logger.Timestamp.Format(time.RFC3339)),
+		fmt.Sprintf("state_%s.csv", time.Now().Format(time.RFC3339)),
+	)
+	err := os.MkdirAll(path.Dir(filename), os.ModePerm)
 	if err != nil {
-		return &logger.ErrCreatingFile{
+		return logger.ErrCreatingAllDir{
+			Name:      Name,
+			Timestamp: time.Now(),
+			Path:      filename,
+		}
+	}
+
+	file, err := os.Create(filename)
+	if err != nil {
+		return logger.ErrCreatingFile{
 			Name:      Name,
 			Timestamp: time.Now(),
 			Inner:     err,
@@ -67,18 +91,25 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	}
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
+	defer func(file *os.File) {
+		_ = file.Close()
+	}(file)
 
-	for _, item := range stateRecord.packet.State() {
+	for _, item := range stateRecord.Packet.State() {
 		err = writer.Write([]string{fmt.Sprint(item)})
 		if err != nil {
-			return err
+			return logger.ErrWritingFile{
+				Name:      Name,
+				Timestamp: time.Now(),
+				Inner:     err,
+			}
 		}
 	}
 
 	return nil
 }
 
-func (sublogger *Logger) PullRecord() (abstraction.LoggerRecord, error) {
+func (sublogger *Logger) PullRecord(abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
 	panic("TODO!")
 }
 

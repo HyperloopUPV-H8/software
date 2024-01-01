@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
+	loggerHandler "github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 )
 
@@ -25,19 +25,29 @@ type Logger struct {
 	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
 	running  *atomic.Bool
 	fileLock *sync.RWMutex
-	// initialTime fixes the starting time of the log
-	initialTime time.Time
 	// valueFileSlice is a map that contains the file of each value
 	valueFileSlice map[data.ValueName]io.WriteCloser
 }
 
 // Record is a struct that implements the abstraction.LoggerRecord interface
 type Record struct {
-	packet *data.Packet
+	Packet    *data.Packet
+	From      string
+	To        string
+	Timestamp time.Time
 }
 
-func (data *Record) Name() abstraction.LoggerName {
-	return Name
+func (*Record) Name() abstraction.LoggerName { return Name }
+
+func NewLogger() *Logger {
+	logger := &Logger{
+		valueFileSlice: make(map[data.ValueName]io.WriteCloser),
+		running:        &atomic.Bool{},
+		fileLock:       &sync.RWMutex{},
+	}
+
+	logger.running.Store(false)
+	return logger
 }
 
 func (sublogger *Logger) Start() error {
@@ -45,7 +55,6 @@ func (sublogger *Logger) Start() error {
 		fmt.Println("Logger already running")
 		return nil
 	}
-	sublogger.initialTime = time.Now()
 
 	fmt.Println("Logger started")
 	return nil
@@ -58,7 +67,7 @@ type numeric interface {
 
 func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	if !sublogger.running.Load() {
-		return &logger.ErrLoggerNotRunning{
+		return loggerHandler.ErrLoggerNotRunning{
 			Name:      Name,
 			Timestamp: time.Now(),
 		}
@@ -66,7 +75,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 	dataRecord, ok := record.(*Record)
 	if !ok {
-		return &logger.ErrWrongRecordType{
+		return loggerHandler.ErrWrongRecordType{
 			Name:      Name,
 			Timestamp: time.Now(),
 			Expected:  &Record{},
@@ -74,15 +83,15 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		}
 	}
 
-	valueMap := dataRecord.packet.GetValues()
+	valueMap := dataRecord.Packet.GetValues()
 
 	sublogger.fileLock.Lock()
 	defer sublogger.fileLock.Unlock()
 
 	writerErr := error(nil)
 	for valueName, value := range valueMap {
-		var packet *Record
-		timestamp := packet.packet.Timestamp()
+
+		timestamp := dataRecord.Packet.Timestamp()
 
 		var val string
 
@@ -99,9 +108,23 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 		file, ok := sublogger.valueFileSlice[valueName]
 		if !ok {
-			f, err := os.Create(path.Join(string(valueName), fmt.Sprintf("%s_%s.csv", valueName, packet.packet.Timestamp().Format("3339"))))
+			filename := path.Join(
+				"loggerHandler/data",
+				fmt.Sprintf("data_%s", loggerHandler.Timestamp.Format(time.RFC3339)),
+				fmt.Sprintf("%s.csv", valueName),
+			)
+			err := os.MkdirAll(path.Dir(filename), os.ModePerm)
 			if err != nil {
-				return &logger.ErrCreatingFile{
+				return loggerHandler.ErrCreatingAllDir{
+					Name:      Name,
+					Timestamp: time.Now(),
+					Path:      filename,
+				}
+			}
+
+			f, err := os.Create(path.Join(filename))
+			if err != nil {
+				return loggerHandler.ErrCreatingFile{
 					Name:      Name,
 					Timestamp: time.Now(),
 					Inner:     err,
@@ -110,26 +133,50 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 			sublogger.valueFileSlice[valueName] = f
 			file = f
 		}
-		writer := csv.NewWriter(file) // TODO! use map/slice of writers
-		defer writer.Flush()
+		writer := csv.NewWriter(file) // TODO! use map/slice of writer
 
-		err := writer.Write([]string{timestamp.Format(time.RFC3339), val})
+		err := writer.Write([]string{
+			timestamp.Format(time.RFC3339),
+			val,
+			dataRecord.From,
+			dataRecord.To,
+			dataRecord.Timestamp.Format(time.RFC3339),
+		})
 		if err != nil {
-			writerErr = err
+			writerErr = loggerHandler.ErrWritingFile{
+				Name:      Name,
+				Timestamp: time.Now(),
+				Inner:     err,
+			}
 		}
+		writer.Flush()
 	}
 	return writerErr
 }
 
-func (sublogger *Logger) PullRecord(request abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
+func (sublogger *Logger) PullRecord(abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
 	panic("TODO!")
 }
 
-func Stop(sublogger *Logger) {
+func (sublogger *Logger) Stop() error {
 	if !sublogger.running.CompareAndSwap(true, false) {
 		fmt.Println("Logger already stopped")
-		return
+		return nil
+	}
+
+	closeErr := error(nil)
+	for _, file := range sublogger.valueFileSlice {
+		err := file.Close()
+		if err != nil {
+			closeErr = loggerHandler.ErrClosingFile{
+				Name:      Name,
+				Timestamp: time.Now(),
+			}
+
+			fmt.Println(closeErr.Error())
+		}
 	}
 
 	fmt.Println("Logger stopped")
+	return closeErr
 }

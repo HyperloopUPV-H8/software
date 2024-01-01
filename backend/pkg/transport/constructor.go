@@ -2,6 +2,7 @@ package transport
 
 import (
 	"net"
+	"sync"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tftp"
@@ -10,8 +11,9 @@ import (
 
 func NewTransport() *Transport {
 	return &Transport{
-		connections: make(map[abstraction.TransportTarget]net.Conn),
-		idToTarget:  make(map[abstraction.PacketId]abstraction.TransportTarget),
+		connectionsMx: &sync.Mutex{},
+		connections:   make(map[abstraction.TransportTarget]net.Conn),
+		idToTarget:    make(map[abstraction.PacketId]abstraction.TransportTarget),
 	}
 }
 
