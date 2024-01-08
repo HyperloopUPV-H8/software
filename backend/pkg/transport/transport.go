@@ -45,7 +45,7 @@ func (transport *Transport) HandleClient(config tcp.ClientConfig, target abstrac
 		conn, err := config.Dial(network, remote)
 		if err != nil {
 			if !errors.Is(err, error(tcp.ErrTooManyRetries{})) {
-				return err
+				fmt.Println(err)
 			}
 
 			continue
@@ -53,7 +53,7 @@ func (transport *Transport) HandleClient(config tcp.ClientConfig, target abstrac
 
 		err = transport.handleTCPConn(target, conn)
 		if errors.Is(err, error(ErrTargetAlreadyConnected{})) {
-			return err
+			fmt.Println(err)
 		}
 
 		// Wait before trying to reconnect
