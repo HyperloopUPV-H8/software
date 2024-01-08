@@ -21,7 +21,6 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/utils"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/info"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/pod_data"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/server"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
 	vehicle_models "github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
@@ -31,6 +30,12 @@ import (
 	logger_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/logger"
 	message_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/message"
 	order_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/order"
+	h "github.com/HyperloopUPV-H8/h9-backend/pkg/http"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
+	data_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/data"
+	messages_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/messages"
+	order_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/order"
+	state_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/state"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tcp"
@@ -47,12 +52,6 @@ import (
 	"github.com/google/gopacket/pcap"
 	"github.com/pelletier/go-toml/v2"
 	trace "github.com/rs/zerolog/log"
-
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
-	data_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/data"
-	messages_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/messages"
-	order_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/order"
-	state_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/state"
 )
 
 var traceLevel = flag.String("trace", "info", "set the trace level (\"fatal\", \"error\", \"warn\", \"info\", \"debug\", \"trace\")")
@@ -106,7 +105,6 @@ func main() {
 		trace.Fatal().Err(err).Msg("Error selecting device")
 		panic(err)
 	}
-	config.Vehicle.Network.Interface = dev.Name
 
 	vehicleOrders, err := vehicle_models.NewVehicleOrders(podData.Boards, config.Excel.Parse.Global.BLCUAddressKey)
 	if err != nil {
@@ -224,36 +222,41 @@ func main() {
 	vehicle.SetTransport(transp)
 
 	// <--- http server --->
+	podDataHandle, err := h.HandleDataJSON("podData.json", pod_data.GetDataOnlyPodData(podData))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error creating podData handler: %v\n", err)
+	}
+	orderDataHandle, err := h.HandleDataJSON("orderData.json", vehicleOrders)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error creating orderData handler: %v\n", err)
+	}
 	uploadableBords := common.Filter(common.Keys(info.Addresses.Boards), func(item string) bool {
 		return item != config.Excel.Parse.Global.BLCUAddressKey
 	})
-
-	endpointData := server.EndpointData{
-		PodData:           pod_data.GetDataOnlyPodData(podData),
-		OrderData:         vehicleOrders,
-		ProgramableBoards: uploadableBords,
-	}
-
-	serverHandler, err := server.New(upgrader, endpointData, config.Server)
+	programableBoardsHandle, err := h.HandleDataJSON("programableBoards.json", uploadableBords)
 	if err != nil {
-		trace.Fatal().Err(err).Msg("Error creating server")
-		panic(err)
+		fmt.Fprintf(os.Stderr, "error creating programableBoards handler: %v\n", err)
 	}
 
-	errs := serverHandler.ListenAndServe()
+	for _, server := range config.Server {
+		mux := h.NewMux(
+			h.Endpoint("/backend"+server.Endpoints.PodData, podDataHandle),
+			h.Endpoint("/backend"+server.Endpoints.OrderData, orderDataHandle),
+			h.Endpoint("/backend"+server.Endpoints.ProgramableBoards, programableBoardsHandle),
+			h.Endpoint(server.Endpoints.Connections, upgrader),
+			h.Endpoint(server.Endpoints.Files, h.HandleStatic(server.StaticPath)),
+		)
+
+		httpServer := h.NewServer(server.Addr, mux)
+		go httpServer.ListenAndServe()
+	}
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
-	for {
-		select {
-		case err := <-errs:
-			trace.Error().Err(err).Msg("Error in server")
-
-		case <-interrupt:
-			trace.Info().Msg("Shutting down")
-			return
-		}
+	for range interrupt {
+		trace.Info().Msg("Shutting down")
+		return
 	}
 }
 
