@@ -6,13 +6,32 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 )
 
-// ErrUnknownKind is returned when the protection kind is not defined
-type ErrUnknownKind struct {
-	Kind kind
+// ErrUnknownBound is returned when the protection kind is not defined
+type ErrUnknownBound struct {
+	Bound Bound
 }
 
-func (err ErrUnknownKind) Error() string {
-	return fmt.Sprintf("unrecognized kind %s", err.Kind)
+func (err ErrUnknownBound) Error() string {
+	var bound string
+	switch err.Bound {
+	case BelowBound:
+		bound = "below"
+	case AboveBound:
+		bound = "above"
+	case OutOfBoundsBound:
+		bound = "out of bounds"
+	case EqualsBound:
+		bound = "equals"
+	case NotEqualsBound:
+		bound = "not equals"
+	case ErrorHandlerBound:
+		bound = "error handler"
+	case TimeAccumulationBound:
+		bound = "time accumulation"
+	default:
+		bound = fmt.Sprint(err.Bound)
+	}
+	return fmt.Sprintf("unrecognized kind %s", bound)
 }
 
 // ErrUnknownSeverity is returned when the severity of the protection is unknown
