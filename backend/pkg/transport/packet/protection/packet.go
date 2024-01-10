@@ -34,6 +34,7 @@ package protection
 import (
 	"encoding/binary"
 	"io"
+	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 )
@@ -139,4 +140,8 @@ func decodeTimestamp(reader io.Reader, endianness binary.ByteOrder) (*Timestamp,
 	packet := new(Timestamp)
 	err := binary.Read(reader, endianness, packet)
 	return packet, err
+}
+
+func (timestamp *Timestamp) ToTime() time.Time {
+	return time.Date(int(timestamp.Year), time.Month(timestamp.Month), int(timestamp.Day), int(timestamp.Hour), int(timestamp.Minute), int(timestamp.Second), 0, time.UTC)
 }

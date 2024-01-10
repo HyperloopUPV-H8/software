@@ -1,4 +1,4 @@
-package messages
+package protection
 
 import (
 	"encoding/csv"
@@ -12,11 +12,11 @@ import (
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/info"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/protection"
 )
 
 const (
-	Name abstraction.LoggerName = "messages"
+	Name abstraction.LoggerName = "protections"
 )
 
 type Logger struct {
@@ -31,7 +31,8 @@ type Logger struct {
 
 // Record is a struct that implements the abstraction.LoggerRecord interface
 type Record struct {
-	Packet    *info.Packet
+	Packet    *protection.Packet
+	BoardId   abstraction.BoardId
 	From      string
 	To        string
 	Timestamp time.Time
@@ -76,26 +77,22 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		}
 	}
 
-	boardId := infoRecord.Packet.BoardId
-	timestamp := infoRecord.Packet.Timestamp.ToTime().Format(time.RFC3339)
-	msg := string(infoRecord.Packet.Msg)
-
 	sublogger.fileLock.Lock()
 	defer sublogger.fileLock.Unlock()
 
 	writerErr := error(nil)
 
 	// The existence check is performed with the board ID
-	file, ok := sublogger.infoIdMap[boardId]
+	file, ok := sublogger.infoIdMap[infoRecord.BoardId]
 	if !ok {
-		boardName, ok := sublogger.boardNames[boardId]
+		boardName, ok := sublogger.boardNames[infoRecord.BoardId]
 		if !ok {
-			boardName = fmt.Sprint(boardId)
+			boardName = fmt.Sprint(infoRecord.BoardId)
 		}
 
 		filename := path.Join(
-			"logger/messages",
-			fmt.Sprintf("messages_%s", logger.Timestamp.Format(time.RFC3339)),
+			"logger/protections",
+			fmt.Sprintf("protections_%s", logger.Timestamp.Format(time.RFC3339)),
 			fmt.Sprintf("%s.csv", boardName),
 		)
 		err := os.MkdirAll(path.Dir(filename), os.ModePerm)
@@ -115,7 +112,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 				Inner:     err,
 			}
 		}
-		sublogger.infoIdMap[boardId] = f
+		sublogger.infoIdMap[infoRecord.BoardId] = f
 		file = f
 	}
 	writer := csv.NewWriter(file)
@@ -125,8 +122,12 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		infoRecord.Timestamp.Format(time.RFC3339),
 		infoRecord.From,
 		infoRecord.To,
-		timestamp,
-		msg,
+		fmt.Sprint(infoRecord.Packet.Id()),
+		fmt.Sprint(infoRecord.Packet.Type),
+		fmt.Sprint(infoRecord.Packet.Kind),
+		infoRecord.Packet.Name,
+		fmt.Sprint(infoRecord.Packet.Data),
+		infoRecord.Packet.Timestamp.ToTime().Format(time.RFC3339),
 	})
 	if err != nil {
 		writerErr = err
