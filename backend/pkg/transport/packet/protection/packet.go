@@ -111,6 +111,7 @@ const (
 
 // Data is a common interface to all the possible protection kinds.
 type Data interface {
+	Name() string
 	Kind() Kind
 }
 
@@ -127,13 +128,13 @@ var (
 
 // Timestamp is the Timestamp of the protection generated from the RTC.
 type Timestamp struct {
-	Counter uint16
-	Second  uint8
-	Minute  uint8
-	Hour    uint8
-	Day     uint8
-	Month   uint8
-	Year    uint16
+	Counter uint16 `json:"counter"`
+	Second  uint8  `json:"second"`
+	Minute  uint8  `json:"minute"`
+	Hour    uint8  `json:"hour"`
+	Day     uint8  `json:"day"`
+	Month   uint8  `json:"month"`
+	Year    uint16 `json:"year"`
 }
 
 func decodeTimestamp(reader io.Reader, endianness binary.ByteOrder) (*Timestamp, error) {
