@@ -10,10 +10,8 @@ import (
 	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/blcu"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/info"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/order"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/protection"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/state"
@@ -47,116 +45,6 @@ func TestDecoder(t *testing.T) {
 			},
 		},
 		{
-			name: "info",
-			input: bytes.NewReader(join(
-				[]byte{0x02, 0x00},
-				[]byte(
-					`{
-	"boardId": 1,
-	"timestamp": {
-		"counter": 1,
-		"second": 2,
-		"minute": 3,
-		"hour": 4,
-		"day": 5,
-		"month": 6,
-		"year": 7
-	},
-	"msg": "hello, world!\n"
-}`,
-				),
-				[]byte{0x00},
-			)),
-			output: []abstraction.Packet{
-				func() abstraction.Packet {
-					p := info.NewPacket(2)
-					p.BoardId = 1
-					p.Timestamp = packet.Timestamp{
-						Counter: 1,
-						Second:  2,
-						Minute:  3,
-						Hour:    4,
-						Day:     5,
-						Month:   6,
-						Year:    7,
-					}
-					p.Msg = "hello, world!\n"
-					return p
-				}(),
-			},
-		},
-		{
-			name: "multiple info",
-			input: bytes.NewReader(join(
-				[]byte{0x02, 0x00},
-				[]byte(
-					`{
-	"boardId": 1,
-	"timestamp": {
-		"counter": 1,
-		"second": 2,
-		"minute": 3,
-		"hour": 4,
-		"day": 5,
-		"month": 6,
-		"year": 7
-	},
-	"msg": "hello, world!\n"
-}`,
-				),
-				[]byte{0x00},
-				[]byte{0x02, 0x00},
-				[]byte(
-					`{
-	"boardId": 2,
-	"timestamp": {
-		"counter": 2,
-		"second": 3,
-		"minute": 4,
-		"hour": 5,
-		"day": 6,
-		"month": 7,
-		"year": 8
-	},
-	"msg": "goodbye, world :(\n"
-}`,
-				),
-				[]byte{0x00},
-			)),
-			output: []abstraction.Packet{
-				func() abstraction.Packet {
-					p := info.NewPacket(2)
-					p.BoardId = 1
-					p.Timestamp = packet.Timestamp{
-						Counter: 1,
-						Second:  2,
-						Minute:  3,
-						Hour:    4,
-						Day:     5,
-						Month:   6,
-						Year:    7,
-					}
-					p.Msg = "hello, world!\n"
-					return p
-				}(),
-				func() abstraction.Packet {
-					p := info.NewPacket(2)
-					p.BoardId = 2
-					p.Timestamp = packet.Timestamp{
-						Counter: 2,
-						Second:  3,
-						Minute:  4,
-						Hour:    5,
-						Day:     6,
-						Month:   7,
-						Year:    8,
-					}
-					p.Msg = "goodbye, world :(\n"
-					return p
-				}(),
-			},
-		},
-		{
 			name:  "state orders add",
 			input: bytes.NewReader([]byte{0x03, 0x00, 0x01, 0x00, 0xFF, 0xFF}),
 			output: []abstraction.Packet{
@@ -185,407 +73,75 @@ func TestDecoder(t *testing.T) {
 			name: "all protection kinds",
 			input: bytes.NewReader(join(
 				[]byte{0x05, 0x00},
-				[]byte(
-					`{
-	"boardId": 1,
-	"timestamp": {
-		"counter": 1,
-		"second": 2,
-		"minute": 3,
-		"hour": 4,
-		"day": 5,
-		"month": 6,
-		"year": 7
-	},
-	"protection": {
-		"name": "out of bounds",
-		"type": "OUT_OF_BOUNDS",
-		"data": {
-			"value": 5.5,
-			"bounds": [0, 3]
-		}
-	}
-}`,
-				),
-				[]byte{0x00},
-				[]byte{0x05, 0x00},
-				[]byte(
-					`{
-	"boardId": 1,
-	"timestamp": {
-		"counter": 1,
-		"second": 2,
-		"minute": 3,
-		"hour": 4,
-		"day": 5,
-		"month": 6,
-		"year": 7
-	},
-	"protection": {
-		"name": "upper bound",
-		"type": "UPPER_BOUND",
-		"data": {
-			"value": 5.5,
-			"bound": 3
-		}
-	}
-}`,
-				),
-				[]byte{0x00},
-				[]byte{0x05, 0x00},
-				[]byte(
-					`{
-	"boardId": 1,
-	"timestamp": {
-		"counter": 1,
-		"second": 2,
-		"minute": 3,
-		"hour": 4,
-		"day": 5,
-		"month": 6,
-		"year": 7
-	},
-	"protection": {
-		"name": "lower bound",
-		"type": "LOWER_BOUND",
-		"data": {
-			"value": 5.5,
-			"bound": 6
-		}
-	}
-}`,
-				),
-				[]byte{0x00},
-				[]byte{0x05, 0x00},
-				[]byte(
-					`{
-	"boardId": 1,
-	"timestamp": {
-		"counter": 1,
-		"second": 2,
-		"minute": 3,
-		"hour": 4,
-		"day": 5,
-		"month": 6,
-		"year": 7
-	},
-	"protection": {
-		"name": "equals",
-		"type": "EQUALS",
-		"data": {
-			"value": 5.5
-		}
-	}
-}`,
-				),
-				[]byte{0x00},
-				[]byte{0x05, 0x00},
-				[]byte(
-					`{
-	"boardId": 1,
-	"timestamp": {
-		"counter": 1,
-		"second": 2,
-		"minute": 3,
-		"hour": 4,
-		"day": 5,
-		"month": 6,
-		"year": 7
-	},
-	"protection": {
-		"name": "not equals",
-		"type": "NOT_EQUALS",
-		"data": {
-			"value": 5.5,
-			"want": 5
-		}
-	}
-}`,
-				),
-				[]byte{0x00},
-				[]byte{0x05, 0x00},
-				[]byte(
-					`{
-	"boardId": 1,
-	"timestamp": {
-		"counter": 1,
-		"second": 2,
-		"minute": 3,
-		"hour": 4,
-		"day": 5,
-		"month": 6,
-		"year": 7
-	},
-	"protection": {
-		"name": "time accumulation",
-		"type": "TIME_ACCUMULATION",
-		"data": {
-			"value": 5.5,
-			"bound": 5,
-			"timelimit": 2.5
-		}
-	}
-}`,
-				),
-				[]byte{0x00},
-				[]byte{0x05, 0x00},
-				[]byte(
-					`{
-	"boardId": 1,
-	"timestamp": {
-		"counter": 1,
-		"second": 2,
-		"minute": 3,
-		"hour": 4,
-		"day": 5,
-		"month": 6,
-		"year": 7
-	},
-	"protection": {
-		"name": "error handler",
-		"type": "ERROR_HANDLER",
-		"data": "something to warn about\n"
-	}
-}`,
-				),
-				[]byte{0x00},
-			)),
-			output: []abstraction.Packet{
-				func() abstraction.Packet {
-					p := protection.NewPacket(5, protection.SeverityWarning)
-					p.BoardId = 1
-					p.Timestamp = packet.Timestamp{
-						Counter: 1,
-						Second:  2,
-						Minute:  3,
-						Hour:    4,
-						Day:     5,
-						Month:   6,
-						Year:    7,
-					}
-					p.Protection = protection.Protection{
-						Name: "out of bounds",
-						Type: protection.OutOfBoundsKind,
-						Data: &protection.OutOfBounds{
-							Value:  5.5,
-							Bounds: [2]float64{0, 3},
-						},
-					}
-					return p
-				}(),
-				func() abstraction.Packet {
-					p := protection.NewPacket(5, protection.SeverityWarning)
-					p.BoardId = 1
-					p.Timestamp = packet.Timestamp{
-						Counter: 1,
-						Second:  2,
-						Minute:  3,
-						Hour:    4,
-						Day:     5,
-						Month:   6,
-						Year:    7,
-					}
-					p.Protection = protection.Protection{
-						Name: "upper bound",
-						Type: protection.UpperBoundKind,
-						Data: &protection.UpperBound{
-							Value: 5.5,
-							Bound: 3,
-						},
-					}
-					return p
-				}(),
-				func() abstraction.Packet {
-					p := protection.NewPacket(5, protection.SeverityWarning)
-					p.BoardId = 1
-					p.Timestamp = packet.Timestamp{
-						Counter: 1,
-						Second:  2,
-						Minute:  3,
-						Hour:    4,
-						Day:     5,
-						Month:   6,
-						Year:    7,
-					}
-					p.Protection = protection.Protection{
-						Name: "lower bound",
-						Type: protection.LowerBoundKind,
-						Data: &protection.LowerBound{
-							Value: 5.5,
-							Bound: 6,
-						},
-					}
-					return p
-				}(),
-				func() abstraction.Packet {
-					p := protection.NewPacket(5, protection.SeverityWarning)
-					p.BoardId = 1
-					p.Timestamp = packet.Timestamp{
-						Counter: 1,
-						Second:  2,
-						Minute:  3,
-						Hour:    4,
-						Day:     5,
-						Month:   6,
-						Year:    7,
-					}
-					p.Protection = protection.Protection{
-						Name: "equals",
-						Type: protection.EqualsKind,
-						Data: &protection.Equals{
-							Value: 5.5,
-						},
-					}
-					return p
-				}(),
-				func() abstraction.Packet {
-					p := protection.NewPacket(5, protection.SeverityWarning)
-					p.BoardId = 1
-					p.Timestamp = packet.Timestamp{
-						Counter: 1,
-						Second:  2,
-						Minute:  3,
-						Hour:    4,
-						Day:     5,
-						Month:   6,
-						Year:    7,
-					}
-					p.Protection = protection.Protection{
-						Name: "not equals",
-						Type: protection.NotEqualsKind,
-						Data: &protection.NotEquals{
-							Value: 5.5,
-							Want:  5,
-						},
-					}
-					return p
-				}(),
-				func() abstraction.Packet {
-					p := protection.NewPacket(5, protection.SeverityWarning)
-					p.BoardId = 1
-					p.Timestamp = packet.Timestamp{
-						Counter: 1,
-						Second:  2,
-						Minute:  3,
-						Hour:    4,
-						Day:     5,
-						Month:   6,
-						Year:    7,
-					}
-					p.Protection = protection.Protection{
-						Name: "time accumulation",
-						Type: protection.TimeAccumulationKind,
-						Data: &protection.TimeAccumulation{
-							Value:     5.5,
-							Bound:     5,
-							TimeLimit: 2.5,
-						},
-					}
-					return p
-				}(),
-				func() abstraction.Packet {
-					p := protection.NewPacket(5, protection.SeverityWarning)
-					p.BoardId = 1
-					p.Timestamp = packet.Timestamp{
-						Counter: 1,
-						Second:  2,
-						Minute:  3,
-						Hour:    4,
-						Day:     5,
-						Month:   6,
-						Year:    7,
-					}
-					data := protection.ErrorHandler("something to warn about\n")
-					p.Protection = protection.Protection{
-						Name: "error handler",
-						Type: protection.ErrorHandlerKind,
-						Data: &data,
-					}
-					return p
-				}(),
-			},
-		},
-		{
-			name: "protection severity",
-			input: bytes.NewReader(join(
-				[]byte{0x05, 0x00},
-				[]byte(
-					`{
-	"boardId": 1,
-	"timestamp": {
-		"counter": 1,
-		"second": 2,
-		"minute": 3,
-		"hour": 4,
-		"day": 5,
-		"month": 6,
-		"year": 7
-	},
-	"protection": {
-		"name": "out of bounds",
-		"type": "OUT_OF_BOUNDS",
-		"data": {
-			"value": 5.5,
-			"bounds": [0, 3]
-		}
-	}
-}`,
-				),
-				[]byte{0x00},
+				toBinary(uint8(protection.Uint8Type), endianness),
+				toBinary(uint8(protection.OutOfBoundsKind), endianness),
+				[]byte("out of bounds"), []byte{0x00},
+				toBinary(uint8(0), endianness),
+				toBinary(uint8(3), endianness),
+				toBinary(uint8(5), endianness),
+				[]byte{0x01, 0x00, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x00},
+
 				[]byte{0x06, 0x00},
-				[]byte(
-					`{
-	"boardId": 1,
-	"timestamp": {
-		"counter": 1,
-		"second": 2,
-		"minute": 3,
-		"hour": 4,
-		"day": 5,
-		"month": 6,
-		"year": 7
-	},
-	"protection": {
-		"name": "out of bounds",
-		"type": "OUT_OF_BOUNDS",
-		"data": {
-			"value": 5.5,
-			"bounds": [0, 3]
-		}
-	}
-}`,
-				),
+				toBinary(uint8(protection.FloatType), endianness),
+				toBinary(uint8(protection.AboveKind), endianness),
+				[]byte("upper bound"), []byte{0x00},
+				toBinary(float32(4.5), endianness),
+				toBinary(float32(5.0), endianness),
+				[]byte{0x01, 0x00, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x00},
+
+				[]byte{0x05, 0x00},
+				toBinary(uint8(protection.IntType), endianness),
+				toBinary(uint8(protection.BelowKind), endianness),
+				[]byte("lower bound"), []byte{0x00},
+				toBinary(int32(0), endianness),
+				toBinary(int32(-5), endianness),
+				[]byte{0x01, 0x00, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x00},
+
+				[]byte{0x06, 0x00},
+				toBinary(uint8(protection.BoolType), endianness),
+				toBinary(uint8(protection.EqualsKind), endianness),
+				[]byte("equals"), []byte{0x00},
+				toBinary(false, endianness),
+				toBinary(false, endianness),
+				[]byte{0x01, 0x00, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x00},
+
+				[]byte{0x05, 0x00},
+				toBinary(uint8(protection.CharType), endianness),
+				toBinary(uint8(protection.NotEqualsKind), endianness),
+				[]byte("not equals"), []byte{0x00},
+				toBinary(byte('a'), endianness),
+				toBinary(byte('b'), endianness),
+				[]byte{0x01, 0x00, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x00},
+
+				[]byte{0x06, 0x00},
+				toBinary(uint8(protection.DoubleType), endianness),
+				toBinary(uint8(protection.TimeAccumulationKind), endianness),
+				[]byte("time accumulation"), []byte{0x00},
+				toBinary(float64(40.0), endianness),
+				toBinary(float64(40.5), endianness),
+				toBinary(float32(1.5), endianness),
+				toBinary(float32(0.5), endianness),
+				[]byte{0x01, 0x00, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x00},
+
+				[]byte{0x05, 0x00},
 				[]byte{0x00},
-				[]byte{0x07, 0x00},
-				[]byte(
-					`{
-	"boardId": 1,
-	"timestamp": {
-		"counter": 1,
-		"second": 2,
-		"minute": 3,
-		"hour": 4,
-		"day": 5,
-		"month": 6,
-		"year": 7
-	},
-	"protection": {
-		"name": "out of bounds",
-		"type": "OUT_OF_BOUNDS",
-		"data": {
-			"value": 5.5,
-			"bounds": [0, 3]
-		}
-	}
-}`,
-				),
-				[]byte{0x00},
+				toBinary(uint8(protection.ErrorHandlerKind), endianness),
+				[]byte("error handler"), []byte{0x00},
+				[]byte("Hello, World!"), []byte{0x00},
+				[]byte{0x01, 0x00, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x00},
 			)),
 			output: []abstraction.Packet{
 				func() abstraction.Packet {
-					p := protection.NewPacket(5, protection.SeverityWarning)
-					p.BoardId = 1
-					p.Timestamp = packet.Timestamp{
+					p := protection.NewPacket(5, protection.Warning)
+					p.Type = protection.Uint8Type
+					p.Kind = protection.OutOfBoundsKind
+					p.Name = "out of bounds"
+					p.Data = &protection.OutOfBounds[uint8]{
+						LowerBound: 0,
+						UpperBound: 3,
+						Value:      5,
+					}
+					p.Timestamp = &protection.Timestamp{
 						Counter: 1,
 						Second:  2,
 						Minute:  3,
@@ -593,21 +149,19 @@ func TestDecoder(t *testing.T) {
 						Day:     5,
 						Month:   6,
 						Year:    7,
-					}
-					p.Protection = protection.Protection{
-						Name: "out of bounds",
-						Type: protection.OutOfBoundsKind,
-						Data: &protection.OutOfBounds{
-							Value:  5.5,
-							Bounds: [2]float64{0, 3},
-						},
 					}
 					return p
 				}(),
 				func() abstraction.Packet {
-					p := protection.NewPacket(6, protection.SeverityError)
-					p.BoardId = 1
-					p.Timestamp = packet.Timestamp{
+					p := protection.NewPacket(6, protection.Fault)
+					p.Type = protection.FloatType
+					p.Kind = protection.AboveKind
+					p.Name = "upper bound"
+					p.Data = &protection.Above[float32]{
+						Threshold: 4.5,
+						Value:     5.0,
+					}
+					p.Timestamp = &protection.Timestamp{
 						Counter: 1,
 						Second:  2,
 						Minute:  3,
@@ -615,21 +169,19 @@ func TestDecoder(t *testing.T) {
 						Day:     5,
 						Month:   6,
 						Year:    7,
-					}
-					p.Protection = protection.Protection{
-						Name: "out of bounds",
-						Type: protection.OutOfBoundsKind,
-						Data: &protection.OutOfBounds{
-							Value:  5.5,
-							Bounds: [2]float64{0, 3},
-						},
 					}
 					return p
 				}(),
 				func() abstraction.Packet {
-					p := protection.NewPacket(7, protection.SeverityFault)
-					p.BoardId = 1
-					p.Timestamp = packet.Timestamp{
+					p := protection.NewPacket(5, protection.Warning)
+					p.Type = protection.IntType
+					p.Kind = protection.BelowKind
+					p.Name = "lower bound"
+					p.Data = &protection.Below[int32]{
+						Threshold: 0,
+						Value:     -5,
+					}
+					p.Timestamp = &protection.Timestamp{
 						Counter: 1,
 						Second:  2,
 						Minute:  3,
@@ -638,13 +190,86 @@ func TestDecoder(t *testing.T) {
 						Month:   6,
 						Year:    7,
 					}
-					p.Protection = protection.Protection{
-						Name: "out of bounds",
-						Type: protection.OutOfBoundsKind,
-						Data: &protection.OutOfBounds{
-							Value:  5.5,
-							Bounds: [2]float64{0, 3},
-						},
+					return p
+				}(),
+				func() abstraction.Packet {
+					p := protection.NewPacket(6, protection.Fault)
+					p.Type = protection.BoolType
+					p.Kind = protection.EqualsKind
+					p.Name = "equals"
+					p.Data = &protection.Equals[bool]{
+						Target: false,
+						Value:  false,
+					}
+					p.Timestamp = &protection.Timestamp{
+						Counter: 1,
+						Second:  2,
+						Minute:  3,
+						Hour:    4,
+						Day:     5,
+						Month:   6,
+						Year:    7,
+					}
+					return p
+				}(),
+				func() abstraction.Packet {
+					p := protection.NewPacket(5, protection.Warning)
+					p.Type = protection.CharType
+					p.Kind = protection.NotEqualsKind
+					p.Name = "not equals"
+					p.Data = &protection.NotEquals[byte]{
+						Target: byte('a'),
+						Value:  byte('b'),
+					}
+					p.Timestamp = &protection.Timestamp{
+						Counter: 1,
+						Second:  2,
+						Minute:  3,
+						Hour:    4,
+						Day:     5,
+						Month:   6,
+						Year:    7,
+					}
+					return p
+				}(),
+				func() abstraction.Packet {
+					p := protection.NewPacket(6, protection.Fault)
+					p.Type = protection.DoubleType
+					p.Kind = protection.TimeAccumulationKind
+					p.Name = "time accumulation"
+					p.Data = &protection.TimeAccumulation[float64]{
+						Threshold: 40.0,
+						Value:     40.5,
+						Time:      1.5,
+						Frequency: 0.5,
+					}
+					p.Timestamp = &protection.Timestamp{
+						Counter: 1,
+						Second:  2,
+						Minute:  3,
+						Hour:    4,
+						Day:     5,
+						Month:   6,
+						Year:    7,
+					}
+					return p
+				}(),
+				func() abstraction.Packet {
+					p := protection.NewPacket(5, protection.Warning)
+					p.Type = 0
+					p.Kind = protection.ErrorHandlerKind
+					p.Name = "error handler"
+					p.Data = &protection.ErrorHandler{
+						Error: "Hello, World!",
+					}
+					p.Timestamp = &protection.Timestamp{
+						Counter: 1,
+						Second:  2,
+						Minute:  3,
+						Hour:    4,
+						Day:     5,
+						Month:   6,
+						Year:    7,
 					}
 					return p
 				}(),
@@ -1023,12 +648,10 @@ func TestDecoder(t *testing.T) {
 
 // getDecoder generates a mock Decoder with the following packet IDs:
 // 1 - blcuAck
-// 2 - info
 // 3 - add state order
 // 4 - remove state order
 // 5 - protection warning
-// 6 - protection error
-// 7 - protection fault
+// 6 - protection fault
 // 8 - state space
 // 9:=18 - data
 func getDecoder(endianness binary.ByteOrder) *presentation.Decoder {
@@ -1036,21 +659,17 @@ func getDecoder(endianness binary.ByteOrder) *presentation.Decoder {
 
 	decoder.SetPacketDecoder(1, blcu.NewDecoder())
 
-	decoder.SetPacketDecoder(2, info.NewDecoder(0))
-
 	ordersDecoder := order.NewDecoder(endianness)
 	ordersDecoder.SetActionId(3, ordersDecoder.DecodeAdd)
 	ordersDecoder.SetActionId(4, ordersDecoder.DecodeRemove)
 	decoder.SetPacketDecoder(3, ordersDecoder)
 	decoder.SetPacketDecoder(4, ordersDecoder)
 
-	protectionDecoder := protection.NewDecoder()
-	protectionDecoder.SetSeverity(5, protection.SeverityWarning)
-	protectionDecoder.SetSeverity(6, protection.SeverityError)
-	protectionDecoder.SetSeverity(7, protection.SeverityFault)
+	protectionDecoder := protection.NewDecoder(endianness)
+	protectionDecoder.SetSeverity(5, protection.Warning)
+	protectionDecoder.SetSeverity(6, protection.Fault)
 	decoder.SetPacketDecoder(5, protectionDecoder)
 	decoder.SetPacketDecoder(6, protectionDecoder)
-	decoder.SetPacketDecoder(7, protectionDecoder)
 
 	decoder.SetPacketDecoder(8, state.NewDecoder(endianness))
 
@@ -1188,7 +807,13 @@ func toBinary(n any, order binary.ByteOrder) []byte {
 		output := make([]byte, 8)
 		order.PutUint64(output, math.Float64bits(num))
 		return output
+	case bool:
+		if num {
+			return []byte{0x01}
+		} else {
+			return []byte{0x00}
+		}
 	default:
-		panic("must be a number")
+		panic("must be a number or boolean")
 	}
 }

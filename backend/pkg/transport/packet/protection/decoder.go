@@ -148,7 +148,7 @@ func (decoder *Decoder) Decode(id abstraction.PacketId, reader io.Reader) (abstr
 		return nil, ErrUnexpectedId{Id: id}
 	}
 
-	packet := newPacket(id, severity)
+	packet := NewPacket(id, severity)
 
 	err := binary.Read(reader, decoder.endianness, &packet.Type)
 	if err != nil {

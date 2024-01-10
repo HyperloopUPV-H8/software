@@ -50,8 +50,8 @@ type Packet struct {
 	severity  Severity
 }
 
-// newPacket creates a new empty protection packet with the given ID.
-func newPacket(id abstraction.PacketId, severity Severity) *Packet {
+// NewPacket creates a new empty protection packet with the given ID.
+func NewPacket(id abstraction.PacketId, severity Severity) *Packet {
 	return &Packet{
 		id:       id,
 		severity: severity,
