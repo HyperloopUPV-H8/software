@@ -11,10 +11,21 @@
 //   - [TimeAccumulation]
 package protection
 
+import (
+	"encoding/binary"
+	"io"
+)
+
 // Below is a protection that triggers when the data goes below a threshold.
 type Below[T valueType] struct {
 	Threshold T
 	Value     T
+}
+
+func decodeBelow[T valueType](reader io.Reader, endianness binary.ByteOrder) (Data, error) {
+	packet := new(Below[T])
+	err := binary.Read(reader, endianness, packet)
+	return packet, err
 }
 
 func (Below[T]) Kind() Kind {
@@ -25,6 +36,12 @@ func (Below[T]) Kind() Kind {
 type Above[T valueType] struct {
 	Threshold T
 	Value     T
+}
+
+func decodeAbove[T valueType](reader io.Reader, endianness binary.ByteOrder) (Data, error) {
+	packet := new(Above[T])
+	err := binary.Read(reader, endianness, packet)
+	return packet, err
 }
 
 func (Above[T]) Kind() Kind {
@@ -38,6 +55,12 @@ type OutOfBounds[T valueType] struct {
 	Value      T
 }
 
+func decodeOutOfBounds[T valueType](reader io.Reader, endianness binary.ByteOrder) (Data, error) {
+	packet := new(OutOfBounds[T])
+	err := binary.Read(reader, endianness, packet)
+	return packet, err
+}
+
 func (OutOfBounds[T]) Kind() Kind {
 	return OutOfBoundsKind
 }
@@ -46,6 +69,12 @@ func (OutOfBounds[T]) Kind() Kind {
 type Equals[T valueType] struct {
 	Target T
 	Value  T
+}
+
+func decodeEquals[T valueType](reader io.Reader, endianness binary.ByteOrder) (Data, error) {
+	packet := new(Equals[T])
+	err := binary.Read(reader, endianness, packet)
+	return packet, err
 }
 
 func (Equals[T]) Kind() Kind {
@@ -58,6 +87,12 @@ type NotEquals[T valueType] struct {
 	Value  T
 }
 
+func decodeNotEquals[T valueType](reader io.Reader, endianness binary.ByteOrder) (Data, error) {
+	packet := new(NotEquals[T])
+	err := binary.Read(reader, endianness, packet)
+	return packet, err
+}
+
 func (NotEquals[T]) Kind() Kind {
 	return NotEqualsKind
 }
@@ -65,6 +100,13 @@ func (NotEquals[T]) Kind() Kind {
 // ErrorHandler is a protection that triggers when an error occurs.
 type ErrorHandler struct {
 	Error string
+}
+
+func decodeErrorHandler(reader io.Reader, endianness binary.ByteOrder) (Data, error) {
+	packet := new(ErrorHandler)
+	var err error
+	packet.Error, err = readCString(reader)
+	return packet, err
 }
 
 func (ErrorHandler) Kind() Kind {
@@ -79,6 +121,12 @@ type TimeAccumulation[T valueType] struct {
 	Value     T
 	Time      float32
 	Frequency float32
+}
+
+func decodeTimeAccumulation[T valueType](reader io.Reader, endianness binary.ByteOrder) (Data, error) {
+	packet := new(TimeAccumulation[T])
+	err := binary.Read(reader, endianness, packet)
+	return packet, err
 }
 
 func (TimeAccumulation[T]) Kind() Kind {

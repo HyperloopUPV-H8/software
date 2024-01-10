@@ -31,23 +31,48 @@
 //	|========|
 package protection
 
-import "github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+import (
+	"encoding/binary"
+	"io"
+
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+)
 
 // Packet is a protection packet, see the package documentation for more information.
 type Packet struct {
 	id        abstraction.PacketId
-	valueType Type
-	kind      Kind
-	name      string
-	data      packetData
-	timestamp timestamp
+	Type      Type
+	Kind      Kind
+	Name      string
+	Data      Data
+	Timestamp *Timestamp
+	severity  Severity
 }
 
-// Fault is a protection with the fault severity.
-type Fault Packet
+// newPacket creates a new empty protection packet with the given ID.
+func newPacket(id abstraction.PacketId, severity Severity) *Packet {
+	return &Packet{
+		id:       id,
+		severity: severity,
+	}
+}
 
-// Warning is a protection with the warning severity.
-type Warning Packet
+// Id returns the id of the packet.
+func (packet *Packet) Id() abstraction.PacketId {
+	return packet.id
+}
+
+func (packet *Packet) Severity() Severity {
+	return packet.severity
+}
+
+// Severity is the severity of the protection.
+type Severity string
+
+const (
+	Fault   Severity = "fault"
+	Warning Severity = "warning"
+)
 
 // Type is the type of the data that is being tracked by a protection packet.
 type Type uint8
@@ -83,24 +108,24 @@ const (
 	TimeAccumulationKind             // [TimeAccumulation]
 )
 
-// packetData is a common interface to all the possible protection kinds.
-type packetData interface {
+// Data is a common interface to all the possible protection kinds.
+type Data interface {
 	Kind() Kind
 }
 
 // The following are possible data specifications for each kind of protection.
 var (
-	_ packetData = &Below[int8]{}
-	_ packetData = &Above[int8]{}
-	_ packetData = &OutOfBounds[int8]{}
-	_ packetData = &Equals[int8]{}
-	_ packetData = &NotEquals[int8]{}
-	_ packetData = &ErrorHandler{}
-	_ packetData = &TimeAccumulation[int8]{}
+	_ Data = &Below[int8]{}
+	_ Data = &Above[int8]{}
+	_ Data = &OutOfBounds[int8]{}
+	_ Data = &Equals[int8]{}
+	_ Data = &NotEquals[int8]{}
+	_ Data = &ErrorHandler{}
+	_ Data = &TimeAccumulation[int8]{}
 )
 
-// timestamp is the timestamp of the protection generated from the RTC.
-type timestamp struct {
+// Timestamp is the Timestamp of the protection generated from the RTC.
+type Timestamp struct {
 	Counter uint16
 	Second  uint8
 	Minute  uint8
@@ -108,4 +133,10 @@ type timestamp struct {
 	Day     uint8
 	Month   uint8
 	Year    uint16
+}
+
+func decodeTimestamp(reader io.Reader, endianness binary.ByteOrder) (*Timestamp, error) {
+	packet := new(Timestamp)
+	err := binary.Read(reader, endianness, packet)
+	return packet, err
 }
