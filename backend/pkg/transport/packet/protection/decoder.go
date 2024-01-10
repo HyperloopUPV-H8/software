@@ -125,9 +125,9 @@ type Decoder struct {
 	idToSeverity map[abstraction.PacketId]Severity
 }
 
-func NewDecoder(endianess *binary.ByteOrder) *Decoder {
+func NewDecoder(endianess binary.ByteOrder) *Decoder {
 	return &Decoder{
-		endianness:   *endianess,
+		endianness:   endianess,
 		idToSeverity: make(map[abstraction.PacketId]Severity),
 	}
 }

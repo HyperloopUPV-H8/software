@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
@@ -36,6 +37,7 @@ type Vehicle struct {
 	logger        abstraction.Logger
 	updateFactory *update_factory.UpdateFactory
 	idToBoardName map[uint16]string
+	ipToBoardId   map[string]abstraction.BoardId
 }
 
 // Notification is the method invoked by transport to notify of a new event (e.g.packet received)
@@ -62,14 +64,15 @@ func (vehicle *Vehicle) Notification(notification abstraction.TransportNotificat
 		}
 
 	case *protection.Packet:
-		err := vehicle.broker.Push(message_topic.Push(p))
+		boardId := vehicle.ipToBoardId[strings.Split(packet.From, ":")[0]]
+		err := vehicle.broker.Push(message_topic.Push(p, boardId))
 		if err != nil {
 			fmt.Println(err)
 		}
 
 		err = vehicle.logger.PushRecord(&protection_logger.Record{
-			Packet: p,
-			// TODO: get boardID
+			Packet:    p,
+			BoardId:   boardId,
 			From:      packet.From,
 			To:        packet.To,
 			Timestamp: packet.Timestamp,

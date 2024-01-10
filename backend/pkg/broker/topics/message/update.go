@@ -104,8 +104,8 @@ type push struct {
 	boardId abstraction.BoardId
 }
 
-func Push(data any) *push {
-	return &push{data: data}
+func Push(data any, boardId abstraction.BoardId) *push {
+	return &push{data: data, boardId: boardId}
 }
 
 func (push *push) Topic() abstraction.BrokerTopic {

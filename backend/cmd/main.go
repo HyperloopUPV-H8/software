@@ -33,15 +33,14 @@ import (
 	h "github.com/HyperloopUPV-H8/h9-backend/pkg/http"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
 	data_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/data"
-	messages_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/messages"
 	order_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/order"
+	protection_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/protection"
 	state_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/state"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tcp"
 	blcu_packet "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/blcu"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
-	info_packet "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/info"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/order"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/protection"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
@@ -117,10 +116,10 @@ func main() {
 	// <--- logger --->
 	var boardMap map[abstraction.BoardId]string
 	var subloggers = map[abstraction.LoggerName]abstraction.Logger{
-		data_logger.Name:     data_logger.NewLogger(),
-		messages_logger.Name: messages_logger.NewLogger(boardMap),
-		order_logger.Name:    order_logger.NewLogger(),
-		state_logger.Name:    state_logger.NewLogger(),
+		data_logger.Name:       data_logger.NewLogger(),
+		protection_logger.Name: protection_logger.NewLogger(boardMap),
+		order_logger.Name:      order_logger.NewLogger(),
+		state_logger.Name:      state_logger.NewLogger(),
 	}
 
 	loggerHandler := logger.NewLogger(subloggers)
@@ -214,10 +213,16 @@ func main() {
 	go transp.HandleSniffer(sniffer.New(source, &layers.LayerTypeEthernet))
 
 	// <--- vehicle --->
+	ipToBoardId := make(map[string]abstraction.BoardId)
+	for name, ip := range info.Addresses.Boards {
+		ipToBoardId[ip.String()] = abstraction.BoardId(info.BoardIds[name])
+	}
+
 	vehicle := vehicle.New()
 	vehicle.SetBroker(broker)
 	vehicle.SetLogger(loggerHandler)
 	vehicle.SetUpdateFactory(updateFactory)
+	vehicle.SetIpToBoardId(ipToBoardId)
 	vehicle.SetIdToBoardName(idToBoard)
 	vehicle.SetTransport(transp)
 
@@ -426,19 +431,31 @@ func getTransportDecEnc(info info.Info, podData pod_data.PodData) (*presentation
 
 	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds.BlcuAck), blcu_packet.NewDecoder())
 
-	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds.Info), info_packet.NewDecoder(0))
-
 	stateOrdersDecoder := order.NewDecoder(binary.LittleEndian)
 	stateOrdersDecoder.SetActionId(abstraction.PacketId(info.MessageIds.AddStateOrder), stateOrdersDecoder.DecodeAdd)
 	stateOrdersDecoder.SetActionId(abstraction.PacketId(info.MessageIds.RemoveStateOrder), stateOrdersDecoder.DecodeRemove)
 	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds.AddStateOrder), stateOrdersDecoder)
 	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds.RemoveStateOrder), stateOrdersDecoder)
 
-	protectionDecoder := protection.NewDecoder()
-	protectionDecoder.SetSeverity(abstraction.PacketId(info.MessageIds.Warning), protection.SeverityWarning)
-	protectionDecoder.SetSeverity(abstraction.PacketId(info.MessageIds.Fault), protection.SeverityFault)
-	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds.Warning), protectionDecoder)
-	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds.Fault), protectionDecoder)
+	protectionDecoder := protection.NewDecoder(binary.LittleEndian)
+	protectionDecoder.SetSeverity(1000, protection.Warning).SetSeverity(2000, protection.Fault)
+	protectionDecoder.SetSeverity(2111, protection.Warning).SetSeverity(1111, protection.Fault)
+	protectionDecoder.SetSeverity(2222, protection.Warning).SetSeverity(1222, protection.Fault)
+	protectionDecoder.SetSeverity(1333, protection.Fault)
+	protectionDecoder.SetSeverity(1444, protection.Fault)
+	protectionDecoder.SetSeverity(1555, protection.Fault)
+	protectionDecoder.SetSeverity(2666, protection.Warning).SetSeverity(1666, protection.Fault)
+	decoder.SetPacketDecoder(1000, protectionDecoder)
+	decoder.SetPacketDecoder(2000, protectionDecoder)
+	decoder.SetPacketDecoder(2111, protectionDecoder)
+	decoder.SetPacketDecoder(1111, protectionDecoder)
+	decoder.SetPacketDecoder(2222, protectionDecoder)
+	decoder.SetPacketDecoder(1222, protectionDecoder)
+	decoder.SetPacketDecoder(1333, protectionDecoder)
+	decoder.SetPacketDecoder(1444, protectionDecoder)
+	decoder.SetPacketDecoder(1555, protectionDecoder)
+	decoder.SetPacketDecoder(2666, protectionDecoder)
+	decoder.SetPacketDecoder(1666, protectionDecoder)
 
 	return decoder, encoder
 }

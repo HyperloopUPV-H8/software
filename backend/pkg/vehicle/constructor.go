@@ -52,3 +52,7 @@ func (vehicle *Vehicle) SetUpdateFactory(updateFactory *update_factory.UpdateFac
 func (vehicle *Vehicle) SetIdToBoardName(idToBoardName map[uint16]string) {
 	vehicle.idToBoardName = idToBoardName
 }
+
+func (vehicle *Vehicle) SetIpToBoardId(ipToBoardId map[string]abstraction.BoardId) {
+	vehicle.ipToBoardId = ipToBoardId
+}
