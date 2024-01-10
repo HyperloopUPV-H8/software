@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"os"
 	"sync"
 	"time"
 
@@ -83,6 +84,12 @@ func (transport *Transport) handleTCPConn(target abstraction.TransportTarget, co
 		return err
 	}
 
+	if tcpConn, ok := conn.(*net.TCPConn); ok {
+		err := tcpConn.SetLinger(0)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error setting %s linger to zero: %v\n", target, err)
+		}
+	}
 	conn, errChan := tcp.WithErrChan(conn)
 	defer conn.Close()
 
