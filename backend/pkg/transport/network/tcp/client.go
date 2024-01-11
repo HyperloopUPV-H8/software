@@ -53,6 +53,8 @@ type ClientConfig struct {
 	CurrentRetries int
 	// Backoff specifies the backoff algorithm for this client
 	Backoff backoffFunction
+	// AbortOnError specifies whether the client should abort on errors or keep trying to connect
+	AbortOnError bool
 }
 
 // NewClient inits a ClientConfig with good defaults and the provided information
@@ -66,8 +68,9 @@ func NewClient(local net.Addr) ClientConfig {
 
 		Context: context.TODO(),
 
-		MaxRetries: -1,
-		Backoff:    NewExponBackoff(defaultBackoffMin, defaultBackoffExp, defaultBackoffMax),
+		MaxRetries:   -1,
+		Backoff:      NewExponBackoff(defaultBackoffMin, defaultBackoffExp, defaultBackoffMax),
+		AbortOnError: false,
 	}
 }
 
