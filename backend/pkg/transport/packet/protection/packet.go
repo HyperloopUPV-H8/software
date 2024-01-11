@@ -4,6 +4,7 @@
 // There are two types of protection packets:
 //   - Fault: used to notify of unsafe conditions, the system will stop automatically when a fault is triggered.
 //   - Warning: used to notify of unexpected values, the user should check everything is working correctly.
+//   - Ok: used to notify of a previous unexpected value returning back to the appropiate range.
 //
 // Independent of the type, all protection packets follow the same structure defined below.
 //
@@ -73,6 +74,7 @@ type Severity string
 const (
 	Fault   Severity = "fault"
 	Warning Severity = "warning"
+	Ok      Severity = "ok"
 )
 
 // Type is the type of the data that is being tracked by a protection packet.
