@@ -158,17 +158,23 @@ func main() {
 	broker.SetPool(pool)
 
 	// <--- transport --->
-	orders := make(map[abstraction.PacketId]struct{})
-	for _, board := range podData.Boards {
-		for _, packet := range board.Packets {
-			if packet.Type == "order" {
-				orders[abstraction.PacketId(packet.Id)] = struct{}{}
-			}
-		}
-	}
-
 	transp := transport.NewTransport()
 
+	// <--- vehicle --->
+	ipToBoardId := make(map[string]abstraction.BoardId)
+	for name, ip := range info.Addresses.Boards {
+		ipToBoardId[ip.String()] = abstraction.BoardId(info.BoardIds[name])
+	}
+
+	vehicle := vehicle.New()
+	vehicle.SetBroker(broker)
+	vehicle.SetLogger(loggerHandler)
+	vehicle.SetUpdateFactory(updateFactory)
+	vehicle.SetIpToBoardId(ipToBoardId)
+	vehicle.SetIdToBoardName(idToBoard)
+	vehicle.SetTransport(transp)
+
+	// <--- transport --->
 	// Load and set packet decoder and encoder
 	decoder, encoder := getTransportDecEnc(info, podData)
 	transp.WithDecoder(decoder).WithEncoder(encoder)
@@ -211,20 +217,6 @@ func main() {
 		panic("failed to compile bpf filter")
 	}
 	go transp.HandleSniffer(sniffer.New(source, &layers.LayerTypeEthernet))
-
-	// <--- vehicle --->
-	ipToBoardId := make(map[string]abstraction.BoardId)
-	for name, ip := range info.Addresses.Boards {
-		ipToBoardId[ip.String()] = abstraction.BoardId(info.BoardIds[name])
-	}
-
-	vehicle := vehicle.New()
-	vehicle.SetBroker(broker)
-	vehicle.SetLogger(loggerHandler)
-	vehicle.SetUpdateFactory(updateFactory)
-	vehicle.SetIpToBoardId(ipToBoardId)
-	vehicle.SetIdToBoardName(idToBoard)
-	vehicle.SetTransport(transp)
 
 	// <--- http server --->
 	podDataHandle, err := h.HandleDataJSON("podData.json", pod_data.GetDataOnlyPodData(podData))
