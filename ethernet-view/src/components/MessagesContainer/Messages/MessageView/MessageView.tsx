@@ -26,7 +26,7 @@ const appearances = {
     info: styles.info,
     warning: styles.warning,
     fault: styles.fault,
-    ok: Info,
+    ok: styles.info,
 };
 
 export const MessageView = React.memo(({ message }: Props) => {
