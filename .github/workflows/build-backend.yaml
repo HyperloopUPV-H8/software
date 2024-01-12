@@ -78,9 +78,9 @@ jobs:
     - name: "Load secret"
       working-directory: "${{env.BACKEND_DIR}}"
       run: |
-        echo "${{env.SECRET}}" > ".\internal\excel\secret.json" &&
-        echo "${{env.SECRET}}" > ".\internal\excel_adapter\internals\secret.json" &&
-        echo "${{env.SECRET}}" > ".\pkg\excel\secret.json" &&
+        echo "${{env.SECRET}}" > ".\internal\excel\secret.json"
+        echo "${{env.SECRET}}" > ".\internal\excel_adapter\internals\secret.json"
+        echo "${{env.SECRET}}" > ".\pkg\excel\secret.json"
         echo "${{env.SECRET}}" > ".\pkg\excel_adapter\internals\secret.json"
 
     - name: "Create output path"
