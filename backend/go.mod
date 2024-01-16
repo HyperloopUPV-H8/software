@@ -7,6 +7,7 @@ require (
 	github.com/google/gopacket v1.1.19
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.5.0
+	github.com/jmaralo/sntp v0.0.0-20240116111937-45a0a3419272
 	github.com/pelletier/go-toml/v2 v2.0.7
 	github.com/pin/tftp/v3 v3.0.0
 	github.com/pkg/errors v0.9.1
@@ -23,7 +24,6 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
 	github.com/googleapis/gax-go/v2 v2.7.1 // indirect
-	github.com/jmaralo/sntp v0.0.0-20240116111937-45a0a3419272 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
