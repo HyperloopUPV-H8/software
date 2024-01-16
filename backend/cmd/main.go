@@ -49,6 +49,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
+	"github.com/jmaralo/sntp"
 	"github.com/pelletier/go-toml/v2"
 	trace "github.com/rs/zerolog/log"
 )
@@ -187,17 +188,19 @@ func main() {
 	}
 
 	// Start handling TCP client connections
-	backendTcpClientAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", info.Addresses.Backend.String(), info.Ports.TcpClient))
-	if err != nil {
-		panic("Failed to resolve local backend TCP client address")
-	}
+	i := 0
 	serverTargets := make(map[string]abstraction.TransportTarget)
 	for _, board := range podData.Boards {
 		if !common.Contains(config.Vehicle.Boards, board.Name) {
 			serverTargets[fmt.Sprintf("%s:%d", info.Addresses.Boards[board.Name], info.Ports.TcpClient)] = abstraction.TransportTarget(board.Name)
 			continue
 		}
+		backendTcpClientAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", info.Addresses.Backend.String(), info.Ports.TcpClient+uint16(i)))
+		if err != nil {
+			panic("Failed to resolve local backend TCP client address")
+		}
 		go transp.HandleClient(tcp.NewClient(backendTcpClientAddr), abstraction.TransportTarget(board.Name), "tcp", fmt.Sprintf("%s:%d", info.Addresses.Boards[board.Name], info.Ports.TcpServer))
+		i++
 	}
 
 	// Start handling TCP server connections
@@ -247,6 +250,26 @@ func main() {
 		httpServer := h.NewServer(server.Addr, mux)
 		go httpServer.ListenAndServe()
 	}
+
+	// <--- SNTP --->
+	sntpAddr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", info.Addresses.Backend, info.Ports.SNTP))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error resolving sntp address: %v\n", err)
+		os.Exit(1)
+	}
+	sntpServer, err := sntp.NewUnicast("udp", sntpAddr)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error creating sntp server: %v\n", err)
+		os.Exit(1)
+	}
+
+	go func() {
+		err := sntpServer.ListenAndServe()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error listening sntp server: %v\n", err)
+			return
+		}
+	}()
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)

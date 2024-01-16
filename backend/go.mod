@@ -1,6 +1,6 @@
 module github.com/HyperloopUPV-H8/h9-backend
 
-go 1.19
+go 1.21.3
 
 require (
 	github.com/HyperloopUPV-H8/ade-linter v0.0.0-20230530153315-3379f05a664f
@@ -23,6 +23,7 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
 	github.com/googleapis/gax-go/v2 v2.7.1 // indirect
+	github.com/jmaralo/sntp v0.0.0-20240116111937-45a0a3419272 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
