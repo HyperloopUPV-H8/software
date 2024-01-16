@@ -1,12 +1,13 @@
 module github.com/HyperloopUPV-H8/h9-backend
 
-go 1.19
+go 1.21.3
 
 require (
 	github.com/HyperloopUPV-H8/ade-linter v0.0.0-20230530153315-3379f05a664f
 	github.com/google/gopacket v1.1.19
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.5.0
+	github.com/jmaralo/sntp v0.0.0-20240116111937-45a0a3419272
 	github.com/pelletier/go-toml/v2 v2.0.7
 	github.com/pin/tftp/v3 v3.0.0
 	github.com/pkg/errors v0.9.1

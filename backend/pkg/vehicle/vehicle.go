@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
@@ -14,13 +15,12 @@ import (
 	order_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/order"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
 	data_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/data"
-	messages_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/messages"
 	order_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/order"
+	protection_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/protection"
 	state_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/state"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
 	blcu_packet "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/blcu"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
-	info_packet "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/info"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/order"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/protection"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/state"
@@ -37,6 +37,7 @@ type Vehicle struct {
 	logger        abstraction.Logger
 	updateFactory *update_factory.UpdateFactory
 	idToBoardName map[uint16]string
+	ipToBoardId   map[string]abstraction.BoardId
 }
 
 // Notification is the method invoked by transport to notify of a new event (e.g.packet received)
@@ -62,36 +63,16 @@ func (vehicle *Vehicle) Notification(notification abstraction.TransportNotificat
 			fmt.Println("Error pushing record to data logger: ", err)
 		}
 
-	case *info_packet.Packet:
-		err := vehicle.broker.Push(message_topic.Push(p))
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		err = vehicle.logger.PushRecord(&messages_logger.Record{
-			Packet:    p,
-			From:      packet.From,
-			To:        packet.To,
-			Timestamp: packet.Timestamp,
-		})
-
-		if err != nil && !errors.Is(err, logger.ErrLoggerNotRunning{}) {
-			fmt.Println("Error pushing record to info logger: ", err)
-		}
-
 	case *protection.Packet:
-		err := vehicle.broker.Push(message_topic.Push(p))
+		boardId := vehicle.ipToBoardId[strings.Split(packet.From, ":")[0]]
+		err := vehicle.broker.Push(message_topic.Push(p, boardId))
 		if err != nil {
 			fmt.Println(err)
 		}
 
-		newPacket := info_packet.NewPacket(p.Id())
-		newPacket.BoardId = p.BoardId
-		newPacket.Timestamp = p.Timestamp
-		newPacket.Msg = info_packet.InfoData(fmt.Sprint(p))
-
-		err = vehicle.logger.PushRecord(&messages_logger.Record{
-			Packet:    newPacket,
+		err = vehicle.logger.PushRecord(&protection_logger.Record{
+			Packet:    p,
+			BoardId:   boardId,
 			From:      packet.From,
 			To:        packet.To,
 			Timestamp: packet.Timestamp,

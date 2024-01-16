@@ -1,6 +1,6 @@
 export type Message = ProtectionMessage | InfoMessage;
 
-export type ProtectionMessage = FaultMessage | WarningMessage;
+export type ProtectionMessage = FaultMessage | WarningMessage | OkMessage;
 
 type AbstractMessage = {
     id: string; // React key
@@ -19,6 +19,11 @@ type WarningMessage = AbstractMessage & {
     kind: "warning";
     payload: Protection;
 };
+
+type OkMessage = AbstractMessage & {
+    kind: "ok";
+    payload: Protection;
+}
 
 export type InfoMessage = AbstractMessage & {
     kind: "info";

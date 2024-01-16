@@ -98,6 +98,11 @@ func (transport *Transport) handleTCPConn(target abstraction.TransportTarget, co
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error setting %s linger to zero: %v\n", target, err)
 		}
+
+		err = tcpConn.SetNoDelay(true)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error setting %s no delay: %v\n", target, err)
+		}
 	}
 	conn, errChan := tcp.WithErrChan(conn)
 	defer conn.Close()
@@ -123,8 +128,8 @@ func (transport *Transport) handleTCPConn(target abstraction.TransportTarget, co
 				break
 			}
 
-			from := conn.LocalAddr().String()
-			to := string(target)
+			to := conn.LocalAddr().String()
+			from := conn.RemoteAddr().String()
 
 			transport.api.Notification(NewPacketNotification(packet, from, to, time.Now()))
 		}

@@ -41,18 +41,20 @@ func (handle *handleData) ServeHTTP(writer http.ResponseWriter, request *http.Re
 }
 
 type handleStatic struct {
-	path string
+	server http.Handler
 }
 
 func HandleStatic(path string) *handleStatic {
 	return &handleStatic{
-		path: path,
+		server: http.FileServer(http.Dir(path)),
 	}
 }
 
 func (handle *handleStatic) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	defer request.Body.Close()
 
+	writer.Header().Set("Cache-Control", "no-cache")
+	writer.Header().Set("Pragma", "no-cache")
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
-	http.ServeFile(writer, request, handle.path)
+	handle.server.ServeHTTP(writer, request)
 }

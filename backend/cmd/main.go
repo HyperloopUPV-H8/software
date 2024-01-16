@@ -33,15 +33,14 @@ import (
 	h "github.com/HyperloopUPV-H8/h9-backend/pkg/http"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
 	data_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/data"
-	messages_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/messages"
 	order_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/order"
+	protection_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/protection"
 	state_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/state"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tcp"
 	blcu_packet "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/blcu"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
-	info_packet "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/info"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/order"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/protection"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
@@ -50,6 +49,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
+	"github.com/jmaralo/sntp"
 	"github.com/pelletier/go-toml/v2"
 	trace "github.com/rs/zerolog/log"
 )
@@ -117,10 +117,10 @@ func main() {
 	// <--- logger --->
 	var boardMap map[abstraction.BoardId]string
 	var subloggers = map[abstraction.LoggerName]abstraction.Logger{
-		data_logger.Name:     data_logger.NewLogger(),
-		messages_logger.Name: messages_logger.NewLogger(boardMap),
-		order_logger.Name:    order_logger.NewLogger(),
-		state_logger.Name:    state_logger.NewLogger(),
+		data_logger.Name:       data_logger.NewLogger(),
+		protection_logger.Name: protection_logger.NewLogger(boardMap),
+		order_logger.Name:      order_logger.NewLogger(),
+		state_logger.Name:      state_logger.NewLogger(),
 	}
 
 	loggerHandler := logger.NewLogger(subloggers)
@@ -159,17 +159,23 @@ func main() {
 	broker.SetPool(pool)
 
 	// <--- transport --->
-	orders := make(map[abstraction.PacketId]struct{})
-	for _, board := range podData.Boards {
-		for _, packet := range board.Packets {
-			if packet.Type == "order" {
-				orders[abstraction.PacketId(packet.Id)] = struct{}{}
-			}
-		}
-	}
-
 	transp := transport.NewTransport()
 
+	// <--- vehicle --->
+	ipToBoardId := make(map[string]abstraction.BoardId)
+	for name, ip := range info.Addresses.Boards {
+		ipToBoardId[ip.String()] = abstraction.BoardId(info.BoardIds[name])
+	}
+
+	vehicle := vehicle.New()
+	vehicle.SetBroker(broker)
+	vehicle.SetLogger(loggerHandler)
+	vehicle.SetUpdateFactory(updateFactory)
+	vehicle.SetIpToBoardId(ipToBoardId)
+	vehicle.SetIdToBoardName(idToBoard)
+	vehicle.SetTransport(transp)
+
+	// <--- transport --->
 	// Load and set packet decoder and encoder
 	decoder, encoder := getTransportDecEnc(info, podData)
 	transp.WithDecoder(decoder).WithEncoder(encoder)
@@ -182,17 +188,19 @@ func main() {
 	}
 
 	// Start handling TCP client connections
-	backendTcpClientAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", info.Addresses.Backend.String(), info.Ports.TcpClient))
-	if err != nil {
-		panic("Failed to resolve local backend TCP client address")
-	}
+	i := 0
 	serverTargets := make(map[string]abstraction.TransportTarget)
 	for _, board := range podData.Boards {
 		if !common.Contains(config.Vehicle.Boards, board.Name) {
 			serverTargets[fmt.Sprintf("%s:%d", info.Addresses.Boards[board.Name], info.Ports.TcpClient)] = abstraction.TransportTarget(board.Name)
 			continue
 		}
+		backendTcpClientAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", info.Addresses.Backend.String(), info.Ports.TcpClient+uint16(i)))
+		if err != nil {
+			panic("Failed to resolve local backend TCP client address")
+		}
 		go transp.HandleClient(tcp.NewClient(backendTcpClientAddr), abstraction.TransportTarget(board.Name), "tcp", fmt.Sprintf("%s:%d", info.Addresses.Boards[board.Name], info.Ports.TcpServer))
+		i++
 	}
 
 	// Start handling TCP server connections
@@ -212,14 +220,6 @@ func main() {
 		panic("failed to compile bpf filter")
 	}
 	go transp.HandleSniffer(sniffer.New(source, &layers.LayerTypeEthernet))
-
-	// <--- vehicle --->
-	vehicle := vehicle.New()
-	vehicle.SetBroker(broker)
-	vehicle.SetLogger(loggerHandler)
-	vehicle.SetUpdateFactory(updateFactory)
-	vehicle.SetIdToBoardName(idToBoard)
-	vehicle.SetTransport(transp)
 
 	// <--- http server --->
 	podDataHandle, err := h.HandleDataJSON("podData.json", pod_data.GetDataOnlyPodData(podData))
@@ -250,6 +250,26 @@ func main() {
 		httpServer := h.NewServer(server.Addr, mux)
 		go httpServer.ListenAndServe()
 	}
+
+	// <--- SNTP --->
+	sntpAddr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", info.Addresses.Backend, info.Ports.SNTP))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error resolving sntp address: %v\n", err)
+		os.Exit(1)
+	}
+	sntpServer, err := sntp.NewUnicast("udp", sntpAddr)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error creating sntp server: %v\n", err)
+		os.Exit(1)
+	}
+
+	go func() {
+		err := sntpServer.ListenAndServe()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error listening sntp server: %v\n", err)
+			return
+		}
+	}()
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
@@ -426,19 +446,35 @@ func getTransportDecEnc(info info.Info, podData pod_data.PodData) (*presentation
 
 	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds.BlcuAck), blcu_packet.NewDecoder())
 
-	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds.Info), info_packet.NewDecoder(0))
-
 	stateOrdersDecoder := order.NewDecoder(binary.LittleEndian)
 	stateOrdersDecoder.SetActionId(abstraction.PacketId(info.MessageIds.AddStateOrder), stateOrdersDecoder.DecodeAdd)
 	stateOrdersDecoder.SetActionId(abstraction.PacketId(info.MessageIds.RemoveStateOrder), stateOrdersDecoder.DecodeRemove)
 	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds.AddStateOrder), stateOrdersDecoder)
 	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds.RemoveStateOrder), stateOrdersDecoder)
 
-	protectionDecoder := protection.NewDecoder()
-	protectionDecoder.SetSeverity(abstraction.PacketId(info.MessageIds.Warning), protection.SeverityWarning)
-	protectionDecoder.SetSeverity(abstraction.PacketId(info.MessageIds.Fault), protection.SeverityFault)
-	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds.Warning), protectionDecoder)
-	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds.Fault), protectionDecoder)
+	protectionDecoder := protection.NewDecoder(binary.LittleEndian)
+	protectionDecoder.SetSeverity(1000, protection.Fault).SetSeverity(2000, protection.Warning).SetSeverity(3000, protection.Ok)
+	protectionDecoder.SetSeverity(1111, protection.Fault).SetSeverity(2111, protection.Warning).SetSeverity(3111, protection.Ok)
+	protectionDecoder.SetSeverity(1222, protection.Fault).SetSeverity(2222, protection.Warning).SetSeverity(3222, protection.Ok)
+	protectionDecoder.SetSeverity(1333, protection.Fault)
+	protectionDecoder.SetSeverity(1444, protection.Fault)
+	protectionDecoder.SetSeverity(1555, protection.Fault)
+	protectionDecoder.SetSeverity(1666, protection.Fault).SetSeverity(2666, protection.Warning).SetSeverity(3666, protection.Ok)
+	decoder.SetPacketDecoder(1000, protectionDecoder)
+	decoder.SetPacketDecoder(1111, protectionDecoder)
+	decoder.SetPacketDecoder(1222, protectionDecoder)
+	decoder.SetPacketDecoder(1333, protectionDecoder)
+	decoder.SetPacketDecoder(1444, protectionDecoder)
+	decoder.SetPacketDecoder(1555, protectionDecoder)
+	decoder.SetPacketDecoder(1666, protectionDecoder)
+	decoder.SetPacketDecoder(2000, protectionDecoder)
+	decoder.SetPacketDecoder(2111, protectionDecoder)
+	decoder.SetPacketDecoder(2222, protectionDecoder)
+	decoder.SetPacketDecoder(2666, protectionDecoder)
+	decoder.SetPacketDecoder(3000, protectionDecoder)
+	decoder.SetPacketDecoder(3111, protectionDecoder)
+	decoder.SetPacketDecoder(3222, protectionDecoder)
+	decoder.SetPacketDecoder(3666, protectionDecoder)
 
 	return decoder, encoder
 }
