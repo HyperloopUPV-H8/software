@@ -1,9 +1,8 @@
 import styles from "components/ChartMenu/ChartMenu.module.scss";
 import Sidebar from "components/ChartMenu/Sidebar/Sidebar";
 import { ChartList } from "components/ChartMenu/ChartList/ChartList";
-import { useMeasurementsStore } from "common";
 import { Section } from "./Sidebar/Section/Section";
-import { NumericMeasurement, getMeasurement } from "common";
+import { NumericMeasurement, getMeasurement, useMeasurementsStore } from "common";
 
 function getRandomColor() {
     const r = Math.floor(Math.random() * 256);
@@ -34,28 +33,16 @@ export const ChartMenu = ({ sidebarSections }: Props) => {
             <div className={styles.chartMenuWrapper}>
                 <Sidebar sections={sidebarSections} />
                 <ChartList
-                    getLine={(id) => {
-                        const meas = getMeasurement(
-                            measurements,
-                            id
-                        ) as NumericMeasurement;
-
+                    getMeasurementInfo={(id) => {
+                        const meas = getMeasurement(measurements, id) as NumericMeasurement;
                         return {
                             id: id,
                             name: meas.name,
                             units: meas.units,
                             range: meas.safeRange,
                             getUpdate: () => {
-                                //TODO: change to getNumericMeasurement and return undefined if its not numeric (or doesnt exist)
-                                const meas = getMeasurement(
-                                    measurements,
-                                    id
-                                ) as NumericMeasurement;
-
-                                if (!meas) {
-                                    return 0;
-                                }
-
+                                const meas = getMeasurement(measurements, id) as NumericMeasurement;
+                                if (meas == undefined) return 0
                                 return meas.value.last;
                             },
                             color: getRandomColor(),
