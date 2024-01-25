@@ -10,7 +10,6 @@ export type MeasurementColor = string;
 export type MeasurementUnits = string;
 export type ChartInfo = {
   chartId: ChartId;
-
   measurementId: MeasurementId;
 };
 
@@ -58,13 +57,12 @@ export const ChartList = ({ getMeasurementInfo }: Props) => {
       onDragOver={(ev) => ev.preventDefault()}
     >
       {charts.map((chart) => (
-        <ChartElement
-          key={chart.chartId}
+        <ChartElement 
           chartId={chart.chartId}
-          maxValue={300}
-          removeChart={removeChart}
           measurementId={chart.measurementId}
+          chartHeight={300}
           getMeasurementInfo={getMeasurementInfo}
+          removeChart={removeChart}
         />
       ))}
     </div>
