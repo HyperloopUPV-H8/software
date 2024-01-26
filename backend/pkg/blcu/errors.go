@@ -13,3 +13,11 @@ type ErrTopicNotFound struct {
 func (err ErrTopicNotFound) Error() string {
 	return fmt.Sprintf("topic not found: got %s expected %s", err.received, err.expected)
 }
+
+type ErrSendMessage struct {
+	received abstraction.TransportMessage
+}
+
+func (err ErrSendMessage) Error() string {
+	return fmt.Sprintf("message not sent: got %s", err.received)
+}
