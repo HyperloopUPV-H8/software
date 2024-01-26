@@ -22,6 +22,23 @@ func (blcu *BLCU) Request(request abstraction.BrokerRequest) (abstraction.Broker
 	case "blcu/upload":
 		return broker.Upload.Pull(request)
 	default:
-		return nil, ErrTopicNotFound{}
+		return nil, ErrTopicNotFound{
+			expected: "blcu/download, blcu/upload",
+			received: request.Topic(),
+		}
+	}
+}
+
+func (blcu *BLCU) SendPush(push abstraction.BrokerPush) error {
+	switch push.Topic() {
+	case "blcu/download":
+		return broker.Download.Push(push)
+	case "blcu/upload":
+		return broker.Upload.Push(push)
+	default:
+		return ErrTopicNotFound{
+			expected: "blcu/download, blcu/upload",
+			received: push.Topic(),
+		}
 	}
 }
