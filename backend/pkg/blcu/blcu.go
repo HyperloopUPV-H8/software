@@ -5,17 +5,7 @@ import (
 	broker "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/blcu"
 )
 
-type BLCU struct {
-	boardToId map[string]abstraction.BoardId
-}
-
-func NewBLCU(boarMap map[string]abstraction.BoardId) *BLCU {
-	return &BLCU{
-		boardToId: boarMap,
-	}
-}
-
-func (blcu *BLCU) Request(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
+func Request(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
 	switch request.Topic() {
 	case "blcu/download":
 		return broker.Download.Pull(request)
@@ -29,7 +19,7 @@ func (blcu *BLCU) Request(request abstraction.BrokerRequest) (abstraction.Broker
 	}
 }
 
-func (blcu *BLCU) SendPush(push abstraction.BrokerPush) error {
+func SendPush(push abstraction.BrokerPush) error {
 	switch push.Topic() {
 	case "blcu/download":
 		return broker.Download.Push(push)
