@@ -32,7 +32,7 @@ type Broker interface {
 	SetAPI(BrokerAPI)
 }
 
-// BrokerAPi is the API provided for the Broker by the Vehicle.
+// BrokerAPI is the API provided for the Broker by the Vehicle.
 // The Broker must use this to communicate with the rest of the code
 type BrokerAPI interface {
 	// UserPush notifies that the front-end has sent information without a previous request
