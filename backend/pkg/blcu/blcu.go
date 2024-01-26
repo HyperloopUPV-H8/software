@@ -3,6 +3,7 @@ package blcu
 import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	broker "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/blcu"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
 )
 
 func Request(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
@@ -31,4 +32,14 @@ func SendPush(push abstraction.BrokerPush) error {
 			received: push.Topic(),
 		}
 	}
+}
+
+func SendMessage(message abstraction.TransportMessage) error {
+	err := transport.Transport.SendMessage(message)
+	if err != nil {
+		return ErrSendMessage{
+			received: message,
+		}
+	}
+	return nil
 }
