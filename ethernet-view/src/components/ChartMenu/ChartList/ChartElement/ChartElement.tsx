@@ -2,12 +2,12 @@
 import CanvasJSReact from '@canvasjs/react-charts';
 import styles from "./ChartElement.module.scss";
 import { AiOutlineCloseCircle } from 'react-icons/ai'
-import { memo, useCallback, useRef, DragEvent, useEffect } from "react";
+import { memo, useRef, useEffect, useCallback } from "react";
 import { ChartId, MeasurementId, MeasurementInfo, UpdateFunction, } from '../ChartList';
-import { createChart, ColorType, IChartApi, ISeriesApi, SeriesType, LineSeriesOptions, UTCTimestamp } from 'lightweight-charts';
+import { createChart, ColorType, IChartApi, ISeriesApi, UTCTimestamp } from 'lightweight-charts';
 import { useGlobalTicker } from 'common';
 
-type DataSerieWithUpdater = [ISeriesApi<"Line">, UpdateFunction];
+type MeasurementToSerieAndUpdater = Map<MeasurementId, { DataSerie: ISeriesApi<"Line">, Updater: UpdateFunction }>;
 
 type Props = {
     chartId: ChartId;
@@ -24,29 +24,23 @@ export const ChartElement = memo(({ chartId, measurementId, chartHeight, removeC
     const chartContainerRef = useRef<HTMLDivElement>(null);
     // Chart generated into chartContainer
     let chart : IChartApi;
-    // Ref to the measurements of the chart render
-    const chartMeasurements = useRef<MeasurementInfo[]>([]);
+    let chartLegend = useRef<HTMLDivElement>(null);
     // Ref to chart's data series
-    const chartDataSeries = useRef<DataSerieWithUpdater[]>([]);
+    const chartDataSeries = useRef<MeasurementToSerieAndUpdater>(new Map());
 
-    // Event handler that adds a new line to the chart when the user
-    // drops a measurementId on the chart.
-    const handleDropOnChart = useCallback((ev: DragEvent<HTMLDivElement>) => {
-        ev.stopPropagation();
-        const measurementId = ev.dataTransfer.getData("id");
-        const measurement = getMeasurementInfo(measurementId);
-        appendToChart(measurement, chartMeasurements.current);
-    }, []);
-
-    // Initialize the charts settings and add the first measurement passed by props to the chart.
+    // INITIALIZE ALL THE CHART INITIAL SETTINGS.
     useEffect(() => {
         const measurement = getMeasurementInfo(measurementId);
-        appendToChart(measurement, chartMeasurements.current);
+        const chartLegendItem = createChartLegendItem(measurement);
+        chartLegendItem.onclick = () => {
+            removeSeries(measurementId)
+            chartLegendItem.remove();
+        };
+        if (chartLegend) chartLegend.current?.appendChild(chartLegendItem);
 
         const handleResize = () => {
             if (chartContainerRef.current)
             chart.applyOptions({ width: chartContainerRef.current.clientWidth });
-            chart.timeScale().fitContent();
         };
 
         const resizeObserver = new ResizeObserver(handleResize);
@@ -69,30 +63,52 @@ export const ChartElement = memo(({ chartId, measurementId, chartHeight, removeC
                 lockVisibleTimeRangeOnResize: true,
             }
         });
-        chartDataSeries.current.push([chart.addLineSeries({ color: measurement.color }), measurement.getUpdate]);
+
+        chartDataSeries.current.set(measurementId, {DataSerie: chart.addLineSeries({ color: measurement.color }), Updater: measurement.getUpdate});
 
         return () => {
             resizeObserver.disconnect();
             chart.remove();
         };
-    }, []);
+    });
+
+    useEffect(() => {
+        if(chartContainerRef.current)
+        chartContainerRef.current.ondrop = (ev) => {
+            ev.stopPropagation();
+            const measurementId = ev.dataTransfer?.getData("id");
+            if (measurementId === undefined || chartDataSeries.current.get(measurementId)) return;
+            const measurement = getMeasurementInfo(measurementId);
+            chartDataSeries.current.set(measurementId, {DataSerie: chart.addLineSeries({ color: measurement.color }), Updater: measurement.getUpdate});
+            const chartLegendItem = createChartLegendItem(measurement);
+            chartLegendItem.onclick = () => {
+                removeSeries(measurementId)
+                chartLegendItem.remove();
+            };
+            if (chartLegend) chartLegend.current?.appendChild(chartLegendItem);
+        };
+    });
 
     // Update the chart with the new measurements values.
     useGlobalTicker(() => {
         chartDataSeries.current.forEach((serie) => {
-            const [dataSerie, getUpdate] = serie;
-            const update = getUpdate();
+            const {DataSerie, Updater} = serie;
+            const update = Updater();
             const now = Date.now() as UTCTimestamp;
-            dataSerie.update({ time: now, value: update });
+            DataSerie.update({ time: now, value: update });
         });
     });
+
+    const removeSeries = useCallback((measurementId: MeasurementId) => {
+        chartDataSeries.current.delete(measurementId);
+        if(chartDataSeries.current.size === 0) removeChart(chartId);
+    }, []);
 
     return (
         <div
             className={styles.chartWrapper}
             onDragEnter={(ev) => ev.preventDefault()}
             onDragOver={(ev) => ev.preventDefault()}
-            onDrop={handleDropOnChart}
         >
 
             <div className={styles.chart}>
@@ -101,17 +117,23 @@ export const ChartElement = memo(({ chartId, measurementId, chartHeight, removeC
                     cursor="pointer"
                     onClick={() => removeChart(chartId)}
                 />
-                <div
-                    ref={chartContainerRef}
-                >
-                </div>
+                <div ref={chartContainerRef}></div>
+                <div className={styles.chartLegend} ref={chartLegend}></div>
             </div>
         </div>
     );
 });
 
-function appendToChart(newMeasurement: MeasurementInfo, chartMeasurements: MeasurementInfo[]) {
-    const measurementInChart = chartMeasurements.find((measurement: MeasurementInfo) => measurement.name === measurement.name);
-    if(!measurementInChart)
-        chartMeasurements.push(newMeasurement);
+function createChartLegendItem(measurement: MeasurementInfo) {
+    const legendItem = document.createElement("div");
+    legendItem.setAttribute("data-id", measurement.id);
+    legendItem.className = styles.chartLegendItem;
+    const seriesColor = document.createElement("div");
+    seriesColor.className = styles.chartLegendItemColor;
+    seriesColor.style.backgroundColor = measurement.color;
+    const seriesName = document.createElement("p");
+    seriesName.innerText = measurement.name;
+    legendItem.appendChild(seriesColor);
+    legendItem.appendChild(seriesName);
+    return legendItem;
 }
