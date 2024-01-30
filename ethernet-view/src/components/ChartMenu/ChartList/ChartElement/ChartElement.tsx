@@ -3,13 +3,11 @@ import CanvasJSReact from '@canvasjs/react-charts';
 import styles from "./ChartElement.module.scss";
 import { AiOutlineCloseCircle } from 'react-icons/ai'
 import { memo, useCallback, useRef, DragEvent, useEffect } from "react";
-import { ChartId, MeasurementId, MeasurementInfo, } from '../ChartList';
-import { createChart, ColorType, IChartApi } from 'lightweight-charts';
+import { ChartId, MeasurementId, MeasurementInfo, UpdateFunction, } from '../ChartList';
+import { createChart, ColorType, IChartApi, ISeriesApi, SeriesType, LineSeriesOptions, UTCTimestamp } from 'lightweight-charts';
+import { useGlobalTicker } from 'common';
 
-export interface Point {
-    x: number,
-    y: number,
-};
+type DataSerieWithUpdater = [ISeriesApi<"Line">, UpdateFunction];
 
 type Props = {
     chartId: ChartId;
@@ -24,10 +22,23 @@ export const ChartElement = memo(({ chartId, measurementId, chartHeight, removeC
 
     // Ref to the CanvasJS chart render
     const chartContainerRef = useRef<HTMLDivElement>(null);
-    // Ref to the data series of the CanvasJS chart render
+    // Chart generated into chartContainer
+    let chart : IChartApi;
+    // Ref to the measurements of the chart render
     const chartMeasurements = useRef<MeasurementInfo[]>([]);
+    // Ref to chart's data series
+    const chartDataSeries = useRef<DataSerieWithUpdater[]>([]);
 
-    // Scaffold the charts settings and add the first measurement passed by props to the chart when it is created.
+    // Event handler that adds a new line to the chart when the user
+    // drops a measurementId on the chart.
+    const handleDropOnChart = useCallback((ev: DragEvent<HTMLDivElement>) => {
+        ev.stopPropagation();
+        const measurementId = ev.dataTransfer.getData("id");
+        const measurement = getMeasurementInfo(measurementId);
+        appendToChart(measurement, chartMeasurements.current);
+    }, []);
+
+    // Initialize the charts settings and add the first measurement passed by props to the chart.
     useEffect(() => {
         const measurement = getMeasurementInfo(measurementId);
         appendToChart(measurement, chartMeasurements.current);
@@ -43,27 +54,22 @@ export const ChartElement = memo(({ chartId, measurementId, chartHeight, removeC
         resizeObserver.observe(chartContainerRef.current);
 
         if (!chartContainerRef.current) return;
-        let chart = createChart(chartContainerRef.current, {
+        chart = createChart(chartContainerRef.current, {
             layout: {
                 background: { type: ColorType.Solid, color: "white" },
                 textColor: "black",
             },
             width: chartContainerRef.current.clientWidth,
             height: chartHeight,
+            timeScale: {
+                timeVisible: true,
+                secondsVisible: true,
+                fixLeftEdge: true,
+                fixRightEdge: true,
+                lockVisibleTimeRangeOnResize: true,
+            }
         });
-        const dataSeries = chart.addLineSeries({ color: measurement.color });
-        dataSeries.setData([
-            { time: '2018-12-22', value: 32.51 },
-            { time: '2018-12-23', value: 31.11 },
-            { time: '2018-12-24', value: 27.02 },
-            { time: '2018-12-25', value: 27.32 },
-            { time: '2018-12-26', value: 25.17 },
-            { time: '2018-12-27', value: 28.89 },
-            { time: '2018-12-28', value: 25.46 },
-            { time: '2018-12-29', value: 23.92 },
-            { time: '2018-12-30', value: 22.68 },
-            { time: '2018-12-31', value: 22.67 },
-        ]);
+        chartDataSeries.current.push([chart.addLineSeries({ color: measurement.color }), measurement.getUpdate]);
 
         return () => {
             resizeObserver.disconnect();
@@ -71,14 +77,15 @@ export const ChartElement = memo(({ chartId, measurementId, chartHeight, removeC
         };
     }, []);
 
-    // Event handler that adds a new line to the chart when the user
-    // drops a measurementId on the chart.
-    const handleDropOnChart = useCallback((ev: DragEvent<HTMLDivElement>) => {
-        ev.stopPropagation();
-        const measurementId = ev.dataTransfer.getData("id");
-        const measurement = getMeasurementInfo(measurementId);
-        appendToChart(measurement, chartMeasurements.current);
-    }, []);
+    // Update the chart with the new measurements values.
+    useGlobalTicker(() => {
+        chartDataSeries.current.forEach((serie) => {
+            const [dataSerie, getUpdate] = serie;
+            const update = getUpdate();
+            const now = Date.now() as UTCTimestamp;
+            dataSerie.update({ time: now, value: update });
+        });
+    });
 
     return (
         <div
@@ -98,44 +105,13 @@ export const ChartElement = memo(({ chartId, measurementId, chartHeight, removeC
                     ref={chartContainerRef}
                 >
                 </div>
-                {/* <CanvasJSReact.CanvasJSChart
-                    options={{
-                        height: 300,
-                        data: chartDataSeries.current,
-                        axisX: {
-                            labelFormatter: () => "",
-                        },
-                        legend: {
-                            fontSize: 16,
-                            cursor: "pointer",
-                            itemclick: (event: any) => {
-                                event.chart.data[event.dataSeriesIndex].remove();
-                                if(event.chart.data.length === 0) removeChart(chartId)
-                            }
-                        },
-                    }}
-                    onRef={(ref: MutableRefObject<undefined>) => {chartRef.current = ref;}} 
-                /> */}
             </div>
         </div>
     );
 });
 
-// export function createDataSeries(measurement: MeasurementInfo): DataSeries {
-//     return {
-//         type: "line",
-//         legendText: measurement.units ? `${measurement.name} (${measurement.units})` : measurement.name,
-//         showInLegend: true,
-//         name: measurement.name,
-//         color: measurement.color,
-//         dataPoints: [] as Point[],
-//         updateFunction: measurement.getUpdate,
-//     };
-// }
-
-function appendToChart(dataSeries: MeasurementInfo, chartMeasurements: MeasurementInfo[]) {
-    const dataSeriesInChart = chartMeasurements.find((measurement: MeasurementInfo) => measurement.name === measurement.name);
-        if(!dataSeriesInChart) {
-            chartMeasurements.push(dataSeries);
-    }
+function appendToChart(newMeasurement: MeasurementInfo, chartMeasurements: MeasurementInfo[]) {
+    const measurementInChart = chartMeasurements.find((measurement: MeasurementInfo) => measurement.name === measurement.name);
+    if(!measurementInChart)
+        chartMeasurements.push(newMeasurement);
 }
