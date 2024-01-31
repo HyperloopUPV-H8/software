@@ -32,10 +32,7 @@ export const ChartElement = memo(({ chartId, measurementId, chartHeight, removeC
     useEffect(() => {
         const measurement = getMeasurementInfo(measurementId);
         const chartLegendItem = createChartLegendItem(measurement);
-        chartLegendItem.onclick = () => {
-            removeSeries(measurementId)
-            chartLegendItem.remove();
-        };
+        chartLegendItem.onclick = (ev) => removeSeriesFromChart(ev, measurementId);
         if (chartLegend) chartLegend.current?.appendChild(chartLegendItem);
 
         const handleResize = () => {
@@ -81,10 +78,7 @@ export const ChartElement = memo(({ chartId, measurementId, chartHeight, removeC
             const measurement = getMeasurementInfo(measurementId);
             chartDataSeries.current.set(measurementId, {DataSerie: chart.addLineSeries({ color: measurement.color }), Updater: measurement.getUpdate});
             const chartLegendItem = createChartLegendItem(measurement);
-            chartLegendItem.onclick = () => {
-                removeSeries(measurementId)
-                chartLegendItem.remove();
-            };
+            chartLegendItem.onclick = (ev) => removeSeriesFromChart(ev, measurementId);
             if (chartLegend) chartLegend.current?.appendChild(chartLegendItem);
         };
     });
@@ -94,14 +88,18 @@ export const ChartElement = memo(({ chartId, measurementId, chartHeight, removeC
         chartDataSeries.current.forEach((serie) => {
             const {DataSerie, Updater} = serie;
             const update = Updater();
-            const now = Date.now() as UTCTimestamp;
+            const now = (Date.now() / 1000) as UTCTimestamp;
             DataSerie.update({ time: now, value: update });
         });
     });
 
-    const removeSeries = useCallback((measurementId: MeasurementId) => {
+    const removeSeriesFromChart = useCallback((ev: MouseEvent, measurementId: MeasurementId) => {
+        ev.stopPropagation();
         chartDataSeries.current.delete(measurementId);
         if(chartDataSeries.current.size === 0) removeChart(chartId);
+        const target = ev.target as HTMLDivElement;
+        const parent = target.parentElement as HTMLDivElement;
+        parent.remove();
     }, []);
 
     return (
