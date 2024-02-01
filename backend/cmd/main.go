@@ -112,7 +112,15 @@ func main() {
 	}
 
 	// <--- update factory --->
-	updateFactory := update_factory.NewFactory()
+	boardToPacket := make(map[abstraction.TransportTarget][]uint16)
+	for _, board := range podData.Boards {
+		packetIds := make([]uint16, len(board.Packets))
+		for i, packet := range board.Packets {
+			packetIds[i] = packet.Id
+		}
+		boardToPacket[abstraction.TransportTarget(board.Name)] = packetIds
+	}
+	updateFactory := update_factory.NewFactory(boardToPacket)
 
 	// <--- logger --->
 	var boardMap map[abstraction.BoardId]string

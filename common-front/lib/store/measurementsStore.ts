@@ -8,6 +8,7 @@ import {
     PacketUpdate,
 } from "../adapters";
 import { create } from "zustand";
+import { isNumericType } from "../BackendTypes";
 
 export type Measurements = Record<string, Measurement>
 
@@ -15,7 +16,8 @@ export interface MeasurementsStore {
     measurements: Measurements;
     packetIdToBoard: Record<number, string>;
     initMeasurements: (podDataAdapter: PodDataAdapter) => void;
-    updateMeasurements: (measurements: Record<string, PacketUpdate>) => void
+    updateMeasurements: (measurements: Record<string, PacketUpdate>) => void;
+    clearMeasurements: (board: string) => void
 }
 
 export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
@@ -57,6 +59,31 @@ export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
                 measurementsDraft[measurementId].value = mUpdate;
             }
         }
+        
+        set(state => ({
+            ...state,
+            measurements: measurementsDraft
+        }))
+    },
+
+    clearMeasurements: (board: string) => {
+        const measurementsDraft = get().measurements;
+
+        for (const measurementId in measurementsDraft) {
+            if (measurementId.includes(board)) {
+                if (isNumericType(measurementsDraft[measurementId].type)) {
+                    measurementsDraft[measurementId].value = {
+                        average: 0,
+                        last: 0,
+                    }
+                } else if (measurementsDraft[measurementId].type == "bool") {
+                    measurementsDraft[measurementId].value = false
+                } else {
+                    measurementsDraft[measurementId].value = "Default"
+                }
+            }
+        }
+
         set(state => ({
             ...state,
             measurements: measurementsDraft
