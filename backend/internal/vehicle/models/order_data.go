@@ -121,6 +121,7 @@ func getField(m pod_data.Measurement) (any, error) {
 				Kind: BooleanKind,
 				Name: typedMeas.Name,
 			},
+			VarType: "bool",
 		}, nil
 	case pod_data.EnumMeasurement:
 		return EnumDescription{
@@ -130,6 +131,7 @@ func getField(m pod_data.Measurement) (any, error) {
 				Name: typedMeas.Name,
 			},
 			Options: typedMeas.Options,
+			VarType: "enum",
 		}, nil
 	default:
 		return struct{}{}, errors.New("unrecognized measurement type")
@@ -157,9 +159,11 @@ type NumericDescription struct {
 
 type BooleanDescription struct {
 	fieldDescription
+	VarType string `json:"type"`
 }
 
 type EnumDescription struct {
 	fieldDescription
 	Options []string `json:"options"`
+	VarType string   `json:"type"`
 }

@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
+	loggerHandler "github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 )
 
@@ -31,12 +31,13 @@ type Logger struct {
 
 // Record is a struct that implements the abstraction.LoggerRecord interface
 type Record struct {
-	Packet *data.Packet
+	Packet    *data.Packet
+	From      string
+	To        string
+	Timestamp time.Time
 }
 
-func (record *Record) Name() abstraction.LoggerName {
-	return Name
-}
+func (*Record) Name() abstraction.LoggerName { return Name }
 
 func NewLogger() *Logger {
 	logger := &Logger{
@@ -66,7 +67,7 @@ type numeric interface {
 
 func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	if !sublogger.running.Load() {
-		return &logger.ErrLoggerNotRunning{
+		return loggerHandler.ErrLoggerNotRunning{
 			Name:      Name,
 			Timestamp: time.Now(),
 		}
@@ -74,7 +75,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 	dataRecord, ok := record.(*Record)
 	if !ok {
-		return &logger.ErrWrongRecordType{
+		return loggerHandler.ErrWrongRecordType{
 			Name:      Name,
 			Timestamp: time.Now(),
 			Expected:  &Record{},
@@ -107,12 +108,23 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 		file, ok := sublogger.valueFileSlice[valueName]
 		if !ok {
-			filename := path.Join("logger/data", fmt.Sprintf("data_%s", logger.Timestamp.Format(time.RFC3339)), fmt.Sprintf("%s.csv", valueName))
-			os.MkdirAll(path.Dir(filename), os.ModePerm)
+			filename := path.Join(
+				"logger/data",
+				fmt.Sprintf("data_%s", loggerHandler.Timestamp.Format(time.RFC3339)),
+				fmt.Sprintf("%s.csv", valueName),
+			)
+			err := os.MkdirAll(path.Dir(filename), os.ModePerm)
+			if err != nil {
+				return loggerHandler.ErrCreatingAllDir{
+					Name:      Name,
+					Timestamp: time.Now(),
+					Path:      filename,
+				}
+			}
 
 			f, err := os.Create(path.Join(filename))
 			if err != nil {
-				return &logger.ErrCreatingFile{
+				return loggerHandler.ErrCreatingFile{
 					Name:      Name,
 					Timestamp: time.Now(),
 					Inner:     err,
@@ -121,18 +133,27 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 			sublogger.valueFileSlice[valueName] = f
 			file = f
 		}
-		writer := csv.NewWriter(file) // TODO! use map/slice of writers
-		defer writer.Flush()
+		writer := csv.NewWriter(file) // TODO! use map/slice of writer
 
-		err := writer.Write([]string{timestamp.Format(time.RFC3339), val})
+		err := writer.Write([]string{
+			timestamp.Format(time.RFC3339),
+			dataRecord.From,
+			dataRecord.To,
+			val,
+		})
 		if err != nil {
-			writerErr = err
+			writerErr = loggerHandler.ErrWritingFile{
+				Name:      Name,
+				Timestamp: time.Now(),
+				Inner:     err,
+			}
 		}
+		writer.Flush()
 	}
 	return writerErr
 }
 
-func (sublogger *Logger) PullRecord(request abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
+func (sublogger *Logger) PullRecord(abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
 	panic("TODO!")
 }
 
@@ -142,10 +163,19 @@ func (sublogger *Logger) Stop() error {
 		return nil
 	}
 
+	closeErr := error(nil)
 	for _, file := range sublogger.valueFileSlice {
-		file.Close()
+		err := file.Close()
+		if err != nil {
+			closeErr = loggerHandler.ErrClosingFile{
+				Name:      Name,
+				Timestamp: time.Now(),
+			}
+
+			fmt.Println(closeErr.Error())
+		}
 	}
 
 	fmt.Println("Logger stopped")
-	return nil
+	return closeErr
 }

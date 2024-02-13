@@ -19,12 +19,14 @@ const icons = {
     info: Info,
     fault: Fault,
     warning: Warning,
+    ok: Info,
 };
 
 const appearances = {
     info: styles.info,
     warning: styles.warning,
     fault: styles.fault,
+    ok: styles.info,
 };
 
 export const MessageView = React.memo(({ message }: Props) => {
@@ -32,7 +34,7 @@ export const MessageView = React.memo(({ message }: Props) => {
     const appearance = appearances[message.kind];
 
     const Message =
-        message.kind == "warning" || message.kind == "fault" ? (
+        message.kind == "warning" || message.kind == "fault" || message.kind == "ok" ? (
             <ProtectionMessageView
                 message={message}
                 className={styles.content}

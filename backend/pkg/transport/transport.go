@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"os"
+	"sync"
 	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
@@ -26,7 +28,8 @@ type Transport struct {
 	decoder *presentation.Decoder
 	encoder *presentation.Encoder
 
-	connections map[abstraction.TransportTarget]net.Conn
+	connectionsMx *sync.Mutex
+	connections   map[abstraction.TransportTarget]net.Conn
 
 	idToTarget map[abstraction.PacketId]abstraction.TransportTarget
 
@@ -42,7 +45,8 @@ func (transport *Transport) HandleClient(config tcp.ClientConfig, target abstrac
 	for {
 		conn, err := config.Dial(network, remote)
 		if err != nil {
-			if !errors.Is(err, error(tcp.ErrTooManyRetries{})) {
+			if config.AbortOnError {
+				fmt.Fprintf(os.Stderr, "Error connecting to %s: %v\n", target, err)
 				return err
 			}
 
@@ -52,6 +56,14 @@ func (transport *Transport) HandleClient(config tcp.ClientConfig, target abstrac
 		err = transport.handleTCPConn(target, conn)
 		if errors.Is(err, error(ErrTargetAlreadyConnected{})) {
 			return err
+		}
+		if err != nil {
+			if config.AbortOnError {
+				fmt.Fprintf(os.Stderr, "Error handling connection to %s: %v\n", target, err)
+				return err
+			}
+
+			continue
 		}
 
 		// Wait before trying to reconnect
@@ -69,16 +81,42 @@ func (transport *Transport) HandleServer(config tcp.ServerConfig, network, local
 // handleTCPConn is used to handle the specific TCP connections to the boards. It detects errors caused
 // on concurrent reads and writes, so other routines should not worry about closing or handling errors
 func (transport *Transport) handleTCPConn(target abstraction.TransportTarget, conn net.Conn) error {
-	if _, ok := transport.connections[target]; ok {
-		conn.Close()
-		return ErrTargetAlreadyConnected{Target: target}
+	if err := func() error {
+		transport.connectionsMx.Lock()
+		defer transport.connectionsMx.Unlock()
+		if _, ok := transport.connections[target]; ok {
+			conn.Close()
+			return ErrTargetAlreadyConnected{Target: target}
+		}
+		return nil
+	}(); err != nil {
+		return err
 	}
 
+	if tcpConn, ok := conn.(*net.TCPConn); ok {
+		err := tcpConn.SetLinger(0)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error setting %s linger to zero: %v\n", target, err)
+		}
+
+		err = tcpConn.SetNoDelay(true)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error setting %s no delay: %v\n", target, err)
+		}
+	}
 	conn, errChan := tcp.WithErrChan(conn)
 	defer conn.Close()
 
-	transport.connections[target] = conn
-	defer delete(transport.connections, target)
+	func() {
+		transport.connectionsMx.Lock()
+		defer transport.connectionsMx.Unlock()
+		transport.connections[target] = conn
+	}()
+	defer func() {
+		transport.connectionsMx.Lock()
+		defer transport.connectionsMx.Unlock()
+		delete(transport.connections, target)
+	}()
 
 	transport.api.ConnectionUpdate(target, true)
 	defer transport.api.ConnectionUpdate(target, false)
@@ -90,7 +128,10 @@ func (transport *Transport) handleTCPConn(target abstraction.TransportTarget, co
 				break
 			}
 
-			transport.api.Notification(NewPacketNotification(packet))
+			to := conn.LocalAddr().String()
+			from := conn.RemoteAddr().String()
+
+			transport.api.Notification(NewPacketNotification(packet, from, to, time.Now()))
 		}
 	}()
 
@@ -119,9 +160,17 @@ func (transport *Transport) handlePacketEvent(message PacketMessage) error {
 		return ErrUnrecognizedId{Id: message.Id()}
 	}
 
-	conn, ok := transport.connections[target]
-	if !ok {
-		return ErrConnClosed{Target: target}
+	conn, err := func() (net.Conn, error) {
+		transport.connectionsMx.Lock()
+		defer transport.connectionsMx.Unlock()
+		conn, ok := transport.connections[target]
+		if !ok {
+			return nil, ErrConnClosed{Target: target}
+		}
+		return conn, nil
+	}()
+	if err != nil {
+		return err
 	}
 
 	data, err := transport.encoder.Encode(message.Packet)
@@ -182,7 +231,10 @@ func (transport *Transport) handleConversation(socket network.Socket, reader io.
 				return // TODO: handle error
 			}
 
-			transport.api.Notification(NewPacketNotification(packet))
+			from := fmt.Sprintf("%s:%d", socket.SrcIP, socket.SrcPort)
+			to := fmt.Sprintf("%s:%d", socket.DstIP, socket.DstPort)
+
+			transport.api.Notification(NewPacketNotification(packet, from, to, time.Now()))
 		}
 	}()
 }

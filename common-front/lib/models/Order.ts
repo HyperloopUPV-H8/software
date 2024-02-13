@@ -8,6 +8,7 @@ export type Order = {
 export type OrderField = {
     value: string | number | boolean;
     isEnabled: boolean;
+    type: string;
 };
 
 export type VehicleOrders = {

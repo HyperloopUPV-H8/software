@@ -1,15 +1,24 @@
 package transport
 
-import "github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+import (
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"time"
+)
 
-// PacketNofitication notifies of an incoming message
+// PacketNotification notifies of an incoming message
 type PacketNotification struct {
-	abstraction.Packet
+	Packet    abstraction.Packet
+	From      string
+	To        string
+	Timestamp time.Time
 }
 
-func NewPacketNotification(packet abstraction.Packet) PacketNotification {
+func NewPacketNotification(packet abstraction.Packet, from string, to string, timestamp time.Time) PacketNotification {
 	return PacketNotification{
-		Packet: packet,
+		Packet:    packet,
+		From:      from,
+		To:        to,
+		Timestamp: timestamp,
 	}
 }
 
