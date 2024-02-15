@@ -49,7 +49,9 @@ func (update *Update) Push(push abstraction.BrokerPush) error {
 	defer update.connectionMx.Unlock()
 	update.connections[connection.Name] = *connection
 
-	rawPayload, err := json.Marshal(update.connections)
+	rawPayload, err := json.Marshal(map[string]Connection{
+		connection.Name: *connection,
+	})
 	if err != nil {
 		return err
 	}
