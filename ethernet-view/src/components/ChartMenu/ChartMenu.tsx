@@ -1,24 +1,27 @@
 import styles from "components/ChartMenu/ChartMenu.module.scss";
+import { DragEvent } from "react";
 import Sidebar from "components/ChartMenu/Sidebar/Sidebar";
-import { ChartList } from "components/ChartMenu/ChartList/ChartList";
 import { Section } from "./Sidebar/Section/Section";
-import { NumericMeasurement, getMeasurement, useMeasurementsStore } from "common";
-
-function getRandomColor() {
-    const r = Math.floor(Math.random() * 256);
-    const g = Math.floor(Math.random() * 256);
-    const b = Math.floor(Math.random() * 256);
-
-    return `rgb(${r}, ${g}, ${b})`;
-}
+import { useMeasurementsStore } from "common";
+import { useChartStore } from "./ChartStore";
+import { nanoid } from "nanoid";
+import { ChartElement } from "./ChartElement/ChartElement";
 
 type Props = {
     sidebarSections: Section[];
 };
 
 export const ChartMenu = ({ sidebarSections }: Props) => {
+    const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
+    
+    const charts = useChartStore((state) => state.charts);
+    const addChart = useChartStore((state) => state.addChart);
 
-    const measurements = useMeasurementsStore((state) => state.measurements);
+    const handleDrop = (ev: DragEvent<HTMLDivElement>) => {
+        const id = ev.dataTransfer.getData("id");
+        const initialMeasurementInfo = getNumericMeasurementInfo(id);
+        addChart(nanoid(), initialMeasurementInfo);
+    };
 
     if (sidebarSections.length == 0) {
         return (
@@ -32,23 +35,22 @@ export const ChartMenu = ({ sidebarSections }: Props) => {
         return (
             <div className={styles.chartMenuWrapper}>
                 <Sidebar sections={sidebarSections} />
-                <ChartList
-                    getMeasurementInfo={(id) => {
-                        const meas = getMeasurement(measurements, id) as NumericMeasurement;
-                        return {
-                            id: id,
-                            name: meas.name,
-                            units: meas.units,
-                            range: meas.safeRange,
-                            getUpdate: () => {
-                                const meas = getMeasurement(measurements, id) as NumericMeasurement;
-                                if (meas == undefined) return 0
-                                return meas.value.last;
-                            },
-                            color: getRandomColor(),
-                        };
-                    }}
-                />
+                <div
+                    className={styles.chartListWrapper}
+                    onDrop={handleDrop}
+                    onDragEnter={(ev) => ev.preventDefault()}
+                    onDragOver={(ev) => ev.preventDefault()}
+                >
+                    {Object.keys(charts).map((chartId) => {
+                        return (
+                            <ChartElement
+                                key={chartId}
+                                chartId={chartId}
+                                chartHeight={300}
+                            />
+                        );
+                    })}
+                </div>
             </div>
         );
     }
