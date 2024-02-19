@@ -1,4 +1,4 @@
-import { Measurement } from "../models";
+import { Measurement, NumericMeasurement, isNumericMeasurement } from "../models";
 import {
     getBooleanMeasurement,
     getEnumMeasurement,
@@ -10,12 +10,28 @@ import {
 import { create } from "zustand";
 
 export type Measurements = Record<string, Measurement>
+export type MeasurementId = string;
+export type MeasurementName = string;
+export type MeasurementColor = string;
+export type MeasurementUnits = string;
+export type UpdateFunction = () => number;
+export type NumericMeasurementInfo = {
+  readonly id: MeasurementId;
+  readonly name: MeasurementName;
+  readonly range: [number | null, number | null];
+  readonly color: MeasurementColor;
+  readonly units: MeasurementUnits;
+  readonly getUpdate: UpdateFunction;
+};
 
 export interface MeasurementsStore {
     measurements: Measurements;
     packetIdToBoard: Record<number, string>;
     initMeasurements: (podDataAdapter: PodDataAdapter) => void;
     updateMeasurements: (measurements: Record<string, PacketUpdate>) => void
+    getMeasurement: (id: MeasurementId) => Measurement;
+    getNumericMeasurementInfo: (id: MeasurementId) => NumericMeasurementInfo;
+    getMeasurementFallback: (id: MeasurementId) => Measurement;
 }
 
 export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
@@ -61,6 +77,38 @@ export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
             ...state,
             measurements: measurementsDraft
         }))
+    },
+
+    getMeasurement: (id: string) => {
+        return get().measurements[id];
+    },
+
+    getNumericMeasurementInfo: (id: string) => {
+        const meas = get().measurements[id] as NumericMeasurement;
+        return {
+            id: meas.id,
+            name: meas.name,
+            units: meas.units,
+            range: meas.safeRange,
+            getUpdate: () => {
+                const meas = get().measurements[id] as NumericMeasurement;
+                if (meas == undefined) return 0;
+                return meas.value.last;
+            },
+            color: getRandomColor(),
+        };
+    },
+
+    getMeasurementFallback: (id: string) => {
+        return get().measurements[id] ?? {
+            id: "Default",
+            name: "Default",
+            safeRange: [null, null],
+            warningRange: [null, null],
+            type: "uint8",
+            units: "A",
+            value: { average: 0, last: 0 },
+        };
     }
 }))
 
@@ -99,33 +147,10 @@ function getPacketIdToBoard(podData: PodDataAdapter) {
     return packetIdToBoard;
 }
 
-export function getMeasurement(
-    measurements: Measurements,
-    id: string
-): Measurement | undefined {
-    const meas = measurements[id];
+function getRandomColor() {
+    const r = Math.floor(Math.random() * 256);
+    const g = Math.floor(Math.random() * 256);
+    const b = Math.floor(Math.random() * 256);
 
-    if (!meas) {
-        console.trace(`measurement ${id} not found in store`);
-        return undefined;
-    }
-
-    return meas;
-}
-
-export function getMeasurementFallback(
-    measurements: Measurements,
-    id: string
-): Measurement {
-    return (
-        getMeasurement(measurements, id) ?? {
-            id: "Default",
-            name: "Default",
-            safeRange: [null, null],
-            warningRange: [null, null],
-            type: "uint8",
-            units: "A",
-            value: { average: 0, last: 0 },
-        }
-    );
+    return `rgb(${r}, ${g}, ${b})`;
 }
