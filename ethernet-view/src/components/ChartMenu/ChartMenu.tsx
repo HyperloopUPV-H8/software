@@ -13,11 +13,11 @@ type Props = {
 
 export const ChartMenu = ({ sidebarSections }: Props) => {
     const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
-    
     const charts = useChartStore((state) => state.charts);
     const addChart = useChartStore((state) => state.addChart);
 
     const handleDrop = (ev: DragEvent<HTMLDivElement>) => {
+        ev.preventDefault();
         const id = ev.dataTransfer.getData("id");
         const initialMeasurementInfo = getNumericMeasurementInfo(id);
         addChart(nanoid(), initialMeasurementInfo);
@@ -41,15 +41,12 @@ export const ChartMenu = ({ sidebarSections }: Props) => {
                     onDragEnter={(ev) => ev.preventDefault()}
                     onDragOver={(ev) => ev.preventDefault()}
                 >
-                    {Object.keys(charts).map((chartId) => {
-                        return (
-                            <ChartElement
-                                key={chartId}
-                                chartId={chartId}
-                                chartHeight={300}
-                            />
-                        );
-                    })}
+                    {charts.map((chart) => (
+                        <ChartElement
+                            key={chart.chartId}
+                            chartId={chart.chartId}
+                        />
+                    ))}
                 </div>
             </div>
         );

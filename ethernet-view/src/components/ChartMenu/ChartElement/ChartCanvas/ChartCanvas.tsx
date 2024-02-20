@@ -1,6 +1,17 @@
+import { NumericMeasurementInfo } from "common"
 
-export const ChartCanvas = () => {
+interface Props {
+  measurements: NumericMeasurementInfo[];
+}
+
+export const ChartCanvas = ({ measurements } : Props) => {
   return (
-    <div>ChartCanvas</div>
+    <div>
+      {measurements.map((measurement) => (
+        <div key={measurement.id}>
+          {measurement.id}
+        </div>
+      ))}
+    </div>
   )
 }

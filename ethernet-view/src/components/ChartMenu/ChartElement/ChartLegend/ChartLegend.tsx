@@ -1,13 +1,29 @@
 import styles from './ChartLegend.module.scss';
-import { MeasurementInfo } from '../../ChartList/ChartList';
+import { useCallback } from 'react';
+import { MeasurementId, NumericMeasurementInfo } from 'common';
 
-export const ChartLegend = () => {
+interface Props {
+  removeMeasurement: (measurementId: MeasurementId) => void;
+}
+
+export const ChartLegend = ({ removeMeasurement } : Props) => {
+
+  // TODO: IMPLEMENT
+  // const removeSeriesFromChart = useCallback((ev: MouseEvent, measurementId: MeasurementId) => {
+  //   ev.stopPropagation();
+  //   chartDataSeries.current.delete(measurementId);
+  //   if(chartDataSeries.current.size === 0) removeChart(chartId);
+  //   const target = ev.target as HTMLDivElement;
+  //   const parent = target.parentElement as HTMLDivElement;
+  //   parent.remove();
+  // }, []);
+
   return (
     <div>ChartLegend</div>
   )
 }
 
-function createChartLegendItem(measurement: MeasurementInfo) {
+function createChartLegendItem(measurement: NumericMeasurementInfo) {
     const legendItem = document.createElement("div");
     legendItem.setAttribute("data-id", measurement.id);
     legendItem.className = styles.chartLegendItem;
