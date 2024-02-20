@@ -3,46 +3,86 @@ import { NumericMeasurementInfo, MeasurementId } from 'common';
 
 export type ChartId = string;
 
-type ChartSet = Map<ChartId, NumericMeasurementInfo[]>;
-
+type ChartInfo = {
+    chartId: ChartId, 
+    measurements: NumericMeasurementInfo[]
+};
+type ChartSet = ChartInfo[];
 type ChartStore = {
     charts: ChartSet;
     addChart: (chartId: ChartId, initialMeasurement: NumericMeasurementInfo) => void;
     removeChart: (chartId: ChartId) => void;
-    addMeasurement: (chartId: ChartId, measurement: NumericMeasurementInfo) => void;
-    removeMeasurement: (chartId: ChartId, measurementId: MeasurementId) => void;
+    addMeasurementToChart: (chartId: ChartId, measurement: NumericMeasurementInfo) => void;
+    removeMeasurementFromChart: (chartId: ChartId, measurementId: MeasurementId) => void;
+    getMeasurementsFromChart: (chartId: ChartId) => NumericMeasurementInfo[] | undefined;
 };
 
-export const useChartStore = create<ChartStore>((set) => ({
-    charts: new Map(),
+export const useChartStore = create<ChartStore>((set, get) => ({
+    charts: [] as ChartSet,
+
     addChart: (chartId: ChartId, initialMeasurement: NumericMeasurementInfo) => {
-        set(() => ({
-            charts: new Map().set(chartId, [initialMeasurement])
+        const newChart = {
+            chartId: chartId,
+            measurements: [initialMeasurement]
+        };
+
+        set(state => ({
+            ...state,
+            charts: [...state.charts, newChart]
         }));
     },
     removeChart: (chartId: ChartId) => {
-        set((state) => ({
-            charts: new Map([...state.charts].filter(([id, _]) => id !== chartId))
-        }));
+        const chartsDraft = get().charts;
+        const newCharts = chartsDraft.filter(chart => chart.chartId !== chartId);
+
+        set(state => ({
+            ...state,
+            charts: newCharts
+    }));
     },
-    addMeasurement: (chartId: ChartId, measurement: NumericMeasurementInfo) => {
-        set((state) => ({
-            charts: new Map([...state.charts].map(([id, measurements]) => {
-                if (id === chartId) {
-                    measurements.push(measurement);
-                }
-                return [id, measurements];
-            }))
-        }));
+    addMeasurementToChart: (chartId: ChartId, measurement: NumericMeasurementInfo) => {
+        const chartsDraft = get().charts;
+        const chartIndex = chartsDraft.findIndex(chart => chart.chartId === chartId);
+        if(chartIndex != -1) {
+            const chart = chartsDraft[chartIndex];
+            if(!isMeasurementInChart(measurement.id, chart)) {
+                chart.measurements.push(measurement);
+
+                set(state => ({
+                    ...state,
+                    charts: [
+                        ...state.charts.slice(0, chartIndex),
+                        chart,
+                        ...state.charts.slice(chartIndex + 1)
+                    ]
+                }));
+            }
+        }
     },
-    removeMeasurement: (chartId: ChartId, measurementId: MeasurementId) => {
-        set((state) => ({
-            charts: new Map([...state.charts].map(([id, measurements]) => {
-                if (id === chartId) {
-                    return [id, measurements.filter((m) => m.id !== measurementId)];
-                }
-                return [id, measurements];
-            }))
-        }));
+    removeMeasurementFromChart: (chartId: ChartId, measurementId: MeasurementId) => {
+        const chartsDraft = get().charts;
+        const chartIndex = chartsDraft.findIndex(chart => chart.chartId === chartId);
+        if(chartIndex != -1) {
+            const chart = chartsDraft[chartIndex];
+            const newMeasurements = chart.measurements.filter(measurement => measurement.id !== measurementId);
+            chart.measurements = newMeasurements;
+
+            set(state => ({
+                ...state,
+                charts: [
+                    ...state.charts.slice(0, chartIndex),
+                    chart,
+                    ...state.charts.slice(chartIndex + 1)
+                ]
+            }));
+        }
+    },
+    getMeasurementsFromChart: (chartId: ChartId) => {
+        const chart = get().charts.find(chart => chart.chartId === chartId);
+        return chart ? chart.measurements : undefined;
     }
 }));
+
+function isMeasurementInChart(measurementId: MeasurementId, chart: ChartInfo) {
+    return chart.measurements.some(measurement => measurement.id === measurementId);
+}
