@@ -3,18 +3,17 @@ import { NumericMeasurementInfo, MeasurementId } from 'common';
 
 export type ChartId = string;
 
-type ChartInfo = {
+export type ChartInfo = {
     chartId: ChartId, 
     measurements: NumericMeasurementInfo[]
 };
-type ChartSet = ChartInfo[];
+export type ChartSet = ChartInfo[];
 type ChartStore = {
     charts: ChartSet;
     addChart: (chartId: ChartId, initialMeasurement: NumericMeasurementInfo) => void;
     removeChart: (chartId: ChartId) => void;
     addMeasurementToChart: (chartId: ChartId, measurement: NumericMeasurementInfo) => void;
     removeMeasurementFromChart: (chartId: ChartId, measurementId: MeasurementId) => void;
-    getMeasurementsFromChart: (chartId: ChartId) => NumericMeasurementInfo[] | undefined;
 };
 
 export const useChartStore = create<ChartStore>((set, get) => ({
@@ -27,7 +26,6 @@ export const useChartStore = create<ChartStore>((set, get) => ({
         };
 
         set(state => ({
-            ...state,
             charts: [...state.charts, newChart]
         }));
     },
@@ -35,10 +33,9 @@ export const useChartStore = create<ChartStore>((set, get) => ({
         const chartsDraft = get().charts;
         const newCharts = chartsDraft.filter(chart => chart.chartId !== chartId);
 
-        set(state => ({
-            ...state,
+        set(_ => ({
             charts: newCharts
-    }));
+        }));
     },
     addMeasurementToChart: (chartId: ChartId, measurement: NumericMeasurementInfo) => {
         const chartsDraft = get().charts;
@@ -49,7 +46,6 @@ export const useChartStore = create<ChartStore>((set, get) => ({
                 chart.measurements.push(measurement);
 
                 set(state => ({
-                    ...state,
                     charts: [
                         ...state.charts.slice(0, chartIndex),
                         chart,
@@ -68,7 +64,6 @@ export const useChartStore = create<ChartStore>((set, get) => ({
             chart.measurements = newMeasurements;
 
             set(state => ({
-                ...state,
                 charts: [
                     ...state.charts.slice(0, chartIndex),
                     chart,
@@ -77,10 +72,6 @@ export const useChartStore = create<ChartStore>((set, get) => ({
             }));
         }
     },
-    getMeasurementsFromChart: (chartId: ChartId) => {
-        const chart = get().charts.find(chart => chart.chartId === chartId);
-        return chart ? chart.measurements : undefined;
-    }
 }));
 
 function isMeasurementInChart(measurementId: MeasurementId, chart: ChartInfo) {

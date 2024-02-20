@@ -1,17 +1,16 @@
-import { NumericMeasurementInfo } from "common"
+import { NumericMeasurementInfo } from "common";
 
 interface Props {
-  measurements: NumericMeasurementInfo[];
-}
+    measurements: NumericMeasurementInfo[];
+} 
 
-export const ChartCanvas = ({ measurements } : Props) => {
-  return (
-    <div>
-      {measurements.map((measurement) => (
-        <div key={measurement.id}>
-          {measurement.id}
+export const ChartCanvas = ({ measurements }: Props) => {
+
+    return (
+        <div>
+            {measurements.map((measurement) => (
+                <div key={measurement.id}>{measurement.id}</div>
+            ))}
         </div>
-      ))}
-    </div>
-  )
-}
+    );
+};

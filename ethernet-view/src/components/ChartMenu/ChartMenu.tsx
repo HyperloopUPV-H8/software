@@ -12,8 +12,8 @@ type Props = {
 };
 
 export const ChartMenu = ({ sidebarSections }: Props) => {
-    const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
     const charts = useChartStore((state) => state.charts);
+    const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
     const addChart = useChartStore((state) => state.addChart);
 
     const handleDrop = (ev: DragEvent<HTMLDivElement>) => {
@@ -44,7 +44,7 @@ export const ChartMenu = ({ sidebarSections }: Props) => {
                     {charts.map((chart) => (
                         <ChartElement
                             key={chart.chartId}
-                            chartId={chart.chartId}
+                            chart={chart}
                         />
                     ))}
                 </div>

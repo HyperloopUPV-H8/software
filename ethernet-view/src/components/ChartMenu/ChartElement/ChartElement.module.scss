@@ -1,34 +1,13 @@
 @use "src/styles/styles";
 
- .chartWrapper {
-     flex-shrink: 0;
+.chartWrapper {
+    flex-shrink: 0;
 
-     border: 1px solid black;
-     border-radius: styles.$normal-border-radius;
-     overflow: hidden;
- }
+    border: 1px solid black;
+    border-radius: styles.$normal-border-radius;
+    overflow: hidden;
+}
 
- .chart {
-     padding: 0.8rem;
- }
-
- .chartLegend {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    justify-content: flex-start;
+.chart {
     padding: 0.8rem;
- }
-
- .chartLegendItem {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
- }
-
- .chartLegendItemColor {
-    width: 1rem;
-    height: 1rem;
- }
+}

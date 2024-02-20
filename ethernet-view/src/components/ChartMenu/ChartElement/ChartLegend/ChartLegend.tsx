@@ -1,27 +1,41 @@
-import styles from './ChartLegend.module.scss';
-import { useCallback } from 'react';
-import { MeasurementId, NumericMeasurementInfo } from 'common';
+import styles from "./ChartLegend.module.scss";
+import { useCallback, useEffect, useRef } from "react";
+import { MeasurementId, NumericMeasurementInfo } from "common";
+import { ChartId, useChartStore } from "components/ChartMenu/ChartStore";
 
 interface Props {
-  removeMeasurement: (measurementId: MeasurementId) => void;
+    chartId: ChartId;
+    measurements: NumericMeasurementInfo[];
 }
 
-export const ChartLegend = ({ removeMeasurement } : Props) => {
+export const ChartLegend = ({ chartId, measurements }: Props) => {
+    const legendRef = useRef<HTMLDivElement>(null);
+    const charts = useChartStore((state) => state.charts);
+    const removeMeasurementFromChart = useChartStore((state) => state.removeMeasurementFromChart);
+    const removeChart = useChartStore((state) => state.removeChart);
 
-  // TODO: IMPLEMENT
-  // const removeSeriesFromChart = useCallback((ev: MouseEvent, measurementId: MeasurementId) => {
-  //   ev.stopPropagation();
-  //   chartDataSeries.current.delete(measurementId);
-  //   if(chartDataSeries.current.size === 0) removeChart(chartId);
-  //   const target = ev.target as HTMLDivElement;
-  //   const parent = target.parentElement as HTMLDivElement;
-  //   parent.remove();
-  // }, []);
+    const removeMeasurement = useCallback((measurementId: MeasurementId) => {
+        removeMeasurementFromChart(chartId, measurementId);
+        if (charts.find((chart) => chart.chartId === chartId)?.measurements.length === 0) {
+            removeChart(chartId);
+        }
+    }, []);
 
-  return (
-    <div>ChartLegend</div>
-  )
-}
+    useEffect(() => {
+        if (legendRef.current) {
+            while (legendRef.current.firstChild) {
+                legendRef.current.removeChild(legendRef.current.firstChild);
+            }
+            measurements.forEach((measurement) => {
+                const newChartLegendItem = createChartLegendItem(measurement);
+                newChartLegendItem.onclick = (_) => removeMeasurement(measurement.id);
+                legendRef.current?.appendChild(newChartLegendItem);
+            });
+        }
+    });
+
+    return <div className={styles.chartLegend} ref={legendRef}></div>;
+};
 
 function createChartLegendItem(measurement: NumericMeasurementInfo) {
     const legendItem = document.createElement("div");

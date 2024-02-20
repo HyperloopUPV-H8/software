@@ -1,36 +1,27 @@
-// @ts-ignore
-import CanvasJSReact from '@canvasjs/react-charts';
 import styles from "./ChartElement.module.scss";
 import { AiOutlineCloseCircle } from 'react-icons/ai'
-import { memo } from "react";
-import { MeasurementId, useMeasurementsStore } from 'common';
-import { ChartId, useChartStore } from '../ChartStore';
+import { useMeasurementsStore } from 'common';
+import { ChartInfo, useChartStore } from '../ChartStore';
 import { ChartCanvas } from './ChartCanvas/ChartCanvas';
 import { ChartLegend } from './ChartLegend/ChartLegend';
+import { useCallback } from "react";
 
 type Props = {
-    chartId: ChartId;
+    chart: ChartInfo;
 };
 
 // React component that keeps the chart render and measurements represented on it.
-export const ChartElement = memo(({ chartId }: Props) => {
-
-    const getMeasurementsFromChart = useChartStore((state) => state.getMeasurementsFromChart);
+export const ChartElement = ({ chart }: Props) => {
     const removeChart = useChartStore((state) => state.removeChart);
     const addMeasurementToChart = useChartStore((state) => state.addMeasurementToChart);
-    const removeMeasurementFromChart = useChartStore((state) => state.removeMeasurementFromChart);
-    const measurements = getMeasurementsFromChart(chartId);
-    const charts = useChartStore((state) => state.charts);
-
     const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
 
-    const handleDrop = (ev: React.DragEvent<HTMLDivElement>) => {
-        ev.preventDefault();
+    const handleDrop = useCallback((ev: React.DragEvent<HTMLDivElement>) => {
         ev.stopPropagation();
         const id = ev.dataTransfer.getData("id");
         const measurementInfo = getNumericMeasurementInfo(id);
-        addMeasurementToChart(chartId, measurementInfo);
-    };
+        addMeasurementToChart(chart.chartId, measurementInfo);
+    }, []);
 
     return (
         <div
@@ -40,23 +31,14 @@ export const ChartElement = memo(({ chartId }: Props) => {
             onDragOver={(ev) => ev.preventDefault()}
         >   
             <div className={styles.chart}>
-                <AiOutlineCloseCircle 
+                <AiOutlineCloseCircle
                     size={30}
                     cursor="pointer"
-                    onClick={() => removeChart(chartId)}
+                    onClick={() => removeChart(chart.chartId)}
                 />
-                {measurements ? 
-                (
-                <>
-                    <ChartCanvas 
-                        measurements={measurements} 
-                    />
-                    <ChartLegend
-                        removeMeasurement={(measurementId: MeasurementId) => removeMeasurementFromChart(chartId, measurementId)}
-                    />
-                </>) 
-                : "Error: No measurements found"}
+                <ChartCanvas measurements={chart.measurements} />
+                <ChartLegend chartId={chart.chartId} measurements={chart.measurements} />
             </div>
         </div>
     );
-});
+};

@@ -1,0 +1,20 @@
+.chartLegend {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 0.8rem;
+}
+
+.chartLegendItem {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.chartLegendItemColor {
+    width: 1rem;
+    height: 1rem;
+}
