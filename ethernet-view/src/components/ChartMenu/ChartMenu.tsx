@@ -1,30 +1,27 @@
 import styles from "components/ChartMenu/ChartMenu.module.scss";
-import { DragEvent, useState } from "react";
+import { DragEvent } from "react";
 import Sidebar from "components/ChartMenu/Sidebar/Sidebar";
 import { Section } from "./Sidebar/Section/Section";
-import { NumericMeasurementInfo, useMeasurementsStore } from "common";
+import { useMeasurementsStore } from "common";
 import { nanoid } from "nanoid";
 import { ChartElement } from "./ChartElement/ChartElement";
+import { useChartStore } from "./ChartStore";
 
 type Props = {
     sidebarSections: Section[];
 };
 
-export type ChartId = string;
-export type ChartInfo = {
-    chartId: ChartId, 
-    initialMeasurement: NumericMeasurementInfo
-};
-
 export const ChartMenu = ({ sidebarSections }: Props) => {
-    const [charts, setCharts] = useState<ChartInfo[]>([]);
+
+    const charts = useChartStore((state) => state.charts);
+    const addChart = useChartStore((state) => state.addChart);
     const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
 
     const handleDrop = (ev: DragEvent<HTMLDivElement>) => {
         ev.preventDefault();
         const id = ev.dataTransfer.getData("id");
         const initialMeasurementInfo = getNumericMeasurementInfo(id);
-        setCharts([...charts, { chartId: nanoid(), initialMeasurement: initialMeasurementInfo }]);
+        addChart(nanoid(), initialMeasurementInfo);
     };
 
     if (sidebarSections.length == 0) {
@@ -49,8 +46,6 @@ export const ChartMenu = ({ sidebarSections }: Props) => {
                         <ChartElement
                             key={chart.chartId}
                             chartId={chart.chartId}
-                            initialMeasurement={chart.initialMeasurement}
-                            removeChart={(chartId) => setCharts(charts.filter((chart) => chart.chartId !== chartId))}
                         />
                     ))}
                 </div>

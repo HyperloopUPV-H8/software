@@ -1,16 +1,22 @@
-import { MeasurementId, NumericMeasurementInfo, UpdateFunction, useGlobalTicker } from "common";
+import { MeasurementId, UpdateFunction, useGlobalTicker } from "common";
+import { ChartId, useChartStore } from "components/ChartMenu/ChartStore";
 import { ColorType, IChartApi, ISeriesApi, UTCTimestamp, createChart } from "lightweight-charts";
 import { useEffect, useRef } from "react";
 
 type DataSerieAndUpdater = Map<MeasurementId, [ISeriesApi<"Line">, UpdateFunction]>;
 
 interface Props {
-    measurements: NumericMeasurementInfo[];
+    chartId: ChartId
 } 
 
 const CHART_HEIGHT = 300;
 
-export const ChartCanvas = ({ measurements }: Props) => {
+export const ChartCanvas = ({ chartId }: Props) => {
+
+    const measurements = useChartStore((state) => {
+        const chart = state.charts.find((chart) => chart.chartId === chartId);
+        return chart ? chart.measurements : [];
+    })
 
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chart = useRef<IChartApi | null>(null);
@@ -42,6 +48,7 @@ export const ChartCanvas = ({ measurements }: Props) => {
                     fixLeftEdge: true,
                     fixRightEdge: true,
                     lockVisibleTimeRangeOnResize: true,
+                    rightBarStaysOnScroll: true,
                 }
             });
         }

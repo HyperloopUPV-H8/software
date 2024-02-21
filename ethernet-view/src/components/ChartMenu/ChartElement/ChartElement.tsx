@@ -1,27 +1,26 @@
 import styles from "./ChartElement.module.scss";
 import { AiOutlineCloseCircle } from 'react-icons/ai'
-import { MeasurementId, NumericMeasurementInfo, useMeasurementsStore } from 'common';
-import { ChartId } from '../ChartMenu';
+import { useMeasurementsStore } from 'common';
 import { ChartCanvas } from './ChartCanvas/ChartCanvas';
 import { ChartLegend } from './ChartLegend/ChartLegend';
-import { memo, useState } from "react";
+import { ChartId, useChartStore } from "../ChartStore";
 
 type Props = {
     chartId: ChartId;
-    initialMeasurement: NumericMeasurementInfo;
-    removeChart(chartId: ChartId): void;
 };
 
 // React component that keeps the chart render and measurements represented on it.
-export const ChartElement = memo(({ chartId, initialMeasurement, removeChart }: Props) => {
-    const [measurementsInChart, setMeasurementsInChart] = useState<NumericMeasurementInfo[]>([initialMeasurement]);
+export const ChartElement = ({ chartId }: Props) => {
+
+    const addMeasurementToChart = useChartStore(state => state.addMeasurementToChart);
+    const removeChart = useChartStore(state => state.removeChart);
     const getNumericMeasurementInfo = useMeasurementsStore(state => state.getNumericMeasurementInfo);
 
     const handleDrop = (ev: React.DragEvent<HTMLDivElement>) => {
         ev.stopPropagation();
         const id = ev.dataTransfer.getData("id");
         const measurementInfo = getNumericMeasurementInfo(id);
-        setMeasurementsInChart([...measurementsInChart, measurementInfo]);
+        addMeasurementToChart(chartId, measurementInfo);
     };
 
     return (
@@ -38,15 +37,12 @@ export const ChartElement = memo(({ chartId, initialMeasurement, removeChart }: 
                     onClick={() => removeChart(chartId)}
                 />
                 <ChartCanvas 
-                    measurements={measurementsInChart}
+                    chartId={chartId}
                 />
                 <ChartLegend
                     chartId={chartId}
-                    measurements={measurementsInChart}
-                    removeMeasurementFromChart={(measurementId: MeasurementId) => setMeasurementsInChart(measurementsInChart.filter(measurement => measurement.id !== measurementId))}
-                    removeChart={removeChart}
                 />
             </div>
         </div>
     );
-});
+};
