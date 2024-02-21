@@ -1,25 +1,26 @@
 import styles from "./ChartLegend.module.scss";
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { MeasurementId, NumericMeasurementInfo } from "common";
-import { ChartId, useChartStore } from "components/ChartMenu/ChartStore";
+import { ChartId } from "components/ChartMenu/ChartStore";
 
 interface Props {
     chartId: ChartId;
     measurements: NumericMeasurementInfo[];
+    removeMeasurementFromChart(measurementId: MeasurementId): void;
+    removeChart(chartId: ChartId): void;
 }
 
-export const ChartLegend = ({ chartId, measurements }: Props) => {
-    const legendRef = useRef<HTMLDivElement>(null);
-    const charts = useChartStore((state) => state.charts);
-    const removeMeasurementFromChart = useChartStore((state) => state.removeMeasurementFromChart);
-    const removeChart = useChartStore((state) => state.removeChart);
+export const ChartLegend = ({ chartId, measurements, removeMeasurementFromChart, removeChart }: Props) => {
 
-    const removeMeasurement = useCallback((measurementId: MeasurementId) => {
-        removeMeasurementFromChart(chartId, measurementId);
-        if (charts.find((chart) => chart.chartId === chartId)?.measurements.length === 0) {
-            removeChart(chartId);
-        }
-    }, []);
+    const legendRef = useRef<HTMLDivElement>(null);
+    
+    const onRemoveMeasurement = (measurementId: MeasurementId) => {
+        removeMeasurementFromChart(measurementId);
+    };
+
+    useEffect(() => {
+        if(measurements.length == 0) removeChart(chartId);
+    }, [measurements.length])
 
     useEffect(() => {
         if (legendRef.current) {
@@ -28,7 +29,7 @@ export const ChartLegend = ({ chartId, measurements }: Props) => {
             }
             measurements.forEach((measurement) => {
                 const newChartLegendItem = createChartLegendItem(measurement);
-                newChartLegendItem.onclick = (_) => removeMeasurement(measurement.id);
+                newChartLegendItem.onclick = (_) => onRemoveMeasurement(measurement.id);
                 legendRef.current?.appendChild(newChartLegendItem);
             });
         }

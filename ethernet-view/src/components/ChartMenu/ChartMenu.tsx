@@ -1,9 +1,8 @@
 import styles from "components/ChartMenu/ChartMenu.module.scss";
-import { DragEvent } from "react";
+import { DragEvent, useState } from "react";
 import Sidebar from "components/ChartMenu/Sidebar/Sidebar";
 import { Section } from "./Sidebar/Section/Section";
-import { useMeasurementsStore } from "common";
-import { useChartStore } from "./ChartStore";
+import { NumericMeasurementInfo, useMeasurementsStore } from "common";
 import { nanoid } from "nanoid";
 import { ChartElement } from "./ChartElement/ChartElement";
 
@@ -11,16 +10,21 @@ type Props = {
     sidebarSections: Section[];
 };
 
+export type ChartId = string;
+export type ChartInfo = {
+    chartId: ChartId, 
+    initialMeasurement: NumericMeasurementInfo
+};
+
 export const ChartMenu = ({ sidebarSections }: Props) => {
-    const charts = useChartStore((state) => state.charts);
+    const [charts, setCharts] = useState<ChartInfo[]>([]);
     const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
-    const addChart = useChartStore((state) => state.addChart);
 
     const handleDrop = (ev: DragEvent<HTMLDivElement>) => {
         ev.preventDefault();
         const id = ev.dataTransfer.getData("id");
         const initialMeasurementInfo = getNumericMeasurementInfo(id);
-        addChart(nanoid(), initialMeasurementInfo);
+        setCharts([...charts, { chartId: nanoid(), initialMeasurement: initialMeasurementInfo }]);
     };
 
     if (sidebarSections.length == 0) {
@@ -44,7 +48,9 @@ export const ChartMenu = ({ sidebarSections }: Props) => {
                     {charts.map((chart) => (
                         <ChartElement
                             key={chart.chartId}
-                            chart={chart}
+                            chartId={chart.chartId}
+                            initialMeasurement={chart.initialMeasurement}
+                            removeChart={(chartId) => setCharts(charts.filter((chart) => chart.chartId !== chartId))}
                         />
                     ))}
                 </div>
