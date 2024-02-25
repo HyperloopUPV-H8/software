@@ -8,7 +8,6 @@ import { useMeasurementsStore, usePodDataStore, useSubscribe } from "common";
 import { createSidebarSections } from "components/ChartMenu/sidebar";
 
 export const ReceiveColumn = () => {
-
     const {podData, updatePodData} = usePodDataStore(state => ({podData: state.podData, updatePodData: state.updatePodData}))
     const updateMeasurements = useMeasurementsStore(state => state.updateMeasurements)
 
