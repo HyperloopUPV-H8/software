@@ -1,38 +1,34 @@
 import styles from "./ChartLegend.module.scss";
 import { useEffect, useRef } from "react";
 import { MeasurementId, NumericMeasurementInfo } from "common";
-import { ChartId, useChartStore } from "components/ChartMenu/ChartStore";
+import { ChartId } from "components/ChartMenu/ChartMenu";
 
 
 interface Props {
     chartId: ChartId;
+    measurementsInChart: NumericMeasurementInfo[];
+    removeMeasurementFromChart: (measurementId: MeasurementId) => void;
+    removeChart: (chartId: ChartId) => void;
 }
 
-export const ChartLegend = ({ chartId }: Props) => {
+export const ChartLegend = ({ chartId, measurementsInChart, removeMeasurementFromChart, removeChart }: Props) => {
 
     const legendRef = useRef<HTMLDivElement>(null);
-
-    const measurements = useChartStore((state) => {
-        const chart = state.charts.find((chart) => chart.chartId === chartId);
-        return chart ? chart.measurements : [];
-    });
-    const removeMeasurementFromChart = useChartStore((state) => state.removeMeasurementFromChart);
-    const removeChart = useChartStore((state) => state.removeChart);
     
     const onRemoveMeasurement = (measurementId: MeasurementId) => {
-        removeMeasurementFromChart(chartId, measurementId);
+        removeMeasurementFromChart(measurementId);
     };
 
     useEffect(() => {
-        if(measurements.length == 0) removeChart(chartId);
-    }, [measurements.length])
+        if(measurementsInChart.length == 0) removeChart(chartId);
+    }, [measurementsInChart.length])
 
     useEffect(() => {
         if (legendRef.current) {
             while (legendRef.current.firstChild) {
                 legendRef.current.removeChild(legendRef.current.firstChild);
             }
-            measurements.forEach((measurement) => {
+            measurementsInChart.forEach((measurement) => {
                 const newChartLegendItem = createChartLegendItem(measurement);
                 newChartLegendItem.onclick = (_) => onRemoveMeasurement(measurement.id);
                 legendRef.current?.appendChild(newChartLegendItem);

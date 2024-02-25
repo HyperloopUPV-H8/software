@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { NumericMeasurementInfo, MeasurementId } from 'common';
+import { ChartId } from './ChartMenu';
 
-export type ChartId = string;
 
 export type ChartInfo = {
     chartId: ChartId, 

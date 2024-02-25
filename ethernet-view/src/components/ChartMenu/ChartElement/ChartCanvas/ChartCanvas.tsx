@@ -1,25 +1,19 @@
-import { MeasurementId, UpdateFunction, useGlobalTicker } from "common";
-import { ChartId, useChartStore } from "components/ChartMenu/ChartStore";
+import { MeasurementId, NumericMeasurementInfo, UpdateFunction, useGlobalTicker } from "common";
 import { ColorType, IChartApi, ISeriesApi, UTCTimestamp, createChart } from "lightweight-charts";
 import { useEffect, useRef } from "react";
 
 type DataSerieAndUpdater = Map<MeasurementId, [ISeriesApi<"Line">, UpdateFunction]>;
 
 interface Props {
-    chartId: ChartId
-} 
+    measurementsInChart: NumericMeasurementInfo[];
+}
 
 const CHART_HEIGHT = 300;
 
-export const ChartCanvas = ({ chartId }: Props) => {
+export const ChartCanvas = ({ measurementsInChart }: Props) => {
 
-    const measurements = useChartStore((state) => {
-        const chart = state.charts.find((chart) => chart.chartId === chartId);
-        return chart ? chart.measurements : [];
-    })
-
-    const chartContainerRef = useRef<HTMLDivElement>(null);
     const chart = useRef<IChartApi | null>(null);
+    const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartDataSeries = useRef<DataSerieAndUpdater>(new Map());
 
     useEffect(() => {
@@ -61,11 +55,11 @@ export const ChartCanvas = ({ chartId }: Props) => {
 
     useEffect(() => {
         chartDataSeries.current.clear();
-        measurements.forEach((measurement) => {
+        measurementsInChart.forEach((measurement) => {
             if(chart.current)
             chartDataSeries.current.set(measurement.id, [chart.current.addLineSeries({color: measurement.color}), measurement.getUpdate]);
         });
-    }, [measurements.length])
+    }, [measurementsInChart.length])
 
     useGlobalTicker(() => {
         const now = Date.now() / 1000 as UTCTimestamp;
