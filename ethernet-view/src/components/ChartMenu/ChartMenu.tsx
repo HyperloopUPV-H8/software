@@ -19,8 +19,6 @@ type Props = {
 
 export const ChartMenu = memo(({ sidebarSections }: Props) => {
 
-    console.log("ChartMenu rendered")
-
     const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
 
     const [charts, setCharts] = useState<ChartInfo[]>([]);

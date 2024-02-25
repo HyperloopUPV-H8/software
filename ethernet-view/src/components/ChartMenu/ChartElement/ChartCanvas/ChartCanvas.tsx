@@ -59,7 +59,7 @@ export const ChartCanvas = ({ measurementsInChart }: Props) => {
             if(chart.current)
             chartDataSeries.current.set(measurement.id, [chart.current.addLineSeries({color: measurement.color}), measurement.getUpdate]);
         });
-    }, [measurementsInChart.length])
+    })
 
     useGlobalTicker(() => {
         const now = Date.now() / 1000 as UTCTimestamp;

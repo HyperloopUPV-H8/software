@@ -15,15 +15,15 @@ type Props = {
 // React component that keeps the chart render and measurements represented on it.
 export const ChartElement = memo(({ chartId, initialMeasurementId, removeChart }: Props) => {
 
-    console.log("ChartElement rendered")
-
     const getNumericMeasurementInfo = useMeasurementsStore(state => state.getNumericMeasurementInfo);
     const initialMeasurement = getNumericMeasurementInfo(initialMeasurementId);
     
     const [measurementsInChart, setMeasurementsInChart] = useState([initialMeasurement]);
 
     const addMeasurementToChart = (measurement: NumericMeasurementInfo) => {
-        setMeasurementsInChart([...measurementsInChart, measurement]);
+        if(!measurementsInChart.some(measurementInChart => measurementInChart.id === measurement.id)) {
+            setMeasurementsInChart([...measurementsInChart, measurement]);
+        }
     }
 
     const removeMeasurementFromChart = useCallback((measurementId: MeasurementId) => {
