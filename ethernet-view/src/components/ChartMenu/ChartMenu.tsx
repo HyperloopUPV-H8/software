@@ -1,27 +1,41 @@
 import styles from "components/ChartMenu/ChartMenu.module.scss";
-import { DragEvent } from "react";
+import { DragEvent, memo, useCallback, useState } from "react";
 import Sidebar from "components/ChartMenu/Sidebar/Sidebar";
 import { Section } from "./Sidebar/Section/Section";
-import { useMeasurementsStore } from "common";
+import { MeasurementId, useMeasurementsStore } from "common";
 import { nanoid } from "nanoid";
 import { ChartElement } from "./ChartElement/ChartElement";
-import { useChartStore } from "./ChartStore";
+
+export type ChartId = string;
+
+type ChartInfo = {
+    chartId: ChartId;
+    initialMeasurementId: MeasurementId;
+};
 
 type Props = {
     sidebarSections: Section[];
 };
 
-export const ChartMenu = ({ sidebarSections }: Props) => {
+export const ChartMenu = memo(({ sidebarSections }: Props) => {
 
-    const charts = useChartStore((state) => state.charts);
-    const addChart = useChartStore((state) => state.addChart);
     const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
 
+    const [charts, setCharts] = useState<ChartInfo[]>([]);
+
+    const addChart = ((chartId: ChartId, initialMeasurementId: MeasurementId) => {
+        setCharts([...charts, { chartId, initialMeasurementId }]);
+    });
+
+    const removeChart = useCallback((chartId: ChartId) => {
+        setCharts(prevCharts => prevCharts.filter(chart => chart.chartId !== chartId));
+    }, []);
+    
     const handleDrop = (ev: DragEvent<HTMLDivElement>) => {
         ev.preventDefault();
         const id = ev.dataTransfer.getData("id");
-        const initialMeasurementInfo = getNumericMeasurementInfo(id);
-        addChart(nanoid(), initialMeasurementInfo);
+        const initialMeasurementId = getNumericMeasurementInfo(id).id;
+        addChart(nanoid(), initialMeasurementId);
     };
 
     if (sidebarSections.length == 0) {
@@ -46,10 +60,12 @@ export const ChartMenu = ({ sidebarSections }: Props) => {
                         <ChartElement
                             key={chart.chartId}
                             chartId={chart.chartId}
+                            initialMeasurementId={chart.initialMeasurementId}
+                            removeChart={removeChart}
                         />
                     ))}
                 </div>
             </div>
         );
     }
-};
+});
