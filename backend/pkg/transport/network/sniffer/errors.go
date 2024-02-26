@@ -13,5 +13,5 @@ func (err ErrMissingLayers) Layers() []gopacket.LayerType {
 }
 
 func (err ErrMissingLayers) Error() string {
-	return "no payload found in message"
+	return "missing expected layer"
 }
