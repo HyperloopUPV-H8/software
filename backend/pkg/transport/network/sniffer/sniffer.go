@@ -2,11 +2,13 @@ package sniffer
 
 import (
 	"fmt"
+	"net"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
+	"github.com/rs/zerolog"
 )
 
 // Sniffer provides a way to capture packets from the wire. It handles both capture
@@ -14,6 +16,8 @@ import (
 type Sniffer struct {
 	source  *pcap.Handle
 	decoder *decoder
+
+	logger *zerolog.Logger
 }
 
 // New creates a new sniffer from the provided source.
@@ -24,68 +28,110 @@ type Sniffer struct {
 // value is nil, the program tries to automatically detect the first layer from the source.
 //
 // The provided source should be already configured and ready to use, with the appropiate filters.
-func New(source *pcap.Handle, firstLayer *gopacket.LayerType) *Sniffer {
+func New(source *pcap.Handle, firstLayer *gopacket.LayerType, baseLogger *zerolog.Logger) *Sniffer {
 	first := source.LinkType().LayerType()
 	if firstLayer != nil {
 		first = *firstLayer
 	}
 	decoder := newDecoder(first)
 
+	logger := baseLogger.With().Caller().Timestamp().Logger().Sample(zerolog.LevelSampler{
+		TraceSampler: zerolog.RandomSampler(50000),
+		DebugSampler: zerolog.RandomSampler(25000),
+		InfoSampler:  zerolog.RandomSampler(1),
+		WarnSampler:  zerolog.RandomSampler(1),
+		ErrorSampler: zerolog.RandomSampler(1),
+	})
+
 	sniffer := &Sniffer{
 		source:  source,
 		decoder: decoder,
+
+		logger: &logger,
 	}
 
 	return sniffer
 }
 
-// ReadNext pulls the next packet from the wire, decodes it and returns the socket it belongs to,
-// its TCP or UDP payload and any errors encountered.
-func (sniffer *Sniffer) ReadNext() (network.Socket, []byte, error) {
-	data, _, err := sniffer.source.ReadPacketData()
+// ReadNext pulls the next packet from the wire, decodes it and returns the payload obtained.
+func (sniffer *Sniffer) ReadNext() (Payload, error) {
+	data, captureInfo, err := sniffer.source.ReadPacketData()
 	if err != nil {
-		return network.Socket{}, nil, err
+		sniffer.logger.Error().Stack().Err(err).Msg("read source")
+		return Payload{}, err
 	}
 
 	packetLayers, err := sniffer.decoder.decode(data)
 	if err != nil {
-		return network.Socket{}, data, err
+		sniffer.logger.Error().Stack().Err(err).Msg("decode layers")
+		return Payload{}, err
 	}
 
-	ip := sniffer.decoder.IPv4()
-
 	socket := network.Socket{
-		SrcIP:   ip.SrcIP.String(),
+		SrcIP:   net.IP{},
 		SrcPort: 0,
-		DstIP:   ip.DstIP.String(),
+		DstIP:   net.IP{},
 		DstPort: 0,
 	}
 
-layerLoop:
+	gotPorts := false
+	gotIp := false
+	layerArr := zerolog.Arr()
 	for _, layer := range packetLayers {
-		switch layer {
-		case layers.LayerTypeUDP:
-			udp := sniffer.decoder.UDP()
-			socket.SrcPort = uint16(udp.SrcPort)
-			socket.DstPort = uint16(udp.DstPort)
-			break layerLoop
-		case layers.LayerTypeTCP:
-			tcp := sniffer.decoder.TCP()
-			socket.SrcPort = uint16(tcp.SrcPort)
-			socket.DstPort = uint16(tcp.DstPort)
-			break layerLoop
+		if !gotIp && layer == layers.LayerTypeIPv4 {
+			ip := sniffer.decoder.IPv4()
+			socket.SrcIP = ip.SrcIP
+			socket.DstIP = ip.DstIP
+			gotIp = true
+		} else if !gotPorts {
+			switch layer {
+			case layers.LayerTypeUDP:
+				udp := sniffer.decoder.UDP()
+				socket.SrcPort = uint16(udp.SrcPort)
+				socket.DstPort = uint16(udp.DstPort)
+				gotPorts = true
+			case layers.LayerTypeTCP:
+				tcp := sniffer.decoder.TCP()
+				socket.SrcPort = uint16(tcp.SrcPort)
+				socket.DstPort = uint16(tcp.DstPort)
+				gotPorts = true
+			}
 		}
+
+		layerArr = layerArr.Str(layer.String())
 	}
 
-	if socket.SrcPort == 0 && socket.DstPort == 0 {
-		fmt.Println(packetLayers)
-		return network.Socket{}, data, ErrMissingPayload{packetLayers}
+	if !gotIp || !gotPorts {
+		sniffer.logger.Warn().Array(
+			"layers", layerArr,
+		).Bool(
+			"has ip", gotIp,
+		).Bool(
+			"has ports", gotPorts,
+		).Msg("missing layers")
+		return Payload{}, ErrMissingLayers{packetLayers}
 	}
 
-	return socket, sniffer.decoder.Payload(), nil
+	sniffer.logger.Debug().Array(
+		"layers", layerArr,
+	).Str(
+		"from", fmt.Sprintf("%s:%d", socket.SrcIP, socket.SrcPort),
+	).Str(
+		"to", fmt.Sprintf("%s:%d", socket.DstIP, socket.DstPort),
+	).Time(
+		"capture", captureInfo.Timestamp,
+	).Msg("packet")
+
+	return Payload{
+		Socket:      socket,
+		Data:        sniffer.decoder.Payload(),
+		CaptureTime: captureInfo.Timestamp,
+	}, nil
 }
 
 // Close closes the underlying packet capture handle and cleans up any left over data.
 func (sniffer *Sniffer) Close() {
+	sniffer.logger.Info().Msg("closing")
+
 	sniffer.source.Close()
 }
