@@ -24,3 +24,22 @@ type ErrInvalidBoardEvent struct {
 func (err ErrInvalidBoardEvent) Error() {
 	fmt.Sprintf("Invalid board event %s at %s", err.Event, err.Timestamp.Format(time.RFC3339))
 }
+
+type ErrReadingFileFailed struct {
+	Filename  string
+	Timestamp time.Time
+	Inner     error
+}
+
+func (err ErrReadingFileFailed) Error() {
+	fmt.Sprintf("Invalid board id %s at %s", err.Filename, err.Timestamp.Format(time.RFC3339))
+}
+
+type ErrSendMessageFailed struct {
+	Timestamp time.Time
+	Inner     error
+}
+
+func (err ErrSendMessageFailed) Error() {
+	fmt.Sprintf("Error sending message at %s", err.Timestamp.Format(time.RFC3339))
+}

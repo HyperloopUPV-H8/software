@@ -3,11 +3,13 @@ package vehicle
 import (
 	"errors"
 	"fmt"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/boards"
 	"os"
 	"strings"
 
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	blcu_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/blcu"
 	connection_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/connection"
 	data_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/data"
 	logger_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/logger"
@@ -25,6 +27,8 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/protection"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/state"
 )
+
+const BlcuId = abstraction.BoardId(1)
 
 // Vehicle is the main abstraction that coordinates the backend modules.
 // It receives its modules and once it is ready, the vehicle manages the flow of
@@ -82,8 +86,6 @@ func (vehicle *Vehicle) Notification(notification abstraction.TransportNotificat
 			fmt.Println("Error pushing record to info logger: ", err)
 		}
 
-	case *blcu_packet.Ack:
-		fmt.Fprintln(os.Stderr, "Received blcu_packet.Ack packet, ignoring")
 	case *state.Space:
 		err := vehicle.logger.PushRecord(&state_logger.Record{
 			Packet:    p,
@@ -100,6 +102,13 @@ func (vehicle *Vehicle) Notification(notification abstraction.TransportNotificat
 		fmt.Fprintln(os.Stderr, "Received order.Add packet, ignoring")
 	case *order.Remove:
 		fmt.Fprintln(os.Stderr, "Received order.Remove packet, ignoring")
+
+	case *blcu_packet.Ack:
+		vehicle.boards[BlcuId].Notify(abstraction.BoardNotification(
+			&boards.AckNot{
+				ID: boards.AckId,
+			},
+		))
 	}
 }
 
@@ -154,6 +163,21 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) {
 		} else {
 			status.Fulfill(status.Enable())
 		}
+
+	case blcu_topic.DownloadName:
+		vehicle.boards[BlcuId].Notify(abstraction.BoardNotification(
+			&boards.DownloadNot{
+				ID: boards.AckId,
+			},
+		))
+
+	case blcu_topic.UploadName:
+		vehicle.boards[BlcuId].Notify(abstraction.BoardNotification(
+			&boards.UploadNot{
+				ID: boards.AckId,
+			},
+		))
+
 	default:
 		fmt.Printf("unknow topic %s\n", push.Topic())
 	}
@@ -165,8 +189,9 @@ func (vehicle *Vehicle) Request(abstraction.BrokerRequest) (abstraction.BrokerRe
 }
 
 // SendMessage is the method invoked by a board to send a message
-func (vehicle *Vehicle) SendMessage(abstraction.TransportMessage) error {
-	panic("TODO")
+func (vehicle *Vehicle) SendMessage(msg abstraction.TransportMessage) error {
+	err := vehicle.transport.SendMessage(msg) // TODO! Handle error
+	return err
 }
 
 // SendPush is the method invoked by a board to send a message to the frontend
