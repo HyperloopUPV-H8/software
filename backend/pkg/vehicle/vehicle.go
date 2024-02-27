@@ -184,22 +184,22 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) {
 }
 
 // Request is the method invoked by a board to ask for a resource from the frontend
-func (vehicle *Vehicle) Request(abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
-	panic("TODO")
+func (vehicle *Vehicle) Request(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
+	return vehicle.broker.Pull(request)
 }
 
 // SendMessage is the method invoked by a board to send a message
 func (vehicle *Vehicle) SendMessage(msg abstraction.TransportMessage) error {
-	err := vehicle.transport.SendMessage(msg) // TODO! Handle error
+	err := vehicle.transport.SendMessage(msg)
 	return err
 }
 
 // SendPush is the method invoked by a board to send a message to the frontend
-func (vehicle *Vehicle) SendPush(abstraction.BrokerPush) error {
-	panic("TODO")
+func (vehicle *Vehicle) SendPush(push abstraction.BrokerPush) error {
+	return vehicle.broker.Push(push)
 }
 
 // ConnectionUpdate is the method invoked by transport to signal a connection state has changed
 func (vehicle *Vehicle) ConnectionUpdate(target abstraction.TransportTarget, isConnected bool) {
-	vehicle.broker.Push(connection_topic.NewConnection(string(target), isConnected))
+	vehicle.broker.Push(connection_topic.NewConnection(string(target), isConnected)) // TODO! Handle error
 }

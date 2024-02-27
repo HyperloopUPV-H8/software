@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tftp"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/vehicle"
 	"time"
 )
 
@@ -14,49 +13,30 @@ const (
 	DownloadId = "2"
 	UploadId   = "3"
 
-	BlcuOrderId = "blcu"
+	BlcuOrderId = "blcu order"
+
+	DownloadName = "download"
+	UploadName   = "upload"
+
+	DSuccess = "download success"
+	USuccess = "upload success"
 )
 
-type AckNot struct {
-	ID abstraction.BoardEvent // AckId
-}
-
-func (ack *AckNot) Event() abstraction.BoardEvent {
-	return ack.ID
-}
-
-type DownloadNot struct {
-	ID abstraction.BoardEvent // DownloadId
-}
-
-func (download *DownloadNot) Event() abstraction.BoardEvent {
-	return download.ID
-}
-
-type UploadNot struct {
-	ID   abstraction.BoardEvent // UploadId
-	Data []byte
-}
-
-func (upload *UploadNot) Event() abstraction.BoardEvent {
-	return upload.ID
-}
-
 type Boards struct {
-	BoardId  string
+	boardId  string
 	BoardAPI abstraction.BoardAPI
-	// Data to be either uploaded to a board or downloaded from a board
-	Data    []byte
-	AckChan chan struct{}
+	TempData []byte
+	AckChan  chan struct{}
 }
 
-func New(boardId string) *Boards {
+func New(Id string) *Boards {
 	return &Boards{
-		BoardId: boardId,
+		boardId: Id,
+		AckChan: make(chan struct{}),
 	}
 }
 func (boards *Boards) Id() string {
-	return boards.BoardId
+	return boards.boardId
 }
 
 func (boards *Boards) Notify(notification abstraction.BoardNotification) {
@@ -65,13 +45,18 @@ func (boards *Boards) Notify(notification abstraction.BoardNotification) {
 		boards.AckChan <- struct{}{}
 
 	case DownloadId:
-		err := vehicle.Vehicle.SendMessage() // TODO: Implement SendMessage
+		err := boards.BoardAPI.SendMessage(abstraction.TransportMessage(
+			&BlcuPing{
+				ID: BlcuOrderId,
+			}))
 		if err != nil {
 			ErrSendMessageFailed{
 				Timestamp: time.Now(),
 				Inner:     err,
 			}.Error()
 		}
+
+		<-boards.AckChan
 
 		client, ok := tftp.NewClient("192.168.0.9:69")
 		if ok != nil {
@@ -93,18 +78,36 @@ func (boards *Boards) Notify(notification abstraction.BoardNotification) {
 			}.Error()
 		}
 
+		// Convert data to uint64 (bytes)
 		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(data))
-		boards.Data = b
 
-	case UploadId:
-		err := vehicle.Vehicle.SendMessage() // TODO: Implement SendMessage
+		err = boards.BoardAPI.SendPush(abstraction.BrokerPush(
+			&BoardPush{
+				ID:   DownloadName,
+				Data: b,
+			},
+		))
 		if err != nil {
 			ErrSendMessageFailed{
 				Timestamp: time.Now(),
 				Inner:     err,
 			}.Error()
 		}
+
+	case UploadId:
+		err := boards.BoardAPI.SendMessage(abstraction.TransportMessage(
+			&BlcuPing{
+				ID: BlcuOrderId,
+			}))
+		if err != nil {
+			ErrSendMessageFailed{
+				Timestamp: time.Now(),
+				Inner:     err,
+			}.Error()
+		}
+
+		<-boards.AckChan
 
 		client, ok := tftp.NewClient("192.168.0.9:69")
 		if ok != nil {
@@ -115,9 +118,29 @@ func (boards *Boards) Notify(notification abstraction.BoardNotification) {
 			}.Error()
 		}
 
-		buffer := bytes.NewBuffer(boards.Data)
+		buffer := bytes.NewBuffer(boards.TempData)
 
 		_, ok = client.WriteFile(string(notification.Event()), tftp.BinaryMode, buffer)
+		if ok != nil {
+			ErrReadingFileFailed{
+				Filename:  string(notification.Event()),
+				Timestamp: time.Now(),
+				Inner:     ok,
+			}.Error()
+		}
+
+		err = boards.BoardAPI.SendMessage(abstraction.TransportMessage(
+			&BoardMessage{
+				ID: USuccess,
+			},
+		))
+		if err != nil {
+			ErrSendMessageFailed{
+				Timestamp: time.Now(),
+				Inner:     err,
+			}.Error()
+		
+		}
 
 	default:
 		ErrInvalidBoardEvent{
