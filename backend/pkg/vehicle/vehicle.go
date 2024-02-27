@@ -201,5 +201,8 @@ func (vehicle *Vehicle) SendPush(push abstraction.BrokerPush) error {
 
 // ConnectionUpdate is the method invoked by transport to signal a connection state has changed
 func (vehicle *Vehicle) ConnectionUpdate(target abstraction.TransportTarget, isConnected bool) {
-	vehicle.broker.Push(connection_topic.NewConnection(string(target), isConnected)) // TODO! Handle error
+	vehicle.broker.Push(connection_topic.NewConnection(string(target), isConnected))
+	if isConnected {
+		vehicle.updateFactory.ClearPacketsFor(target)
+	}
 }
