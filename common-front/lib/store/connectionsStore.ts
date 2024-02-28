@@ -1,4 +1,4 @@
-import { Connection } from "..";
+import { Connection, ConnectionsUpdate } from "..";
 import { StateCreator, StoreApi, create } from "zustand";
 
 export interface ConnectionsStore {
@@ -7,10 +7,10 @@ export interface ConnectionsStore {
         boards: Connection[];
     }
     setBackendConnection: (isConnected: boolean) => void;
-    setConnections: (connections: Connection[]) => void;
+    setConnections: (connections: ConnectionsUpdate) => void;
 }
 
-export const useConnectionsStore = create<ConnectionsStore>((set) => ({
+export const useConnectionsStore = create<ConnectionsStore>((set, get) => ({
     connections: {
         backend: { name: "Backend WebSocket", isConnected: false },
         boards: [] as Connection[],
@@ -42,12 +42,25 @@ export const useConnectionsStore = create<ConnectionsStore>((set) => ({
      * When a board connection state changes, it updates all the connections.
      * @param {Connection[]} connections 
      */
-    setConnections: (connections: Connection[]) => {
+    setConnections: (connections: ConnectionsUpdate) => {
+        const boardsDraft = get().connections.boards;
+
+        for (const board of boardsDraft) {
+            if (board.name in connections) {
+                board.isConnected = connections[board.name].isConnected
+                delete(connections[board.name])
+            }
+        }
+
+        for (const connection of Object.values(connections)) {
+            boardsDraft.push(connection)
+        }
+
         set(state => ({
             ...state,
             connections: {
                 ...state.connections,
-                boards: connections
+                boards: boardsDraft
             }
         }))
     }

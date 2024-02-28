@@ -1,3 +1,4 @@
+import { isNumericType } from "../BackendTypes";
 import {
     createPodDataFromAdapter,
     PacketUpdate,
@@ -13,6 +14,7 @@ export interface PodDataStore {
     podData: PodData
     initPodData: (podDataAdapter: PodDataAdapter) => void
     updatePodData: (packetUpdates: Record<number, PacketUpdate>) => void
+    clearPodData: (board: string) => void
 }
 
 export const usePodDataStore = create<PodDataStore>((set, get) => ({
@@ -101,6 +103,42 @@ export const usePodDataStore = create<PodDataStore>((set, get) => ({
             }
         }))
     },
+
+    clearPodData(boardName: string) {
+        const boardsDraft = get().podData.boards
+
+        for (const board of boardsDraft) {
+            if (board.name != boardName) {
+                continue;
+            }
+
+            for (const packet of board.packets) {
+                packet.count = 0
+                packet.cycleTime = 0
+                packet.hexValue = ""
+                for (const measurement of packet.measurements) {
+                    if (isNumericType(measurement.type)) {
+                        measurement.value = {
+                            average: 0,
+                            last: 0,
+                        }
+                    } else if (measurement.type == "bool") {
+                        measurement.value = false
+                    } else {
+                        measurement.value = "Default"
+                    }
+                }
+            }
+        }
+
+        set(state => ({
+            ...state,
+            podData: {
+                ...state.podData,
+                boards: boardsDraft,
+            }
+        }))
+    }
 }))
 
 export function getPacket(podData: PodData, id: number): Packet | undefined {

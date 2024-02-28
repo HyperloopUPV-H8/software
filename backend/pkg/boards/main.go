@@ -139,7 +139,6 @@ func (boards *Boards) Notify(notification abstraction.BoardNotification) {
 				Timestamp: time.Now(),
 				Inner:     err,
 			}.Error()
-
 		}
 
 	default:

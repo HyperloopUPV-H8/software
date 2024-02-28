@@ -1,25 +1,42 @@
 import styles from "components/ChartMenu/ChartMenu.module.scss";
+import { DragEvent, memo, useCallback, useState } from "react";
 import Sidebar from "components/ChartMenu/Sidebar/Sidebar";
-import { ChartList } from "components/ChartMenu/ChartList/ChartList";
-import { useMeasurementsStore } from "common";
 import { Section } from "./Sidebar/Section/Section";
-import { NumericMeasurement, getMeasurement } from "common";
+import { MeasurementId, useMeasurementsStore } from "common";
+import { nanoid } from "nanoid";
+import { ChartElement } from "./ChartElement/ChartElement";
 
-function getRandomColor() {
-    const r = Math.floor(Math.random() * 256);
-    const g = Math.floor(Math.random() * 256);
-    const b = Math.floor(Math.random() * 256);
+export type ChartId = string;
 
-    return `rgb(${r}, ${g}, ${b})`;
-}
+type ChartInfo = {
+    chartId: ChartId;
+    initialMeasurementId: MeasurementId;
+};
 
 type Props = {
     sidebarSections: Section[];
 };
 
-export const ChartMenu = ({ sidebarSections }: Props) => {
+export const ChartMenu = memo(({ sidebarSections }: Props) => {
 
-    const measurements = useMeasurementsStore((state) => state.measurements);
+    const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
+
+    const [charts, setCharts] = useState<ChartInfo[]>([]);
+
+    const addChart = ((chartId: ChartId, initialMeasurementId: MeasurementId) => {
+        setCharts([...charts, { chartId, initialMeasurementId }]);
+    });
+
+    const removeChart = useCallback((chartId: ChartId) => {
+        setCharts(prevCharts => prevCharts.filter(chart => chart.chartId !== chartId));
+    }, []);
+    
+    const handleDrop = (ev: DragEvent<HTMLDivElement>) => {
+        ev.preventDefault();
+        const id = ev.dataTransfer.getData("id");
+        const initialMeasurementId = getNumericMeasurementInfo(id).id;
+        addChart(nanoid(), initialMeasurementId);
+    };
 
     if (sidebarSections.length == 0) {
         return (
@@ -33,36 +50,22 @@ export const ChartMenu = ({ sidebarSections }: Props) => {
         return (
             <div className={styles.chartMenuWrapper}>
                 <Sidebar sections={sidebarSections} />
-                <ChartList
-                    getLine={(id) => {
-                        const meas = getMeasurement(
-                            measurements,
-                            id
-                        ) as NumericMeasurement;
-
-                        return {
-                            id: id,
-                            name: meas.name,
-                            units: meas.units,
-                            range: meas.safeRange,
-                            getUpdate: () => {
-                                //TODO: change to getNumericMeasurement and return undefined if its not numeric (or doesnt exist)
-                                const meas = getMeasurement(
-                                    measurements,
-                                    id
-                                ) as NumericMeasurement;
-
-                                if (!meas) {
-                                    return 0;
-                                }
-
-                                return meas.value.last;
-                            },
-                            color: getRandomColor(),
-                        };
-                    }}
-                />
+                <div
+                    className={styles.chartListWrapper}
+                    onDrop={handleDrop}
+                    onDragEnter={(ev) => ev.preventDefault()}
+                    onDragOver={(ev) => ev.preventDefault()}
+                >
+                    {charts.map((chart) => (
+                        <ChartElement
+                            key={chart.chartId}
+                            chartId={chart.chartId}
+                            initialMeasurementId={chart.initialMeasurementId}
+                            removeChart={removeChart}
+                        />
+                    ))}
+                </div>
             </div>
         );
     }
-};
+});

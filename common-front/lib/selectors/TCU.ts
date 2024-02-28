@@ -1,4 +1,4 @@
-import { Measurements, NumericMeasurement, getMeasurementFallback } from "..";
+import { Measurements, NumericMeasurement, useMeasurementsStore } from "..";
 
 export type TcuMeasurements = {
     pressure: NumericMeasurement;
@@ -8,8 +8,11 @@ export type TcuMeasurements = {
 export function selectTcuMeasurements(
     measurements: Measurements
 ): TcuMeasurements {
+    
+    const getMeasurementFallback = useMeasurementsStore(state => state.getMeasurementFallback);
+
     return {
-        pressure: getMeasurementFallback(measurements, "TCU/pressure"),
-        temperature: getMeasurementFallback(measurements, "TCU/temperature"),
+        pressure: getMeasurementFallback("TCU/pressure"),
+        temperature: getMeasurementFallback("TCU/temperature"),
     } as TcuMeasurements;
 }
