@@ -37,4 +37,8 @@ type Broker interface {
 type BrokerAPI interface {
 	// UserPush notifies that the front-end has sent information without a previous request
 	UserPush(BrokerPush)
+	// Push sends information from the front-end.
+	Push(BrokerPush) error
+	// Pull requests information from the front-end.
+	Pull(BrokerRequest) (BrokerResponse, error)
 }
