@@ -1,7 +1,5 @@
 import styles from "layouts/SplitLayout/Pane/Pane.module.scss";
 
-import React from "react"; // Add missing import
-
 type Props = {
     component: React.ReactNode;
     normalizedLength: number;
@@ -9,20 +7,26 @@ type Props = {
 };
 
 export const Pane = ({ component, normalizedLength, collapsedIcon }: Props) => {
-    return normalizedLength === 0 ? (
-        <div className={styles.collapsed}>
-            <div className={styles.icon}>
-                <img src={collapsedIcon} alt="collapsed" />
-            </div>
-        </div>
-    ) : (
+
+    const isCollapsed = normalizedLength === 0;
+    
+    return (
         <div
-            className={styles.wrapper}
+            className={isCollapsed ? styles.collapsed : styles.wrapper}
             style={{
                 flex: normalizedLength,
             }}
         >
-            {component}
+            <div className={styles.icon} style={{
+                display: isCollapsed ? "block" : "none"
+            }}>
+                <img src={collapsedIcon} alt="collapsed" />
+            </div>
+
+            <div style={isCollapsed ? {display: "none"} : {height: "100%"}}>
+                {component}
+            </div>
+            
         </div>
     );
 };
