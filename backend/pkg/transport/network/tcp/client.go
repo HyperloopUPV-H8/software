@@ -10,30 +10,6 @@ import (
 	"github.com/rs/zerolog"
 )
 
-type backoffFunction = func(uint) time.Duration
-
-const (
-	defaultBackoffMin time.Duration = 100 * time.Millisecond
-	defaultBackoffExp float32       = 1.5
-	defaultBackoffMax time.Duration = 5 * time.Second
-)
-
-// NewExponBackoff returns an exponential backoff function with the given paramenters.
-//
-// It follows this formula: delay = (min * (exp ^ n); delay < max ? delay : max
-func NewExponBackoff(min time.Duration, exp float32, max time.Duration) backoffFunction {
-	return func(n uint) time.Duration {
-		curr := min
-		for i := uint(0); curr < max && i < n; i++ {
-			curr = time.Duration(exp * float32(curr))
-			if curr >= max {
-				return max
-			}
-		}
-		return curr
-	}
-}
-
 type Client struct {
 	config ClientConfig
 
