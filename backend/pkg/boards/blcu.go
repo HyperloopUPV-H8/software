@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tftp"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
+	dataPacket "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 	"time"
 )
 
@@ -47,7 +47,9 @@ func (boards *BLCU) Notify(notification abstraction.BoardNotification) {
 		boards.arkChan <- struct{}{}
 
 	case DownloadEvent:
-		data.NewPacketWithValues(abstraction.PacketId(BlcuOrderId), make(map[data.ValueName]data.Value), make(map[data.ValueName]bool))
+		dataPacket.NewPacketWithValues(abstraction.PacketId(BlcuOrderId),
+			make(map[dataPacket.ValueName]dataPacket.Value),
+			make(map[dataPacket.ValueName]bool))
 
 		<-boards.arkChan
 
@@ -89,7 +91,9 @@ func (boards *BLCU) Notify(notification abstraction.BoardNotification) {
 		}
 
 	case UploadEvent:
-		data.NewPacketWithValues(abstraction.PacketId(BlcuOrderId), make(map[data.ValueName]data.Value), make(map[data.ValueName]bool))
+		dataPacket.NewPacketWithValues(abstraction.PacketId(BlcuOrderId),
+			make(map[dataPacket.ValueName]dataPacket.Value),
+			make(map[dataPacket.ValueName]bool))
 
 		<-boards.arkChan
 
