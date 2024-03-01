@@ -5,15 +5,17 @@ import (
 	"encoding/binary"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tftp"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 	"time"
 )
 
+// TODO! Get from ADE
 const (
 	AckId      = "1"
 	DownloadId = "2"
 	UploadId   = "3"
 
-	BlcuOrderId = "blcu order"
+	BlcuOrderId = 1
 
 	DownloadName = "download"
 	UploadName   = "upload"
@@ -45,16 +47,7 @@ func (boards *BLCU) Notify(notification abstraction.BoardNotification) {
 		boards.arkChan <- struct{}{}
 
 	case DownloadEvent:
-		err := boards.api.SendMessage(abstraction.TransportMessage(
-			&BlcuPing{
-				ID: BlcuOrderId,
-			}))
-		if err != nil {
-			ErrSendMessageFailed{
-				Timestamp: time.Now(),
-				Inner:     err,
-			}.Error()
-		}
+		data.NewPacketWithValues(abstraction.PacketId(BlcuOrderId), make(map[data.ValueName]data.Value), make(map[data.ValueName]bool))
 
 		<-boards.arkChan
 
@@ -82,7 +75,7 @@ func (boards *BLCU) Notify(notification abstraction.BoardNotification) {
 		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(data))
 
-		err = boards.api.SendPush(abstraction.BrokerPush(
+		err := boards.api.SendPush(abstraction.BrokerPush(
 			&BoardPush{
 				ID:   DownloadName,
 				Data: b,
@@ -96,16 +89,7 @@ func (boards *BLCU) Notify(notification abstraction.BoardNotification) {
 		}
 
 	case UploadEvent:
-		err := boards.api.SendMessage(abstraction.TransportMessage(
-			&BlcuPing{
-				ID: BlcuOrderId,
-			}))
-		if err != nil {
-			ErrSendMessageFailed{
-				Timestamp: time.Now(),
-				Inner:     err,
-			}.Error()
-		}
+		data.NewPacketWithValues(abstraction.PacketId(BlcuOrderId), make(map[data.ValueName]data.Value), make(map[data.ValueName]bool))
 
 		<-boards.arkChan
 
@@ -129,7 +113,7 @@ func (boards *BLCU) Notify(notification abstraction.BoardNotification) {
 			}.Error()
 		}
 
-		err = boards.api.SendMessage(abstraction.TransportMessage(
+		err := boards.api.SendMessage(abstraction.TransportMessage(
 			&BoardMessage{
 				ID: USuccess,
 			},

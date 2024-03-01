@@ -31,14 +31,6 @@ func (upload UploadEvent) Event() abstraction.BoardEvent {
 	return upload.EventID
 }
 
-type BlcuPing struct {
-	ID abstraction.TransportEvent // BlcuOrderId
-}
-
-func (blcuPing BlcuPing) Event() abstraction.TransportEvent {
-	return blcuPing.ID
-}
-
 type BoardPush struct {
 	ID   abstraction.BrokerTopic // DownloadName
 	Data []byte
