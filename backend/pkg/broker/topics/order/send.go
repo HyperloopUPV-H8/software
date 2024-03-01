@@ -24,11 +24,11 @@ func (send *Send) Topic() abstraction.BrokerTopic {
 	return SendName
 }
 
-func (send *Send) Push(push abstraction.BrokerPush) error {
+func (send *Send) UserPush(push abstraction.BrokerPush) error {
 	return nil
 }
 
-func (send *Send) Pull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
+func (send *Send) UserPull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
 	return nil, nil
 }
 

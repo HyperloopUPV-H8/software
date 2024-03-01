@@ -20,7 +20,7 @@ func New() *Broker {
 	}
 }
 
-func (broker *Broker) Push(push abstraction.BrokerPush) error {
+func (broker *Broker) UserPush(push abstraction.BrokerPush) error {
 	topic, ok := broker.topics[push.Topic()]
 	if !ok {
 		return ErrTopicNotFound{
@@ -28,10 +28,10 @@ func (broker *Broker) Push(push abstraction.BrokerPush) error {
 		}
 	}
 
-	return topic.Push(push)
+	return topic.UserPush(push)
 }
 
-func (broker *Broker) Pull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
+func (broker *Broker) UserPull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
 	topic, ok := broker.topics[request.Topic()]
 	if !ok {
 		return nil, ErrTopicNotFound{
@@ -39,7 +39,7 @@ func (broker *Broker) Pull(request abstraction.BrokerRequest) (abstraction.Broke
 		}
 	}
 
-	return topic.Pull(request)
+	return topic.UserPull(request)
 }
 
 func (broker *Broker) SetAPI(api abstraction.BrokerAPI) {
@@ -70,8 +70,4 @@ func (broker *Broker) onMessage(id websocket.ClientId, message *websocket.Messag
 	}
 
 	topic.ClientMessage(id, message)
-}
-
-func (broker *Broker) UserPush(push abstraction.BrokerPush) {
-	broker.api.UserPush(push)
 }

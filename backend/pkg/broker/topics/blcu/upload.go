@@ -16,12 +16,12 @@ func (upload *Upload) Topic() abstraction.BrokerTopic {
 	return UploadName
 }
 
-func (upload *Upload) Push(push abstraction.BrokerPush) error {
-	return upload.api.Push(push)
+func (upload *Upload) UserPush(push abstraction.BrokerPush) error {
+	return upload.api.UserPush(push)
 }
 
-func (upload *Upload) Pull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
-	return upload.api.Pull(request)
+func (upload *Upload) UserPull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
+	return upload.api.UserPull(request)
 }
 
 func (upload *Upload) SetPool(pool *websocket.Pool) {

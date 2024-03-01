@@ -16,12 +16,12 @@ func (download *Download) Topic() abstraction.BrokerTopic {
 	return DownloadName
 }
 
-func (download *Download) Push(push abstraction.BrokerPush) error {
-	return download.api.Push(push)
+func (download *Download) UserPush(push abstraction.BrokerPush) error {
+	return download.api.UserPush(push)
 }
 
-func (download *Download) Pull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
-	return download.api.Pull(request)
+func (download *Download) UserPull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
+	return download.api.UserPull(request)
 }
 
 func (download *Download) SetPool(pool *websocket.Pool) {

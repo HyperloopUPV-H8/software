@@ -30,11 +30,11 @@ func (enable *Enable) Topic() abstraction.BrokerTopic {
 	return EnableName
 }
 
-func (enable *Enable) Push(push abstraction.BrokerPush) error {
+func (enable *Enable) UserPush(push abstraction.BrokerPush) error {
 	return nil
 }
 
-func (enable *Enable) Pull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
+func (enable *Enable) UserPull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
 	return nil, nil
 }
 
