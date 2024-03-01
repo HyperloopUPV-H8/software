@@ -22,30 +22,30 @@ const (
 	USuccess = "upload success"
 )
 
-type Boards struct {
+type BLCU struct {
 	boardId  string
-	BoardAPI abstraction.BoardAPI
-	TempData []byte
-	AckChan  chan struct{}
+	api      abstraction.BoardAPI
+	tempData []byte
+	arkChan  chan struct{}
 }
 
-func New(Id string) *Boards {
-	return &Boards{
+func New(Id string) *BLCU {
+	return &BLCU{
 		boardId: Id,
-		AckChan: make(chan struct{}),
+		arkChan: make(chan struct{}),
 	}
 }
-func (boards *Boards) Id() string {
+func (boards *BLCU) Id() string {
 	return boards.boardId
 }
 
-func (boards *Boards) Notify(notification abstraction.BoardNotification) {
-	switch notification.Event() {
-	case AckId:
-		boards.AckChan <- struct{}{}
+func (boards *BLCU) Notify(notification abstraction.BoardNotification) {
+	switch concreteNotification := notification.(type) {
+	case AckNotification:
+		boards.arkChan <- struct{}{}
 
-	case DownloadId:
-		err := boards.BoardAPI.SendMessage(abstraction.TransportMessage(
+	case DownloadEvent:
+		err := boards.api.SendMessage(abstraction.TransportMessage(
 			&BlcuPing{
 				ID: BlcuOrderId,
 			}))
@@ -56,7 +56,7 @@ func (boards *Boards) Notify(notification abstraction.BoardNotification) {
 			}.Error()
 		}
 
-		<-boards.AckChan
+		<-boards.arkChan
 
 		client, ok := tftp.NewClient("192.168.0.9:69")
 		if ok != nil {
@@ -82,7 +82,7 @@ func (boards *Boards) Notify(notification abstraction.BoardNotification) {
 		b := make([]byte, 8)
 		binary.LittleEndian.PutUint64(b, uint64(data))
 
-		err = boards.BoardAPI.SendPush(abstraction.BrokerPush(
+		err = boards.api.SendPush(abstraction.BrokerPush(
 			&BoardPush{
 				ID:   DownloadName,
 				Data: b,
@@ -95,8 +95,8 @@ func (boards *Boards) Notify(notification abstraction.BoardNotification) {
 			}.Error()
 		}
 
-	case UploadId:
-		err := boards.BoardAPI.SendMessage(abstraction.TransportMessage(
+	case UploadEvent:
+		err := boards.api.SendMessage(abstraction.TransportMessage(
 			&BlcuPing{
 				ID: BlcuOrderId,
 			}))
@@ -107,7 +107,7 @@ func (boards *Boards) Notify(notification abstraction.BoardNotification) {
 			}.Error()
 		}
 
-		<-boards.AckChan
+		<-boards.arkChan
 
 		client, ok := tftp.NewClient("192.168.0.9:69")
 		if ok != nil {
@@ -118,7 +118,7 @@ func (boards *Boards) Notify(notification abstraction.BoardNotification) {
 			}.Error()
 		}
 
-		buffer := bytes.NewBuffer(boards.TempData)
+		buffer := bytes.NewBuffer(boards.tempData)
 
 		_, ok = client.WriteFile(string(notification.Event()), tftp.BinaryMode, buffer)
 		if ok != nil {
@@ -129,7 +129,7 @@ func (boards *Boards) Notify(notification abstraction.BoardNotification) {
 			}.Error()
 		}
 
-		err = boards.BoardAPI.SendMessage(abstraction.TransportMessage(
+		err = boards.api.SendMessage(abstraction.TransportMessage(
 			&BoardMessage{
 				ID: USuccess,
 			},
@@ -149,6 +149,6 @@ func (boards *Boards) Notify(notification abstraction.BoardNotification) {
 	}
 }
 
-func (boards *Boards) SetAPI(api abstraction.BoardAPI) {
-	boards.BoardAPI = api
+func (boards *BLCU) SetAPI(api abstraction.BoardAPI) {
+	boards.api = api
 }
