@@ -14,8 +14,7 @@ type Server struct {
 
 	address string
 
-	whitelist map[net.Addr]struct{}
-
+	whitelist    map[net.Addr]struct{}
 	onConnection connectionCallback
 
 	logger *zerolog.Logger
@@ -31,7 +30,6 @@ func NewServer(address string, config ServerConfig, baseLogger *zerolog.Logger) 
 		address: address,
 
 		whitelist: make(map[net.Addr]struct{}),
-
 		onConnection: func(conn net.Conn) {
 			defer conn.Close()
 			logger.Warn().Str("remoteAddress", conn.RemoteAddr().String()).Msg("connection callback not set yet")
@@ -110,6 +108,6 @@ func (server *Server) OnConnection(callback connectionCallback) {
 // Close closes the server and stops listening for connections
 func (server *Server) Close() {
 	server.logger.Debug().Msg("closing")
-	defer server.logger.Debug().Msg("closed")
 	server.closeChan <- struct{}{}
+	server.logger.Debug().Msg("closed")
 }
