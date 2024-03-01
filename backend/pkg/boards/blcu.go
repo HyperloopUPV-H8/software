@@ -53,6 +53,8 @@ func (boards *BLCU) Notify(notification abstraction.BoardNotification) {
 
 		<-boards.arkChan
 
+		// TODO! Notify on progress
+
 		client, ok := tftp.NewClient("192.168.0.9:69")
 		if ok != nil {
 			ErrNewClientFailed{
@@ -96,6 +98,8 @@ func (boards *BLCU) Notify(notification abstraction.BoardNotification) {
 			make(map[dataPacket.ValueName]bool))
 
 		<-boards.arkChan
+
+		// TODO! Notify on progress
 
 		client, ok := tftp.NewClient("192.168.0.9:69")
 		if ok != nil {
