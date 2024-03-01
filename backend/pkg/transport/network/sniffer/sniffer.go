@@ -53,17 +53,17 @@ func New(source *pcap.Handle, firstLayer *gopacket.LayerType, baseLogger *zerolo
 }
 
 // ReadNext pulls the next packet from the wire, decodes it and returns the payload obtained.
-func (sniffer *Sniffer) ReadNext() (Payload, error) {
+func (sniffer *Sniffer) ReadNext() (network.Payload, error) {
 	data, captureInfo, err := sniffer.source.ReadPacketData()
 	if err != nil {
 		sniffer.logger.Error().Stack().Err(err).Msg("read source")
-		return Payload{}, err
+		return network.Payload{}, err
 	}
 
 	packetLayers, err := sniffer.decoder.decode(data)
 	if err != nil {
 		sniffer.logger.Error().Stack().Err(err).Msg("decode layers")
-		return Payload{}, err
+		return network.Payload{}, err
 	}
 
 	socket := network.Socket{
@@ -108,7 +108,7 @@ func (sniffer *Sniffer) ReadNext() (Payload, error) {
 		).Bool(
 			"has ports", gotPorts,
 		).Msg("missing layers")
-		return Payload{}, ErrMissingLayers{packetLayers}
+		return network.Payload{}, ErrMissingLayers{packetLayers}
 	}
 
 	sniffer.logger.Debug().Array(
@@ -121,10 +121,10 @@ func (sniffer *Sniffer) ReadNext() (Payload, error) {
 		"capture", captureInfo.Timestamp,
 	).Msg("packet")
 
-	return Payload{
-		Socket:      socket,
-		Data:        sniffer.decoder.Payload(),
-		CaptureTime: captureInfo.Timestamp,
+	return network.Payload{
+		Socket:    socket,
+		Data:      sniffer.decoder.Payload(),
+		Timestamp: captureInfo.Timestamp,
 	}, nil
 }
 
