@@ -4,29 +4,31 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 )
 
-type AckNot struct {
+type AckNotification struct {
 	ID abstraction.BoardEvent // AckId
 }
 
-func (ack *AckNot) Event() abstraction.BoardEvent {
+func (ack *AckNotification) Event() abstraction.BoardEvent {
 	return ack.ID
 }
 
-type DownloadNot struct {
-	ID abstraction.BoardEvent // DownloadId
+type DownloadEvent struct {
+	eventID abstraction.BoardEvent // DownloadId
+	boardID abstraction.BoardId
 }
 
-func (download *DownloadNot) Event() abstraction.BoardEvent {
-	return download.ID
+func (download *DownloadEvent) Event() abstraction.BoardEvent {
+	return download.eventID
 }
 
-type UploadNot struct {
-	ID   abstraction.BoardEvent // UploadId
-	Data []byte
+type UploadEvent struct {
+	eventID abstraction.BoardEvent // UploadId
+	boardID abstraction.BoardId
+	Data    []byte
 }
 
-func (upload *UploadNot) Event() abstraction.BoardEvent {
-	return upload.ID
+func (upload *UploadEvent) Event() abstraction.BoardEvent {
+	return upload.eventID
 }
 
 type BlcuPing struct {
