@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"io"
 	"math"
+	"os"
 	"reflect"
 	"testing"
 	"time"
@@ -16,6 +17,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/protection"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/state"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
+	"github.com/rs/zerolog"
 )
 
 func TestDecoder(t *testing.T) {
@@ -655,7 +657,8 @@ func TestDecoder(t *testing.T) {
 // 8 - state space
 // 9:=18 - data
 func getDecoder(endianness binary.ByteOrder) *presentation.Decoder {
-	decoder := presentation.NewDecoder(endianness)
+	logger := zerolog.New(os.Stdout)
+	decoder := presentation.NewDecoder(endianness, &logger)
 
 	decoder.SetPacketDecoder(1, blcu.NewDecoder())
 
