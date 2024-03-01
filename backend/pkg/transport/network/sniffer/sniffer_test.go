@@ -2,7 +2,6 @@ package sniffer_test
 
 import (
 	"io"
-	"net"
 	"testing"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network"
@@ -25,16 +24,16 @@ func TestSniffer(t *testing.T) {
 	}
 
 	socketA := network.Socket{
-		SrcIP:   net.ParseIP("192.168.1.140"),
+		SrcIP:   "192.168.1.140",
 		SrcPort: 56760,
-		DstIP:   net.ParseIP("192.168.1.194"),
+		DstIP:   "192.168.1.194",
 		DstPort: 23,
 	}
 
 	socketB := network.Socket{
-		SrcIP:   net.ParseIP("192.168.1.194"),
+		SrcIP:   "192.168.1.194",
 		SrcPort: 23,
-		DstIP:   net.ParseIP("192.168.1.140"),
+		DstIP:   "192.168.1.140",
 		DstPort: 56760,
 	}
 
@@ -71,7 +70,7 @@ func TestSniffer(t *testing.T) {
 				t.Fatalf("error reading packet: %s", err)
 			}
 
-			if !areSocketsEqual(data.Socket, test.socket) {
+			if data.Socket != test.socket {
 				t.Fatalf("returned socket does not match expected (%v != %v)", data.Socket, test.socket)
 			}
 
@@ -80,8 +79,4 @@ func TestSniffer(t *testing.T) {
 			}
 		})
 	}
-}
-
-func areSocketsEqual(a, b network.Socket) bool {
-	return a.SrcIP.String() == b.SrcIP.String() && a.DstIP.String() == b.DstIP.String() && a.SrcPort == b.SrcPort && a.DstPort == b.DstPort
 }

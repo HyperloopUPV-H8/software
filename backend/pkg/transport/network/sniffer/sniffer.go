@@ -2,7 +2,6 @@ package sniffer
 
 import (
 	"fmt"
-	"net"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network"
 	"github.com/google/gopacket"
@@ -68,9 +67,9 @@ func (sniffer *Sniffer) ReadNext() (Payload, error) {
 	}
 
 	socket := network.Socket{
-		SrcIP:   net.IP{},
+		SrcIP:   "",
 		SrcPort: 0,
-		DstIP:   net.IP{},
+		DstIP:   "",
 		DstPort: 0,
 	}
 
@@ -80,8 +79,8 @@ func (sniffer *Sniffer) ReadNext() (Payload, error) {
 	for _, layer := range packetLayers {
 		if !gotIp && layer == layers.LayerTypeIPv4 {
 			ip := sniffer.decoder.IPv4()
-			socket.SrcIP = ip.SrcIP
-			socket.DstIP = ip.DstIP
+			socket.SrcIP = ip.SrcIP.String()
+			socket.DstIP = ip.DstIP.String()
 			gotIp = true
 		} else if !gotPorts {
 			switch layer {
@@ -102,7 +101,7 @@ func (sniffer *Sniffer) ReadNext() (Payload, error) {
 	}
 
 	if !gotIp || !gotPorts {
-		sniffer.logger.Warn().Array(
+		sniffer.logger.Debug().Array(
 			"layers", layerArr,
 		).Bool(
 			"has ip", gotIp,
