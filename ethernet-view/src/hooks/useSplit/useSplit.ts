@@ -171,11 +171,11 @@ function getAffectedAndUnaffectedElements(
 
 function getNewMainElement(
     mainElement: SplitElement,
-    shrinkedElements: SplitElement[]
+    elements: SplitElement[]
 ): SplitElement {
     const mainElementLength =
         1 -
-        shrinkedElements.reduce((prevValue, currentElement) => {
+        elements.reduce((prevValue, currentElement) => {
             return prevValue + currentElement.length;
         }, 0);
 
@@ -195,10 +195,8 @@ function substractDisplacement(
     let remaindingDistance = Math.abs(distance);
 
     for (let i = 0; i < orderedElements.length; i++) {
-        const newLength = Math.max(
-            orderedElements[i].length - remaindingDistance,
-            orderedElements[i].minLength
-        );
+        let newLength = orderedElements[i].length - remaindingDistance;
+        if(newLength < orderedElements[i].minLength) newLength = 0;
         remaindingDistance = Math.max(
             remaindingDistance - (orderedElements[i].length - newLength),
             0

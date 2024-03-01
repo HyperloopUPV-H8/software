@@ -1,12 +1,15 @@
 import React from "react";
 import styles from "layouts/SplitLayout/SplitLayout.module.scss";
 import { useSplit } from "hooks/useSplit/useSplit";
-import { Component } from "layouts/SplitLayout/Component/Component";
+import { Pane } from "layouts/SplitLayout/Pane/Pane";
 import { Separator } from "layouts/SplitLayout/Separator/Separator";
 import { Orientation } from "hooks/useSplit/Orientation";
 
 type Props = {
-    components: React.ReactNode[];
+    components: {
+        component: React.ReactNode;
+        collapsedIcon: string;
+    }[];
     orientation?: Orientation;
 };
 
@@ -15,7 +18,7 @@ export const SplitLayout = ({
     components,
     orientation = Orientation.HORIZONTAL,
 }: Props) => {
-    const minSizes = components.map(() => 0.2);
+    const minSizes = components.map(() => 0.05);
     const [splitElements, onSeparatorMouseDown] = useSplit(
         minSizes,
         orientation
@@ -32,9 +35,10 @@ export const SplitLayout = ({
             {components.map((component, index) => {
                 return (
                     <React.Fragment key={index}>
-                        <Component
-                            component={component}
+                        <Pane
+                            component={component.component}
                             normalizedLength={splitElements[index].length}
+                            collapsedIcon={component.collapsedIcon}
                         />
                         {index < components.length - 1 && (
                             <Separator
