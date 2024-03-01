@@ -8,34 +8,34 @@ type AckNotification struct {
 	ID abstraction.BoardEvent // AckId
 }
 
-func (ack *AckNotification) Event() abstraction.BoardEvent {
+func (ack AckNotification) Event() abstraction.BoardEvent {
 	return ack.ID
 }
 
 type DownloadEvent struct {
-	eventID abstraction.BoardEvent // DownloadId
-	boardID abstraction.BoardId
+	EventID abstraction.BoardEvent // DownloadId
+	BoardID abstraction.BoardId
 }
 
-func (download *DownloadEvent) Event() abstraction.BoardEvent {
-	return download.eventID
+func (download DownloadEvent) Event() abstraction.BoardEvent {
+	return download.EventID
 }
 
 type UploadEvent struct {
-	eventID abstraction.BoardEvent // UploadId
-	boardID abstraction.BoardId
+	EventID abstraction.BoardEvent // UploadId
+	BoardID abstraction.BoardId
 	Data    []byte
 }
 
-func (upload *UploadEvent) Event() abstraction.BoardEvent {
-	return upload.eventID
+func (upload UploadEvent) Event() abstraction.BoardEvent {
+	return upload.EventID
 }
 
 type BlcuPing struct {
 	ID abstraction.TransportEvent // BlcuOrderId
 }
 
-func (blcuPing *BlcuPing) Event() abstraction.TransportEvent {
+func (blcuPing BlcuPing) Event() abstraction.TransportEvent {
 	return blcuPing.ID
 }
 
@@ -44,7 +44,7 @@ type BoardPush struct {
 	Data []byte
 }
 
-func (boardPush *BoardPush) Topic() abstraction.BrokerTopic {
+func (boardPush BoardPush) Topic() abstraction.BrokerTopic {
 	return boardPush.ID
 }
 
@@ -52,6 +52,6 @@ type BoardMessage struct {
 	ID abstraction.TransportEvent // UploadName
 }
 
-func (boardMessage *BoardMessage) Event() abstraction.TransportEvent {
+func (boardMessage BoardMessage) Event() abstraction.TransportEvent {
 	return boardMessage.ID
 }

@@ -40,7 +40,7 @@ func (boards *BLCU) Id() string {
 }
 
 func (boards *BLCU) Notify(notification abstraction.BoardNotification) {
-	switch concreteNotification := notification.(type) {
+	switch notification := notification.(type) {
 	case AckNotification:
 		boards.arkChan <- struct{}{}
 
