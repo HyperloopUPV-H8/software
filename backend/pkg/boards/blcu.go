@@ -68,6 +68,19 @@ func (boards *BLCU) Notify(notification abstraction.BoardNotification) {
 
 		data, ok := client.ReadFile(string(notification.Event()), tftp.BinaryMode, buffer)
 		if ok != nil {
+			err := boards.api.SendPush(abstraction.BrokerPush(
+				&DownloadFailure{
+					ID:    DownloadName,
+					Error: ok,
+				},
+			))
+			if err != nil {
+				ErrSendMessageFailed{
+					Timestamp: time.Now(),
+					Inner:     err,
+				}.Error()
+			}
+
 			ErrReadingFileFailed{
 				Filename:  string(notification.Event()),
 				Timestamp: time.Now(),
@@ -80,7 +93,7 @@ func (boards *BLCU) Notify(notification abstraction.BoardNotification) {
 		binary.LittleEndian.PutUint64(b, uint64(data))
 
 		err := boards.api.SendPush(abstraction.BrokerPush(
-			&BoardPush{
+			&DownloadSuccess{
 				ID:   DownloadName,
 				Data: b,
 			},
@@ -114,6 +127,18 @@ func (boards *BLCU) Notify(notification abstraction.BoardNotification) {
 
 		_, ok = client.WriteFile(string(notification.Event()), tftp.BinaryMode, buffer)
 		if ok != nil {
+			err := boards.api.SendPush(abstraction.BrokerPush(
+				&UploadFailure{
+					ID:    UploadName,
+					Error: ok,
+				}))
+			if err != nil {
+				ErrSendMessageFailed{
+					Timestamp: time.Now(),
+					Inner:     err,
+				}.Error()
+			}
+
 			ErrReadingFileFailed{
 				Filename:  string(notification.Event()),
 				Timestamp: time.Now(),
@@ -121,11 +146,10 @@ func (boards *BLCU) Notify(notification abstraction.BoardNotification) {
 			}.Error()
 		}
 
-		err := boards.api.SendMessage(abstraction.TransportMessage(
-			&BoardMessage{
-				ID: USuccess,
-			},
-		))
+		err := boards.api.SendPush(abstraction.BrokerPush(
+			&UploadSuccess{
+				ID: UploadName,
+			}))
 		if err != nil {
 			ErrSendMessageFailed{
 				Timestamp: time.Now(),

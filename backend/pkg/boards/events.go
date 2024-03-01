@@ -32,12 +32,47 @@ func (upload UploadEvent) Event() abstraction.BoardEvent {
 }
 
 type BoardPush struct {
-	ID   abstraction.BrokerTopic // DownloadName
+	ID   abstraction.BrokerTopic // BlcuOrderId
 	Data []byte
 }
 
 func (boardPush BoardPush) Topic() abstraction.BrokerTopic {
 	return boardPush.ID
+}
+
+type DownloadSuccess struct {
+	ID   abstraction.BrokerTopic // DSuccess
+	Data []byte
+}
+
+func (downloadSuccess DownloadSuccess) Topic() abstraction.BrokerTopic {
+	return downloadSuccess.ID
+}
+
+type UploadSuccess struct {
+	ID abstraction.BrokerTopic // USuccess
+}
+
+func (uploadSuccess UploadSuccess) Topic() abstraction.BrokerTopic {
+	return uploadSuccess.ID
+}
+
+type DownloadFailure struct {
+	ID    abstraction.BrokerTopic // DFailure
+	Error error
+}
+
+func (downloadFailure DownloadFailure) Topic() abstraction.BrokerTopic {
+	return downloadFailure.ID
+}
+
+type UploadFailure struct {
+	ID    abstraction.BrokerTopic // UFailure
+	Error error
+}
+
+func (uploadFailure UploadFailure) Topic() abstraction.BrokerTopic {
+	return uploadFailure.ID
 }
 
 type BoardMessage struct {
