@@ -10,7 +10,7 @@ type Props = {
 export const TabLayout = ({ tabs }: Props) => {
     const [visibleTab, setVisibleTab] = useState(tabs[0]);
 
-    function handleClick(tab: TabItem) {
+    function onTabClick(tab: TabItem) {
         setVisibleTab(tab);
     }
 
@@ -19,7 +19,7 @@ export const TabLayout = ({ tabs }: Props) => {
             <Header
                 tabs={tabs}
                 visibleTab={visibleTab}
-                handleClick={handleClick}
+                onTabClick={onTabClick}
             />
             <div className={styles.body}>
                 <div className={styles.componentWrapper}>

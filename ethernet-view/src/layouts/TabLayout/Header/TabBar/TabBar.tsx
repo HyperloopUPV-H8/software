@@ -18,9 +18,7 @@ export const TabBar = ({ tabs, onTabClick, visibleTabId }: Props) => {
                         className={tab.id == visibleTabId ? styles.active : ""}
                         name={tab.name}
                         icon={tab.icon}
-                        onClick={() => {
-                            onTabClick(tab);
-                        }}
+                        onClick={() => onTabClick(tab)}
                     ></Tab>
                 );
             })}
