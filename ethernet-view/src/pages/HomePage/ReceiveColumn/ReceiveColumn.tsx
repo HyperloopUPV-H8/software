@@ -17,5 +17,5 @@ export const ReceiveColumn = () => {
             },
         ]
 
-    return <TabLayout items={receiveColumnTabItems}></TabLayout>;
+    return <TabLayout tabs={receiveColumnTabItems}></TabLayout>;
 };

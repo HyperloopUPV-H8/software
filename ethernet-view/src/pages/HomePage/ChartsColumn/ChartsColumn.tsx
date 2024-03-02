@@ -27,5 +27,5 @@ export const ChartsColumn = () => {
             },
         ]
 
-    return <TabLayout items={chartsColumnTabItems}></TabLayout>;
+    return <TabLayout tabs={chartsColumnTabItems}></TabLayout>;
 };
