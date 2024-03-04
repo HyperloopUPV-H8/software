@@ -7,8 +7,6 @@ import (
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/info"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/protection"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
 	"github.com/google/uuid"
@@ -44,7 +42,7 @@ func (update *Update) Push(p abstraction.BrokerPush) error {
 		return topics.ErrUnexpectedPush{Push: p}
 	}
 
-	raw, err := json.Marshal(push.Data(update.idToBoard))
+	raw, err := json.Marshal(push.Data(push.boardId, update.idToBoard))
 	if err != nil {
 		return err
 	}
@@ -102,18 +100,19 @@ func (update *Update) SetAPI(api abstraction.BrokerAPI) {
 }
 
 type push struct {
-	data any
+	data    any
+	boardId abstraction.BoardId
 }
 
-func Push(data any) *push {
-	return &push{data: data}
+func Push(data any, boardId abstraction.BoardId) *push {
+	return &push{data: data, boardId: boardId}
 }
 
 func (push *push) Topic() abstraction.BrokerTopic {
 	return UpdateName
 }
 
-func (push *push) Data(idToBoard map[abstraction.BoardId]string) wrapper {
+func (push *push) Data(boardID abstraction.BoardId, idToBoard map[abstraction.BoardId]string) wrapper {
 	switch data := push.data.(type) {
 	case *protection.Packet:
 		return wrapper{
@@ -122,30 +121,21 @@ func (push *push) Data(idToBoard map[abstraction.BoardId]string) wrapper {
 				Kind string `json:"kind"`
 				Data any    `json:"data"`
 			}{
-				Kind: string(data.Protection.Type),
-				Data: data.Protection.Data,
+				Kind: string(data.Data.Name()),
+				Data: data.Data,
 			},
-			Board:     string(idToBoard[data.BoardId]),
-			Name:      string(data.Protection.Name),
-			Timestamp: data.Timestamp,
-		}
-	case *info.Packet:
-		return wrapper{
-			Kind:      "info",
-			Payload:   string(data.Msg),
-			Board:     string(idToBoard[data.BoardId]),
-			Name:      "info",
+			Board:     string(idToBoard[boardID]),
+			Name:      string(data.Name),
 			Timestamp: data.Timestamp,
 		}
 	}
-
 	return wrapper{}
 }
 
 type wrapper struct {
-	Kind      string           `json:"kind"`
-	Payload   any              `json:"payload"`
-	Board     string           `json:"board"`
-	Name      string           `json:"name"`
-	Timestamp packet.Timestamp `json:"timestamp"`
+	Kind      string                `json:"kind"`
+	Payload   any                   `json:"payload"`
+	Board     string                `json:"board"`
+	Name      string                `json:"name"`
+	Timestamp *protection.Timestamp `json:"timestamp"`
 }

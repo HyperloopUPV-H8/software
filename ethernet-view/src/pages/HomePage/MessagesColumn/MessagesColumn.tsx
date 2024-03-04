@@ -9,7 +9,8 @@ import { Logger } from "components/Logger/Logger";
 import { useRef } from "react";
 import { Connections } from "common";
 import { BootloaderContainer } from "components/BootloaderContainer/BootloaderContainer";
-import { Island } from "components/Island/Island";
+import letter from "assets/svg/letter.svg"
+import connection from "assets/svg/connection.svg"
 
 export const MessagesColumn = () => {
     const messagesTabItems = useRef([
@@ -22,14 +23,28 @@ export const MessagesColumn = () => {
         },
     ]);
 
+    const connectionsTabItems = useRef([
+        {
+            id: nanoid(),
+            name: "Connections",
+            icon: <BiLineChart />,
+
+            component: <Connections />,
+        }
+    ])
+
     return (
         <div className={styles.messageColumnWrapper}>
             <SplitLayout
                 components={[
-                    <TabLayout items={messagesTabItems.current}></TabLayout>,
-                    <Island>
-                        <Connections />
-                    </Island>,
+                    {
+                        component: <TabLayout tabs={messagesTabItems.current}></TabLayout>,
+                        collapsedIcon: letter,
+                    },
+                    {
+                        component: <TabLayout tabs={connectionsTabItems.current}></TabLayout>,
+                        collapsedIcon: connection,
+                    },
                 ]}
                 orientation={Orientation.VERTICAL}
             ></SplitLayout>

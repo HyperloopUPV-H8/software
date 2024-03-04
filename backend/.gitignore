@@ -11,7 +11,8 @@ Backend-H8
 backend
 !build
 # MacOS build
-cmd
+cmd/cmd
+cmd/logger/
 
 # EXCEL
 *.xlsx

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory/models"
@@ -30,9 +31,10 @@ type UpdateFactory struct {
 	packetCount     map[uint16]uint
 	lastPacketCount map[uint16]float64
 	trace           zerolog.Logger
+	boardToPackets  map[abstraction.TransportTarget][]uint16
 }
 
-func NewFactory() *UpdateFactory {
+func NewFactory(boardToPackets map[abstraction.TransportTarget][]uint16) *UpdateFactory {
 	trace.Info().Msg("new update factory")
 	factory := &UpdateFactory{
 		count:           make(map[uint16]uint64),
@@ -44,11 +46,37 @@ func NewFactory() *UpdateFactory {
 		packetCount:     make(map[uint16]uint),
 		lastPacketCount: make(map[uint16]float64),
 		trace:           trace.With().Str("component", "updateFactory").Logger(),
+		boardToPackets:  boardToPackets,
 	}
 
 	go factory.adjustOrder()
 
 	return factory
+}
+
+func (factory *UpdateFactory) ClearPacketsFor(target abstraction.TransportTarget) {
+	packets, ok := factory.boardToPackets[target]
+	if !ok {
+		return
+	}
+
+	factory.averageMx.Lock()
+	defer factory.averageMx.Unlock()
+	factory.countMx.Lock()
+	defer factory.countMx.Unlock()
+
+	for _, id := range packets {
+		factory.clearPacket(id)
+	}
+}
+
+func (factory *UpdateFactory) clearPacket(id uint16) {
+	delete(factory.count, id)
+	delete(factory.cycleTimeAvg, id)
+	delete(factory.timestamp, id)
+	delete(factory.fieldAvg, id)
+	delete(factory.packetCount, id)
+	delete(factory.lastPacketCount, id)
 }
 
 func (factory *UpdateFactory) NewUpdate(packet *data.Packet) models.Update {

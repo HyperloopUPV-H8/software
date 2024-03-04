@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"os"
 	"sync"
 	"time"
 
@@ -44,7 +45,8 @@ func (transport *Transport) HandleClient(config tcp.ClientConfig, target abstrac
 	for {
 		conn, err := config.Dial(network, remote)
 		if err != nil {
-			if !errors.Is(err, error(tcp.ErrTooManyRetries{})) {
+			if config.AbortOnError {
+				fmt.Fprintf(os.Stderr, "Error connecting to %s: %v\n", target, err)
 				return err
 			}
 
@@ -54,6 +56,14 @@ func (transport *Transport) HandleClient(config tcp.ClientConfig, target abstrac
 		err = transport.handleTCPConn(target, conn)
 		if errors.Is(err, error(ErrTargetAlreadyConnected{})) {
 			return err
+		}
+		if err != nil {
+			if config.AbortOnError {
+				fmt.Fprintf(os.Stderr, "Error handling connection to %s: %v\n", target, err)
+				return err
+			}
+
+			continue
 		}
 
 		// Wait before trying to reconnect
@@ -83,6 +93,17 @@ func (transport *Transport) handleTCPConn(target abstraction.TransportTarget, co
 		return err
 	}
 
+	if tcpConn, ok := conn.(*net.TCPConn); ok {
+		err := tcpConn.SetLinger(0)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error setting %s linger to zero: %v\n", target, err)
+		}
+
+		err = tcpConn.SetNoDelay(true)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error setting %s no delay: %v\n", target, err)
+		}
+	}
 	conn, errChan := tcp.WithErrChan(conn)
 	defer conn.Close()
 
@@ -107,8 +128,8 @@ func (transport *Transport) handleTCPConn(target abstraction.TransportTarget, co
 				break
 			}
 
-			from := conn.LocalAddr().String()
-			to := string(target)
+			to := conn.LocalAddr().String()
+			from := conn.RemoteAddr().String()
 
 			transport.api.Notification(NewPacketNotification(packet, from, to, time.Now()))
 		}

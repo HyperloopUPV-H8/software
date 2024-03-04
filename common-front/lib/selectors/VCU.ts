@@ -3,7 +3,7 @@ import {
     EnumMeasurement,
     Measurements,
     NumericMeasurement,
-    getMeasurementFallback,
+    useMeasurementsStore,
 } from "..";
 
 export type VcuMeasurements = {
@@ -25,44 +25,24 @@ export type VcuMeasurements = {
 export function selectVcuMeasurements(
     measurements: Measurements
 ): VcuMeasurements {
-    return {
-        general_state: getMeasurementFallback(
-            measurements,
-            "VCU/general_state"
-        ),
+    const getMeasurementFallback = useMeasurementsStore(
+        (state) => state.getMeasurementFallback
+    );
 
-        specific_state: getMeasurementFallback(
-            measurements,
-            "VCU/specific_state"
-        ),
-        voltage_state: getMeasurementFallback(
-            measurements,
-            "VCU/voltage_state"
-        ),
-        reference_pressure: getMeasurementFallback(
-            measurements,
-            "VCU/reference_pressure"
-        ),
-        actual_pressure: getMeasurementFallback(
-            measurements,
-            "VCU/actual_pressure"
-        ),
-        valve_state: getMeasurementFallback(measurements, "VCU/valve_state"),
-        reed1: getMeasurementFallback(measurements, "VCU/reed1"),
-        reed2: getMeasurementFallback(measurements, "VCU/reed2"),
-        bottle_temp_1: getMeasurementFallback(
-            measurements,
-            "VCU/bottle_temp_1"
-        ),
-        bottle_temp_2: getMeasurementFallback(
-            measurements,
-            "VCU/bottle_temp_2"
-        ),
-        high_pressure: getMeasurementFallback(
-            measurements,
-            "VCU/high_pressure"
-        ),
-        position: getMeasurementFallback(measurements, "VCU/position"),
-        speed: getMeasurementFallback(measurements, "VCU/speed"),
+    return {
+        general_state: getMeasurementFallback("VCU/general_state"),
+
+        specific_state: getMeasurementFallback("VCU/specific_state"),
+        voltage_state: getMeasurementFallback("VCU/voltage_state"),
+        reference_pressure: getMeasurementFallback("VCU/reference_pressure"),
+        actual_pressure: getMeasurementFallback("VCU/actual_pressure"),
+        valve_state: getMeasurementFallback("VCU/valve_state"),
+        reed1: getMeasurementFallback("VCU/reed1"),
+        reed2: getMeasurementFallback("VCU/reed2"),
+        bottle_temp_1: getMeasurementFallback("VCU/bottle_temp_1"),
+        bottle_temp_2: getMeasurementFallback("VCU/bottle_temp_2"),
+        high_pressure: getMeasurementFallback("VCU/high_pressure"),
+        position: getMeasurementFallback("VCU/position"),
+        speed: getMeasurementFallback("VCU/speed"),
     } as VcuMeasurements;
 }

@@ -1,5 +1,4 @@
 import {
-    getMeasurement,
     getPacket,
     isNumericMeasurement,
     useGlobalTicker,
@@ -38,7 +37,7 @@ export const TableUpdater = ({ children }: Props) => {
     const measurementElements = useRef<MeasurementElement[]>([]);
 
     const podData = usePodDataStore(state => state.podData)
-    const measurements = useMeasurementsStore(state => state.measurements)
+    const getMeasurement = useMeasurementsStore(state => state.getMeasurement)
 
     useGlobalTicker(() => {
         
@@ -54,7 +53,7 @@ export const TableUpdater = ({ children }: Props) => {
         }
 
         for (const item of measurementElements.current) {
-            const measurement = getMeasurement(measurements, item.id);
+            const measurement = getMeasurement(item.id);
             if (!measurement) {
                 console.warn(`measurement ${item.id} not found`);
                 return;

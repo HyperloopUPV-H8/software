@@ -6,20 +6,29 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 )
 
-// ErrUnknownKind is returned when the protection kind is not defined
-type ErrUnknownKind struct {
-	Kind kind
+// ErrUnexpectedType is returned when the type of the protection value is not recognized
+type ErrUnexpectedType struct {
+	Type Type
 }
 
-func (err ErrUnknownKind) Error() string {
-	return fmt.Sprintf("unrecognized kind %s", err.Kind)
+func (err ErrUnexpectedType) Error() string {
+	return fmt.Sprintf("unexpected value for type %d", err.Type)
 }
 
-// ErrUnknownSeverity is returned when the severity of the protection is unknown
-type ErrUnknownSeverity struct {
+// ErrUnexpectedKind is returned when the kind of the protection value is not recognized
+type ErrUnexpectedKind struct {
+	Kind Kind
+}
+
+func (err ErrUnexpectedKind) Error() string {
+	return fmt.Sprintf("unexpected value for kind %d", err.Kind)
+}
+
+// ErrUnexpectedId is returned when the id of the protection packet is not recognized
+type ErrUnexpectedId struct {
 	Id abstraction.PacketId
 }
 
-func (err ErrUnknownSeverity) Error() string {
-	return fmt.Sprintf("unknown severity for id %d", err.Id)
+func (err ErrUnexpectedId) Error() string {
+	return fmt.Sprintf("unexpected packet with id %d", err.Id)
 }
