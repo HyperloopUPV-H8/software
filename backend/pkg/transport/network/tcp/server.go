@@ -6,7 +6,7 @@ import (
 	"github.com/rs/zerolog"
 )
 
-type connectionCallback = func(conn net.Conn)
+type connectionCallback = func(conn net.Conn) error
 
 type Server struct {
 	config    ServerConfig
@@ -30,9 +30,10 @@ func NewServer(address string, config ServerConfig, baseLogger *zerolog.Logger) 
 		address: address,
 
 		whitelist: make(map[net.Addr]struct{}),
-		onConnection: func(conn net.Conn) {
+		onConnection: func(conn net.Conn) error {
 			defer conn.Close()
 			logger.Warn().Str("remoteAddress", conn.RemoteAddr().String()).Msg("connection callback not set yet")
+			return nil
 		},
 
 		logger: &logger,
@@ -69,7 +70,12 @@ func (server *Server) Listen() error {
 			}
 			server.logger.Debug().Str("remoteAddress", conn.RemoteAddr().String()).Msg("new connection")
 
-			server.onConnection(conn)
+			go func() {
+				err = server.onConnection(conn)
+				if err != nil {
+					server.logger.Error().Stack().Err(err).Str("remoteAddress", conn.RemoteAddr().String()).Msg("connection")
+				}
+			}()
 		}
 	}()
 
