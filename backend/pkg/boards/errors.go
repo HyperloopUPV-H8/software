@@ -12,7 +12,7 @@ type ErrNewClientFailed struct {
 	Inner     error
 }
 
-func (err ErrNewClientFailed) Error() {
+func (err ErrNewClientFailed) String() {
 	fmt.Sprintf("Error creating new client at %s", err.Timestamp.Format(time.RFC3339))
 }
 
@@ -21,7 +21,7 @@ type ErrInvalidBoardEvent struct {
 	Timestamp time.Time
 }
 
-func (err ErrInvalidBoardEvent) Error() {
+func (err ErrInvalidBoardEvent) String() {
 	fmt.Sprintf("Invalid board event %s at %s", err.Event, err.Timestamp.Format(time.RFC3339))
 }
 
@@ -31,7 +31,7 @@ type ErrReadingFileFailed struct {
 	Inner     error
 }
 
-func (err ErrReadingFileFailed) Error() {
+func (err ErrReadingFileFailed) String() {
 	fmt.Sprintf("Invalid board id %s at %s", err.Filename, err.Timestamp.Format(time.RFC3339))
 }
 
@@ -40,7 +40,7 @@ type ErrSendMessageFailed struct {
 	Inner     error
 }
 
-func (err ErrSendMessageFailed) Error() {
+func (err ErrSendMessageFailed) String() {
 	fmt.Sprintf("Error sending message at %s", err.Timestamp.Format(time.RFC3339))
 }
 
@@ -48,6 +48,6 @@ type ErrNotAllBytesWritten struct {
 	Timestamp time.Time
 }
 
-func (err ErrNotAllBytesWritten) Error() {
+func (err ErrNotAllBytesWritten) String() {
 	fmt.Sprintf("Not all bytes written at %s", err.Timestamp.Format(time.RFC3339))
 }

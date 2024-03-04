@@ -58,7 +58,7 @@ func (boards *BLCU) Notify(notification abstraction.BoardNotification) {
 		ErrInvalidBoardEvent{
 			Event:     notification.Event(),
 			Timestamp: time.Now(),
-		}.Error()
+		}.String()
 	}
 }
 
@@ -83,7 +83,7 @@ func (boards *BLCU) download(notification abstraction.BoardNotification) {
 			Addr:      boards.ip,
 			Timestamp: time.Now(),
 			Inner:     err,
-		}.Error()
+		}.String()
 	}
 
 	buffer := &bytes.Buffer{}
@@ -100,14 +100,14 @@ func (boards *BLCU) download(notification abstraction.BoardNotification) {
 			ErrSendMessageFailed{
 				Timestamp: time.Now(),
 				Inner:     err,
-			}.Error()
+			}.String()
 		}
 
 		ErrReadingFileFailed{
 			Filename:  string(notification.Event()),
 			Timestamp: time.Now(),
 			Inner:     err,
-		}.Error()
+		}.String()
 	}
 
 	err = boards.api.SendPush(abstraction.BrokerPush(
@@ -120,7 +120,7 @@ func (boards *BLCU) download(notification abstraction.BoardNotification) {
 		ErrSendMessageFailed{
 			Timestamp: time.Now(),
 			Inner:     err,
-		}.Error()
+		}.String()
 	}
 
 }
@@ -140,7 +140,7 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) {
 			Addr:      boards.ip,
 			Timestamp: time.Now(),
 			Inner:     err,
-		}.Error()
+		}.String()
 	}
 
 	buffer := bytes.NewBuffer(boards.tempData)
@@ -156,21 +156,21 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) {
 			ErrSendMessageFailed{
 				Timestamp: time.Now(),
 				Inner:     err,
-			}.Error()
+			}.String()
 		}
 
 		ErrReadingFileFailed{
 			Filename:  string(notification.Event()),
 			Timestamp: time.Now(),
 			Inner:     err,
-		}.Error()
+		}.String()
 	}
 
 	// Check if all bytes written
 	if int(read) != len(boards.tempData) {
 		ErrNotAllBytesWritten{
 			Timestamp: time.Now(),
-		}.Error()
+		}.String()
 	}
 
 	err = boards.api.SendPush(abstraction.BrokerPush(
@@ -181,6 +181,6 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) {
 		ErrSendMessageFailed{
 			Timestamp: time.Now(),
 			Inner:     err,
-		}.Error()
+		}.String()
 	}
 }
