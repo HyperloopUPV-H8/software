@@ -43,3 +43,11 @@ type ErrSendMessageFailed struct {
 func (err ErrSendMessageFailed) Error() {
 	fmt.Sprintf("Error sending message at %s", err.Timestamp.Format(time.RFC3339))
 }
+
+type ErrNotAllBytesWritten struct {
+	Timestamp time.Time
+}
+
+func (err ErrNotAllBytesWritten) Error() {
+	fmt.Sprintf("Not all bytes written at %s", err.Timestamp.Format(time.RFC3339))
+}

@@ -33,7 +33,7 @@ func (upload UploadEvent) Event() abstraction.BoardEvent {
 
 type BoardPush struct {
 	ID   abstraction.BrokerTopic // BlcuOrderId
-	Data []byte
+	Data int64
 }
 
 func (boardPush BoardPush) Topic() abstraction.BrokerTopic {
@@ -42,7 +42,7 @@ func (boardPush BoardPush) Topic() abstraction.BrokerTopic {
 
 type DownloadSuccess struct {
 	ID   abstraction.BrokerTopic // DSuccess
-	Data []byte
+	Data int64
 }
 
 func (downloadSuccess DownloadSuccess) Topic() abstraction.BrokerTopic {

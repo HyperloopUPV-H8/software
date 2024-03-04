@@ -2,7 +2,6 @@ package boards
 
 import (
 	"bytes"
-	"encoding/binary"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tftp"
 	dataPacket "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
@@ -31,12 +30,14 @@ type BLCU struct {
 	api      abstraction.BoardAPI
 	tempData []byte
 	arkChan  chan struct{}
+	ip       string
 }
 
-func New(Id string) *BLCU {
+func New(Id string, ip string) *BLCU {
 	return &BLCU{
 		boardId: Id,
 		arkChan: make(chan struct{}),
+		ip:      ip,
 	}
 }
 func (boards *BLCU) Id() string {
@@ -49,115 +50,9 @@ func (boards *BLCU) Notify(notification abstraction.BoardNotification) {
 		boards.arkChan <- struct{}{}
 
 	case DownloadEvent:
-		dataPacket.NewPacketWithValues(abstraction.PacketId(BlcuOrderId),
-			make(map[dataPacket.ValueName]dataPacket.Value),
-			make(map[dataPacket.ValueName]bool))
-
-		<-boards.arkChan
-
-		// TODO! Notify on progress
-
-		client, ok := tftp.NewClient("192.168.0.9:69")
-		if ok != nil {
-			ErrNewClientFailed{
-				Addr:      "192.168.0.9:69",
-				Timestamp: time.Now(),
-				Inner:     ok,
-			}.Error()
-		}
-
-		buffer := &bytes.Buffer{}
-
-		data, ok := client.ReadFile(string(notification.Event()), tftp.BinaryMode, buffer)
-		if ok != nil {
-			err := boards.api.SendPush(abstraction.BrokerPush(
-				&DownloadFailure{
-					ID:    DownloadName,
-					Error: ok,
-				},
-			))
-			if err != nil {
-				ErrSendMessageFailed{
-					Timestamp: time.Now(),
-					Inner:     err,
-				}.Error()
-			}
-
-			ErrReadingFileFailed{
-				Filename:  string(notification.Event()),
-				Timestamp: time.Now(),
-				Inner:     ok,
-			}.Error()
-		}
-
-		// Convert data to uint64 (bytes)
-		b := make([]byte, 8)
-		binary.LittleEndian.PutUint64(b, uint64(data))
-
-		err := boards.api.SendPush(abstraction.BrokerPush(
-			&DownloadSuccess{
-				ID:   DownloadName,
-				Data: b,
-			},
-		))
-		if err != nil {
-			ErrSendMessageFailed{
-				Timestamp: time.Now(),
-				Inner:     err,
-			}.Error()
-		}
-
+		boards.download(notification)
 	case UploadEvent:
-		dataPacket.NewPacketWithValues(abstraction.PacketId(BlcuOrderId),
-			make(map[dataPacket.ValueName]dataPacket.Value),
-			make(map[dataPacket.ValueName]bool))
-
-		<-boards.arkChan
-
-		// TODO! Notify on progress
-
-		client, ok := tftp.NewClient("192.168.0.9:69")
-		if ok != nil {
-			ErrNewClientFailed{
-				Addr:      "192.168.0.9:69",
-				Timestamp: time.Now(),
-				Inner:     ok,
-			}.Error()
-		}
-
-		buffer := bytes.NewBuffer(boards.tempData)
-
-		_, ok = client.WriteFile(string(notification.Event()), tftp.BinaryMode, buffer)
-		if ok != nil {
-			err := boards.api.SendPush(abstraction.BrokerPush(
-				&UploadFailure{
-					ID:    UploadName,
-					Error: ok,
-				}))
-			if err != nil {
-				ErrSendMessageFailed{
-					Timestamp: time.Now(),
-					Inner:     err,
-				}.Error()
-			}
-
-			ErrReadingFileFailed{
-				Filename:  string(notification.Event()),
-				Timestamp: time.Now(),
-				Inner:     ok,
-			}.Error()
-		}
-
-		err := boards.api.SendPush(abstraction.BrokerPush(
-			&UploadSuccess{
-				ID: UploadName,
-			}))
-		if err != nil {
-			ErrSendMessageFailed{
-				Timestamp: time.Now(),
-				Inner:     err,
-			}.Error()
-		}
+		boards.upload(notification)
 
 	default:
 		ErrInvalidBoardEvent{
@@ -169,4 +64,123 @@ func (boards *BLCU) Notify(notification abstraction.BoardNotification) {
 
 func (boards *BLCU) SetAPI(api abstraction.BoardAPI) {
 	boards.api = api
+}
+
+func (boards *BLCU) download(notification abstraction.BoardNotification) {
+	// Notify the BLCU
+	dataPacket.NewPacketWithValues(abstraction.PacketId(BlcuOrderId),
+		make(map[dataPacket.ValueName]dataPacket.Value),
+		make(map[dataPacket.ValueName]bool))
+
+	// Wait for the ACK
+	<-boards.arkChan
+
+	// TODO! Notify on progress
+
+	client, err := tftp.NewClient(boards.ip)
+	if err != nil {
+		ErrNewClientFailed{
+			Addr:      boards.ip,
+			Timestamp: time.Now(),
+			Inner:     err,
+		}.Error()
+	}
+
+	buffer := &bytes.Buffer{}
+
+	data, err := client.ReadFile(BoardId, tftp.BinaryMode, buffer)
+	if err != nil {
+		err := boards.api.SendPush(abstraction.BrokerPush(
+			&DownloadFailure{
+				ID:    DownloadName,
+				Error: err,
+			},
+		))
+		if err != nil {
+			ErrSendMessageFailed{
+				Timestamp: time.Now(),
+				Inner:     err,
+			}.Error()
+		}
+
+		ErrReadingFileFailed{
+			Filename:  string(notification.Event()),
+			Timestamp: time.Now(),
+			Inner:     err,
+		}.Error()
+	}
+
+	err = boards.api.SendPush(abstraction.BrokerPush(
+		&DownloadSuccess{
+			ID:   DownloadName,
+			Data: data,
+		},
+	))
+	if err != nil {
+		ErrSendMessageFailed{
+			Timestamp: time.Now(),
+			Inner:     err,
+		}.Error()
+	}
+
+}
+
+func (boards *BLCU) upload(notification abstraction.BoardNotification) {
+	dataPacket.NewPacketWithValues(abstraction.PacketId(BlcuOrderId),
+		make(map[dataPacket.ValueName]dataPacket.Value),
+		make(map[dataPacket.ValueName]bool))
+
+	<-boards.arkChan
+
+	// TODO! Notify on progress
+
+	client, err := tftp.NewClient(boards.ip)
+	if err != nil {
+		ErrNewClientFailed{
+			Addr:      boards.ip,
+			Timestamp: time.Now(),
+			Inner:     err,
+		}.Error()
+	}
+
+	buffer := bytes.NewBuffer(boards.tempData)
+
+	read, err := client.WriteFile(BoardId, tftp.BinaryMode, buffer)
+	if err != nil {
+		err := boards.api.SendPush(abstraction.BrokerPush(
+			&UploadFailure{
+				ID:    UploadName,
+				Error: err,
+			}))
+		if err != nil {
+			ErrSendMessageFailed{
+				Timestamp: time.Now(),
+				Inner:     err,
+			}.Error()
+		}
+
+		ErrReadingFileFailed{
+			Filename:  string(notification.Event()),
+			Timestamp: time.Now(),
+			Inner:     err,
+		}.Error()
+	}
+
+	// Check if all bytes written
+	if int(read) != len(boards.tempData) {
+		ErrNotAllBytesWritten{
+			Timestamp: time.Now(),
+		}.Error()
+	}
+
+	err = boards.api.SendPush(abstraction.BrokerPush(
+		&UploadSuccess{
+			ID: UploadName,
+		}))
+	if err != nil {
+		ErrSendMessageFailed{
+			Timestamp: time.Now(),
+			Inner:     err,
+		}.Error()
+	}
 }
