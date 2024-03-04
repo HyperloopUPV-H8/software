@@ -4,7 +4,7 @@ import { ReceiveTable } from "components/ReceiveTable/ReceiveTable";
 import { usePodDataStore } from "common";
 
 export const ReceiveColumn = () => {
-    const {podData} = usePodDataStore(state => ({podData: state.podData, updatePodData: state.updatePodData}))
+    const podData = usePodDataStore(state => state.podData)
 
     const receiveColumnTabItems = [
             {
@@ -17,5 +17,5 @@ export const ReceiveColumn = () => {
             },
         ]
 
-    return <TabLayout items={receiveColumnTabItems}></TabLayout>;
+    return <TabLayout tabs={receiveColumnTabItems}></TabLayout>;
 };

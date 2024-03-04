@@ -6,7 +6,8 @@ import { useMeasurementsStore, usePodDataStore, useSubscribe } from "common";
 import { createSidebarSections } from "components/ChartMenu/sidebar";
 
 export const ChartsColumn = () => {
-    const {podData, updatePodData} = usePodDataStore(state => ({podData: state.podData, updatePodData: state.updatePodData}))
+    const podData = usePodDataStore(state => state.podData);
+    const updatePodData = usePodDataStore(state => state.updatePodData)
     const updateMeasurements = useMeasurementsStore(state => state.updateMeasurements)
 
     useSubscribe("podData/update", (update) => {
@@ -27,5 +28,5 @@ export const ChartsColumn = () => {
             },
         ]
 
-    return <TabLayout items={chartsColumnTabItems}></TabLayout>;
+    return <TabLayout tabs={chartsColumnTabItems}></TabLayout>;
 };
