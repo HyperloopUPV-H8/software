@@ -51,7 +51,7 @@ func (vehicle *Vehicle) Notification(notification abstraction.TransportNotificat
 	switch p := packet.Packet.(type) {
 	case *data.Packet:
 		update := vehicle.updateFactory.NewUpdate(p)
-		err := vehicle.broker.UserPush(data_topic.NewPush(&update))
+		err := vehicle.broker.Push(data_topic.NewPush(&update))
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -69,7 +69,7 @@ func (vehicle *Vehicle) Notification(notification abstraction.TransportNotificat
 
 	case *protection.Packet:
 		boardId := vehicle.ipToBoardId[strings.Split(packet.From, ":")[0]]
-		err := vehicle.broker.UserPush(message_topic.Push(p, boardId))
+		err := vehicle.broker.Push(message_topic.Push(p, boardId))
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -185,7 +185,7 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) {
 
 // Request is the method invoked by a board to ask for a resource from the frontend
 func (vehicle *Vehicle) Request(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
-	return vehicle.broker.UserPull(request)
+	return vehicle.broker.Pull(request)
 }
 
 // SendMessage is the method invoked by a board to send a message
@@ -196,12 +196,12 @@ func (vehicle *Vehicle) SendMessage(msg abstraction.TransportMessage) error {
 
 // SendPush is the method invoked by a board to send a message to the frontend
 func (vehicle *Vehicle) SendPush(push abstraction.BrokerPush) error {
-	return vehicle.broker.UserPush(push)
+	return vehicle.broker.Push(push)
 }
 
 // ConnectionUpdate is the method invoked by transport to signal a connection state has changed
 func (vehicle *Vehicle) ConnectionUpdate(target abstraction.TransportTarget, isConnected bool) {
-	vehicle.broker.UserPush(connection_topic.NewConnection(string(target), isConnected))
+	vehicle.broker.Push(connection_topic.NewConnection(string(target), isConnected))
 	if isConnected {
 		vehicle.updateFactory.ClearPacketsFor(target)
 	}

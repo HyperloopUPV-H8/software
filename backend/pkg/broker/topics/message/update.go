@@ -36,7 +36,7 @@ func (update *Update) Topic() abstraction.BrokerTopic {
 	return UpdateName
 }
 
-func (update *Update) UserPush(p abstraction.BrokerPush) error {
+func (update *Update) Push(p abstraction.BrokerPush) error {
 	push, ok := p.(*push)
 	if !ok {
 		return topics.ErrUnexpectedPush{Push: p}
@@ -72,7 +72,7 @@ func (update *Update) UserPush(p abstraction.BrokerPush) error {
 	return nil
 }
 
-func (update *Update) UserPull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
+func (update *Update) Pull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
 	return nil, nil
 }
 

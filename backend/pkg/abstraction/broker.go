@@ -22,11 +22,11 @@ type BrokerResponse interface {
 // Broker is the module in charge of handling back-end and front-end communications.
 // It uses Topics to determine how each message should be handled and who should receive it.
 type Broker interface {
-	// UserPush sends information from the back-end to the front-end
-	UserPush(BrokerPush) error
-	// UserPull requests information from the front-end.
+	// Push sends information from the back-end to the front-end
+	Push(BrokerPush) error
+	// Pull requests information from the front-end.
 	// The response or any errors encountered are returned.
-	UserPull(BrokerRequest) (BrokerResponse, error)
+	Pull(BrokerRequest) (BrokerResponse, error)
 	// SetAPI sets the API the Broker must use to communicate with the rest of the back-end
 	// through the Vehicle. It should avoid using any other means
 	SetAPI(BrokerAPI)

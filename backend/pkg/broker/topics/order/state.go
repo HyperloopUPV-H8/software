@@ -16,11 +16,11 @@ func (state *State) Topic() abstraction.BrokerTopic {
 	return StateName
 }
 
-func (state *State) UserPush(push abstraction.BrokerPush) error {
+func (state *State) Push(push abstraction.BrokerPush) error {
 	return nil
 }
 
-func (state *State) UserPull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
+func (state *State) Pull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
 	return nil, nil
 }
 

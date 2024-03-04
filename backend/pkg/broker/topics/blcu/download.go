@@ -16,11 +16,11 @@ func (download *Download) Topic() abstraction.BrokerTopic {
 	return DownloadName
 }
 
-func (download *Download) UserPush(push abstraction.BrokerPush) error {
+func (download *Download) Push(push abstraction.BrokerPush) error {
 	return download.api.UserPush(push)
 }
 
-func (download *Download) UserPull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
+func (download *Download) Pull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
 	return download.api.UserPull(request)
 }
 

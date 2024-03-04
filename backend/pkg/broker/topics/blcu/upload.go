@@ -16,11 +16,11 @@ func (upload *Upload) Topic() abstraction.BrokerTopic {
 	return UploadName
 }
 
-func (upload *Upload) UserPush(push abstraction.BrokerPush) error {
+func (upload *Upload) Push(push abstraction.BrokerPush) error {
 	return upload.api.UserPush(push)
 }
 
-func (upload *Upload) UserPull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
+func (upload *Upload) Pull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
 	return upload.api.UserPull(request)
 }
 
