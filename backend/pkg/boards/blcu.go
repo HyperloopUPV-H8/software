@@ -10,7 +10,7 @@ import (
 
 // TODO! Get from ADE
 const (
-	BoardId = "BLCU"
+	BoardId = abstraction.BoardId(1)
 
 	AckId      = "1"
 	DownloadId = "2"
@@ -41,7 +41,7 @@ func New(Id string, ip string) *BLCU {
 	}
 }
 func (boards *BLCU) Id() string {
-	return BoardId
+	return string(BoardId)
 }
 
 func (boards *BLCU) Notify(notification abstraction.BoardNotification) {
@@ -88,7 +88,7 @@ func (boards *BLCU) download(notification abstraction.BoardNotification) {
 
 	buffer := &bytes.Buffer{}
 
-	data, err := client.ReadFile(BoardId, tftp.BinaryMode, buffer)
+	data, err := client.ReadFile(boards.boardId, tftp.BinaryMode, buffer)
 	if err != nil {
 		err := boards.api.SendPush(abstraction.BrokerPush(
 			&DownloadFailure{
@@ -145,7 +145,7 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) {
 
 	buffer := bytes.NewBuffer(boards.tempData)
 
-	read, err := client.WriteFile(BoardId, tftp.BinaryMode, buffer)
+	read, err := client.WriteFile(boards.boardId, tftp.BinaryMode, buffer)
 	if err != nil {
 		err := boards.api.SendPush(abstraction.BrokerPush(
 			&UploadFailure{

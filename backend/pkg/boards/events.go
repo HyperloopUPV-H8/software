@@ -24,7 +24,6 @@ func (download DownloadEvent) Event() abstraction.BoardEvent {
 type UploadEvent struct {
 	EventID abstraction.BoardEvent // UploadId
 	BoardID abstraction.BoardId
-	Data    []byte
 }
 
 func (upload UploadEvent) Event() abstraction.BoardEvent {
