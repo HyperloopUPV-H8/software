@@ -11,6 +11,8 @@ import (
 
 // TODO! Get from ADE
 const (
+	BoardId = "BLCU"
+
 	AckId      = "1"
 	DownloadId = "2"
 	UploadId   = "3"
@@ -38,7 +40,7 @@ func New(Id string) *BLCU {
 	}
 }
 func (boards *BLCU) Id() string {
-	return boards.boardId
+	return BoardId
 }
 
 func (boards *BLCU) Notify(notification abstraction.BoardNotification) {
