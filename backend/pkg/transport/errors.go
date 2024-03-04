@@ -2,6 +2,7 @@ package transport
 
 import (
 	"fmt"
+	"net"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 )
@@ -38,4 +39,12 @@ type ErrConnClosed struct {
 
 func (err ErrConnClosed) Error() string {
 	return fmt.Sprintf("connection with %s is closed", err.Target)
+}
+
+type ErrUnknownTarget struct {
+	Remote net.Addr
+}
+
+func (err ErrUnknownTarget) Error() string {
+	return fmt.Sprintf("unknown target for %s", err.Remote)
 }

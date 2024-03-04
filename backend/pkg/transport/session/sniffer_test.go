@@ -3,12 +3,14 @@ package session_test
 import (
 	"errors"
 	"io"
+	"os"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/session"
+	"github.com/rs/zerolog"
 )
 
 type testInputChunk struct {
@@ -23,14 +25,18 @@ type testInputAdapter struct {
 	curr   int
 }
 
-func (input *testInputAdapter) ReadNext() (network.Socket, []byte, error) {
+func (input *testInputAdapter) ReadNext() (network.Payload, error) {
 	if input.curr >= len(input.chunks) {
-		return network.Socket{}, nil, errors.New("no more packets to read")
+		return network.Payload{}, errors.New("no more packets to read")
 	}
 
 	chunk := input.chunks[input.curr]
 	input.curr++
-	return chunk.socket, []byte(chunk.data), nil
+	return network.Payload{
+		Socket:    chunk.socket,
+		Data:      []byte(chunk.data),
+		Timestamp: time.Now(),
+	}, nil
 }
 
 type testOutput = map[network.Socket]string
@@ -255,11 +261,13 @@ func TestSnifferDemux(t *testing.T) {
 				}(socket, reader)
 			}
 
-			demux := session.NewSnifferDemux(onConversation)
+			logger := zerolog.New(os.Stdout)
+			demux, err := session.NewSnifferDemux(onConversation, &logger)
 
 			data := testInputAdapter{test.input, 0}
 
-			demux.ReadPackets(&data)
+			go demux.ReadPackets(&data)
+			<-err
 			wg.Wait()
 
 			if len(outputMap) > len(test.output) {
