@@ -79,6 +79,9 @@ func (transport *Transport) HandleClient(config tcp.ClientConfig, remote string)
 // handles them.
 func (transport *Transport) HandleServer(config tcp.ServerConfig, local string) error {
 	server := tcp.NewServer(local, config, transport.logger)
+	for addr := range transport.ipToTarget {
+		server.AddToWhitelist(addr)
+	}
 	server.OnConnection(transport.handleTCPConn)
 	return server.Listen()
 }
@@ -86,10 +89,24 @@ func (transport *Transport) HandleServer(config tcp.ServerConfig, local string) 
 // handleTCPConn is used to handle the specific TCP connections to the boards. It detects errors caused
 // on concurrent reads and writes, so other routines should not worry about closing or handling errors
 func (transport *Transport) handleTCPConn(conn net.Conn) error {
+	if tcpConn, ok := conn.(*net.TCPConn); ok {
+		transport.logger.Trace().Str("remoteAddress", conn.RemoteAddr().String()).Msg("setting connection linger")
+		err := tcpConn.SetLinger(0)
+		if err != nil {
+			transport.logger.Error().Stack().Err(err).Str("remoteAddress", conn.RemoteAddr().String()).Msg("set linger")
+		}
+
+		transport.logger.Trace().Str("remoteAddress", conn.RemoteAddr().String()).Msg("setting connection no delay")
+		err = tcpConn.SetNoDelay(true)
+		if err != nil {
+			transport.logger.Error().Stack().Err(err).Str("remoteAddress", conn.RemoteAddr().String()).Msg("set no delay")
+		}
+	}
+
 	target, ok := transport.ipToTarget[conn.RemoteAddr().(*net.TCPAddr).IP.String()]
 	if !ok {
 		conn.Close()
-		transport.logger.Warn().Str("remoteAddress", conn.RemoteAddr().String()).Msg("ip target not found")
+		transport.logger.Warn().Str("remoteAddress", conn.RemoteAddr().(*net.TCPAddr).IP.String()).Msg("ip target not found")
 		return ErrUnknownTarget{Remote: conn.RemoteAddr()}
 	}
 
@@ -109,19 +126,6 @@ func (transport *Transport) handleTCPConn(conn net.Conn) error {
 		return err
 	}
 
-	if tcpConn, ok := conn.(*net.TCPConn); ok {
-		connectionLogger.Trace().Msg("setting connection linger")
-		err := tcpConn.SetLinger(0)
-		if err != nil {
-			connectionLogger.Error().Stack().Err(err).Msg("set linger")
-		}
-
-		connectionLogger.Trace().Msg("setting connection no delay")
-		err = tcpConn.SetNoDelay(true)
-		if err != nil {
-			connectionLogger.Error().Stack().Err(err).Msg("set no delay")
-		}
-	}
 	conn, errChan := tcp.WithErrChan(conn)
 	defer func() {
 		conn.Close()

@@ -21,14 +21,6 @@ var traceLevelMap = map[string]zerolog.Level{
 
 func initTrace(traceLevel string, traceFile string) *os.File {
 	zerolog.CallerMarshalFunc = func(pc uintptr, file string, line int) string {
-		short := file
-		for i := len(file) - 1; i > 0; i-- {
-			if file[i] == '/' {
-				short = file[i+1:]
-				break
-			}
-		}
-		file = short
 		return file + ":" + strconv.Itoa(line)
 	}
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnixNano
@@ -45,8 +37,7 @@ func initTrace(traceLevel string, traceFile string) *os.File {
 
 	multi := zerolog.MultiLevelWriter(consoleWriter, file)
 
-	global_logger := zerolog.New(multi).With().Timestamp().Caller().Logger()
-	trace.Logger = global_logger
+	trace.Logger = zerolog.New(multi).With().Timestamp().Caller().Logger()
 
 	if level, ok := traceLevelMap[traceLevel]; ok {
 		zerolog.SetGlobalLevel(level)

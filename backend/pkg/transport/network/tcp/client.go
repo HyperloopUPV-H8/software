@@ -43,6 +43,7 @@ func (client *Client) Dial() (net.Conn, error) {
 		conn, err = client.config.DialContext(client.config.Context, "tcp", client.address)
 		if err == nil {
 			client.logger.Info().Msg("connected")
+			client.currentRetries = 0
 			return conn, nil
 		}
 		if client.config.Context.Err() != nil {
@@ -60,6 +61,7 @@ func (client *Client) Dial() (net.Conn, error) {
 		time.Sleep(backoffDuration)
 	}
 
+	client.currentRetries = client.config.MaxConnectionRetries - 1
 	client.logger.Debug().Uint("max", client.config.MaxConnectionRetries).Msg("max connections exceeded")
 	return nil, ErrTooManyRetries{
 		Max:     client.config.MaxConnectionRetries,

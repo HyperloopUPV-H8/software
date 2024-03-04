@@ -16,6 +16,7 @@ func NewTransport(baseLogger *zerolog.Logger) *Transport {
 		connectionsMx: &sync.Mutex{},
 		connections:   make(map[abstraction.TransportTarget]net.Conn),
 		idToTarget:    make(map[abstraction.PacketId]abstraction.TransportTarget),
+		ipToTarget:    make(map[string]abstraction.TransportTarget),
 
 		logger: &logger,
 	}
@@ -47,6 +48,6 @@ func (transport *Transport) SetIdTarget(id abstraction.PacketId, target abstract
 
 func (transport *Transport) SetTargetIp(ip string, target abstraction.TransportTarget) *Transport {
 	transport.ipToTarget[ip] = target
-	transport.logger.Trace().Str("ip", ip).Str("target", string(target)).Msg("set id for target")
+	transport.logger.Trace().Str("ip", ip).Str("target", string(target)).Msg("set ip for target")
 	return transport
 }

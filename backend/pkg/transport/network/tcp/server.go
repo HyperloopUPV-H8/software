@@ -14,7 +14,7 @@ type Server struct {
 
 	address string
 
-	whitelist    map[net.Addr]struct{}
+	whitelist    map[string]struct{}
 	onConnection connectionCallback
 
 	logger *zerolog.Logger
@@ -29,7 +29,7 @@ func NewServer(address string, config ServerConfig, baseLogger *zerolog.Logger) 
 
 		address: address,
 
-		whitelist: make(map[net.Addr]struct{}),
+		whitelist: make(map[string]struct{}),
 		onConnection: func(conn net.Conn) error {
 			defer conn.Close()
 			logger.Warn().Str("remoteAddress", conn.RemoteAddr().String()).Msg("connection callback not set yet")
@@ -63,7 +63,7 @@ func (server *Server) Listen() error {
 				break
 			}
 
-			if !server.IsWhitelisted(conn.RemoteAddr()) {
+			if !server.IsWhitelisted(conn.RemoteAddr().(*net.TCPAddr).IP.String()) {
 				server.logger.Warn().Str("remoteAddress", conn.RemoteAddr().String()).Msg("unauthorized connection")
 				conn.Close()
 				continue
@@ -88,21 +88,21 @@ func (server *Server) Listen() error {
 }
 
 // IsWhitelisted checks if the address is in the server whitelist
-func (server *Server) IsWhitelisted(addr net.Addr) bool {
+func (server *Server) IsWhitelisted(addr string) bool {
 	_, ok := server.whitelist[addr]
 	return ok
 }
 
 // AddToWhitelist adds a new address to the server whitelist
-func (server *Server) AddToWhitelist(addr net.Addr) {
+func (server *Server) AddToWhitelist(addr string) {
 	server.whitelist[addr] = struct{}{}
-	server.logger.Trace().Str("address", addr.String()).Msg("added to whitelist")
+	server.logger.Trace().Str("address", addr).Msg("added to whitelist")
 }
 
 // RemoveafromWhitelist removes an address from the server whitelist
-func (server *Server) RemoveFromWhitelist(addr net.Addr) {
+func (server *Server) RemoveFromWhitelist(addr string) {
 	delete(server.whitelist, addr)
-	server.logger.Trace().Str("address", addr.String()).Msg("removed from whitelist")
+	server.logger.Trace().Str("address", addr).Msg("removed from whitelist")
 }
 
 // OnConnection sets the callback that will be used when a new connection is created
