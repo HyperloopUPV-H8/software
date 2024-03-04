@@ -3,24 +3,22 @@ import { Tab } from "./Tab/Tab";
 import { TabItem } from "layouts/TabLayout/TabItem";
 
 type Props = {
-    items: TabItem[];
+    tabs: TabItem[];
     onTabClick: (tab: TabItem) => void;
     visibleTabId: string;
 };
 
-export const TabBar = ({ items, onTabClick, visibleTabId }: Props) => {
+export const TabBar = ({ tabs, onTabClick, visibleTabId }: Props) => {
     return (
         <div className={styles.wrapper}>
-            {items.map((item) => {
+            {tabs.map((tab) => {
                 return (
                     <Tab
-                        key={item.id}
-                        className={item.id == visibleTabId ? styles.active : ""}
-                        name={item.name}
-                        icon={item.icon}
-                        onClick={() => {
-                            onTabClick(item);
-                        }}
+                        key={tab.id}
+                        className={tab.id == visibleTabId ? styles.active : ""}
+                        name={tab.name}
+                        icon={tab.icon}
+                        onClick={() => onTabClick(tab)}
                     ></Tab>
                 );
             })}

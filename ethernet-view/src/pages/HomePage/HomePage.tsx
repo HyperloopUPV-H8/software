@@ -24,11 +24,11 @@ export const HomePage = () => {
                             component: <ReceiveColumn />,
                             collapsedIcon: incomingMessage
                         },
-                        { 
+                        {
                             component: <OrderColumn />,
                             collapsedIcon: paperAirplane
                         },
-                        { 
+                        {
                             component: <MessagesColumn />,
                             collapsedIcon: outgoingMessage
                         },

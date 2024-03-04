@@ -38,11 +38,11 @@ export const MessagesColumn = () => {
             <SplitLayout
                 components={[
                     {
-                        component: <TabLayout items={messagesTabItems.current}></TabLayout>,
+                        component: <TabLayout tabs={messagesTabItems.current}></TabLayout>,
                         collapsedIcon: letter,
                     },
                     {
-                        component: <TabLayout items={connectionsTabItems.current}></TabLayout>,
+                        component: <TabLayout tabs={connectionsTabItems.current}></TabLayout>,
                         collapsedIcon: connection,
                     },
                 ]}
