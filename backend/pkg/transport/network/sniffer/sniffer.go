@@ -16,7 +16,7 @@ type Sniffer struct {
 	source  *pcap.Handle
 	decoder *decoder
 
-	logger *zerolog.Logger
+	logger zerolog.Logger
 }
 
 // New creates a new sniffer from the provided source.
@@ -27,14 +27,14 @@ type Sniffer struct {
 // value is nil, the program tries to automatically detect the first layer from the source.
 //
 // The provided source should be already configured and ready to use, with the appropiate filters.
-func New(source *pcap.Handle, firstLayer *gopacket.LayerType, baseLogger *zerolog.Logger) *Sniffer {
+func New(source *pcap.Handle, firstLayer *gopacket.LayerType, baseLogger zerolog.Logger) *Sniffer {
 	first := source.LinkType().LayerType()
 	if firstLayer != nil {
 		first = *firstLayer
 	}
 	decoder := newDecoder(first)
 
-	logger := baseLogger.With().Caller().Timestamp().Logger().Sample(zerolog.LevelSampler{
+	logger := baseLogger.Sample(zerolog.LevelSampler{
 		TraceSampler: zerolog.RandomSampler(50000),
 		DebugSampler: zerolog.RandomSampler(25000),
 		InfoSampler:  zerolog.RandomSampler(1),
@@ -46,7 +46,7 @@ func New(source *pcap.Handle, firstLayer *gopacket.LayerType, baseLogger *zerolo
 		source:  source,
 		decoder: decoder,
 
-		logger: &logger,
+		logger: logger,
 	}
 
 	return sniffer

@@ -2,7 +2,7 @@ package presentation_test
 
 import (
 	"encoding/binary"
-	"os"
+	"io"
 	"reflect"
 	"testing"
 
@@ -398,8 +398,8 @@ func TestEncoder(t *testing.T) {
 // getEncoder generates a mock Encoder with the following packet IDs:
 // 9:=18 - data
 func getEncoder(endianness binary.ByteOrder) *presentation.Encoder {
-	logger := zerolog.New(os.Stdout)
-	encoder := presentation.NewEncoder(endianness, &logger)
+	nullLogger := zerolog.New(io.Discard)
+	encoder := presentation.NewEncoder(endianness, nullLogger)
 
 	dataDecoder := data.NewEncoder(endianness)
 	dataDecoder.SetDescriptor(9, data.Descriptor{

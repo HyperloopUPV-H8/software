@@ -2,6 +2,7 @@ package tcp
 
 import (
 	"context"
+	"math"
 	"net"
 	"time"
 )
@@ -14,14 +15,14 @@ type ClientConfig struct {
 
 	TryReconnect              bool
 	ConnectionBackoffFunction backoffFunction
-	MaxConnectionRetries      uint
+	MaxConnectionRetries      int
 }
 
 // NewClientConfig creates a new client configuration with good defaults
 func NewClientConfig(laddr net.Addr) ClientConfig {
 	return ClientConfig{
 		Dialer: net.Dialer{
-			Timeout:   time.Second * 5,
+			Timeout:   time.Second,
 			LocalAddr: laddr,
 			KeepAlive: time.Second, // Going under 1 second won't work in most systems
 		},
@@ -29,29 +30,27 @@ func NewClientConfig(laddr net.Addr) ClientConfig {
 		Context:                   context.TODO(),
 		TryReconnect:              true,
 		ConnectionBackoffFunction: NewExponentialBackoff(defaultBackoffMin, defaultBackoffExp, defaultBackoffMax),
-		MaxConnectionRetries:      10,
+		MaxConnectionRetries:      -1,
 	}
 }
 
-type backoffFunction = func(uint) time.Duration
+type backoffFunction = func(int) time.Duration
 
 const (
 	defaultBackoffMin time.Duration = 100 * time.Millisecond
-	defaultBackoffExp float32       = 1.5
+	defaultBackoffExp float64       = 1.5
 	defaultBackoffMax time.Duration = 5 * time.Second
 )
 
 // NewExponentialBackoff returns an exponential backoff function with the given paramenters.
 //
 // It follows this formula: delay = (min * (exp ^ n); delay < max ? delay : max
-func NewExponentialBackoff(min time.Duration, exp float32, max time.Duration) backoffFunction {
-	return func(n uint) time.Duration {
+func NewExponentialBackoff(min time.Duration, exp float64, max time.Duration) backoffFunction {
+	return func(n int) time.Duration {
 		curr := min
-		for i := uint(0); curr < max && i < n; i++ {
-			curr = time.Duration(exp * float32(curr))
-			if curr >= max {
-				return max
-			}
+		curr = time.Duration(math.Trunc(math.Pow(float64(curr), exp)))
+		if curr >= max {
+			return max
 		}
 		return curr
 	}

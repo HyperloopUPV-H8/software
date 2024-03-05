@@ -60,7 +60,7 @@ func TestSniffer(t *testing.T) {
 
 	first := layers.LayerTypeEthernet
 	nullLogger := zerolog.New(io.Discard)
-	sniffer := sniffer.New(source, &first, &nullLogger)
+	sniffer := sniffer.New(source, &first, nullLogger)
 	defer sniffer.Close()
 
 	for _, test := range expected {

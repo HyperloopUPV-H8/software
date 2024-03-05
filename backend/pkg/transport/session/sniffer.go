@@ -27,12 +27,12 @@ type SnifferDemux struct {
 	onConversation conversationCallback
 	errorChan      chan<- error
 
-	logger *zerolog.Logger
+	logger zerolog.Logger
 }
 
 // NewSnifferDemux creates a new SnifferDemux with the provided onConversation callback
-func NewSnifferDemux(onConversation conversationCallback, baseLogger *zerolog.Logger) (*SnifferDemux, <-chan error) {
-	logger := baseLogger.With().Caller().Timestamp().Logger().Sample(zerolog.LevelSampler{
+func NewSnifferDemux(onConversation conversationCallback, baseLogger zerolog.Logger) (*SnifferDemux, <-chan error) {
+	logger := baseLogger.Sample(zerolog.LevelSampler{
 		TraceSampler: zerolog.RandomSampler(25000),
 		DebugSampler: zerolog.RandomSampler(1),
 		InfoSampler:  zerolog.RandomSampler(1),
@@ -48,7 +48,7 @@ func NewSnifferDemux(onConversation conversationCallback, baseLogger *zerolog.Lo
 		onConversation: onConversation,
 		errorChan:      errorChan,
 
-		logger: &logger,
+		logger: logger,
 	}, errorChan
 }
 
@@ -64,21 +64,18 @@ func (demux *SnifferDemux) ReadPackets(reader packetReader) {
 			demux.errorChan <- err
 			return
 		}
-
-		demux.logger.Trace().Str(
+		payloadLogger := demux.logger.With().Str(
 			"from", fmt.Sprintf("%s:%d", payload.Socket.SrcIP, payload.Socket.SrcPort),
 		).Str(
 			"to", fmt.Sprintf("%s:%d", payload.Socket.DstIP, payload.Socket.DstPort),
-		).Time("capture timestamp", payload.Timestamp).Msg("read next")
+		).Logger()
+
+		payloadLogger.Trace().Time("capture", payload.Timestamp).Msg("read next")
 
 		conversation, ok := demux.conversations[payload.Socket]
 		if !ok {
-			demux.logger.Debug().Str(
-				"from", fmt.Sprintf("%s:%d", payload.Socket.SrcIP, payload.Socket.SrcPort),
-			).Str(
-				"to", fmt.Sprintf("%s:%d", payload.Socket.DstIP, payload.Socket.DstPort),
-			).Int("buffer size", defaultBufferSize).Msg("new conversation")
-			buffer := NewBuffer(defaultBufferSize) // TODO: this reader implementation does not exactly work as we want
+			payloadLogger.Debug().Int("buffer size", defaultBufferSize).Msg("new conversation")
+			buffer := NewBuffer(defaultBufferSize)
 			demux.conversations[payload.Socket] = buffer
 			conversation = buffer
 			demux.onConversation(payload.Socket, buffer)
@@ -86,11 +83,7 @@ func (demux *SnifferDemux) ReadPackets(reader packetReader) {
 
 		_, err = conversation.Write(payload.Data)
 		if err != nil {
-			demux.logger.Error().Stack().Err(err).Str(
-				"from", fmt.Sprintf("%s:%d", payload.Socket.SrcIP, payload.Socket.SrcPort),
-			).Str(
-				"to", fmt.Sprintf("%s:%d", payload.Socket.DstIP, payload.Socket.DstPort),
-			).Msg("write")
+			payloadLogger.Error().Stack().Err(err).Msg("write")
 			delete(demux.conversations, payload.Socket)
 			demux.errorChan <- err
 			continue

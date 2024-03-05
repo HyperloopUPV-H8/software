@@ -38,7 +38,7 @@ type Transport struct {
 
 	api abstraction.TransportAPI
 
-	logger *zerolog.Logger
+	logger zerolog.Logger
 }
 
 // HandleClient connects to the specified client and handles its messages. This method blocks.

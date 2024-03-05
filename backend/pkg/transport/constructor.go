@@ -10,15 +10,14 @@ import (
 	"github.com/rs/zerolog"
 )
 
-func NewTransport(baseLogger *zerolog.Logger) *Transport {
-	logger := baseLogger.With().Caller().Timestamp().Logger()
+func NewTransport(baseLogger zerolog.Logger) *Transport {
 	return &Transport{
 		connectionsMx: &sync.Mutex{},
 		connections:   make(map[abstraction.TransportTarget]net.Conn),
 		idToTarget:    make(map[abstraction.PacketId]abstraction.TransportTarget),
 		ipToTarget:    make(map[string]abstraction.TransportTarget),
 
-		logger: &logger,
+		logger: baseLogger,
 	}
 }
 
