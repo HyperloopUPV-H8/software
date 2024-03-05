@@ -143,7 +143,7 @@ func main() {
 	}
 
 	// <--- broker --->
-	broker := broker.New()
+	broker := broker.New(trace.Logger)
 
 	dataTopic := data_topic.NewUpdateTopic(time.Second / 10)
 	defer dataTopic.Stop()
@@ -164,7 +164,7 @@ func main() {
 
 	connections := make(chan *websocket.Client)
 	upgrader := websocket.NewUpgrader(connections)
-	pool := websocket.NewPool(connections)
+	pool := websocket.NewPool(connections, trace.Logger)
 	broker.SetPool(pool)
 
 	// <--- transport --->
