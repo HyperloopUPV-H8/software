@@ -163,7 +163,7 @@ func main() {
 	broker.AddTopic(message_topic.UpdateName, messageTopic)
 
 	connections := make(chan *websocket.Client)
-	upgrader := websocket.NewUpgrader(connections)
+	upgrader := websocket.NewUpgrader(connections, trace.Logger)
 	pool := websocket.NewPool(connections, trace.Logger)
 	broker.SetPool(pool)
 
