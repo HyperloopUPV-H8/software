@@ -184,7 +184,8 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) error {
 		}.String()
 	}
 
-	buffer := bytes.NewBuffer()
+	data := notification.(UploadEvent).Data
+	buffer := bytes.NewBuffer(data)
 
 	read, err := client.WriteFile(BoardName, tftp.BinaryMode, buffer)
 	if err != nil {
@@ -212,7 +213,7 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) error {
 	}
 
 	// Check if all bytes written
-	if int(read) != len(boards.tempData) {
+	if int(read) != len(data) {
 		ErrNotAllBytesWritten{
 			Timestamp: time.Now(),
 		}.String()
