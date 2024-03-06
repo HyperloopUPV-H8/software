@@ -51,3 +51,17 @@ type ErrNotAllBytesWritten struct {
 func (err ErrNotAllBytesWritten) String() {
 	fmt.Sprintf("Not all bytes written at %s", err.Timestamp.Format(time.RFC3339))
 }
+
+type ErrDownloadFailure struct {
+	Timestamp time.Time
+	Inner     error
+}
+
+func (err ErrDownloadFailure) String() {
+	fmt.Sprintf("Download failure at %s", err.Timestamp.Format(time.RFC3339))
+}
+
+type ErrUploadFailure struct {
+	Timestamp time.Time
+	Inner     error
+}

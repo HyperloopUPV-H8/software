@@ -49,10 +49,21 @@ func (boards *BLCU) Notify(notification abstraction.BoardNotification) {
 		boards.ackChan <- struct{}{}
 
 	case DownloadEvent:
-		boards.download(notification)
+		err := boards.download(notification)
+		if err != nil {
+			ErrDownloadFailure{
+				Timestamp: time.Now(),
+				Inner:     err,
+			}.String()
+		}
 	case UploadEvent:
-		boards.upload(notification)
-
+		err := boards.upload(notification)
+		if err != nil {
+			ErrDownloadFailure{
+				Timestamp: time.Now(),
+				Inner:     err,
+			}.String()
+		}
 	default:
 		ErrInvalidBoardEvent{
 			Event:     notification.Event(),
