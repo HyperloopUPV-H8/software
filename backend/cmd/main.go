@@ -176,7 +176,7 @@ func main() {
 		ipToBoardId[ip.String()] = abstraction.BoardId(info.BoardIds[name])
 	}
 
-	vehicle := vehicle.New()
+	vehicle := vehicle.New(trace.Logger)
 	vehicle.SetBroker(broker)
 	vehicle.SetLogger(loggerHandler)
 	vehicle.SetUpdateFactory(updateFactory)
