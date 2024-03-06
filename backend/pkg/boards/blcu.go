@@ -10,7 +10,8 @@ import (
 
 // TODO! Get from ADE
 const (
-	BoardId = abstraction.BoardId(1)
+	BoardName = "BLCU"
+	BoardId   = abstraction.BoardId(1)
 
 	AckId      = "1"
 	DownloadId = "2"
@@ -26,28 +27,26 @@ const (
 )
 
 type BLCU struct {
-	boardId  string
 	api      abstraction.BoardAPI
 	tempData []byte
-	arkChan  chan struct{}
+	ackChan  chan struct{}
 	ip       string
 }
 
 func New(Id string, ip string) *BLCU {
 	return &BLCU{
-		boardId: Id,
-		arkChan: make(chan struct{}),
+		ackChan: make(chan struct{}),
 		ip:      ip,
 	}
 }
-func (boards *BLCU) Id() string {
-	return string(BoardId)
+func (boards *BLCU) Id() abstraction.BoardId {
+	return BoardId
 }
 
 func (boards *BLCU) Notify(notification abstraction.BoardNotification) {
 	switch notification := notification.(type) {
 	case AckNotification:
-		boards.arkChan <- struct{}{}
+		boards.ackChan <- struct{}{}
 
 	case DownloadEvent:
 		boards.download(notification)
@@ -73,7 +72,7 @@ func (boards *BLCU) download(notification abstraction.BoardNotification) {
 		make(map[dataPacket.ValueName]bool))
 
 	// Wait for the ACK
-	<-boards.arkChan
+	<-boards.ackChan
 
 	// TODO! Notify on progress
 
@@ -88,7 +87,7 @@ func (boards *BLCU) download(notification abstraction.BoardNotification) {
 
 	buffer := &bytes.Buffer{}
 
-	data, err := client.ReadFile(boards.boardId, tftp.BinaryMode, buffer)
+	data, err := client.ReadFile(BoardName, tftp.BinaryMode, buffer)
 	if err != nil {
 		err := boards.api.SendPush(abstraction.BrokerPush(
 			&DownloadFailure{
@@ -130,7 +129,7 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) {
 		make(map[dataPacket.ValueName]dataPacket.Value),
 		make(map[dataPacket.ValueName]bool))
 
-	<-boards.arkChan
+	<-boards.ackChan
 
 	// TODO! Notify on progress
 
@@ -145,7 +144,7 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) {
 
 	buffer := bytes.NewBuffer(boards.tempData)
 
-	read, err := client.WriteFile(boards.boardId, tftp.BinaryMode, buffer)
+	read, err := client.WriteFile(BoardName, tftp.BinaryMode, buffer)
 	if err != nil {
 		err := boards.api.SendPush(abstraction.BrokerPush(
 			&UploadFailure{
