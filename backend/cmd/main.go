@@ -132,7 +132,7 @@ func main() {
 		state_logger.Name:      state_logger.NewLogger(),
 	}
 
-	loggerHandler := logger.NewLogger(subloggers)
+	loggerHandler := logger.NewLogger(subloggers, trace.Logger)
 
 	// <--- order transfer --->
 	idToBoard := make(map[uint16]string)
