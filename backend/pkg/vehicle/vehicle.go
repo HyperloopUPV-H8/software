@@ -102,7 +102,7 @@ func (vehicle *Vehicle) Notification(notification abstraction.TransportNotificat
 		fmt.Fprintln(os.Stderr, "Received order.Remove packet, ignoring")
 
 	case *blcu_packet.Ack:
-		vehicle.boards[boards.BoardId].Notify(abstraction.BoardNotification(
+		vehicle.boards[boards.BlcuId].Notify(abstraction.BoardNotification(
 			&boards.AckNotification{
 				ID: boards.AckId,
 			},
@@ -163,18 +163,18 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) {
 		}
 
 	case blcu_topic.DownloadName:
-		vehicle.boards[boards.BoardId].Notify(abstraction.BoardNotification(
+		vehicle.boards[boards.BlcuId].Notify(abstraction.BoardNotification(
 			&boards.DownloadEvent{
 				EventID: boards.AckId,
-				BoardID: boards.BoardId,
+				BoardID: boards.BlcuId,
 			},
 		))
 
 	case blcu_topic.UploadName:
-		vehicle.boards[boards.BoardId].Notify(abstraction.BoardNotification(
+		vehicle.boards[boards.BlcuId].Notify(abstraction.BoardNotification(
 			&boards.UploadEvent{
 				EventID: boards.AckId,
-				BoardID: boards.BoardId,
+				BoardID: boards.BlcuId,
 			},
 		))
 
