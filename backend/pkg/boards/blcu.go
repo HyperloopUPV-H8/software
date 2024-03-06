@@ -33,7 +33,7 @@ type BLCU struct {
 	ip       string
 }
 
-func New(Id string, ip string) *BLCU {
+func New(ip string) *BLCU {
 	return &BLCU{
 		ackChan: make(chan struct{}),
 		ip:      ip,
@@ -65,7 +65,7 @@ func (boards *BLCU) SetAPI(api abstraction.BoardAPI) {
 	boards.api = api
 }
 
-func (boards *BLCU) download(notification abstraction.BoardNotification) {
+func (boards *BLCU) download(notification abstraction.BoardNotification) error {
 	// Notify the BLCU
 	dataPacket.NewPacketWithValues(abstraction.PacketId(BlcuOrderId),
 		make(map[dataPacket.ValueName]dataPacket.Value),
@@ -83,23 +83,27 @@ func (boards *BLCU) download(notification abstraction.BoardNotification) {
 			Timestamp: time.Now(),
 			Inner:     err,
 		}.String()
+
+		return err
 	}
 
 	buffer := &bytes.Buffer{}
 
 	data, err := client.ReadFile(BoardName, tftp.BinaryMode, buffer)
 	if err != nil {
-		err := boards.api.SendPush(abstraction.BrokerPush(
+		pushErr := boards.api.SendPush(abstraction.BrokerPush(
 			&DownloadFailure{
 				ID:    DownloadName,
 				Error: err,
 			},
 		))
-		if err != nil {
+		if pushErr != nil {
 			ErrSendMessageFailed{
 				Timestamp: time.Now(),
-				Inner:     err,
+				Inner:     pushErr,
 			}.String()
+
+			return pushErr
 		}
 
 		ErrReadingFileFailed{
@@ -107,24 +111,29 @@ func (boards *BLCU) download(notification abstraction.BoardNotification) {
 			Timestamp: time.Now(),
 			Inner:     err,
 		}.String()
+
+		return err
 	}
 
-	err = boards.api.SendPush(abstraction.BrokerPush(
+	pushErr := boards.api.SendPush(abstraction.BrokerPush(
 		&DownloadSuccess{
 			ID:   DownloadName,
 			Data: data,
 		},
 	))
-	if err != nil {
+	if pushErr != nil {
 		ErrSendMessageFailed{
 			Timestamp: time.Now(),
 			Inner:     err,
 		}.String()
+
+		return pushErr
 	}
 
+	return err
 }
 
-func (boards *BLCU) upload(notification abstraction.BoardNotification) {
+func (boards *BLCU) upload(notification abstraction.BoardNotification) error {
 	dataPacket.NewPacketWithValues(abstraction.PacketId(BlcuOrderId),
 		make(map[dataPacket.ValueName]dataPacket.Value),
 		make(map[dataPacket.ValueName]bool))
@@ -146,16 +155,18 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) {
 
 	read, err := client.WriteFile(BoardName, tftp.BinaryMode, buffer)
 	if err != nil {
-		err := boards.api.SendPush(abstraction.BrokerPush(
+		pushErr := boards.api.SendPush(abstraction.BrokerPush(
 			&UploadFailure{
 				ID:    UploadName,
 				Error: err,
 			}))
-		if err != nil {
+		if pushErr != nil {
 			ErrSendMessageFailed{
 				Timestamp: time.Now(),
-				Inner:     err,
+				Inner:     pushErr,
 			}.String()
+
+			return pushErr
 		}
 
 		ErrReadingFileFailed{
@@ -163,6 +174,8 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) {
 			Timestamp: time.Now(),
 			Inner:     err,
 		}.String()
+
+		return err
 	}
 
 	// Check if all bytes written
@@ -172,14 +185,17 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) {
 		}.String()
 	}
 
-	err = boards.api.SendPush(abstraction.BrokerPush(
+	pushErr := boards.api.SendPush(abstraction.BrokerPush(
 		&UploadSuccess{
 			ID: UploadName,
 		}))
-	if err != nil {
+	if pushErr != nil {
 		ErrSendMessageFailed{
 			Timestamp: time.Now(),
-			Inner:     err,
+			Inner:     pushErr,
 		}.String()
+
+		return pushErr
 	}
+	return err
 }
