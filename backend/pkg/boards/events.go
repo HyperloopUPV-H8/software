@@ -17,6 +17,10 @@ type DownloadEvent struct {
 	BoardID abstraction.BoardId
 }
 
+func (download DownloadEvent) Topic() abstraction.BrokerTopic {
+	return abstraction.BrokerTopic(download.EventID)
+}
+
 func (download DownloadEvent) Event() abstraction.BoardEvent {
 	return download.EventID
 }
@@ -25,6 +29,10 @@ type UploadEvent struct {
 	EventID abstraction.BoardEvent // UploadId
 	BoardID abstraction.BoardId
 	Data    []byte
+}
+
+func (upload UploadEvent) Topic() abstraction.BrokerTopic {
+	return abstraction.BrokerTopic(upload.EventID)
 }
 
 func (upload UploadEvent) Event() abstraction.BoardEvent {
