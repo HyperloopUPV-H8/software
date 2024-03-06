@@ -20,6 +20,14 @@ func New() *Broker {
 	}
 }
 
+func (broker *Broker) UserPush(push abstraction.BrokerPush) error {
+	return broker.api.UserPush(push)
+}
+
+func (broker *Broker) UserPull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
+	return broker.api.UserPull(request)
+}
+
 func (broker *Broker) Push(push abstraction.BrokerPush) error {
 	topic, ok := broker.topics[push.Topic()]
 	if !ok {
