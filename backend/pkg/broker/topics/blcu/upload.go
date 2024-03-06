@@ -17,11 +17,11 @@ func (upload *Upload) Topic() abstraction.BrokerTopic {
 }
 
 func (upload *Upload) Push(push abstraction.BrokerPush) error {
-	return upload.api.UserPush(push)
+	return nil
 }
 
 func (upload *Upload) Pull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
-	return upload.api.UserPull(request)
+	return nil, nil
 }
 
 func (upload *Upload) SetPool(pool *websocket.Pool) {

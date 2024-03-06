@@ -17,11 +17,11 @@ func (download *Download) Topic() abstraction.BrokerTopic {
 }
 
 func (download *Download) Push(push abstraction.BrokerPush) error {
-	return download.api.UserPush(push)
+	return nil
 }
 
 func (download *Download) Pull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
-	return download.api.UserPull(request)
+	return nil, nil
 }
 
 func (download *Download) SetPool(pool *websocket.Pool) {

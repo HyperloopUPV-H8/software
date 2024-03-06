@@ -54,7 +54,7 @@ func (boards *BLCU) Notify(notification abstraction.BoardNotification) {
 			ErrDownloadFailure{
 				Timestamp: time.Now(),
 				Inner:     err,
-			}.String()
+			}.Error()
 		}
 	case UploadEvent:
 		err := boards.upload(notification)
@@ -62,13 +62,13 @@ func (boards *BLCU) Notify(notification abstraction.BoardNotification) {
 			ErrDownloadFailure{
 				Timestamp: time.Now(),
 				Inner:     err,
-			}.String()
+			}.Error()
 		}
 	default:
 		ErrInvalidBoardEvent{
 			Event:     notification.Event(),
 			Timestamp: time.Now(),
-		}.String()
+		}.Error()
 	}
 }
 
@@ -89,7 +89,7 @@ func (boards *BLCU) download(notification abstraction.BoardNotification) error {
 		ErrSendMessageFailed{
 			Timestamp: time.Now(),
 			Inner:     err,
-		}.String()
+		}.Error()
 
 		return err
 	}
@@ -105,7 +105,7 @@ func (boards *BLCU) download(notification abstraction.BoardNotification) error {
 			Addr:      boards.ip,
 			Timestamp: time.Now(),
 			Inner:     err,
-		}.String()
+		}.Error()
 
 		return err
 	}
@@ -124,7 +124,7 @@ func (boards *BLCU) download(notification abstraction.BoardNotification) error {
 			ErrSendMessageFailed{
 				Timestamp: time.Now(),
 				Inner:     pushErr,
-			}.String()
+			}.Error()
 
 			return pushErr
 		}
@@ -133,7 +133,7 @@ func (boards *BLCU) download(notification abstraction.BoardNotification) error {
 			Filename:  string(notification.Event()),
 			Timestamp: time.Now(),
 			Inner:     err,
-		}.String()
+		}.Error()
 
 		return err
 	}
@@ -148,7 +148,7 @@ func (boards *BLCU) download(notification abstraction.BoardNotification) error {
 		ErrSendMessageFailed{
 			Timestamp: time.Now(),
 			Inner:     err,
-		}.String()
+		}.Error()
 
 		return pushErr
 	}
@@ -166,7 +166,7 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) error {
 		ErrSendMessageFailed{
 			Timestamp: time.Now(),
 			Inner:     err,
-		}.String()
+		}.Error()
 
 		return err
 	}
@@ -181,7 +181,7 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) error {
 			Addr:      boards.ip,
 			Timestamp: time.Now(),
 			Inner:     err,
-		}.String()
+		}.Error()
 	}
 
 	data := notification.(UploadEvent).Data
@@ -198,7 +198,7 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) error {
 			ErrSendMessageFailed{
 				Timestamp: time.Now(),
 				Inner:     pushErr,
-			}.String()
+			}.Error()
 
 			return pushErr
 		}
@@ -207,7 +207,7 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) error {
 			Filename:  string(notification.Event()),
 			Timestamp: time.Now(),
 			Inner:     err,
-		}.String()
+		}.Error()
 
 		return err
 	}
@@ -216,7 +216,7 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) error {
 	if int(read) != len(data) {
 		ErrNotAllBytesWritten{
 			Timestamp: time.Now(),
-		}.String()
+		}.Error()
 	}
 
 	pushErr := boards.api.SendPush(abstraction.BrokerPush(
@@ -227,7 +227,7 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) error {
 		ErrSendMessageFailed{
 			Timestamp: time.Now(),
 			Inner:     pushErr,
-		}.String()
+		}.Error()
 
 		return pushErr
 	}
