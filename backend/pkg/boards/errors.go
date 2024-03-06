@@ -65,3 +65,7 @@ type ErrUploadFailure struct {
 	Timestamp time.Time
 	Inner     error
 }
+
+func (err ErrUploadFailure) String() {
+	fmt.Sprintf("Upload failure at %s", err.Timestamp.Format(time.RFC3339))
+}

@@ -3,6 +3,7 @@ package boards
 import (
 	"bytes"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tftp"
 	dataPacket "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 	"time"
@@ -27,10 +28,9 @@ const (
 )
 
 type BLCU struct {
-	api      abstraction.BoardAPI
-	tempData []byte
-	ackChan  chan struct{}
-	ip       string
+	api     abstraction.BoardAPI
+	ackChan chan struct{}
+	ip      string
 }
 
 func New(ip string) *BLCU {
@@ -78,9 +78,21 @@ func (boards *BLCU) SetAPI(api abstraction.BoardAPI) {
 
 func (boards *BLCU) download(notification abstraction.BoardNotification) error {
 	// Notify the BLCU
-	dataPacket.NewPacketWithValues(abstraction.PacketId(BlcuOrderId),
+
+	// TODO! Ask for message procedure
+	ping := dataPacket.NewPacketWithValues(abstraction.PacketId(BlcuOrderId),
 		make(map[dataPacket.ValueName]dataPacket.Value),
 		make(map[dataPacket.ValueName]bool))
+
+	err := boards.api.SendMessage(transport.NewPacketMessage(ping))
+	if err != nil {
+		ErrSendMessageFailed{
+			Timestamp: time.Now(),
+			Inner:     err,
+		}.String()
+
+		return err
+	}
 
 	// Wait for the ACK
 	<-boards.ackChan
@@ -145,9 +157,19 @@ func (boards *BLCU) download(notification abstraction.BoardNotification) error {
 }
 
 func (boards *BLCU) upload(notification abstraction.BoardNotification) error {
-	dataPacket.NewPacketWithValues(abstraction.PacketId(BlcuOrderId),
+	ping := dataPacket.NewPacketWithValues(abstraction.PacketId(BlcuOrderId),
 		make(map[dataPacket.ValueName]dataPacket.Value),
 		make(map[dataPacket.ValueName]bool))
+
+	err := boards.api.SendMessage(transport.NewPacketMessage(ping))
+	if err != nil {
+		ErrSendMessageFailed{
+			Timestamp: time.Now(),
+			Inner:     err,
+		}.String()
+
+		return err
+	}
 
 	<-boards.ackChan
 
@@ -162,7 +184,7 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) error {
 		}.String()
 	}
 
-	buffer := bytes.NewBuffer(boards.tempData)
+	buffer := bytes.NewBuffer()
 
 	read, err := client.WriteFile(BoardName, tftp.BinaryMode, buffer)
 	if err != nil {
