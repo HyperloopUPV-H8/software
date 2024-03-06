@@ -14,5 +14,5 @@ export const OrderColumn = () => {
         },
     ]);
 
-    return <TabLayout items={orderTabItems.current}></TabLayout>;
+    return <TabLayout tabs={orderTabItems.current}></TabLayout>;
 };

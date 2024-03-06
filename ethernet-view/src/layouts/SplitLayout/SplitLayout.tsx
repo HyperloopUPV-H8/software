@@ -13,16 +13,10 @@ type Props = {
     orientation?: Orientation;
 };
 
-//TODO: not rerender elements that dont resize
-export const SplitLayout = ({
-    components,
-    orientation = Orientation.HORIZONTAL,
-}: Props) => {
+export const SplitLayout = ({ components, orientation = Orientation.HORIZONTAL }: Props) => {
+
     const minSizes = components.map(() => 0.05);
-    const [splitElements, onSeparatorMouseDown] = useSplit(
-        minSizes,
-        orientation
-    );
+    const [splitElements, onSeparatorMouseDown] = useSplit(minSizes, orientation);
 
     return (
         <div
