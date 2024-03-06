@@ -100,7 +100,7 @@ func (boards *BLCU) download(notification abstraction.BoardNotification) error {
 
 	buffer := &bytes.Buffer{}
 
-	data, err := client.ReadFile(BoardName, tftp.BinaryMode, buffer)
+	_, err = client.ReadFile(BoardName, tftp.BinaryMode, buffer)
 	if err != nil {
 		pushErr := boards.api.SendPush(abstraction.BrokerPush(
 			&DownloadFailure{
@@ -129,7 +129,7 @@ func (boards *BLCU) download(notification abstraction.BoardNotification) error {
 	pushErr := boards.api.SendPush(abstraction.BrokerPush(
 		&DownloadSuccess{
 			ID:   DownloadName,
-			Data: data,
+			Data: buffer.Bytes(),
 		},
 	))
 	if pushErr != nil {

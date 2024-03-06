@@ -41,7 +41,7 @@ func (boardPush BoardPush) Topic() abstraction.BrokerTopic {
 
 type DownloadSuccess struct {
 	ID   abstraction.BrokerTopic // DSuccess
-	Data int64
+	Data []byte
 }
 
 func (downloadSuccess DownloadSuccess) Topic() abstraction.BrokerTopic {
