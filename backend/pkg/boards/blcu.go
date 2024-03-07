@@ -80,20 +80,16 @@ func (boards *BLCU) SetAPI(api abstraction.BoardAPI) {
 
 func (boards *BLCU) download(notification abstraction.BoardNotification) error {
 	// Notify the BLCU
-
-	// TODO! Ask for message procedure
 	ping := dataPacket.NewPacketWithValues(abstraction.PacketId(BlcuDownloadOrderId),
 		make(map[dataPacket.ValueName]dataPacket.Value),
 		make(map[dataPacket.ValueName]bool))
 
 	err := boards.api.SendMessage(transport.NewPacketMessage(ping))
 	if err != nil {
-		fmt.Printf(ErrSendMessageFailed{
+		return ErrSendMessageFailed{
 			Timestamp: time.Now(),
 			Inner:     err,
-		}.Error())
-
-		return err
+		}
 	}
 
 	// Wait for the ACK
@@ -103,13 +99,11 @@ func (boards *BLCU) download(notification abstraction.BoardNotification) error {
 
 	client, err := tftp.NewClient(boards.ip)
 	if err != nil {
-		fmt.Printf(ErrNewClientFailed{
+		return ErrNewClientFailed{
 			Addr:      boards.ip,
 			Timestamp: time.Now(),
 			Inner:     err,
-		}.Error())
-
-		return err
+		}
 	}
 
 	buffer := &bytes.Buffer{}
@@ -123,21 +117,17 @@ func (boards *BLCU) download(notification abstraction.BoardNotification) error {
 			},
 		))
 		if pushErr != nil {
-			fmt.Printf(ErrSendMessageFailed{
+			return ErrSendMessageFailed{
 				Timestamp: time.Now(),
 				Inner:     pushErr,
-			}.Error())
-
-			return pushErr
+			}
 		}
 
-		fmt.Printf(ErrReadingFileFailed{
+		return ErrReadingFileFailed{
 			Filename:  string(notification.Event()),
 			Timestamp: time.Now(),
 			Inner:     err,
-		}.Error())
-
-		return err
+		}
 	}
 
 	pushErr := boards.api.SendPush(abstraction.BrokerPush(
@@ -147,15 +137,13 @@ func (boards *BLCU) download(notification abstraction.BoardNotification) error {
 		},
 	))
 	if pushErr != nil {
-		fmt.Printf(ErrSendMessageFailed{
+		return ErrSendMessageFailed{
 			Timestamp: time.Now(),
 			Inner:     err,
-		}.Error())
-
-		return pushErr
+		}
 	}
 
-	return err
+	return nil
 }
 
 func (boards *BLCU) upload(notification abstraction.BoardNotification) error {
@@ -165,12 +153,10 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) error {
 
 	err := boards.api.SendMessage(transport.NewPacketMessage(ping))
 	if err != nil {
-		fmt.Printf(ErrSendMessageFailed{
+		return ErrSendMessageFailed{
 			Timestamp: time.Now(),
 			Inner:     err,
-		}.Error())
-
-		return err
+		}
 	}
 
 	<-boards.ackChan
@@ -179,11 +165,11 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) error {
 
 	client, err := tftp.NewClient(boards.ip)
 	if err != nil {
-		fmt.Printf(ErrNewClientFailed{
+		return ErrNewClientFailed{
 			Addr:      boards.ip,
 			Timestamp: time.Now(),
 			Inner:     err,
-		}.Error())
+		}
 	}
 
 	data := notification.(UploadEvent).Data
@@ -197,28 +183,24 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) error {
 				Error: err,
 			}))
 		if pushErr != nil {
-			fmt.Printf(ErrSendMessageFailed{
+			return ErrSendMessageFailed{
 				Timestamp: time.Now(),
 				Inner:     pushErr,
-			}.Error())
-
-			return pushErr
+			}
 		}
 
-		fmt.Printf(ErrReadingFileFailed{
+		return ErrReadingFileFailed{
 			Filename:  string(notification.Event()),
 			Timestamp: time.Now(),
 			Inner:     err,
-		}.Error())
-
-		return err
+		}
 	}
 
 	// Check if all bytes written
 	if int(read) != len(data) {
-		fmt.Printf(ErrNotAllBytesWritten{
+		return ErrNotAllBytesWritten{
 			Timestamp: time.Now(),
-		}.Error())
+		}
 	}
 
 	pushErr := boards.api.SendPush(abstraction.BrokerPush(
@@ -226,12 +208,10 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) error {
 			ID: UploadName,
 		}))
 	if pushErr != nil {
-		fmt.Printf(ErrSendMessageFailed{
+		return ErrSendMessageFailed{
 			Timestamp: time.Now(),
 			Inner:     pushErr,
-		}.Error())
-
-		return pushErr
+		}
 	}
-	return err
+	return nil
 }
