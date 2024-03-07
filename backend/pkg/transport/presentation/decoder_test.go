@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"io"
 	"math"
-	"os"
 	"reflect"
 	"testing"
 	"time"
@@ -657,8 +656,8 @@ func TestDecoder(t *testing.T) {
 // 8 - state space
 // 9:=18 - data
 func getDecoder(endianness binary.ByteOrder) *presentation.Decoder {
-	logger := zerolog.New(os.Stdout)
-	decoder := presentation.NewDecoder(endianness, &logger)
+	nullLogger := zerolog.New(io.Discard)
+	decoder := presentation.NewDecoder(endianness, nullLogger)
 
 	decoder.SetPacketDecoder(1, blcu.NewDecoder())
 

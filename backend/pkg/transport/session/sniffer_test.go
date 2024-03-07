@@ -3,7 +3,6 @@ package session_test
 import (
 	"errors"
 	"io"
-	"os"
 	"sync"
 	"testing"
 	"time"
@@ -261,8 +260,8 @@ func TestSnifferDemux(t *testing.T) {
 				}(socket, reader)
 			}
 
-			logger := zerolog.New(os.Stdout)
-			demux, err := session.NewSnifferDemux(onConversation, &logger)
+			nullLogger := zerolog.New(io.Discard)
+			demux, err := session.NewSnifferDemux(onConversation, nullLogger)
 
 			data := testInputAdapter{test.input, 0}
 

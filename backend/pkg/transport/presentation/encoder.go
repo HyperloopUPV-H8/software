@@ -17,19 +17,17 @@ type Encoder struct {
 	idToEncoder map[abstraction.PacketId]PacketEncoder
 	endianness  binary.ByteOrder
 
-	logger *zerolog.Logger
+	logger zerolog.Logger
 }
 
 // TODO: improve constructor
 // NewEncoder creates a new encoder with the given endianness
-func NewEncoder(endianness binary.ByteOrder, baseLogger *zerolog.Logger) *Encoder {
-	logger := baseLogger.With().Caller().Timestamp().Logger()
-
+func NewEncoder(endianness binary.ByteOrder, baseLogger zerolog.Logger) *Encoder {
 	return &Encoder{
 		idToEncoder: make(map[abstraction.PacketId]PacketEncoder),
 		endianness:  endianness,
 
-		logger: &logger,
+		logger: baseLogger,
 	}
 }
 

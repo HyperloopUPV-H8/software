@@ -9,24 +9,21 @@ import (
 type connectionCallback = func(conn net.Conn) error
 
 type Server struct {
-	config    ServerConfig
-	closeChan chan struct{}
-
+	config  ServerConfig
 	address string
 
 	whitelist    map[string]struct{}
 	onConnection connectionCallback
+	closeChan    chan struct{}
 
-	logger *zerolog.Logger
+	logger zerolog.Logger
 }
 
 // NewServer inits a new ServerConfig with good defaults and the provided values
-func NewServer(address string, config ServerConfig, baseLogger *zerolog.Logger) Server {
-	logger := baseLogger.With().Caller().Timestamp().Str("localAddres", address).Logger()
+func NewServer(address string, config ServerConfig, baseLogger zerolog.Logger) Server {
+	logger := baseLogger.With().Str("localAddres", address).Logger()
 	return Server{
-		config:    config,
-		closeChan: make(chan struct{}),
-
+		config:  config,
 		address: address,
 
 		whitelist: make(map[string]struct{}),
@@ -35,8 +32,9 @@ func NewServer(address string, config ServerConfig, baseLogger *zerolog.Logger) 
 			logger.Warn().Str("remoteAddress", conn.RemoteAddr().String()).Msg("connection callback not set yet")
 			return nil
 		},
+		closeChan: make(chan struct{}),
 
-		logger: &logger,
+		logger: logger,
 	}
 }
 
@@ -62,18 +60,19 @@ func (server *Server) Listen() error {
 				errChan <- err
 				break
 			}
+			connectionLogger := server.logger.With().Str("remoteAddress", conn.RemoteAddr().String()).Logger()
 
 			if !server.IsWhitelisted(conn.RemoteAddr().(*net.TCPAddr).IP.String()) {
-				server.logger.Warn().Str("remoteAddress", conn.RemoteAddr().String()).Msg("unauthorized connection")
+				connectionLogger.Warn().Msg("unauthorized connection")
 				conn.Close()
 				continue
 			}
-			server.logger.Debug().Str("remoteAddress", conn.RemoteAddr().String()).Msg("new connection")
+			connectionLogger.Debug().Msg("new connection")
 
 			go func() {
 				err = server.onConnection(conn)
 				if err != nil {
-					server.logger.Error().Stack().Err(err).Str("remoteAddress", conn.RemoteAddr().String()).Msg("connection")
+					connectionLogger.Error().Stack().Err(err).Msg("connection")
 				}
 			}()
 		}

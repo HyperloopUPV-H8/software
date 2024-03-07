@@ -11,18 +11,17 @@ import (
 )
 
 type Client struct {
-	config ClientConfig
-
+	config  ClientConfig
 	address string
 
-	currentRetries uint
+	currentRetries int
 
-	logger *zerolog.Logger
+	logger zerolog.Logger
 }
 
 // NewClient inits a ClientConfig with good defaults and the provided information
-func NewClient(address string, config ClientConfig, baseLogger *zerolog.Logger) Client {
-	logger := baseLogger.With().Caller().Timestamp().Str("localAddres", config.LocalAddr.String()).Str("remoteAddress", address).Logger()
+func NewClient(address string, config ClientConfig, baseLogger zerolog.Logger) Client {
+	logger := baseLogger.With().Str("localAddres", config.LocalAddr.String()).Str("remoteAddress", address).Logger()
 	return Client{
 		config: config,
 
@@ -30,12 +29,14 @@ func NewClient(address string, config ClientConfig, baseLogger *zerolog.Logger) 
 
 		currentRetries: 0,
 
-		logger: &logger,
+		logger: logger,
 	}
 }
 
 // Dial attempts to connect with the client
 func (client *Client) Dial() (net.Conn, error) {
+	client.currentRetries = 0
+
 	var err error
 	var conn net.Conn
 	client.logger.Info().Msg("dialing")
@@ -43,7 +44,6 @@ func (client *Client) Dial() (net.Conn, error) {
 		conn, err = client.config.DialContext(client.config.Context, "tcp", client.address)
 		if err == nil {
 			client.logger.Info().Msg("connected")
-			client.currentRetries = 0
 			return conn, nil
 		}
 		if client.config.Context.Err() != nil {
@@ -57,12 +57,11 @@ func (client *Client) Dial() (net.Conn, error) {
 		}
 
 		backoffDuration := client.config.ConnectionBackoffFunction(client.currentRetries)
-		client.logger.Debug().Stack().Err(err).Dur("backoff", backoffDuration).Uint("retries", client.currentRetries+1).Msg("retrying")
+		client.logger.Debug().Stack().Err(err).Dur("backoff", backoffDuration).Int("retries", client.currentRetries+1).Msg("retrying")
 		time.Sleep(backoffDuration)
 	}
 
-	client.currentRetries = client.config.MaxConnectionRetries - 1
-	client.logger.Debug().Uint("max", client.config.MaxConnectionRetries).Msg("max connections exceeded")
+	client.logger.Debug().Int("max", client.config.MaxConnectionRetries).Msg("max connection retries exceeded")
 	return nil, ErrTooManyRetries{
 		Max:     client.config.MaxConnectionRetries,
 		Network: "tcp",
@@ -71,7 +70,7 @@ func (client *Client) Dial() (net.Conn, error) {
 }
 
 type ErrTooManyRetries struct {
-	Max     uint
+	Max     int
 	Network string
 	Remote  string
 }

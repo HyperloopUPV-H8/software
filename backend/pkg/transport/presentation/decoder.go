@@ -30,13 +30,13 @@ type Decoder struct {
 	idToDecoder map[abstraction.PacketId]PacketDecoder
 	endianness  binary.ByteOrder
 
-	logger *zerolog.Logger
+	logger zerolog.Logger
 }
 
 // TODO: improve constructor
 // NewDecoder creates a new decoder with the given endianness
-func NewDecoder(endianness binary.ByteOrder, baseLogger *zerolog.Logger) *Decoder {
-	logger := baseLogger.With().Caller().Timestamp().Logger().Sample(zerolog.LevelSampler{
+func NewDecoder(endianness binary.ByteOrder, baseLogger zerolog.Logger) *Decoder {
+	logger := baseLogger.Sample(zerolog.LevelSampler{
 		TraceSampler: zerolog.RandomSampler(1),
 		DebugSampler: zerolog.RandomSampler(25000),
 		InfoSampler:  zerolog.RandomSampler(1),
@@ -48,7 +48,7 @@ func NewDecoder(endianness binary.ByteOrder, baseLogger *zerolog.Logger) *Decode
 		idToDecoder: make(map[abstraction.PacketId]PacketDecoder),
 		endianness:  endianness,
 
-		logger: &logger,
+		logger: logger,
 	}
 }
 

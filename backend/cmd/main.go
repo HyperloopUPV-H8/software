@@ -132,7 +132,7 @@ func main() {
 		state_logger.Name:      state_logger.NewLogger(),
 	}
 
-	loggerHandler := logger.NewLogger(subloggers)
+	loggerHandler := logger.NewLogger(subloggers, trace.Logger)
 
 	// <--- order transfer --->
 	idToBoard := make(map[uint16]string)
@@ -143,7 +143,7 @@ func main() {
 	}
 
 	// <--- broker --->
-	broker := broker.New()
+	broker := broker.New(trace.Logger)
 
 	dataTopic := data_topic.NewUpdateTopic(time.Second / 10)
 	defer dataTopic.Stop()
@@ -163,12 +163,12 @@ func main() {
 	broker.AddTopic(message_topic.UpdateName, messageTopic)
 
 	connections := make(chan *websocket.Client)
-	upgrader := websocket.NewUpgrader(connections)
-	pool := websocket.NewPool(connections)
+	upgrader := websocket.NewUpgrader(connections, trace.Logger)
+	pool := websocket.NewPool(connections, trace.Logger)
 	broker.SetPool(pool)
 
 	// <--- transport --->
-	transp := transport.NewTransport(&trace.Logger)
+	transp := transport.NewTransport(trace.Logger)
 
 	// <--- vehicle --->
 	ipToBoardId := make(map[string]abstraction.BoardId)
@@ -176,7 +176,7 @@ func main() {
 		ipToBoardId[ip.String()] = abstraction.BoardId(info.BoardIds[name])
 	}
 
-	vehicle := vehicle.New()
+	vehicle := vehicle.New(trace.Logger)
 	vehicle.SetBroker(broker)
 	vehicle.SetLogger(loggerHandler)
 	vehicle.SetUpdateFactory(updateFactory)
@@ -234,7 +234,7 @@ func main() {
 	if err != nil {
 		panic("failed to compile bpf filter")
 	}
-	go transp.HandleSniffer(sniffer.New(source, &layers.LayerTypeEthernet, &trace.Logger))
+	go transp.HandleSniffer(sniffer.New(source, &layers.LayerTypeEthernet, trace.Logger))
 
 	// <--- http server --->
 	podDataHandle, err := h.HandleDataJSON("podData.json", pod_data.GetDataOnlyPodData(podData))
@@ -397,8 +397,8 @@ func getConfig(path string) Config {
 }
 
 func getTransportDecEnc(info info.Info, podData pod_data.PodData) (*presentation.Decoder, *presentation.Encoder) {
-	decoder := presentation.NewDecoder(binary.LittleEndian, &trace.Logger)
-	encoder := presentation.NewEncoder(binary.LittleEndian, &trace.Logger)
+	decoder := presentation.NewDecoder(binary.LittleEndian, trace.Logger)
+	encoder := presentation.NewEncoder(binary.LittleEndian, trace.Logger)
 
 	dataDecoder := data.NewDecoder(binary.LittleEndian)
 	dataEncoder := data.NewEncoder(binary.LittleEndian)
