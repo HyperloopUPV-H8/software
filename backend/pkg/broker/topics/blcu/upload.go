@@ -20,6 +20,14 @@ func (upload *Upload) Topic() abstraction.BrokerTopic {
 	return UploadName
 }
 
+type UploadRequest struct {
+	Board string `json:"board"`
+}
+
+func (request UploadRequest) Topic() abstraction.BrokerTopic {
+	return "blcu/uploadRequest"
+}
+
 func (upload *Upload) Push(push abstraction.BrokerPush) error {
 	// Switch success/failure
 	// upload.pool.Write(ID, message)
@@ -64,13 +72,13 @@ func (upload *Upload) ClientMessage(id websocket.ClientId, message *websocket.Me
 }
 
 func (upload *Upload) handleUpload(message *websocket.Message) error {
-	var uploadEvent boards.UploadEvent
-	err := json.Unmarshal(message.Payload, &uploadEvent)
+	var uploadRequest UploadRequest
+	err := json.Unmarshal(message.Payload, &uploadRequest)
 	if err != nil {
 		return err
 	}
 
-	pushErr := upload.api.UserPush(&uploadEvent)
+	pushErr := upload.api.UserPush(uploadRequest)
 	return pushErr
 }
 

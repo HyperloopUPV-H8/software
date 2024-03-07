@@ -20,6 +20,14 @@ func (download *Download) Topic() abstraction.BrokerTopic {
 	return DownloadName
 }
 
+type DownloadRequest struct {
+	Board string `json:"board"`
+}
+
+func (request DownloadRequest) Topic() abstraction.BrokerTopic {
+	return "blcu/downloadRequest"
+}
+
 func (download *Download) Push(push abstraction.BrokerPush) error {
 	switch push.Topic() {
 	case boards.DownloadSuccess{}.Topic():
@@ -60,13 +68,13 @@ func (download *Download) ClientMessage(id websocket.ClientId, message *websocke
 }
 
 func (download *Download) handleDownload(message *websocket.Message) error {
-	var downloadEvent boards.DownloadEvent
-	err := json.Unmarshal(message.Payload, &downloadEvent)
+	var downloadRequest DownloadRequest
+	err := json.Unmarshal(message.Payload, &downloadRequest)
 	if err != nil {
 		return err
 	}
 
-	pushErr := download.api.UserPush(&downloadEvent)
+	pushErr := download.api.UserPush(downloadRequest)
 	return pushErr
 }
 
