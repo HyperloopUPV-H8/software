@@ -11,6 +11,10 @@ $base-color: hsl(212, 27%, 55%);
 
 $dark-normal-text-color: #bec6d2;
 
+@function getColor($name, $lightness) {
+    @return var(--color-#{$name}-#{$lightness});
+}
+
 // FONTS
 $sans-font: Inter;
 $code-font: Consolas, Cascadia Code, Cascadia Mono, Monospace;

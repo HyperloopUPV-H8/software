@@ -1,0 +1,15 @@
+@use "src/styles/styles";
+
+.iconWrapper {
+    > * {
+        font-size: 0.8rem;
+    }
+}
+
+.link {
+    color: styles.getColor("base-color", 60);
+}
+
+.active {
+    color: styles.getColor("orange", 60);
+}

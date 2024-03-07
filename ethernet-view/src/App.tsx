@@ -9,7 +9,7 @@ import {
     usePodDataStore,
     useConnectionsStore
 } from "common";
-import { HomePage } from "pages/HomePage/HomePage";
+import { TestingPage } from "pages/TestingPage/TestingPage";
 import { SplashScreen } from "components/SplashScreen/SplashScreen";
 
 function App() {
@@ -47,7 +47,7 @@ function App() {
             >
                 {([handler]) => (
                     <WsHandlerProvider handler={handler}>
-                        <HomePage />
+                        <TestingPage />
                     </WsHandlerProvider>
                 )}
             </Loader>
