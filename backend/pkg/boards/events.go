@@ -13,74 +13,67 @@ func (ack AckNotification) Event() abstraction.BoardEvent {
 }
 
 type DownloadEvent struct {
-	EventID abstraction.BoardEvent // DownloadId
-	BoardID abstraction.BoardId
+	BoardEvent abstraction.BoardEvent // DownloadId
+	BoardID    abstraction.BoardId
 }
 
 func (download DownloadEvent) Topic() abstraction.BrokerTopic {
-	return abstraction.BrokerTopic(download.EventID)
+	return "blcu/download"
 }
 
 func (download DownloadEvent) Event() abstraction.BoardEvent {
-	return download.EventID
+	return download.BoardEvent
 }
 
 type UploadEvent struct {
-	EventID abstraction.BoardEvent // UploadId
-	BoardID abstraction.BoardId
-	Data    []byte
+	BoardEvent abstraction.BoardEvent
+	Data       []byte
 }
 
 func (upload UploadEvent) Topic() abstraction.BrokerTopic {
-	return abstraction.BrokerTopic(upload.EventID)
+	return "blcu/upload"
 }
 
 func (upload UploadEvent) Event() abstraction.BoardEvent {
-	return upload.EventID
+	return upload.BoardEvent
 }
 
 type BoardPush struct {
-	ID   abstraction.BrokerTopic // BlcuDownloadOrderId
 	Data int64
 }
 
 func (boardPush BoardPush) Topic() abstraction.BrokerTopic {
-	return boardPush.ID
+	return "blcu/boardPush"
 }
 
 type DownloadSuccess struct {
-	ID   abstraction.BrokerTopic // DSuccess
 	Data []byte
 }
 
 func (downloadSuccess DownloadSuccess) Topic() abstraction.BrokerTopic {
-	return downloadSuccess.ID
+	return "blcu/download/success"
 }
 
-type UploadSuccess struct {
-	ID abstraction.BrokerTopic // USuccess
-}
+type UploadSuccess struct{}
 
 func (uploadSuccess UploadSuccess) Topic() abstraction.BrokerTopic {
-	return uploadSuccess.ID
+	return "blcu/upload/success"
 }
 
 type DownloadFailure struct {
-	ID    abstraction.BrokerTopic // DFailure
 	Error error
 }
 
 func (downloadFailure DownloadFailure) Topic() abstraction.BrokerTopic {
-	return downloadFailure.ID
+	return "blcu/download/failure"
 }
 
 type UploadFailure struct {
-	ID    abstraction.BrokerTopic // UFailure
 	Error error
 }
 
 func (uploadFailure UploadFailure) Topic() abstraction.BrokerTopic {
-	return uploadFailure.ID
+	return "blcu/upload/failure"
 }
 
 type BoardMessage struct {

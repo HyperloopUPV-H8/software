@@ -165,8 +165,8 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) error {
 	case blcu_topic.DownloadName:
 		vehicle.boards[boards.BlcuId].Notify(abstraction.BoardNotification(
 			&boards.DownloadEvent{
-				EventID: boards.AckId,
-				BoardID: boards.BlcuId,
+				BoardEvent: boards.AckId,
+				BoardID:    boards.BlcuId,
 			},
 		))
 
