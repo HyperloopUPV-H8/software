@@ -15,18 +15,10 @@ const (
 	BlcuName = "BLCU"
 	BlcuId   = abstraction.BoardId(1)
 
-	AckId      = "1"
-	DownloadId = "2"
-	UploadId   = "3"
+	AckId = "1"
 
 	BlcuDownloadOrderId = 1
 	BlcuUploadOrderId   = 2
-
-	DownloadName = "download"
-	UploadName   = "upload"
-
-	DSuccess = "download success"
-	USuccess = "upload success"
 )
 
 type BLCU struct {
@@ -112,7 +104,6 @@ func (boards *BLCU) download(notification abstraction.BoardNotification) error {
 	if err != nil {
 		pushErr := boards.api.SendPush(abstraction.BrokerPush(
 			&DownloadFailure{
-				ID:    DownloadName,
 				Error: err,
 			},
 		))
@@ -132,7 +123,6 @@ func (boards *BLCU) download(notification abstraction.BoardNotification) error {
 
 	pushErr := boards.api.SendPush(abstraction.BrokerPush(
 		&DownloadSuccess{
-			ID:   DownloadName,
 			Data: buffer.Bytes(),
 		},
 	))
@@ -179,7 +169,6 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) error {
 	if err != nil {
 		pushErr := boards.api.SendPush(abstraction.BrokerPush(
 			&UploadFailure{
-				ID:    UploadName,
 				Error: err,
 			}))
 		if pushErr != nil {
@@ -198,15 +187,26 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) error {
 
 	// Check if all bytes written
 	if int(read) != len(data) {
-		return ErrNotAllBytesWritten{
+		err = ErrNotAllBytesWritten{
 			Timestamp: time.Now(),
 		}
+
+		pushErr := boards.api.SendPush(abstraction.BrokerPush(
+			&UploadFailure{
+				Error: err,
+			}))
+		if pushErr != nil {
+			return ErrSendMessageFailed{
+				Timestamp: time.Now(),
+				Inner:     pushErr,
+			}
+		}
+
+		return err
 	}
 
 	pushErr := boards.api.SendPush(abstraction.BrokerPush(
-		&UploadSuccess{
-			ID: UploadName,
-		}))
+		&UploadSuccess{}))
 	if pushErr != nil {
 		return ErrSendMessageFailed{
 			Timestamp: time.Now(),
