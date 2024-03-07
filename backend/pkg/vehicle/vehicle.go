@@ -111,25 +111,25 @@ func (vehicle *Vehicle) Notification(notification abstraction.TransportNotificat
 }
 
 // UserPush is the method invoked by boards to signal the user has sent information to the back
-func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) {
+func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) error {
 	switch push.Topic() {
 	case order_topic.SendName:
 		order, ok := push.(*order_topic.Order)
 		if !ok {
 			fmt.Fprintf(os.Stderr, "error casting push to order: %v\n", push)
-			return
+			return nil
 		}
 
 		packet, err := order.ToPacket()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error converting order to packet: %v\n", err)
-			return
+			return err
 		}
 
 		err = vehicle.transport.SendMessage(transport.NewPacketMessage(packet))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error sending packet: %v\n", err)
-			return
+			return err
 		}
 
 		err = vehicle.logger.PushRecord(&order_logger.Record{
@@ -146,7 +146,7 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) {
 		status, ok := push.(*logger_topic.Status)
 		if !ok {
 			fmt.Fprintf(os.Stderr, "error casting push to logger status: %v\n", push)
-			return
+			return nil
 		}
 
 		var err error
@@ -181,6 +181,13 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) {
 	default:
 		fmt.Printf("unknow topic %s\n", push.Topic())
 	}
+
+	return nil
+}
+
+func (vehicle *Vehicle) UserPull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
+	// TODO! Implement
+	return nil, nil
 }
 
 // Request is the method invoked by a board to ask for a resource from the frontend
