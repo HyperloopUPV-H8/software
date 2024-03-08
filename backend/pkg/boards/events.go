@@ -15,6 +15,7 @@ func (ack AckNotification) Event() abstraction.BoardEvent {
 type DownloadEvent struct {
 	BoardEvent abstraction.BoardEvent // DownloadId
 	BoardID    abstraction.BoardId
+	Board      string
 }
 
 func (download DownloadEvent) Topic() abstraction.BrokerTopic {
@@ -27,6 +28,7 @@ func (download DownloadEvent) Event() abstraction.BoardEvent {
 
 type UploadEvent struct {
 	BoardEvent abstraction.BoardEvent
+	Board      string
 	Data       []byte
 }
 

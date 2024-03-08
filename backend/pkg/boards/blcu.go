@@ -37,8 +37,8 @@ func (boards *BLCU) Id() abstraction.BoardId {
 	return BlcuId
 }
 
-func (boards *BLCU) Notify(notification abstraction.BoardNotification) {
-	switch notification.(type) {
+func (boards *BLCU) Notify(boardNotification abstraction.BoardNotification) {
+	switch notification := boardNotification.(type) {
 	case AckNotification:
 		boards.ackChan <- struct{}{}
 
@@ -70,11 +70,16 @@ func (boards *BLCU) SetAPI(api abstraction.BoardAPI) {
 	boards.api = api
 }
 
-func (boards *BLCU) download(notification abstraction.BoardNotification) error {
+func (boards *BLCU) download(notification DownloadEvent) error {
 	// Notify the BLCU
-	ping := dataPacket.NewPacketWithValues(abstraction.PacketId(BlcuDownloadOrderId),
-		make(map[dataPacket.ValueName]dataPacket.Value),
-		make(map[dataPacket.ValueName]bool))
+	ping := dataPacket.NewPacketWithValues(
+		abstraction.PacketId(BlcuDownloadOrderId),
+		map[dataPacket.ValueName]dataPacket.Value{
+			BlcuName: dataPacket.NewEnumValue(dataPacket.EnumVariant(notification.Board)),
+		},
+		map[dataPacket.ValueName]bool{
+			BlcuName: true,
+		})
 
 	err := boards.api.SendMessage(transport.NewPacketMessage(ping))
 	if err != nil {
@@ -136,10 +141,14 @@ func (boards *BLCU) download(notification abstraction.BoardNotification) error {
 	return nil
 }
 
-func (boards *BLCU) upload(notification abstraction.BoardNotification) error {
+func (boards *BLCU) upload(notification UploadEvent) error {
 	ping := dataPacket.NewPacketWithValues(abstraction.PacketId(BlcuUploadOrderId),
-		make(map[dataPacket.ValueName]dataPacket.Value),
-		make(map[dataPacket.ValueName]bool))
+		map[dataPacket.ValueName]dataPacket.Value{
+			BlcuName: dataPacket.NewEnumValue(dataPacket.EnumVariant(notification.Board)),
+		},
+		map[dataPacket.ValueName]bool{
+			BlcuName: true,
+		})
 
 	err := boards.api.SendMessage(transport.NewPacketMessage(ping))
 	if err != nil {
@@ -162,7 +171,7 @@ func (boards *BLCU) upload(notification abstraction.BoardNotification) error {
 		}
 	}
 
-	data := notification.(UploadEvent).Data
+	data := notification.Data
 	buffer := bytes.NewBuffer(data)
 
 	read, err := client.WriteFile(BlcuName, tftp.BinaryMode, buffer)
