@@ -1,56 +1,21 @@
 import "./App.css";
-import {
-    WsHandlerProvider,
-    createWsHandler,
-    useConfig,
-    useFetchBack,
-    Loader,
-    useMeasurementsStore,
-    usePodDataStore,
-    useConnectionsStore
-} from "common";
 import { TestingPage } from "pages/TestingPage/TestingPage";
 import { SplashScreen } from "components/SplashScreen/SplashScreen";
+import { WsHandlerProvider, useLoadBackend } from "common";
 
 function App() {
-    const config = useConfig();
-    const podDataDescriptionPromise = useFetchBack(
-        import.meta.env.PROD,
-        config.paths.podDataDescription
-    );
 
-    const initMeasurements = useMeasurementsStore((state) => state.initMeasurements);
-    const initPodData = usePodDataStore((state) => state.initPodData);
-    const setBackendConnection = useConnectionsStore((state) => state.setBackendConnection);
-
-    const SERVER_URL = import.meta.env.PROD
-        ? `${config.prodServer.ip}:${config.prodServer.port}/${config.paths.websocket}`
-        : `${config.devServer.ip}:${config.devServer.port}/${config.paths.websocket}`;
+    const isProduction = import.meta.env.PROD;
+    const loadBackend = useLoadBackend(isProduction);
 
     return (
         <div className="App">
-            <Loader
-                promises={[
-                    createWsHandler(
-                        SERVER_URL,
-                        true,
-                        () => setBackendConnection(true),
-                        () => setBackendConnection(false),
-                    ),
-                    podDataDescriptionPromise.then((adapter) => {
-                        initPodData(adapter);
-                        initMeasurements(adapter);
-                    }),
-                ]}
-                LoadingView={<SplashScreen />}
-                FailureView={<div>Failure</div>}
-            >
-                {([handler]) => (
-                    <WsHandlerProvider handler={handler}>
-                        <TestingPage />
-                    </WsHandlerProvider>
-                )}
-            </Loader>
+            {loadBackend.state === "fulfilled" && 
+                <WsHandlerProvider handler={loadBackend.wsHandler}>
+                    <TestingPage />
+                </WsHandlerProvider>}
+            {loadBackend.state === "pending" && <SplashScreen />}
+            {loadBackend.state === "rejected" && <div>{`${loadBackend.error}`}</div>}
         </div>
     );
 }
