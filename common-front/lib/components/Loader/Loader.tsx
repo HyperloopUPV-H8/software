@@ -32,9 +32,7 @@ export const Loader = <T extends Promise<any>[]>({
     FailureView,
     children,
 }: Props<T>) => {
-    const [state, setState] = useState<
-        PromiseResult<AwaitedArray<typeof promises>>
-    >({ state: "pending" });
+    const [state, setState] = useState<PromiseResult<AwaitedArray<typeof promises>>>({ state: "pending" });
     const startTime = useRef(0);
 
     useEffect(() => {
@@ -42,9 +40,7 @@ export const Loader = <T extends Promise<any>[]>({
         Promise.all(promises)
             .then((values) => {
                 const elapsed = performance.now() - startTime.current;
-                setTimeout(() => {
-                    setState({ state: "fulfilled", result: values });
-                }, clamp(MAX_TITLE_TIME - elapsed, 0, MAX_TITLE_TIME));
+                setTimeout(() => setState({ state: "fulfilled", result: values }), clamp(MAX_TITLE_TIME - elapsed, 0, MAX_TITLE_TIME));
             })
             .catch(() => setState({ state: "rejected" }));
     }, []);
