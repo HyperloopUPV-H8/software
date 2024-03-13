@@ -3,6 +3,7 @@ import { TestingPage } from "pages/TestingPage/TestingPage";
 import { SplashScreen } from "components/SplashScreen/SplashScreen";
 import { WsHandlerProvider, useLoadBackend } from "common";
 
+
 function App() {
 
     const isProduction = import.meta.env.PROD;

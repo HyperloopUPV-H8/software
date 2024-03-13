@@ -5,6 +5,21 @@ import App from "./App";
 import "styles/fonts.scss";
 import "./index.scss";
 import { ConfigProvider, GlobalTicker } from "common";
+import { AppLayout } from "layouts/AppLayout/AppLayout";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
+
+const router = createBrowserRouter([
+    {
+        path: "/",
+        element: <AppLayout />,
+        children: [
+            {
+                index: true,
+                element: <App />,
+            }
+        ]
+    },
+]);
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
@@ -13,7 +28,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
             prodIp="127.0.0.1"
         >
             <GlobalTicker fps={100}>
-                <App />
+                <RouterProvider router={router} />
             </GlobalTicker>
         </ConfigProvider>
     </React.StrictMode>
