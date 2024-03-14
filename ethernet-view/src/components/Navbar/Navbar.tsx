@@ -1,15 +1,15 @@
-import styles from "./Sidebar.module.scss";
-import { SidebarItem, SidebarItemData } from "./SidebarItem/SidebarItem";
+import styles from "./Navbar.module.scss";
 import { ReactComponent as TeamLogo } from "assets/svg/team_logo.svg";
 import { Link } from "react-router-dom";
+import { NavbarItem, NavbarItemData } from "./NavbarItem/NavbarItem";
 
 type Props = {
-    items: SidebarItemData[];
+    items: NavbarItemData[];
 };
 
-export const Sidebar = ({ items }: Props) => {
+export const Navbar = ({ items }: Props) => {
     return (
-        <nav className={styles.sidebarWrapper}>
+        <nav className={styles.navbarWrapper}>
             <Link to={"/"}>
                 <TeamLogo className={styles.logo} />
             </Link>
@@ -17,7 +17,7 @@ export const Sidebar = ({ items }: Props) => {
             <div className={styles.items}>
                 {items.map((item) => {
                     return (
-                        <SidebarItem
+                        <NavbarItem
                             key={item.path}
                             item={item}
                         />

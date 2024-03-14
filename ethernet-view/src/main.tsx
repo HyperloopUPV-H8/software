@@ -7,6 +7,7 @@ import "./index.scss";
 import { ConfigProvider, GlobalTicker } from "common";
 import { AppLayout } from "layouts/AppLayout/AppLayout";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { LoggerPage } from "pages/LoggerPage/LoggerPage";
 
 const router = createBrowserRouter([
     {
@@ -16,6 +17,10 @@ const router = createBrowserRouter([
             {
                 index: true,
                 element: <App />,
+            },
+            {
+                path: "/logger",
+                element: <LoggerPage />,
             }
         ]
     },

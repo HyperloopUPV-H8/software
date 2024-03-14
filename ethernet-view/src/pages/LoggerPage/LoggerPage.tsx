@@ -1,6 +1,6 @@
 
 export const LoggerPage = () => {
-  return (
-    <div>LoggerPage</div>
-  )
+    return (
+      <div>LoggerPage</div>
+    )
 }

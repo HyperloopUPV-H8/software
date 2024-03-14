@@ -1,16 +1,16 @@
-import styles from "components/Sidebar/SidebarItem/SidebarItem.module.scss";
+import styles from "components/Navbar/NavbarItem/NavbarItem.module.scss";
 import { NavLink } from "react-router-dom";
 
-export type SidebarItemData = {
+export type NavbarItemData = {
     path: string;
     icon: string;
 };
 
 type Props = {
-    item: SidebarItemData;
+    item: NavbarItemData;
 };
 
-export const SidebarItem = ({ item }: Props) => {
+export const NavbarItem = ({ item }: Props) => {
     return (
         <NavLink
             to={item.path}
