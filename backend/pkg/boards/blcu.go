@@ -45,7 +45,7 @@ func (boards *BLCU) Notify(boardNotification abstraction.BoardNotification) {
 	case DownloadEvent:
 		err := boards.download(notification)
 		if err != nil {
-			fmt.Printf(ErrDownloadFailure{
+			fmt.Println(ErrDownloadFailure{
 				Timestamp: time.Now(),
 				Inner:     err,
 			}.Error())
@@ -53,13 +53,13 @@ func (boards *BLCU) Notify(boardNotification abstraction.BoardNotification) {
 	case UploadEvent:
 		err := boards.upload(notification)
 		if err != nil {
-			fmt.Printf(ErrDownloadFailure{
+			fmt.Println(ErrDownloadFailure{
 				Timestamp: time.Now(),
 				Inner:     err,
 			}.Error())
 		}
 	default:
-		fmt.Printf(ErrInvalidBoardEvent{
+		fmt.Println(ErrInvalidBoardEvent{
 			Event:     notification.Event(),
 			Timestamp: time.Now(),
 		}.Error())
