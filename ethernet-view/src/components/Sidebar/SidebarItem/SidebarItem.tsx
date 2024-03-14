@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 
 export type SidebarItemData = {
     path: string;
-    icon: React.ReactNode;
+    icon: string;
 };
 
 type Props = {
@@ -16,7 +16,9 @@ export const SidebarItem = ({ item }: Props) => {
             to={item.path}
             className={({isActive}) => isActive ? styles.active : ""}
         >
-            <div className={styles.iconWrapper}> {item.icon}</div>
+            <div className={styles.iconWrapper}>
+                <img src={item.icon} alt="icon" />
+            </div>
         </NavLink>
     );
 };

@@ -1,10 +1,23 @@
-import { TestingPage } from "pages/TestingPage/TestingPage";
-import { Outlet, createBrowserRouter } from "react-router-dom"
+import { Sidebar } from "components/Sidebar/Sidebar"
+import { Outlet} from "react-router-dom"
+import styles from "./AppLayout.module.scss"
+import Testing from "assets/svg/testing.svg"
+import Logger from "assets/svg/logger.svg"
 
 export const AppLayout = () => {
 
     return (
-        <div>
+        <div className={styles.appLayout}>
+            <Sidebar items={[
+                {
+                    path: "/",
+                    icon: Testing
+                },
+                {
+                    path: "/logger",
+                    icon: Logger
+                }
+            ]}/>
             
             <Outlet />
         </div>

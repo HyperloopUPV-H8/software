@@ -2,12 +2,12 @@
 
 .iconWrapper {
     > * {
-        font-size: 0.8rem;
+        width: 2rem;
     }
 }
 
 .link {
-    color: styles.getColor("base-color", 60);
+    color: styles.getColor(styles.$base-color, 60);
 }
 
 .active {

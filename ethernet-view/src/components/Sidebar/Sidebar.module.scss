@@ -1,4 +1,4 @@
-@use "src/styles/styles";
+@use "../../styles/styles.scss";
 
 .sidebarWrapper {
     width: fit-content;
@@ -8,20 +8,21 @@
     align-items: center;
     gap: 1.4rem;
     padding: 2rem 0.8rem;
-    background-color: styles.getColor("base-color", 90);
-    border-right: 1px solid styles.getColor("base-color", 80);
+    background-color: white;
+    border-right: 1px solid styles.getColor(styles.$base-color, 80);
+    border-radius: styles.$large-border-radius;
 }
 
 .logo {
-    font-size: 2rem;
-    color: styles.getColor("base-color", 30);
+    font-size: 3rem;
+    color: styles.$base-color;
 }
 
 .separator {
     width: 46%;
     height: 0.25rem;
     border-radius: 10rem;
-    background-color: styles.getColor("base-color", 80);
+    background-color: styles.getColor(styles.$base-color, 80);
 }
 
 .items {
