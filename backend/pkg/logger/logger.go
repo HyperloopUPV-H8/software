@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"fmt"
 	"os"
 	"path"
 	"sync"
@@ -9,6 +8,7 @@ import (
 	"time"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"github.com/rs/zerolog"
 )
 
 const (
@@ -23,6 +23,8 @@ type Logger struct {
 	subloggersLock *sync.RWMutex
 	// The subloggers are only the loggers selected at the start of the log
 	subloggers map[abstraction.LoggerName]abstraction.Logger
+
+	trace zerolog.Logger
 }
 
 var _ abstraction.Logger = &Logger{}
@@ -31,11 +33,21 @@ var Timestamp = time.Now()
 
 func (Logger) HandlerName() string { return HandlerName }
 
-func NewLogger(keys map[abstraction.LoggerName]abstraction.Logger) *Logger {
+func NewLogger(keys map[abstraction.LoggerName]abstraction.Logger, baseLogger zerolog.Logger) *Logger {
+	trace := baseLogger.Sample(zerolog.LevelSampler{
+		TraceSampler: zerolog.RandomSampler(25000),
+		DebugSampler: zerolog.RandomSampler(1),
+		InfoSampler:  zerolog.RandomSampler(1),
+		WarnSampler:  zerolog.RandomSampler(1),
+		ErrorSampler: zerolog.RandomSampler(1),
+	})
+
 	logger := &Logger{
 		running:        &atomic.Bool{},
 		subloggersLock: &sync.RWMutex{},
 		subloggers:     keys,
+
+		trace: trace,
 	}
 
 	logger.running.Store(false)
@@ -43,20 +55,23 @@ func NewLogger(keys map[abstraction.LoggerName]abstraction.Logger) *Logger {
 }
 
 func (logger *Logger) Start() error {
+	logger.trace.Info().Msg("starting...")
 	if !logger.running.CompareAndSwap(false, true) {
-		fmt.Println("Logger already running")
+		logger.trace.Warn().Msg("already running")
 		return nil
 	}
 
 	// Create log folders
-	for logger := range logger.subloggers {
+	for subLogger := range logger.subloggers {
 		loggerPath := path.Join(
 			"logger",
-			fmt.Sprint(logger),
-			fmt.Sprintf("%s_%s", logger, Timestamp.Format(time.RFC3339)),
+			string(subLogger),
+			Timestamp.Format(time.RFC3339),
 		)
+		logger.trace.Debug().Str("subLogger", string(subLogger)).Str("path", loggerPath).Msg("creating folder")
 		err := os.MkdirAll(loggerPath, os.ModePerm)
 		if err != nil {
+			logger.trace.Error().Stack().Err(err).Msg("creating folder")
 			return ErrCreatingAllDir{
 				Name:      Name,
 				Timestamp: time.Now(),
@@ -68,24 +83,24 @@ func (logger *Logger) Start() error {
 	logger.subloggersLock.Lock()
 	defer logger.subloggersLock.Unlock()
 
-	for _, key := range logger.subloggers {
-		err := key.Start()
+	for name, sublogger := range logger.subloggers {
+		err := sublogger.Start()
 		if err != nil {
-			fmt.Println(ErrStartingLogger{
-				Name:      Name,
-				Timestamp: time.Now(),
-			}.Error())
+			logger.trace.Error().Stack().Err(err).Str("subLogger", string(name)).Msg("start sublogger")
+			return err
 		}
 	}
 
-	fmt.Println("Logger started")
+	logger.trace.Info().Msg("started")
 	return nil
 }
 
 // PushRecord works as a proxy for the PushRecord method of the subloggers
 func (logger *Logger) PushRecord(record abstraction.LoggerRecord) error {
+	logger.trace.Trace().Type("record", record).Msg("push")
 	sublogger, ok := logger.subloggers[record.Name()]
 	if !ok {
+		logger.trace.Warn().Type("record", record).Str("name", string(record.Name())).Msg("no sublogger found for record")
 		return ErrLoggerNotFound{record.Name()}
 	}
 
@@ -94,21 +109,24 @@ func (logger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 // PullRecord works as a proxy for the PullRecord method of the subloggers
 func (logger *Logger) PullRecord(request abstraction.LoggerRequest) (abstraction.LoggerRecord, error) {
+	logger.trace.Trace().Type("request", request).Msg("request")
 	loggerChecked, ok := logger.subloggers[request.Name()]
 	if !ok {
+		logger.trace.Warn().Type("request", request).Str("name", string(request.Name())).Msg("no subloggger found for request")
 		return nil, ErrLoggerNotFound{request.Name()}
 	}
 	return loggerChecked.PullRecord(request)
 }
 
 func (logger *Logger) Stop() error {
-	logger.subloggersLock.Lock()
-	defer logger.subloggersLock.Unlock()
-
+	logger.trace.Info().Msg("stopping...")
 	if !logger.running.CompareAndSwap(true, false) {
-		fmt.Println("Logger already stopped")
+		logger.trace.Warn().Msg("already stopped")
 		return nil
 	}
+
+	logger.subloggersLock.Lock()
+	defer logger.subloggersLock.Unlock()
 
 	// The wait group is used in order to wait for all the subloggers to stop
 	// before closing the main logger
@@ -123,6 +141,6 @@ func (logger *Logger) Stop() error {
 	}
 	wg.Wait()
 
-	fmt.Println("Logger stopped")
+	logger.trace.Info().Msg("stopped")
 	return nil
 }
