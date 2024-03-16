@@ -129,9 +129,7 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) error {
 			return nil
 		}
 
-	switch push := push.(type) {
-	case *order_topic.Order:
-		packet, err := push.ToPacket()
+		packet, err := order.ToPacket()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error converting order to packet: %v\n", err)
 			return err
@@ -159,18 +157,18 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) error {
 			fmt.Fprintf(os.Stderr, "error casting push to logger status: %v\n", push)
 			return nil
 		}
-	case *logger_topic.Status:
+
 		var err error
-		if push.Enable() {
+		if status.Enable() {
 			err = vehicle.logger.Start()
 		} else {
 			err = vehicle.logger.Stop()
 		}
 
 		if err != nil {
-			push.Fulfill(!push.Enable())
+			status.Fulfill(!status.Enable())
 		} else {
-			push.Fulfill(push.Enable())
+			status.Fulfill(status.Enable())
 		}
 
 	case blcu_topic.DownloadName:
@@ -196,7 +194,7 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) error {
 		))
 
 	default:
-		vehicle.trace.Warn().Type("push", push).Msg("unrecognized push")
+		fmt.Printf("unknow topic %s\n", push.Topic())
 	}
 
 	return nil
