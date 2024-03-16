@@ -163,18 +163,24 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) error {
 		}
 
 	case blcu_topic.DownloadName:
+		download := push.(*blcu_topic.DownloadRequest)
+
 		vehicle.boards[boards.BlcuId].Notify(abstraction.BoardNotification(
 			&boards.DownloadEvent{
 				BoardEvent: boards.AckId,
 				BoardID:    boards.BlcuId,
+				Board:      download.Board,
 			},
 		))
 
 	case blcu_topic.UploadName:
+		upload := push.(*blcu_topic.UploadRequest)
+
 		vehicle.boards[boards.BlcuId].Notify(abstraction.BoardNotification(
 			&boards.UploadEvent{
-				EventID: boards.AckId,
-				BoardID: boards.BlcuId,
+				BoardEvent: boards.AckId,
+				Board:      upload.Board,
+				Data:       upload.Data,
 			},
 		))
 
@@ -185,7 +191,7 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) error {
 	return nil
 }
 
-func (vehicle *Vehicle) UserPull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
+func (vehicle *Vehicle) UserPull(abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
 	// TODO! Implement
 	return nil, nil
 }

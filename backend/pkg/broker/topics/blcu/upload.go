@@ -22,6 +22,7 @@ func (upload *Upload) Topic() abstraction.BrokerTopic {
 
 type UploadRequest struct {
 	Board string `json:"board"`
+	Data  []byte `json:"data"`
 }
 
 func (request UploadRequest) Topic() abstraction.BrokerTopic {
