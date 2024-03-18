@@ -49,7 +49,7 @@ func (send *Send) handleOrder(id websocket.ClientId, message *websocket.Message)
 		return err
 	}
 
-	send.api.UserPush(&order)
+	send.api.UserPush(&order) // TODO! Error handling
 	return nil
 }
 

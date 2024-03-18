@@ -6,3 +6,6 @@ secret.json
 
 # MacOS Files
 .DS_Store
+
+# JetBrains IDE
+.idea/

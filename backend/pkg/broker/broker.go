@@ -26,6 +26,14 @@ func New(baseLogger zerolog.Logger) *Broker {
 	}
 }
 
+func (broker *Broker) UserPush(push abstraction.BrokerPush) error {
+	return broker.api.UserPush(push)
+}
+
+func (broker *Broker) UserPull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
+	return broker.api.UserPull(request)
+}
+
 func (broker *Broker) Push(push abstraction.BrokerPush) error {
 	topic, ok := broker.topics[push.Topic()]
 	if !ok {
@@ -87,9 +95,4 @@ func (broker *Broker) onMessage(id websocket.ClientId, message *websocket.Messag
 	messageLogger.Debug().Msg("client message")
 
 	topic.ClientMessage(id, message)
-}
-
-func (broker *Broker) UserPush(push abstraction.BrokerPush) {
-	broker.logger.Info().Str("topic", string(push.Topic())).Msg("user push")
-	broker.api.UserPush(push)
 }
