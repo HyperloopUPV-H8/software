@@ -2,10 +2,14 @@ package vehicle
 
 import (
 	"errors"
+	"fmt"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/boards"
+	"os"
 	"strings"
 
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	blcu_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/blcu"
 	connection_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/connection"
 	data_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/data"
 	logger_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/logger"
@@ -89,8 +93,6 @@ func (vehicle *Vehicle) Notification(notification abstraction.TransportNotificat
 			vehicle.trace.Error().Stack().Err(err).Msg("logger push")
 		}
 
-	case *blcu_packet.Ack:
-		vehicle.trace.Warn().Msg("blcu ack not implemented")
 	case *state.Space:
 		err := vehicle.logger.PushRecord(&state_logger.Record{
 			Packet:    p,
@@ -106,28 +108,37 @@ func (vehicle *Vehicle) Notification(notification abstraction.TransportNotificat
 	case *order.Add:
 		vehicle.trace.Warn().Msg("state order add not implemented")
 	case *order.Remove:
-		vehicle.trace.Warn().Msg("state order remove not implemented")
-	default:
-		vehicle.trace.Warn().Type("packet", packet.Packet).Msg("unrecognized packet")
+		fmt.Fprintln(os.Stderr, "Received order.Remove packet, ignoring")
+
+	case *blcu_packet.Ack:
+		vehicle.boards[boards.BlcuId].Notify(abstraction.BoardNotification(
+			&boards.AckNotification{
+				ID: boards.AckId,
+			},
+		))
 	}
 }
 
 // UserPush is the method invoked by boards to signal the user has sent information to the back
-func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) {
-	vehicle.trace.Trace().Type("push", push).Msg("user push")
+func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) error {
+	switch push.Topic() {
+	case order_topic.SendName:
+		order, ok := push.(*order_topic.Order)
+		if !ok {
+			fmt.Fprintf(os.Stderr, "error casting push to order: %v\n", push)
+			return nil
+		}
 
-	switch push := push.(type) {
-	case *order_topic.Order:
-		packet, err := push.ToPacket()
+		packet, err := order.ToPacket()
 		if err != nil {
-			vehicle.trace.Error().Stack().Err(err).Type("topic", push).Msg("convert to packet")
-			return
+			fmt.Fprintf(os.Stderr, "error converting order to packet: %v\n", err)
+			return err
 		}
 
 		err = vehicle.transport.SendMessage(transport.NewPacketMessage(packet))
 		if err != nil {
-			vehicle.trace.Error().Stack().Err(err).Type("topic", push).Msg("sending")
-			return
+			fmt.Fprintf(os.Stderr, "error sending packet: %v\n", err)
+			return err
 		}
 
 		err = vehicle.logger.PushRecord(&order_logger.Record{
@@ -138,39 +149,76 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) {
 		})
 
 		if err != nil && !errors.Is(err, logger.ErrLoggerNotRunning{}) {
-			vehicle.trace.Error().Stack().Err(err).Msg("logger push")
+			fmt.Fprintln(os.Stderr, "Error pushing record to logger: ", err)
 		}
-	case *logger_topic.Status:
+	case logger_topic.EnableName:
+		status, ok := push.(*logger_topic.Status)
+		if !ok {
+			fmt.Fprintf(os.Stderr, "error casting push to logger status: %v\n", push)
+			return nil
+		}
+
 		var err error
-		if push.Enable() {
+		if status.Enable() {
 			err = vehicle.logger.Start()
 		} else {
 			err = vehicle.logger.Stop()
 		}
 
 		if err != nil {
-			push.Fulfill(!push.Enable())
+			status.Fulfill(!status.Enable())
 		} else {
-			push.Fulfill(push.Enable())
+			status.Fulfill(status.Enable())
 		}
+
+	case blcu_topic.DownloadName:
+		download := push.(*blcu_topic.DownloadRequest)
+
+		vehicle.boards[boards.BlcuId].Notify(abstraction.BoardNotification(
+			&boards.DownloadEvent{
+				BoardEvent: boards.AckId,
+				BoardID:    boards.BlcuId,
+				Board:      download.Board,
+			},
+		))
+
+	case blcu_topic.UploadName:
+		upload := push.(*blcu_topic.UploadRequest)
+
+		vehicle.boards[boards.BlcuId].Notify(abstraction.BoardNotification(
+			&boards.UploadEvent{
+				BoardEvent: boards.AckId,
+				Board:      upload.Board,
+				Data:       upload.Data,
+			},
+		))
+
 	default:
-		vehicle.trace.Warn().Type("push", push).Msg("unrecognized push")
+		fmt.Printf("unknow topic %s\n", push.Topic())
 	}
+
+	return nil
+}
+
+func (vehicle *Vehicle) UserPull(abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
+	// TODO! Implement
+	return nil, nil
 }
 
 // Request is the method invoked by a board to ask for a resource from the frontend
-func (vehicle *Vehicle) Request(abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
-	panic("TODO")
+func (vehicle *Vehicle) Request(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
+	return vehicle.broker.Pull(request)
 }
 
 // SendMessage is the method invoked by a board to send a message
-func (vehicle *Vehicle) SendMessage(abstraction.TransportMessage) error {
-	panic("TODO")
+func (vehicle *Vehicle) SendMessage(msg abstraction.TransportMessage) error {
+	err := vehicle.transport.SendMessage(msg)
+	return err
 }
 
 // SendPush is the method invoked by a board to send a message to the frontend
-func (vehicle *Vehicle) SendPush(abstraction.BrokerPush) error {
-	panic("TODO")
+func (vehicle *Vehicle) SendPush(push abstraction.BrokerPush) error {
+	return vehicle.broker.Push(push)
 }
 
 // ConnectionUpdate is the method invoked by transport to signal a connection state has changed
