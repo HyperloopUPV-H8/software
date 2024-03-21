@@ -1,7 +1,8 @@
 import "./App.css";
 import { TestingPage } from "pages/TestingPage/TestingPage";
 import { SplashScreen } from "components/SplashScreen/SplashScreen";
-import { WsHandlerProvider, useLoadBackend } from "common";
+import { WsHandlerProvider } from "common";
+import { useLoadBackend } from "common";
 
 
 function App() {

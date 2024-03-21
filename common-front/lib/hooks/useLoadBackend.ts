@@ -28,8 +28,8 @@ export const useLoadBackend : UseLoadBackend = (isProduction) => {
         : `${config.devServer.ip}:${config.devServer.port}/${config.paths.websocket}`;
 
     const POD_DATA_DESCRIPTION_URL = isProduction
-        ? `${config.prodServer.ip}:${config.prodServer.port}/${config.paths.podDataDescription}`
-        : `${config.devServer.ip}:${config.devServer.port}/${config.paths.podDataDescription}`;
+        ? `http://${config.prodServer.ip}:${config.prodServer.port}/${config.paths.podDataDescription}`
+        : `http://${config.devServer.ip}:${config.devServer.port}/${config.paths.podDataDescription}`;
 
     useEffect(() => {
         Promise.all([
