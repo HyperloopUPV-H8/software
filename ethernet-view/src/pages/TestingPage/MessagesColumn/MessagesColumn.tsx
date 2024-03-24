@@ -1,4 +1,4 @@
-import styles from "pages/HomePage/MessagesColumn/MessagesColumn.module.scss";
+import styles from "pages/TestingPage/MessagesColumn/MessagesColumn.module.scss";
 import { SplitLayout } from "layouts/SplitLayout/SplitLayout";
 import { Orientation } from "hooks/useSplit/Orientation";
 import { TabLayout } from "layouts/TabLayout/TabLayout";

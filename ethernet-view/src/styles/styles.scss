@@ -5,11 +5,15 @@ $background-color: #dce3eb;
 $title-color: #45677d;
 $normal-text-color: #373c43;
 $alternate-text-color: #505868;
-$orange: hsl(29, 88%, 57%);
+$orange: #ee7623;
 $blue: #317ae7;
 $base-color: hsl(212, 27%, 55%);
 
 $dark-normal-text-color: #bec6d2;
+
+@function getColor($name, $lightness) {
+    @return var(--color-#{$name}-#{$lightness});
+}
 
 // FONTS
 $sans-font: Inter;
