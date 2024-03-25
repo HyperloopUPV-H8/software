@@ -1,7 +1,8 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LogSession, UploadState } from "../LogLoader";
 import styles from "./Dropzone.module.scss"
 import { processLoggerSession } from "../LogsProcessor";
+import { Controls } from "../Controls/Controls";
 
 type Props = {
     uploadState: UploadState;
@@ -9,40 +10,43 @@ type Props = {
     addLogSession: (logSession: LogSession) => void;
 }
 
-export const Dropzone = ({uploadState, setUploadState}: Props) => {
+export const Dropzone = ({uploadState, setUploadState, addLogSession}: Props) => {
 
     const dropZone = useRef<HTMLDivElement>(null);
     const [isDraggingOver, setIsDraggingOver] = useState<boolean>(false);
-    const [dropZoneText, setDropZoneText] = useState<string>("Drop the log session directory");
-    const [draftSession, setDraftSession] = useState<Map<string, {time: Date, value: number}[]>>();
+    const [dropZoneText, setDropZoneText] = useState<string>();
+    const [draftSession, setDraftSession] = useState<LogSession>();
+
+    useEffect(() => {
+        setDropZoneText(`${
+            uploadState === UploadState.UPLOADING ? "Uploading..." :
+            uploadState === UploadState.SUCCESS ? "Upload successful" :
+            uploadState === UploadState.ERROR ? "Upload failed" : 
+            "Drop a logger session directory here"
+        }`);
+    }, [uploadState]);
 
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         const files = e.dataTransfer.items;
-        if(files.length != 1) {
-            setUploadState(UploadState.ERROR);
-            setDropZoneText("Please drop only one directory");
-        };
+        if(files.length != 1) setUploadState(UploadState.ERROR);
         let file = files[0].webkitGetAsEntry();
         if(file && file.isDirectory) {
             setUploadState(UploadState.UPLOADING);
-            setDropZoneText("Uploading...");
             const loggerSession = processLoggerSession(file as FileSystemDirectoryEntry);
             loggerSession.then((session) => {
                 setDraftSession(new Map().set(file.name, session));
                 setUploadState(UploadState.SUCCESS);
-                setDropZoneText("Upload successful");
-            }).catch((err) => {
+            }).catch(() => {
                 setUploadState(UploadState.ERROR);
-                setDropZoneText("Upload failed: " + err.message);
             });
         } else {
             setUploadState(UploadState.ERROR);
-            setDropZoneText("Upload failed: Please drop a directory");
         }
     };
 
     return (
+        <div>
         <div 
             className={`${styles.dropZone} 
             ${isDraggingOver ? styles.Active : ""}
@@ -67,5 +71,25 @@ export const Dropzone = ({uploadState, setUploadState}: Props) => {
                 <p>{dropZoneText}</p>
             </div>
         </div>
+
+        
+        <Controls
+            uploadState={uploadState}
+            setUploadState={setUploadState}
+            onLoad={() => {
+                if(draftSession) {
+                    addLogSession(draftSession);
+                    setUploadState(UploadState.IDLE);
+                    setDraftSession(undefined);
+                }
+            }}
+            onRemove={() => {
+                setUploadState(UploadState.IDLE);
+                setDraftSession(undefined);
+            }}
+        />
+
+        </div>
     )
 }
+
