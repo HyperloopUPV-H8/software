@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Dropzone } from "./Dropzone/Dropzone"
+import { Controls } from "./Controls/Controls";
 
 export enum UploadState {
     IDLE = "idle",
@@ -23,6 +24,7 @@ export const LogLoader = () => {
                 setUploadState={setUploadState}
                 addLogSession={(logSession: LogSession) => setLogSessions([...logSessions, logSession])}
             />
+            <Controls />
         </>
     )
 }
