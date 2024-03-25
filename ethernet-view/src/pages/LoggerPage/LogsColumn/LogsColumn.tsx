@@ -1,5 +1,6 @@
 import { TabItem } from "layouts/TabLayout/TabItem";
 import { TabLayout } from "layouts/TabLayout/TabLayout"
+import { LogLoader } from "./LogLoader/LogLoader";
 
 export const LogsColumn = () => {
 
@@ -8,7 +9,7 @@ export const LogsColumn = () => {
             id: "logs",
             name: "Logs",
             icon: null,
-            component: null
+            component: <LogLoader />
         }
     ];
 
