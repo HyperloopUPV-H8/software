@@ -1,16 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { LogSession, UploadState } from "../LogLoader";
+import { LogSession, UploadInformation, UploadState } from "../LogLoader";
 import styles from "./Dropzone.module.scss"
 import { processLoggerSession } from "../LogsProcessor";
 import { Controls } from "../Controls/Controls";
 
 type Props = {
-    uploadState: UploadState;
-    setUploadState: (newUploadState: UploadState) => void;
+    uploadInformation: UploadInformation;
+    setUploadInformation: (newUploadInformation: UploadInformation) => void;
     addLogSession: (logSession: LogSession) => void;
 }
 
-export const Dropzone = ({uploadState, setUploadState, addLogSession}: Props) => {
+export const Dropzone = ({uploadInformation, setUploadInformation, addLogSession}: Props) => {
 
     const dropZone = useRef<HTMLDivElement>(null);
     const [isDraggingOver, setIsDraggingOver] = useState<boolean>(false);
@@ -19,29 +19,29 @@ export const Dropzone = ({uploadState, setUploadState, addLogSession}: Props) =>
 
     useEffect(() => {
         setDropZoneText(`${
-            uploadState === UploadState.UPLOADING ? "Uploading..." :
-            uploadState === UploadState.SUCCESS ? "Upload successful" :
-            uploadState === UploadState.ERROR ? "Upload failed" : 
+            uploadInformation.state === UploadState.UPLOADING ? "Uploading..." :
+            uploadInformation.state === UploadState.SUCCESS ? "Upload successful" :
+            uploadInformation.state === UploadState.ERROR ? "Upload failed" : 
             "Drop a logger session directory here"
         }`);
-    }, [uploadState]);
+    }, [uploadInformation]);
 
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         const files = e.dataTransfer.items;
-        if(files.length != 1) setUploadState(UploadState.ERROR);
+        if(files.length != 1) setUploadInformation({state: UploadState.ERROR, errorMessage: "Only one file or directory is allowed"});
         let file = files[0].webkitGetAsEntry();
         if(file && file.isDirectory) {
-            setUploadState(UploadState.UPLOADING);
+            setUploadInformation({state: UploadState.UPLOADING});
             const loggerSession = processLoggerSession(file as FileSystemDirectoryEntry);
             loggerSession.then((session) => {
                 setDraftSession(new Map().set(file.name, session));
-                setUploadState(UploadState.SUCCESS);
-            }).catch(() => {
-                setUploadState(UploadState.ERROR);
+                setUploadInformation({state: UploadState.SUCCESS});
+            }).catch((error) => {
+                setUploadInformation({state: UploadState.ERROR, errorMessage: error});
             });
         } else {
-            setUploadState(UploadState.ERROR);
+            setUploadInformation({state: UploadState.ERROR, errorMessage: "Only directories are allowed"});
         }
     };
 
@@ -49,10 +49,10 @@ export const Dropzone = ({uploadState, setUploadState, addLogSession}: Props) =>
         <div>
         <div 
             className={`${styles.dropZone} 
-            ${isDraggingOver ? styles.Active : ""}
-            ${uploadState === UploadState.UPLOADING ? styles.Uploading : ""}
-            ${uploadState === UploadState.SUCCESS ? styles.Success : ""}
-            ${uploadState === UploadState.ERROR ? styles.Error : ""}
+                ${isDraggingOver ? styles.Active : ""}
+                ${uploadInformation.state === UploadState.UPLOADING ? styles.Uploading : ""}
+                ${uploadInformation.state === UploadState.SUCCESS ? styles.Success : ""}
+                ${uploadInformation.state === UploadState.ERROR ? styles.Error : ""}
             `}
             ref={dropZone}
             onDragEnter={e => {
@@ -68,23 +68,26 @@ export const Dropzone = ({uploadState, setUploadState, addLogSession}: Props) =>
             onDrop={handleDrop}
         >
             <div className={styles.dropZoneText}>
-                <p>{dropZoneText}</p>
+                <p>
+                    {dropZoneText}
+                    <br/>
+                    {uploadInformation.errorMessage}
+                </p>
             </div>
         </div>
 
         
         <Controls
-            uploadState={uploadState}
-            setUploadState={setUploadState}
+            uploadInformation={uploadInformation}
             onLoad={() => {
                 if(draftSession) {
                     addLogSession(draftSession);
-                    setUploadState(UploadState.IDLE);
+                    setUploadInformation({state: UploadState.IDLE});
                     setDraftSession(undefined);
                 }
             }}
             onRemove={() => {
-                setUploadState(UploadState.IDLE);
+                setUploadInformation({state: UploadState.IDLE});
                 setDraftSession(undefined);
             }}
         />
@@ -93,3 +96,7 @@ export const Dropzone = ({uploadState, setUploadState, addLogSession}: Props) =>
     )
 }
 
+function checkFile(file: FileSystemEntry): boolean {
+    
+    return false;
+}

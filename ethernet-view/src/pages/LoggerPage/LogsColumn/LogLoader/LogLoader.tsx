@@ -9,12 +9,17 @@ export enum UploadState {
     ERROR = "error",
 }
 
+export interface UploadInformation {
+    state: UploadState;
+    errorMessage?: string;
+}
+
 export type LogSession = Map<string, {time: Date, value: number}[]>;
 export type LogSessionCollection = Map<string, {time: Date, value: number}[]>[];
 
 export const LogLoader = () => {
 
-    const [uploadState, setUploadState] = useState<UploadState>(UploadState.IDLE);
+    const [uploadInformation, setUploadInformation] = useState<UploadInformation>({state: UploadState.IDLE});
     const [logSessions, setLogSessions] = useState<LogSessionCollection>([]);
 
     useEffect(() => {
@@ -24,8 +29,8 @@ export const LogLoader = () => {
     return (
         <div className={styles.logLoaderWrapper}>
             <Dropzone 
-                uploadState={uploadState}
-                setUploadState={setUploadState}
+                uploadInformation={uploadInformation}
+                setUploadInformation={setUploadInformation}
                 addLogSession={(logSession: LogSession) => setLogSessions([...logSessions, logSession])}
             />
         </div>
