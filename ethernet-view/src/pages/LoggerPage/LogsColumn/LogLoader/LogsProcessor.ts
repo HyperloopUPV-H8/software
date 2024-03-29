@@ -14,33 +14,45 @@ import Papa from 'papaparse';
  * a `value` property of type number, representing an array of points with all the data
  * retrieved from the CSV file.
  */
-export const processLoggerSession = async (directory: FileSystemDirectoryEntry): Promise<Map<string, {time: Date, value: number}[]>> => {
-    const session = new Map<string, {time: Date, value: number}[]>();
+
+type Session = Map<string, {time: Date, value: number}[]>;
+
+export async function extractLoggerSession (directory: FileSystemDirectoryEntry): Promise<Session> {
+    const session: Session = new Map();
     const files = await getFilesFromDirectory(directory);
+    if(files.length === 0) throw new Error("No files found in the directory.");
     
     for(const file of files) {
-        if(file.isFile && file.name.endsWith(".csv")) {
+        try {
+            if(!file.isFile) throw new Error(`Invalid entry ${file.name}. Expected a file.`);
+            if(!file.name.endsWith(".csv")) throw new Error(`Invalid file ${file.name}. Expected a CSV file.`);
             (file as FileSystemFileEntry).file((file) => {
                 Papa.parse(file, {
                     complete: (result) => {
-                        const measurementLogs = [] as {time: Date, value: number}[];
+                        const measurementPoints = [] as {time: Date, value: number}[];
                         for(const row of result.data) {
                             if(isValidLog(row)) {
                                 const [timestamp, , , value] = row as [string, string, string, string];
-                                measurementLogs.push({time: new Date(timestamp), value: parseFloat(value)});
+                                measurementPoints.push({time: new Date(timestamp), value: parseFloat(value)});
                             }
                         }
-                        session.set(file.name, measurementLogs);
+                        session.set(file.name.replace(".csv", ""), measurementPoints);
                     },
                     error: (err) => {
-                        console.error(err);
+                        throw new Error(`Error parsing file ${file.name}. ${err}`);
                     },
                     header: false
                 });
             });
+        } catch(err) {
+            if(err instanceof Error) {
+                console.error(err.message);
+            } else {
+                console.error("An unexpected error occurred");
+            }
         }
-    }
-
+    };
+    
     return session;
 };
 
@@ -52,7 +64,7 @@ export const processLoggerSession = async (directory: FileSystemDirectoryEntry):
  * @returns The function `getFilesFromDirectory` returns a Promise that resolves to an array of
  * `FileSystemEntry` objects representing the files in the specified directory.
  */
-export const getFilesFromDirectory = async (folder: FileSystemDirectoryEntry): Promise<FileSystemEntry[]> => {
+export async function getFilesFromDirectory(folder: FileSystemDirectoryEntry): Promise<FileSystemEntry[]> {
     const reader = folder.createReader();
     const entries = await new Promise<FileSystemEntry[]>((resolve, reject) => {
         reader.readEntries((entries) => {

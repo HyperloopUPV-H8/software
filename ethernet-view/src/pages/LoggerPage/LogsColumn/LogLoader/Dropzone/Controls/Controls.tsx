@@ -1,6 +1,6 @@
 import { Button } from "components/FormComponents/Button/Button"
 import styles from "./Controls.module.scss"
-import { UploadInformation, UploadState } from "../LogLoader";
+import { UploadInformation, UploadState } from "../../LogLoader";
 
 type Props = {
     uploadInformation: UploadInformation;

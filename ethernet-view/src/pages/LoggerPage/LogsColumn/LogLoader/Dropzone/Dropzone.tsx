@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { LogSession, UploadInformation, UploadState } from "../LogLoader";
 import styles from "./Dropzone.module.scss"
-import { processLoggerSession } from "../LogsProcessor";
-import { Controls } from "../Controls/Controls";
+import { extractLoggerSession } from "../LogsProcessor";
+import { Controls } from "./Controls/Controls";
+import { useDropzone } from "./useDropzone";
 
-type Props = {
+interface Props {
     uploadInformation: UploadInformation;
     setUploadInformation: (newUploadInformation: UploadInformation) => void;
     addLogSession: (logSession: LogSession) => void;
@@ -12,36 +13,37 @@ type Props = {
 
 export const Dropzone = ({uploadInformation, setUploadInformation, addLogSession}: Props) => {
 
-    const dropZone = useRef<HTMLDivElement>(null);
     const [isDraggingOver, setIsDraggingOver] = useState<boolean>(false);
-    const [dropZoneText, setDropZoneText] = useState<string>();
-    const [draftSession, setDraftSession] = useState<LogSession>();
+    const {dropZoneText, draftSession, setDraftSession} = useDropzone({uploadInformation});
 
-    useEffect(() => {
-        setDropZoneText(`${
-            uploadInformation.state === UploadState.UPLOADING ? "Uploading..." :
-            uploadInformation.state === UploadState.SUCCESS ? "Upload successful" :
-            uploadInformation.state === UploadState.ERROR ? "Upload failed" : 
-            "Drop a logger session directory here"
-        }`);
-    }, [uploadInformation]);
+    const uploadSession = (directory: FileSystemDirectoryEntry) => {
+        setUploadInformation({state: UploadState.UPLOADING});
+        const loggerSession = extractLoggerSession(directory as FileSystemDirectoryEntry);
+        loggerSession.then((session) => {
+            console.log(session);
+            setDraftSession({name: directory.name, measurementLogs: session} as LogSession);
+            setUploadInformation({state: UploadState.SUCCESS});
+        }).catch((error) => {
+            if(error instanceof Error) {
+                setUploadInformation({state: UploadState.ERROR, errorMessage: error.message});
+            } else {
+                setUploadInformation({state: UploadState.ERROR, errorMessage: "An unexpected error occurred"});
+            }
+        });
+    };
 
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
-        const files = e.dataTransfer.items;
-        if(files.length != 1) setUploadInformation({state: UploadState.ERROR, errorMessage: "Only one file or directory is allowed"});
-        let file = files[0].webkitGetAsEntry();
-        if(file && file.isDirectory) {
-            setUploadInformation({state: UploadState.UPLOADING});
-            const loggerSession = processLoggerSession(file as FileSystemDirectoryEntry);
-            loggerSession.then((session) => {
-                setDraftSession(new Map().set(file.name, session));
-                setUploadInformation({state: UploadState.SUCCESS});
-            }).catch((error) => {
-                setUploadInformation({state: UploadState.ERROR, errorMessage: error});
-            });
-        } else {
-            setUploadInformation({state: UploadState.ERROR, errorMessage: "Only directories are allowed"});
+        try {
+            validateEntry(e.dataTransfer.items);
+            const directory = e.dataTransfer.items[0].webkitGetAsEntry();
+            uploadSession(directory as FileSystemDirectoryEntry);
+        } catch(err) {
+            if (err instanceof Error){
+                setUploadInformation({state: UploadState.ERROR, errorMessage: err.cause as string});
+            } else {
+                setUploadInformation({state: UploadState.ERROR, errorMessage: "An unexpected error occurred"});
+            }
         }
     };
 
@@ -54,7 +56,6 @@ export const Dropzone = ({uploadInformation, setUploadInformation, addLogSession
                 ${uploadInformation.state === UploadState.SUCCESS ? styles.Success : ""}
                 ${uploadInformation.state === UploadState.ERROR ? styles.Error : ""}
             `}
-            ref={dropZone}
             onDragEnter={e => {
                 e.preventDefault();
                 setIsDraggingOver(true);
@@ -96,7 +97,14 @@ export const Dropzone = ({uploadInformation, setUploadInformation, addLogSession
     )
 }
 
-function checkFile(file: FileSystemEntry): boolean {
-    
-    return false;
+/**
+ * The function `validateEntry` checks if only one directory is selected from a list of files.
+ * @param {DataTransferItemList} files - The `files` parameter in the `validateEntry` function is of
+ * type `DataTransferItemList`, which represents a list of items.
+ */
+function validateEntry(files: DataTransferItemList) {
+    if(files.length != 1) throw new Error("Only one file or directory is allowed");
+    let file = files[0].webkitGetAsEntry();
+    if(!file) throw new Error("Invalid file");
+    if(!file.isDirectory) throw new Error("Only directories are allowed");
 }

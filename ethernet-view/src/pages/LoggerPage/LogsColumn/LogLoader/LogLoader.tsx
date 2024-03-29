@@ -14,8 +14,11 @@ export interface UploadInformation {
     errorMessage?: string;
 }
 
-export type LogSession = Map<string, {time: Date, value: number}[]>;
-export type LogSessionCollection = Map<string, {time: Date, value: number}[]>[];
+export interface LogSession {
+    name: string;
+    measurementLogs: Map<string, {time: Date, value: number}[]>;
+}
+export type LogSessionCollection = LogSession[];
 
 export const LogLoader = () => {
 
@@ -24,7 +27,7 @@ export const LogLoader = () => {
 
     useEffect(() => {
         console.log(logSessions);
-    })
+    }, [logSessions])
 
     return (
         <div className={styles.logLoaderWrapper}>
