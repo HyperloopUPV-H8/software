@@ -1,16 +1,21 @@
 import { ChartsColumn } from "pages/LoggerPage/ChartsColumn/ChartsColumn";
 import { LogsColumn } from "./LogsColumn/LogsColumn";
-import styles from "./LoggerPage.module.scss";
+import { SplitLayout } from "layouts/SplitLayout/SplitLayout";
 
 export const LoggerPage = () => {
     return (
-        <div className={styles.LoggerPage}>
-            <div className={styles.LogsColumn}>
-                <LogsColumn />
-            </div>
-            <div className={styles.ChartsColumn}>
-                <ChartsColumn />
-            </div>
-        </div>
+        <SplitLayout 
+            components={[
+                {
+                    component: <LogsColumn />,
+                    collapsedIcon: ""
+                },
+                {
+                    component: <ChartsColumn />,
+                    collapsedIcon: ""
+                }
+            ]}
+            initialLengths={[0.3, 0.7]}
+        />
     );
 };

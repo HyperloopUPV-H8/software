@@ -13,11 +13,11 @@ export type SplitElement = {
     minLength: number;
 };
 
-export function useSplit(minLengths: number[], direction: Orientation) {
+export function useSplit(initialLengths: number[], minLengths: number[], direction: Orientation) {
     const [elements, setElements] = useState<SplitElement[]>(
-        minLengths.map((minLength) => ({
-            length: 1 / minLengths.length,
-            minLength: minLength,
+        initialLengths.map((length, index) => ({
+            length,
+            minLength: minLengths[index],
         }))
     );
 
