@@ -1,3 +1,5 @@
+import { LogItem } from "./LogItem/LogItem";
+import styles from "./LogList.module.scss"
 
 interface Props {
     logNames: string[];
@@ -5,9 +7,9 @@ interface Props {
 
 export const LogList = ({logNames}: Props) => {
     return (
-        <div>
+        <div className={styles.logListWrapper}>
             {logNames.map((logName) => (
-                <div key={logName}>{logName}</div>
+                <LogItem key={logName} logName={logName} />
             ))}
         </div>
     )
