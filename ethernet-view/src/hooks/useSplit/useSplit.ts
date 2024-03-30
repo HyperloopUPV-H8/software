@@ -13,7 +13,12 @@ export type SplitElement = {
     minLength: number;
 };
 
-export function useSplit(initialLengths: number[], minLengths: number[], direction: Orientation) {
+export function useSplit(initialLengths: number[] | undefined, minLengths: number[], direction: Orientation) {
+
+    if(!initialLengths || initialLengths.length != minLengths.length || initialLengths.reduce((prev, curr) => prev + curr, 0) != 1) {
+        initialLengths = minLengths.map(() => 1 / minLengths.length);
+    }
+
     const [elements, setElements] = useState<SplitElement[]>(
         initialLengths.map((length, index) => ({
             length,

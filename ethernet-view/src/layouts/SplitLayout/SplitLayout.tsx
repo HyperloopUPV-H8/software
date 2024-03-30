@@ -17,9 +17,6 @@ type Props = {
 export const SplitLayout = ({ initialLengths, components, orientation = Orientation.HORIZONTAL }: Props) => {
 
     const minLengths = components.map(() => 0.05);
-    if(!initialLengths || initialLengths.length !== components.length) {
-        initialLengths = components.map(() => 1 / components.length);
-    }
     const [splitElements, onSeparatorMouseDown] = useSplit(initialLengths, minLengths, orientation);
 
     return (
