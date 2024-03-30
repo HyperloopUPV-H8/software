@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { Dropzone } from "./Dropzone/Dropzone"
 import styles from "./LogLoader.module.scss"
+import { LogList } from "./LogList/LogList";
 
 export enum UploadState {
     IDLE = "idle",
@@ -31,11 +32,15 @@ export const LogLoader = () => {
 
     return (
         <div className={styles.logLoaderWrapper}>
+
+            <LogList logNames={logSessions.map((logSession) => logSession.name)} />
+
             <Dropzone 
                 uploadInformation={uploadInformation}
                 setUploadInformation={setUploadInformation}
                 addLogSession={(logSession: LogSession) => setLogSessions([...logSessions, logSession])}
             />
+            
         </div>
     )
 }
