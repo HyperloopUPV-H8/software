@@ -1,18 +1,21 @@
-import { Orientation } from "hooks/useSplit/Orientation";
-import { SplitLayout } from "layouts/SplitLayout/SplitLayout";
 import { ChartsColumn } from "pages/LoggerPage/ChartsColumn/ChartsColumn";
-import chart from "assets/svg/chart.svg"
+import { LogsColumn } from "./LogsColumn/LogsColumn";
+import { SplitLayout } from "layouts/SplitLayout/SplitLayout";
 
 export const LoggerPage = () => {
     return (
-        <SplitLayout
+        <SplitLayout 
             components={[
                 {
-                    component: <ChartsColumn />,
-                    collapsedIcon: chart,
+                    component: <LogsColumn />,
+                    collapsedIcon: ""
                 },
+                {
+                    component: <ChartsColumn />,
+                    collapsedIcon: ""
+                }
             ]}
-            orientation={Orientation.HORIZONTAL}
-        ></SplitLayout>
+            initialLengths={[0.3, 0.7]}
+        />
     );
 };

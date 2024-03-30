@@ -4,7 +4,7 @@ import { lightenHSL } from "utils/color";
 
 type Props = {
     label: string;
-    onClick: (ev: React.MouseEvent) => void;
+    onClick?: (ev: React.MouseEvent) => void;
     disabled?: boolean;
     color?: string;
     className?: string;
@@ -13,7 +13,7 @@ type Props = {
 export const Button = ({
     label,
     color = "hsl(29, 88%, 57%)",
-    onClick,
+    onClick = () => {},
     disabled,
     className = "",
 }: Props) => {

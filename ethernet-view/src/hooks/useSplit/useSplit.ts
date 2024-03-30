@@ -13,11 +13,34 @@ export type SplitElement = {
     minLength: number;
 };
 
-export function useSplit(minLengths: number[], direction: Orientation) {
+/**
+ * The `useSplit` function in TypeScript is used to manage resizable elements with specified initial
+ * lengths and minimum lengths in a given direction.
+ * @param {number[] | undefined} initialLengths - The `initialLengths` parameter is an array of numbers
+ * representing the initial lengths of the elements to be split. It can be either `undefined` or an
+ * array of numbers. If it is `undefined`, if its length is not equal to the length of the
+ * `minLengths` array or if its sum is not equal to 1, the `initialLengths` will be set proportionally equal.
+ * @param {number[]} minLengths - The `minLengths` parameter in the `useSplit` function represents an
+ * array of minimum lengths for each split element. These minimum lengths determine the smallest size
+ * each element can be resized to. If a user tries to resize an element below its minimum length, the
+ * element will be collapsed.
+ * @param {Orientation} direction - The `direction` parameter in the `useSplit` function is used to
+ * determine the orientation of the split elements. It is of type `Orientation`, which is likely an
+ * enum or type that specifies whether the split should be horizontal or vertical. This helps in
+ * calculating the resizing of elements based on the direction
+ * @returns The `useSplit` function returns an array containing the `elements` state and the
+ * `handleMouseDown` function from the `separatorEventHandler`.
+ */
+export function useSplit(minLengths: number[], direction: Orientation, initialLengths?: number[]) {
+
+    if(!initialLengths || initialLengths.length != minLengths.length || initialLengths.reduce((prev, curr) => prev + curr, 0) != 1) {
+        initialLengths = minLengths.map(() => 1 / minLengths.length);
+    }
+
     const [elements, setElements] = useState<SplitElement[]>(
-        minLengths.map((minLength) => ({
-            length: 1 / minLengths.length,
-            minLength: minLength,
+        initialLengths.map((length, index) => ({
+            length,
+            minLength: minLengths[index],
         }))
     );
 
