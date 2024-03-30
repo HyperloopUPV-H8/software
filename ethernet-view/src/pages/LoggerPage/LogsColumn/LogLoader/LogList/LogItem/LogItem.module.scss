@@ -1,3 +1,5 @@
+@use "src/styles/styles.scss";
+
 .logItemWrapper {
     display: flex;
     align-items: center;
@@ -18,5 +20,8 @@
 }
 
 .title {
-    font-size: 1.2rem;
+    color: styles.$title-color;
+    font-size: 1.6rem;
+    font-family: styles.$code-font;
+    font-style: italic;
 }

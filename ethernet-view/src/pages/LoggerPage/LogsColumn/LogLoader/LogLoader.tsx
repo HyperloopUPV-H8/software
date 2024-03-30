@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Dropzone } from "./Dropzone/Dropzone"
 import styles from "./LogLoader.module.scss"
 import { LogList } from "./LogList/LogList";
@@ -26,10 +26,6 @@ export const LogLoader = () => {
     const [uploadInformation, setUploadInformation] = useState<UploadInformation>({state: UploadState.IDLE});
     const [logSessions, setLogSessions] = useState<LogSessionCollection>([]);
 
-    useEffect(() => {
-        console.log(logSessions);
-    }, [logSessions])
-
     return (
         <div className={styles.logLoaderWrapper}>
 
@@ -40,7 +36,7 @@ export const LogLoader = () => {
                 setUploadInformation={setUploadInformation}
                 addLogSession={(logSession: LogSession) => setLogSessions([...logSessions, logSession])}
             />
-            
+
         </div>
     )
 }
