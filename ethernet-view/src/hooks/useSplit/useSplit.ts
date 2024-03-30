@@ -31,7 +31,7 @@ export type SplitElement = {
  * @returns The `useSplit` function returns an array containing the `elements` state and the
  * `handleMouseDown` function from the `separatorEventHandler`.
  */
-export function useSplit(initialLengths: number[] | undefined, minLengths: number[], direction: Orientation) {
+export function useSplit(minLengths: number[], direction: Orientation, initialLengths?: number[]) {
 
     if(!initialLengths || initialLengths.length != minLengths.length || initialLengths.reduce((prev, curr) => prev + curr, 0) != 1) {
         initialLengths = minLengths.map(() => 1 / minLengths.length);
