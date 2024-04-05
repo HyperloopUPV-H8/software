@@ -1,7 +1,7 @@
-import { useState } from "react"
 import { Dropzone } from "./Dropzone/Dropzone"
 import styles from "./LogLoader.module.scss"
 import { LogList } from "./LogList/LogList";
+import { useLogStore } from "pages/LoggerPage/useLogStore";
 
 export enum UploadState {
     IDLE = "idle",
@@ -15,27 +15,16 @@ export interface UploadInformation {
     errorMessage?: string;
 }
 
-export interface LogSession {
-    name: string;
-    measurementLogs: Map<string, {time: Date, value: number}[]>;
-}
-export type LogSessionCollection = LogSession[];
-
 export const LogLoader = () => {
 
-    const [uploadInformation, setUploadInformation] = useState<UploadInformation>({state: UploadState.IDLE});
-    const [logSessions, setLogSessions] = useState<LogSessionCollection>([]);
+    const logSessions = useLogStore(state => state.logSessions);
 
     return (
         <div className={styles.logLoaderWrapper}>
 
             <LogList logNames={logSessions.map((logSession) => logSession.name)} />
 
-            <Dropzone 
-                uploadInformation={uploadInformation}
-                setUploadInformation={setUploadInformation}
-                addLogSession={(logSession: LogSession) => setLogSessions([...logSessions, logSession])}
-            />
+            <Dropzone />
 
         </div>
     )

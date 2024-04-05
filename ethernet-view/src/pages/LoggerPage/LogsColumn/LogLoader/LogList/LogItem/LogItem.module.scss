@@ -12,7 +12,7 @@
 }
 
 .icon {
-    width: 1.8rem;
+    width: 1.6rem;
 
     img {
         width: 100%;
@@ -24,4 +24,8 @@
     font-size: 1.6rem;
     font-family: styles.$code-font;
     font-style: italic;
+}
+
+.active {
+    color: styles.$orange;
 }
