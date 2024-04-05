@@ -12,11 +12,7 @@ func TestTFTP(t *testing.T) {
 	fileContent := "Hello, TFTP World!"
 
 	// Initialize TFTP client with a mock progress callback
-	client, err := tftp.NewClient(serverAddr,
-		tftp.WithProgressCallback(func(file string, amount int) {
-			t.Logf("Progress for %s: %d bytes", file, amount)
-		}),
-	)
+	client, err := tftp.NewClient(serverAddr)
 	if err != nil {
 		t.Fatalf("Failed to create TFTP client: %v", err)
 	}
