@@ -27,7 +27,7 @@ func TestTCP(t *testing.T) {
 	logger := zerolog.New(os.Stderr).With().Timestamp().Logger()
 
 	// Server setup
-	serverAddr := "127.0.0.1:50400"
+	serverAddr := "127.0.0.1:3000"
 	server := tcp.NewServer(serverAddr, tcp.ServerConfig{}, logger)
 	go func() {
 		if err := server.Listen(); err != nil {
@@ -49,9 +49,9 @@ func TestTCP(t *testing.T) {
 		Timestamp: time.Now(),
 		Socket: Socket{
 			SrcIP:   "127.0.0.1",
-			SrcPort: 50400,
-			DstIP:   "127.0.0.2",
-			DstPort: 50400,
+			SrcPort: 3000,
+			DstIP:   "127.0.0.1",
+			DstPort: 3000,
 		},
 		Data: []byte("hello"),
 	}

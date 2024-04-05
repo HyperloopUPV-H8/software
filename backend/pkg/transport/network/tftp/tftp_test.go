@@ -7,7 +7,7 @@ import (
 )
 
 func TestTFTP(t *testing.T) {
-	serverAddr := "127.0.0.1:50400"
+	serverAddr := "127.0.0.1:3000"
 	fileName := "testfile.txt"
 	fileContent := "Hello, TFTP World!"
 
