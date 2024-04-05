@@ -23,7 +23,7 @@ type Payload struct {
 	Data      []byte
 }
 
-func TestTCPIntegrationWithPayload(t *testing.T) {
+func TestTCP(t *testing.T) {
 	logger := zerolog.New(os.Stderr).With().Timestamp().Logger()
 
 	// Server setup

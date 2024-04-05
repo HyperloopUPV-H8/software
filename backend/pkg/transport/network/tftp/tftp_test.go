@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestTFTPClientFileOperations(t *testing.T) {
+func TestTFTP(t *testing.T) {
 	serverAddr := "127.0.0.1:50400"
 	fileName := "testfile.txt"
 	fileContent := "Hello, TFTP World!"
