@@ -24,7 +24,8 @@ type Payload struct {
 }
 
 func TestTCP(t *testing.T) {
-	logger := zerolog.New(os.Stderr).With().Timestamp().Logger()
+	writer := os.Stdout
+	logger := zerolog.New(writer)
 
 	// Server setup
 	serverAddr := "127.0.0.1:3000"
