@@ -6,9 +6,12 @@
 }
 
 .name {
+    display: flex;
+    gap: .6rem;
     font-family: Inter;
     font-weight: 600;
     color: hsl(29, 88%, 70%);
+    cursor: pointer;
 }
 
 .orders,
