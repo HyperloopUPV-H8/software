@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import zustymiddlewarets from "zustymiddlewarets";
 
 export interface LogSession {
     name: string;
