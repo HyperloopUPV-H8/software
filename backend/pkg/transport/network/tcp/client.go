@@ -40,7 +40,7 @@ func (client *Client) Dial() (net.Conn, error) {
 	var err error
 	var conn net.Conn
 	client.logger.Info().Msg("dialing")
-	for ; client.currentRetries < client.config.MaxConnectionRetries; client.currentRetries++ {
+	for ; client.config.MaxConnectionRetries > 0 && client.currentRetries < client.config.MaxConnectionRetries; client.currentRetries++ {
 		conn, err = client.config.DialContext(client.config.Context, "tcp", client.address)
 		if err == nil {
 			client.logger.Info().Msg("connected")
