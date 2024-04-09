@@ -1,43 +1,39 @@
 import { useState } from "react";
-import { LogSession, UploadInformation, UploadState } from "../LogLoader";
+import { UploadInformation, UploadState } from "../LogLoader";
 import styles from "./Dropzone.module.scss"
 import { extractLoggerSession } from "../LogsProcessor";
 import { Controls } from "./Controls/Controls";
 import { useDropzone } from "./useDropzone";
+import { LogSession, useLogStore } from "pages/LoggerPage/useLogStore";
 
-interface Props {
-    uploadInformation: UploadInformation;
-    setUploadInformation: (newUploadInformation: UploadInformation) => void;
-    addLogSession: (logSession: LogSession) => void;
-}
+export const Dropzone = () => {
 
-export const Dropzone = ({uploadInformation, setUploadInformation, addLogSession}: Props) => {
-
+    const [uploadInformation, setUploadInformation] = useState<UploadInformation>({state: UploadState.IDLE});
     const [isDraggingOver, setIsDraggingOver] = useState<boolean>(false);
     const {dropZoneText, draftSession, setDraftSession} = useDropzone({uploadInformation});
+    const addLogSession = useLogStore(state => state.addLogSession);
 
-    const uploadSession = (directory: FileSystemDirectoryEntry) => {
+    const uploadSession = async (directory: FileSystemDirectoryEntry) => {
         setUploadInformation({state: UploadState.UPLOADING});
-        const loggerSession = extractLoggerSession(directory as FileSystemDirectoryEntry);
-        loggerSession.then((session) => {
-            console.log(session);
-            setDraftSession({name: directory.name, measurementLogs: session} as LogSession);
+        try {
+            const loggerSession = await extractLoggerSession(directory as FileSystemDirectoryEntry);
+            setDraftSession({name: directory.name, measurementLogs: loggerSession} as LogSession);
             setUploadInformation({state: UploadState.SUCCESS});
-        }).catch((error) => {
-            if(error instanceof Error) {
-                setUploadInformation({state: UploadState.ERROR, errorMessage: error.message});
+        } catch(err) {
+            if(err instanceof Error) {
+                setUploadInformation({state: UploadState.ERROR, errorMessage: err.message});
             } else {
                 setUploadInformation({state: UploadState.ERROR, errorMessage: "An unexpected error occurred"});
             }
-        });
+        }
     };
 
-    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         try {
             validateEntry(e.dataTransfer.items);
             const directory = e.dataTransfer.items[0].webkitGetAsEntry();
-            uploadSession(directory as FileSystemDirectoryEntry);
+            await uploadSession(directory as FileSystemDirectoryEntry);
         } catch(err) {
             if (err instanceof Error){
                 setUploadInformation({state: UploadState.ERROR, errorMessage: err.cause as string});

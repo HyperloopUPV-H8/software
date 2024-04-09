@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { LogSession, UploadInformation, UploadState } from "../LogLoader";
+import { UploadInformation, UploadState } from "../LogLoader";
+import { LogSession } from "pages/LoggerPage/useLogStore";
 
 interface Props {
     uploadInformation: UploadInformation;
