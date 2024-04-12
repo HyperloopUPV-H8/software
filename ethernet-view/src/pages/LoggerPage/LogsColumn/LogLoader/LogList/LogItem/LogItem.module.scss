@@ -1,0 +1,31 @@
+@use "src/styles/styles.scss";
+
+.logItemWrapper {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    width: fit-content;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.icon {
+    width: 1.6rem;
+
+    img {
+        width: 100%;
+    }
+}
+
+.title {
+    color: styles.$title-color;
+    font-size: 1.6rem;
+    font-family: styles.$code-font;
+    font-style: italic;
+}
+
+.active {
+    color: styles.$orange;
+}

@@ -32,7 +32,8 @@
         "vite-plugin-svgr": "^2.4.0",
         "vite-tsconfig-paths": "^4.0.5",
         "zustand": "^4.4.6",
-        "zustymiddleware": "^1.2.0"
+        "zustymiddleware": "^1.2.0",
+        "zustymiddlewarets": "^1.4.2"
     },
     "devDependencies": {
         "@testing-library/jest-dom": "^5.16.5",
