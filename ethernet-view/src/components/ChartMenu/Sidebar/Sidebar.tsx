@@ -3,11 +3,14 @@ import { Section } from "./Section/Section";
 import { memo } from "react";
 
 type Props = {
-    sections: Section[];
+    sections?: Section[];
+    elements?: string[];
 };
 
-const Sidebar = ({ sections }: Props) => {
-    return (
+const Sidebar = ({ sections, elements }: Props) => {
+
+    return sections && sections.length > 0 ?
+    (
         <div className={styles.sidebar}>
             {sections.map((section) => {
                 return (
@@ -18,7 +21,18 @@ const Sidebar = ({ sections }: Props) => {
                 );
             })}
         </div>
-    );
+    ) : (elements && elements.length > 0 ? (
+        <div className={styles.sidebar}>
+            {elements.map((element) => {
+                return (
+                    <div key={element} className={styles.subsection}>
+                        <div className={styles.name}>{element}</div>
+                    </div>
+                );
+            })}
+        </div>
+    ) : null);
+
 };
 
 export default memo(Sidebar);
