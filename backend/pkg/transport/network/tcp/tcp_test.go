@@ -1,9 +1,9 @@
 package tcp_test
 
 import (
-	"encoding/json"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tcp"
 	"github.com/rs/zerolog"
+	"net"
 	"os"
 	"testing"
 	"time"
@@ -16,29 +16,67 @@ type Socket struct {
 	DstPort uint16
 }
 
-// Payload defines a piece of information comming from the network with its metadata
+// Payload defines a piece of information coming from the network with its metadata
 type Payload struct {
 	Timestamp time.Time
 	Socket    Socket
 	Data      []byte
 }
 
+type Addr struct {
+	Net  string
+	Addr string
+}
+
+func (a Addr) Network() string {
+	return a.Net
+}
+
+func (a Addr) String() string {
+	return a.Addr
+}
+
 func TestTCP(t *testing.T) {
-	writer := os.Stdout
-	logger := zerolog.New(writer)
+	logger := zerolog.New(os.Stdout)
 
 	// Server setup
-	serverAddr := "127.0.0.1:3000"
-	server := tcp.NewServer(serverAddr, tcp.ServerConfig{}, logger)
+	serverAddrSol, _ := net.ResolveTCPAddr("tcp", "127.0.0.1:8080")
+	serverAddr := serverAddrSol.String()
+
+	server := tcp.NewServer(serverAddr, tcp.NewServerConfig(), logger)
+	server.AddToWhitelist("127.0.0.1")
+
+	server.OnConnection(func(conn net.Conn) error {
+		defer conn.Close()
+
+		for {
+			// Read and echo back the Payload
+			buffer := make([]byte, len([]byte("hello")))
+			_, err := conn.Read(buffer)
+			if err != nil {
+				t.Fatalf("Failed to read from client: %v", err)
+			}
+			_, err = conn.Write(buffer)
+			if err != nil {
+				t.Fatalf("Failed to write to client: %v", err)
+			}
+		}
+
+		return nil
+	})
+
 	go func() {
-		if err := server.Listen(); err != nil {
+		defer server.Close()
+		err := server.Listen()
+		if err != nil {
 			t.Fatalf("Server failed to listen: %v", err)
 		}
 	}()
-	time.Sleep(1 * time.Second)
 
 	// Client setup
-	client := tcp.NewClient(serverAddr, tcp.ClientConfig{}, logger)
+	addr, _ := net.ResolveTCPAddr("tcp", "127.0.0.1:3000")
+	client := tcp.NewClient(serverAddr, tcp.NewClientConfig(net.Addr(addr)), logger)
+
 	conn, err := client.Dial()
 	if err != nil {
 		t.Fatalf("Client failed to dial: %v", err)
@@ -52,34 +90,25 @@ func TestTCP(t *testing.T) {
 			SrcIP:   "127.0.0.1",
 			SrcPort: 3000,
 			DstIP:   "127.0.0.1",
-			DstPort: 3000,
+			DstPort: 8080,
 		},
 		Data: []byte("hello"),
 	}
-	payloadBytes, err := json.Marshal(originalPayload)
-	if err != nil {
-		t.Fatalf("Failed to serialize Payload: %v", err)
-	}
-	_, err = conn.Write(payloadBytes)
+	_, err = conn.Write(originalPayload.Data)
 	if err != nil {
 		t.Fatalf("Failed to write Payload to server: %v", err)
 	}
 
-	// Read and verify Payload
-	buffer := make([]byte, 1024)
-	n, err := conn.Read(buffer)
+	// Read file
+	buffer := make([]byte, len([]byte("hello")))
+	_, err = conn.Read(buffer)
 	if err != nil {
 		t.Fatalf("Failed to read from server: %v", err)
 	}
-	var receivedPayload Payload
-	err = json.Unmarshal(buffer[:n], &receivedPayload)
-	if err != nil {
-		t.Fatalf("Failed to deserialize Payload: %v", err)
-	}
 
-	// Verify Payload content
-	if string(receivedPayload.Data) != string(originalPayload.Data) {
-		t.Fatalf("Expected message '%s', got '%s'", string(originalPayload.Data), string(receivedPayload.Data))
+	// Verify Payload content when echoed back
+	if string(buffer) != string(originalPayload.Data) {
+		t.Fatalf("Expected message '%s', got '%s'", string(originalPayload.Data), string(buffer))
 	}
 
 	server.Close()

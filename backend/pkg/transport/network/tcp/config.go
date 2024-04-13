@@ -62,3 +62,12 @@ type ServerConfig struct {
 
 	Context context.Context
 }
+
+func NewServerConfig() ServerConfig {
+	return ServerConfig{
+		ListenConfig: net.ListenConfig{
+			KeepAlive: time.Second,
+		},
+		Context: context.TODO(),
+	}
+}
