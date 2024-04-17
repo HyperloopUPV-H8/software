@@ -3,6 +3,7 @@ package logger
 import (
 	"os"
 	"path"
+	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -66,7 +67,7 @@ func (logger *Logger) Start() error {
 		loggerPath := path.Join(
 			"logger",
 			string(subLogger),
-			Timestamp.Format(time.RFC3339),
+			strconv.FormatInt(Timestamp.UnixMilli(), 10),
 		)
 		logger.trace.Debug().Str("subLogger", string(subLogger)).Str("path", loggerPath).Msg("creating folder")
 		err := os.MkdirAll(loggerPath, os.ModePerm)
