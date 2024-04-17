@@ -110,7 +110,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		if !ok {
 			filename := path.Join(
 				"logger/data",
-				fmt.Sprintf("data_%s", loggerHandler.Timestamp.Format(time.RFC3339)),
+				fmt.Sprintf("data_%s", loggerHandler.Timestamp.UnixMilli()),
 				fmt.Sprintf("%s.csv", valueName),
 			)
 			err := os.MkdirAll(path.Dir(filename), os.ModePerm)
@@ -136,7 +136,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		writer := csv.NewWriter(file) // TODO! use map/slice of writer
 
 		err := writer.Write([]string{
-			timestamp.Format(time.RFC3339),
+			strconv.FormatInt(timestamp.UnixMilli(), 10),
 			dataRecord.From,
 			dataRecord.To,
 			val,
