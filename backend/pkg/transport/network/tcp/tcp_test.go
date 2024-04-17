@@ -77,6 +77,8 @@ func TestTCP(t *testing.T) {
 	addr, _ := net.ResolveTCPAddr("tcp", "127.0.0.1:3000")
 	client := tcp.NewClient(serverAddr, tcp.NewClientConfig(net.Addr(addr)), logger)
 
+	time.Sleep(10 * time.Millisecond)
+
 	conn, err := client.Dial()
 	if err != nil {
 		t.Fatalf("Client failed to dial: %v", err)
@@ -112,4 +114,5 @@ func TestTCP(t *testing.T) {
 	}
 
 	server.Close()
+	time.Sleep(10 * time.Millisecond)
 }
