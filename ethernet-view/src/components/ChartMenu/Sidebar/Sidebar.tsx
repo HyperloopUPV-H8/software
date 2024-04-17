@@ -1,13 +1,14 @@
 import styles from "./Sidebar.module.scss";
 import { Section } from "./Section/Section";
 import { memo } from "react";
+import { Item, ItemView } from "./Section/Subsection/Subsection/Items/Item/ItemView";
 
 type Props = {
     sections?: Section[];
-    elements?: string[];
+    items?: Item[];
 };
 
-const Sidebar = ({ sections, elements }: Props) => {
+const Sidebar = ({ sections, items }: Props) => {
 
     return sections && sections.length > 0 ?
     (
@@ -21,13 +22,17 @@ const Sidebar = ({ sections, elements }: Props) => {
                 );
             })}
         </div>
-    ) : (elements && elements.length > 0 ? (
+    ) : (items && items.length > 0 ? (
         <div className={styles.sidebar}>
-            {elements.map((element) => {
+            {items.map((item) => {
                 return (
-                    <div key={element} className={styles.subsection}>
-                        <div className={styles.name}>{element}</div>
-                    </div>
+                    // <div key={item.id} className={styles.subsection} draggable={true}>
+                    //     <div className={styles.name}>{item.name}</div>
+                    // </div>
+                    <ItemView 
+                        key={item.id}
+                        item={item}
+                    />
                 );
             })}
         </div>

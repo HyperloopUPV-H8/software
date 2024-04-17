@@ -1,3 +1,4 @@
+import { UTCTimestamp } from 'lightweight-charts';
 import Papa from 'papaparse';
 
 /**
@@ -15,7 +16,8 @@ import Papa from 'papaparse';
  * retrieved from the CSV file.
  */
 
-type Session = Map<string, {time: Date, value: number}[]>;
+export type ChartPoint = {time: UTCTimestamp, value: number};
+export type Session = Map<string, ChartPoint[]>;
 
 export async function extractLoggerSession (directory: FileSystemDirectoryEntry): Promise<Session> {
     const session: Session = new Map();
@@ -29,11 +31,14 @@ export async function extractLoggerSession (directory: FileSystemDirectoryEntry)
             (file as FileSystemFileEntry).file((file) => {
                 Papa.parse(file, {
                     complete: (result) => {
-                        const measurementPoints = [] as {time: Date, value: number}[];
+                        const measurementPoints = [] as ChartPoint[];
                         for(const row of result.data) {
                             if(isValidLog(row)) {
                                 const [timestamp, , , value] = row as [string, string, string, string];
-                                measurementPoints.push({time: new Date(timestamp), value: parseFloat(value)});
+                                measurementPoints.push({
+                                    time: new Date(timestamp).getMilliseconds() as UTCTimestamp, 
+                                    value: parseFloat(value)
+                                });
                             }
                         }
                         session.set(file.name.replace(".csv", ""), measurementPoints);
