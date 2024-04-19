@@ -36,7 +36,7 @@ export async function extractLoggerSession (directory: FileSystemDirectoryEntry)
                             if(isValidLog(row)) {
                                 const [timestamp, , , value] = row as [string, string, string, string];
                                 measurementPoints.push({
-                                    time: new Date(timestamp).getMilliseconds() as UTCTimestamp, 
+                                    time: parseFloat(timestamp) / 1000 as UTCTimestamp, 
                                     value: parseFloat(value)
                                 });
                             }
@@ -86,7 +86,7 @@ function isValidLog(row: unknown) {
     return (
         Array.isArray(row) &&
         row.length === 4 &&
-        new Date(row[0]).toISOString() !== "Invalid Date" &&
+        // new Date(row[0]).to() !== "Invalid Date" &&
         typeof row[1] === "string" &&
         typeof row[2] === "string" &&
         !isNaN(parseFloat(row[3]))
