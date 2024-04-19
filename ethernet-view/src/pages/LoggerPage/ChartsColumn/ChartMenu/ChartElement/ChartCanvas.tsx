@@ -9,7 +9,6 @@ interface Props {
 }
 
 export const ChartCanvas = ({ data }: Props) => {
-    console.log(data)
     const chart = useRef<IChartApi | null>(null);
     const chartContainerRef = useRef<HTMLDivElement>(null);
 

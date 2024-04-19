@@ -69,17 +69,29 @@ export async function extractLoggerSession (directory: FileSystemDirectoryEntry)
  * @returns The function `getFilesFromDirectory` returns a Promise that resolves to an array of
  * `FileSystemEntry` objects representing the files in the specified directory.
  */
+
 export async function getFilesFromDirectory(folder: FileSystemDirectoryEntry): Promise<FileSystemEntry[]> {
-    const reader = folder.createReader();
-    const entries = await new Promise<FileSystemEntry[]>((resolve, reject) => {
-        reader.readEntries((entries) => {
-            resolve(entries);
-        }, (err) => {
-            reject(err);
+    const entries: FileSystemEntry[] = [];
+
+    async function readEntries(reader: FileSystemDirectoryReader) {
+        const result = await new Promise<FileSystemEntry[]>((resolve, reject) => {
+            reader.readEntries((results) => {
+                resolve(results);
+            }, (err) => {
+                reject(err);
+            });
         });
-    })
+
+        if (result.length > 0) {
+            entries.push(...result);
+            await readEntries(reader);
+        }
+    }
+
+    await readEntries(folder.createReader());
+
     return entries;
-};
+}
 
 
 function isValidLog(row: unknown) {
