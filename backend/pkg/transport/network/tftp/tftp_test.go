@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"testing"
+	"time"
 )
 
 func TestTFTP(t *testing.T) {
@@ -47,6 +48,8 @@ func TestTFTP(t *testing.T) {
 	}()
 
 	println("Server listening on", serverAddr)
+
+	time.Sleep(10 * time.Millisecond)
 
 	// Initialize TFTP client
 	client, err := tftp.NewClient(serverAddr)
