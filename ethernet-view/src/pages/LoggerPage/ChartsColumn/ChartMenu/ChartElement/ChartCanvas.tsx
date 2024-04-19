@@ -1,4 +1,4 @@
-import { ColorType, createChart, IChartApi } from "lightweight-charts";
+import { ColorType, createChart, IChartApi, UTCTimestamp } from "lightweight-charts";
 import { ChartPoint } from "pages/LoggerPage/LogsColumn/LogLoader/LogsProcessor";
 import { useEffect, useRef } from "react";
 
@@ -9,6 +9,7 @@ interface Props {
 }
 
 export const ChartCanvas = ({ data }: Props) => {
+    console.log(data)
     const chart = useRef<IChartApi | null>(null);
     const chartContainerRef = useRef<HTMLDivElement>(null);
 
@@ -23,6 +24,8 @@ export const ChartCanvas = ({ data }: Props) => {
         if (chartContainerRef.current)
         resizeObserver.observe(chartContainerRef.current);
 
+        let date = Math.floor(Date.now() / 1000);
+
         if (chartContainerRef.current) {
             if(chart)
             chart.current = createChart(chartContainerRef.current, {
@@ -33,16 +36,19 @@ export const ChartCanvas = ({ data }: Props) => {
                 width: chartContainerRef.current.clientWidth,
                 height: CHART_HEIGHT,
                 timeScale: {
-                    timeVisible: true,
-                    secondsVisible: true,
                     fixLeftEdge: true,
                     fixRightEdge: true,
                     lockVisibleTimeRangeOnResize: true,
-                    rightBarStaysOnScroll: true,
                 },
             });
 
-            chart.current?.addLineSeries().setData(data)
+            const series = chart.current?.addLineSeries({
+                color: "red"
+            })
+
+            data.forEach((point) => {
+                series?.update({ time: date++ as UTCTimestamp, value: point.value });
+            })
         }
 
         return () => {
