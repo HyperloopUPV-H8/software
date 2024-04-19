@@ -24,4 +24,11 @@ func TestTransport(t *testing.T) {
 		t.Errorf("Error creating client at 127.0.0.1:3000: %s", err)
 	}
 
+	// Create client with wrong address
+	addr, _ = net.ResolveTCPAddr("tcp", "127.0.0.1:3030")
+	err = transport.NewTransport(logger).HandleClient(tcp.NewClientConfig(addr), "127.0.0.1:8000")
+	if err == nil {
+		t.Errorf("Expected error creating client at wrong address, got nil")
+	}
+
 }
