@@ -35,8 +35,7 @@ export const Logger = () => {
                         onClick={() => {
                             window.open(`http://${config.oscilloscope.ip}/screenshot.png`, '_blank');
                         }}
-                    >
-                    </Button>
+                    ></Button>
                 </div>
             </div>
         </Island>

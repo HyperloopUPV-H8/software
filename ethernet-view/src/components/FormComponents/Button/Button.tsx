@@ -12,11 +12,11 @@ type Props = {
 };
 
 export const Button = ({
-    label,
+    label = undefined,
     icon = undefined,
     color = "hsl(29, 88%, 57%)",
     onClick = () => {},
-    disabled,
+    disabled = false,
     className = "",
 }: Props) => {
     const [springs, api] = useSpring(() => ({
