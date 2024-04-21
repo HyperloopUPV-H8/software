@@ -6,7 +6,6 @@ import (
 	"io"
 	"os"
 	"path"
-	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -107,7 +106,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	timestamp := orderRecord.Packet.Timestamp().UnixMilli()
 	val := fmt.Sprint(orderRecord.Packet.GetValues())
 	err := csvWriter.Write([]string{
-		fmt.Sprint(timestamp)
+		fmt.Sprint(timestamp),
 		orderRecord.From,
 		orderRecord.To,
 		fmt.Sprint(orderRecord.Packet.Id()),

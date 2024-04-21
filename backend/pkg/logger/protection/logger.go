@@ -6,7 +6,6 @@ import (
 	"io"
 	"os"
 	"path"
-	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
