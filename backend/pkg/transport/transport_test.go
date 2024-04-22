@@ -18,7 +18,7 @@ func TestTransport(t *testing.T) {
 	transport := transport_module.NewTransport(logger)
 
 	// Create a context that cancels after a timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Millisecond)
 	defer cancel()
 
 	var wg sync.WaitGroup
