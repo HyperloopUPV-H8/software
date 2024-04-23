@@ -23,9 +23,9 @@ export const ChartMenu = memo(({ sidebarSections }: Props) => {
 
     const [charts, setCharts] = useState<ChartInfo[]>([]);
 
-    const addChart = ((chartId: ChartId, initialMeasurementId: MeasurementId) => {
-        setCharts([...charts, { chartId, initialMeasurementId }]);
-    });
+        const addChart = ((chartId: ChartId, initialMeasurementId: MeasurementId) => {
+            setCharts([...charts, { chartId, initialMeasurementId }]);
+        });
 
     const removeChart = useCallback((chartId: ChartId) => {
         setCharts(prevCharts => prevCharts.filter(chart => chart.chartId !== chartId));
