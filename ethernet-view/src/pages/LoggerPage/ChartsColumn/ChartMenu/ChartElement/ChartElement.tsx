@@ -3,9 +3,9 @@ import { AiOutlineCloseCircle } from "react-icons/ai"
 import styles from "components/ChartMenu/ChartElement/ChartElement.module.scss"
 import { ChartCanvas } from "./ChartCanvas";
 import { ChartPoint } from "pages/LoggerPage/LogsColumn/LogLoader/LogsProcessor";
-import { ChartLegend } from "components/ChartMenu/ChartElement/ChartLegend/ChartLegend";
-import { useCallback, useEffect, useState } from "react";
-import { MeasurementId, NumericMeasurementInfo, useMeasurementsStore } from "common";
+import { useEffect, useState } from "react";
+import { MeasurementId, } from "common";
+import { ChartLegend } from "./ChartLegend";
 
 interface Props {
     chartId: ChartId;
@@ -24,18 +24,14 @@ export const ChartElement = ({ chartId, initialMeasurementId, removeChart, getDa
     const [measurementsInChart, setMeasurementsInChart] = useState<MeasurementLogger[]>([{id: initialMeasurementId, color: 'red'}]);
 
     useEffect(() => {
-        console.log(measurementsInChart);
-    }, [measurementsInChart]);
+        console.log(measurementsInChart)
+    }, [measurementsInChart])
 
     const addMeasurementToChart = (measurement: MeasurementLogger) => {
         if(!measurementsInChart.some(measurementInChart => measurementInChart.id === measurement.id)) {
             setMeasurementsInChart([...measurementsInChart, measurement]);
         }
     }
-
-    // const removeMeasurementFromChart = useCallback((measurementId: MeasurementId) => {
-    //     setMeasurementsInChart(prevMeasurements => prevMeasurements.filter(measurement => measurement.id !== measurementId));
-    // }, []);
 
     const handleDrop = (ev: React.DragEvent<HTMLDivElement>) => {
         ev.stopPropagation();
@@ -59,6 +55,12 @@ export const ChartElement = ({ chartId, initialMeasurementId, removeChart, getDa
                 <ChartCanvas
                     measurementsInChart={measurementsInChart}
                     getDataFromLogSession={getDataFromLogSession}
+                />
+                <ChartLegend 
+                    chartId={chartId}
+                    measurementsInChart={measurementsInChart}
+                    removeChart={removeChart}
+                    removeMeasurementFromChart={(measurementId: MeasurementId) => setMeasurementsInChart(measurementsInChart.filter(measurement => measurement.id !== measurementId))}
                 />
             </div>
         </div>

@@ -1,4 +1,3 @@
-import { NumericMeasurementInfo } from "common";
 import { ColorType, createChart, IChartApi, UTCTimestamp } from "lightweight-charts";
 import { ChartPoint } from "pages/LoggerPage/LogsColumn/LogLoader/LogsProcessor";
 import { useEffect, useRef } from "react";
@@ -12,6 +11,7 @@ interface Props {
 }
 
 export const ChartCanvas = ({ measurementsInChart, getDataFromLogSession }: Props) => {
+    const timeRendered = useRef<number>(Date.now() / 1000);
     const chart = useRef<IChartApi | null>(null);
     const chartContainerRef = useRef<HTMLDivElement>(null);
 
@@ -42,23 +42,27 @@ export const ChartCanvas = ({ measurementsInChart, getDataFromLogSession }: Prop
                 },
             });
         }
+        
+        let chartTime = timeRendered.current;
+        measurementsInChart.forEach((measurement) => {
+            const data = getDataFromLogSession(measurement.id);
+            const series = chart.current?.addLineSeries({
+                color: measurement.color,
+            })
+            for(const point of data) {
+                series?.update({ time: chartTime++ as UTCTimestamp, value: point.value });
+            }
+            chartTime = timeRendered.current;
+        })
 
         return () => {
             resizeObserver.disconnect();
             chart.current?.remove();
         }
-    }, []);
+    }, [measurementsInChart.length]);
 
     useEffect(() => {
-        let date = Math.floor(Date.now() / 1000);
-        measurementsInChart.forEach((measurement) => {
-            const series = chart.current?.addLineSeries({color: measurement.color});
-            const data = getDataFromLogSession(measurement.id);
-            data.forEach((point) => {
-                series?.update({ time: date++ as UTCTimestamp, value: point.value });
-            })
-        })
-    }, [measurementsInChart]);
+    }, [measurementsInChart.length]);
 
     return (
         <div ref={chartContainerRef}></div>
