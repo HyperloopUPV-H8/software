@@ -44,7 +44,7 @@ export const ChartCanvas = ({ measurementsInChart, getDataFromLogSession }: Prop
         }
         
         let chartTime = timeRendered.current;
-        measurementsInChart.forEach((measurement) => {
+        for(const measurement of measurementsInChart) {
             const data = getDataFromLogSession(measurement.id);
             const series = chart.current?.addLineSeries({
                 color: measurement.color,
@@ -53,16 +53,18 @@ export const ChartCanvas = ({ measurementsInChart, getDataFromLogSession }: Prop
                 series?.update({ time: chartTime++ as UTCTimestamp, value: point.value });
             }
             chartTime = timeRendered.current;
+        }
+
+        chart.current?.timeScale().setVisibleRange({
+            from: timeRendered.current as UTCTimestamp,
+            to: timeRendered.current + 60 as UTCTimestamp,
         })
 
         return () => {
             resizeObserver.disconnect();
             chart.current?.remove();
         }
-    }, [measurementsInChart.length]);
-
-    useEffect(() => {
-    }, [measurementsInChart.length]);
+    }, [measurementsInChart]);
 
     return (
         <div ref={chartContainerRef}></div>
