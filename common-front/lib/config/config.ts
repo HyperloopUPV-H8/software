@@ -12,6 +12,9 @@ export const config = {
         websocket: "backend",
         uploadableBoards: "backend/uploadableBoards",
     },
+    oscilloscope: {
+        ip: "192.168.0.100"
+    },
     cameras: {
         ip: "192.168.0.9",
         port: 4040,
