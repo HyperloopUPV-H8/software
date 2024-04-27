@@ -62,7 +62,6 @@ func TestTCP(t *testing.T) {
 			}
 		}
 
-		return nil
 	})
 
 	go func() {
