@@ -1,4 +1,4 @@
-import { NumericType, isNumericType } from "../../BackendTypes";
+import { NumericType, isNumericType } from '../../BackendTypes';
 
 export type Measurement =
     | NumericMeasurement
@@ -19,15 +19,19 @@ export type NumericMeasurement = AbstractMeasurement & {
     warningRange: [number | null, number | null];
 };
 
-export type NumericValue = { last: number; average: number };
+export type NumericValue = {
+    last: number;
+    average: number;
+    showLatest: boolean;
+};
 
 export type BooleanMeasurement = AbstractMeasurement & {
-    type: "bool";
+    type: 'bool';
     value: boolean;
 };
 
 export type EnumMeasurement = AbstractMeasurement & {
-    type: "enum";
+    type: 'enum';
     value: string;
 };
 
@@ -67,16 +71,16 @@ export function isNumericMeasurement(
 
 export function isNumber(type: string) {
     switch (type) {
-        case "uint8":
-        case "uint16":
-        case "uint32":
-        case "uint64":
-        case "int8":
-        case "int16":
-        case "int32":
-        case "int64":
-        case "float32":
-        case "float64":
+        case 'uint8':
+        case 'uint16':
+        case 'uint32':
+        case 'uint64':
+        case 'int8':
+        case 'int16':
+        case 'int32':
+        case 'int64':
+        case 'float32':
+        case 'float64':
             return true;
         default:
             return false;
@@ -85,20 +89,20 @@ export function isNumber(type: string) {
 
 export function getNumber(type: string, value: string): number {
     switch (type) {
-        case "uint8":
-        case "uint16":
-        case "uint32":
-        case "uint64":
-        case "int8":
-        case "int16":
-        case "int32":
-        case "int64":
+        case 'uint8':
+        case 'uint16':
+        case 'uint32':
+        case 'uint64':
+        case 'int8':
+        case 'int16':
+        case 'int32':
+        case 'int64':
             return Number.parseInt(value);
-        case "float32":
-        case "float64":
+        case 'float32':
+        case 'float64':
             return Number.parseFloat(value);
         default:
-            console.error("Incorrect value type");
-            throw "Incorrect value type";
+            console.error('Incorrect value type');
+            throw 'Incorrect value type';
     }
 }

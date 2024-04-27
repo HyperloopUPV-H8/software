@@ -4,8 +4,8 @@ import {
     useGlobalTicker,
     useMeasurementsStore,
     usePodDataStore,
-} from "common";
-import { createContext, useRef } from "react";
+} from 'common';
+import { createContext, useRef } from 'react';
 
 export type PacketElement = {
     count: Text;
@@ -36,11 +36,12 @@ export const TableUpdater = ({ children }: Props) => {
     const packetElements = useRef<Record<string, PacketElement>>({});
     const measurementElements = useRef<MeasurementElement[]>([]);
 
-    const podData = usePodDataStore(state => state.podData)
-    const getMeasurement = useMeasurementsStore(state => state.getMeasurement)
+    const podData = usePodDataStore((state) => state.podData);
+    const getMeasurement = useMeasurementsStore(
+        (state) => state.getMeasurement
+    );
 
     useGlobalTicker(() => {
-        
         for (const id in packetElements.current) {
             const packet = getPacket(podData, Number.parseInt(id));
             const element = packetElements.current[id];
@@ -66,7 +67,9 @@ export const TableUpdater = ({ children }: Props) => {
                 return;
             }
             element.value.nodeValue = isNumericMeasurement(measurement)
-                ? measurement.value.average.toFixed(3)
+                ? measurement.value.showLatest
+                    ? measurement.value.last.toFixed(3)
+                    : measurement.value.average.toFixed(3)
                 : measurement.value.toString();
         }
     });
