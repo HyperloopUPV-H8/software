@@ -14,7 +14,7 @@ type ClientConfig struct {
 	Context context.Context
 
 	TryReconnect              bool
-	ConnectionBackoffFunction BackoffFunction
+	ConnectionBackoffFunction backoffFunction
 	MaxConnectionRetries      int
 }
 
@@ -34,7 +34,7 @@ func NewClientConfig(laddr net.Addr) ClientConfig {
 	}
 }
 
-type BackoffFunction = func(int) time.Duration
+type backoffFunction = func(int) time.Duration
 
 const (
 	defaultBackoffMin time.Duration = 100 * time.Millisecond
@@ -45,7 +45,7 @@ const (
 // NewExponentialBackoff returns an exponential backoff function with the given paramenters.
 //
 // It follows this formula: delay = (min * (exp ^ n); delay < max ? delay : max
-func NewExponentialBackoff(min time.Duration, exp float64, max time.Duration) BackoffFunction {
+func NewExponentialBackoff(min time.Duration, exp float64, max time.Duration) backoffFunction {
 	return func(n int) time.Duration {
 		curr := time.Duration(float64(min) * math.Trunc(math.Pow(exp, float64(n))))
 		if curr >= max {
