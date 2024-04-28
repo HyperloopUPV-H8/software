@@ -47,8 +47,7 @@ const (
 // It follows this formula: delay = (min * (exp ^ n); delay < max ? delay : max
 func NewExponentialBackoff(min time.Duration, exp float64, max time.Duration) backoffFunction {
 	return func(n int) time.Duration {
-		curr := min
-		curr = time.Duration(math.Trunc(math.Pow(float64(curr), exp)))
+		curr := time.Duration(float64(min) * math.Trunc(math.Pow(exp, float64(n))))
 		if curr >= max {
 			return max
 		}
@@ -61,4 +60,13 @@ type ServerConfig struct {
 	net.ListenConfig
 
 	Context context.Context
+}
+
+func NewServerConfig() ServerConfig {
+	return ServerConfig{
+		ListenConfig: net.ListenConfig{
+			KeepAlive: time.Second,
+		},
+		Context: context.TODO(),
+	}
 }
