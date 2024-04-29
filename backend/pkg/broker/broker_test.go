@@ -17,7 +17,7 @@ func TestBroker(t *testing.T) {
 	download := blcu.Download{}
 	download.SetPool(&websocket.Pool{})
 	download.SetAPI(brokerAPI)
-	
+
 	err := download.Push(boards.DownloadSuccess{
 		Data: []byte("hello"),
 	})
