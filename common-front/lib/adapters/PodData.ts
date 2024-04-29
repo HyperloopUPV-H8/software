@@ -6,17 +6,17 @@ import {
     EnumMeasurement,
     Measurement,
     NumericMeasurement,
-} from "../models";
+} from '../models';
 
-import { NumericType, isNumericType } from "../BackendTypes";
+import { NumericType, isNumericType } from '../BackendTypes';
 
 export type PodDataAdapter = { boards: { [name: string]: BoardAdapter } };
 
-type BoardAdapter = Omit<Board, "measurementToPacket" | "packets"> & {
+type BoardAdapter = Omit<Board, 'measurementToPacket' | 'packets'> & {
     packets: { [id: number]: PacketAdapter };
 };
 
-export type PacketAdapter = Omit<Packet, "measurements"> & {
+export type PacketAdapter = Omit<Packet, 'measurements'> & {
     measurements: { [name: string]: MeasurementAdapter };
 };
 
@@ -25,9 +25,9 @@ export type MeasurementAdapter =
     | BooleanMeasurementAdapter
     | EnumMeasurementAdapter;
 
-export type NumericMeasurementAdapter = Omit<NumericMeasurement, "value">;
-export type BooleanMeasurementAdapter = Omit<BooleanMeasurement, "value">;
-export type EnumMeasurementAdapter = Omit<EnumMeasurement, "value">;
+export type NumericMeasurementAdapter = Omit<NumericMeasurement, 'value'>;
+export type BooleanMeasurementAdapter = Omit<BooleanMeasurement, 'value'>;
+export type EnumMeasurementAdapter = Omit<EnumMeasurement, 'value'>;
 
 export function createPodDataFromAdapter(adapter: PodDataAdapter): PodData {
     const boards: Board[] = Object.values(adapter.boards).map(
@@ -73,7 +73,7 @@ function getMeasurements(
         const id = `${boardName}/${adapter.id}`;
         if (isNumericAdapter(adapter)) {
             return getNumericMeasurement(id, adapter);
-        } else if (adapter.type == "enum") {
+        } else if (adapter.type == 'enum') {
             return getEnumMeasurement(id, adapter);
         } else {
             return getBooleanMeasurement(id, adapter);
@@ -101,6 +101,7 @@ export function getNumericMeasurement(
         value: {
             average: 0,
             last: 0,
+            showLatest: false,
         },
         units: adapter.units,
         safeRange: adapter.safeRange,
@@ -115,8 +116,8 @@ export function getEnumMeasurement(
     return {
         id: id,
         name: adapter.name,
-        type: "enum",
-        value: "Default",
+        type: 'enum',
+        value: 'Default',
     };
 }
 
@@ -127,7 +128,7 @@ export function getBooleanMeasurement(
     return {
         id: id,
         name: adapter.name,
-        type: adapter.type as "bool",
+        type: adapter.type as 'bool',
         value: false,
     };
 }
@@ -147,7 +148,7 @@ export function getBooleanMeasurement(
 export function getPacketToBoard(
     boards: Record<string, BoardAdapter>
 ): Record<number, number> {
-    let packetToBoard: PodData["packetToBoard"] = {};
+    let packetToBoard: PodData['packetToBoard'] = {};
 
     Object.values(boards).forEach((board, index) => {
         Object.values(board.packets).forEach((packet) => {
@@ -161,7 +162,7 @@ export function getPacketToBoard(
 export function getMeasurementToPacket(
     packets: Record<string, PacketAdapter>
 ): Record<string, number> {
-    let measurementToPacket: Board["measurementToPacket"] = {};
+    let measurementToPacket: Board['measurementToPacket'] = {};
 
     Object.values(packets).forEach((packet) => {
         Object.values(packet.measurements).forEach(

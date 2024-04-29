@@ -1,20 +1,20 @@
-import { isNumericType } from "../BackendTypes";
+import { isNumericType } from '../BackendTypes';
 import {
     createPodDataFromAdapter,
     PacketUpdate,
     PodDataAdapter,
     getPacketToBoard,
     getMeasurementToPacket,
-    getPackets
-} from "../adapters";
-import { PodData, updatePacket, Board, Packet } from "../models";
-import { create, StateCreator, StoreApi, UseBoundStore } from "zustand";
+    getPackets,
+} from '../adapters';
+import { PodData, updatePacket, Board, Packet } from '../models';
+import { create, StateCreator, StoreApi, UseBoundStore } from 'zustand';
 
 export interface PodDataStore {
-    podData: PodData
-    initPodData: (podDataAdapter: PodDataAdapter) => void
-    updatePodData: (packetUpdates: Record<number, PacketUpdate>) => void
-    clearPodData: (board: string) => void
+    podData: PodData;
+    initPodData: (podDataAdapter: PodDataAdapter) => void;
+    updatePodData: (packetUpdates: Record<number, PacketUpdate>) => void;
+    clearPodData: (board: string) => void;
 }
 
 export const usePodDataStore = create<PodDataStore>((set, get) => ({
@@ -27,17 +27,19 @@ export const usePodDataStore = create<PodDataStore>((set, get) => ({
     /**
      * Reducer that initializes the state based on podDataAdapter.
      * It uses a helper function createPodDataFromAdapter to do it.
-     * @param {PodDataAdapter} podDataAdapter 
+     * @param {PodDataAdapter} podDataAdapter
      */
     initPodData: (podDataAdapter: PodDataAdapter) => {
-
         const boards: Board[] = Object.values(podDataAdapter.boards).map(
             (boardAdapter) => {
-                const packets = getPackets(boardAdapter.name, boardAdapter.packets);
+                const packets = getPackets(
+                    boardAdapter.name,
+                    boardAdapter.packets
+                );
                 const measurementToPacket = getMeasurementToPacket(
                     boardAdapter.packets
                 );
-    
+
                 return {
                     name: boardAdapter.name,
                     packets,
@@ -45,20 +47,20 @@ export const usePodDataStore = create<PodDataStore>((set, get) => ({
                 };
             }
         );
-    
+
         const packetToBoard = getPacketToBoard(podDataAdapter.boards);
 
         const podDataResult = { boards, packetToBoard, lastUpdates: {} };
 
-        set(state => ({
+        set((state) => ({
             ...state,
-            podData: podDataResult
-        }))
+            podData: podDataResult,
+        }));
     },
 
     /**
      * Reducer that updates the state based on packetUpdates.
-     * @param {Record<number, PacketUpdate>} packetUpdates 
+     * @param {Record<number, PacketUpdate>} packetUpdates
      */
     updatePodData: (packetUpdates: Record<number, PacketUpdate>) => {
         const podData = get().podData;
@@ -68,44 +70,50 @@ export const usePodDataStore = create<PodDataStore>((set, get) => ({
             const packet = getPacket(podData, update.id);
             if (packet) {
                 const boardIndex = podData.packetToBoard[update.id];
-    
+
                 if (boardIndex == undefined) {
-                    console.warn(`packet with id ${update.id} not found in packetToBoard`);
+                    console.warn(
+                        `packet with id ${update.id} not found in packetToBoard`
+                    );
                     continue;
                 }
-    
+
                 const board = podData.boards[boardIndex];
-    
+
                 if (board == undefined) {
                     console.warn(`board with index ${boardIndex} not found`);
                     continue;
                 }
 
-                const packetIndexInBoard = board.packets.findIndex(p => p.id == packet.id)
+                const packetIndexInBoard = board.packets.findIndex(
+                    (p) => p.id == packet.id
+                );
 
-                const updatedBoard = {...board}
-                updatedBoard.packets[packetIndexInBoard] = updatePacket(board.name, packet, update)
+                const updatedBoard = { ...board };
+                updatedBoard.packets[packetIndexInBoard] = updatePacket(
+                    board.name,
+                    packet,
+                    update
+                );
 
                 updatedBoards[boardIndex] = updatedBoard;
-                
             } else {
                 console.warn(`packet with id ${update.id} not found`);
             }
-
         }
 
-        set(state => ({
+        set((state) => ({
             ...state,
             podData: {
                 ...state.podData,
                 boards: updatedBoards,
-                lastUpdates: packetUpdates
-            }
-        }))
+                lastUpdates: packetUpdates,
+            },
+        }));
     },
 
     clearPodData(boardName: string) {
-        const boardsDraft = get().podData.boards
+        const boardsDraft = get().podData.boards;
 
         for (const board of boardsDraft) {
             if (board.name != boardName) {
@@ -113,33 +121,34 @@ export const usePodDataStore = create<PodDataStore>((set, get) => ({
             }
 
             for (const packet of board.packets) {
-                packet.count = 0
-                packet.cycleTime = 0
-                packet.hexValue = ""
+                packet.count = 0;
+                packet.cycleTime = 0;
+                packet.hexValue = '';
                 for (const measurement of packet.measurements) {
                     if (isNumericType(measurement.type)) {
                         measurement.value = {
                             average: 0,
                             last: 0,
-                        }
-                    } else if (measurement.type == "bool") {
-                        measurement.value = false
+                            showLatest: false,
+                        };
+                    } else if (measurement.type == 'bool') {
+                        measurement.value = false;
                     } else {
-                        measurement.value = "Default"
+                        measurement.value = 'Default';
                     }
                 }
             }
         }
 
-        set(state => ({
+        set((state) => ({
             ...state,
             podData: {
                 ...state.podData,
                 boards: boardsDraft,
-            }
-        }))
-    }
-}))
+            },
+        }));
+    },
+}));
 
 export function getPacket(podData: PodData, id: number): Packet | undefined {
     const board = podData.boards[podData.packetToBoard[id]];
