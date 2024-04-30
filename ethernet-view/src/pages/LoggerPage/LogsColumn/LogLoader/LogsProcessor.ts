@@ -16,7 +16,7 @@ import Papa from 'papaparse';
  * retrieved from the CSV file.
  */
 
-export type ChartPoint = {time: UTCTimestamp, value: number};
+export type ChartPoint = {time: number, value: number};
 export type Session = Map<string, ChartPoint[]>;
 
 export async function extractLoggerSession (directory: FileSystemDirectoryEntry): Promise<Session> {
@@ -36,7 +36,7 @@ export async function extractLoggerSession (directory: FileSystemDirectoryEntry)
                             if(isValidLog(row)) {
                                 const [timestamp, , , value] = row as [string, string, string, string];
                                 measurementPoints.push({
-                                    time: parseFloat(timestamp) / 1000 as UTCTimestamp, 
+                                    time: parseFloat(timestamp), 
                                     value: parseFloat(value)
                                 });
                             }

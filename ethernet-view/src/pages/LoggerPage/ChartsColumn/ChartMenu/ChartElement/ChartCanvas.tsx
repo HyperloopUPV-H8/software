@@ -36,6 +36,7 @@ export const ChartCanvas = ({ measurementsInChart, getDataFromLogSession }: Prop
                 width: chartContainerRef.current.clientWidth,
                 height: CHART_HEIGHT,
                 timeScale: {
+                    timeVisible: true,
                     fixLeftEdge: true,
                     fixRightEdge: true,
                     lockVisibleTimeRangeOnResize: true,
@@ -43,23 +44,17 @@ export const ChartCanvas = ({ measurementsInChart, getDataFromLogSession }: Prop
             });
         }
         
-        let chartTime = timeRendered.current;
         for(const measurement of measurementsInChart) {
             const data = getDataFromLogSession(measurement.id);
             const series = chart.current?.addLineSeries({
                 color: measurement.color,
             })
+            console.log(data)
             for(const point of data) {
-                series?.update({ time: chartTime++ as UTCTimestamp, value: point.value });
+                series?.update({ time: point.time / 1000 as UTCTimestamp, value: point.value });
             }
-            chartTime = timeRendered.current;
         }
-
-        chart.current?.timeScale().setVisibleRange({
-            from: timeRendered.current as UTCTimestamp,
-            to: timeRendered.current + 60 as UTCTimestamp,
-        })
-
+        
         return () => {
             resizeObserver.disconnect();
             chart.current?.remove();
