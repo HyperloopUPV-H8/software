@@ -11,7 +11,6 @@ interface Props {
 }
 
 export const ChartCanvas = ({ measurementsInChart, getDataFromLogSession }: Props) => {
-    const timeRendered = useRef<number>(Date.now() / 1000);
     const chart = useRef<IChartApi | null>(null);
     const chartContainerRef = useRef<HTMLDivElement>(null);
 

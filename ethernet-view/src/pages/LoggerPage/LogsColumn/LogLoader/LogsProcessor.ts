@@ -1,4 +1,3 @@
-import { UTCTimestamp } from 'lightweight-charts';
 import Papa from 'papaparse';
 
 /**
