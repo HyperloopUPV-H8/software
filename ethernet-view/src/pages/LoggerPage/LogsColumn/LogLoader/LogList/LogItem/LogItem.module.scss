@@ -2,9 +2,10 @@
 
 .logItemWrapper {
     display: flex;
+    justify-content: center;
     align-items: center;
     gap: .8rem;
-    width: fit-content;
+    width: 100%;
 
     &:hover {
         cursor: pointer;
@@ -12,10 +13,8 @@
 }
 
 .icon {
-    width: 1.6rem;
-
     img {
-        width: 100%;
+        width: 1.6rem;
     }
 }
 
@@ -24,6 +23,9 @@
     font-size: 1.6rem;
     font-family: styles.$code-font;
     font-style: italic;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .active {

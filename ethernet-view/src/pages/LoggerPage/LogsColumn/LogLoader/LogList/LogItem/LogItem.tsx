@@ -19,9 +19,7 @@ export const LogItem = ({logName}: Props) => {
                 <img src={`${isOpen ? folderOpen : folderClosed}`} alt="log-icon" />
             </div>
             <div className={`${styles.title} ${isOpen ? styles.active : ""}`}>
-                <p>
-                    {logName}
-                </p>
+                {logName}
             </div>
         </div>
     )
