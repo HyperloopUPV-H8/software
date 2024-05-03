@@ -15,10 +15,10 @@ import (
 
 func TestDownloadPush(t *testing.T) {
 	logger := zerolog.New(os.Stdout)
-	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/ws"}
+	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/download"}
 
 	clientChan := make(chan *websocket.Client)
-	http.HandleFunc("/ws", func(writer http.ResponseWriter, request *http.Request) {
+	http.HandleFunc("/download", func(writer http.ResponseWriter, request *http.Request) {
 		upgrader := websocket.NewUpgrader(clientChan, logger)
 		upgrader.Upgrade(writer, request, nil)
 	})
@@ -39,6 +39,36 @@ func TestDownloadPush(t *testing.T) {
 	download.SetAPI(api)
 
 	err = download.Push(blcu.DownloadRequest{Board: "test"})
+
+	assert.NoError(t, err)
+}
+
+func TestUploadPush(t *testing.T) {
+	logger := zerolog.New(os.Stdout)
+	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/upload"}
+
+	clientChan := make(chan *websocket.Client)
+	http.HandleFunc("/upload", func(writer http.ResponseWriter, request *http.Request) {
+		upgrader := websocket.NewUpgrader(clientChan, logger)
+		upgrader.Upgrade(writer, request, nil)
+	})
+	go http.ListenAndServe(":8080", nil)
+
+	c, _, err := ws.DefaultDialer.Dial(u.String(), nil)
+	if err != nil {
+		t.Fatal("Error dialing:", err)
+	}
+
+	api := broker.New(logger)
+	pool := websocket.NewPool(make(chan *websocket.Client), logger)
+
+	websocket.NewClient(c)
+
+	upload := &blcu.Upload{}
+	upload.SetPool(pool)
+	upload.SetAPI(api)
+
+	err = upload.Push(blcu.UploadRequest{Board: "test"})
 
 	assert.NoError(t, err)
 }
