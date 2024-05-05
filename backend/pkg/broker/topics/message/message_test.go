@@ -16,10 +16,10 @@ import (
 
 func TestMessageUpdate(t *testing.T) {
 	logger := zerolog.New(os.Stdout)
-	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/download"}
+	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/message"}
 
 	clientChan := make(chan *websocket.Client)
-	http.HandleFunc("/download", func(writer http.ResponseWriter, request *http.Request) {
+	http.HandleFunc("/message", func(writer http.ResponseWriter, request *http.Request) {
 		upgrader := websocket.NewUpgrader(clientChan, logger)
 		upgrader.Upgrade(writer, request, nil)
 	})

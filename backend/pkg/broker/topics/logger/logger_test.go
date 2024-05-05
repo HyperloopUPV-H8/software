@@ -15,10 +15,10 @@ import (
 
 func TestLoggerEnable(t *testing.T) {
 	logger := zerolog.New(os.Stdout)
-	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/download"}
+	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/logger"}
 
 	clientChan := make(chan *websocket.Client)
-	http.HandleFunc("/download", func(writer http.ResponseWriter, request *http.Request) {
+	http.HandleFunc("/logger", func(writer http.ResponseWriter, request *http.Request) {
 		upgrader := websocket.NewUpgrader(clientChan, logger)
 		upgrader.Upgrade(writer, request, nil)
 	})
