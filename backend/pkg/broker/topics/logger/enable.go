@@ -55,7 +55,7 @@ func (enable *Enable) handleToggle(id websocket.ClientId, message *websocket.Mes
 		return err
 	}
 
-	status := newStatus(request)
+	status := NewStatus(request)
 	go enable.api.UserPush(status)
 
 	go func() {
@@ -91,7 +91,7 @@ type Status struct {
 	response chan bool
 }
 
-func newStatus(request bool) *Status {
+func NewStatus(request bool) *Status {
 	return &Status{
 		request:  request,
 		response: make(chan bool),
