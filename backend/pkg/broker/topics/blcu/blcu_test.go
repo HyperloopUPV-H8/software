@@ -22,15 +22,15 @@ func TestDownloadPush(t *testing.T) {
 		upgrader := websocket.NewUpgrader(clientChan, logger)
 		upgrader.Upgrade(writer, request, nil)
 	})
-
 	go http.ListenAndServe(":8080", nil)
+	
 	c, _, err := ws.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
 		t.Fatal("Error dialing:", err)
 	}
 
 	api := broker.New(logger)
-	pool := websocket.NewPool(make(chan *websocket.Client), logger)
+	pool := websocket.NewPool(clientChan, logger)
 
 	websocket.NewClient(c)
 
@@ -60,7 +60,7 @@ func TestUploadPush(t *testing.T) {
 	}
 
 	api := broker.New(logger)
-	pool := websocket.NewPool(make(chan *websocket.Client), logger)
+	pool := websocket.NewPool(clientChan, logger)
 
 	websocket.NewClient(c)
 
