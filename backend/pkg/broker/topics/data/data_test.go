@@ -54,10 +54,10 @@ func TestUpdatePush(t *testing.T) {
 
 func TestClientMessage(t *testing.T) {
 	logger := zerolog.New(os.Stdout)
-	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/blcucm"}
+	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/datacm"}
 
 	clientChan := make(chan *websocket.Client)
-	http.HandleFunc("/blcucm", func(writer http.ResponseWriter, request *http.Request) {
+	http.HandleFunc("/datacm", func(writer http.ResponseWriter, request *http.Request) {
 		upgrader := websocket.NewUpgrader(clientChan, logger)
 		upgrader.Upgrade(writer, request, nil)
 	})
