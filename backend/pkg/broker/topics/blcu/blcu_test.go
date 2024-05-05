@@ -23,7 +23,7 @@ func TestDownloadPush(t *testing.T) {
 		upgrader.Upgrade(writer, request, nil)
 	})
 	go http.ListenAndServe(":8080", nil)
-	
+
 	c, _, err := ws.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
 		t.Fatal("Error dialing:", err)

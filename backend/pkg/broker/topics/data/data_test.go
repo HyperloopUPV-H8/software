@@ -1,8 +1,9 @@
 package data_test
 
 import (
+	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory/models"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker"
-	data "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/connection"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/data"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
 	ws "github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
@@ -11,14 +12,15 @@ import (
 	"net/url"
 	"os"
 	"testing"
+	"time"
 )
 
-func TestUpdate_Push(t *testing.T) {
+func TestUpdatePush(t *testing.T) {
 	logger := zerolog.New(os.Stdout)
-	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/update"}
+	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/data"}
 
 	clientChan := make(chan *websocket.Client)
-	http.HandleFunc("/update", func(writer http.ResponseWriter, request *http.Request) {
+	http.HandleFunc("/data", func(writer http.ResponseWriter, request *http.Request) {
 		upgrader := websocket.NewUpgrader(clientChan, logger)
 		upgrader.Upgrade(writer, request, nil)
 	})
@@ -34,11 +36,17 @@ func TestUpdate_Push(t *testing.T) {
 
 	websocket.NewClient(c)
 
-	update := data.NewUpdateTopic()
+	update := data.NewUpdateTopic(1 * time.Millisecond)
 	update.SetPool(pool)
 	update.SetAPI(api)
 
-	err = update.Push(data.NewConnection("test", true))
+	err = update.Push(data.NewPush(&models.Update{
+		Id:        0,
+		HexValue:  "",
+		Count:     0,
+		CycleTime: 0,
+		Values:    nil,
+	}))
 
 	assert.NoError(t, err)
 }
