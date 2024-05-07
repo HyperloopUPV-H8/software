@@ -1,102 +1,71 @@
 package tcp
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net"
 	"syscall"
 	"time"
 
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"github.com/rs/zerolog"
 )
 
-type backoffFunction = func(int) time.Duration
+type Client struct {
+	config  ClientConfig
+	address string
 
-const (
-	defaultBackoffMin time.Duration = 100 * time.Millisecond
-	defaultBackoffExp float32       = 1.5
-	defaultBackoffMax time.Duration = 5 * time.Second
-)
+	currentRetries int
 
-// NewExponBackoff returns an exponential backoff function with the given paramenters.
-//
-// It follows this formula: delay = (min * (exp ^ n); delay < max ? delay : max
-func NewExponBackoff(min time.Duration, exp float32, max time.Duration) backoffFunction {
-	return func(n int) time.Duration {
-		curr := min
-		for i := 0; curr < max && i < n; i++ {
-			curr = time.Duration(exp * float32(curr))
-		}
-		if curr > max {
-			return max
-		}
-
-		return curr
-	}
-}
-
-// ClientConfig defines multiple configuration options for client operations
-type ClientConfig struct {
-	net.Dialer
-
-	// Context is the context used for the client. When cancelled, any attempts to connect to a
-	// remote will be cancelled
-	Context context.Context
-
-	// Target is the transport target associated with this client
-	Target abstraction.TransportTarget
-
-	// MaxRetries defines how many times might this client attempt to connect after a failed attempt
-	MaxRetries int
-	// CurrentRetries is how many times the client has tried to reconnect
-	CurrentRetries int
-	// Backoff specifies the backoff algorithm for this client
-	Backoff backoffFunction
-	// AbortOnError specifies whether the client should abort on errors or keep trying to connect
-	AbortOnError bool
+	logger zerolog.Logger
 }
 
 // NewClient inits a ClientConfig with good defaults and the provided information
-func NewClient(local net.Addr) ClientConfig {
-	return ClientConfig{
-		Dialer: net.Dialer{
-			Timeout:   time.Second,
-			KeepAlive: 1,
-			LocalAddr: local,
-		},
+func NewClient(address string, config ClientConfig, baseLogger zerolog.Logger) Client {
+	logger := baseLogger.With().Str("localAddres", config.LocalAddr.String()).Str("remoteAddress", address).Logger()
+	return Client{
+		config: config,
 
-		Context: context.TODO(),
+		address: address,
 
-		MaxRetries:   -1,
-		Backoff:      NewExponBackoff(defaultBackoffMin, defaultBackoffExp, defaultBackoffMax),
-		AbortOnError: false,
+		currentRetries: 0,
+
+		logger: logger,
 	}
 }
 
-// Dial attempts to create a connection with the specified remote using the client configuration.
-func (config ClientConfig) Dial(network, remote string) (net.Conn, error) {
+// Dial attempts to connect with the client
+func (client *Client) Dial() (net.Conn, error) {
+	client.currentRetries = 0
+
 	var err error
-	for ; config.CurrentRetries != config.MaxRetries; config.CurrentRetries++ {
-		var conn net.Conn
-		conn, err = config.DialContext(config.Context, network, remote)
+	var conn net.Conn
+	client.logger.Info().Msg("dialing")
+	for ; client.config.MaxConnectionRetries <= 0 || client.currentRetries < client.config.MaxConnectionRetries; client.currentRetries++ {
+		conn, err = client.config.DialContext(client.config.Context, "tcp", client.address)
 		if err == nil {
+			client.logger.Info().Msg("connected")
 			return conn, nil
 		}
-		if config.Context.Err() != nil {
-			return nil, config.Context.Err()
+		if client.config.Context.Err() != nil {
+			client.logger.Error().Stack().Err(client.config.Context.Err()).Msg("canceled")
+			return nil, client.config.Context.Err()
 		}
 
-		if netErr, ok := err.(net.Error); !errors.Is(err, syscall.ECONNREFUSED) && (!ok || !netErr.Timeout()) {
+		if netErr, ok := err.(net.Error); !client.config.TryReconnect || (!errors.Is(err, syscall.ECONNREFUSED) && (!ok || !netErr.Timeout())) {
+			client.logger.Error().Stack().Err(err).Msg("failed")
 			return nil, err
 		}
-		time.Sleep(config.Backoff(config.CurrentRetries))
+
+		backoffDuration := client.config.ConnectionBackoffFunction(client.currentRetries)
+		client.logger.Debug().Stack().Err(err).Dur("backoff", backoffDuration).Int("retries", client.currentRetries+1).Msg("retrying")
+		time.Sleep(backoffDuration)
 	}
 
+	client.logger.Debug().Int("max", client.config.MaxConnectionRetries).Msg("max connection retries exceeded")
 	return nil, ErrTooManyRetries{
-		Max:     config.MaxRetries,
-		Network: network,
-		Remote:  remote,
+		Max:     client.config.MaxConnectionRetries,
+		Network: "tcp",
+		Remote:  client.address,
 	}
 }
 

@@ -36,6 +36,8 @@ func HandleDataJSON(name string, data any) (*handleData, error) {
 func (handle *handleData) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	defer request.Body.Close()
 
+	writer.Header().Set("Cache-Control", "no-cache")
+	writer.Header().Set("Pragma", "no-cache")
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
 	http.ServeContent(writer, request, handle.name, handle.modTime, handle.data)
 }

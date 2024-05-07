@@ -22,8 +22,12 @@
     color: rgb(78, 78, 78);
 }
 
-.value {
+.show_last {
     grid-column: 2;
+}
+
+.value {
+    grid-column: 3;
     text-align: right;
     color: hsl(29, 88%, 57%);
     font-family: Consolas;
@@ -31,11 +35,11 @@
 }
 
 .units {
-    grid-column: 3;
+    grid-column: 4;
     text-align: center;
 }
 
 .type {
-    grid-column: 4;
+    grid-column: 5;
     text-align: center;
 }

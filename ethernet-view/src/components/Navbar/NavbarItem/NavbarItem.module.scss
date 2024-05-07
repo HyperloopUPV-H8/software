@@ -1,0 +1,15 @@
+@use "src/styles/styles";
+
+.iconWrapper {
+    > * {
+        width: 2rem;
+    }
+}
+
+.link {
+    color: styles.getColor(styles.$base-color, 60);
+}
+
+.active {
+    filter: brightness(0) saturate(100%) invert(69%) sepia(35%) saturate(2228%) hue-rotate(336deg) brightness(97%) contrast(96%);
+}

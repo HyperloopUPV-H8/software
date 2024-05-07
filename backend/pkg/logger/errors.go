@@ -57,15 +57,6 @@ func (err ErrWrongRecordType) Error() string {
 	return fmt.Sprintf("Error wrong record type for %s logger at %s, expected %T, got %T", err.Name, err.Timestamp.Format(time.RFC3339), err.Expected.Name(), err.Received.Name())
 }
 
-type ErrStartingLogger struct {
-	Name      abstraction.LoggerName
-	Timestamp time.Time
-}
-
-func (err ErrStartingLogger) Error() string {
-	return fmt.Sprintf("Error starting %s logger at %s", err.Name, err.Timestamp.Format(time.RFC3339))
-}
-
 type ErrStoppingLogger struct {
 	Name      abstraction.LoggerName
 	Timestamp time.Time

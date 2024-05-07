@@ -1,12 +1,14 @@
 package sniffer_test
 
 import (
+	"io"
 	"testing"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
+	"github.com/rs/zerolog"
 )
 
 const (
@@ -57,24 +59,24 @@ func TestSniffer(t *testing.T) {
 	}
 
 	first := layers.LayerTypeEthernet
-	sniffer := sniffer.New(source, &first)
+	nullLogger := zerolog.New(io.Discard)
+	sniffer := sniffer.New(source, &first, nullLogger)
 	defer sniffer.Close()
 
 	for _, test := range expected {
 		t.Run(test.name, func(t *testing.T) {
-			socket, data, err := sniffer.ReadNext()
+			data, err := sniffer.ReadNext()
 			if err != nil {
 				t.Fatalf("error reading packet: %s", err)
 			}
 
-			if socket != test.socket {
-				t.Fatalf("returned socket does not match expected (%v != %v)", socket, test.socket)
+			if data.Socket != test.socket {
+				t.Fatalf("returned socket does not match expected (%v != %v)", data.Socket, test.socket)
 			}
 
-			if string(data) != string(test.payload) {
-				t.Fatalf("returned payload does not match expected (%v != %v)", data, test.payload)
+			if string(data.Data) != string(test.payload) {
+				t.Fatalf("returned payload does not match expected (%v != %v)", data.Data, test.payload)
 			}
 		})
 	}
-
 }

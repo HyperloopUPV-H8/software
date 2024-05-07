@@ -3,18 +3,20 @@ import { animated, useSpring } from "@react-spring/web";
 import { lightenHSL } from "utils/color";
 
 type Props = {
-    label: string;
-    onClick: (ev: React.MouseEvent) => void;
+    label?: string;
+    icon?: string;
+    onClick?: (ev: React.MouseEvent) => void;
     disabled?: boolean;
     color?: string;
     className?: string;
 };
 
 export const Button = ({
-    label,
+    label = undefined,
+    icon = undefined,
     color = "hsl(29, 88%, 57%)",
-    onClick,
-    disabled,
+    onClick = () => {},
+    disabled = false,
     className = "",
 }: Props) => {
     const [springs, api] = useSpring(() => ({
@@ -55,6 +57,7 @@ export const Button = ({
                 })
             }
         >
+            {icon && <img src={icon} alt="icon" className={styles.icon}/>}
             <span className={styles.label}>{label}</span>
         </animated.div>
     );

@@ -103,10 +103,10 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	csvWriter := csv.NewWriter(sublogger.writer)
 	defer csvWriter.Flush()
 
-	timestamp := orderRecord.Packet.Timestamp().Format(time.RFC3339)
+	timestamp := orderRecord.Packet.Timestamp().UnixMilli()
 	val := fmt.Sprint(orderRecord.Packet.GetValues())
 	err := csvWriter.Write([]string{
-		timestamp,
+		fmt.Sprint(timestamp),
 		orderRecord.From,
 		orderRecord.To,
 		fmt.Sprint(orderRecord.Packet.Id()),

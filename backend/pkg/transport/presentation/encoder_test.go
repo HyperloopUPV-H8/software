@@ -2,12 +2,14 @@ package presentation_test
 
 import (
 	"encoding/binary"
+	"io"
 	"reflect"
 	"testing"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
+	"github.com/rs/zerolog"
 )
 
 func TestEncoder(t *testing.T) {
@@ -396,7 +398,8 @@ func TestEncoder(t *testing.T) {
 // getEncoder generates a mock Encoder with the following packet IDs:
 // 9:=18 - data
 func getEncoder(endianness binary.ByteOrder) *presentation.Encoder {
-	encoder := presentation.NewEncoder(endianness)
+	nullLogger := zerolog.New(io.Discard)
+	encoder := presentation.NewEncoder(endianness, nullLogger)
 
 	dataDecoder := data.NewEncoder(endianness)
 	dataDecoder.SetDescriptor(9, data.Descriptor{

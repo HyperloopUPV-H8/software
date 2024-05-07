@@ -11,12 +11,13 @@ type Props = {
         collapsedIcon: string;
     }[];
     orientation?: Orientation;
+    initialLengths?: number[];
 };
 
-export const SplitLayout = ({ components, orientation = Orientation.HORIZONTAL }: Props) => {
+export const SplitLayout = ({ initialLengths, components, orientation = Orientation.HORIZONTAL }: Props) => {
 
-    const minSizes = components.map(() => 0.05);
-    const [splitElements, onSeparatorMouseDown] = useSplit(minSizes, orientation);
+    const minLengths = components.map(() => 0.05);
+    const [splitElements, onSeparatorMouseDown] = useSplit(minLengths, orientation, initialLengths);
 
     return (
         <div

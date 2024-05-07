@@ -1,0 +1,34 @@
+@use "src/styles/styles.scss";
+
+.dropZone {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 3rem 2rem;
+    border: dashed styles.$alternate-text-color;
+    border-radius: styles.$large-border-radius;
+
+    &Text {
+        font-weight: styles.$normal-font-weight;
+        font-size: styles.$normal-font-size;
+        color: styles.$alternate-text-color;
+        font-family: styles.$code-font;
+    }
+
+    &.Active {
+        background-color: #80b3ff24;
+    }
+
+    &.Uploading {
+        background-color: #80b3ff24;
+    }
+
+    &.Success {
+        background-color: #80ff8024;
+    }
+
+    &.Error {
+        background-color: #ff808024;
+    }
+}
