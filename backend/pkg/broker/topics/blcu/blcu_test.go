@@ -32,23 +32,6 @@ func (m MockAPI) UserPull(pull abstraction.BrokerRequest) (abstraction.BrokerRes
 	return nil, nil
 }
 
-type MockPacket struct {
-	Message string
-	Data    string
-}
-
-func (m MockPacket) Topic() abstraction.BrokerTopic {
-	return "test"
-}
-
-func (m MockPacket) GetMessage() string {
-	return m.Message
-}
-
-func (m MockPacket) GetData() string {
-	return m.Data
-}
-
 func TestDownloadPush(t *testing.T) {
 	logger := zerolog.New(os.Stdout)
 	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/download"}
@@ -77,15 +60,15 @@ func TestDownloadPush(t *testing.T) {
 	go func() {
 		for {
 			message := <-api.messageChan
-			packet := message.(MockPacket)
-			if packet.GetMessage() != "test" {
+			packet := message.(blcu.DownloadRequest)
+			if packet.Board != "test" {
 				t.Error("Output does not match input")
 				return
 			}
 		}
 	}()
 
-	err = download.Push(MockPacket{Message: "test"})
+	err = download.Push(blcu.DownloadRequest{Board: "test"})
 
 	assert.NoError(t, err)
 
@@ -119,8 +102,8 @@ func TestUploadPush(t *testing.T) {
 	go func() {
 		for {
 			message := <-api.messageChan
-			packet := message.(MockPacket)
-			if packet.GetMessage() != "test" || packet.GetData() != "test" {
+			packet := message.(blcu.UploadRequest)
+			if packet.Board != "test" || string(packet.Data) != "test" {
 				t.Error("Output does not match input")
 				return
 			}
