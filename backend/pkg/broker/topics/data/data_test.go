@@ -3,7 +3,8 @@ package data_test
 import (
 	"encoding/json"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory/models"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/blcu"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/data"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
 	ws "github.com/gorilla/websocket"
@@ -15,6 +16,24 @@ import (
 	"testing"
 	"time"
 )
+
+type MockAPI struct {
+	messageChan chan abstraction.BrokerPush
+}
+
+func NewMockAPI() MockAPI {
+	return MockAPI{messageChan: make(chan abstraction.BrokerPush)}
+}
+
+func (m MockAPI) UserPush(push abstraction.BrokerPush) error {
+	m.messageChan <- push
+	return nil
+}
+
+func (m MockAPI) UserPull(pull abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
+	m.messageChan <- pull
+	return nil, nil
+}
 
 func TestUpdatePush(t *testing.T) {
 	logger := zerolog.New(os.Stdout)
@@ -32,7 +51,7 @@ func TestUpdatePush(t *testing.T) {
 		t.Fatal("Error dialing:", err)
 	}
 
-	api := broker.New(logger)
+	api := NewMockAPI()
 	pool := websocket.NewPool(clientChan, logger)
 
 	websocket.NewClient(c)
@@ -41,9 +60,20 @@ func TestUpdatePush(t *testing.T) {
 	update.SetPool(pool)
 	update.SetAPI(api)
 
+	go func() {
+		for {
+			message := <-api.messageChan
+			packet := message.(*data.Push).Update()
+			if packet.HexValue != "test" || packet.Count != 0 || packet.CycleTime != 0 || packet.Values != nil {
+				t.Error("Output does not match input")
+				return
+			}
+		}
+	}()
+
 	err = update.Push(data.NewPush(&models.Update{
 		Id:        0,
-		HexValue:  "",
+		HexValue:  "test",
 		Count:     0,
 		CycleTime: 0,
 		Values:    nil,
@@ -68,7 +98,7 @@ func TestClientMessage(t *testing.T) {
 		t.Fatal("Error dialing:", err)
 	}
 
-	api := broker.New(logger)
+	api := NewMockAPI()
 	pool := websocket.NewPool(clientChan, logger)
 
 	websocket.NewClient(c)
@@ -77,5 +107,16 @@ func TestClientMessage(t *testing.T) {
 	update.SetPool(pool)
 	update.SetAPI(api)
 
-	update.ClientMessage(websocket.ClientId{}, &websocket.Message{"test", json.RawMessage("test")})
+	go func() {
+		for {
+			message := <-api.messageChan
+			packet := message.(blcu.UploadRequest)
+			if packet.Board != "test" || string(packet.Data) != "test" {
+				t.Error("Output does not match input")
+				return
+			}
+		}
+	}()
+
+	update.ClientMessage(websocket.ClientId{}, &websocket.Message{Topic: "test", Payload: json.RawMessage("test")})
 }
