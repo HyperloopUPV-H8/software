@@ -106,8 +106,8 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 			val = string(v.Variant())
 		}
 
-		file, ok := sublogger.valueFileSlice[valueName]
-		if !ok {
+		file, exists := sublogger.valueFileSlice[valueName]
+		if !exists {
 			filename := path.Join(
 				"logger/data",
 				fmt.Sprintf("data_%s", loggerHandler.Timestamp.Format(time.RFC3339)),
