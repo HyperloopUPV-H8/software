@@ -2,7 +2,6 @@ import "common/dist/style.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
-import { store } from "store";
 import {
     createBrowserRouter,
     Navigate,
@@ -30,15 +29,13 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
-        <Provider store={store}>
-            <ConfigProvider
-                devIp="127.0.0.1"
-                prodIp="127.0.0.1"
-            >
-                <GlobalTicker fps={60}>
-                    <RouterProvider router={router}></RouterProvider>
-                </GlobalTicker>
-            </ConfigProvider>
-        </Provider>
+        <ConfigProvider
+            devIp="127.0.0.1"
+            prodIp="127.0.0.1"
+        >
+            <GlobalTicker fps={60}>
+                <RouterProvider router={router}></RouterProvider>
+            </GlobalTicker>
+        </ConfigProvider>
     </React.StrictMode>
 );

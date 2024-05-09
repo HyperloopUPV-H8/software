@@ -1,4 +1,4 @@
-import { Measurement, NumericMeasurement, isNumericMeasurement } from "../models";
+import { Measurement, NumericMeasurement } from "../models";
 import {
     getBooleanMeasurement,
     getEnumMeasurement,

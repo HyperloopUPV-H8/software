@@ -4,8 +4,6 @@ import { BarTag } from "components/BarTag/BarTag";
 import { Window } from "components/Window/Window";
 import { BmslMeasurements, NumericMeasurement } from "common";
 import { ValueDataTag } from "components/ValueDataTag/ValueDataTag";
-import { useSelector } from "react-redux";
-import { RootState } from "store";
 
 export const BMSL = (props: BmslMeasurements) => {
     return (

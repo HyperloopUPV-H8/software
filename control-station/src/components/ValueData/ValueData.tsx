@@ -1,17 +1,19 @@
 import styles from "components/ValueData/ValueData.module.scss";
-import { Measurement, isNumericMeasurement } from "common";
+import { Measurement, isNumericMeasurement, useMeasurementsStore } from "common";
 import { useTextUpdater } from "services/ImperativeUpdater/useTextUpdater";
 import { memo } from "react";
-import { store } from "store";
 
 type Props = {
     measurement: Measurement;
 };
 
 export const ValueData = memo(({ measurement }: Props) => {
+
+    const measurements = useMeasurementsStore(state => state.measurements);
+
     const ref = useTextUpdater(() => {
         const storeMeas =
-            store.getState().measurements.measurements[measurement.id];
+            measurements[measurement.id];
 
         if (!storeMeas) {
             return "Default";

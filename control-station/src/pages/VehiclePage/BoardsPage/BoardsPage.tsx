@@ -1,5 +1,4 @@
 import styles from "./BoardsPage.module.scss";
-import { useMeasurements } from "../useMeasurements";
 import { LCU } from "../Boards/LCU/LCU";
 import { PCU } from "../Boards/PCU/PCU";
 import { BMSL } from "../Boards/BMSL/BMSL";
@@ -12,10 +11,26 @@ import {
     selectObccuMeasurements,
     selectPcuMeasurements,
     selectVcuMeasurements,
+    useGlobalTicker,
+    useMeasurementsStore,
+    useSubscribe,
 } from "common";
+import { useCallback, useState } from "react";
 
 export const BoardsPage = () => {
-    const measurements = useMeasurements();
+    const measurements = useMeasurementsStore(state => state.measurements);
+    const updateMeasurements = useMeasurementsStore(state => state.updateMeasurements);
+    const [measurementsState, setMeasurementsState] = useState(measurements);
+
+    useSubscribe("podData/update", (msg) => {
+        updateMeasurements(msg);
+    });
+
+    const callback = useCallback(() => {
+        setMeasurementsState(measurements);
+    }, []);
+
+    useGlobalTicker(callback);
 
     return (
         <div className={styles.boardsPage}>

@@ -1,5 +1,4 @@
-import { LinesChart, NumericMeasurement } from "common";
-import { store } from "store";
+import { LinesChart, NumericMeasurement, useMeasurementsStore } from "common";
 
 type Props = {
     current: NumericMeasurement;
@@ -7,6 +6,8 @@ type Props = {
 };
 
 export const CurrentChart = ({ current }: Props) => {
+    const getMeasurement = useMeasurementsStore((state) => state.getMeasurement);
+
     return (
         <LinesChart
             width="8rem"
@@ -20,9 +21,7 @@ export const CurrentChart = ({ current }: Props) => {
                     color: "red",
                     getUpdate: () =>
                         (
-                            store.getState().measurements.measurements[
-                                current.id
-                            ] as NumericMeasurement
+                            getMeasurement(current.id) as NumericMeasurement
                         ).value.last,
                 },
             ]}
