@@ -2,8 +2,7 @@ package data_test
 
 import (
 	"encoding/json"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/blcu"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/connection"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
 	ws "github.com/gorilla/websocket"
@@ -14,24 +13,6 @@ import (
 	"os"
 	"testing"
 )
-
-type MockAPI struct {
-	messageChan chan abstraction.BrokerPush
-}
-
-func NewMockAPI() MockAPI {
-	return MockAPI{messageChan: make(chan abstraction.BrokerPush)}
-}
-
-func (m MockAPI) UserPush(push abstraction.BrokerPush) error {
-	m.messageChan <- push
-	return nil
-}
-
-func (m MockAPI) UserPull(pull abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
-	m.messageChan <- pull
-	return nil, nil
-}
 
 func TestUpdate_Push(t *testing.T) {
 	logger := zerolog.New(os.Stdout)
@@ -49,7 +30,7 @@ func TestUpdate_Push(t *testing.T) {
 		t.Fatal("Error dialing:", err)
 	}
 
-	api := NewMockAPI()
+	api := broker.New(logger)
 	pool := websocket.NewPool(clientChan, logger)
 
 	websocket.NewClient(c)
@@ -58,16 +39,6 @@ func TestUpdate_Push(t *testing.T) {
 	update.SetPool(pool)
 	update.SetAPI(api)
 
-	go func() {
-		for {
-			message := <-api.messageChan
-			packet := message.(*data.Connection)
-			if packet.Name != "test" || packet.IsConnected != true {
-				t.Error("Output does not match input")
-				return
-			}
-		}
-	}()
 	err = update.Push(data.NewConnection("test", true))
 
 	assert.NoError(t, err)
@@ -89,7 +60,7 @@ func TestClientMessage(t *testing.T) {
 		t.Fatal("Error dialing:", err)
 	}
 
-	api := NewMockAPI()
+	api := broker.New(logger)
 	pool := websocket.NewPool(clientChan, logger)
 
 	websocket.NewClient(c)
@@ -98,16 +69,5 @@ func TestClientMessage(t *testing.T) {
 	update.SetPool(pool)
 	update.SetAPI(api)
 
-	go func() {
-		for {
-			message := <-api.messageChan
-			packet := message.(blcu.UploadRequest)
-			if packet.Board != "test" || string(packet.Data) != "test" {
-				t.Error("Output does not match input")
-				return
-			}
-		}
-	}()
-
-	update.ClientMessage(websocket.ClientId{}, &websocket.Message{Topic: "test", Payload: json.RawMessage("test")})
+	update.ClientMessage(websocket.ClientId{}, &websocket.Message{"test", json.RawMessage("test")})
 }

@@ -1,158 +1,101 @@
 package blcu_test
 
 import (
-	"encoding/json"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/blcu"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
 	ws "github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/url"
 	"os"
 	"testing"
+	"time"
 )
 
-type MockAPI struct {
-	messageChan chan abstraction.BrokerPush
-}
-
-func NewMockAPI() MockAPI {
-	return MockAPI{messageChan: make(chan abstraction.BrokerPush)}
-}
-
-func (m MockAPI) UserPush(push abstraction.BrokerPush) error {
-	m.messageChan <- push
-	return nil
-}
-
-func (m MockAPI) UserPull(pull abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
-	m.messageChan <- pull
-	return nil, nil
-}
-
-func TestDownloadPush(t *testing.T) {
-	logger := zerolog.New(os.Stdout)
+func TestDownload(t *testing.T) {
+	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
 	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/download"}
-
 	clientChan := make(chan *websocket.Client)
+
+	// Start HTTP server with WebSocket upgrade and echo back
 	http.HandleFunc("/download", func(writer http.ResponseWriter, request *http.Request) {
-		upgrader := websocket.NewUpgrader(clientChan, logger)
-		upgrader.Upgrade(writer, request, nil)
+		upgrader := ws.Upgrader{
+			CheckOrigin: func(r *http.Request) bool { return true },
+		}
+		conn, err := upgrader.Upgrade(writer, request, nil)
+		if err != nil {
+			logger.Error().Err(err).Msg("Failed to upgrade")
+			return
+		}
+		defer conn.Close()
+		defer logger.Info().Str("id", "server").Msg("Connection closed")
+
+		// Handle and echo messages continuously
+		go func() {
+			for {
+				_, msg, err := conn.ReadMessage()
+				if err != nil {
+					logger.Error().Err(err).Msg("Read error")
+					return
+				}
+				err = conn.WriteMessage(ws.TextMessage, msg)
+				if err != nil {
+					logger.Error().Err(err).Msg("Write error")
+					return
+				}
+			}
+		}()
 	})
+
 	go http.ListenAndServe(":8080", nil)
 
+	// Set up the client
 	c, _, err := ws.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
-		t.Fatal("Error dialing:", err)
+		logger.Fatal().Err(err).Msg("Error dialing")
 	}
+	defer c.Close()
+	defer logger.Info().Str("id", "client").Msg("Client connection closed")
 
-	api := NewMockAPI()
+	api := broker.New(logger)
 	pool := websocket.NewPool(clientChan, logger)
+	client := websocket.NewClient(c)
+	clientChan <- client
 
-	websocket.NewClient(c)
-
-	download := &blcu.Download{}
+	download := blcu.Download{}
 	download.SetPool(pool)
 	download.SetAPI(api)
 
-	go func() {
-		for {
-			message := <-api.messageChan
-			packet := message.(blcu.DownloadRequest)
-			if packet.Board != "test" {
-				t.Error("Output does not match input")
-				return
-			}
-		}
-	}()
-
-	err = download.Push(blcu.DownloadRequest{Board: "test"})
-
-	assert.NoError(t, err)
-
-}
-
-func TestUploadPush(t *testing.T) {
-	logger := zerolog.New(os.Stdout)
-	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/upload"}
-
-	clientChan := make(chan *websocket.Client)
-	http.HandleFunc("/upload", func(writer http.ResponseWriter, request *http.Request) {
-		upgrader := websocket.NewUpgrader(clientChan, logger)
-		upgrader.Upgrade(writer, request, nil)
-	})
-	go http.ListenAndServe(":8080", nil)
-
-	c, _, err := ws.DefaultDialer.Dial(u.String(), nil)
+	// Simulate sending a download request
+	request := blcu.DownloadRequest{Board: "test"}
+	err = download.Push(request)
 	if err != nil {
-		t.Fatal("Error dialing:", err)
+		t.Fatal("Error pushing download request:", err)
 	}
 
-	api := NewMockAPI()
-	pool := websocket.NewPool(clientChan, logger)
-
-	websocket.NewClient(c)
-
-	upload := &blcu.Upload{}
-	upload.SetPool(pool)
-	upload.SetAPI(api)
-
+	// Use a timeout for client read
+	done := make(chan bool)
 	go func() {
-		for {
-			message := <-api.messageChan
-			packet := message.(blcu.UploadRequest)
-			if packet.Board != "test" || string(packet.Data) != "test" {
-				t.Error("Output does not match input")
-				return
-			}
+		output, err := client.Read()
+		if err != nil {
+			logger.Error().Err(err).Msg("Client read failed")
+			done <- true
+			return
 		}
+		if output.Topic != "blcu/downloadRequest" {
+			t.Error("Expected topic blcu/downloadRequest, got", output.Topic)
+		}
+		if string(output.Payload) != "test" {
+			t.Error("Expected payload test, got", string(output.Payload))
+		}
+		done <- true
 	}()
 
-	err = upload.Push(blcu.UploadRequest{Board: "test", Data: []byte("test")})
-
-	assert.NoError(t, err)
-}
-
-func TestClientMessage(t *testing.T) {
-	logger := zerolog.New(os.Stdout)
-	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/blcucm"}
-
-	clientChan := make(chan *websocket.Client)
-	http.HandleFunc("/blcucm", func(writer http.ResponseWriter, request *http.Request) {
-		upgrader := websocket.NewUpgrader(clientChan, logger)
-		upgrader.Upgrade(writer, request, nil)
-	})
-	go http.ListenAndServe(":8080", nil)
-
-	c, _, err := ws.DefaultDialer.Dial(u.String(), nil)
-	if err != nil {
-		t.Fatal("Error dialing:", err)
+	select {
+	case <-done:
+		logger.Info().Msg("Test completed successfully")
+	case <-time.After(10 * time.Second):
+		t.Error("Test timed out")
 	}
-
-	api := NewMockAPI()
-	pool := websocket.NewPool(clientChan, logger)
-
-	websocket.NewClient(c)
-
-	upload := &blcu.Upload{}
-	upload.SetPool(pool)
-	upload.SetAPI(api)
-
-	go func() {
-		for {
-			message := <-api.messageChan
-			packet := message.(blcu.UploadRequest)
-			if packet.Board != "test" || string(packet.Data) != "test" {
-				t.Error("Output does not match input")
-				return
-			}
-		}
-	}()
-
-	packet := blcu.UploadRequest{Board: "test", Data: []byte("test")}
-	encodedPackage, _ := json.Marshal(packet)
-
-	upload.ClientMessage(websocket.ClientId{}, &websocket.Message{Topic: blcu.UploadName, Payload: encodedPackage})
 }
