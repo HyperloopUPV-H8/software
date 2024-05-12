@@ -14,6 +14,6 @@ func NewConnection(name string, isConnected bool) *Connection {
 	}
 }
 
-func (connection *Connection) Topic() abstraction.BrokerTopic {
+func (connection Connection) Topic() abstraction.BrokerTopic {
 	return UpdateName
 }

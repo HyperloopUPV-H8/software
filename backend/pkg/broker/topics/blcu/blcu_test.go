@@ -39,7 +39,7 @@ func (api MockAPI) UserPush(push abstraction.BrokerPush) error {
 	case blcu.UploadRequest:
 		if push.(blcu.UploadRequest).Board != "test" || string(push.(blcu.UploadRequest).Data) != "test" {
 			errorFlag = true
-			fmt.Fprintf(os.Stderr, "Expected board 'test' and data 'test', got board '%s' and data '%s'\n", push.(blcu.UploadRequest).Board, string(push.(blcu.UploadRequest).Data))
+			fmt.Printf("Expected board 'test' and data 'test', got board '%s' and data '%s'\n", push.(blcu.UploadRequest).Board, string(push.(blcu.UploadRequest).Data))
 			return &OutputNotMatchingError{}
 		}
 		log.Printf("Output matches")
@@ -62,9 +62,9 @@ func TestDownload_Push(t *testing.T) {
 		upgrader := ws.Upgrader{
 			CheckOrigin: func(r *http.Request) bool { return true },
 		}
-		conn, err := upgrader.Upgrade(writer, request, nil)
-		if err != nil {
-			logger.Error().Err(err).Msg("Failed to upgrade")
+		conn, upgradeErr := upgrader.Upgrade(writer, request, nil)
+		if upgradeErr != nil {
+			logger.Error().Err(upgradeErr).Msg("Failed to upgrade")
 			return
 		}
 		defer conn.Close()
@@ -73,14 +73,14 @@ func TestDownload_Push(t *testing.T) {
 		// Handle and echo messages continuously
 		go func() {
 			for {
-				_, msg, err := conn.ReadMessage()
-				if err != nil {
-					logger.Error().Err(err).Msg("Read error")
+				_, msg, readMsgRead := conn.ReadMessage()
+				if readMsgRead != nil {
+					logger.Error().Err(readMsgRead).Msg("Read error")
 					return
 				}
-				err = conn.WriteMessage(ws.TextMessage, msg)
-				if err != nil {
-					logger.Error().Err(err).Msg("Write error")
+				writeMsgErr := conn.WriteMessage(ws.TextMessage, msg)
+				if writeMsgErr != nil {
+					logger.Error().Err(writeMsgErr).Msg("Write error")
 					return
 				}
 			}
@@ -124,8 +124,8 @@ func TestDownload_Push(t *testing.T) {
 			done <- true
 			return
 		}
-		if output.Topic != "blcu/downloadRequest" {
-			t.Error("Expected topic blcu/downloadRequest, got", output.Topic)
+		if output.Topic != blcu.DownloadName {
+			t.Errorf("Expected topic %s, got %s", blcu.DownloadName, output.Topic)
 		}
 		if string(output.Payload) != "test" {
 			t.Error("Expected payload 'test', got", string(output.Payload))
@@ -227,8 +227,8 @@ func TestUpload_Push(t *testing.T) {
 			done <- true
 			return
 		}
-		if output.Topic != "blcu/uploadRequest" {
-			t.Error("Expected topic blcu/uploadRequest, got", output.Topic)
+		if output.Topic != blcu.UploadName {
+			t.Errorf("Expected topic %s, got %s", blcu.UploadName, output.Topic)
 		}
 		if string(output.Payload) != "test" {
 			t.Error("Expected payload 'test', got", string(output.Payload))
