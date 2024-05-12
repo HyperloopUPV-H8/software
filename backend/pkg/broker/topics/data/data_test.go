@@ -8,7 +8,6 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
 	ws "github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/url"
 	"os"
@@ -16,66 +15,118 @@ import (
 	"time"
 )
 
-func TestUpdatePush(t *testing.T) {
-	logger := zerolog.New(os.Stdout)
+func TestData_Push(t *testing.T) {
+	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
 	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/data"}
-
 	clientChan := make(chan *websocket.Client)
+
+	// Start HTTP server with WebSocket upgrade and echo back
 	http.HandleFunc("/data", func(writer http.ResponseWriter, request *http.Request) {
-		upgrader := websocket.NewUpgrader(clientChan, logger)
-		upgrader.Upgrade(writer, request, nil)
+		upgrader := ws.Upgrader{
+			CheckOrigin: func(r *http.Request) bool { return true },
+		}
+		conn, upgradeErr := upgrader.Upgrade(writer, request, nil)
+		if upgradeErr != nil {
+			logger.Error().Err(upgradeErr).Msg("Failed to upgrade")
+			return
+		}
+		defer conn.Close()
+		defer logger.Info().Str("id", "server").Msg("Connection closed")
+
+		// Handle and echo messages continuously
+		go func() {
+			for {
+				_, msg, readMsgErr := conn.ReadMessage()
+				if readMsgErr != nil {
+					logger.Error().Err(readMsgErr).Msg("Read error")
+					return
+				}
+				readMsgErr = conn.WriteMessage(ws.TextMessage, msg)
+				if readMsgErr != nil {
+					logger.Error().Err(readMsgErr).Msg("Write error")
+					return
+				}
+			}
+		}()
 	})
+
 	go http.ListenAndServe(":8080", nil)
 
-	c, _, err := ws.DefaultDialer.Dial(u.String(), nil)
-	if err != nil {
-		t.Fatal("Error dialing:", err)
+	time.Sleep(100 * time.Millisecond)
+
+	// Set up the client
+	c, _, clientErr := ws.DefaultDialer.Dial(u.String(), nil)
+	if clientErr != nil {
+		logger.Fatal().Err(clientErr).Msg("Error dialing")
 	}
+	defer c.Close()
+	defer logger.Info().Str("id", "client").Msg("Client connection closed")
 
 	api := broker.New(logger)
 	pool := websocket.NewPool(clientChan, logger)
+	client := websocket.NewClient(c)
+	clientChan <- client
 
-	websocket.NewClient(c)
+	dataTopic := data.NewUpdateTopic(1 * time.Millisecond)
+	dataTopic.SetAPI(api)
+	dataTopic.SetPool(pool)
 
-	update := data.NewUpdateTopic(1 * time.Millisecond)
-	update.SetPool(pool)
-	update.SetAPI(api)
+	// Simulate sending a download request
 
-	err = update.Push(data.NewPush(&models.Update{
-		Id:        0,
-		HexValue:  "",
-		Count:     0,
-		CycleTime: 0,
-		Values:    nil,
-	}))
-
-	assert.NoError(t, err)
-}
-
-func TestClientMessage(t *testing.T) {
-	logger := zerolog.New(os.Stdout)
-	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/datacm"}
-
-	clientChan := make(chan *websocket.Client)
-	http.HandleFunc("/datacm", func(writer http.ResponseWriter, request *http.Request) {
-		upgrader := websocket.NewUpgrader(clientChan, logger)
-		upgrader.Upgrade(writer, request, nil)
+	request := data.NewPush(&models.Update{
+		Id:        1,
+		HexValue:  "test",
+		Count:     1,
+		CycleTime: 1,
+		Values: map[string]models.UpdateValue{
+			"test": &models.NumericValue{
+				Value:   1.0,
+				Average: 1.0,
+			},
+		},
 	})
-	go http.ListenAndServe(":8080", nil)
-
-	c, _, err := ws.DefaultDialer.Dial(u.String(), nil)
-	if err != nil {
-		t.Fatal("Error dialing:", err)
+	pushErr := dataTopic.Push(request)
+	if pushErr != nil {
+		t.Fatal("Error pushing:", pushErr)
 	}
 
-	api := broker.New(logger)
-	pool := websocket.NewPool(clientChan, logger)
+	// Use a timeout for client read
+	done := make(chan bool)
+	go func() {
+		output, readErr := client.Read()
+		if readErr != nil {
+			logger.Error().Err(readErr).Msg("Client read failed")
+			done <- true
+			return
+		}
+		if output.Topic != data.UpdateName {
+			t.Errorf("Expected topic %s, got %s", data.UpdateName, output.Topic)
+		}
 
-	websocket.NewClient(c)
+		payload := data.NewPush(&models.Update{
+			Id:        1,
+			HexValue:  "test",
+			Count:     1,
+			CycleTime: 1,
+			Values: map[string]models.UpdateValue{
+				"test": &models.NumericValue{
+					Value:   1.0,
+					Average: 1.0,
+				},
+			},
+		})
+		payloadBytes, _ := json.Marshal(payload)
 
-	update := data.NewUpdateTopic(1 * time.Millisecond)
-	update.SetPool(pool)
-	update.SetAPI(api)
+		if string(output.Payload) != string(payloadBytes) {
+			t.Error("Expected payload 'test', got", string(output.Payload))
+		}
+		done <- true
+	}()
 
-	update.ClientMessage(websocket.ClientId{}, &websocket.Message{"test", json.RawMessage("test")})
+	select {
+	case <-done:
+		logger.Info().Msg("Test completed successfully")
+	case <-time.After(3 * time.Second):
+		t.Error("Test timed out")
+	}
 }

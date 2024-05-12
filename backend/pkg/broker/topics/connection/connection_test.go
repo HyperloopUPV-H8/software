@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-func TestUpdate_Push(t *testing.T) {
+func TestConnection_Push(t *testing.T) {
 	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
 	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/connection"}
 	clientChan := make(chan *websocket.Client)
@@ -74,7 +74,7 @@ func TestUpdate_Push(t *testing.T) {
 	request := data.NewConnection("test", true)
 	pushErr := update.Push(request)
 	if pushErr != nil {
-		t.Fatal("Error pushing download request:", pushErr)
+		t.Fatal("Error pushing:", pushErr)
 	}
 
 	// Use a timeout for client read
@@ -107,7 +107,7 @@ func TestUpdate_Push(t *testing.T) {
 	}
 }
 
-func TestUpdate_ClientMessage(t *testing.T) {
+func TestConnection_ClientMessage(t *testing.T) {
 	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
 	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/connectioncm"}
 	clientChan := make(chan *websocket.Client)
