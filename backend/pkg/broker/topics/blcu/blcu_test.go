@@ -1,11 +1,13 @@
 package blcu_test
 
 import (
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/blcu"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
 	ws "github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -13,7 +15,30 @@ import (
 	"time"
 )
 
-func TestDownload(t *testing.T) {
+var errorFlag bool
+
+type OutputNotMatchingError struct{}
+
+func (e *OutputNotMatchingError) Error() string {
+	return "Output does not match"
+}
+
+type MockAPI struct{}
+
+func (api MockAPI) UserPush(push abstraction.BrokerPush) error {
+	if push.(blcu.DownloadRequest).Board != "test" {
+		errorFlag = true
+		return &OutputNotMatchingError{}
+	}
+	log.Printf("Output matches")
+	return nil
+}
+
+func (api MockAPI) UserPull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
+	return nil, nil
+}
+
+func TestDownload_Push(t *testing.T) {
 	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
 	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/download"}
 	clientChan := make(chan *websocket.Client)
@@ -97,5 +122,19 @@ func TestDownload(t *testing.T) {
 		logger.Info().Msg("Test completed successfully")
 	case <-time.After(10 * time.Second):
 		t.Error("Test timed out")
+	}
+}
+
+func TestDownload_ClientMessage(t *testing.T) {
+	download := blcu.Download{}
+	download.SetAPI(&MockAPI{})
+
+	download.ClientMessage(websocket.ClientId{0}, &websocket.Message{
+		Topic:   blcu.DownloadName,
+		Payload: []byte(`{"board":"test"}`),
+	})
+
+	if errorFlag {
+		t.Fatal("Output does not match")
 	}
 }
