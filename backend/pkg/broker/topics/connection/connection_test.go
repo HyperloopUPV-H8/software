@@ -1,73 +1,27 @@
 package data_test
 
 import (
-	"encoding/json"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/connection"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
-	ws "github.com/gorilla/websocket"
-	"github.com/rs/zerolog"
-	"github.com/stretchr/testify/assert"
-	"net/http"
-	"net/url"
-	"os"
-	"testing"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/blcu"
+	"github.com/rs/zerolog/log"
 )
 
-func TestUpdate_Push(t *testing.T) {
-	logger := zerolog.New(os.Stdout)
-	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/update"}
+var errorFlag bool
 
-	clientChan := make(chan *websocket.Client)
-	http.HandleFunc("/update", func(writer http.ResponseWriter, request *http.Request) {
-		upgrader := websocket.NewUpgrader(clientChan, logger)
-		upgrader.Upgrade(writer, request, nil)
-	})
-	go http.ListenAndServe(":8080", nil)
+type OutputNotMatchingError struct{}
 
-	c, _, err := ws.DefaultDialer.Dial(u.String(), nil)
-	if err != nil {
-		t.Fatal("Error dialing:", err)
-	}
-
-	api := broker.New(logger)
-	pool := websocket.NewPool(clientChan, logger)
-
-	websocket.NewClient(c)
-
-	update := data.NewUpdateTopic()
-	update.SetPool(pool)
-	update.SetAPI(api)
-
-	err = update.Push(data.NewConnection("test", true))
-
-	assert.NoError(t, err)
+func (e *OutputNotMatchingError) Error() string {
+	return "Output does not match"
 }
 
-func TestClientMessage(t *testing.T) {
-	logger := zerolog.New(os.Stdout)
-	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/connectioncm"}
+type MockAPI struct{}
 
-	clientChan := make(chan *websocket.Client)
-	http.HandleFunc("/connectioncm", func(writer http.ResponseWriter, request *http.Request) {
-		upgrader := websocket.NewUpgrader(clientChan, logger)
-		upgrader.Upgrade(writer, request, nil)
-	})
-	go http.ListenAndServe(":8080", nil)
-
-	c, _, err := ws.DefaultDialer.Dial(u.String(), nil)
-	if err != nil {
-		t.Fatal("Error dialing:", err)
-	}
-
-	api := broker.New(logger)
-	pool := websocket.NewPool(clientChan, logger)
-
-	websocket.NewClient(c)
-
-	update := data.NewUpdateTopic()
-	update.SetPool(pool)
-	update.SetAPI(api)
-
-	update.ClientMessage(websocket.ClientId{}, &websocket.Message{"test", json.RawMessage("test")})
+func (api MockAPI) UserPush(push abstraction.BrokerPush) error {
+	return nil
 }
+
+func (api MockAPI) UserPull(request abstraction.BrokerRequest) (abstraction.BrokerResponse, error) {
+	return nil, nil
+}
+
+func Test
