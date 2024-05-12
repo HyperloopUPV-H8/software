@@ -98,7 +98,7 @@ func NewStatus(request bool) *Status {
 	}
 }
 
-func (status *Status) Topic() abstraction.BrokerTopic {
+func (status Status) Topic() abstraction.BrokerTopic {
 	return EnableName
 }
 

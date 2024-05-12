@@ -34,6 +34,7 @@ func (api MockAPI) UserPush(push abstraction.BrokerPush) error {
 			errorFlag = true
 			return &OutputNotMatchingError{}
 		}
+		errorFlag = false
 		log.Printf("Output matches")
 		return nil
 	case blcu.UploadRequest:
@@ -42,6 +43,7 @@ func (api MockAPI) UserPush(push abstraction.BrokerPush) error {
 			fmt.Printf("Expected board 'test' and data 'test', got board '%s' and data '%s'\n", push.(blcu.UploadRequest).Board, string(push.(blcu.UploadRequest).Data))
 			return &OutputNotMatchingError{}
 		}
+		errorFlag = false
 		log.Printf("Output matches")
 		return nil
 	}
@@ -52,7 +54,7 @@ func (api MockAPI) UserPull(request abstraction.BrokerRequest) (abstraction.Brok
 	return nil, nil
 }
 
-func TestDownload_Push(t *testing.T) {
+func TestBLCUTopic_Download_Push(t *testing.T) {
 	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
 	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/download"}
 	clientChan := make(chan *websocket.Client)
@@ -89,7 +91,7 @@ func TestDownload_Push(t *testing.T) {
 
 	go http.ListenAndServe(":8080", nil)
 
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	// Set up the client
 	c, _, err := ws.DefaultDialer.Dial(u.String(), nil)
@@ -141,7 +143,7 @@ func TestDownload_Push(t *testing.T) {
 	}
 }
 
-func TestDownload_ClientMessage(t *testing.T) {
+func TestBLCUTopic_Download_ClientMessage(t *testing.T) {
 	download := blcu.Download{}
 	download.SetAPI(&MockAPI{})
 
@@ -155,7 +157,7 @@ func TestDownload_ClientMessage(t *testing.T) {
 	}
 }
 
-func TestUpload_Push(t *testing.T) {
+func TestBLCUTopic_Upload_Push(t *testing.T) {
 	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
 	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/upload"}
 	clientChan := make(chan *websocket.Client)
@@ -244,7 +246,7 @@ func TestUpload_Push(t *testing.T) {
 	}
 }
 
-func TestUpload_ClientMessage(t *testing.T) {
+func TestBLCUTopic_Upload_ClientMessage(t *testing.T) {
 	upload := blcu.Upload{}
 	upload.SetAPI(&MockAPI{})
 

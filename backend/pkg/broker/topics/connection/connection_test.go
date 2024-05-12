@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-func TestConnection_Push(t *testing.T) {
+func TestConnectionTopic_Push(t *testing.T) {
 	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
 	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/connection"}
 	clientChan := make(chan *websocket.Client)
@@ -107,7 +107,7 @@ func TestConnection_Push(t *testing.T) {
 	}
 }
 
-func TestConnection_ClientMessage(t *testing.T) {
+func TestConnectionTopic_ClientMessage(t *testing.T) {
 	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
 	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/connectioncm"}
 	clientChan := make(chan *websocket.Client)

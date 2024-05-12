@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-func TestData_Push(t *testing.T) {
+func TestDataTopic_Push(t *testing.T) {
 	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
 	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/data"}
 	clientChan := make(chan *websocket.Client)
