@@ -119,7 +119,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	defer writer.Flush()
 
 	err := writer.Write([]string{
-		infoRecord.Timestamp.Format(time.RFC3339),
+		fmt.Sprint(infoRecord.Timestamp.UnixMilli()),
 		infoRecord.From,
 		infoRecord.To,
 		fmt.Sprint(infoRecord.Packet.Id()),
@@ -157,6 +157,8 @@ func (sublogger *Logger) Stop() error {
 			fmt.Println(closeErr.Error())
 		}
 	}
+
+	sublogger.infoIdMap = make(map[abstraction.BoardId]io.WriteCloser, len(sublogger.infoIdMap))
 
 	fmt.Println("Logger stopped")
 	return closeErr

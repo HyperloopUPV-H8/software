@@ -15,7 +15,8 @@ import Papa from 'papaparse';
  * retrieved from the CSV file.
  */
 
-type Session = Map<string, {time: Date, value: number}[]>;
+export type ChartPoint = {time: number, value: number};
+export type Session = Map<string, ChartPoint[]>;
 
 export async function extractLoggerSession (directory: FileSystemDirectoryEntry): Promise<Session> {
     const session: Session = new Map();
@@ -29,11 +30,14 @@ export async function extractLoggerSession (directory: FileSystemDirectoryEntry)
             (file as FileSystemFileEntry).file((file) => {
                 Papa.parse(file, {
                     complete: (result) => {
-                        const measurementPoints = [] as {time: Date, value: number}[];
+                        const measurementPoints = [] as ChartPoint[];
                         for(const row of result.data) {
                             if(isValidLog(row)) {
                                 const [timestamp, , , value] = row as [string, string, string, string];
-                                measurementPoints.push({time: new Date(timestamp), value: parseFloat(value)});
+                                measurementPoints.push({
+                                    time: parseFloat(timestamp), 
+                                    value: parseFloat(value)
+                                });
                             }
                         }
                         session.set(file.name.replace(".csv", ""), measurementPoints);
@@ -64,24 +68,36 @@ export async function extractLoggerSession (directory: FileSystemDirectoryEntry)
  * @returns The function `getFilesFromDirectory` returns a Promise that resolves to an array of
  * `FileSystemEntry` objects representing the files in the specified directory.
  */
+
 export async function getFilesFromDirectory(folder: FileSystemDirectoryEntry): Promise<FileSystemEntry[]> {
-    const reader = folder.createReader();
-    const entries = await new Promise<FileSystemEntry[]>((resolve, reject) => {
-        reader.readEntries((entries) => {
-            resolve(entries);
-        }, (err) => {
-            reject(err);
+    const entries: FileSystemEntry[] = [];
+
+    async function readEntries(reader: FileSystemDirectoryReader) {
+        const result = await new Promise<FileSystemEntry[]>((resolve, reject) => {
+            reader.readEntries((results) => {
+                resolve(results);
+            }, (err) => {
+                reject(err);
+            });
         });
-    })
+
+        if (result.length > 0) {
+            entries.push(...result);
+            await readEntries(reader);
+        }
+    }
+
+    await readEntries(folder.createReader());
+
     return entries;
-};
+}
 
 
 function isValidLog(row: unknown) {
     return (
         Array.isArray(row) &&
         row.length === 4 &&
-        new Date(row[0]).toISOString() !== "Invalid Date" &&
+        // new Date(row[0]).to() !== "Invalid Date" &&
         typeof row[1] === "string" &&
         typeof row[2] === "string" &&
         !isNaN(parseFloat(row[3]))
