@@ -52,8 +52,6 @@ func TestDataTopic_Push(t *testing.T) {
 
 	go http.ListenAndServe(":8080", nil)
 
-	time.Sleep(100 * time.Millisecond)
-
 	// Set up the client
 	c, _, clientErr := ws.DefaultDialer.Dial(u.String(), nil)
 	if clientErr != nil {

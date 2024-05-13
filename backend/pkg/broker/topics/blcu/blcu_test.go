@@ -91,7 +91,8 @@ func TestBLCUTopic_Download_Push(t *testing.T) {
 
 	go http.ListenAndServe(":8080", nil)
 
-	time.Sleep(500 * time.Millisecond)
+	// Mock first client as it always fails
+	ws.DefaultDialer.Dial(u.String(), nil)
 
 	// Set up the client
 	c, _, err := ws.DefaultDialer.Dial(u.String(), nil)
@@ -194,7 +195,8 @@ func TestBLCUTopic_Upload_Push(t *testing.T) {
 
 	go http.ListenAndServe(":8080", nil)
 
-	time.Sleep(500 * time.Millisecond)
+	// Mock first client as it always fails
+	ws.DefaultDialer.Dial(u.String(), nil)
 
 	// Set up the client
 	c, _, err := ws.DefaultDialer.Dial(u.String(), nil)

@@ -6,7 +6,6 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
 	"log"
 	"testing"
-	"time"
 )
 
 var errorFlag bool
@@ -42,8 +41,6 @@ func TestLoggerTopic_ClientMessage(t *testing.T) {
 		Topic:   data.EnableName,
 		Payload: []byte("true"),
 	})
-
-	time.Sleep(100 * time.Millisecond)
 
 	if errorFlag {
 		t.Fatal("Output does not match")
