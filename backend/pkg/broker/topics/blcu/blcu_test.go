@@ -91,7 +91,7 @@ func TestBLCUTopic_Download_Push(t *testing.T) {
 
 	go http.ListenAndServe(":8080", nil)
 
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(300 * time.Millisecond)
 
 	// Set up the client
 	c, _, err := ws.DefaultDialer.Dial(u.String(), nil)
@@ -120,9 +120,9 @@ func TestBLCUTopic_Download_Push(t *testing.T) {
 	// Use a timeout for client read
 	done := make(chan bool)
 	go func() {
-		output, err := client.Read()
-		if err != nil {
-			logger.Error().Err(err).Msg("Client read failed")
+		output, readErr := client.Read()
+		if readErr != nil {
+			logger.Error().Err(readErr).Msg("Client read failed")
 			done <- true
 			return
 		}

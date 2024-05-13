@@ -41,11 +41,11 @@ func (api MockAPI) UserPull(request abstraction.BrokerRequest) (abstraction.Brok
 
 func TestLoggerTopic_Push(t *testing.T) {
 	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
-	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/data"}
+	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/logger"}
 	clientChan := make(chan *websocket.Client)
 
 	// Start HTTP server with WebSocket upgrade and echo back
-	http.HandleFunc("/data", func(writer http.ResponseWriter, request *http.Request) {
+	http.HandleFunc("/logger", func(writer http.ResponseWriter, request *http.Request) {
 		upgrader := ws.Upgrader{
 			CheckOrigin: func(r *http.Request) bool { return true },
 		}
@@ -128,7 +128,7 @@ func TestLoggerTopic_Push(t *testing.T) {
 	}
 }
 
-func TestDownload_ClientMessage(t *testing.T) {
+func TestLoggerTopic_ClientMessage(t *testing.T) {
 	errorFlag = true
 	loggerTopic := data.NewEnableTopic()
 	loggerTopic.SetAPI(&MockAPI{})
