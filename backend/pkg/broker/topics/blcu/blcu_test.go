@@ -91,7 +91,7 @@ func TestBLCUTopic_Download_Push(t *testing.T) {
 
 	go http.ListenAndServe(":8080", nil)
 
-	time.Sleep(300 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 
 	// Set up the client
 	c, _, err := ws.DefaultDialer.Dial(u.String(), nil)
@@ -194,7 +194,7 @@ func TestBLCUTopic_Upload_Push(t *testing.T) {
 
 	go http.ListenAndServe(":8080", nil)
 
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 
 	// Set up the client
 	c, _, err := ws.DefaultDialer.Dial(u.String(), nil)
