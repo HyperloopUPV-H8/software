@@ -1,4 +1,4 @@
-import { useMeasurementsStore } from "common";
+import { useGlobalTicker, useMeasurementsStore, useSubscribe } from "common";
 import styles from "./VehiclePage.module.scss";
 
 import { Pagination } from "components/Pagination/Pagination";
@@ -6,12 +6,11 @@ import { PageWrapper } from "pages/PageWrapper/PageWrapper";
 import { Outlet } from "react-router-dom";
 import { useOrders } from "useOrders";
 import { fetchFromBackend } from "services/HTTPHandler";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export const VehiclePage = () => {
     
     const [podData, setPodData] = useState(null);
-    const measurements = useMeasurementsStore(state => state.measurements);
     const initMeasurements = useMeasurementsStore(state => state.initMeasurements);
 
     useEffect(() => {

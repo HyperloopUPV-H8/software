@@ -11,26 +11,17 @@ import {
     selectObccuMeasurements,
     selectPcuMeasurements,
     selectVcuMeasurements,
-    useGlobalTicker,
     useMeasurementsStore,
     useSubscribe,
 } from "common";
-import { useCallback, useState } from "react";
 
 export const BoardsPage = () => {
     const measurements = useMeasurementsStore(state => state.measurements);
     const updateMeasurements = useMeasurementsStore(state => state.updateMeasurements);
-    const [measurementsState, setMeasurementsState] = useState(measurements);
 
     useSubscribe("podData/update", (msg) => {
         updateMeasurements(msg);
     });
-
-    const callback = useCallback(() => {
-        setMeasurementsState(measurements);
-    }, []);
-
-    useGlobalTicker(callback);
 
     return (
         <div className={styles.boardsPage}>
