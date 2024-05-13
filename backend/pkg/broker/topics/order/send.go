@@ -49,8 +49,8 @@ func (send *Send) handleOrder(id websocket.ClientId, message *websocket.Message)
 		return err
 	}
 
-	send.api.UserPush(&order) // TODO! Error handling
-	return nil
+	pushErr := send.api.UserPush(order) // TODO! Error handling
+	return pushErr
 }
 
 func (send *Send) SetPool(pool *websocket.Pool) {
@@ -66,7 +66,7 @@ type Order struct {
 	Fields map[string]Field `json:"fields"`
 }
 
-func (order *Order) Topic() abstraction.BrokerTopic {
+func (order Order) Topic() abstraction.BrokerTopic {
 	return SendName
 }
 
