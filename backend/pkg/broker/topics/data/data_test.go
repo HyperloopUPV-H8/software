@@ -130,3 +130,29 @@ func TestDataTopic_Push(t *testing.T) {
 		t.Error("Test timed out")
 	}
 }
+
+func TestDataTopic_ClientMessage(t *testing.T) {
+	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
+	api := broker.New(logger)
+
+	dataTopic := data.NewUpdateTopic(1 * time.Millisecond)
+	dataTopic.SetAPI(api)
+
+	payload := data.NewPush(&models.Update{
+		Id:        1,
+		HexValue:  "test",
+		Count:     1,
+		CycleTime: 1,
+		Values: map[string]models.UpdateValue{
+			"test": &models.NumericValue{
+				Value:   1.0,
+				Average: 1.0,
+			},
+		},
+	})
+	payloadBytes, _ := json.Marshal(payload)
+	dataTopic.ClientMessage(websocket.ClientId{0}, &websocket.Message{
+		Topic:   data.SubscribeName,
+		Payload: payloadBytes,
+	})
+}
