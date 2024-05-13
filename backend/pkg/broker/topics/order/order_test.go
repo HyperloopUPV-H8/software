@@ -20,7 +20,8 @@ func (e *OutputNotMatchingError) Error() string {
 type MockAPI struct{}
 
 func (api MockAPI) UserPush(push abstraction.BrokerPush) error {
-	p := push.(order.Order).Fields["test"]
+	packet := push.(*order.Order)
+	p := packet.Fields["test"]
 	if p.IsEnabled != true || p.Type != "test" {
 		errorFlag = true
 		println(p.Value, p.IsEnabled, p.Type)

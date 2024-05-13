@@ -20,7 +20,7 @@ func NewSendTopic() *Send {
 	return &Send{}
 }
 
-func (send *Send) Topic() abstraction.BrokerTopic {
+func (send Send) Topic() abstraction.BrokerTopic {
 	return SendName
 }
 
@@ -49,7 +49,7 @@ func (send *Send) handleOrder(id websocket.ClientId, message *websocket.Message)
 		return err
 	}
 
-	pushErr := send.api.UserPush(order) // TODO! Error handling
+	pushErr := send.api.UserPush(&order) // TODO! Error handling
 	return pushErr
 }
 
@@ -66,7 +66,7 @@ type Order struct {
 	Fields map[string]Field `json:"fields"`
 }
 
-func (order Order) Topic() abstraction.BrokerTopic {
+func (order *Order) Topic() abstraction.BrokerTopic {
 	return SendName
 }
 

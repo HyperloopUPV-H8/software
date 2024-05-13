@@ -55,7 +55,7 @@ func (enable *Enable) handleToggle(id websocket.ClientId, message *websocket.Mes
 		return err
 	}
 
-	status := NewStatus(request)
+	status := newStatus(request)
 	go enable.api.UserPush(status)
 
 	go func() {
@@ -91,14 +91,14 @@ type Status struct {
 	response chan bool
 }
 
-func NewStatus(request bool) *Status {
+func newStatus(request bool) *Status {
 	return &Status{
 		request:  request,
 		response: make(chan bool),
 	}
 }
 
-func (status Status) Topic() abstraction.BrokerTopic {
+func (status *Status) Topic() abstraction.BrokerTopic {
 	return EnableName
 }
 

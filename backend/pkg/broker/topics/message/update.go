@@ -108,7 +108,7 @@ func Push(data any, boardId abstraction.BoardId) *pushStruct {
 	return &pushStruct{data: data, boardId: boardId}
 }
 
-func (push pushStruct) Topic() abstraction.BrokerTopic {
+func (push *pushStruct) Topic() abstraction.BrokerTopic {
 	return UpdateName
 }
 
