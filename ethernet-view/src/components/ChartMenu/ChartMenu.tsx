@@ -8,7 +8,7 @@ import { ChartElement } from "./ChartElement/ChartElement";
 
 export type ChartId = string;
 
-type ChartInfo = {
+export type ChartInfo = {
     chartId: ChartId;
     initialMeasurementId: MeasurementId;
 };

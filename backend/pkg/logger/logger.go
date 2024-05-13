@@ -61,13 +61,11 @@ func (logger *Logger) Start() error {
 		return nil
 	}
 
+	Timestamp = time.Now()
+
 	// Create log folders
 	for subLogger := range logger.subloggers {
-		loggerPath := path.Join(
-			"logger",
-			string(subLogger),
-			Timestamp.Format(time.RFC3339),
-		)
+		loggerPath := path.Join("logger", string(subLogger), Timestamp.Format(time.RFC3339))
 		logger.trace.Debug().Str("subLogger", string(subLogger)).Str("path", loggerPath).Msg("creating folder")
 		err := os.MkdirAll(loggerPath, os.ModePerm)
 		if err != nil {

@@ -136,7 +136,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		writer := csv.NewWriter(file) // TODO! use map/slice of writer
 
 		err := writer.Write([]string{
-			timestamp.Format(time.RFC3339),
+			fmt.Sprint(timestamp.UnixMilli()),
 			dataRecord.From,
 			dataRecord.To,
 			val,
@@ -147,6 +147,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 				Timestamp: time.Now(),
 				Inner:     err,
 			}
+			fmt.Println(writerErr)
 		}
 		writer.Flush()
 	}
@@ -164,7 +165,7 @@ func (sublogger *Logger) Stop() error {
 	}
 
 	closeErr := error(nil)
-	for _, file := range sublogger.valueFileSlice {
+	for value, file := range sublogger.valueFileSlice {
 		err := file.Close()
 		if err != nil {
 			closeErr = loggerHandler.ErrClosingFile{
@@ -172,9 +173,11 @@ func (sublogger *Logger) Stop() error {
 				Timestamp: time.Now(),
 			}
 
-			fmt.Println(closeErr.Error())
+			fmt.Println(value, ": ", closeErr)
 		}
 	}
+
+	sublogger.valueFileSlice = make(map[data.ValueName]io.WriteCloser, len(sublogger.valueFileSlice))
 
 	fmt.Println("Logger stopped")
 	return closeErr

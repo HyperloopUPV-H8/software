@@ -1,8 +1,9 @@
 import { create } from "zustand";
+import { ChartPoint } from "./LogsColumn/LogLoader/LogsProcessor";
 
 export interface LogSession {
     name: string;
-    measurementLogs: Map<string, { time: Date; value: number }[]>;
+    measurementLogs: Map<string, ChartPoint[]>;
 }
 export type LogSessionCollection = LogSession[];
 
