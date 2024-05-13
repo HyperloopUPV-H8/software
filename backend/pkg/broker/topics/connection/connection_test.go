@@ -1,4 +1,4 @@
-package data_test
+package connection_test
 
 import (
 	"encoding/json"

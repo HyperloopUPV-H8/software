@@ -1,4 +1,4 @@
-package data_test
+package logger_test
 
 import (
 	"encoding/json"
