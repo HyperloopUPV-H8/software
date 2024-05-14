@@ -67,4 +67,6 @@ func TestLogger_Data(t *testing.T) {
 	if closeErr := logger.Stop(); closeErr != nil {
 		t.Error(err)
 	}
+
+	os.RemoveAll("logger")
 }
