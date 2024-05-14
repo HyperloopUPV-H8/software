@@ -21,7 +21,7 @@ type Logger struct {
 	// An atomic boolean is used in order to use CompareAndSwap in the Start and Stop methods
 	running        *atomic.Bool
 	subloggersLock *sync.RWMutex
-	// The subloggers are only the loggers selected at the start of the log
+	// The subloggers are only the logger s selected at the start of the log
 	subloggers map[abstraction.LoggerName]abstraction.Logger
 
 	trace zerolog.Logger
