@@ -69,8 +69,8 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 	filename := path.Join(
 		"logger/state",
-		fmt.Sprintf("state_%s", logger.Timestamp.Format(time.RFC3339)),
-		fmt.Sprintf("state_%s.csv", time.Now().Format(time.RFC3339)),
+		fmt.Sprintf("data_%s_%s", logger.Timestamp.Format("YYYY_MM_DD_HH_mm_ss"), fmt.Sprint(logger.Timestamp.Nanosecond())),
+		fmt.Sprintf("state_%s_%s.csv", time.Now().Format("YYYY_MM_DD_HH_mm_ss"), fmt.Sprint(logger.Timestamp.Nanosecond())),
 	)
 	err := os.MkdirAll(path.Dir(filename), os.ModePerm)
 	if err != nil {
