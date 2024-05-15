@@ -39,8 +39,6 @@ func TestLogger(t *testing.T) {
 
 	timestamp := logger.Timestamp
 
-	time.Sleep(100 * time.Millisecond)
-
 	// Data
 	dataPacket := dataPacketer.NewPacketWithValues(
 		0,
@@ -202,8 +200,6 @@ func TestLogger(t *testing.T) {
 		t.Error(err)
 	}
 	defer file.Close()
-
-	time.Sleep(1 * time.Second)
 
 	reader := csv.NewReader(file)
 	for i := 0; i < 8; i++ {
