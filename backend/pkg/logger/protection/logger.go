@@ -92,7 +92,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 		filename := path.Join(
 			"logger/protections",
-			fmt.Sprintf("protection_%s_%s", logger.Timestamp.Format("YYYY_MM_DD_HH_mm_ss"), fmt.Sprint(logger.Timestamp.Nanosecond())),
+			fmt.Sprintf("protection_%s", logger.Timestamp.Format("2006_01_02_15_04_05")),
 			fmt.Sprintf("%s.csv", boardName),
 		)
 		err := os.MkdirAll(path.Dir(filename), os.ModePerm)
