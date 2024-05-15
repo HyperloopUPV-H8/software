@@ -109,8 +109,8 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		file, ok := sublogger.valueFileSlice[valueName]
 		if !ok {
 			filename := path.Join(
-				"logger/data",
-				fmt.Sprintf("data_%s", loggerHandler.Timestamp.Format(time.RFC3339)),
+				"logger", "data",
+				loggerHandler.Timestamp.Format(loggerHandler.TimestampFormat),
 				fmt.Sprintf("%s.csv", valueName),
 			)
 			err := os.MkdirAll(path.Dir(filename), os.ModePerm)
