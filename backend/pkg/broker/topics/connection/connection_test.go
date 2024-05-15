@@ -76,12 +76,12 @@ func TestConnectionTopic_Push(t *testing.T) {
 	}
 
 	// Use a timeout for client read
-	done := make(chan bool)
+	done := make(chan struct{})
 	go func() {
 		output, readErr := client.Read()
 		if readErr != nil {
 			logger.Error().Err(readErr).Msg("Client read failed")
-			done <- true
+			done <- struct{}{}
 			return
 		}
 		if output.Topic != data.UpdateName {
@@ -94,7 +94,7 @@ func TestConnectionTopic_Push(t *testing.T) {
 		if string(output.Payload) != string(payloadBytes) {
 			t.Error("Expected payload 'test', got", string(output.Payload))
 		}
-		done <- true
+		done <- struct{}{}
 	}()
 
 	select {
@@ -171,12 +171,12 @@ func TestConnectionTopic_ClientMessage(t *testing.T) {
 	})
 
 	// Use a timeout for client read
-	done := make(chan bool)
+	done := make(chan struct{})
 	go func() {
 		output, readErr := client.Read()
 		if readErr != nil {
 			logger.Error().Err(readErr).Msg("Client read failed")
-			done <- true
+			done <- struct{}{}
 			return
 		}
 		if output.Topic != data.SubscribeName {
@@ -190,7 +190,7 @@ func TestConnectionTopic_ClientMessage(t *testing.T) {
 			comparison, _ := json.Marshal(payloadInput)
 			t.Errorf("Expected payload %s , got %s", string(comparison), string(output.Payload))
 		}
-		done <- true
+		done <- struct{}{}
 	}()
 
 	select {

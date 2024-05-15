@@ -123,12 +123,12 @@ func TestBLCUTopic_Download_Push(t *testing.T) {
 	}
 
 	// Use a timeout for client read
-	done := make(chan bool)
+	done := make(chan struct{})
 	go func() {
 		output, readErr := client.Read()
 		if readErr != nil {
 			logger.Error().Err(readErr).Msg("Client read failed")
-			done <- true
+			done <- struct{}{}
 			return
 		}
 		if output.Topic != blcu.DownloadName {
@@ -137,7 +137,7 @@ func TestBLCUTopic_Download_Push(t *testing.T) {
 		if string(output.Payload) != "test" {
 			t.Error("Expected payload 'test', got", string(output.Payload))
 		}
-		done <- true
+		done <- struct{}{}
 	}()
 
 	select {
@@ -224,12 +224,12 @@ func TestBLCUTopic_Upload_Push(t *testing.T) {
 	}
 
 	// Use a timeout for client read
-	done := make(chan bool)
+	done := make(chan struct{})
 	go func() {
 		output, err := client.Read()
 		if err != nil {
 			logger.Error().Err(err).Msg("Client read failed")
-			done <- true
+			done <- struct{}{}
 			return
 		}
 		if output.Topic != blcu.UploadName {
@@ -238,7 +238,7 @@ func TestBLCUTopic_Upload_Push(t *testing.T) {
 		if string(output.Payload) != "test" {
 			t.Error("Expected payload 'test', got", string(output.Payload))
 		}
-		done <- true
+		done <- struct{}{}
 	}()
 
 	select {
