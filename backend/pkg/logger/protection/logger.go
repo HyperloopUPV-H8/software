@@ -158,6 +158,8 @@ func (sublogger *Logger) Stop() error {
 		}
 	}
 
+	sublogger.infoIdMap = make(map[abstraction.BoardId]io.WriteCloser, len(sublogger.infoIdMap))
+
 	fmt.Println("Logger stopped")
 	return closeErr
 }
