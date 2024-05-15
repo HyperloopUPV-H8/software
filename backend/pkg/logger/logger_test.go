@@ -57,7 +57,7 @@ func TestLogger(t *testing.T) {
 
 	filename := path.Join(
 		"logger/data",
-		fmt.Sprintf("data_%s_%s", timestamp.Format("YYYY_MM_DD_HH_mm_ss"), fmt.Sprint(timestamp.Nanosecond())),
+		fmt.Sprintf("data_%s", timestamp.Format("2006_01_02_15_04_05")),
 		fmt.Sprintf("%s.csv", "test"),
 	)
 	file, err := os.Open(filename)
@@ -90,7 +90,7 @@ func TestLogger(t *testing.T) {
 
 	filename = path.Join(
 		"logger/order",
-		fmt.Sprintf("order_%s_%s", timestamp.Format("YYYY_MM_DD_HH_mm_ss"), fmt.Sprint(timestamp.Nanosecond())),
+		fmt.Sprintf("order_%s", timestamp.Format("2006_01_02_15_04_05")),
 		"order.csv",
 	)
 	file, err = os.Open(filename)
@@ -124,7 +124,7 @@ func TestLogger(t *testing.T) {
 
 	filename = path.Join(
 		"logger/protections",
-		fmt.Sprintf("protections_%s_%s", timestamp.Format("YYYY_MM_DD_HH_mm_ss"), fmt.Sprint(timestamp.Nanosecond())),
+		fmt.Sprintf("protections_%s", timestamp.Format("2006_01_02_15_04_05")),
 		fmt.Sprintf("%s.csv", "test"),
 	)
 	file, err = os.Open(filename)

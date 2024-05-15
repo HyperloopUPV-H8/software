@@ -53,7 +53,7 @@ func (sublogger *Logger) Start() error {
 
 	filename := path.Join(
 		"logger/order",
-		fmt.Sprintf("order_%s_%s", logger.Timestamp.Format("YYYY_MM_DD_HH_mm_ss"), fmt.Sprint(logger.Timestamp.Nanosecond())),
+		fmt.Sprintf("order_%s", logger.Timestamp.Format("2006_01_02_15_04_05")),
 		"order.csv",
 	)
 	err := os.MkdirAll(path.Dir(filename), os.ModePerm)
