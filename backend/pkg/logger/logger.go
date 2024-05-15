@@ -1,8 +1,6 @@
 package logger
 
 import (
-	"os"
-	"path"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -62,21 +60,6 @@ func (logger *Logger) Start() error {
 	}
 
 	Timestamp = time.Now()
-
-	// Create log folders
-	for subLogger := range logger.subloggers {
-		loggerPath := path.Join("logger", string(subLogger), Timestamp.Format(time.RFC3339))
-		logger.trace.Debug().Str("subLogger", string(subLogger)).Str("path", loggerPath).Msg("creating folder")
-		err := os.MkdirAll(loggerPath, os.ModePerm)
-		if err != nil {
-			logger.trace.Error().Stack().Err(err).Msg("creating folder")
-			return ErrCreatingAllDir{
-				Name:      Name,
-				Timestamp: time.Now(),
-				Path:      loggerPath,
-			}
-		}
-	}
 
 	logger.subloggersLock.Lock()
 	defer logger.subloggersLock.Unlock()
