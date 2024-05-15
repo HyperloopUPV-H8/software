@@ -11,6 +11,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger/state"
 	dataPacketer "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 	protectionPacketer "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/protection"
+	statePacketer "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/state"
 	"github.com/rs/zerolog"
 	"os"
 	"path"
@@ -165,6 +166,57 @@ func TestLogger(t *testing.T) {
 
 	if output[0] != fmt.Sprint(timestamp.UnixMilli()) || output[1] != "test" || output[2] != "test" || output[3] != "0" || output[4] != "7" || output[5] != "3" || output[6] != "test" || output[7] != "&{0 0}" || output[8] != protectionPacketTime.Format(time.RFC3339) {
 		t.Errorf("orderErr: expected [test test 0], got %v", output)
+	}
+
+	// State
+	matrix := [8][15]float32{
+		{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
+		{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
+		{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
+		{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
+		{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
+		{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
+		{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
+		{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
+	}
+	statePacket := statePacketer.NewSpace(0, matrix)
+	stateRecord := &state.Record{
+		Packet:    statePacket,
+		From:      "test",
+		To:        "test",
+		Timestamp: timestamp,
+	}
+
+	err = loggerHandler.PushRecord(stateRecord)
+	if err != nil {
+		t.Error(err)
+	}
+
+	filename = path.Join(
+		"logger", "state",
+		logger.Timestamp.Format(logger.TimestampFormat),
+		fmt.Sprintf("%s.csv", stateRecord.Timestamp.Format(logger.TimestampFormat)),
+	)
+	file, err = os.Open(filename)
+	if err != nil {
+		t.Error(err)
+	}
+	defer file.Close()
+
+	time.Sleep(1 * time.Second)
+
+	reader := csv.NewReader(file)
+	for i := 0; i < 8; i++ {
+		output, err = reader.Read()
+		if err != nil {
+			t.Error(err)
+		}
+
+		for j := 0; j < 15; j++ {
+			if output[j] != fmt.Sprint(float32(1.0)) {
+				t.Errorf("stateErr: expected 1.0, got %v", output[j])
+			}
+		}
 	}
 
 	if closeErr := loggerHandler.Stop(); closeErr != nil {
