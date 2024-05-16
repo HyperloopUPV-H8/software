@@ -63,7 +63,6 @@ export const ChartCanvas = ({
                     minMove: 0.001,
                 },
             });
-            console.log(data);
             for (const point of data) {
                 series?.update({
                     time: (point.time / 1000) as UTCTimestamp,

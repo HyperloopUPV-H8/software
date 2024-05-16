@@ -2,6 +2,7 @@ import { useLogStore } from "pages/LoggerPage/useLogStore";
 import styles from "./LogItem.module.scss"
 import folderClosed from "assets/svg/folder-closed.svg"
 import folderOpen from "assets/svg/folder-open.svg"
+import cross from "assets/svg/cross.svg"
 
 interface Props {
     logName: string;
@@ -20,6 +21,9 @@ export const LogItem = ({logName}: Props) => {
             </div>
             <div className={`${styles.title} ${isOpen ? styles.active : ""}`}>
                 {logName}
+            </div>
+            <div>
+                <img src={cross} alt="Remove log" />
             </div>
         </div>
     )
