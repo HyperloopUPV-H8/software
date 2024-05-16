@@ -12,7 +12,12 @@ export const LogItem = ({logName}: Props) => {
 
     const openLogSession = useLogStore(state => state.openLogSession);
     const setOpenLogSession = useLogStore(state => state.setOpenLogSession);
+    const removeLogSession = useLogStore(state => state.removeLogSession);
     const isOpen = openLogSession === logName;
+
+    const handleRemoveLog = () => {
+        removeLogSession(logName);
+    }
 
     return (
         <div className={styles.logItemWrapper} onClick={() => setOpenLogSession(logName)}>
@@ -22,7 +27,7 @@ export const LogItem = ({logName}: Props) => {
             <div className={`${styles.title} ${isOpen ? styles.active : ""}`}>
                 {logName}
             </div>
-            <div>
+            <div className={styles.icon} onClick={handleRemoveLog}>
                 <img src={cross} alt="Remove log" />
             </div>
         </div>
