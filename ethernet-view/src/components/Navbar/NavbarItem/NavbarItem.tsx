@@ -1,24 +1,27 @@
 import styles from "components/Navbar/NavbarItem/NavbarItem.module.scss";
-import { NavLink } from "react-router-dom";
 
 export type NavbarItemData = {
-    path: string;
     icon: string;
+    page: string;
 };
 
 type Props = {
     item: NavbarItemData;
+    pageShown: string;
+    setPageShown: (page: string) => void;
 };
 
-export const NavbarItem = ({ item }: Props) => {
+export const NavbarItem = ({ item, pageShown, setPageShown }: Props) => {
+
+    const handleClick = () => {
+        setPageShown(item.page);
+    }
+
     return (
-        <NavLink
-            to={item.path}
-            className={({isActive}) => isActive ? styles.active : ""}
-        >
-            <div className={styles.iconWrapper}>
+        <div className={pageShown === item.page ? styles.active : ""}>
+            <div className={styles.iconWrapper} onClick={handleClick}>
                 <img src={item.icon} alt="icon" />
             </div>
-        </NavLink>
+        </div>
     );
 };
