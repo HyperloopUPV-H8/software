@@ -91,8 +91,8 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		}
 
 		filename := path.Join(
-			"logger/protections",
-			fmt.Sprintf("protections_%s", logger.Timestamp.Format(time.RFC3339)),
+			"logger", "protections",
+			logger.Timestamp.Format(logger.TimestampFormat),
 			fmt.Sprintf("%s.csv", boardName),
 		)
 		err := os.MkdirAll(path.Dir(filename), os.ModePerm)
@@ -119,7 +119,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	defer writer.Flush()
 
 	err := writer.Write([]string{
-		infoRecord.Timestamp.Format(time.RFC3339),
+		fmt.Sprint(infoRecord.Timestamp.UnixMilli()),
 		infoRecord.From,
 		infoRecord.To,
 		fmt.Sprint(infoRecord.Packet.Id()),
@@ -157,6 +157,8 @@ func (sublogger *Logger) Stop() error {
 			fmt.Println(closeErr.Error())
 		}
 	}
+
+	sublogger.infoIdMap = make(map[abstraction.BoardId]io.WriteCloser, len(sublogger.infoIdMap))
 
 	fmt.Println("Logger stopped")
 	return closeErr

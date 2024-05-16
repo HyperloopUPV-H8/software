@@ -1,8 +1,6 @@
 package logger
 
 import (
-	"os"
-	"path"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -12,8 +10,9 @@ import (
 )
 
 const (
-	Name        = "loggerHandler"
-	HandlerName = "logger"
+	Name            = "loggerHandler"
+	HandlerName     = "logger"
+	TimestampFormat = "01-Jan-2006_15-04-05.000"
 )
 
 // Logger is a struct that implements the abstraction.Logger interface
@@ -61,24 +60,7 @@ func (logger *Logger) Start() error {
 		return nil
 	}
 
-	// Create log folders
-	for subLogger := range logger.subloggers {
-		loggerPath := path.Join(
-			"logger",
-			string(subLogger),
-			Timestamp.Format(time.RFC3339),
-		)
-		logger.trace.Debug().Str("subLogger", string(subLogger)).Str("path", loggerPath).Msg("creating folder")
-		err := os.MkdirAll(loggerPath, os.ModePerm)
-		if err != nil {
-			logger.trace.Error().Stack().Err(err).Msg("creating folder")
-			return ErrCreatingAllDir{
-				Name:      Name,
-				Timestamp: time.Now(),
-				Path:      loggerPath,
-			}
-		}
-	}
+	Timestamp = time.Now()
 
 	logger.subloggersLock.Lock()
 	defer logger.subloggersLock.Unlock()
