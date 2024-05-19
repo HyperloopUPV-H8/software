@@ -58,7 +58,17 @@ export const ChartCanvas = ({ measurementsInChart }: Props) => {
                         fixRightEdge: true,
                         lockVisibleTimeRangeOnResize: true,
                         rightBarStaysOnScroll: true,
+                        tickMarkFormatter: (time: UTCTimestamp) => {
+                            const date = new Date(time * 1000);
+                            return date.toLocaleTimeString() + '.' + date.getMilliseconds();
+                        }
                     },
+                    localization: {
+                        timeFormatter: (time: UTCTimestamp) => {
+                            const date = new Date(time * 1000);
+                            return date.toLocaleTimeString() + '.' + date.getMilliseconds();
+                        }
+                    }
                 });
             }
         }

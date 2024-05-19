@@ -49,7 +49,17 @@ export const ChartCanvas = ({
                         fixLeftEdge: true,
                         fixRightEdge: true,
                         lockVisibleTimeRangeOnResize: true,
+                        tickMarkFormatter: (time: UTCTimestamp) => {
+                            const date = new Date(time * 1000);
+                            return date.toLocaleTimeString() + '.' + date.getMilliseconds();
+                        },    
                     },
+                    localization: {
+                        timeFormatter: (time: UTCTimestamp) => {
+                            const date = new Date(time * 1000);
+                            return date.toLocaleTimeString() + '.' + date.getMilliseconds();
+                        }
+                    }
                 });
         }
 
