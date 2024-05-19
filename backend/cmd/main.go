@@ -235,7 +235,7 @@ func main() {
 	if err != nil {
 		panic("failed to compile bpf filter")
 	}
-	go transp.HandleSniffer(sniffer.New(source, &layers.LayerTypeLoopback, trace.Logger))
+	go transp.HandleSniffer(sniffer.New(source, &layers.LayerTypeEthernet, trace.Logger))
 
 	// <--- http server --->
 	podDataHandle, err := h.HandleDataJSON("podData.json", pod_data.GetDataOnlyPodData(podData))
