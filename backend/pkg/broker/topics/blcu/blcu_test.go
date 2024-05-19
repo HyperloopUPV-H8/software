@@ -6,12 +6,11 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/blcu"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/tests_functions"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
 	ws "github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 	"log"
-	"net/http"
-	"net/url"
 	"os"
 	"testing"
 	"time"
@@ -56,40 +55,8 @@ func (api MockAPI) UserPull(request abstraction.BrokerRequest) (abstraction.Brok
 
 func TestBLCUTopic_Download_Push(t *testing.T) {
 	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
-	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/download"}
 	clientChan := make(chan *websocket.Client)
-
-	// Start HTTP server with WebSocket upgrade and echo back
-	http.HandleFunc("/download", func(writer http.ResponseWriter, request *http.Request) {
-		upgrader := ws.Upgrader{
-			CheckOrigin: func(r *http.Request) bool { return true },
-		}
-		conn, upgradeErr := upgrader.Upgrade(writer, request, nil)
-		if upgradeErr != nil {
-			logger.Error().Err(upgradeErr).Msg("Failed to upgrade")
-			return
-		}
-		defer conn.Close()
-		defer logger.Info().Str("id", "server").Msg("Connection closed")
-
-		// Handle and echo messages continuously
-		go func() {
-			for {
-				_, msg, readMsgRead := conn.ReadMessage()
-				if readMsgRead != nil {
-					logger.Error().Err(readMsgRead).Msg("Read error")
-					return
-				}
-				writeMsgErr := conn.WriteMessage(ws.TextMessage, msg)
-				if writeMsgErr != nil {
-					logger.Error().Err(writeMsgErr).Msg("Write error")
-					return
-				}
-			}
-		}()
-	})
-
-	go http.ListenAndServe(":8080", nil)
+	u := tests_functions.StartServer(logger, "download")
 
 	// Mock first client as it always fails
 	c, _, err := ws.DefaultDialer.Dial(u.String(), nil)
@@ -164,40 +131,8 @@ func TestBLCUTopic_Download_ClientMessage(t *testing.T) {
 
 func TestBLCUTopic_Upload_Push(t *testing.T) {
 	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
-	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/upload"}
 	clientChan := make(chan *websocket.Client)
-
-	// Start HTTP server with WebSocket upgrade and echo back
-	http.HandleFunc("/upload", func(writer http.ResponseWriter, request *http.Request) {
-		upgrader := ws.Upgrader{
-			CheckOrigin: func(r *http.Request) bool { return true },
-		}
-		conn, err := upgrader.Upgrade(writer, request, nil)
-		if err != nil {
-			logger.Error().Err(err).Msg("Failed to upgrade")
-			return
-		}
-		defer conn.Close()
-		defer logger.Info().Str("id", "server").Msg("Connection closed")
-
-		// Handle and echo messages continuously
-		go func() {
-			for {
-				_, msg, err := conn.ReadMessage()
-				if err != nil {
-					logger.Error().Err(err).Msg("Read error")
-					return
-				}
-				err = conn.WriteMessage(ws.TextMessage, msg)
-				if err != nil {
-					logger.Error().Err(err).Msg("Write error")
-					return
-				}
-			}
-		}()
-	})
-
-	go http.ListenAndServe(":8080", nil)
+	u := tests_functions.StartServer(logger, "upload")
 
 	// Set up the client
 	c, _, err := ws.DefaultDialer.Dial(u.String(), nil)
