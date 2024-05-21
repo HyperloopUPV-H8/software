@@ -11,15 +11,16 @@ import {
     WsHandlerProvider,
     createWsHandler,
     useConfig,
+    useConnectionsStore,
     useFetchBack,
+    useMeasurementsStore,
+    usePodDataStore,
 } from "common";
-import { useDispatch } from "react-redux";
-import { initPodData } from "slices/podDataSlice";
-import { initMeasurements } from "slices/measurementsSlice";
-import { setWebSocketConnection } from "slices/connectionsSlice";
 
 export const App = () => {
-    const dispatch = useDispatch();
+    const setBackendConnection = useConnectionsStore(store => store.setBackendConnection);
+    const initPodData = usePodDataStore(store => store.initPodData);
+    const initMeasurements = useMeasurementsStore(store => store.initMeasurements);
     const config = useConfig();
     const podDataDescriptionPromise = useFetchBack(
         import.meta.env.PROD,
@@ -36,12 +37,12 @@ export const App = () => {
                     createWsHandler(
                         WS_URL,
                         true,
-                        () => dispatch(setWebSocketConnection(true)),
-                        () => dispatch(setWebSocketConnection(false))
+                        () => setBackendConnection(true),
+                        () => setBackendConnection(false)
                     ),
                     podDataDescriptionPromise.then((adapter) => {
-                        dispatch(initPodData(adapter));
-                        dispatch(initMeasurements(adapter));
+                        initPodData(adapter);
+                        initMeasurements(adapter);
                     }),
                 ]}
                 LoadingView={<div>Loading</div>}
