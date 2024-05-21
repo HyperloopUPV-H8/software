@@ -161,6 +161,7 @@ func main() {
 	broker.AddTopic(connection_topic.UpdateName, connectionTopic)
 	broker.AddTopic(order_topic.SendName, orderTopic)
 	broker.AddTopic(logger_topic.EnableName, loggerTopic)
+	broker.AddTopic(logger_topic.ResponseName, loggerTopic)
 	broker.AddTopic(message_topic.UpdateName, messageTopic)
 
 	connections := make(chan *websocket.Client)

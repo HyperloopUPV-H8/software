@@ -7,20 +7,24 @@ import (
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
+	"github.com/google/uuid"
+	ws "github.com/gorilla/websocket"
 )
 
 const EnableName abstraction.BrokerTopic = "logger/enable"
 const ResponseName abstraction.BrokerTopic = "logger/response"
 
 type Enable struct {
-	isRunning *atomic.Bool
-	pool      *websocket.Pool
-	api       abstraction.BrokerAPI
+	isRunning   *atomic.Bool
+	pool        *websocket.Pool
+	subscribers map[websocket.ClientId]struct{}
+	api         abstraction.BrokerAPI
 }
 
 func NewEnableTopic() *Enable {
 	enable := &Enable{
-		isRunning: &atomic.Bool{},
+		isRunning:   &atomic.Bool{},
+		subscribers: make(map[websocket.ClientId]struct{}),
 	}
 	enable.isRunning.Store(false)
 	return enable
@@ -45,10 +49,17 @@ func (enable *Enable) ClientMessage(id websocket.ClientId, message *websocket.Me
 		if err != nil {
 			fmt.Printf("error handling logger: %v\n", err)
 		}
+	case ResponseName:
+		fmt.Printf("logger/response subscribed %s\n", uuid.UUID(id).String())
+		enable.subscribers[id] = struct{}{}
+	default:
+		enable.pool.Disconnect(id, ws.CloseUnsupportedData, "unsupported topic")
+		delete(enable.subscribers, id)
+		fmt.Printf("logger/response unsubscribed %s\n", uuid.UUID(id).String())
 	}
 }
 
-func (enable *Enable) handleToggle(id websocket.ClientId, message *websocket.Message) error {
+func (enable *Enable) handleToggle(_ websocket.ClientId, message *websocket.Message) error {
 	var request bool
 	err := json.Unmarshal(message.Payload, &request)
 	if err != nil {
@@ -71,10 +82,25 @@ func (enable *Enable) broadcastState() error {
 		return err
 	}
 
-	enable.pool.Broadcast(websocket.Message{
+	message := websocket.Message{
 		Topic:   ResponseName,
 		Payload: payload,
-	})
+	}
+
+	flaged := make([]websocket.ClientId, 0, len(enable.subscribers))
+	for id := range enable.subscribers {
+		err := enable.pool.Write(id, message)
+		if err != nil {
+			flaged = append(flaged, id)
+		}
+	}
+
+	for _, id := range flaged {
+		enable.pool.Disconnect(id, ws.CloseInternalServerErr, "client disconnected")
+		delete(enable.subscribers, id)
+		fmt.Printf("logger/response unsubscribed %s\n", uuid.UUID(id).String())
+	}
+
 	return nil
 }
 
