@@ -1,9 +1,9 @@
-import styles from "./Orders.module.scss";
-import { BoardOrders, Button } from "common";
-import { OrderContext } from "./OrderContext";
-import { useSendOrder } from "../useSendOrder";
-import { BoardOrdersView } from "./BoardOrders/BoardOrders";
-import { useState } from "react";
+import styles from './Orders.module.scss';
+import { BoardOrders, Button } from 'common';
+import { OrderContext } from './OrderContext';
+import { useSendOrder } from '../useSendOrder';
+import { BoardOrdersView } from './BoardOrders/BoardOrders';
+import { useState } from 'react';
 
 type Props = {
     boards: BoardOrders[];
@@ -17,7 +17,8 @@ export const Orders = ({ boards }: Props) => {
         <OrderContext.Provider value={sendOrder}>
             <div className={styles.ordersWrapper}>
                 <div className={styles.stateOrdersToggle}>
-                    Always show state orders: {alwaysShowStateOrders}
+                    Always show state orders:{' '}
+                    {alwaysShowStateOrders ? 'true' : 'false'}
                     <Button
                         label="Toggle"
                         onClick={() =>
