@@ -156,10 +156,12 @@ func main() {
 		boardIdToBoard[abstraction.BoardId(id)] = name
 	}
 	messageTopic := message_topic.NewUpdateTopic(boardIdToBoard)
+	stateOrderTopic := order_topic.NewState(idToBoard)
 
 	broker.AddTopic(data_topic.UpdateName, dataTopic)
 	broker.AddTopic(connection_topic.UpdateName, connectionTopic)
 	broker.AddTopic(order_topic.SendName, orderTopic)
+	broker.AddTopic(order_topic.StateName, stateOrderTopic)
 	broker.AddTopic(logger_topic.EnableName, loggerTopic)
 	broker.AddTopic(logger_topic.ResponseName, loggerTopic)
 	broker.AddTopic(message_topic.UpdateName, messageTopic)

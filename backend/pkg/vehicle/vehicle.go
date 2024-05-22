@@ -3,9 +3,10 @@ package vehicle
 import (
 	"errors"
 	"fmt"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/boards"
 	"os"
 	"strings"
+
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/boards"
 
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
@@ -106,10 +107,17 @@ func (vehicle *Vehicle) Notification(notification abstraction.TransportNotificat
 		}
 
 	case *order.Add:
-		vehicle.trace.Warn().Msg("state order add not implemented")
-	case *order.Remove:
-		fmt.Fprintln(os.Stderr, "Received order.Remove packet, ignoring")
+		err := vehicle.broker.Push(order_topic.NewAdd(p))
 
+		if err != nil {
+			vehicle.trace.Error().Stack().Err(err).Msg("add state orders")
+		}
+	case *order.Remove:
+		err := vehicle.broker.Push(order_topic.NewRemove(p))
+
+		if err != nil {
+			vehicle.trace.Error().Stack().Err(err).Msg("remove state orders")
+		}
 	case *blcu_packet.Ack:
 		vehicle.boards[boards.BlcuId].Notify(abstraction.BoardNotification(
 			&boards.AckNotification{
