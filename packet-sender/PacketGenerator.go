@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"strconv"
 	"strings"
+	"time"
 
 	excelAdapter "github.com/HyperloopUPV-H8/h9-backend/pkg/excel_adapter"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/excel_adapter/internals"
@@ -73,7 +74,30 @@ func New() PacketGenerator {
 	return pg
 }
 
-func (pg *PacketGenerator) CreateRandomPacket() []byte {
+// func (pg *PacketGenerator) CreateRandomPacket() []byte {
+// 	randomIndex := rand.Int63n(int64(len(pg.packets)))
+// 	randomPacket := pg.packets[randomIndex]
+
+// 	buff := bytes.NewBuffer(make([]byte, 0))
+
+// 	binary.Write(buff, binary.LittleEndian, randomPacket.ID)
+
+// 	for _, measurement := range randomPacket.Measurements {
+// 		if strings.Contains(measurement.Type, "enum") {
+// 			binary.Write(buff, binary.LittleEndian, uint8(1))
+// 		} else if measurement.Type != "string" {
+// 			number := mapNumberToRange(rand.Float64(), measurement.SafeRange, measurement.Type)
+// 			writeNumberAsBytes(number, measurement.Type, buff)
+// 		} else {
+// 			return nil
+// 		}
+
+// 	}
+
+// 	return buff.Bytes()
+// }
+
+func (pg *PacketGenerator) CreateSinePacket() []byte {
 	randomIndex := rand.Int63n(int64(len(pg.packets)))
 	randomPacket := pg.packets[randomIndex]
 
@@ -85,15 +109,24 @@ func (pg *PacketGenerator) CreateRandomPacket() []byte {
 		if strings.Contains(measurement.Type, "enum") {
 			binary.Write(buff, binary.LittleEndian, uint8(1))
 		} else if measurement.Type != "string" {
-			number := mapNumberToRange(rand.Float64(), measurement.SafeRange, measurement.Type)
+			sineValue := generateSinusoidalValue()
+			number := mapNumberToRange(sineValue, measurement.SafeRange, measurement.Type)
 			writeNumberAsBytes(number, measurement.Type, buff)
 		} else {
 			return nil
 		}
-
 	}
 
 	return buff.Bytes()
+}
+
+func generateSinusoidalValue() float64 {
+	amplitude := 1.0
+	frequency := 0.01
+	phase := 0.0
+
+	value := amplitude * math.Sin(2*math.Pi*frequency*float64(time.Now().Unix())+phase)
+	return value
 }
 
 func mapNumberToRange(number float64, numberRange []float64, numberType string) float64 {
