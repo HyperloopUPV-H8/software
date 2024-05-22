@@ -74,21 +74,21 @@ func writeConn(conn *net.TCPConn, closeChan chan<- error) {
 	addPayload := generateAddPayload()
 	removePayload := generateRemovePayload()
 	for {
+		<-time.After(*delayFlag)
 		fmt.Println("< write add")
 		_, err := io.Copy(conn, bytes.NewReader(addPayload))
 		if err != nil {
 			closeChan <- err
 			return
 		}
-		<-time.After(*delayFlag)
 
+		<-time.After(*delayFlag)
 		fmt.Println("< write remove")
 		_, err = io.Copy(conn, bytes.NewReader(removePayload))
 		if err != nil {
 			closeChan <- err
 			return
 		}
-		<-time.After(*delayFlag)
 	}
 }
 
