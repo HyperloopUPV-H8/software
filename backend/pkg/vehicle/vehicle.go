@@ -235,5 +235,6 @@ func (vehicle *Vehicle) ConnectionUpdate(target abstraction.TransportTarget, isC
 	vehicle.broker.Push(connection_topic.NewConnection(string(target), isConnected))
 	if isConnected {
 		vehicle.updateFactory.ClearPacketsFor(target)
+		vehicle.broker.Push(order_topic.NewStateClear(string(target)))
 	}
 }

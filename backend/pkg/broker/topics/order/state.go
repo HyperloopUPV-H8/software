@@ -11,6 +11,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
 	"github.com/google/uuid"
 	ws "github.com/gorilla/websocket"
+	"github.com/rs/zerolog"
 )
 
 const StateName abstraction.BrokerTopic = "order/stateOrders"
@@ -22,9 +23,10 @@ type State struct {
 	subscribers   map[websocket.ClientId]struct{}
 	pool          *websocket.Pool
 	api           abstraction.BrokerAPI
+	logger        zerolog.Logger
 }
 
-func NewState(idToBoard map[uint16]string) *State {
+func NewState(idToBoard map[uint16]string, baseLogger zerolog.Logger) *State {
 	enabled := make(map[string]map[abstraction.PacketId]struct{})
 	for _, board := range idToBoard {
 		enabled[board] = make(map[abstraction.PacketId]struct{})
@@ -35,6 +37,7 @@ func NewState(idToBoard map[uint16]string) *State {
 		idToBoard:     idToBoard,
 		connectionMx:  new(sync.Mutex),
 		subscribers:   make(map[websocket.ClientId]struct{}),
+		logger:        baseLogger,
 	}
 }
 
@@ -45,12 +48,18 @@ func (state *State) Topic() abstraction.BrokerTopic {
 func (state *State) Push(push abstraction.BrokerPush) error {
 	switch action := push.(type) {
 	case *StateAdd:
+		state.logger.Info().Msg("add")
 		return state.addOrders(action.update)
 	case *StateRemove:
+		state.logger.Info().Msg("remove")
 		return state.removeOrders(action.update)
+	case *StateClear:
+		state.logger.Info().Msg("clear board")
+		return state.clearBoard(action.board)
 	default:
-		fmt.Printf("unknown push type: %T", push)
-		return topics.ErrUnexpectedPush{Push: push}
+		err := topics.ErrUnexpectedPush{Push: push}
+		state.logger.Warn().Stack().Err(err).Msg("unexpected topic")
+		return err
 	}
 }
 
@@ -58,7 +67,7 @@ func (state *State) addOrders(add *order.Add) error {
 	for _, addedOrder := range add.Orders() {
 		board, ok := state.idToBoard[uint16(addedOrder)]
 		if !ok {
-			fmt.Println("unrecoginzed id:", addedOrder)
+			state.logger.Warn().Uint16("id", uint16(addedOrder)).Msg("unrecognized topic")
 			continue
 		}
 
@@ -72,12 +81,23 @@ func (state *State) removeOrders(remove *order.Remove) error {
 	for _, removedOrder := range remove.Orders() {
 		board, ok := state.idToBoard[uint16(removedOrder)]
 		if !ok {
-			fmt.Println("unrecoginzed id:", removedOrder)
+			state.logger.Warn().Uint16("id", uint16(removedOrder)).Msg("unrecognized topic")
 			continue
 		}
 
 		delete(state.enabledOrders[board], removedOrder)
 	}
+
+	return state.updateOrders()
+}
+
+func (state *State) clearBoard(board string) error {
+	if _, ok := state.enabledOrders[board]; !ok {
+		state.logger.Warn().Str("board", board).Msg("unknown board")
+		return nil
+	}
+
+	state.enabledOrders[board] = make(map[abstraction.PacketId]struct{}, len(state.enabledOrders[board]))
 
 	return state.updateOrders()
 }
@@ -172,5 +192,19 @@ func NewRemove(diff *order.Remove) *StateRemove {
 }
 
 func (remove *StateRemove) Topic() abstraction.BrokerTopic {
+	return StateName
+}
+
+type StateClear struct {
+	board string
+}
+
+func NewStateClear(boardName string) *StateClear {
+	return &StateClear{
+		board: boardName,
+	}
+}
+
+func (clear *StateClear) Topic() abstraction.BrokerTopic {
 	return StateName
 }

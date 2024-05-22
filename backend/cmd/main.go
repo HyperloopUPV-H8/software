@@ -156,7 +156,7 @@ func main() {
 		boardIdToBoard[abstraction.BoardId(id)] = name
 	}
 	messageTopic := message_topic.NewUpdateTopic(boardIdToBoard)
-	stateOrderTopic := order_topic.NewState(idToBoard)
+	stateOrderTopic := order_topic.NewState(idToBoard, trace.Logger)
 
 	broker.AddTopic(data_topic.UpdateName, dataTopic)
 	broker.AddTopic(connection_topic.UpdateName, connectionTopic)
