@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
 	"github.com/rs/zerolog"
 )
 
@@ -60,6 +61,9 @@ func (demux *SnifferDemux) ReadPackets(reader packetReader) {
 	for {
 		payload, err := reader.ReadNext()
 		if err != nil {
+			if _, ok := err.(sniffer.ErrMissingLayers); ok {
+				continue
+			}
 			demux.logger.Error().Stack().Err(err).Msg("read next")
 			demux.errorChan <- err
 			return
