@@ -1,25 +1,23 @@
 import styles from "./Navbar.module.scss";
-import { ReactComponent as TeamLogo } from "assets/svg/team_logo.svg";
-import { Link } from "react-router-dom";
 import { NavbarItem, NavbarItemData } from "./NavbarItem/NavbarItem";
 
 type Props = {
     items: NavbarItemData[];
+    pageShown: string;
+    setPageShown: (page: string) => void;
 };
 
-export const Navbar = ({ items }: Props) => {
+export const Navbar = ({ items, pageShown, setPageShown }: Props) => {
     return (
         <nav className={styles.navbarWrapper}>
-            <Link to={"/"}>
-                <TeamLogo className={styles.logo} />
-            </Link>
             <div className={styles.separator} />
             <div className={styles.items}>
                 {items.map((item) => {
                     return (
                         <NavbarItem
-                            key={item.path}
                             item={item}
+                            pageShown={pageShown}
+                            setPageShown={setPageShown}
                         />
                     );
                 })}
