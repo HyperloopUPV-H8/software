@@ -45,14 +45,6 @@ export const Gauge = ({
                 radius={radius}
                 strokeWidth={strokeWidth}
             ></BackgroundArc>
-
-            {/* <BackgroundArc
-                sweep={sweep}
-                className={styles.radialShadowArc}
-                percentage={percentage}
-                radius={radius}
-                strokeWidth={strokeWidth}
-            ></BackgroundArc> */}
         </svg>
     );
 };
