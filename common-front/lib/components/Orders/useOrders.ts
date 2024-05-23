@@ -5,19 +5,21 @@ import {
     OrderDescription,
     OrderFieldDescription,
     useSubscribe,
-} from "../..";
+} from '../..';
 import {
     doesNumberOverflow,
     isNumberValid,
     isWithinRange,
-} from "../../numberValidation";
-import { useOrdersStore } from "../..";
+} from '../../numberValidation';
+import { useOrdersStore } from '../..';
 
 export function useOrders() {
-    const updateStateOrders = useOrdersStore((state) => state.updateStateOrders);
+    const updateStateOrders = useOrdersStore(
+        (state) => state.updateStateOrders
+    );
     const ordersBoards = useOrdersStore((state) => state.vehicleOrders.boards);
 
-    useSubscribe("order/stateOrders", (msg) => {
+    useSubscribe('order/stateOrders', (msg) => {
         updateStateOrders(msg);
     });
 
@@ -26,7 +28,7 @@ export function useOrders() {
 
 export function createFormFromOrder(
     order: OrderDescription
-): Omit<Form, "isValid"> {
+): Omit<Form, 'isValid'> {
     const fields = Object.values(order.fields).map((desc) => {
         return getField(desc);
     });
@@ -40,26 +42,26 @@ export function createFormFromOrder(
 
 function getField(desc: OrderFieldDescription): Field {
     switch (desc.kind) {
-        case "boolean":
+        case 'boolean':
             return {
                 id: desc.id,
                 name: desc.name,
-                type: "boolean",
+                type: 'boolean',
                 value: false,
             };
-        case "enum":
+        case 'enum':
             return {
                 id: desc.id,
                 name: desc.name,
-                type: "enum",
+                type: 'enum',
                 options: desc.options,
-                value: desc.options[0] ?? "Default",
+                value: desc.options[0] ?? 'Default',
             };
-        case "numeric":
+        case 'numeric':
             return {
                 id: desc.id,
                 name: desc.name,
-                type: "numeric",
+                type: 'numeric',
                 value: null,
                 placeholder: desc.type,
                 isValid: false,

@@ -30,6 +30,7 @@ type UploadEvent struct {
 	BoardEvent abstraction.BoardEvent
 	Board      string
 	Data       []byte
+	Length     int
 }
 
 func (upload UploadEvent) Topic() abstraction.BrokerTopic {
