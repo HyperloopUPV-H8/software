@@ -1,3 +1,4 @@
+
 import {
     Measurement,
     NumericMeasurement,
@@ -67,7 +68,8 @@ export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
      * @param {Record<string, PacketUpdate>} measurements
      */
     updateMeasurements: (measurements: Record<string, PacketUpdate>) => {
-        const measurementsDraft = get().measurements;
+
+        const measurementsDraft = {...get().measurements};
 
         for (const update of Object.values(measurements)) {
             for (const [id, mUpdate] of Object.entries(

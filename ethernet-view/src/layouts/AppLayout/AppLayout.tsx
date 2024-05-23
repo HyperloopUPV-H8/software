@@ -1,26 +1,34 @@
 
-import { Outlet} from "react-router-dom"
 import styles from "./AppLayout.module.scss"
 import Testing from "assets/svg/testing.svg"
 import Logger from "assets/svg/logger.svg"
 import { Navbar } from "components/Navbar/Navbar"
+import { ReactNode } from "react"
 
-export const AppLayout = () => {
+interface Props {
+    children: ReactNode;
+    pageShown: string;
+    setPageShown: (page: string) => void;
+}
+
+export const AppLayout = ({children, pageShown, setPageShown} : Props) => {
 
     return (
         <div className={styles.appLayout}>
             <Navbar items={[
                 {
-                    path: "/",
-                    icon: Testing
+                    icon: Testing,
+                    page: "testing"
                 },
                 {
-                    path: "/logger",
-                    icon: Logger
+                    icon: Logger,
+                    page: "logger"
                 }
-            ]}/>
-            
-            <Outlet />
+                ]}
+                pageShown={pageShown}
+                setPageShown={setPageShown}
+            />
+            {children}
         </div>
     )
 }

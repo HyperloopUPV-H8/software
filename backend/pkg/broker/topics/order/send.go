@@ -20,7 +20,7 @@ func NewSendTopic() *Send {
 	return &Send{}
 }
 
-func (send *Send) Topic() abstraction.BrokerTopic {
+func (send Send) Topic() abstraction.BrokerTopic {
 	return SendName
 }
 
@@ -42,15 +42,15 @@ func (send *Send) ClientMessage(id websocket.ClientId, message *websocket.Messag
 	}
 }
 
-func (send *Send) handleOrder(id websocket.ClientId, message *websocket.Message) error {
+func (send *Send) handleOrder(_ websocket.ClientId, message *websocket.Message) error {
 	var order Order
 	err := json.Unmarshal(message.Payload, &order)
 	if err != nil {
 		return err
 	}
 
-	send.api.UserPush(&order) // TODO! Error handling
-	return nil
+	pushErr := send.api.UserPush(&order) // TODO! Error handling
+	return pushErr
 }
 
 func (send *Send) SetPool(pool *websocket.Pool) {

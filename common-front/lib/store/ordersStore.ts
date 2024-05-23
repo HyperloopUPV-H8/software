@@ -1,13 +1,13 @@
-import { StateCreator, StoreApi, UseBoundStore, create } from "zustand";
-import { BoardOrders, StateOrdersUpdate, VehicleOrders } from "..";
+import { StateCreator, StoreApi, UseBoundStore, create } from 'zustand';
+import { BoardOrders, StateOrdersUpdate, VehicleOrders } from '..';
 
 export interface OrdersStore {
-    vehicleOrders: VehicleOrders
-    setOrders: (vehicleOrders: VehicleOrders) => void
-    updateStateOrders: (stateOrdersUpdate: StateOrdersUpdate) => void
+    vehicleOrders: VehicleOrders;
+    setOrders: (vehicleOrders: VehicleOrders) => void;
+    updateStateOrders: (stateOrdersUpdate: StateOrdersUpdate) => void;
 }
 
-export const useOrdersStore= create<OrdersStore>((set, get) => ({
+export const useOrdersStore = create<OrdersStore>((set, get) => ({
     vehicleOrders: { boards: [] as BoardOrders[] },
 
     /**
@@ -15,32 +15,41 @@ export const useOrdersStore= create<OrdersStore>((set, get) => ({
      * @param {VehicleOrders} vehicleOrders
      */
     setOrders: (vehicleOrders: VehicleOrders) => {
-        set(state => ({
+        set((state) => ({
             ...state,
-            vehicleOrders: vehicleOrders
-        }))
+            vehicleOrders: vehicleOrders,
+        }));
     },
 
     /**
      * Reducer that updates orders to stateOrdersUpdate param.
      * It checks if the board vinculated with each order of stateOrdersUpdate exists.
      * If so, it is updated. If not exists, it ignores that order.
-     * @param {StateOrdersUpdate} stateOrdersUpdate 
+     * @param {StateOrdersUpdate} stateOrdersUpdate
      */
     updateStateOrders: (stateOrdersUpdate: StateOrdersUpdate) => {
-        const vehicleOrdersDraft = get().vehicleOrders;
-        Object.entries(stateOrdersUpdate).forEach(([name, ids]) => {
-            const index = get().vehicleOrders.boards.findIndex( (board) => board.name == name );
-            if (index == -1) return
-
-            vehicleOrdersDraft.boards[index].stateOrders.map(item => {
-                item.enabled = ids.includes(item.id);
-            })
-        })
-        set(state => ({
+        set((state) => ({
             ...state,
-            vehicleOrders: vehicleOrdersDraft
-        }))
+            vehicleOrders: {
+                ...state.vehicleOrders,
+                boards: state.vehicleOrders.boards.map((board) => {
+                    if (!(board.name in stateOrdersUpdate)) {
+                        return board;
+                    }
 
+                    return {
+                        ...board,
+                        stateOrders: board.stateOrders.map((desc) => {
+                            return {
+                                ...desc,
+                                enabled: stateOrdersUpdate[board.name].includes(
+                                    desc.id
+                                ),
+                            };
+                        }),
+                    };
+                }),
+            },
+        }));
     },
-}))
+}));

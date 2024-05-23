@@ -1,4 +1,4 @@
-package data
+package message
 
 import (
 	"encoding/json"
@@ -37,7 +37,7 @@ func (update *Update) Topic() abstraction.BrokerTopic {
 }
 
 func (update *Update) Push(p abstraction.BrokerPush) error {
-	push, ok := p.(*push)
+	push, ok := p.(*pushStruct)
 	if !ok {
 		return topics.ErrUnexpectedPush{Push: p}
 	}
@@ -99,20 +99,20 @@ func (update *Update) SetAPI(api abstraction.BrokerAPI) {
 	update.api = api
 }
 
-type push struct {
+type pushStruct struct {
 	data    any
 	boardId abstraction.BoardId
 }
 
-func Push(data any, boardId abstraction.BoardId) *push {
-	return &push{data: data, boardId: boardId}
+func Push(data any, boardId abstraction.BoardId) *pushStruct {
+	return &pushStruct{data: data, boardId: boardId}
 }
 
-func (push *push) Topic() abstraction.BrokerTopic {
+func (push *pushStruct) Topic() abstraction.BrokerTopic {
 	return UpdateName
 }
 
-func (push *push) Data(boardID abstraction.BoardId, idToBoard map[abstraction.BoardId]string) wrapper {
+func (push *pushStruct) Data(boardID abstraction.BoardId, idToBoard map[abstraction.BoardId]string) wrapper {
 	switch data := push.data.(type) {
 	case *protection.Packet:
 		return wrapper{
