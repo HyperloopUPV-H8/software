@@ -1,5 +1,4 @@
 build
-.vscode
 
 # GOOGLE API KEY
 secret.json
@@ -7,5 +6,7 @@ secret.json
 # MacOS Files
 .DS_Store
 
-# JetBrains IDE
+# Code Editor
 .idea/
+.vscode/
+.prettierrc
