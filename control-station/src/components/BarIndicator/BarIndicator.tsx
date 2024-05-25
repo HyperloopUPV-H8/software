@@ -1,4 +1,4 @@
-import { NumericMeasurement, useMeasurementsStore } from "common";
+import { NumericMeasurement } from "common";
 import styles from "./BarIndicator.module.scss";
 import { getPercentFromRange, getState, stateToColor, stateToColorBackground } from "state";
 
@@ -9,7 +9,7 @@ interface Props {
 }
 
 export const BarIndicator = ({icon, title, measurement}: Props) => {
-    
+
     const state = getState(measurement);
     const percentage = getPercentFromRange(measurement.value.last, measurement.safeRange[0]!!, measurement.safeRange[1]!!)
     
