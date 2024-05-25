@@ -1,15 +1,16 @@
 import { BarIndicator } from 'components/BarIndicator/BarIndicator'
 import batteryIcon from "assets/svg/battery-filled.svg"
-import thermometerIcon from "assets/svg/thermometer-field.svg"
+import thermometerIcon from "assets/svg/thermometer-filled.svg"
 import thunderIcon from "assets/svg/thunder-filled.svg"
-import { NumericMeasurement, useMeasurementsStore } from 'common'
+import { Measurement } from 'common'
+import styles from "./BatteryPack.module.scss"
 
 interface Props {
-    stateOfChargeMeasurement: NumericMeasurement;
-    temperatureMeasurement: NumericMeasurement;
-    maxCellMeasurement: NumericMeasurement;
-    minCellMeasurement: NumericMeasurement;
-    voltageMeasurement: NumericMeasurement;
+    stateOfChargeMeasurement: Measurement;
+    temperatureMeasurement: Measurement;
+    maxCellMeasurement: Measurement;
+    minCellMeasurement: Measurement;
+    voltageMeasurement: Measurement;
 }
 
 export const BatteryPack = (
@@ -23,31 +24,36 @@ export const BatteryPack = (
 ) => {
 
     return (
-        <div>
-            <BarIndicator 
+        <div className={styles.container}>
+            <BarIndicator
                 icon={batteryIcon}
                 title="State of Charge"
                 measurement={stateOfChargeMeasurement}
+                units="%"
             />
             <BarIndicator 
                 icon={thermometerIcon}
                 title="Temperature"
                 measurement={temperatureMeasurement}
+                units="ºC"
             />
-            <BarIndicator 
+            <BarIndicator
                 icon={thunderIcon}
                 title="Max Cell"
                 measurement={maxCellMeasurement}
+                units="V"
             />
-            <BarIndicator 
+            <BarIndicator
                 icon={thunderIcon}
                 title="Min Cell"
                 measurement={minCellMeasurement}
+                units="V"
             />
-            <BarIndicator 
+            <BarIndicator
                 icon={thunderIcon}
                 title="Voltage"
                 measurement={voltageMeasurement}
+                units="V"
             />
         </div>
     )
