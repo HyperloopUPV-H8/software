@@ -9,8 +9,7 @@ interface Props {
 }
 
 export const BarIndicator = ({icon, title, measurement}: Props) => {
-
-    measurement.value.last = 30;
+    
     const state = getState(measurement);
     const percentage = getPercentFromRange(measurement.value.last, measurement.safeRange[0]!!, measurement.safeRange[1]!!)
     
