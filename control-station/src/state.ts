@@ -70,7 +70,7 @@ export function getStateFromRange(
     return "fault";
 }
 
-export function getPercentFromRange(value: number, min: number, max: number): number {
+export function getPercentageFromRange(value: number, min: number, max: number): number {
     const normValue = Math.max(Math.min(value, max), min);
     return ((normValue - min) / (max - min)) * 100;
 }

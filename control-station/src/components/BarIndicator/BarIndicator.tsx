@@ -1,6 +1,6 @@
 import { isNumericMeasurement, Measurement } from "common";
 import styles from "./BarIndicator.module.scss";
-import { getPercentFromRange, getState, stateToColor, stateToColorBackground } from "state";
+import { getPercentageFromRange, getState, stateToColor, stateToColorBackground } from "state";
 import { useEffect, useState } from "react";
 
 interface Props {
@@ -19,7 +19,7 @@ export const BarIndicator = ({icon, title, measurement, units}: Props) => {
     useEffect(() => {
         if(isNumericMeasurement(measurement)) {
             setPercentage(
-                getPercentFromRange(measurement.value.last, measurement.safeRange[0]!!, measurement.safeRange[1]!!)
+                getPercentageFromRange(measurement.value.last, measurement.safeRange[0]!!, measurement.safeRange[1]!!)
             )
             setValue(measurement.value.last);
         } else if(measurement.type == "enum") {
@@ -37,7 +37,10 @@ export const BarIndicator = ({icon, title, measurement, units}: Props) => {
         >
             <div 
                 className={styles.bar}
-                style={{width: percentage + "%", backgroundColor: stateToColor[state]}}
+                style={{
+                    width: percentage + "%",
+                    backgroundColor: stateToColor[state]
+                }}
             ></div>
 
             <div className={styles.infoContainer}>
