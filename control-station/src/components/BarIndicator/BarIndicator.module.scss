@@ -1,0 +1,50 @@
+.background {
+    position: relative;
+    height: 3rem;
+    width: 100%;
+    background-color: #000;
+    overflow: hidden;
+}
+
+.infoContainer {
+    position: absolute;
+    padding: 0rem 2rem;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bar {
+    position: absolute;
+    top: -25%;
+    left: -2%;
+    filter: blur(10px);
+    background-color: red;
+    width: 40%;
+    height: 150%;
+    transition: width 0.1s ease-in-out;
+}
+
+.icon {
+    
+}
+
+.title {
+    opacity: .8;
+    font-size: 24px;
+    font-style: italic;
+    font-weight: 300;
+}
+
+.title 
+
+.value {
+    opacity: .8;
+    font-size: 32px;
+}
+
+.unit {
+
+}
