@@ -1,16 +1,21 @@
 @use "src/styles/colors";
+@use "src/styles/fonts";
 
 .pageWrapper {
     display: flex;
     flex-direction: column;
-    gap: 1.3rem;
-    padding: 1.3rem;
+    gap: .6rem;
+    padding: .8rem;
 }
 
 .header {
     display: flex;
     flex-direction: row;
     align-items: center;
+
+    > h1 {
+        font-size: map-get($map: fonts.$font-sizes, $key: default);
+    }
 }
 
 .header::after {

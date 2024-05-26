@@ -30,11 +30,11 @@ export const BoardsPage = () => {
                 <VCU {...selectVcuMeasurements(measurements)} />
                 <PCU {...selectPcuMeasurements(measurements)} />
             </div>
-            <div className={styles.gridColumn}>
+            {/* <div className={styles.gridColumn}>
                 <Connections />
                 <LCU {...selectLcuMeasurements(measurements)} />
                 <BMSL {...selectBmslMeasurements(measurements)} />
-            </div>
+            </div> */}
         </div>
     );
 };

@@ -31,10 +31,13 @@ export const BarIndicator = ({icon, title, measurement, units}: Props) => {
     })
     
     return (
-        <div 
-            className={styles.background}
-            style={{backgroundColor: stateToColorBackground[state]}}
+        <div
+            className={styles.container}
         >
+            <div 
+                className={styles.background}
+                style={{backgroundColor: stateToColorBackground[state]}}
+            ></div>
             <div 
                 className={styles.bar}
                 style={{

@@ -1,22 +1,23 @@
-// .obccu {
-//     width: 100%;
-//     display: flex;
-//     flex-direction: column;
-//     gap: 1.5rem;
-//     background-color: white;
-//     --border-radius: 1rem;
-//     overflow-y: auto;
-// }
+@use "src/styles/fonts";
 
-// .batteries {
-//     display: grid;
-//     grid-template-columns: auto;
-//     gap: 1.5rem;
-// }
-
-.columnBatteries {
+.batteryRow {
     display: flex;
-    flex-direction: column;
-    width: 50%;
-    gap: 1.5rem;
+    flex: 1;
+    gap: 1rem;
+}
+
+.centerPiece {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: .4rem;
+    gap: .5rem;
+    background-color: hsla(207, 89%, 96%, 1);
+    width: 100%;
+}
+
+.connectorIndicator {
+    position: absolute;
+    color: #3C7A8D;
+    font-size: map-get($map: fonts.$font-sizes, $key: x-small);
 }
