@@ -19,6 +19,12 @@ export const stateToColor = {
     fault: "hsl(356, 90%, 61%)",
 };
 
+export const stateToColorBackground = {
+    stable: "hsl(92, 82%, 86%)",
+    warning: "hsl(52, 90%, 86%)",
+    fault: "hsl(356, 90%, 86%)",
+};
+
 export function getState(meas: Measurement): State {
     if (isNumericMeasurement(meas)) {
         return getStateFromRange(
@@ -62,4 +68,9 @@ export function getStateFromRange(
     }
 
     return "fault";
+}
+
+export function getPercentFromRange(value: number, min: number, max: number): number {
+    const normValue = Math.max(Math.min(value, max), min);
+    return ((normValue - min) / (max - min)) * 100;
 }
