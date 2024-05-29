@@ -1,3 +1,5 @@
+@use "../../../styles/fonts.scss";
+
 .textData {
     display: flex;
     flex-direction: column;
@@ -10,19 +12,22 @@
 
     .name {
         font-weight: inherit;
-        font-size: 0.7em;
-        font-weight: 400;
+        font-family: map-get($map: fonts.$font-families, $key: roboto);
+        font-size: map-get($map: fonts.$font-sizes, $key: x-small);
+        font-weight: map-get($map: fonts.$font-weights, $key: light);
+        font-style: italic;
     }
 
     .value {
-        font-family: var(--font-mono);
+        font-family: map-get($map: fonts.$font-families, $key: roboto);
         font-size: 1.8em;
-        font-weight: 600;
+        font-weight: map-get($map: fonts.$font-weights, $key: bold);
     }
 
     .units {
         font-weight: inherit;
-        font-size: 1em;
-        font-weight: 400;
+        font-family: map-get($map: fonts.$font-families, $key: roboto);
+        font-size: map-get($map: fonts.$font-sizes, $key: small);
+        font-weight: map-get($map: fonts.$font-weights, $key: normal);
     }
 }

@@ -1,26 +1,33 @@
-package data
+package logger
 
 import (
 	"encoding/json"
 	"fmt"
+	"sync"
 	"sync/atomic"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
+	"github.com/google/uuid"
+	ws "github.com/gorilla/websocket"
 )
 
 const EnableName abstraction.BrokerTopic = "logger/enable"
 const ResponseName abstraction.BrokerTopic = "logger/response"
 
 type Enable struct {
-	isRunning *atomic.Bool
-	pool      *websocket.Pool
-	api       abstraction.BrokerAPI
+	isRunning    *atomic.Bool
+	pool         *websocket.Pool
+	connectionMx *sync.Mutex
+	subscribers  map[websocket.ClientId]struct{}
+	api          abstraction.BrokerAPI
 }
 
 func NewEnableTopic() *Enable {
 	enable := &Enable{
-		isRunning: &atomic.Bool{},
+		isRunning:    &atomic.Bool{},
+		connectionMx: new(sync.Mutex),
+		subscribers:  make(map[websocket.ClientId]struct{}),
 	}
 	enable.isRunning.Store(false)
 	return enable
@@ -45,10 +52,23 @@ func (enable *Enable) ClientMessage(id websocket.ClientId, message *websocket.Me
 		if err != nil {
 			fmt.Printf("error handling logger: %v\n", err)
 		}
+	case ResponseName:
+		enable.connectionMx.Lock()
+		defer enable.connectionMx.Unlock()
+
+		fmt.Printf("logger/response subscribed %s\n", uuid.UUID(id).String())
+		enable.subscribers[id] = struct{}{}
+	default:
+		enable.connectionMx.Lock()
+		defer enable.connectionMx.Unlock()
+
+		enable.pool.Disconnect(id, ws.CloseUnsupportedData, "unsupported topic")
+		delete(enable.subscribers, id)
+		fmt.Printf("logger/response unsubscribed %s\n", uuid.UUID(id).String())
 	}
 }
 
-func (enable *Enable) handleToggle(id websocket.ClientId, message *websocket.Message) error {
+func (enable *Enable) handleToggle(_ websocket.ClientId, message *websocket.Message) error {
 	var request bool
 	err := json.Unmarshal(message.Payload, &request)
 	if err != nil {
@@ -71,10 +91,27 @@ func (enable *Enable) broadcastState() error {
 		return err
 	}
 
-	enable.pool.Broadcast(websocket.Message{
+	message := websocket.Message{
 		Topic:   ResponseName,
 		Payload: payload,
-	})
+	}
+
+	enable.connectionMx.Lock()
+	defer enable.connectionMx.Unlock()
+	flaged := make([]websocket.ClientId, 0, len(enable.subscribers))
+	for id := range enable.subscribers {
+		err := enable.pool.Write(id, message)
+		if err != nil {
+			flaged = append(flaged, id)
+		}
+	}
+
+	for _, id := range flaged {
+		enable.pool.Disconnect(id, ws.CloseInternalServerErr, "client disconnected")
+		delete(enable.subscribers, id)
+		fmt.Printf("logger/response unsubscribed %s\n", uuid.UUID(id).String())
+	}
+
 	return nil
 }
 

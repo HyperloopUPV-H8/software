@@ -13,6 +13,7 @@ type LogStore = {
     setOpenLogSession: (logSession: string) => void;
     addLogSession: (log: LogSession) => void;
     clearLogSessions: () => void;
+    removeLogSession: (logName: string) => void;
 };
 
 
@@ -31,4 +32,7 @@ export const useLogStore = create<LogStore>((set, get) => ({
         set((state) => ({ logSessions: [...state.logSessions, log] }));
     },
     clearLogSessions: () => set({ logSessions: [] }),
+    removeLogSession: (logName: string) => {
+        set((state) => ({ logSessions: state.logSessions.filter((logSession) => logSession.name !== logName) }));
+    }
 }));

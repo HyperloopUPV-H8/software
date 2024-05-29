@@ -16,7 +16,7 @@ export const Dropzone = () => {
     const uploadSession = async (directory: FileSystemDirectoryEntry) => {
         setUploadInformation({state: UploadState.UPLOADING});
         try {
-            const loggerSession = await extractLoggerSession(directory as FileSystemDirectoryEntry);
+            const loggerSession = await extractLoggerSession(directory);
             setDraftSession({name: directory.name, measurementLogs: loggerSession} as LogSession);
             setUploadInformation({state: UploadState.SUCCESS});
         } catch(err) {
@@ -33,6 +33,7 @@ export const Dropzone = () => {
         try {
             validateEntry(e.dataTransfer.items);
             const directory = e.dataTransfer.items[0].webkitGetAsEntry();
+            console.log(directory)
             await uploadSession(directory as FileSystemDirectoryEntry);
         } catch(err) {
             if (err instanceof Error){
@@ -67,7 +68,26 @@ export const Dropzone = () => {
             <div className={styles.dropZoneText}>
                 <p>
                     {dropZoneText}
-                    <br/>
+                    {uploadInformation.state === UploadState.IDLE &&
+                        <div>
+                            <label 
+                                htmlFor="directoryInput"
+                                className={styles.selectLabel}
+                            >Select a directory</label>
+                            <input 
+                                type="file" 
+                                id="directoryInput"
+                                {...{ webkitdirectory: '', mozdirectory: '', directory: '' }}
+                                style={{ display: "none" }}
+                                onChange={ev => {
+                                    if(ev.target.files && ev.target.files.length === 1) {
+                                        
+                                    }
+                                }}
+                            >
+                            </input>
+                        </div>
+                    }
                     {uploadInformation.errorMessage}
                 </p>
             </div>

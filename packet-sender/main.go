@@ -38,7 +38,7 @@ func main() {
 	prev := time.Now()
 	go func() {
 		for range ticker.C {
-			packet := packetGenerator.CreateRandomPacket()
+			packet := packetGenerator.CreateSinePacket()
 			// packet := []byte{10, 0, 20, 0, 20, 0, 20, 0, 20, 0}
 			fmt.Println(time.Since(prev))
 			prev = time.Now()

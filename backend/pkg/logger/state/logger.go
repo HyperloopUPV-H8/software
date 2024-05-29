@@ -70,7 +70,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	filename := path.Join(
 		"logger", "state",
 		logger.Timestamp.Format(logger.TimestampFormat),
-		fmt.Sprintf("%s.csv", time.Now().Format(logger.TimestampFormat)),
+		fmt.Sprintf("%s.csv", stateRecord.Timestamp.Format(logger.TimestampFormat)),
 	)
 	err := os.MkdirAll(path.Dir(filename), os.ModePerm)
 	if err != nil {
@@ -96,7 +96,11 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	}(file)
 
 	for _, item := range stateRecord.Packet.State() {
-		err = writer.Write([]string{fmt.Sprint(item)})
+		values := make([]string, 0, len(item))
+		for _, value := range item {
+			values = append(values, fmt.Sprint(value))
+		}
+		err = writer.Write(values)
 		if err != nil {
 			return logger.ErrWritingFile{
 				Name:      Name,
@@ -104,6 +108,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 				Inner:     err,
 			}
 		}
+		writer.Flush()
 	}
 
 	return nil

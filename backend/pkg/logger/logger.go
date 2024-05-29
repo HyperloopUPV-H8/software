@@ -10,11 +10,10 @@ import (
 )
 
 const (
-	Name        = "loggerHandler"
-	HandlerName = "logger"
+	Name            = "loggerHandler"
+	HandlerName     = "logger"
+  TimestampFormat = "02-Jan-2006_15-04-05.000"
 )
-
-const TimestampFormat = "02-Jan-2006_15-04-05.000"
 
 // Logger is a struct that implements the abstraction.Logger interface
 type Logger struct {

@@ -1,13 +1,13 @@
-import { VehicleOrders, useConfig, useFetchBack, useWsHandler } from "common";
+import { VehicleOrders, useConfig, useFetchBack, useOrdersStore, useWsHandler } from "common";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { setOrders, updateStateOrders } from "slices/ordersSlice";
 import { nanoid } from "nanoid";
 
 //TODO: make typed fetch function, from url you get response type
 
 export function useOrders() {
-    const dispatch = useDispatch();
+    const setOrders = useOrdersStore((state) => state.setOrders);
+    const updateStateOrders = useOrdersStore((state) => state.updateStateOrders);
     const handler = useWsHandler();
     const config = useConfig();
     const orderDescriptionPromise = useFetchBack(
@@ -20,11 +20,11 @@ export function useOrders() {
         const id = nanoid();
         orderDescriptionPromise
             .then((descriptions: VehicleOrders) => {
-                dispatch(setOrders(descriptions));
+                setOrders(descriptions);
                 handler.subscribe("order/stateOrders", {
                     id: id,
                     cb: (stateOrder) => {
-                        dispatch(updateStateOrders(stateOrder));
+                        updateStateOrders(stateOrder);
                     },
                 });
             })
