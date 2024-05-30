@@ -16,6 +16,10 @@ type Upload struct {
 	client websocket.ClientId
 }
 
+func NewUploadTopic() *Upload {
+	return &Upload{}
+}
+
 func (upload *Upload) Topic() abstraction.BrokerTopic {
 	return UploadName
 }

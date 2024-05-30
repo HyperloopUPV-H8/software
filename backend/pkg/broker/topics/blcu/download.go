@@ -16,6 +16,10 @@ type Download struct {
 	client websocket.ClientId
 }
 
+func NewDownloadTopic() *Download {
+	return &Download{}
+}
+
 func (download *Download) Topic() abstraction.BrokerTopic {
 	return DownloadName
 }
