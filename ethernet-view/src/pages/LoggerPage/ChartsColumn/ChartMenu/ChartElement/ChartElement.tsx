@@ -23,10 +23,6 @@ export const ChartElement = ({ chartId, initialMeasurementId, removeChart, getDa
 
     const [measurementsInChart, setMeasurementsInChart] = useState<MeasurementLogger[]>([{id: initialMeasurementId, color: 'red'}]);
 
-    useEffect(() => {
-        console.log(measurementsInChart)
-    }, [measurementsInChart])
-
     const addMeasurementToChart = (measurement: MeasurementLogger) => {
         if(!measurementsInChart.some(measurementInChart => measurementInChart.id === measurement.id)) {
             setMeasurementsInChart([...measurementsInChart, measurement]);
