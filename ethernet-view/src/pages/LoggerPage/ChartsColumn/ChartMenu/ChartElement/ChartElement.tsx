@@ -3,7 +3,7 @@ import { AiOutlineCloseCircle } from "react-icons/ai"
 import styles from "components/ChartMenu/ChartElement/ChartElement.module.scss"
 import { ChartCanvas } from "./ChartCanvas";
 import { ChartPoint } from "pages/LoggerPage/LogsColumn/LogLoader/LogsProcessor";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MeasurementId, } from "common";
 import { ChartLegend } from "./ChartLegend";
 
