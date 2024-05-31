@@ -1,19 +1,11 @@
 import styles from "./BoardsPage.module.scss";
-import { LCU } from "../Boards/LCU/LCU";
-import { PCU } from "../Boards/PCU/PCU";
-import { BMSL } from "../Boards/BMSL/BMSL";
-import { OBCCU } from "../Boards/OBCCU/OBCCU";
-import { VCU } from "../Boards/VCU/VCU";
+import { OBCCUBatteries } from "../Boards/OBCCU/OBCCUBatteries";
 import {
-    Connections,
-    selectBmslMeasurements,
-    selectLcuMeasurements,
     selectObccuMeasurements,
-    selectPcuMeasurements,
-    selectVcuMeasurements,
     useMeasurementsStore,
     useSubscribe,
 } from "common";
+import { OBCCUGeneralInfo } from "../Boards/OBCCU/OBCCUGeneralInfo";
 
 export const BoardsPage = () => {
     const measurements = useMeasurementsStore(state => state.measurements);
@@ -25,16 +17,10 @@ export const BoardsPage = () => {
 
     return (
         <div className={styles.boardsPage}>
-            <OBCCU {...selectObccuMeasurements(measurements)} />
+            <OBCCUBatteries {...selectObccuMeasurements(measurements)} />
             <div className={styles.column}>
-                <VCU {...selectVcuMeasurements(measurements)} />
-                <PCU {...selectPcuMeasurements(measurements)} />
+                <OBCCUGeneralInfo {...selectObccuMeasurements(measurements)}/>
             </div>
-            {/* <div className={styles.gridColumn}>
-                <Connections />
-                <LCU {...selectLcuMeasurements(measurements)} />
-                <BMSL {...selectBmslMeasurements(measurements)} />
-            </div> */}
         </div>
     );
 };
