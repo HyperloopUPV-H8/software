@@ -156,11 +156,14 @@ func main() {
 		boardIdToBoard[abstraction.BoardId(id)] = name
 	}
 	messageTopic := message_topic.NewUpdateTopic(boardIdToBoard)
+	stateOrderTopic := order_topic.NewState(idToBoard, trace.Logger)
 
 	broker.AddTopic(data_topic.UpdateName, dataTopic)
 	broker.AddTopic(connection_topic.UpdateName, connectionTopic)
 	broker.AddTopic(order_topic.SendName, orderTopic)
+	broker.AddTopic(order_topic.StateName, stateOrderTopic)
 	broker.AddTopic(logger_topic.EnableName, loggerTopic)
+	broker.AddTopic(logger_topic.ResponseName, loggerTopic)
 	broker.AddTopic(message_topic.UpdateName, messageTopic)
 
 	connections := make(chan *websocket.Client)
@@ -235,7 +238,13 @@ func main() {
 	if err != nil {
 		panic("failed to compile bpf filter")
 	}
-	go transp.HandleSniffer(sniffer.New(source, &layers.LayerTypeEthernet, trace.Logger))
+	go func() {
+		sniffer := sniffer.New(source, &layers.LayerTypeEthernet, trace.Logger)
+		for {
+			errChan := transp.HandleSniffer(sniffer)
+			trace.Error().Stack().Err(<-errChan).Msg("sniffer crashed, restarting...")
+		}
+	}()
 
 	// <--- http server --->
 	podDataHandle, err := h.HandleDataJSON("podData.json", pod_data.GetDataOnlyPodData(podData))

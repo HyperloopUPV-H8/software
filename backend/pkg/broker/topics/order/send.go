@@ -42,7 +42,7 @@ func (send *Send) ClientMessage(id websocket.ClientId, message *websocket.Messag
 	}
 }
 
-func (send *Send) handleOrder(id websocket.ClientId, message *websocket.Message) error {
+func (send *Send) handleOrder(_ websocket.ClientId, message *websocket.Message) error {
 	var order Order
 	err := json.Unmarshal(message.Payload, &order)
 	if err != nil {
