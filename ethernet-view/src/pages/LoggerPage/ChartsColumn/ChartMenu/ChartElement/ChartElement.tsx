@@ -3,7 +3,7 @@ import { AiOutlineCloseCircle } from "react-icons/ai"
 import styles from "components/ChartMenu/ChartElement/ChartElement.module.scss"
 import { ChartCanvas } from "./ChartCanvas";
 import { ChartPoint } from "pages/LoggerPage/LogsColumn/LogLoader/LogsProcessor";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MeasurementId, } from "common";
 import { ChartLegend } from "./ChartLegend";
 
@@ -22,10 +22,6 @@ export interface MeasurementLogger {
 export const ChartElement = ({ chartId, initialMeasurementId, removeChart, getDataFromLogSession }: Props) => {
 
     const [measurementsInChart, setMeasurementsInChart] = useState<MeasurementLogger[]>([{id: initialMeasurementId, color: 'red'}]);
-
-    useEffect(() => {
-        console.log(measurementsInChart)
-    }, [measurementsInChart])
 
     const addMeasurementToChart = (measurement: MeasurementLogger) => {
         if(!measurementsInChart.some(measurementInChart => measurementInChart.id === measurement.id)) {
