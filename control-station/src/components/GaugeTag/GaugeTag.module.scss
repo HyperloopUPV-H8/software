@@ -2,17 +2,15 @@
 
 .gaugeTagWrapper {
     display: grid;
-    grid-template-columns: min-content;
     justify-items: center;
     align-items: center;
-    margin-bottom: -1.87em;
     background-color: map-get($map: colors.$key-colors, $key: lightskyblue);
-    padding: 1rem;
+    padding: .6rem;
     border-radius: 100%;
 }
 
 .gauge {
     grid-row-start: 1;
     grid-column-start: 1;
-    font-size: 10em;
+    font-size: 6rem;
 }

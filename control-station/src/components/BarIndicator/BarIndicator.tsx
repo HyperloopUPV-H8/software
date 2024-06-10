@@ -57,16 +57,12 @@ export const BarIndicator = ({ icon, title, measurement, units }: Props) => {
                     </div>
                     <div className={styles.title}>{title}</div>
                 </div>
-                <div className={styles.valueUnits}>
                     {isNumericMeasurement(measurement) && (
-                        <div>
+                        <div className={styles.valueUnits}>
                             <div className={styles.value}>{value.toFixed(1)}</div>
                             <div className={styles.unit}>{units}</div>
-                        </div>
-                    )}
-                    <div>
                     </div>
-                </div>
+                    )}
             </div>
         </div>
     );

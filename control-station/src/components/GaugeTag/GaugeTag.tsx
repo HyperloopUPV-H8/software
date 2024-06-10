@@ -5,7 +5,7 @@ import { TextData } from "./TextData/TextData";
 
 type Props = {
     measurement: NumericMeasurement;
-    className: string;
+    className?: string;
     strokeWidth: number;
     min: number;
     max: number;

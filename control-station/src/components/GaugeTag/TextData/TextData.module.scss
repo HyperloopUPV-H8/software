@@ -5,6 +5,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    padding-top: 1rem;
 
     grid-row-start: 1;
     grid-column-start: 1;
@@ -20,7 +21,6 @@
 
     .value {
         font-family: map-get($map: fonts.$font-families, $key: roboto);
-        font-size: 1.8em;
         font-weight: map-get($map: fonts.$font-weights, $key: bold);
     }
 

@@ -57,8 +57,7 @@
     display: flex;
     justify-content: center;
     opacity: .7;
-    width: .6rem;
-    height: 100%;
+    width: .4rem;
 }
 
 .iconName {
@@ -70,8 +69,8 @@
 }
 
 .valueUnits {
-    width: 3rem;
     display: flex;
+    width: 3rem;
     gap: .5rem;
     align-items: center;
     justify-content: end;

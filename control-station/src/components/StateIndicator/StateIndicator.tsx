@@ -1,6 +1,7 @@
-import { EnumMeasurement } from "common";
+import { EnumMeasurement, NumericMeasurement } from "common";
 import styles from "./StateIndicator.module.scss"
-import { getState, stateToColorBackground } from "state";
+import { getState, State, stateToColorBackground } from "state";
+import { useState } from "react";
 
 interface Props {
     measurement: EnumMeasurement;
@@ -8,20 +9,23 @@ interface Props {
 }
 
 export const StateIndicator = ({measurement, icon}: Props) => {
-    const state = getState(measurement);
+    const [state, setState] = useState<State>(getState(measurement));
+    console.log(measurement.value)
 
     return (
         <div className={styles.wrapper}
             style={{backgroundColor: stateToColorBackground[state]}}
         >
             <div className={styles.icon}>
-                <img src={icon} alt="State icno" />
+                <img src={icon} alt="State icon" />
             </div>
 
-                <div className={styles.title}>{measurement.value}</div>
+                <div className={styles.title}>
+                    {/* {measurement.type} */}
+                </div>
                 
             <div className={styles.icon}>
-                <img src={icon} alt="State icno" />
+                <img src={icon} alt="State icon" />
             </div>
         </div>
     )

@@ -1,11 +1,16 @@
 import styles from "./BoardsPage.module.scss";
 import { OBCCUBatteries } from "../Boards/OBCCU/OBCCUBatteries";
 import {
+    selectBmslMeasurements,
     selectObccuMeasurements,
+    selectVcuMeasurements,
     useMeasurementsStore,
     useSubscribe,
 } from "common";
 import { OBCCUGeneralInfo } from "../Boards/OBCCU/OBCCUGeneralInfo";
+import { BMSL } from "../Boards/BMSL/BMSL";
+import { VCUPositionInfo } from "../Boards/VCU/VCUPositionInfo";
+import { VCUBrakesInfo } from "../Boards/VCU/VCUBrakesInfo";
 
 export const BoardsPage = () => {
     const measurements = useMeasurementsStore(state => state.measurements);
@@ -20,7 +25,10 @@ export const BoardsPage = () => {
             <OBCCUBatteries {...selectObccuMeasurements(measurements)} />
             <div className={styles.column}>
                 <OBCCUGeneralInfo {...selectObccuMeasurements(measurements)}/>
+                <BMSL {...selectBmslMeasurements(measurements)} />
             </div>
+            <VCUPositionInfo {...selectVcuMeasurements(measurements)} />
+            <VCUBrakesInfo {...selectVcuMeasurements(measurements)} />
         </div>
     );
 };

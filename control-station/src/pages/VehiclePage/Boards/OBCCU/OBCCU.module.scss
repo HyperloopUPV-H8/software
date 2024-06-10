@@ -1,5 +1,9 @@
 @use "src/styles/fonts";
 
+.obccu {
+    min-width: fit-content;
+}
+
 .batteryRow {
     display: flex;
     flex: 1;

@@ -6,6 +6,7 @@
     flex-direction: column;
     gap: .6rem;
     padding: .8rem;
+    height: 100%;
 }
 
 .header {
@@ -28,12 +29,9 @@
 }
 
 .content {
-    flex: 1 1 0;
-    align-self: stretch;
     display: flex;
-    justify-content: center;
-    padding-top: 0;
-    gap: 2rem;
-    min-height: 0;
-    max-height: 100%;
+    flex-direction: column;
+    align-items: center;
+    gap: .6rem;
+    height: 100%;
 }
