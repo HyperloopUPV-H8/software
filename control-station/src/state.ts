@@ -14,15 +14,15 @@ const WarningLowerBound = 40;
 const WarningUpperBound = 60;
 
 export const stateToColor = {
-    stable: "hsl(92, 82%, 56%)",
-    warning: "hsl(52, 90%, 61%)",
-    fault: "hsl(356, 90%, 61%)",
+    stable: "#ACF293",
+    warning: "#F4F688",
+    fault: "#EF9A87",
 };
 
 export const stateToColorBackground = {
-    stable: "hsl(92, 82%, 86%)",
-    warning: "hsl(52, 90%, 86%)",
-    fault: "hsl(356, 90%, 86%)",
+    stable: "#E6FFDD",
+    warning: "#FCFFDD",
+    fault: "#FFE5DD",
 };
 
 export function getState(meas: Measurement): State {
@@ -70,7 +70,7 @@ export function getStateFromRange(
     return "fault";
 }
 
-export function getPercentFromRange(value: number, min: number, max: number): number {
+export function getPercentageFromRange(value: number, min: number, max: number): number {
     const normValue = Math.max(Math.min(value, max), min);
     return ((normValue - min) / (max - min)) * 100;
 }

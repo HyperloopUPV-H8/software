@@ -1,7 +1,5 @@
-.vcu {
-    flex: 1 1 0;
-    display: grid;
-    grid-template-columns: auto;
-    gap: 1rem;
-    overflow-y: auto;
+.row {
+    display: flex;
+    justify-content: center;
+    gap: .5rem;
 }
