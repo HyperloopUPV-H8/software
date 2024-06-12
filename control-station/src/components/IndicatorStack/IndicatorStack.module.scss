@@ -13,7 +13,7 @@
         border-bottom: 1.5px solid hsla(0, 0%, 0%, 0.792);
     }
 
-    > div:last-child, > div:nth-last-child(2):nth-child(odd) {
+    > div:last-child {
         border-bottom: none;
     }
 }
