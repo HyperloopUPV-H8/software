@@ -1,13 +1,15 @@
-import { ObccuMeasurements } from "common"
+import { GaugeTag, ObccuMeasurements, useMeasurementsStore } from "common"
+import { BarIndicator } from "components/BarIndicator/BarIndicator"
 import { IndicatorStack } from "components/IndicatorStack/IndicatorStack"
 import { StateIndicator } from "components/StateIndicator/StateIndicator"
 import { Window } from "components/Window/Window"
-import thunderIcon from "assets/svg/thunder-filled.svg"
 import batteryIcon from "assets/svg/battery-filled.svg"
-import { GaugeTag } from "components/GaugeTag/GaugeTag"
-import { BarIndicator } from "components/BarIndicator/BarIndicator"
+import thunderIcon from "assets/svg/thunder-filled.svg"
 
-export const OBCCUGeneralInfo = (props: ObccuMeasurements) => {
+export const OBCCUGeneralInfo = () => {
+    
+    const getMeasurement = useMeasurementsStore(state => state.getMeasurement)
+    
     return (
         <Window title="OBCCU">
             <div style={{
@@ -23,15 +25,21 @@ export const OBCCUGeneralInfo = (props: ObccuMeasurements) => {
                     gap: ".5rem",
                 }}>
                     <IndicatorStack>
-                        <StateIndicator measurement={props.generalState} icon={thunderIcon} />
-                        <StateIndicator measurement={props.generalState} icon={batteryIcon} />
+                        <StateIndicator
+                            measurementId={ObccuMeasurements.generalState}
+                            icon={thunderIcon} 
+                        />
+                        <StateIndicator 
+                            measurementId={ObccuMeasurements.generalState}
+                            icon={batteryIcon} 
+                        />
                     </IndicatorStack>
 
                     <div style={{
                         display: "flex",
                         gap: "1rem",
                     }}>
-                        <GaugeTag 
+                        {/* <GaugeTag 
                             measurement={props.totalVoltageHigh}
                             strokeWidth={120}
                             min={0}
@@ -43,7 +51,7 @@ export const OBCCUGeneralInfo = (props: ObccuMeasurements) => {
                             strokeWidth={120}
                             min={0}
                             max={100}
-                        />
+                        /> */}
                     </div>
                 </div>
                 <div style={{
@@ -53,11 +61,10 @@ export const OBCCUGeneralInfo = (props: ObccuMeasurements) => {
                     gap: ".5rem",
                     height: "fit-content"
                 }}>
-                    <StateIndicator measurement={props.generalState} icon={thunderIcon} />
+                    {/* <StateIndicator measurement={props.generalState} icon={thunderIcon} /> */}
 
-                    <IndicatorStack>
-                        <BarIndicator 
-                            measurement={props.battery_temperature_1}
+                    {/* <IndicatorStack>
+                        <BarIndicator
                             icon={batteryIcon}
                             title="TODO" 
                             units="ºC"
@@ -80,7 +87,7 @@ export const OBCCUGeneralInfo = (props: ObccuMeasurements) => {
                             title="TODO" 
                             units="ºC"
                         />
-                    </IndicatorStack>
+                    </IndicatorStack> */}
                 </div>
             </div>
         </Window>

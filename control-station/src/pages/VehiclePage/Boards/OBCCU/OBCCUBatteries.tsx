@@ -4,17 +4,17 @@ import { ObccuMeasurements } from "common";
 import { BatteryPack } from "pages/VehiclePage/Boards/OBCCU/BatteryPack/BatteryPack";
 import { BatteryConnector } from "components/BatteryConnector/BatteryConnector";
 
-export const OBCCUBatteries = (props: ObccuMeasurements) => {
+export const OBCCUBatteries = () => {
     return (
         <Window title="OBCCU">
             <div className={styles.obccu}>
                 <div className={styles.batteryRow}>
                     <BatteryPack
-                        stateOfChargeMeasurement={props.SOC1}
-                        temperatureMeasurement={props.battery_temperature_1}
-                        maxCellMeasurement={props.maximumCell1}
-                        minCellMeasurement={props.minimumCell1}
-                        voltageMeasurement={props.totalVoltage1}
+                        stateOfChargeMeasurementId={ObccuMeasurements.SOC1}
+                        temperatureMeasurementId={ObccuMeasurements.battery_temperature_1}
+                        maxCellMeasurementId={ObccuMeasurements.maximumCell1}
+                        minCellMeasurementId={ObccuMeasurements.minimumCell1}
+                        voltageMeasurementId={ObccuMeasurements.totalVoltage1}
                     />
                     <div className={styles.centerPiece}>
                         <div style={{
@@ -33,80 +33,80 @@ export const OBCCUBatteries = (props: ObccuMeasurements) => {
                         <BatteryConnector />
                     </div>
                     <BatteryPack
-                        stateOfChargeMeasurement={props.SOC10}
-                        temperatureMeasurement={props.battery_temperature_10}
-                        maxCellMeasurement={props.maximumCell10}
-                        minCellMeasurement={props.minimumCell10}
-                        voltageMeasurement={props.totalVoltage10}
+                        stateOfChargeMeasurementId={ObccuMeasurements.SOC10}
+                        temperatureMeasurementId={ObccuMeasurements.battery_temperature_10}
+                        maxCellMeasurementId={ObccuMeasurements.maximumCell10}
+                        minCellMeasurementId={ObccuMeasurements.minimumCell10}
+                        voltageMeasurementId={ObccuMeasurements.totalVoltage10}
                     />
                 </div>
                 <div className={styles.batteryRow}>
                     <BatteryPack
-                        stateOfChargeMeasurement={props.SOC2}
-                        temperatureMeasurement={props.battery_temperature_2}
-                        maxCellMeasurement={props.maximumCell2}
-                        minCellMeasurement={props.minimumCell2}
-                        voltageMeasurement={props.totalVoltage2}
+                        stateOfChargeMeasurementId={ObccuMeasurements.SOC2}
+                        temperatureMeasurementId={ObccuMeasurements.battery_temperature_2}
+                        maxCellMeasurementId={ObccuMeasurements.maximumCell2}
+                        minCellMeasurementId={ObccuMeasurements.minimumCell2}
+                        voltageMeasurementId={ObccuMeasurements.totalVoltage2}
                     />
                     <div className={styles.centerPiece}>
                         <BatteryConnector rotate />
                         <BatteryConnector />
                     </div>
                     <BatteryPack
-                        stateOfChargeMeasurement={props.SOC9}
-                        temperatureMeasurement={props.battery_temperature_9}
-                        maxCellMeasurement={props.maximumCell9}
-                        minCellMeasurement={props.minimumCell9}
-                        voltageMeasurement={props.totalVoltage9}
+                        stateOfChargeMeasurementId={ObccuMeasurements.SOC9}
+                        temperatureMeasurementId={ObccuMeasurements.battery_temperature_9}
+                        maxCellMeasurementId={ObccuMeasurements.maximumCell9}
+                        minCellMeasurementId={ObccuMeasurements.minimumCell9}
+                        voltageMeasurementId={ObccuMeasurements.totalVoltage9}
                     />
                 </div>
                 <div className={styles.batteryRow}>
                     <BatteryPack
-                        stateOfChargeMeasurement={props.SOC3}
-                        temperatureMeasurement={props.battery_temperature_3}
-                        maxCellMeasurement={props.maximumCell3}
-                        minCellMeasurement={props.minimumCell3}
-                        voltageMeasurement={props.totalVoltage3}
+                        stateOfChargeMeasurementId={ObccuMeasurements.SOC3}
+                        temperatureMeasurementId={ObccuMeasurements.battery_temperature_3}
+                        maxCellMeasurementId={ObccuMeasurements.maximumCell3}
+                        minCellMeasurementId={ObccuMeasurements.minimumCell3}
+                        voltageMeasurementId={ObccuMeasurements.totalVoltage3}
                     />
                     <div className={styles.centerPiece}>
                         <BatteryConnector rotate />
                         <BatteryConnector />
                     </div>
                     <BatteryPack
-                        stateOfChargeMeasurement={props.SOC8}
-                        temperatureMeasurement={props.battery_temperature_8}
-                        maxCellMeasurement={props.maximumCell8}
-                        minCellMeasurement={props.minimumCell8}
-                        voltageMeasurement={props.totalVoltage8}
+                        stateOfChargeMeasurementId={ObccuMeasurements.SOC8}
+                        temperatureMeasurementId={ObccuMeasurements.battery_temperature_8}
+                        maxCellMeasurementId={ObccuMeasurements.maximumCell8}
+                        minCellMeasurementId={ObccuMeasurements.minimumCell8}
+                        voltageMeasurementId={ObccuMeasurements.totalVoltage8}
                     />
                 </div>
                 <div className={styles.batteryRow}>
                     <BatteryPack
-                        stateOfChargeMeasurement={props.SOC4}
-                        temperatureMeasurement={props.battery_temperature_4}
-                        maxCellMeasurement={props.maximumCell4}
-                        minCellMeasurement={props.minimumCell4}
-                        voltageMeasurement={props.totalVoltage4}
+                        stateOfChargeMeasurementId={ObccuMeasurements.SOC4}
+                        temperatureMeasurementId={ObccuMeasurements.battery_temperature_4}
+                        maxCellMeasurementId={ObccuMeasurements.maximumCell4}
+                        minCellMeasurementId={ObccuMeasurements.minimumCell4}
+                        voltageMeasurementId={ObccuMeasurements.totalVoltage4}
                     />
                     <div className={styles.centerPiece}>
                         <BatteryConnector rotate />
                         <BatteryConnector />
                     </div>
                     <BatteryPack
-                        stateOfChargeMeasurement={props.SOC7}
-                        temperatureMeasurement={props.battery_temperature_7}
-                        maxCellMeasurement={props.maximumCell7}
-                        minCellMeasurement={props.minimumCell7}
-                        voltageMeasurement={props.totalVoltage7}
+                        stateOfChargeMeasurementId={ObccuMeasurements.SOC7}
+                        temperatureMeasurementId={ObccuMeasurements.battery_temperature_7}
+                        maxCellMeasurementId={ObccuMeasurements.maximumCell7}
+                        minCellMeasurementId={ObccuMeasurements.minimumCell7}
+                        voltageMeasurementId={ObccuMeasurements.totalVoltage7}
                     />
                 </div>
                 <div className={styles.batteryRow}>
                     <BatteryPack
-                        stateOfChargeMeasurement={props.SOC5}
-                        temperatureMeasurement={props.battery_temperature_5}
-                        maxCellMeasurement={props.maximumCell5}
-                        minCellMeasurement={props.minimumCell5}
-                        voltageMeasurement={props.totalVoltage5}
+                        stateOfChargeMeasurementId={ObccuMeasurements.SOC5}
+                        temperatureMeasurementId={ObccuMeasurements.battery_temperature_5}
+                        maxCellMeasurementId={ObccuMeasurements.maximumCell5}
+                        minCellMeasurementId={ObccuMeasurements.minimumCell5}
+                        voltageMeasurementId={ObccuMeasurements.totalVoltage5}
                     />
                     <div className={styles.centerPiece}>
                         <div style={{
@@ -125,11 +125,11 @@ export const OBCCUBatteries = (props: ObccuMeasurements) => {
                         <BatteryConnector />
                     </div>
                     <BatteryPack
-                        stateOfChargeMeasurement={props.SOC6}
-                        temperatureMeasurement={props.battery_temperature_6}
-                        maxCellMeasurement={props.maximumCell6}
-                        minCellMeasurement={props.minimumCell6}
-                        voltageMeasurement={props.totalVoltage6}
+                        stateOfChargeMeasurementId={ObccuMeasurements.SOC6}
+                        temperatureMeasurementId={ObccuMeasurements.battery_temperature_6}
+                        maxCellMeasurementId={ObccuMeasurements.maximumCell6}
+                        minCellMeasurementId={ObccuMeasurements.minimumCell6}
+                        voltageMeasurementId={ObccuMeasurements.totalVoltage6}
                     />
                 </div>
             </div>

@@ -1,20 +1,25 @@
-import { EnumMeasurement, NumericMeasurement } from "common";
+import { EnumMeasurement, NumericMeasurement, useGlobalTicker, useMeasurementsStore } from "common";
 import styles from "./StateIndicator.module.scss"
 import { getState, State, stateToColorBackground } from "state";
-import { useState } from "react";
+import { memo, useRef, useState } from "react";
 
 interface Props {
-    measurement: EnumMeasurement;
+    measurementId: string;
     icon?: string;
 }
 
-export const StateIndicator = ({measurement, icon}: Props) => {
-    const [state, setState] = useState<State>(getState(measurement));
-    console.log(measurement.value)
+export const StateIndicator = memo(({measurementId, icon}: Props) => {
+    const getMeasurement = useMeasurementsStore(state => state.getMeasurement)
+    let [measurement, setMeasurement] = useState<EnumMeasurement>(getMeasurement(measurementId) as EnumMeasurement)
+    const state = useRef<State>(getState(measurement as EnumMeasurement))
+
+    useGlobalTicker(() => {
+        setMeasurement(getMeasurement(measurementId) as EnumMeasurement)
+    })
 
     return (
         <div className={styles.wrapper}
-            style={{backgroundColor: stateToColorBackground[state]}}
+            style={{backgroundColor: stateToColorBackground[state.current]}}
         >
             <div className={styles.icon}>
                 <img src={icon} alt="State icon" />
@@ -29,4 +34,4 @@ export const StateIndicator = ({measurement, icon}: Props) => {
             </div>
         </div>
     )
-}
+})
