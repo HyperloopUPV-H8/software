@@ -1,4 +1,5 @@
 import {
+    EnumMeasurement,
     Measurement,
     clamp,
     clampAndNormalize,
@@ -37,6 +38,10 @@ export function getState(meas: Measurement): State {
     } else {
         return "stable";
     }
+}
+
+export function getStateFromEnum(_: EnumMeasurement): State {
+    return "stable";
 }
 
 export function getStateFromRange(

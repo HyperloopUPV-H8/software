@@ -6,7 +6,7 @@ import (
 )
 
 type decoder struct {
-	eth     layers.Ethernet
+	eth     layers.Loopback
 	ipv4    layers.IPv4
 	ipipv4  layers.IPv4
 	tcp     layers.TCP

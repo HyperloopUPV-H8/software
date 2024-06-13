@@ -1,25 +1,39 @@
 import styles from "./VCU.module.scss";
 import { Window } from "components/Window/Window";
-import { VcuMeasurements } from "common";
+import { useMeasurementsStore, VcuMeasurements } from "common";
 import { GaugeTag } from "components/GaugeTag/GaugeTag";
+import vehicleTrack from "assets/svg/vehicle-track.svg";
 
-export const VCUPositionInfo = (props: VcuMeasurements) => {
+export const VCUPositionInfo = () => {
+
+    const getNumericMeasurementInfo = useMeasurementsStore(state => state.getNumericMeasurementInfo);
+    const speed = getNumericMeasurementInfo(VcuMeasurements.speed);
+    const acceleration = getNumericMeasurementInfo(VcuMeasurements.acceleration);
+
     return (
         <Window title="VCU">
             <div className={styles.vcu}>
                 <div className={styles.row}>
                     <GaugeTag 
-                        measurement={props.speed} 
+                        name={speed.name}
+                        units={speed.units}
+                        getUpdate={speed.getUpdate}
                         strokeWidth={120}
-                        min={props.speed.safeRange[0] || 0}
-                        max={props.speed.safeRange[1] || 50}
+                        min={speed.range[0] || 0}
+                        max={speed.range[1] || 50}
                     />
                     <GaugeTag 
-                        measurement={props.speed}
+                        name={acceleration.name}
+                        units={acceleration.units}
+                        getUpdate={acceleration.getUpdate}
                         strokeWidth={120}
-                        min={props.speed.safeRange[0] || 0}
-                        max={props.speed.safeRange[1] || 50}
+                        min={acceleration.range[0] || 0}
+                        max={acceleration.range[1] || 50}
                     />
+                </div>
+
+                <div className={styles.trackContainer}>
+                    <img src={vehicleTrack} alt="Vehicle Track" />
                 </div>
             </div>
         </Window>

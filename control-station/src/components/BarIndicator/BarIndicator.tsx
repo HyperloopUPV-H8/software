@@ -42,6 +42,7 @@ export const BarIndicator = memo(({ icon, title, getValue, safeRangeMin, safeRan
                 className={styles.background}
                 style={{ backgroundColor: stateToColorBackground[state.current] }}
             ></div>
+            
             <div
                 className={styles.bar}
                 style={{

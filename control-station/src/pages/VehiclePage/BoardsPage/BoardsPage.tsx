@@ -5,6 +5,9 @@ import {
     useSubscribe,
 } from "common";
 import { OBCCUGeneralInfo } from "../Boards/OBCCU/OBCCUGeneralInfo";
+import { BMSL } from "../Boards/BMSL/BMSL";
+import { VCUPositionInfo } from "../Boards/VCU/VCUPositionInfo";
+import { VCUBrakesInfo } from "../Boards/VCU/VCUBrakesInfo";
 
 export const BoardsPage = () => {
     const updateMeasurements = useMeasurementsStore(state => state.updateMeasurements);
@@ -18,10 +21,10 @@ export const BoardsPage = () => {
             <OBCCUBatteries />
             <div className={styles.column}>
                 <OBCCUGeneralInfo />
-                {/* <BMSL {...selectBmslMeasurements(measurements)} /> */}
+                <BMSL />
             </div>
-            {/* <VCUPositionInfo {...selectVcuMeasurements(measurements)} />
-            <VCUBrakesInfo {...selectVcuMeasurements(measurements)} /> */}
+            <VCUPositionInfo />
+            <VCUBrakesInfo />
         </div>
     );
 };

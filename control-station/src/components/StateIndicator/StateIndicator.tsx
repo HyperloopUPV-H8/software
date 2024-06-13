@@ -1,7 +1,7 @@
-import { EnumMeasurement, NumericMeasurement, useGlobalTicker, useMeasurementsStore } from "common";
+import { EnumMeasurement, getEnumMeasurement, NumericMeasurement, useGlobalTicker, useMeasurementsStore } from "common";
 import styles from "./StateIndicator.module.scss"
-import { getState, State, stateToColorBackground } from "state";
-import { memo, useRef, useState } from "react";
+import { getStateFromEnum, State, stateToColorBackground } from "state";
+import { memo, useEffect, useRef, useState } from "react";
 
 interface Props {
     measurementId: string;
@@ -10,11 +10,15 @@ interface Props {
 
 export const StateIndicator = memo(({measurementId, icon}: Props) => {
     const getMeasurement = useMeasurementsStore(state => state.getMeasurement)
-    let [measurement, setMeasurement] = useState<EnumMeasurement>(getMeasurement(measurementId) as EnumMeasurement)
-    const state = useRef<State>(getState(measurement as EnumMeasurement))
+    const [measurement, setMeasurement] = useState<EnumMeasurement>(getMeasurement(measurementId) as EnumMeasurement)
+    const state = useRef<State>(getStateFromEnum(measurement as EnumMeasurement))
 
     useGlobalTicker(() => {
         setMeasurement(getMeasurement(measurementId) as EnumMeasurement)
+    })
+
+    useEffect(() => {
+        state.current = getStateFromEnum(measurement as EnumMeasurement)
     })
 
     return (
