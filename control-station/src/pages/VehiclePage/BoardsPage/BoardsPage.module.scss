@@ -1,11 +1,12 @@
 .boardsPage {
+    width: 100%;
     display: flex;
+    justify-content: center;
     flex: 1;
     gap: 1rem;
-}
 
-.gridColumn {
-    display: flex;
-    flex-direction: column;
-    gap: .2rem;
+    > * {
+        min-width: fit-content;
+        flex: 1;
+    }
 }

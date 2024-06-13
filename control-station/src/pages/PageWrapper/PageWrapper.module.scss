@@ -3,10 +3,10 @@
 
 .pageWrapper {
     display: flex;
+    flex: 1;
     flex-direction: column;
     gap: .6rem;
     padding: .8rem;
-    height: 100%;
 }
 
 .header {
