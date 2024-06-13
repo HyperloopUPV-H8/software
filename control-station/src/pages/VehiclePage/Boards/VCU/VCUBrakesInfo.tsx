@@ -4,6 +4,7 @@ import { useMeasurementsStore, VcuMeasurements } from "common";
 import { IndicatorStack } from "components/IndicatorStack/IndicatorStack";
 import { BarIndicator } from "components/BarIndicator/BarIndicator";
 import thermometerIcon from "assets/svg/thermometer-filled.svg";
+import { BreakVisualizer } from "components/BreakVisualizer/BreakVisualizer";
 
 export const VCUBrakesInfo = () => {
 
@@ -15,7 +16,19 @@ export const VCUBrakesInfo = () => {
 
     return (
         <Window title="VCU">
-            <div className={styles.vcu}>
+            <div className={styles.vcuBrakesInfo}>
+
+                <div className={styles.brakesContainer}>
+                    <div className={styles.brakesColumn}>
+                        <BreakVisualizer active={false} rotation="left" />
+                        <BreakVisualizer active={false} rotation="left" />
+                    </div>
+                    <div className={styles.brakesColumn}>
+                        <BreakVisualizer active={false} rotation="right" />
+                        <BreakVisualizer active={false} rotation="right" />
+                    </div>
+                </div>
+
                 <IndicatorStack>
                     <BarIndicator
                         title="Bottle Temp"

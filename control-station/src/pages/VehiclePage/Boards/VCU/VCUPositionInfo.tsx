@@ -12,7 +12,7 @@ export const VCUPositionInfo = () => {
 
     return (
         <Window title="VCU">
-            <div className={styles.vcu}>
+            <div className={styles.vcuPositionInfo}>
                 <div className={styles.row}>
                     <GaugeTag 
                         name={speed.name}
