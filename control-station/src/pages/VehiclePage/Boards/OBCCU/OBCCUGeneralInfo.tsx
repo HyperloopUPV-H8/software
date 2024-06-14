@@ -1,14 +1,17 @@
-import { GaugeTag, ObccuMeasurements, useMeasurementsStore } from "common"
-import { BarIndicator } from "components/BarIndicator/BarIndicator"
+import { ObccuMeasurements, useMeasurementsStore } from "common"
 import { IndicatorStack } from "components/IndicatorStack/IndicatorStack"
 import { StateIndicator } from "components/StateIndicator/StateIndicator"
 import { Window } from "components/Window/Window"
 import batteryIcon from "assets/svg/battery-filled.svg"
 import thunderIcon from "assets/svg/thunder-filled.svg"
+import { GaugeTag } from "components/GaugeTag/GaugeTag"
+import { BarIndicator } from "components/BarIndicator/BarIndicator"
 
 export const OBCCUGeneralInfo = () => {
     
-    const getMeasurement = useMeasurementsStore(state => state.getMeasurement)
+    const getNumericMeasurementInfo = useMeasurementsStore(state => state.getNumericMeasurementInfo)
+    const totalVoltageHigh = getNumericMeasurementInfo(ObccuMeasurements.totalVoltageHigh)
+    const batteryTemperature1 = getNumericMeasurementInfo(ObccuMeasurements.battery_temperature_1)
     
     return (
         <Window title="OBCCU">
@@ -39,55 +42,73 @@ export const OBCCUGeneralInfo = () => {
                         display: "flex",
                         gap: "1rem",
                     }}>
-                        {/* <GaugeTag 
-                            measurement={props.totalVoltageHigh}
-                            strokeWidth={120}
-                            min={0}
-                            max={100}
-                        />
-
                         <GaugeTag 
-                            measurement={props.totalVoltageHigh}
+                            name={totalVoltageHigh.name}
+                            units={totalVoltageHigh.units}
+                            getUpdate={totalVoltageHigh.getUpdate}
                             strokeWidth={120}
-                            min={0}
-                            max={100}
-                        /> */}
+                            min={totalVoltageHigh.range[0] ?? 0}
+                            max={totalVoltageHigh.range[1] ?? 100}
+                        />
+                        <GaugeTag 
+                            name={totalVoltageHigh.name}
+                            units={totalVoltageHigh.units}
+                            getUpdate={totalVoltageHigh.getUpdate}
+                            strokeWidth={120}
+                            min={totalVoltageHigh.range[0] ?? 0}
+                            max={totalVoltageHigh.range[1] ?? 100}
+                        />
                     </div>
                 </div>
                 <div style={{
                     flex: "1",
                     display: "flex",
                     flexDirection: "column",
+                    justifyContent: "space-around",
                     gap: ".5rem",
-                    height: "fit-content"
                 }}>
-                    {/* <StateIndicator measurement={props.generalState} icon={thunderIcon} /> */}
 
-                    {/* <IndicatorStack>
+                    <IndicatorStack>
+                        <StateIndicator 
+                            measurementId={ObccuMeasurements.generalState} 
+                            icon={thunderIcon} 
+                        />
+                    </IndicatorStack>
+
+                    <IndicatorStack>
                         <BarIndicator
                             icon={batteryIcon}
-                            title="TODO" 
+                            title="TODO"
+                            getValue={batteryTemperature1.getUpdate}
+                            safeRangeMin={batteryTemperature1.range[0] ?? 0}
+                            safeRangeMax={batteryTemperature1.range[1] ?? 100}
                             units="ºC"
                         />
                         <BarIndicator 
-                            measurement={props.battery_temperature_1} 
                             icon={batteryIcon}
                             title="TODO" 
+                            getValue={batteryTemperature1.getUpdate}
+                            safeRangeMin={batteryTemperature1.range[0] ?? 0}
+                            safeRangeMax={batteryTemperature1.range[1] ?? 100}
                             units="ºC"
                         />
                         <BarIndicator 
-                            measurement={props.battery_temperature_1} 
                             icon={batteryIcon}
                             title="TODO" 
+                            getValue={batteryTemperature1.getUpdate}
+                            safeRangeMin={batteryTemperature1.range[0] ?? 0}
+                            safeRangeMax={batteryTemperature1.range[1] ?? 100}
                             units="ºC"
                         />
                         <BarIndicator 
-                            measurement={props.battery_temperature_1} 
                             icon={batteryIcon}
                             title="TODO" 
+                            getValue={batteryTemperature1.getUpdate}
+                            safeRangeMin={batteryTemperature1.range[0] ?? 0}
+                            safeRangeMax={batteryTemperature1.range[1] ?? 100}
                             units="ºC"
                         />
-                    </IndicatorStack> */}
+                    </IndicatorStack>
                 </div>
             </div>
         </Window>

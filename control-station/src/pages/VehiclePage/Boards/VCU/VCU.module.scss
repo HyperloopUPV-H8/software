@@ -1,5 +1,38 @@
+.vcuPositionInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
 .row {
     display: flex;
     justify-content: center;
     gap: .5rem;
+}
+
+.trackContainer {
+    display: flex;
+    justify-content: center;
+    max-height: 25rem;
+
+    > img {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+.vcuBrakesInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.brakesContainer {
+    display: flex;
+    justify-content: center;
+}
+
+.brakesColumn {
+    display: flex;
+    flex-direction: column;
 }

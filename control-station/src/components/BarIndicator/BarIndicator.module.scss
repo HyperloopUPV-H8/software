@@ -2,7 +2,7 @@
 
 .container {
     position: relative;
-    height: 1.4rem;
+    min-height: 1.3rem;
     width: 100%;
     background-color: #000;
     overflow: hidden;
@@ -28,7 +28,7 @@
     position: absolute;
     top: -25%;
     left: -2%;
-    filter: blur(10px);
+    filter: blur(.5rem);
     background-color: red;
     width: 40%;
     height: 150%;
