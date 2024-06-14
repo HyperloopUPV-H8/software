@@ -8,6 +8,8 @@ export enum VcuMeasurements {
     valveState = "VCU/valve_state",
     reed1 = "VCU/reed1",
     reed2 = "VCU/reed2",
+    reed3 = "VCU/reed3",
+    reed4 = "VCU/reed4",
     bottleTemp1 = "VCU/bottle_temp_1",
     bottleTemp2 = "VCU/bottle_temp_2",
     highPressure = "VCU/high_pressure",
