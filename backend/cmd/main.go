@@ -239,7 +239,7 @@ func main() {
 		panic("failed to compile bpf filter")
 	}
 	go func() {
-		sniffer := sniffer.New(source, &layers.LayerTypeLoopback, trace.Logger)
+		sniffer := sniffer.New(source, &layers.LayerTypeEthernet, trace.Logger)
 		for {
 			errChan := transp.HandleSniffer(sniffer)
 			trace.Error().Stack().Err(<-errChan).Msg("sniffer crashed, restarting...")
