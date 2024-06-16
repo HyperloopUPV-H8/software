@@ -24,7 +24,7 @@ export const BrakeVisualizer = ({
         <div
             className={styles.brakeVisualizerWrapper}
             style={{
-                transform: rotation === "left" ? "rotate(0deg)" : "rotate(90deg)"
+                transform: rotation === "left" ? "rotate(0deg)" : "rotate(180deg)"
             }}
         >
             <img src={status ? brakeExtended : brakeContracted} alt="Break Visualizer" />

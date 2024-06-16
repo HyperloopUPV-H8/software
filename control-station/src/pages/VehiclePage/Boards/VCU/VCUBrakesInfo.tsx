@@ -12,6 +12,8 @@ export const VCUBrakesInfo = () => {
     const getBooleanMeasurementInfo = useMeasurementsStore(state => state.getBooleanMeasurementInfo);
     const reed1 = getBooleanMeasurementInfo(VcuMeasurements.reed1);
     const reed2 = getBooleanMeasurementInfo(VcuMeasurements.reed2);
+    const reed3 = getBooleanMeasurementInfo(VcuMeasurements.reed2);
+    const reed4 = getBooleanMeasurementInfo(VcuMeasurements.reed2);
     const bottleTemp1 = getNumericMeasurementInfo(VcuMeasurements.bottleTemp1);
     const bottleTemp2 = getNumericMeasurementInfo(VcuMeasurements.bottleTemp2);
     const highPressure = getNumericMeasurementInfo(VcuMeasurements.highPressure);
@@ -26,8 +28,8 @@ export const VCUBrakesInfo = () => {
                         <BrakeVisualizer getStatus={reed2.getUpdate} rotation="left" />
                     </div>
                     <div className={styles.brakesColumn}>
-                        {/* <BrakeVisualizer getStatus={reed3.getUpdate} rotation="right" />
-                        <BrakeVisualizer getStatus={reed4.getUpdate} rotation="right" /> */}
+                        <BrakeVisualizer getStatus={reed3.getUpdate} rotation="right" />
+                        <BrakeVisualizer getStatus={reed4.getUpdate} rotation="right" />
                     </div>
                 </div>
 

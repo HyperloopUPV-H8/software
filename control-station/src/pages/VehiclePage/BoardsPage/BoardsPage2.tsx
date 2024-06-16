@@ -2,7 +2,6 @@ import styles from "./BoardsPage.module.scss";
 import { LCU } from "../Boards/LCU/LCU";
 import { DLIM } from "../Boards/DLIM/DLIM";
 import { LSM } from "../Boards/LSM/LSM";
-import { MessagesContainer } from "common";
 import { Messages } from "../Messages/Messages";
 
 export const BoardsPage2 = () => {
