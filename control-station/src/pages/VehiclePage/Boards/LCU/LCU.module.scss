@@ -20,7 +20,9 @@
 }
 
 .rotationIndicatorsWrapper {
+    max-width: 40rem;
     display: flex;
-    gap: 1rem;
-    width: 100%;
+    justify-content: center;
+    gap: .8rem;
+    flex-wrap: wrap;
 }

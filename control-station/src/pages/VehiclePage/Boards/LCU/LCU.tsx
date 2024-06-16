@@ -9,6 +9,7 @@ import yawRotation from "assets/svg/yaw-rotation.svg"
 import rollRotation from "assets/svg/roll-rotation.svg"
 import zIndex from "assets/svg/z-index.svg"
 import yIndex from "assets/svg/y-index.svg"
+import { IndicatorStack } from "components/IndicatorStack/IndicatorStack"
 
 export const LCU = () => {
     return (
@@ -66,41 +67,52 @@ export const LCU = () => {
                 </div>
 
                 <div className={styles.rotationIndicatorsWrapper}>
-                    <BarIndicator 
-                        icon={pitchRotation}
-                        title="Pitch"
-                        getValue={() => 0}
-                        safeRangeMin={0}
-                        safeRangeMax={10}
-                    />
-                    <BarIndicator 
-                        icon={rollRotation}
-                        title="Roll"
-                        getValue={() => 0}
-                        safeRangeMin={0}
-                        safeRangeMax={10}
-                    />
-                    <BarIndicator 
-                        icon={yawRotation}
-                        title="Yaw"
-                        getValue={() => 0}
-                        safeRangeMin={0}
-                        safeRangeMax={10}
-                    />
-                    <BarIndicator 
-                        icon={zIndex}
-                        title="Z"
-                        getValue={() => 0}
-                        safeRangeMin={0}
-                        safeRangeMax={10}
-                    />
-                    <BarIndicator 
-                        icon={yIndex}
-                        title="Y"
-                        getValue={() => 0}
-                        safeRangeMin={0}
-                        safeRangeMax={10}
-                    />
+                    <IndicatorStack>
+                        <BarIndicator 
+                            icon={pitchRotation}
+                            title="Pitch"
+                            getValue={() => 0}
+                            safeRangeMin={0}
+                            safeRangeMax={10}
+                        />
+                    </IndicatorStack>
+                    <IndicatorStack>
+                        <BarIndicator 
+                            icon={rollRotation}
+                            title="Roll"
+                            getValue={() => 0}
+                            safeRangeMin={0}
+                            safeRangeMax={10}
+                        />
+                    </IndicatorStack>
+                    <IndicatorStack>
+                        <BarIndicator 
+                            icon={yawRotation}
+                            title="Yaw"
+                            getValue={() => 0}
+                            safeRangeMin={0}
+                            safeRangeMax={10}
+                        />
+                    </IndicatorStack>
+                    <IndicatorStack>
+                        <BarIndicator 
+                            icon={zIndex}
+                            title="Z"
+                            getValue={() => 0}
+                            safeRangeMin={0}
+                            safeRangeMax={10}
+                        />
+                    </IndicatorStack>
+                    <IndicatorStack>
+                        <BarIndicator 
+                            icon={yIndex}
+                            title="Y"
+                            getValue={() => 0}
+                            safeRangeMin={0}
+                            safeRangeMax={10}
+                        />
+                    </IndicatorStack>
+                    
                 </div>
             </div>
         </Window>
