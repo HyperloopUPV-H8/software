@@ -32,7 +32,7 @@ export const VehiclePage = () => {
     return (
         <PageWrapper title="Vehicle">
             <Outlet />
-            <Pagination routes={["first", "second"]} />
+            <Pagination routes={["first", "second", "thirst"]} />
         </PageWrapper>
     );
 };

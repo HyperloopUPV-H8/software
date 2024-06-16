@@ -1,0 +1,17 @@
+.levitationUnitWrapper {
+    width: 100%;
+    display: flex;
+    gap: 1rem;
+
+    > * {
+        flex: 1;
+    }
+}
+
+.levitationUnitImage {
+    width: 100%;
+    object-fit: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
