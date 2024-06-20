@@ -1,16 +1,22 @@
 @use "src/styles/colors";
+@use "src/styles/fonts";
 
 .pageWrapper {
     display: flex;
+    flex: 1;
     flex-direction: column;
-    gap: 1.3rem;
-    padding: 1.3rem;
+    gap: .6rem;
+    padding: .8rem;
 }
 
 .header {
     display: flex;
     flex-direction: row;
     align-items: center;
+
+    > h1 {
+        font-size: map-get($map: fonts.$font-sizes, $key: default);
+    }
 }
 
 .header::after {
@@ -23,12 +29,9 @@
 }
 
 .content {
-    flex: 1 1 0;
-    align-self: stretch;
     display: flex;
-    justify-content: center;
-    padding-top: 0;
-    gap: 2rem;
-    min-height: 0;
-    max-height: 100%;
+    flex-direction: column;
+    align-items: center;
+    gap: .6rem;
+    height: 100%;
 }
