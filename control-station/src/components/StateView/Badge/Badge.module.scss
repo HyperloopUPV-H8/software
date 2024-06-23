@@ -1,8 +1,0 @@
-@use "src/styles/fonts";
-
-.badgeWrapper {
-    width: fit-content;
-    padding: 0.1rem 0.5rem;
-    border-radius: 0.4rem;
-    font-weight: fonts.getFontWeight("bold");
-}

@@ -31,13 +31,16 @@ export async function extractLoggerSession (directory: FileSystemDirectoryEntry)
                 Papa.parse(file, {
                     complete: (result) => {
                         const measurementPoints = [] as ChartPoint[];
+                        let lastTimestamp = 0;
                         for(const row of result.data) {
                             if(isValidLog(row)) {
                                 const [timestamp, , , value] = row as [string, string, string, string];
+                                if(parseInt(timestamp) <= lastTimestamp) continue;
                                 measurementPoints.push({
                                     time: parseFloat(timestamp), 
                                     value: parseFloat(value)
                                 });
+                                lastTimestamp = parseInt(timestamp);
                             }
                         }
                         session.set(file.name.replace(".csv", ""), measurementPoints);

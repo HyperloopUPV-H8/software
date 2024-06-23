@@ -6,7 +6,7 @@ import { PageWrapper } from "pages/PageWrapper/PageWrapper";
 import { Outlet } from "react-router-dom";
 import { useOrders } from "useOrders";
 import { fetchFromBackend } from "services/HTTPHandler";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 export const VehiclePage = () => {
     
@@ -31,10 +31,8 @@ export const VehiclePage = () => {
 
     return (
         <PageWrapper title="Vehicle">
-            <div className={styles.contentWrapper}>
-                <Outlet />
-                <Pagination routes={["first", "second"]} />
-            </div>
+            <Outlet />
+            <Pagination routes={["first", "second", "thirst"]} />
         </PageWrapper>
     );
 };

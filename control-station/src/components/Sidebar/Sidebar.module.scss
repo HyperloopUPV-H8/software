@@ -7,13 +7,13 @@
     justify-content: flex-start;
     align-items: center;
     gap: 1.4rem;
-    padding: 2rem 0.8rem;
+    padding: 1rem 0.4rem;
     background-color: colors.getColor("primary", 90);
     border-right: 1px solid colors.getColor("primary", 80);
 }
 
 .logo {
-    font-size: 2rem;
+    font-size: 1.6rem;
     color: colors.getColor("primary", 30);
 }
 
