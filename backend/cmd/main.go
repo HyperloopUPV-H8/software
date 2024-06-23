@@ -160,7 +160,6 @@ func main() {
 	messageTopic := message_topic.NewUpdateTopic(boardIdToBoard)
 
 	stateOrderTopic := order_topic.NewState(idToBoard, trace.Logger)
-
 	blcuDownloadTopic := blcu_topic.NewDownloadTopic()
 	blcuUploadTopic := blcu_topic.NewUploadTopic()
 
@@ -173,8 +172,6 @@ func main() {
 	broker.AddTopic(message_topic.UpdateName, messageTopic)
 	broker.AddTopic(blcu_topic.DownloadName, blcuDownloadTopic)
 	broker.AddTopic(blcu_topic.UploadName, blcuUploadTopic)
-	broker.AddTopic(blcu_topic.UploadRequestName, orderTopic)
-	broker.AddTopic(blcu_topic.DownloadRequestName, orderTopic)
 
 	connections := make(chan *websocket.Client)
 	upgrader := websocket.NewUpgrader(connections, trace.Logger)
