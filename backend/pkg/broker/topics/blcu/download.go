@@ -8,7 +8,10 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
 )
 
-const DownloadName abstraction.BrokerTopic = "blcu/download"
+const (
+	DownloadName        abstraction.BrokerTopic = "blcu/download"
+	DownloadRequestName                         = "blcu/downloadRequest"
+)
 
 type Download struct {
 	pool   *websocket.Pool
@@ -29,7 +32,7 @@ type DownloadRequest struct {
 }
 
 func (request DownloadRequest) Topic() abstraction.BrokerTopic {
-	return "blcu/downloadRequest"
+	return DownloadRequestName
 }
 
 func (download *Download) Push(push abstraction.BrokerPush) error {
