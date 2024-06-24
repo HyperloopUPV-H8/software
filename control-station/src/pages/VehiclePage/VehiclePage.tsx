@@ -1,17 +1,18 @@
-import { useGlobalTicker, useMeasurementsStore, useSubscribe } from "common";
-import styles from "./VehiclePage.module.scss";
+import { useGlobalTicker, useMeasurementsStore, useSubscribe } from 'common';
+import styles from './VehiclePage.module.scss';
 
-import { Pagination } from "components/Pagination/Pagination";
-import { PageWrapper } from "pages/PageWrapper/PageWrapper";
-import { Outlet } from "react-router-dom";
-import { useOrders } from "useOrders";
-import { fetchFromBackend } from "services/HTTPHandler";
-import { useEffect, useState } from "react";
+import { Pagination } from 'components/Pagination/Pagination';
+import { PageWrapper } from 'pages/PageWrapper/PageWrapper';
+import { Outlet } from 'react-router-dom';
+import { useOrders } from 'useOrders';
+import { fetchFromBackend } from 'services/HTTPHandler';
+import { useEffect, useState } from 'react';
 
 export const VehiclePage = () => {
-    
     const [podData, setPodData] = useState(null);
-    const initMeasurements = useMeasurementsStore(state => state.initMeasurements);
+    const initMeasurements = useMeasurementsStore(
+        (state) => state.initMeasurements
+    );
 
     useEffect(() => {
         const fetchPodDataAsync = async () => {
@@ -29,10 +30,18 @@ export const VehiclePage = () => {
 
     useOrders();
 
+    const updateMeasurements = useMeasurementsStore(
+        (state) => state.updateMeasurements
+    );
+
+    useSubscribe('podData/update', (msg) => {
+        updateMeasurements(msg);
+    });
+
     return (
         <PageWrapper title="Vehicle">
             <Outlet />
-            <Pagination routes={["first", "second", "thirst"]} />
+            <Pagination routes={['first', 'second', 'thirst']} />
         </PageWrapper>
     );
 };

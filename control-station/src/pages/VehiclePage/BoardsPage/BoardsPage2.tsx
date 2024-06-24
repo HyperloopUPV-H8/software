@@ -1,21 +1,21 @@
-import styles from "./BoardsPage.module.scss";
-import { LCU } from "../Boards/LCU/LCU";
-import { DLIM } from "../Boards/DLIM/DLIM";
-import { LSM } from "../Boards/LSM/LSM";
-import { Messages } from "../Messages/Messages";
+import styles from './BoardsPage.module.scss';
+import { LCU } from '../Boards/LCU/LCU';
+import { Messages } from '../Messages/Messages';
+import { PCU } from '../Boards/PCU/PCU';
 
 export const BoardsPage2 = () => {
-
     return (
         <div className={styles.boardsPage}>
             <LCU />
 
             <div className={styles.column}>
-                <DLIM />
-                <LSM />
+                <PCU />
             </div>
-            
-            <Messages />
+
+            <div className={styles.column}>
+                <Messages />
+                {/* <Controls /> */}
+            </div>
         </div>
     );
 };

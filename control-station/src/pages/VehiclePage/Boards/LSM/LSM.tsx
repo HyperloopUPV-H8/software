@@ -1,6 +1,6 @@
 import { Window } from "components/Window/Window";
 import styles from "./LSM.module.scss";
-import lsm from "assets/svg/LSM.svg";
+import lsm from "assets/svg/lsm.svg";
 
 export const LSM = () => {
     return (
