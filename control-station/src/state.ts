@@ -25,7 +25,9 @@ export function getState(meas: Measurement): State {
         return getStateFromRange(
             meas.value.last,
             meas.safeRange[0],
-            meas.safeRange[1]
+            meas.safeRange[1],
+            meas.warningRange[0],
+            meas.warningRange[1]
         );
     } else if (meas.type == 'bool') {
         return meas.value ? 'stable' : 'fault';
