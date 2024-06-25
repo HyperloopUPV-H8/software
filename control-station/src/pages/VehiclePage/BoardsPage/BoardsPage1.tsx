@@ -3,6 +3,7 @@ import { OBCCUBatteries } from '../Boards/OBCCU/OBCCUBatteries';
 import { OBCCUGeneralInfo } from '../Boards/OBCCU/OBCCUGeneralInfo';
 import { VCUBrakesInfo } from '../Boards/VCU/VCUBrakesInfo';
 import { VCUPositionInfo } from '../Boards/VCU/VCUPositionInfo';
+import { VCUConnectionsInfo } from '../Boards/VCU/VCUConnectionsInfo';
 
 export const BoardsPage1 = () => {
     return (
@@ -10,7 +11,7 @@ export const BoardsPage1 = () => {
             <OBCCUBatteries />
             <div className={styles.column}>
                 <OBCCUGeneralInfo />
-                {/* <BMSL /> */}
+                <VCUConnectionsInfo />
             </div>
             <VCUPositionInfo />
             <VCUBrakesInfo />

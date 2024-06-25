@@ -1,11 +1,11 @@
-import { Outlet } from "react-router-dom";
-import "styles/global.scss";
-import "styles/scrollbars.scss";
-import styles from "./App.module.scss";
-import { Sidebar } from "components/Sidebar/Sidebar";
-import { ReactComponent as Wheel } from "assets/svg/wheel.svg";
-import { ReactComponent as Tube } from "assets/svg/tube.svg";
-import { ReactComponent as Cameras } from "assets/svg/cameras.svg";
+import { Outlet } from 'react-router-dom';
+import 'styles/global.scss';
+import 'styles/scrollbars.scss';
+import styles from './App.module.scss';
+import { Sidebar } from 'components/Sidebar/Sidebar';
+import { ReactComponent as Wheel } from 'assets/svg/wheel.svg';
+import { ReactComponent as Tube } from 'assets/svg/tube.svg';
+import { ReactComponent as Cameras } from 'assets/svg/cameras.svg';
 import {
     Loader,
     WsHandlerProvider,
@@ -13,19 +13,30 @@ import {
     useConfig,
     useConnectionsStore,
     useFetchBack,
+    useListenKey,
     useMeasurementsStore,
     usePodDataStore,
-} from "common";
+    useSendOrder,
+} from 'common';
+import {
+    BrakeOrder,
+    OpenContactorsOrder,
+} from 'pages/VehiclePage/ControlPage/hardcodedOrders';
 
 export const App = () => {
-    const setBackendConnection = useConnectionsStore(store => store.setBackendConnection);
-    const initPodData = usePodDataStore(store => store.initPodData);
-    const initMeasurements = useMeasurementsStore(store => store.initMeasurements);
+    const setBackendConnection = useConnectionsStore(
+        (store) => store.setBackendConnection
+    );
+    const initPodData = usePodDataStore((store) => store.initPodData);
+    const initMeasurements = useMeasurementsStore(
+        (store) => store.initMeasurements
+    );
     const config = useConfig();
     const podDataDescriptionPromise = useFetchBack(
         import.meta.env.PROD,
         config.paths.podDataDescription
     );
+    const sendOrder = useSendOrder();
 
     const WS_URL = import.meta.env.PROD
         ? `${config.prodServer.ip}:${config.prodServer.port}/${config.paths.websocket}`
@@ -37,7 +48,9 @@ export const App = () => {
                     createWsHandler(
                         WS_URL,
                         true,
-                        () => setBackendConnection(true),
+                        () => {
+                            setBackendConnection(true);
+                        },
                         () => setBackendConnection(false)
                     ),
                     podDataDescriptionPromise.then((adapter) => {
@@ -52,8 +65,8 @@ export const App = () => {
                     <WsHandlerProvider handler={handler}>
                         <Sidebar
                             items={[
-                                { path: "/vehicle", icon: <Wheel /> },
-                                { path: "/cameras", icon: <Cameras /> },
+                                { path: '/vehicle', icon: <Wheel /> },
+                                { path: '/cameras', icon: <Cameras /> },
                             ]}
                         />
                         <Outlet />

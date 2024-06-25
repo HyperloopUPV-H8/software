@@ -11,4 +11,7 @@ export enum VcuMeasurements {
     position = 'VCU/position',
     speed = 'VCU/speed',
     acceleration = 'VCU/acceleration',
+    pcuConnection = 'VCU/PCU_connection',
+    obccuConnection = 'VCU/OBCCU_connection',
+    lcuConnection = 'VCU/LCU_connection',
 }

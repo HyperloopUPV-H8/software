@@ -1,4 +1,10 @@
-import { useGlobalTicker, useMeasurementsStore, useSubscribe } from 'common';
+import {
+    useGlobalTicker,
+    useListenKey,
+    useMeasurementsStore,
+    useSendOrder,
+    useSubscribe,
+} from 'common';
 import styles from './VehiclePage.module.scss';
 
 import { Pagination } from 'components/Pagination/Pagination';
@@ -7,6 +13,7 @@ import { Outlet } from 'react-router-dom';
 import { useOrders } from 'useOrders';
 import { fetchFromBackend } from 'services/HTTPHandler';
 import { useEffect, useState } from 'react';
+import { BrakeOrder, OpenContactorsOrder } from './ControlPage/hardcodedOrders';
 
 export const VehiclePage = () => {
     const [podData, setPodData] = useState(null);
@@ -37,6 +44,16 @@ export const VehiclePage = () => {
     useSubscribe('podData/update', (msg) => {
         updateMeasurements(msg);
     });
+
+    const sendOrder = useSendOrder();
+    useListenKey(
+        ' ',
+        () => {
+            sendOrder(BrakeOrder);
+            sendOrder(OpenContactorsOrder);
+        },
+        true
+    );
 
     return (
         <PageWrapper title="Vehicle">

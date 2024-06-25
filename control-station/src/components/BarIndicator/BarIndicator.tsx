@@ -18,6 +18,8 @@ interface Props {
     safeRangeMax: number;
     warningRangeMax: number;
     units?: string;
+    color?: string;
+    backgroundColor?: string;
 }
 
 export const BarIndicator = memo(
@@ -30,6 +32,8 @@ export const BarIndicator = memo(
         safeRangeMax,
         warningRangeMax,
         units,
+        color,
+        backgroundColor,
     }: Props) => {
         const [valueState, setValueState] = useState<number>(0);
         const percentage = useRef<number>(0);
@@ -67,7 +71,10 @@ export const BarIndicator = memo(
                 <div
                     className={styles.background}
                     style={{
-                        backgroundColor: stateToColorBackground[state.current],
+                        backgroundColor:
+                            backgroundColor != undefined
+                                ? backgroundColor
+                                : stateToColorBackground[state.current],
                     }}
                 ></div>
 
@@ -75,7 +82,10 @@ export const BarIndicator = memo(
                     className={styles.bar}
                     style={{
                         width: percentage.current + '%',
-                        backgroundColor: stateToColor[state.current],
+                        backgroundColor:
+                            color != undefined
+                                ? color
+                                : stateToColor[state.current],
                     }}
                 ></div>
 
