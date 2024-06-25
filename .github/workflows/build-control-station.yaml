@@ -1,4 +1,4 @@
-name: Build ethernet view
+name: Build control station
 
 on:
     workflow_call:
@@ -9,7 +9,7 @@ on:
             - common-front/**
 
 jobs:
-    build-ethernet-view:
+    build-control-station:
         name: 'Build control station'
         runs-on: ubuntu-latest
 
