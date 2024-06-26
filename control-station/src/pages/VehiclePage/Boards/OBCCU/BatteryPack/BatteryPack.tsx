@@ -55,7 +55,7 @@ export const BatteryPack = memo(
 
         return (
             <IndicatorStack
-                className={isBalancing ? styles.balancing : undefined}
+                className={isBalancing ? styles.balancing : styles.idle}
             >
                 <BarIndicator
                     icon={batteryIcon}
@@ -65,7 +65,7 @@ export const BatteryPack = memo(
                     safeRangeMax={stateOfChargeMeasurement.range[1]!!}
                     warningRangeMin={stateOfChargeMeasurement.warningRange[0]!!}
                     warningRangeMax={stateOfChargeMeasurement.warningRange[1]!!}
-                    units="%"
+                    units={stateOfChargeMeasurement.units}
                 />
                 <BarIndicator
                     icon={thermometerIcon}
@@ -75,7 +75,7 @@ export const BatteryPack = memo(
                     safeRangeMax={temperatureMeasurement.range[1]!!}
                     warningRangeMin={temperatureMeasurement.warningRange[0]!!}
                     warningRangeMax={temperatureMeasurement.warningRange[1]!!}
-                    units="ºC"
+                    units={temperatureMeasurement.units}
                 />
                 <BarIndicator
                     icon={thunderIcon}
@@ -85,7 +85,7 @@ export const BatteryPack = memo(
                     safeRangeMax={maxCellMeasurement.range[1]!!}
                     warningRangeMin={maxCellMeasurement.warningRange[0]!!}
                     warningRangeMax={maxCellMeasurement.warningRange[1]!!}
-                    units="V"
+                    units={maxCellMeasurement.units}
                 />
                 <BarIndicator
                     icon={thunderIcon}
@@ -95,7 +95,7 @@ export const BatteryPack = memo(
                     safeRangeMax={minCellMeasurement.range[1]!!}
                     warningRangeMin={minCellMeasurement.warningRange[0]!!}
                     warningRangeMax={minCellMeasurement.warningRange[1]!!}
-                    units="V"
+                    units={minCellMeasurement.units}
                 />
                 <BarIndicator
                     icon={thunderIcon}
@@ -105,7 +105,7 @@ export const BatteryPack = memo(
                     safeRangeMax={voltageMeasurement.range[1]!!}
                     warningRangeMin={voltageMeasurement.warningRange[0]!!}
                     warningRangeMax={voltageMeasurement.warningRange[1]!!}
-                    units="V"
+                    units={voltageMeasurement.units}
                 />
             </IndicatorStack>
         );

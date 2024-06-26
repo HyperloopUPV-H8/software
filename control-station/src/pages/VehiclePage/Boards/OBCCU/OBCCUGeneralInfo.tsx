@@ -10,6 +10,7 @@ export const OBCCUGeneralInfo = () => {
     const getNumericMeasurementInfo = useMeasurementsStore(
         (state) => state.getNumericMeasurementInfo
     );
+
     const totalVoltageHigh = getNumericMeasurementInfo(
         ObccuMeasurements.totalVoltageHigh
     );
