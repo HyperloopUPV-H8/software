@@ -1,71 +1,20 @@
-import {
-    useGlobalTicker,
-    useListenKey,
-    useMeasurementsStore,
-    useSendOrder,
-    useSubscribe,
-} from 'common';
+import { useListenKey, useSendOrder } from 'common';
 import styles from './VehiclePage.module.scss';
-
 import { Pagination } from 'components/Pagination/Pagination';
 import { PageWrapper } from 'pages/PageWrapper/PageWrapper';
 import { Outlet } from 'react-router-dom';
-import { useOrders } from 'useOrders';
-import { fetchFromBackend } from 'services/HTTPHandler';
-import { useEffect, useState } from 'react';
 import { BrakeOrder, OpenContactorsOrder } from './ControlPage/hardcodedOrders';
+import { useEmergencyOrders } from 'hooks/useEmergencyOrders';
 
 export const VehiclePage = () => {
-    const [podData, setPodData] = useState(null);
-    const initMeasurements = useMeasurementsStore(
-        (state) => state.initMeasurements
-    );
-
-    useEffect(() => {
-        const fetchPodDataAsync = async () => {
-            const data = await fetchPodData();
-            setPodData(data);
-        };
-        fetchPodDataAsync();
-    }, []);
-
-    useEffect(() => {
-        if (podData) {
-            initMeasurements(podData);
-        }
-    }, [podData, initMeasurements]);
-
-    useOrders();
-
-    const updateMeasurements = useMeasurementsStore(
-        (state) => state.updateMeasurements
-    );
-
-    useSubscribe('podData/update', (msg) => {
-        updateMeasurements(msg);
-    });
-
-    const sendOrder = useSendOrder();
-    useListenKey(
-        ' ',
-        () => {
-            sendOrder(BrakeOrder);
-            sendOrder(OpenContactorsOrder);
-        },
-        true
-    );
+    useEmergencyOrders();
 
     return (
         <PageWrapper title="Vehicle">
             <Outlet />
-            <Pagination routes={['first', 'second', 'thirst']} />
+            <div className={styles.pagination_position}>
+                <Pagination routes={['data-1', 'data-2', 'controls']} />
+            </div>
         </PageWrapper>
     );
 };
-
-async function fetchPodData() {
-    const response = await fetchFromBackend(
-        import.meta.env.VITE_POD_DATA_DESCRIPTION_PATH
-    );
-    return response.json();
-}
