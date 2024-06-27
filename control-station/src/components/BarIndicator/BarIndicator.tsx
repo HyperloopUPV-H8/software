@@ -76,18 +76,18 @@ export const BarIndicator = memo(
                                 ? backgroundColor
                                 : stateToColorBackground[state.current],
                     }}
-                ></div>
-
-                <div
-                    className={styles.bar}
-                    style={{
-                        width: percentage.current + '%',
-                        backgroundColor:
-                            color != undefined
-                                ? color
-                                : stateToColor[state.current],
-                    }}
-                ></div>
+                >
+                    <div
+                        className={styles.range_bar}
+                        style={{
+                            width: percentage.current + '%',
+                            color:
+                                color != undefined
+                                    ? color
+                                    : stateToColor[state.current],
+                        }}
+                    />
+                </div>
 
                 <div className={styles.infoContainer}>
                     <div className={styles.iconName}>
@@ -98,7 +98,7 @@ export const BarIndicator = memo(
                     </div>
                     <div className={styles.valueUnits}>
                         <div className={styles.value}>
-                            {valueState?.toFixed(1)}
+                            {valueState?.toFixed(2)}
                         </div>
                         <div className={styles.unit}>{units}</div>
                     </div>
