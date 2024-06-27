@@ -20,8 +20,7 @@ export const BrakeVisualizer = ({ getStatus, rotation }: Props) => {
         <div
             className={styles.brakeVisualizerWrapper}
             style={{
-                transform:
-                    rotation === 'left' ? 'rotate(0deg)' : 'rotate(180deg)',
+                transform: rotation === 'left' ? 'scaleX(1)' : 'scaleX(-1)',
             }}
         >
             <img
