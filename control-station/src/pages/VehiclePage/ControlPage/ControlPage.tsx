@@ -1,16 +1,8 @@
-import { Order, Orders, useOrders, useSendOrder } from 'common';
+import { Orders, useOrders } from 'common';
 import styles from './ControlPage.module.scss';
 import { Connections, Logger, MessagesContainer } from 'common';
 import { Window } from 'components/Window/Window';
-import { EmergencyOrders } from 'components/EmergencyOrders/EmergencyOrders';
-import {
-    BrakeOrder,
-    OpenContactorsOrder,
-    ResetVehicleOrder,
-    StopOrder,
-    getHardcodedOrders,
-} from './hardcodedOrders';
-import { BootloaderContainer } from 'components/BootloaderContainer/BootloaderContainer';
+import { getHardcodedOrders } from './hardcodedOrders';
 
 export const ControlPage = () => {
     const boardOrders = useOrders();
