@@ -67,7 +67,7 @@ export const BarIndicator = memo(
         });
 
         return (
-            <div className={styles.container}>
+            <div className={styles.bar_indicator}>
                 <div
                     className={styles.background}
                     style={{
@@ -91,9 +91,7 @@ export const BarIndicator = memo(
 
                 <div className={styles.infoContainer}>
                     <div className={styles.iconName}>
-                        <div className={styles.icon}>
-                            <img src={icon} alt="" />
-                        </div>
+                        <img className={styles.icon} src={icon} alt="" />
                         <div className={styles.title}>{title}</div>
                     </div>
                     <div className={styles.valueUnits}>

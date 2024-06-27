@@ -1,44 +1,41 @@
-import {
-    EnumMeasurement,
-    getEnumMeasurement,
-    NumericMeasurement,
-    useGlobalTicker,
-    useMeasurementsStore,
-} from 'common';
+import { useGlobalTicker, useMeasurementsStore } from 'common';
 import styles from './StateIndicator.module.scss';
-import { getStateFromEnum, State, stateToColorBackground } from 'state';
-import { memo, useEffect, useRef, useState } from 'react';
+import { State, getState, stateToColor } from 'state';
+import { ReactNode, memo, useEffect, useRef, useState } from 'react';
 
 interface Props {
     measurementId: string;
-    icon?: string;
+    icon: string;
 }
 
 export const StateIndicator = memo(({ measurementId, icon }: Props) => {
-    const measurement = useMeasurementsStore((state) =>
-        state.getEnumMeasurementInfo(measurementId)
-    );
+    const [measurement, measurementInfo] = useMeasurementsStore((state) => [
+        state.getMeasurement(measurementId),
+        state.getEnumMeasurementInfo(measurementId),
+    ]);
 
-    const [state, setState] = useState(measurement.getUpdate());
+    const state = useRef<State>(getState(measurement));
+
+    const [variant, setVariant] = useState(measurementInfo.getUpdate());
 
     useGlobalTicker(() => {
-        setState(measurement.getUpdate());
+        setVariant(measurementInfo.getUpdate());
+    });
+
+    useEffect(() => {
+        state.current = getState(measurement);
     });
 
     return (
         <div
-            className={styles.wrapper}
-            style={{ backgroundColor: stateToColorBackground['stable'] }}
+            className={styles.state_indicator}
+            style={{ backgroundColor: stateToColor[state.current] }}
         >
-            <div className={styles.icon}>
-                <img src={icon} alt="State icon" />
-            </div>
+            <img className={styles.icon} src={icon} alt="State icon" />
 
-            <p className={styles.title}>{state}</p>
+            <p className={styles.title}>{variant}</p>
 
-            <div className={styles.icon}>
-                <img src={icon} alt="State icon" />
-            </div>
+            <img className={styles.icon} src={icon} alt="State icon" />
         </div>
     );
 });

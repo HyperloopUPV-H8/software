@@ -1,23 +1,55 @@
 import {
     EnumMeasurement,
     Measurement,
+    ObccuMeasurements,
+    VcuMeasurements,
     clamp,
     clampAndNormalize,
     isNumericMeasurement,
 } from 'common';
 
-export type State = 'stable' | 'warning' | 'fault';
+export type State = 'stable' | 'warning' | 'fault' | 'ignore';
 
 export const stateToColor = {
     stable: '#ACF293',
     warning: '#F4F688',
     fault: '#EF9A87',
+    ignore: '#EDF6FE',
 };
 
 export const stateToColorBackground = {
     stable: '#E6FFDD',
     warning: '#FCFFDD',
     fault: '#FFE5DD',
+    ignore: '#EDF6FE',
+};
+
+const enumStates: { [meas_id: string]: { [enum_variant: string]: State } } = {
+    [VcuMeasurements.valveState]: {
+        OPEN: 'warning',
+    },
+    [VcuMeasurements.pcuConnection]: {
+        PCU_Connected: 'stable',
+    },
+    [VcuMeasurements.obccuConnection]: {
+        OBCCU_Connected: 'stable',
+    },
+    [VcuMeasurements.lcuConnection]: {
+        LCU_Connected: 'stable',
+    },
+    [ObccuMeasurements.contactorsState]: {
+        OPEN: 'stable',
+        PRECHARGE: 'warning',
+        CLOSED: 'warning',
+    },
+    [ObccuMeasurements.imdState]: {
+        DEVICE_ERROR: 'fault',
+        ISOLATED: 'stable',
+        UNKNOWN: 'warning',
+        DRIFT: 'fault',
+        EARTH_FAULT: 'fault',
+        SHORT_CIRCUIT: 'fault',
+    },
 };
 
 export function getState(meas: Measurement): State {
@@ -32,7 +64,13 @@ export function getState(meas: Measurement): State {
     } else if (meas.type == 'bool') {
         return meas.value ? 'stable' : 'fault';
     } else {
-        return 'stable';
+        if (
+            enumStates[meas.id] != undefined &&
+            enumStates[meas.id][meas.value] != undefined
+        ) {
+            return enumStates[meas.id][meas.value];
+        }
+        return 'ignore';
     }
 }
 
