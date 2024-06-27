@@ -35,6 +35,7 @@ export const VCUPositionInfo = () => {
                 </IndicatorStack>
                 <div className={styles.row}>
                     <GaugeTag
+                        id="vcu_position_speed"
                         name={speed.name}
                         units={speed.units}
                         getUpdate={speed.getUpdate}
@@ -43,6 +44,7 @@ export const VCUPositionInfo = () => {
                         max={speed.warningRange[1] || 50}
                     />
                     <GaugeTag
+                        id="vcu_position_acceleration"
                         name={acceleration.name}
                         units={acceleration.units}
                         getUpdate={acceleration.getUpdate}

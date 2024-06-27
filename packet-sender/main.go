@@ -33,7 +33,6 @@ func main() {
 	fmt.Println("Sending packets")
 
 	count := make(chan struct{}, 10000)
-	// ticker := time.NewTicker(5 * time.Millisecond)
 	start := time.Now()
 	prev := time.Now()
 	go func() {

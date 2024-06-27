@@ -1,4 +1,3 @@
-import { GaugeTag } from 'components/GaugeTag/GaugeTag';
 import { PumpIndicator } from './PumpIndicator/PumpIndicator';
 import styles from './TubeData.module.scss';
 import { NumericMeasurement } from 'common';

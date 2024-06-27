@@ -49,20 +49,22 @@ export const OBCCUGeneralInfo = () => {
                         }}
                     >
                         <GaugeTag
+                            id="obccu_general_voltage"
                             name={'Voltage'}
                             units={'Volts'}
                             getUpdate={totalVoltageHigh.getUpdate}
                             strokeWidth={120}
-                            min={totalVoltageHigh.range[0] ?? 225}
-                            max={totalVoltageHigh.range[1] ?? 252}
+                            min={totalVoltageHigh.warningRange[0] ?? 225}
+                            max={totalVoltageHigh.warningRange[1] ?? 252}
                         />
                         <GaugeTag
+                            id="obccu_general_current"
                             name={'Current'}
                             units={'Amps'}
                             getUpdate={dischargeCurrent.getUpdate}
                             strokeWidth={120}
-                            min={dischargeCurrent.range[0] ?? 0}
-                            max={dischargeCurrent.range[1] ?? 100}
+                            min={dischargeCurrent.warningRange[0] ?? 0}
+                            max={dischargeCurrent.warningRange[1] ?? 100}
                         />
                     </div>
 
