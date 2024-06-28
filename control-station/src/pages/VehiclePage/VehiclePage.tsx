@@ -7,7 +7,7 @@ import { usePodDataUpdate } from 'hooks/usePodDataUpdate';
 
 export const VehiclePage = () => {
     usePodDataUpdate();
-    useEmergencyOrders();
+    // useEmergencyOrders();
 
     return (
         <PageWrapper title="Vehicle">
