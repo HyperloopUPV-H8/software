@@ -2,7 +2,7 @@ import { Order, useListenKey, useSendOrder } from 'common';
 import {
     BrakeOrder,
     OpenContactorsOrder,
-} from 'pages/VehiclePage/ControlPage/hardcodedOrders';
+} from 'pages/VehiclePage/Data2Page/hardcodedOrders';
 
 export function useEmergencyOrders(
     shortcut: string = ' ',
