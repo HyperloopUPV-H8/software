@@ -7,6 +7,7 @@ import {
     useConnectionsStore,
     useFetchBack,
     useMeasurementsStore,
+    useOrdersStore,
     usePodDataStore,
 } from '..';
 
@@ -36,6 +37,7 @@ export const useLoadBackend: UseLoadBackend = (isProduction) => {
     const setBackendConnection = useConnectionsStore(
         (state) => state.setBackendConnection
     );
+    const setOrders = useOrdersStore((state) => state.setOrders);
 
     const [result, setResult] = useState<loadBackendResult>({
         state: 'pending',
@@ -48,6 +50,9 @@ export const useLoadBackend: UseLoadBackend = (isProduction) => {
     const POD_DATA_DESCRIPTION_URL = isProduction
         ? `http://${config.prodServer.ip}:${config.prodServer.port}/${config.paths.podDataDescription}`
         : `http://${config.devServer.ip}:${config.devServer.port}/${config.paths.podDataDescription}`;
+    const ORDER_DESCRIPTION_URL = isProduction
+        ? `http://${config.prodServer.ip}:${config.prodServer.port}/${config.paths.orderDescription}`
+        : `http://${config.devServer.ip}:${config.devServer.port}/${config.paths.orderDescription}`;
 
     useEffect(() => {
         function requestBackend() {
@@ -64,6 +69,9 @@ export const useLoadBackend: UseLoadBackend = (isProduction) => {
                         initPodData(adapter);
                         initMeasurements(adapter);
                     }),
+                fetch(ORDER_DESCRIPTION_URL)
+                    .then((res) => res.json())
+                    .then((adapter) => setOrders(adapter)),
             ])
                 .then((result) =>
                     setResult({ state: 'fulfilled', wsHandler: result[0] })

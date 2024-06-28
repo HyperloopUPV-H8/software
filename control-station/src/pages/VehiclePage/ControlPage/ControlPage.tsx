@@ -8,21 +8,25 @@ export const ControlPage = () => {
     const boardOrders = useOrders();
 
     return (
-        <div className={styles.controlPage}>
-            <Window title="Orders" height="fill">
-                <Orders orders={getHardcodedOrders(boardOrders)} />
-            </Window>
+        <div className={styles.control_page}>
             <div className={styles.column}>
-                <Window title="Messages" height="fill">
+                <Window title="Orders">
+                    <Orders orders={getHardcodedOrders(boardOrders)} />
+                </Window>
+            </div>
+            <div className={styles.column}>
+                <Window title="Messages">
                     <MessagesContainer />
                 </Window>
             </div>
-            <Window title="Connections" height="fill">
-                <Connections />
-            </Window>
-            <Window title="Logger">
-                <Logger />
-            </Window>
+            <div className={styles.column}>
+                <Window title="Connections">
+                    <Connections />
+                </Window>
+                <Window title="Logger">
+                    <Logger />
+                </Window>
+            </div>
         </div>
     );
 };
