@@ -5,6 +5,7 @@ import DLIM from 'assets/svg/dlim.svg';
 import { IndicatorStack } from 'components/IndicatorStack/IndicatorStack';
 import { BarIndicator } from 'components/BarIndicator/BarIndicator';
 import thermometerIcon from 'assets/svg/thermometer-filled.svg';
+import { StateIndicator } from 'components/StateIndicator/StateIndicator';
 
 export const PCU = () => {
     const getNumericMeasurementInfo = useMeasurementsStore(
@@ -237,6 +238,10 @@ export const PCU = () => {
                         </div>
                     </div>
                     <IndicatorStack className={styles.frequency}>
+                        <StateIndicator
+                            measurementId={PcuMeasurements.generalState}
+                            icon={thermometerIcon}
+                        />
                         <BarIndicator
                             title="Frequency"
                             icon={thermometerIcon}

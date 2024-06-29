@@ -61,7 +61,7 @@ export enum ObccuMeasurements {
     isBalancing10 = 'OBCCU/is_balancing10',
     totalVoltageHigh = 'OBCCU/total_voltage_high',
     dischargeCurrent = 'OBCCU/discharge_current_obccu',
-    generalState = 'OBCCU/Board_state',
     imdState = 'OBCCU/STATUS',
     contactorsState = 'OBCCU/contactors_state',
+    generalState = 'OBCCU/Board_state',
 }

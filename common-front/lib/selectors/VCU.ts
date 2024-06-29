@@ -14,4 +14,6 @@ export enum VcuMeasurements {
     pcuConnection = 'VCU/PCU_connection',
     obccuConnection = 'VCU/OBCCU_connection',
     lcuConnection = 'VCU/LCU_connection',
+    generalState = 'VCU/general_state',
+    specificState = 'VCU/specific_state',
 }

@@ -2,6 +2,7 @@ import {
     EnumMeasurement,
     Measurement,
     ObccuMeasurements,
+    PcuMeasurements,
     VcuMeasurements,
     clamp,
     clampAndNormalize,
@@ -49,6 +50,18 @@ const enumStates: { [meas_id: string]: { [enum_variant: string]: State } } = {
         DRIFT: 'fault',
         EARTH_FAULT: 'fault',
         SHORT_CIRCUIT: 'fault',
+    },
+    [ObccuMeasurements.generalState]: {
+        FAULT: 'fault',
+        OPERATIONAL: 'stable',
+    },
+    [PcuMeasurements.generalState]: {
+        FAULT: 'fault',
+        OPERATIONAL: 'stable',
+    },
+    [VcuMeasurements.generalState]: {
+        FAULT: 'fault',
+        OPERATIONAL: 'stable',
     },
 };
 

@@ -8,20 +8,28 @@ import { VcuMeasurements } from 'common';
 export const VCUConnectionsInfo = () => {
     return (
         <Window title="VCU">
-            <IndicatorStack className={styles.connections}>
-                <StateIndicator
-                    measurementId={VcuMeasurements.pcuConnection}
-                    icon={thermometerIcon}
-                />
-                <StateIndicator
-                    measurementId={VcuMeasurements.obccuConnection}
-                    icon={thermometerIcon}
-                />
-                <StateIndicator
-                    measurementId={VcuMeasurements.lcuConnection}
-                    icon={thermometerIcon}
-                />
-            </IndicatorStack>
+            <div style={{ display: 'flex', flexFlow: 'column', gap: '0.5rem' }}>
+                <IndicatorStack>
+                    <StateIndicator
+                        measurementId={VcuMeasurements.generalState}
+                        icon={thermometerIcon}
+                    />
+                </IndicatorStack>
+                <IndicatorStack className={styles.connections}>
+                    <StateIndicator
+                        measurementId={VcuMeasurements.pcuConnection}
+                        icon={thermometerIcon}
+                    />
+                    <StateIndicator
+                        measurementId={VcuMeasurements.obccuConnection}
+                        icon={thermometerIcon}
+                    />
+                    <StateIndicator
+                        measurementId={VcuMeasurements.lcuConnection}
+                        icon={thermometerIcon}
+                    />
+                </IndicatorStack>
+            </div>
         </Window>
     );
 };
