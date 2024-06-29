@@ -1,0 +1,43 @@
+.container {
+    display: flex;
+    flex-flow: column;
+    max-width: 670px;
+}
+.content {
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    margin: 1rem 0;
+}
+
+.current_display {
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.current_chart {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    width: 100%;
+}
+
+.chart_title {
+    margin: 0;
+}
+
+.chart {
+    width: 100%;
+}
+
+.frequency {
+    max-width: 15rem;
+}

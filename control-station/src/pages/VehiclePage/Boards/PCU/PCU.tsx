@@ -1,15 +1,6 @@
 import styles from './PCU.module.scss';
 import { Window } from 'components/Window/Window';
-import {
-    ColorfulChart,
-    LineDescription,
-    Measurement,
-    MeasurementId,
-    NumericMeasurement,
-    PcuMeasurements,
-    isNumericMeasurement,
-    useMeasurementsStore,
-} from 'common';
+import { ColorfulChart, PcuMeasurements, useMeasurementsStore } from 'common';
 import DLIM from 'assets/svg/dlim.svg';
 import { IndicatorStack } from 'components/IndicatorStack/IndicatorStack';
 import { BarIndicator } from 'components/BarIndicator/BarIndicator';

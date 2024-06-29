@@ -4,6 +4,8 @@ import { OBCCUGeneralInfo } from '../Boards/OBCCU/OBCCUGeneralInfo';
 import { VCUBrakesInfo } from '../Boards/VCU/VCUBrakesInfo';
 import { VCUPositionInfo } from '../Boards/VCU/VCUPositionInfo';
 import { VCUConnectionsInfo } from '../Boards/VCU/VCUConnectionsInfo';
+import { BCU } from '../Boards/BCU/BCU';
+import { BMSL } from '../Boards/BMSL/BMSL';
 
 export const Data1Page = () => {
     return (
@@ -14,6 +16,7 @@ export const Data1Page = () => {
 
             <div className={styles.column}>
                 <OBCCUGeneralInfo />
+                <BMSL />
             </div>
 
             <div className={styles.column}>
@@ -23,6 +26,10 @@ export const Data1Page = () => {
             <div className={styles.column}>
                 <VCUBrakesInfo />
                 <VCUConnectionsInfo />
+            </div>
+
+            <div className={styles.column}>
+                <BCU />
             </div>
         </div>
     );
