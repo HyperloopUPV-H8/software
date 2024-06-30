@@ -1,18 +1,19 @@
+@use '../../../styles/styles.scss';
+
 .buttonWrapper {
+    flex: 1 1 0;
     display: flex;
     justify-content: center;
     align-items: center;
 
-    padding: 0.3rem;
+    padding: 0.5rem;
     text-align: center;
-    font-size: 0.8rem;
-    font-weight: 500;
-    border-radius: 0.5rem;
-    background-color: var(--tertiary-60);
+    border-radius: styles.$normal-border-radius;
+    background-color: styles.$orange;
     color: white;
     user-select: none;
 
-    filter: var(--shadow);
+    @include styles.shadow;
 
     &.enabled {
         cursor: pointer;
@@ -27,4 +28,8 @@
 .label {
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.icon {
+    width: 75%;
 }

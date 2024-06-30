@@ -1,22 +1,20 @@
+@use '../../../styles/styles.scss';
+
 .textInput {
-    all: unset;
     flex: 1 1 0;
     min-width: 5rem;
-    padding: 0.3rem 0.4rem;
-    border-radius: 0.4rem;
+    padding: 0.5rem 0.8rem;
+    border-radius: styles.$normal-border-radius;
     font: inherit;
     transition: border-color 0.1s linear;
-    border-width: 1px;
-    border-style: solid;
-    font-size: 0.8rem;
 }
 
 .valid {
-    border-color: rgb(95, 213, 77);
+    border-color: #84e067;
 }
 
 .invalid {
-    border-color: rgb(212, 66, 66);
+    border-color: rgb(244, 90, 90);
 }
 
 .disabled {
