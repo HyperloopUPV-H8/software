@@ -33,7 +33,7 @@ export function getHardcodedOrders(boardOrders: BoardOrders[]): BoardOrders[] {
         }
     }
 
-    return [{ name: '', orders: foundOrders, stateOrders: [] }];
+    return [{ name: 'General Orders', orders: foundOrders, stateOrders: [] }];
 }
 
 export const ResetVehicleOrder: Order = {

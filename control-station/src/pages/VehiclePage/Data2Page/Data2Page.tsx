@@ -11,7 +11,7 @@ export const Data2Page = () => {
 
     return (
         <div className={styles.data2_page}>
-            <div className={styles.column}>
+            <div className={`${styles.column} ${styles.lcu}`}>
                 <LCU />
             </div>
 

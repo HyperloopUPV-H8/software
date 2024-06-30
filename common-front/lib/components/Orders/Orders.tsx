@@ -19,6 +19,7 @@ export const Orders = ({ boards }: Props) => {
                     Always show state orders:{' '}
                     {alwaysShowStateOrders ? 'true' : 'false'}
                     <Button
+                        className={styles.stateOrdersToggleButton}
                         label="Toggle"
                         onClick={() =>
                             setAlwaysShowStateOrders((prev) => !prev)

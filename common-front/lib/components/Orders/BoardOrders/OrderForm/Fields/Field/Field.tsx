@@ -32,45 +32,49 @@ export const Field = ({ name, field, onChange, changeEnabled }: Props) => {
             }`}
         >
             <div className={styles.name}>{name}</div>
-            {field.kind == 'numeric' ? (
-                <NumericInput
-                    required={field.isEnabled}
-                    disabled={!field.isEnabled}
-                    isValid={field.isValid}
-                    placeholder={`${field.type}...`}
-                    defaultValue={!field.isValid ? '' : (field.value as number)}
-                    onChange={(value) =>
-                        handleTextInputChange(
-                            value,
-                            field.type,
-                            field.safeRange
-                        )
-                    }
-                />
-            ) : field.kind == 'boolean' ? (
-                <CheckBox
-                    isRequired={field.isEnabled}
-                    disabled={!field.isEnabled}
-                    onChange={(value: boolean) => {
-                        onChange(value, true);
-                    }}
-                />
-            ) : (
-                <Dropdown
-                    value={field.value as string}
-                    options={field.options}
-                    onChange={(newValue) => {
-                        onChange(newValue, true);
-                    }}
-                />
-            )}
+            <div className={styles.input}>
+                {field.kind == 'numeric' ? (
+                    <NumericInput
+                        required={field.isEnabled}
+                        disabled={!field.isEnabled}
+                        isValid={field.isValid}
+                        placeholder={`${field.type}...`}
+                        defaultValue={
+                            !field.isValid ? '' : (field.value as number)
+                        }
+                        onChange={(value) =>
+                            handleTextInputChange(
+                                value,
+                                field.type,
+                                field.safeRange
+                            )
+                        }
+                    />
+                ) : field.kind == 'boolean' ? (
+                    <CheckBox
+                        isRequired={field.isEnabled}
+                        disabled={!field.isEnabled}
+                        onChange={(value: boolean) => {
+                            onChange(value, true);
+                        }}
+                    />
+                ) : (
+                    <Dropdown
+                        value={field.value as string}
+                        options={field.options}
+                        onChange={(newValue) => {
+                            onChange(newValue, true);
+                        }}
+                    />
+                )}
 
-            <CheckBox
-                color="orange"
-                isRequired={true}
-                onChange={changeEnabled}
-                initialValue={field.isEnabled}
-            />
+                <CheckBox
+                    color="orange"
+                    isRequired={true}
+                    onChange={changeEnabled}
+                    initialValue={field.isEnabled}
+                />
+            </div>
         </div>
     );
 };

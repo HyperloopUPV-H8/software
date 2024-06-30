@@ -5,7 +5,7 @@
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    gap: 0.8rem;
+    gap: 0.5rem;
 }
 
 .stateOrdersToggle {
@@ -13,19 +13,25 @@
     position: sticky;
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
+    gap: 0.5rem;
     z-index: 1;
     background-color: white;
+    font-size: 0.8rem;
+    align-items: center;
+}
+
+.stateOrdersToggleButton {
+    font-size: 0.8rem;
 }
 
 .boardOrderList {
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
+    gap: 0.5rem;
 }
 
 .boardOrderList > :not(:last-child)::after {
-    content: "";
+    content: '';
     border-bottom: 1px solid rgba(165, 131, 101, 0.368);
-    margin-bottom: 0.8rem;
+    margin-bottom: 0.5rem;
 }
