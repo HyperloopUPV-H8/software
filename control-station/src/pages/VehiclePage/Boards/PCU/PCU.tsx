@@ -6,6 +6,8 @@ import { IndicatorStack } from 'components/IndicatorStack/IndicatorStack';
 import { BarIndicator } from 'components/BarIndicator/BarIndicator';
 import thermometerIcon from 'assets/svg/thermometer-filled.svg';
 import { StateIndicator } from 'components/StateIndicator/StateIndicator';
+import thunderIcon from 'assets/svg/thunder-filled.svg';
+import pluggedIcon from 'assets/svg/plugged-icon.svg';
 
 export const PCU = () => {
     const getNumericMeasurementInfo = useMeasurementsStore(
@@ -63,7 +65,7 @@ export const PCU = () => {
                             <IndicatorStack>
                                 <BarIndicator
                                     title="Peak current"
-                                    icon={thermometerIcon}
+                                    icon={thunderIcon}
                                     getValue={motorAPeakCurrent.getUpdate}
                                     safeRangeMin={motorAPeakCurrent.range[0]!!}
                                     safeRangeMax={motorAPeakCurrent.range[1]!!}
@@ -77,7 +79,7 @@ export const PCU = () => {
                                 />
                                 <BarIndicator
                                     title="Current U"
-                                    icon={thermometerIcon}
+                                    icon={thunderIcon}
                                     getValue={motorACurrentU.getUpdate}
                                     safeRangeMin={motorACurrentU.range[0]!!}
                                     safeRangeMax={motorACurrentU.range[1]!!}
@@ -93,7 +95,7 @@ export const PCU = () => {
                                 />
                                 <BarIndicator
                                     title="Current V"
-                                    icon={thermometerIcon}
+                                    icon={thunderIcon}
                                     getValue={motorACurrentV.getUpdate}
                                     safeRangeMin={motorACurrentV.range[0]!!}
                                     safeRangeMax={motorACurrentV.range[1]!!}
@@ -109,7 +111,7 @@ export const PCU = () => {
                                 />
                                 <BarIndicator
                                     title="Current W"
-                                    icon={thermometerIcon}
+                                    icon={thunderIcon}
                                     getValue={motorACurrentW.getUpdate}
                                     safeRangeMin={motorACurrentW.range[0]!!}
                                     safeRangeMax={motorACurrentW.range[1]!!}
@@ -157,7 +159,7 @@ export const PCU = () => {
                             <IndicatorStack>
                                 <BarIndicator
                                     title="Peak current"
-                                    icon={thermometerIcon}
+                                    icon={thunderIcon}
                                     getValue={motorBPeakCurrent.getUpdate}
                                     safeRangeMin={motorBPeakCurrent.range[0]!!}
                                     safeRangeMax={motorBPeakCurrent.range[1]!!}
@@ -171,7 +173,7 @@ export const PCU = () => {
                                 />
                                 <BarIndicator
                                     title="Current U"
-                                    icon={thermometerIcon}
+                                    icon={thunderIcon}
                                     getValue={motorBCurrentU.getUpdate}
                                     safeRangeMin={motorBCurrentU.range[0]!!}
                                     safeRangeMax={motorBCurrentU.range[1]!!}
@@ -187,7 +189,7 @@ export const PCU = () => {
                                 />
                                 <BarIndicator
                                     title="Current V"
-                                    icon={thermometerIcon}
+                                    icon={thunderIcon}
                                     getValue={motorBCurrentV.getUpdate}
                                     safeRangeMin={motorBCurrentV.range[0]!!}
                                     safeRangeMax={motorBCurrentV.range[1]!!}
@@ -203,7 +205,7 @@ export const PCU = () => {
                                 />
                                 <BarIndicator
                                     title="Current W"
-                                    icon={thermometerIcon}
+                                    icon={thunderIcon}
                                     getValue={motorBCurrentW.getUpdate}
                                     safeRangeMin={motorBCurrentW.range[0]!!}
                                     safeRangeMax={motorBCurrentW.range[1]!!}
@@ -240,11 +242,11 @@ export const PCU = () => {
                     <IndicatorStack className={styles.frequency}>
                         <StateIndicator
                             measurementId={PcuMeasurements.generalState}
-                            icon={thermometerIcon}
+                            icon={pluggedIcon}
                         />
                         <BarIndicator
                             title="Frequency"
-                            icon={thermometerIcon}
+                            icon={thunderIcon}
                             getValue={frequency.getUpdate}
                             safeRangeMin={frequency.range[0]!!}
                             safeRangeMax={frequency.range[1]!!}

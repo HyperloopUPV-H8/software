@@ -3,7 +3,7 @@ import { Window } from 'components/Window/Window';
 import { useMeasurementsStore, VcuMeasurements } from 'common';
 import { IndicatorStack } from 'components/IndicatorStack/IndicatorStack';
 import { BarIndicator } from 'components/BarIndicator/BarIndicator';
-import thermometerIcon from 'assets/svg/thermometer-filled.svg';
+import pressureIcon from 'assets/svg/pressure-filled.svg';
 import { BrakeVisualizer } from 'components/BrakeVisualizer/BrakeVisualizer';
 import { StateIndicator } from 'components/StateIndicator/StateIndicator';
 
@@ -18,8 +18,6 @@ export const VCUBrakesInfo = () => {
     const reed2 = getEnumMeasurementInfo(VcuMeasurements.reed2);
     const reed3 = getEnumMeasurementInfo(VcuMeasurements.reed3);
     const reed4 = getEnumMeasurementInfo(VcuMeasurements.reed4);
-    // const bottleTemp1 = getNumericMeasurementInfo(VcuMeasurements.bottleTemp1);
-    // const bottleTemp2 = getNumericMeasurementInfo(VcuMeasurements.bottleTemp2);
     const highPressure = getNumericMeasurementInfo(
         VcuMeasurements.highPressure
     );
@@ -81,7 +79,7 @@ export const VCUBrakesInfo = () => {
                 <IndicatorStack>
                     <BarIndicator
                         title="High Pressure"
-                        icon={thermometerIcon}
+                        icon={pressureIcon}
                         getValue={highPressure.getUpdate}
                         safeRangeMin={highPressure.range[0]!!}
                         safeRangeMax={highPressure.range[1]!!}
@@ -91,11 +89,11 @@ export const VCUBrakesInfo = () => {
                     />
                     <StateIndicator
                         measurementId={VcuMeasurements.valveState}
-                        icon={thermometerIcon}
+                        icon={pressureIcon}
                     />
                     <BarIndicator
                         title="Reference Pressure"
-                        icon={thermometerIcon}
+                        icon={pressureIcon}
                         getValue={referencePressure.getUpdate}
                         safeRangeMin={referencePressure.range[0]!!}
                         safeRangeMax={referencePressure.range[1]!!}
@@ -105,7 +103,7 @@ export const VCUBrakesInfo = () => {
                     />
                     <BarIndicator
                         title="Low Pressure 1"
-                        icon={thermometerIcon}
+                        icon={pressureIcon}
                         getValue={lowPressure1.getUpdate}
                         safeRangeMin={lowPressure1.range[0]!!}
                         safeRangeMax={lowPressure1.range[1]!!}
@@ -115,7 +113,7 @@ export const VCUBrakesInfo = () => {
                     />
                     <BarIndicator
                         title="Low Pressure 2"
-                        icon={thermometerIcon}
+                        icon={pressureIcon}
                         getValue={lowPressure2.getUpdate}
                         safeRangeMin={lowPressure2.range[0]!!}
                         safeRangeMax={lowPressure2.range[1]!!}

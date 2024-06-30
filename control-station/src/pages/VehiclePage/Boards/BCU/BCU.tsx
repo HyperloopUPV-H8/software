@@ -4,7 +4,7 @@ import styles from './BCU.module.scss';
 import { ColorfulChart, BcuMeasurements, useMeasurementsStore } from 'common';
 import { IndicatorStack } from 'components/IndicatorStack/IndicatorStack';
 import { BarIndicator } from 'components/BarIndicator/BarIndicator';
-import thermometerIcon from 'assets/svg/thermometer-filled.svg';
+import thunderIcon from 'assets/svg/thunder-filled.svg';
 
 export const BCU = () => {
     const getNumericMeasurementInfo = useMeasurementsStore(
@@ -52,7 +52,7 @@ export const BCU = () => {
                             <IndicatorStack>
                                 <BarIndicator
                                     title="Current U"
-                                    icon={thermometerIcon}
+                                    icon={thunderIcon}
                                     getValue={bpu1CurrentU.getUpdate}
                                     safeRangeMin={bpu1CurrentU.range[0]!!}
                                     safeRangeMax={bpu1CurrentU.range[1]!!}
@@ -68,7 +68,7 @@ export const BCU = () => {
                                 />
                                 <BarIndicator
                                     title="Current V"
-                                    icon={thermometerIcon}
+                                    icon={thunderIcon}
                                     getValue={bpu1CurrentV.getUpdate}
                                     safeRangeMin={bpu1CurrentV.range[0]!!}
                                     safeRangeMax={bpu1CurrentV.range[1]!!}
@@ -84,7 +84,7 @@ export const BCU = () => {
                                 />
                                 <BarIndicator
                                     title="Current W"
-                                    icon={thermometerIcon}
+                                    icon={thunderIcon}
                                     getValue={bpu1CurrentW.getUpdate}
                                     safeRangeMin={bpu1CurrentW.range[0]!!}
                                     safeRangeMax={bpu1CurrentW.range[1]!!}
@@ -115,7 +115,7 @@ export const BCU = () => {
                             <IndicatorStack>
                                 <BarIndicator
                                     title="Current U"
-                                    icon={thermometerIcon}
+                                    icon={thunderIcon}
                                     getValue={bpu2CurrentU.getUpdate}
                                     safeRangeMin={bpu2CurrentU.range[0]!!}
                                     safeRangeMax={bpu2CurrentU.range[1]!!}
@@ -131,7 +131,7 @@ export const BCU = () => {
                                 />
                                 <BarIndicator
                                     title="Current V"
-                                    icon={thermometerIcon}
+                                    icon={thunderIcon}
                                     getValue={bpu2CurrentV.getUpdate}
                                     safeRangeMin={bpu2CurrentV.range[0]!!}
                                     safeRangeMax={bpu2CurrentV.range[1]!!}
@@ -147,7 +147,7 @@ export const BCU = () => {
                                 />
                                 <BarIndicator
                                     title="Current W"
-                                    icon={thermometerIcon}
+                                    icon={thunderIcon}
                                     getValue={bpu2CurrentW.getUpdate}
                                     safeRangeMin={bpu2CurrentW.range[0]!!}
                                     safeRangeMax={bpu2CurrentW.range[1]!!}

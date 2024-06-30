@@ -4,6 +4,7 @@ import { IndicatorStack } from 'components/IndicatorStack/IndicatorStack';
 import { BarIndicator } from 'components/BarIndicator/BarIndicator';
 import batteryFilled from 'assets/svg/battery-filled.svg';
 import thermometerFilled from 'assets/svg/thermometer-filled.svg';
+import airgapIcon from 'assets/svg/z-index.svg';
 import { useMeasurementsStore } from 'common';
 import EMSRepresentation from './EMSRepresentation/EMSRepresentation';
 import HEMSRepresentation from './HEMSRepresentation/HEMSRepresentation';
@@ -130,7 +131,7 @@ export const LevitationUnit = ({ unitIndex, kind, imageSide }: Props) => {
                     warningRangeMax={temperature.warningRange[1] ?? 80}
                 />
                 <BarIndicator
-                    icon={batteryFilled}
+                    icon={airgapIcon}
                     title="Airgap"
                     getValue={
                         unitIndex == 6 || unitIndex == 7

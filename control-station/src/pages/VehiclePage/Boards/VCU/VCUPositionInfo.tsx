@@ -2,10 +2,9 @@ import styles from './VCU.module.scss';
 import { Window } from 'components/Window/Window';
 import { useMeasurementsStore, VcuMeasurements } from 'common';
 import { GaugeTag } from 'components/GaugeTag/GaugeTag';
-import vehicleTrack from 'assets/svg/vehicle-track.svg';
 import { IndicatorStack } from 'components/IndicatorStack/IndicatorStack';
 import { BarIndicator } from 'components/BarIndicator/BarIndicator';
-import thermometerIcon from 'assets/svg/thermometer-filled.svg';
+import positionIcon from 'assets/svg/z-index.svg';
 import { TrackVisualizer } from './TrackVisualizer/TrackVisualizer';
 
 export const VCUPositionInfo = () => {
@@ -24,7 +23,7 @@ export const VCUPositionInfo = () => {
                 <IndicatorStack>
                     <BarIndicator
                         title="Position"
-                        icon={thermometerIcon}
+                        icon={positionIcon}
                         getValue={position.getUpdate}
                         safeRangeMin={position.range[0]!!}
                         safeRangeMax={position.range[1]!!}

@@ -5,6 +5,7 @@ import { Window } from 'components/Window/Window';
 import batteryIcon from 'assets/svg/battery-filled.svg';
 import thunderIcon from 'assets/svg/thunder-filled.svg';
 import { GaugeTag } from 'components/GaugeTag/GaugeTag';
+import pluggedIcon from 'assets/svg/plugged-icon.svg';
 
 export const OBCCUGeneralInfo = () => {
     const getNumericMeasurementInfo = useMeasurementsStore(
@@ -38,7 +39,7 @@ export const OBCCUGeneralInfo = () => {
                     <IndicatorStack>
                         <StateIndicator
                             measurementId={ObccuMeasurements.generalState}
-                            icon={thunderIcon}
+                            icon={pluggedIcon}
                         />
                     </IndicatorStack>
 
