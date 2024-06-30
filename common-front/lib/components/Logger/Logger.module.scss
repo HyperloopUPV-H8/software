@@ -11,7 +11,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 0.8rem;
+    font-size: 1.1rem;
 }
 
 .buttons {
@@ -19,6 +19,7 @@
     flex-direction: row;
     align-items: center;
     gap: 1rem;
+    width: fit-content;
 
     > * {
         min-width: 0;
