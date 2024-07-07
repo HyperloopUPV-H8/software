@@ -64,7 +64,13 @@ export const BarIndicator = memo(
                 warningRangeMin,
                 warningRangeMax
             );
-        });
+        }, [
+            valueState,
+            safeRangeMin,
+            safeRangeMax,
+            warningRangeMin,
+            warningRangeMax,
+        ]);
 
         return (
             <div className={styles.bar_indicator}>
