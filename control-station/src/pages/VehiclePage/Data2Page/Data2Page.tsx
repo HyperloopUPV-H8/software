@@ -21,7 +21,7 @@ export const Data2Page = () => {
 
             <div className={styles.column}>
                 <Window title="Orders" className={styles.orders}>
-                    <Orders boards={getHardcodedOrders(boardOrders)} />
+                    <Orders boards={boardOrders} />
                 </Window>
 
                 <Window title="Logger">
