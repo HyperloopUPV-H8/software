@@ -36,41 +36,22 @@ export const BarIndicator = memo(
         backgroundColor,
     }: Props) => {
         const [valueState, setValueState] = useState<number>(0);
-        const percentage = useRef<number>(0);
-        const state = useRef<State>(
-            getStateFromRange(
-                valueState,
-                safeRangeMin,
-                safeRangeMax,
-                warningRangeMin,
-                warningRangeMax
-            )
+        const percentage = getPercentageFromRange(
+            valueState,
+            warningRangeMin,
+            warningRangeMax
+        );
+        const state = getStateFromRange(
+            valueState,
+            safeRangeMin,
+            safeRangeMax,
+            warningRangeMin,
+            warningRangeMax
         );
 
         useGlobalTicker(() => {
             setValueState(getValue());
         });
-
-        useEffect(() => {
-            percentage.current = getPercentageFromRange(
-                valueState,
-                warningRangeMin,
-                warningRangeMax
-            );
-            state.current = getStateFromRange(
-                valueState,
-                safeRangeMin,
-                safeRangeMax,
-                warningRangeMin,
-                warningRangeMax
-            );
-        }, [
-            valueState,
-            safeRangeMin,
-            safeRangeMax,
-            warningRangeMin,
-            warningRangeMax,
-        ]);
 
         return (
             <div className={styles.bar_indicator}>
@@ -80,17 +61,17 @@ export const BarIndicator = memo(
                         backgroundColor:
                             backgroundColor != undefined
                                 ? backgroundColor
-                                : stateToColorBackground[state.current],
+                                : stateToColorBackground[state],
                     }}
                 >
                     <div
                         className={styles.range_bar}
                         style={{
-                            width: percentage.current + '%',
+                            width: percentage + '%',
                             color:
                                 color != undefined
                                     ? color
-                                    : stateToColor[state.current],
+                                    : stateToColor[state],
                         }}
                     />
                 </div>
