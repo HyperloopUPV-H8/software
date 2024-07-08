@@ -1,10 +1,10 @@
-import { NumericMeasurement } from "common";
+import { NumericMeasurementInfo } from "common";
 import styles from "./DoubleGauge.module.scss";
 import { GaugeTag } from "components/GaugeTag/GaugeTag";
 
 type Props = {
-    firstGauge: NumericMeasurement;
-    secondGauge: NumericMeasurement;
+    firstGauge: NumericMeasurementInfo;
+    secondGauge: NumericMeasurementInfo;
 };
 
 const DEFAULT_MIN = 0;
@@ -15,15 +15,15 @@ export const DoubleGauge = ({ firstGauge, secondGauge }: Props) => {
         <div className={styles.doubleGauge}>
             <GaugeTag
                 className=""
-                min={firstGauge.safeRange[0] ?? DEFAULT_MIN}
-                max={firstGauge.safeRange[1] ?? DEFAULT_MAX}
+                min={firstGauge.range[0] ?? DEFAULT_MIN}
+                max={firstGauge.range[1] ?? DEFAULT_MAX}
                 strokeWidth={150}
                 measurement={firstGauge}
             />
             <GaugeTag
                 className=""
-                min={secondGauge.safeRange[0] ?? DEFAULT_MIN}
-                max={secondGauge.safeRange[1] ?? DEFAULT_MAX}
+                min={secondGauge.range[0] ?? DEFAULT_MIN}
+                max={secondGauge.range[1] ?? DEFAULT_MAX}
                 strokeWidth={150}
                 measurement={secondGauge}
             />

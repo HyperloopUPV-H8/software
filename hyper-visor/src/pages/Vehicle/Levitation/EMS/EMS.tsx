@@ -1,4 +1,4 @@
-import { NumericMeasurement, NumericMeasurementInfo } from "common";
+import { NumericMeasurementInfo } from "common";
 import { EMUnits } from "../EMUnits/EMUnits";
 import { ImageTag } from "../ImageTag/ImageTag";
 import emsUrl from "assets/images/EMS.png";

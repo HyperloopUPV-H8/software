@@ -1,11 +1,13 @@
-import { ColorfulChart, LcuMeasurements, useGlobalTicker, useMeasurementsStore } from "common";
+import { ColorfulChart, LcuMeasurements, useMeasurementsStore } from "common";
 import { HEMS } from "./HEMS/HEMS";
 import styles from "./Levitation.module.scss";
 import { getLines } from "../getLines";
 import { EMS } from "./EMS/EMS";
 
 export const Levitation = () => {
+
     const measurements = useMeasurementsStore((state) => state.measurements);
+    
     const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
     const airgap1 = getNumericMeasurementInfo(LcuMeasurements.airgap1);
     const airgap2 = getNumericMeasurementInfo(LcuMeasurements.airgap2);
@@ -15,10 +17,6 @@ export const Levitation = () => {
     const airgap6 = getNumericMeasurementInfo(LcuMeasurements.airgap6);
     const airgap7 = getNumericMeasurementInfo(LcuMeasurements.airgap7);
     const airgap8 = getNumericMeasurementInfo(LcuMeasurements.airgap8);
-    
-    useGlobalTicker(() => {
-        console.log(airgap1.getUpdate())
-    })
 
     return (
         <div className={styles.levitation}>

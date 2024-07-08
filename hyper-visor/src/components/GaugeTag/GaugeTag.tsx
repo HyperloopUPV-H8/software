@@ -1,10 +1,11 @@
 import styles from "components/GaugeTag/GaugeTag.module.scss";
 import { Gauge } from "components/GaugeTag/Gauge/Gauge";
-import { NumericMeasurement } from "common";
+import { NumericMeasurementInfo, useGlobalTicker } from "common";
 import { TextData } from "./TextData/TextData";
+import { useState } from "react";
 
 type Props = {
-    measurement: NumericMeasurement;
+    measurement: NumericMeasurementInfo;
     className: string;
     strokeWidth: number;
     min: number;
@@ -17,20 +18,25 @@ export const GaugeTag = ({
     min,
     max,
 }: Props) => {
+
+    const [value, setValue] = useState(0);
+
+    useGlobalTicker(() => setValue(measurement.getUpdate()))
+
     return (
         <article className={`${styles.gaugeTagWrapper} ${className}`}>
             <Gauge
                 className={styles.gauge}
                 sweep={250}
                 strokeWidth={strokeWidth}
-                value={measurement.value.average}
+                value={value}
                 min={min}
                 max={max}
             />
             <TextData
                 name={measurement.name}
                 units={measurement.units}
-                value={measurement.value.average}
+                value={value}
             ></TextData>
         </article>
     );

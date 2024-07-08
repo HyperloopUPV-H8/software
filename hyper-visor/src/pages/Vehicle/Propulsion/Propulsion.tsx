@@ -1,24 +1,20 @@
 import styles from "./Propulsion.module.scss";
 import { Title } from "components/Title/Title";
 import { Text } from "components/Text/Text";
-import { ColorfulChart, selectPcuMeasurements, useMeasurementsStore } from "common";
+import { ColorfulChart, useMeasurementsStore } from "common";
 import { DoubleGauge } from "components/DoubleGauge/DoubleGauge";
-import { useMemo } from "react";
 import { getLines } from "../getLines";
 
 export const Propulsion = () => {
     const measurements  = useMeasurementsStore(state => state.measurements);
-    const propulData = useMemo(
-        () => selectPcuMeasurements(measurements),
-        [measurements]
-    );
+    const getNumericMeasurementInfo = useMeasurementsStore(state => state.getNumericMeasurementInfo)
 
     return (
         <div className={styles.propulsion}>
             <Title title="Propulsion ON" />
             <DoubleGauge
-                firstGauge={propulData.velocity}
-                secondGauge={propulData.accel}
+                firstGauge={getNumericMeasurementInfo("PCU/velocity")}
+                secondGauge={getNumericMeasurementInfo("PCU/accel")}
             />
             <Text text="These are the currents inside the vehicle's motor. Together, they propulse Kénos." />
             <ColorfulChart
@@ -26,9 +22,9 @@ export const Propulsion = () => {
                 title="Motor 1"
                 length={100}
                 items={getLines(measurements, [
-                    propulData.motor_a_current_u.id,
-                    propulData.motor_a_current_v.id,
-                    propulData.motor_a_current_w.id,
+                    "PCU/motor_a_current_u",
+                    "PCU/motor_a_current_v",
+                    "PCU/motor_a_current_w",
                 ])}
             ></ColorfulChart>
             <ColorfulChart
@@ -36,9 +32,9 @@ export const Propulsion = () => {
                 title="Motor 2"
                 length={100}
                 items={getLines(measurements, [
-                    propulData.motor_b_current_u.id,
-                    propulData.motor_b_current_v.id,
-                    propulData.motor_b_current_w.id,
+                    "motor_b_current_u",
+                    "motor_b_current_v",
+                    "motor_b_current_w",
                 ])}
             ></ColorfulChart>
         </div>
