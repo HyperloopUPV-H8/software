@@ -24,7 +24,7 @@ export function useLines(
     const initialLargestRange = useMemo(
         () =>
             getLargestRangeFromPartial(
-                lineDescriptions.map((line) => line.warningRange)
+                lineDescriptions.map((line) => line.range)
             ),
         []
     );

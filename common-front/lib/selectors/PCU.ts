@@ -12,6 +12,7 @@ export const PcuMeasurements = {
     motorBCurrentW: 'PCU/motor_b_current_w',
     motorBTemp: 'PCU/max_motor_a_temperature',
     frequency: 'PCU/target_frequency',
+    accel: 'PCU/accel'
 };
 
 export const PcuOrders = {};

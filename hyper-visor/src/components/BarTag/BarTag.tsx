@@ -13,8 +13,6 @@ export const BarTag = ({
     measurement,
     showWrapper = false,
 }: Props) => {
-    
-    console.log(measurement.id)
 
     return (
         <article

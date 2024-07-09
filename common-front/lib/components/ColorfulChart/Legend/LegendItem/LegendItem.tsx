@@ -12,7 +12,9 @@ type Props = {
 export const LegendItem = ({ name, units, getValue, color }: Props) => {
     const [value, setValue] = useState(getValue());
 
-    useGlobalTicker(() => setValue(getValue()));
+    useGlobalTicker(() => {
+        setValue(getValue())
+    });
 
     return (
         <div className={styles.legendItem}>

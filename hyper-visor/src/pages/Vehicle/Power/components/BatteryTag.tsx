@@ -1,14 +1,26 @@
 import { ReactComponent as Thunder } from "assets/icons/thunder.svg";
+import { useGlobalTicker } from "common";
+import { useState } from "react";
 
-type Props = { name: string; value: number };
+type Props = { 
+    name: string; 
+    getUpdate: () => number 
+};
 
-export const BatteryTag = (props: Props) => {
+export const BatteryTag = ({name, getUpdate}: Props) => {
+
+    const [value, setValue] = useState(getUpdate());
+
+    useGlobalTicker(() => {
+        setValue(getUpdate());
+    })
+
     return (
         <div className={"battery-tag"}>
-            <h3>{props.name}</h3>
+            <h3>{name}</h3>
             <div>
                 <Thunder />
-                <p>{props.value.toFixed(2)} W</p>
+                <p>{value.toFixed(2)} W</p>
             </div>
         </div>
     );

@@ -7,16 +7,15 @@ import { EMS } from "./EMS/EMS";
 export const Levitation = () => {
 
     const measurements = useMeasurementsStore((state) => state.measurements);
-    
     const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
-    const airgap1 = getNumericMeasurementInfo(LcuMeasurements.airgap1);
-    const airgap2 = getNumericMeasurementInfo(LcuMeasurements.airgap2);
-    const airgap3 = getNumericMeasurementInfo(LcuMeasurements.airgap3);
-    const airgap4 = getNumericMeasurementInfo(LcuMeasurements.airgap4);
-    const airgap5 = getNumericMeasurementInfo(LcuMeasurements.airgap5);
-    const airgap6 = getNumericMeasurementInfo(LcuMeasurements.airgap6);
-    const airgap7 = getNumericMeasurementInfo(LcuMeasurements.airgap7);
-    const airgap8 = getNumericMeasurementInfo(LcuMeasurements.airgap8);
+    const airgap1 = getNumericMeasurementInfo(LcuMeasurements.verticalAirgap1);
+    const airgap2 = getNumericMeasurementInfo(LcuMeasurements.verticalAirgap2);
+    const airgap3 = getNumericMeasurementInfo(LcuMeasurements.verticalAirgap3);
+    const airgap4 = getNumericMeasurementInfo(LcuMeasurements.verticalAirgap4);
+    const airgap5 = getNumericMeasurementInfo(LcuMeasurements.horizontalAirgap1);
+    const airgap6 = getNumericMeasurementInfo(LcuMeasurements.horizontalAirgap1);
+    const airgap7 = getNumericMeasurementInfo(LcuMeasurements.horizontalAirgap1);
+    const airgap8 = getNumericMeasurementInfo(LcuMeasurements.horizontalAirgap1);
 
     return (
         <div className={styles.levitation}>
@@ -35,6 +34,7 @@ export const Levitation = () => {
                     "LCU/lcu_coil_current_ref_4",
                 ])}
                 length={100}
+                showLegend={true}
             />
             <EMS
                 m1={airgap5}
@@ -51,6 +51,7 @@ export const Levitation = () => {
                     "LCU/lcu_coil_current_ref_8",
                 ])}
                 length={100}
+                showLegend={true}
             />
         </div>
     );

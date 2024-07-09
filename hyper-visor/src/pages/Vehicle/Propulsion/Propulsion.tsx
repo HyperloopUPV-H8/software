@@ -26,6 +26,7 @@ export const Propulsion = () => {
                     "PCU/motor_a_current_v",
                     "PCU/motor_a_current_w",
                 ])}
+                showLegend={true}
             ></ColorfulChart>
             <ColorfulChart
                 className={styles.chart}
@@ -36,6 +37,7 @@ export const Propulsion = () => {
                     "motor_b_current_v",
                     "motor_b_current_w",
                 ])}
+                showLegend={true}
             ></ColorfulChart>
         </div>
     );
