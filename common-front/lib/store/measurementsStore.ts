@@ -169,7 +169,11 @@ export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
     },
 
     getBooleanMeasurementInfo: (id: string): BooleanMeasurementInfo => {
-        const meas = get().measurements[id] as BooleanMeasurement;
+        const measurements = get().measurements;
+        if (!(id in measurements)) {
+            return booleanFallback(id);
+        }
+        const meas = measurements[id] as BooleanMeasurement;
         return {
             id: meas.id,
             name: meas.name,
@@ -182,7 +186,11 @@ export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
     },
 
     getEnumMeasurementInfo: (id: string): EnumMeasurementInfo => {
-        const meas = get().measurements[id] as EnumMeasurement;
+        const measurements = get().measurements;
+        if (!(id in measurements)) {
+            return enumFallback(id);
+        }
+        const meas = measurements[id] as EnumMeasurement;
         return {
             id: meas.id,
             name: meas.name,
@@ -195,7 +203,11 @@ export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
     },
 
     getNumericMeasurementInfo: (id: string): NumericMeasurementInfo => {
-        const meas = get().measurements[id] as NumericMeasurement;
+        const measurements = get().measurements;
+        if (!(id in measurements)) {
+            return numericFallback(id);
+        }
+        const meas = measurements[id] as NumericMeasurement;
         return {
             id: meas.id,
             name: meas.name,
@@ -267,4 +279,36 @@ function getRandomColor() {
     const b = Math.floor(Math.random() * 256);
 
     return `rgb(${r}, ${g}, ${b})`;
+}
+
+function numericFallback(id: string): NumericMeasurementInfo {
+    return {
+        id: id,
+        name: id,
+        units: id,
+        range: [null, null],
+        warningRange: [null, null],
+        getUpdate: () => {
+            return 0;
+        },
+        color: getRandomColor(),
+    };
+}
+function booleanFallback(id: string): BooleanMeasurementInfo {
+    return {
+        id: id,
+        name: id,
+        getUpdate: () => {
+            return false;
+        },
+    };
+}
+function enumFallback(id: string): EnumMeasurementInfo {
+    return {
+        id: id,
+        name: id,
+        getUpdate: () => {
+            return id;
+        },
+    };
 }
