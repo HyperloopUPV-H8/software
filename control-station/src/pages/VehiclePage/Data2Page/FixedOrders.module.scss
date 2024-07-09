@@ -1,0 +1,50 @@
+.fixed_orders {
+    display: grid;
+    grid-template:
+        'open_contactors brake_stop'
+        'emergency_stop emergency_stop'
+        / 1fr 1fr;
+    gap: 1rem;
+    height: 35vh;
+}
+
+.emergency_button {
+    height: 100%;
+    width: 100%;
+    appearance: none;
+    border: none;
+    justify-content: center;
+    align-items: center;
+    color: white;
+
+    font-weight: 900;
+    font-size: 1rem;
+    border-radius: 0.8rem;
+}
+
+.emergency_stop {
+    background-color: rgb(210, 0, 0);
+    grid-area: emergency_stop;
+
+    &:hover {
+        background-color: rgb(230, 0, 0);
+    }
+}
+
+.brake_stop {
+    background-color: rgb(0, 88, 195);
+    grid-area: brake_stop;
+
+    &:hover {
+        background-color: rgb(0, 99, 220);
+    }
+}
+
+.open_contactors {
+    background-color: rgb(255, 162, 0);
+    grid-area: open_contactors;
+
+    &:hover {
+        background-color: rgb(255, 178, 35);
+    }
+}
