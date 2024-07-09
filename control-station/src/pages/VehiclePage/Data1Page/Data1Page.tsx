@@ -6,8 +6,11 @@ import { VCUPositionInfo } from '../Boards/VCU/VCUPositionInfo';
 import { VCUConnectionsInfo } from '../Boards/VCU/VCUConnectionsInfo';
 import { BCU } from '../Boards/BCU/BCU';
 import { BMSL } from '../Boards/BMSL/BMSL';
+import { useEmergencyOrders } from 'hooks/useEmergencyOrders';
 
 export const Data1Page = () => {
+    useEmergencyOrders();
+
     return (
         <div className={styles.data1_page}>
             <div className={styles.column}>

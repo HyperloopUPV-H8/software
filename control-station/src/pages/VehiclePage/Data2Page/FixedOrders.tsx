@@ -38,21 +38,21 @@ export default function FixedOrders(_: Props) {
     );
 }
 
-const brakeOrders: Order[] = [
+export const brakeOrders: Order[] = [
     {
         id: 215,
         fields: {},
     },
 ];
 
-const openContactorsOrders: Order[] = [
+export const openContactorsOrders: Order[] = [
     {
         id: 902,
         fields: {},
     },
 ];
 
-const emergencyStopOrders: Order[] = [
+export const emergencyStopOrders: Order[] = [
     ...brakeOrders,
     ...openContactorsOrders,
     {
