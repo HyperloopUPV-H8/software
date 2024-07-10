@@ -24,9 +24,6 @@ export const BMSL = () => {
     const totalVoltage = getNumericMeasurementInfo(
         BmslMeasurements.totalVoltage
     );
-    const dischargeCurrent = getNumericMeasurementInfo(
-        BmslMeasurements.dischargeCurrent
-    );
 
     return (
         <Window title="BMSL">
@@ -54,15 +51,6 @@ export const BMSL = () => {
                         strokeWidth={120}
                         min={totalVoltage.warningRange[0] ?? 225}
                         max={totalVoltage.warningRange[1] ?? 252}
-                    />
-                    <GaugeTag
-                        id="bmsl_general_current"
-                        name={'Current'}
-                        units={'Amps'}
-                        getUpdate={dischargeCurrent.getUpdate}
-                        strokeWidth={120}
-                        min={dischargeCurrent.warningRange[0] ?? 0}
-                        max={dischargeCurrent.warningRange[1] ?? 100}
                     />
                 </div>
 

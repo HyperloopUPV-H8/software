@@ -35,6 +35,10 @@ export const VCUConnectionsInfo = () => {
                         measurementId={VcuMeasurements.lcuConnection}
                         icon={pluggedIcon}
                     />
+                    <StateIndicator
+                        measurementId={VcuMeasurements.bmslConnection}
+                        icon={pluggedIcon}
+                    />
                 </IndicatorStack>
             </div>
         </Window>
