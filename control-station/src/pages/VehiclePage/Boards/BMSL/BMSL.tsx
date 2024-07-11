@@ -5,6 +5,8 @@ import { IndicatorStack } from 'components/IndicatorStack/IndicatorStack';
 import { BarIndicator } from 'components/BarIndicator/BarIndicator';
 import batteryIcon from 'assets/svg/battery-filled.svg';
 import thermometerIcon from 'assets/svg/thermometer-filled.svg';
+import { StateIndicator } from 'components/StateIndicator/StateIndicator';
+import pluggedIcon from 'assets/svg/plugged-icon.svg';
 
 export const BMSL = () => {
     const getNumericMeasurementInfo = useMeasurementsStore(
@@ -24,6 +26,12 @@ export const BMSL = () => {
     const totalVoltage = getNumericMeasurementInfo(
         BmslMeasurements.totalVoltage
     );
+    const stateOfCharge = getNumericMeasurementInfo(
+        BmslMeasurements.stateOfCharge
+    );
+    const dischargeCurrent = getNumericMeasurementInfo(
+        BmslMeasurements.dischargeCurrent
+    );
 
     return (
         <Window title="BMSL">
@@ -35,12 +43,21 @@ export const BMSL = () => {
                     height: '100%',
                 }}
             >
+                <IndicatorStack>
+                    <StateIndicator
+                        icon={pluggedIcon}
+                        measurementId={BmslMeasurements.generalState}
+                    />
+                </IndicatorStack>
+
                 <div
                     style={{
                         flex: '1',
                         display: 'flex',
                         flexFlow: 'row',
                         gap: '.5rem',
+                        justifyContent: 'center',
+                        alignItems: 'center',
                     }}
                 >
                     <GaugeTag
@@ -52,7 +69,29 @@ export const BMSL = () => {
                         min={totalVoltage.warningRange[0] ?? 225}
                         max={totalVoltage.warningRange[1] ?? 252}
                     />
+                    <GaugeTag
+                        id="bmsl_discharge_current"
+                        name={'Current'}
+                        units={'Amps'}
+                        getUpdate={dischargeCurrent.getUpdate}
+                        strokeWidth={120}
+                        min={dischargeCurrent.warningRange[0] ?? 20}
+                        max={dischargeCurrent.warningRange[1] ?? 100}
+                    />
                 </div>
+
+                <IndicatorStack>
+                    <BarIndicator
+                        icon={batteryIcon}
+                        title="SoC"
+                        getValue={stateOfCharge.getUpdate}
+                        safeRangeMin={stateOfCharge.range[0]!!}
+                        safeRangeMax={stateOfCharge.range[1]!!}
+                        warningRangeMin={stateOfCharge.warningRange[0]!!}
+                        warningRangeMax={stateOfCharge.warningRange[1]!!}
+                        units={stateOfCharge.units}
+                    />
+                </IndicatorStack>
 
                 <IndicatorStack>
                     <BarIndicator

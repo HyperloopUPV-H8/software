@@ -27,27 +27,27 @@ export const LCU = () => {
                 <div className={styles.levitationUnitsWrapper}>
                     <div className={styles.levitationUnitsColumn}>
                         <LevitationUnit
-                            unitIndex={0}
+                            unitIndex={1}
                             kind="hems"
                             imageSide="left"
                         />
                         <LevitationUnit
-                            unitIndex={4}
+                            unitIndex={5}
                             kind="ems"
                             imageSide="left"
                         />
                         <LevitationUnit
-                            unitIndex={6}
+                            unitIndex={7}
                             kind="ems"
                             imageSide="left"
                         />
                         <LevitationUnit
-                            unitIndex={8}
+                            unitIndex={9}
                             kind="ems"
                             imageSide="left"
                         />
                         <LevitationUnit
-                            unitIndex={2}
+                            unitIndex={3}
                             kind="hems"
                             imageSide="left"
                         />
@@ -55,27 +55,27 @@ export const LCU = () => {
 
                     <div className={styles.levitationUnitsColumn}>
                         <LevitationUnit
-                            unitIndex={1}
+                            unitIndex={0}
                             kind="hems"
                             imageSide="right"
                         />
                         <LevitationUnit
-                            unitIndex={5}
+                            unitIndex={4}
                             kind="ems"
                             imageSide="right"
                         />
                         <LevitationUnit
-                            unitIndex={7}
+                            unitIndex={6}
                             kind="ems"
                             imageSide="right"
                         />
                         <LevitationUnit
-                            unitIndex={9}
+                            unitIndex={8}
                             kind="ems"
                             imageSide="right"
                         />
                         <LevitationUnit
-                            unitIndex={3}
+                            unitIndex={2}
                             kind="hems"
                             imageSide="right"
                         />

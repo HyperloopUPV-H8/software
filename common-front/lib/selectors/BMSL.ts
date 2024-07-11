@@ -9,4 +9,6 @@ export const BmslMeasurements = {
     temp2: 'BMSL/low_temp_2',
     totalVoltage: 'BMSL/low_total_voltage',
     dischargeCurrent: 'BMSL/avionics_current',
+    stateOfCharge: 'BMSL/low_soc',
+    generalState: 'BMSL/general_state',
 };

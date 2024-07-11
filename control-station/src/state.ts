@@ -1,4 +1,5 @@
 import {
+    BmslMeasurements,
     EnumMeasurement,
     Measurement,
     ObccuMeasurements,
@@ -38,6 +39,9 @@ const enumStates: { [meas_id: string]: { [enum_variant: string]: State } } = {
     [VcuMeasurements.lcuConnection]: {
         LCU_Connected: 'stable',
     },
+    [VcuMeasurements.bmslConnection]: {
+        BMSL_Connected: 'stable',
+    },
     [ObccuMeasurements.contactorsState]: {
         OPEN: 'stable',
         PRECHARGE: 'warning',
@@ -56,6 +60,10 @@ const enumStates: { [meas_id: string]: { [enum_variant: string]: State } } = {
         OPERATIONAL: 'stable',
     },
     [PcuMeasurements.generalState]: {
+        FAULT: 'fault',
+        OPERATIONAL: 'stable',
+    },
+    [BmslMeasurements.generalState]: {
         FAULT: 'fault',
         OPERATIONAL: 'stable',
     },
