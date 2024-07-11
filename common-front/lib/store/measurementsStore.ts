@@ -165,7 +165,11 @@ export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
     },
 
     getMeasurement: (id: string) => {
-        return get().measurements[id];
+        const measurements = get().measurements;
+        if (!(id in measurements)) {
+            return measurementFallback(id);
+        }
+        return measurements[id];
     },
 
     getBooleanMeasurementInfo: (id: string): BooleanMeasurementInfo => {
@@ -310,5 +314,21 @@ function enumFallback(id: string): EnumMeasurementInfo {
         getUpdate: () => {
             return id;
         },
+    };
+}
+
+function measurementFallback(id: string): Measurement {
+    return {
+        id: id,
+        name: id,
+        type: 'float64',
+        value: {
+            last: 0,
+            average: 0,
+            showLatest: false,
+        },
+        units: '',
+        safeRange: [null, null],
+        warningRange: [null, null],
     };
 }

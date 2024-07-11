@@ -3,10 +3,10 @@ import { OBCCUBatteries } from '../Boards/OBCCU/OBCCUBatteries';
 import { OBCCUGeneralInfo } from '../Boards/OBCCU/OBCCUGeneralInfo';
 import { VCUBrakesInfo } from '../Boards/VCU/VCUBrakesInfo';
 import { VCUPositionInfo } from '../Boards/VCU/VCUPositionInfo';
-import { VCUConnectionsInfo } from '../Boards/VCU/VCUConnectionsInfo';
 import { BCU } from '../Boards/BCU/BCU';
 import { BMSL } from '../Boards/BMSL/BMSL';
 import { useEmergencyOrders } from 'hooks/useEmergencyOrders';
+import Connections from '../Windows/Connections';
 
 export const Data1Page = () => {
     useEmergencyOrders();
@@ -28,11 +28,11 @@ export const Data1Page = () => {
 
             <div className={styles.column}>
                 <VCUBrakesInfo />
-                <VCUConnectionsInfo />
             </div>
 
             <div className={styles.column}>
                 <BCU />
+                <Connections />
             </div>
         </div>
     );

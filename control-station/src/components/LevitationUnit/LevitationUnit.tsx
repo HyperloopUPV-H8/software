@@ -68,16 +68,6 @@ export const LevitationUnit = ({ unitIndex, kind, imageSide }: Props) => {
             ? getNumericMeasurementInfo(airgapMeasurements[unitIndex + 2])
             : undefined;
 
-    console.log(
-        unitIndex,
-        currentMeasurements[unitIndex],
-        temperatureMeasurements[unitIndex],
-        airgapMeasurements[unitIndex],
-        current,
-        temperature,
-        airgap
-    );
-
     return (
         <div className={styles.levitationUnitWrapper}>
             {imageSide === 'left' &&

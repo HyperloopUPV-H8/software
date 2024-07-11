@@ -1,7 +1,7 @@
 import { useGlobalTicker, useMeasurementsStore } from 'common';
 import styles from './StateIndicator.module.scss';
-import { State, getState, stateToColor } from 'state';
-import { ReactNode, memo, useEffect, useRef, useState } from 'react';
+import { getStateFromEnum, stateToColor } from 'state';
+import { memo, useState } from 'react';
 
 interface Props {
     measurementId: string;
@@ -9,27 +9,21 @@ interface Props {
 }
 
 export const StateIndicator = memo(({ measurementId, icon }: Props) => {
-    const [measurement, measurementInfo] = useMeasurementsStore((state) => [
-        state.getMeasurement(measurementId),
-        state.getEnumMeasurementInfo(measurementId),
-    ]);
+    const getValue = useMeasurementsStore(
+        (state) => state.getEnumMeasurementInfo(measurementId).getUpdate
+    );
 
-    const state = useRef<State>(getState(measurement));
-
-    const [variant, setVariant] = useState(measurementInfo.getUpdate());
+    const [variant, setVariant] = useState(getValue());
+    const state = getStateFromEnum(measurementId, variant);
 
     useGlobalTicker(() => {
-        setVariant(measurementInfo.getUpdate());
-    });
-
-    useEffect(() => {
-        state.current = getState(measurement);
+        setVariant(getValue());
     });
 
     return (
         <div
             className={styles.state_indicator}
-            style={{ backgroundColor: stateToColor[state.current] }}
+            style={{ backgroundColor: stateToColor[state] }}
         >
             <img className={styles.icon} src={icon} alt="State icon" />
 

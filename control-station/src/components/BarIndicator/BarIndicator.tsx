@@ -3,7 +3,6 @@ import styles from './BarIndicator.module.scss';
 import {
     getPercentageFromRange,
     getStateFromRange,
-    State,
     stateToColor,
     stateToColorBackground,
 } from 'state';

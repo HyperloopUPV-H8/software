@@ -32,6 +32,7 @@ export const LcuMeasurements = {
     rotationPitch: 'LCU/pos_rot_y',
     rotationRoll: 'LCU/pos_rot_x',
     rotationYaw: 'LCU/pos_rot_z',
+    generalState: 'LCU/general_state',
 };
 
 export const LcuOrders = {

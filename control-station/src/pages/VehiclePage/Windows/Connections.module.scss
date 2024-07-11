@@ -1,0 +1,36 @@
+.connections {
+    display: flex;
+    flex-flow: column;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+
+    width: fit-content;
+
+    max-width: 670px;
+}
+
+.board {
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.4rem;
+
+    color: #003b4d;
+
+    & .name {
+        font-size: 0.9rem;
+        font-weight: 400;
+        padding: 0;
+        margin: 0;
+    }
+}
+
+.row {
+    display: flex;
+    flex-flow: row;
+    gap: 2rem;
+    justify-content: center;
+    align-items: center;
+}

@@ -95,8 +95,11 @@ export function getState(meas: Measurement): State {
     }
 }
 
-export function getStateFromEnum(_: EnumMeasurement): State {
-    return 'stable';
+export function getStateFromEnum(id: string, value: string): State {
+    if (enumStates[id] != undefined && enumStates[id][value] != undefined) {
+        return enumStates[id][value];
+    }
+    return 'ignore';
 }
 
 export function getStateFromRange(

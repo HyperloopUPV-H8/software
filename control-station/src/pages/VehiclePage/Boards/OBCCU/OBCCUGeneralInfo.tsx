@@ -36,13 +36,6 @@ export const OBCCUGeneralInfo = () => {
                         gap: '.5rem',
                     }}
                 >
-                    <IndicatorStack>
-                        <StateIndicator
-                            measurementId={ObccuMeasurements.generalState}
-                            icon={pluggedIcon}
-                        />
-                    </IndicatorStack>
-
                     <div
                         style={{
                             display: 'flex',

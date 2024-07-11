@@ -14,18 +14,14 @@ type Props = {
 
 export default function EMSRepresentation(props: Props) {
     const [valueState, setValueState] = useState<number>(0);
-    const percentage = useRef<number>(100);
+    const percentage = getPercentageFromRange(
+        valueState,
+        props.rangeMin,
+        props.rangeMax
+    );
 
     useGlobalTicker(() => {
         setValueState(props.getUpdate());
-    });
-
-    useEffect(() => {
-        percentage.current = getPercentageFromRange(
-            valueState,
-            props.rangeMin,
-            props.rangeMax
-        );
     });
 
     return (
@@ -43,7 +39,7 @@ export default function EMSRepresentation(props: Props) {
                     src={EMS}
                     alt="ems"
                     style={{
-                        left: percentage.current + '%',
+                        left: percentage + '%',
                     }}
                 />
             </div>

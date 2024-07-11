@@ -240,10 +240,6 @@ export const PCU = () => {
                         </div>
                     </div>
                     <IndicatorStack className={styles.frequency}>
-                        <StateIndicator
-                            measurementId={PcuMeasurements.generalState}
-                            icon={pluggedIcon}
-                        />
                         <BarIndicator
                             title="Frequency"
                             icon={thunderIcon}

@@ -43,13 +43,6 @@ export const BMSL = () => {
                     height: '100%',
                 }}
             >
-                <IndicatorStack>
-                    <StateIndicator
-                        icon={pluggedIcon}
-                        measurementId={BmslMeasurements.generalState}
-                    />
-                </IndicatorStack>
-
                 <div
                     style={{
                         flex: '1',

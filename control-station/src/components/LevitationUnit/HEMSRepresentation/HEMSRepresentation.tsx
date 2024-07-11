@@ -13,18 +13,14 @@ type Props = {
 
 export default function HEMSRepresentation(props: Props) {
     const [valueState, setValueState] = useState<number>(0);
-    const percentage = useRef<number>(100);
+    const percentage = getPercentageFromRange(
+        valueState,
+        props.rangeMin,
+        props.rangeMax
+    );
 
     useGlobalTicker(() => {
         setValueState(props.getUpdate());
-    });
-
-    useEffect(() => {
-        percentage.current = getPercentageFromRange(
-            valueState,
-            props.rangeMin,
-            props.rangeMax
-        );
     });
 
     return (
@@ -38,7 +34,7 @@ export default function HEMSRepresentation(props: Props) {
                     src={HEMS}
                     alt="hems"
                     style={{
-                        top: percentage.current + '%',
+                        top: percentage + '%',
                     }}
                 />
             </div>

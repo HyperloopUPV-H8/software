@@ -2,7 +2,7 @@ import styles from './TrackVisualizer.module.scss';
 import vehicleTrack from 'assets/svg/vehicle-track.svg';
 import vehicle from 'assets/svg/vesper-icon.svg';
 import { useGlobalTicker } from 'common';
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useState } from 'react';
 import { getPercentageFromRange } from 'state';
 
 type Props = {
@@ -13,16 +13,12 @@ type Props = {
 
 export const TrackVisualizer = memo((props: Props) => {
     const [valueState, setValueState] = useState<number>(0);
-    const percentage = useRef<number>(100);
+    const percentage =
+        100 -
+        getPercentageFromRange(valueState, props.rangeMin, props.rangeMax);
 
     useGlobalTicker(() => {
         setValueState(props.getUpdate());
-    });
-
-    useEffect(() => {
-        percentage.current =
-            100 -
-            getPercentageFromRange(valueState, props.rangeMin, props.rangeMax);
     });
 
     return (
@@ -33,7 +29,7 @@ export const TrackVisualizer = memo((props: Props) => {
             <div
                 className={styles.vehicle_container}
                 style={{
-                    top: percentage.current + '%',
+                    top: percentage + '%',
                 }}
             >
                 <img src={vehicle} alt="Vehicle" />
