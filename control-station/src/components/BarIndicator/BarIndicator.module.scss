@@ -2,84 +2,71 @@
 
 .bar_indicator {
     position: relative;
-    min-height: 1.8rem;
+
+    min-height: fit-content;
     width: 100%;
-    background-color: #000;
     overflow: hidden;
-}
 
-.background {
-    position: absolute;
-    width: 100%;
-    height: 100%;
+    padding: 8px;
 
-    .range_bar {
-        box-shadow: 2px 0 1rem 1rem currentColor;
-        background-color: currentColor;
-        height: 100%;
-        transition: width 0.1s ease-in-out;
-    }
-}
-
-.infoContainer {
-    position: absolute;
-    padding: 0rem 0.8rem;
-    width: 100%;
-    height: 100%;
     display: flex;
-    justify-content: space-between;
+    flex-flow: row;
     align-items: center;
+    justify-content: space-between;
+    gap: 4px;
 }
 
-.bar {
+.range_bar {
     position: absolute;
-    top: -25%;
-    left: -2%;
-    filter: blur(0.5rem);
-    background-color: red;
-    width: 40%;
-    height: 150%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+
+    height: 100%;
+
+    box-shadow: 2px 0 1rem 1rem currentColor;
+    background-color: currentColor;
+
     transition: width 0.1s ease-in-out;
 }
 
-.title {
-    opacity: 0.8;
-    font-size: map-get($map: fonts.$font-sizes, $key: x-small);
-    font-style: italic;
-    font-weight: 300;
+.name_display,
+.value_display {
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+    gap: 4px;
 }
 
-.value {
-    flex: 1;
-    opacity: 0.7;
-    font-size: map-get($map: fonts.$font-sizes, $key: small);
-}
-
-.unit {
-    flex: 1;
-    opacity: 0.7;
-    font-size: 0.8rem;
+.name_display {
+    width: 100%;
 }
 
 .icon {
-    display: flex;
-    justify-content: center;
-    opacity: 0.6;
-    max-width: 0.7rem;
+    max-width: 12px;
+
+    opacity: 0.8;
 }
 
-.iconName {
-    display: flex;
-    flex: 1;
-    gap: 0.5rem;
-    align-items: center;
-    height: 100%;
+.name {
+    width: 100%;
+
+    margin: 0;
+
+    opacity: 0.8;
+
+    font-size: 16px;
+    font-style: italic;
+    font-weight: 300;
+    text-overflow: ellipsis;
 }
 
-.valueUnits {
-    display: flex;
-    width: 3rem;
-    gap: 0.5rem;
-    align-items: center;
-    justify-content: end;
+.value,
+.units {
+    opacity: 0.8;
+
+    margin: 0;
+
+    font-size: 20px;
+    font-weight: 400;
 }

@@ -53,39 +53,30 @@ export const BarIndicator = memo(
         });
 
         return (
-            <div className={styles.bar_indicator}>
+            <div
+                className={styles.bar_indicator}
+                style={{
+                    backgroundColor:
+                        backgroundColor != undefined
+                            ? backgroundColor
+                            : stateToColorBackground[state],
+                }}
+            >
                 <div
-                    className={styles.background}
+                    className={styles.range_bar}
                     style={{
-                        backgroundColor:
-                            backgroundColor != undefined
-                                ? backgroundColor
-                                : stateToColorBackground[state],
+                        width: percentage + '%',
+                        color: color != undefined ? color : stateToColor[state],
                     }}
-                >
-                    <div
-                        className={styles.range_bar}
-                        style={{
-                            width: percentage + '%',
-                            color:
-                                color != undefined
-                                    ? color
-                                    : stateToColor[state],
-                        }}
-                    />
-                </div>
+                />
 
-                <div className={styles.infoContainer}>
-                    <div className={styles.iconName}>
-                        <img className={styles.icon} src={icon} alt="" />
-                        <div className={styles.title}>{title}</div>
-                    </div>
-                    <div className={styles.valueUnits}>
-                        <div className={styles.value}>
-                            {valueState?.toFixed(2)}
-                        </div>
-                        <div className={styles.unit}>{units}</div>
-                    </div>
+                <div className={styles.name_display}>
+                    <img className={styles.icon} src={icon} />
+                    <p className={styles.name}>{title}</p>
+                </div>
+                <div className={styles.value_display}>
+                    <p className={styles.value}>{valueState?.toFixed(2)}</p>
+                    <p className={styles.units}>{units}</p>
                 </div>
             </div>
         );
