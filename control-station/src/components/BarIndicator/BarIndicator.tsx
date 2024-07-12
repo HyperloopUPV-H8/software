@@ -10,7 +10,7 @@ import { memo, useEffect, useRef, useState } from 'react';
 
 interface Props {
     icon?: string;
-    title: string;
+    name: string;
     getValue: () => number;
     safeRangeMin: number;
     warningRangeMin: number;
@@ -19,12 +19,13 @@ interface Props {
     units?: string;
     color?: string;
     backgroundColor?: string;
+    className?: string;
 }
 
 export const BarIndicator = memo(
     ({
         icon,
-        title,
+        name,
         getValue,
         safeRangeMin,
         warningRangeMin,
@@ -33,6 +34,7 @@ export const BarIndicator = memo(
         units,
         color,
         backgroundColor,
+        className,
     }: Props) => {
         const [valueState, setValueState] = useState<number>(0);
         const percentage = getPercentageFromRange(
@@ -54,7 +56,7 @@ export const BarIndicator = memo(
 
         return (
             <div
-                className={styles.bar_indicator}
+                className={`${styles.bar_indicator} ${className}`}
                 style={{
                     backgroundColor:
                         backgroundColor != undefined
@@ -72,7 +74,7 @@ export const BarIndicator = memo(
 
                 <div className={styles.name_display}>
                     <img className={styles.icon} src={icon} />
-                    <p className={styles.name}>{title}</p>
+                    <p className={styles.name}>{name}</p>
                 </div>
                 <div className={styles.value_display}>
                     <p className={styles.value}>{valueState?.toFixed(2)}</p>
