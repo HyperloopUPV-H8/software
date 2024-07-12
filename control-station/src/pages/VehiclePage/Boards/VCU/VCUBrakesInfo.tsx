@@ -78,7 +78,7 @@ export const VCUBrakesInfo = () => {
 
                 <IndicatorStack>
                     <BarIndicator
-                        title="High Pressure"
+                        name="High Pressure"
                         icon={pressureIcon}
                         getValue={highPressure.getUpdate}
                         safeRangeMin={highPressure.range[0]!!}
@@ -92,7 +92,7 @@ export const VCUBrakesInfo = () => {
                         icon={pressureIcon}
                     />
                     <BarIndicator
-                        title="Reference Pressure"
+                        name="Reference Pressure"
                         icon={pressureIcon}
                         getValue={referencePressure.getUpdate}
                         safeRangeMin={referencePressure.range[0]!!}
@@ -102,7 +102,7 @@ export const VCUBrakesInfo = () => {
                         units="bar"
                     />
                     <BarIndicator
-                        title="Low Pressure 1"
+                        name="Low Pressure 1"
                         icon={pressureIcon}
                         getValue={lowPressure1.getUpdate}
                         safeRangeMin={lowPressure1.range[0]!!}
@@ -112,7 +112,7 @@ export const VCUBrakesInfo = () => {
                         units="bar"
                     />
                     <BarIndicator
-                        title="Low Pressure 2"
+                        name="Low Pressure 2"
                         icon={pressureIcon}
                         getValue={lowPressure2.getUpdate}
                         safeRangeMin={lowPressure2.range[0]!!}

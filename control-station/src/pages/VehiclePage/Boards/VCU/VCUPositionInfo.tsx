@@ -22,7 +22,7 @@ export const VCUPositionInfo = () => {
             <div className={styles.vcuPositionInfo}>
                 <IndicatorStack>
                     <BarIndicator
-                        title="Position"
+                        name="Position"
                         icon={positionIcon}
                         getValue={position.getUpdate}
                         safeRangeMin={position.range[0]!!}

@@ -25,11 +25,11 @@ export const StateIndicator = memo(({ measurementId, icon }: Props) => {
             className={styles.state_indicator}
             style={{ backgroundColor: stateToColor[state] }}
         >
-            <img className={styles.icon} src={icon} alt="State icon" />
+            <img className={styles.icon} src={icon} />
 
             <p className={styles.title}>{variant}</p>
 
-            <img className={styles.icon} src={icon} alt="State icon" />
+            <img className={styles.icon} src={icon} />
         </div>
     );
 });

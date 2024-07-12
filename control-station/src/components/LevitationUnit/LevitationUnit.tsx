@@ -102,7 +102,7 @@ export const LevitationUnit = ({ unitIndex, kind, imageSide }: Props) => {
             <IndicatorStack>
                 <BarIndicator
                     icon={batteryFilled}
-                    title="Current"
+                    name="Current"
                     getValue={current.getUpdate}
                     units={current.units}
                     safeRangeMin={current.range[0] ?? -25}
@@ -112,7 +112,7 @@ export const LevitationUnit = ({ unitIndex, kind, imageSide }: Props) => {
                 />
                 <BarIndicator
                     icon={thermometerFilled}
-                    title="Temperature"
+                    name="Temperature"
                     getValue={temperature.getUpdate}
                     units={temperature.units}
                     safeRangeMin={temperature.range[0] ?? 0}
@@ -122,7 +122,7 @@ export const LevitationUnit = ({ unitIndex, kind, imageSide }: Props) => {
                 />
                 <BarIndicator
                     icon={airgapIcon}
-                    title="Airgap"
+                    name="Airgap"
                     getValue={
                         unitIndex == 6 || unitIndex == 7
                             ? () =>

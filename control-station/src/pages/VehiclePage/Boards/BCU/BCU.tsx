@@ -51,7 +51,7 @@ export const BCU = () => {
                             />
                             <IndicatorStack>
                                 <BarIndicator
-                                    title="Current U"
+                                    name="Current U"
                                     icon={thunderIcon}
                                     getValue={bpu1CurrentU.getUpdate}
                                     safeRangeMin={bpu1CurrentU.range[0]!!}
@@ -67,7 +67,7 @@ export const BCU = () => {
                                     backgroundColor="#FFE7CF"
                                 />
                                 <BarIndicator
-                                    title="Current V"
+                                    name="Current V"
                                     icon={thunderIcon}
                                     getValue={bpu1CurrentV.getUpdate}
                                     safeRangeMin={bpu1CurrentV.range[0]!!}
@@ -83,7 +83,7 @@ export const BCU = () => {
                                     backgroundColor="#CEF3FF"
                                 />
                                 <BarIndicator
-                                    title="Current W"
+                                    name="Current W"
                                     icon={thunderIcon}
                                     getValue={bpu1CurrentW.getUpdate}
                                     safeRangeMin={bpu1CurrentW.range[0]!!}
@@ -114,7 +114,7 @@ export const BCU = () => {
                             />
                             <IndicatorStack>
                                 <BarIndicator
-                                    title="Current U"
+                                    name="Current U"
                                     icon={thunderIcon}
                                     getValue={bpu2CurrentU.getUpdate}
                                     safeRangeMin={bpu2CurrentU.range[0]!!}
@@ -130,7 +130,7 @@ export const BCU = () => {
                                     backgroundColor="#FFE7CF"
                                 />
                                 <BarIndicator
-                                    title="Current V"
+                                    name="Current V"
                                     icon={thunderIcon}
                                     getValue={bpu2CurrentV.getUpdate}
                                     safeRangeMin={bpu2CurrentV.range[0]!!}
@@ -146,7 +146,7 @@ export const BCU = () => {
                                     backgroundColor="#CEF3FF"
                                 />
                                 <BarIndicator
-                                    title="Current W"
+                                    name="Current W"
                                     icon={thunderIcon}
                                     getValue={bpu2CurrentW.getUpdate}
                                     safeRangeMin={bpu2CurrentW.range[0]!!}

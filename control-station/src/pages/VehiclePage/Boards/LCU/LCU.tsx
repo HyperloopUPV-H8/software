@@ -86,7 +86,7 @@ export const LCU = () => {
                     <IndicatorStack>
                         <BarIndicator
                             icon={pitchRotation}
-                            title="Pitch"
+                            name="Pitch"
                             getValue={pitch.getUpdate}
                             safeRangeMin={pitch.range[0] ?? -0.05}
                             safeRangeMax={pitch.range[1] ?? 0.05}
@@ -98,7 +98,7 @@ export const LCU = () => {
                     <IndicatorStack>
                         <BarIndicator
                             icon={rollRotation}
-                            title="Roll"
+                            name="Roll"
                             getValue={roll.getUpdate}
                             safeRangeMin={roll.range[0] ?? -0.05}
                             safeRangeMax={roll.range[1] ?? 0.05}
@@ -110,7 +110,7 @@ export const LCU = () => {
                     <IndicatorStack>
                         <BarIndicator
                             icon={yawRotation}
-                            title="Yaw"
+                            name="Yaw"
                             getValue={yaw.getUpdate}
                             safeRangeMin={yaw.range[0] ?? -0.005}
                             safeRangeMax={yaw.range[1] ?? 0.005}
@@ -122,7 +122,7 @@ export const LCU = () => {
                     <IndicatorStack>
                         <BarIndicator
                             icon={zIndex}
-                            title="Z"
+                            name="Z"
                             getValue={positionZ.getUpdate}
                             safeRangeMin={positionZ.range[0] ?? -2}
                             safeRangeMax={positionZ.range[1] ?? 2}
@@ -134,7 +134,7 @@ export const LCU = () => {
                     <IndicatorStack>
                         <BarIndicator
                             icon={yIndex}
-                            title="Y"
+                            name="Y"
                             getValue={positionY.getUpdate}
                             safeRangeMin={positionY.range[0] ?? -5}
                             safeRangeMax={positionY.range[1] ?? 5}
