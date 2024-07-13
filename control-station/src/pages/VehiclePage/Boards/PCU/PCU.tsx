@@ -8,6 +8,8 @@ import thermometerIcon from 'assets/svg/thermometer-filled.svg';
 import { StateIndicator } from 'components/StateIndicator/StateIndicator';
 import thunderIcon from 'assets/svg/thunder-filled.svg';
 import pluggedIcon from 'assets/svg/plugged-icon.svg';
+import { LostConnectionContext } from 'services/connections';
+import { useContext } from 'react';
 
 export const PCU = () => {
     const getNumericMeasurementInfo = useMeasurementsStore(
@@ -44,6 +46,8 @@ export const PCU = () => {
 
     const frequency = getNumericMeasurementInfo(PcuMeasurements.frequency);
 
+    const lostConnection = useContext(LostConnectionContext);
+
     return (
         <Window title="PCU">
             <div className={styles.container}>
@@ -57,9 +61,24 @@ export const PCU = () => {
                                 className={styles.chart}
                                 length={35}
                                 items={[
-                                    motorACurrentU,
-                                    motorACurrentV,
-                                    motorACurrentW,
+                                    lostConnection
+                                        ? {
+                                              ...motorACurrentU,
+                                              getUpdate: () => 0,
+                                          }
+                                        : motorACurrentU,
+                                    lostConnection
+                                        ? {
+                                              ...motorACurrentV,
+                                              getUpdate: () => 0,
+                                          }
+                                        : motorACurrentV,
+                                    lostConnection
+                                        ? {
+                                              ...motorACurrentW,
+                                              getUpdate: () => 0,
+                                          }
+                                        : motorACurrentW,
                                 ]}
                             />
                             <IndicatorStack>
@@ -151,9 +170,24 @@ export const PCU = () => {
                                 className={styles.chart}
                                 length={35}
                                 items={[
-                                    motorBCurrentU,
-                                    motorBCurrentV,
-                                    motorBCurrentW,
+                                    lostConnection
+                                        ? {
+                                              ...motorBCurrentU,
+                                              getUpdate: () => 0,
+                                          }
+                                        : motorBCurrentU,
+                                    lostConnection
+                                        ? {
+                                              ...motorBCurrentV,
+                                              getUpdate: () => 0,
+                                          }
+                                        : motorBCurrentV,
+                                    lostConnection
+                                        ? {
+                                              ...motorBCurrentW,
+                                              getUpdate: () => 0,
+                                          }
+                                        : motorBCurrentW,
                                 ]}
                             />
                             <IndicatorStack>

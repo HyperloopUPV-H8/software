@@ -2,7 +2,8 @@ import styles from './TrackVisualizer.module.scss';
 import vehicleTrack from 'assets/svg/vehicle-track.svg';
 import vehicle from 'assets/svg/vesper-icon.svg';
 import { useGlobalTicker } from 'common';
-import { memo, useState } from 'react';
+import { memo, useContext, useState } from 'react';
+import { LostConnectionContext } from 'services/connections';
 import { getPercentageFromRange } from 'state';
 
 type Props = {
@@ -13,9 +14,16 @@ type Props = {
 
 export const TrackVisualizer = memo((props: Props) => {
     const [valueState, setValueState] = useState<number>(0);
+    const lostConnection = useContext(LostConnectionContext);
     const percentage =
         100 -
-        getPercentageFromRange(valueState, props.rangeMin, props.rangeMax);
+        (lostConnection
+            ? 0
+            : getPercentageFromRange(
+                  valueState,
+                  props.rangeMin,
+                  props.rangeMax
+              ));
 
     useGlobalTicker(() => {
         setValueState(props.getUpdate());

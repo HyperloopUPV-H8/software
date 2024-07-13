@@ -6,7 +6,8 @@ import {
     stateToColor,
     stateToColorBackground,
 } from 'state';
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useContext, useEffect, useRef, useState } from 'react';
+import { LostConnectionContext } from 'services/connections';
 
 interface Props {
     icon?: string;
@@ -37,18 +38,24 @@ export const BarIndicator = memo(
         className,
     }: Props) => {
         const [valueState, setValueState] = useState<number>(0);
-        const percentage = getPercentageFromRange(
-            valueState,
-            warningRangeMin,
-            warningRangeMax
-        );
-        const state = getStateFromRange(
-            valueState,
-            safeRangeMin,
-            safeRangeMax,
-            warningRangeMin,
-            warningRangeMax
-        );
+        const lostConnection = useContext(LostConnectionContext);
+
+        const percentage = lostConnection
+            ? 100
+            : getPercentageFromRange(
+                  valueState,
+                  warningRangeMin,
+                  warningRangeMax
+              );
+        const state = lostConnection
+            ? 'fault'
+            : getStateFromRange(
+                  valueState,
+                  safeRangeMin,
+                  safeRangeMax,
+                  warningRangeMin,
+                  warningRangeMax
+              );
 
         useGlobalTicker(() => {
             setValueState(getValue());
@@ -77,7 +84,9 @@ export const BarIndicator = memo(
                     <p className={styles.name}>{name}</p>
                 </div>
                 <div className={styles.value_display}>
-                    <p className={styles.value}>{valueState?.toFixed(2)}</p>
+                    <p className={styles.value}>
+                        {lostConnection ? '-.--' : valueState?.toFixed(2)}
+                    </p>
                     <p className={styles.units}>{units}</p>
                 </div>
             </div>

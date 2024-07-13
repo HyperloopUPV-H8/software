@@ -1,9 +1,10 @@
 import styles from 'components/GaugeTag/GaugeTag.module.scss';
 import { Gauge } from 'components/GaugeTag/Gauge/Gauge';
 import { TextData } from './TextData/TextData';
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useContext, useEffect, useRef, useState } from 'react';
 import { useGlobalTicker } from 'common';
 import { getPercentageFromRange } from 'state';
+import { LostConnectionContext } from 'services/connections';
 
 type Props = {
     name: string;
@@ -14,10 +15,14 @@ type Props = {
     min: number;
     max: number;
 };
+
 export const GaugeTag = memo(
     ({ name, units, id, getUpdate, strokeWidth, min, max }: Props) => {
         const [value, setValue] = useState(getUpdate());
-        const percentage = getPercentageFromRange(value, min, max);
+        const lostConnection = useContext(LostConnectionContext);
+        const percentage = lostConnection
+            ? 100
+            : getPercentageFromRange(value, min, max);
 
         useGlobalTicker(() => {
             setValue(getUpdate());
@@ -32,7 +37,12 @@ export const GaugeTag = memo(
                     strokeWidth={strokeWidth}
                     percentage={percentage}
                 />
-                <TextData name={name} units={units} value={value}></TextData>
+                <TextData
+                    name={name}
+                    units={units}
+                    value={value}
+                    lostConnection={lostConnection}
+                ></TextData>
             </article>
         );
     }

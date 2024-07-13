@@ -7,6 +7,7 @@ import { BCU } from '../Boards/BCU/BCU';
 import { BMSL } from '../Boards/BMSL/BMSL';
 import { useEmergencyOrders } from 'hooks/useEmergencyOrders';
 import Connections from '../Windows/Connections';
+import { Connection, useConnections } from 'common';
 
 export const Data1Page = () => {
     useEmergencyOrders();

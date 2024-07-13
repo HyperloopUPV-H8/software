@@ -1,7 +1,8 @@
 import { useGlobalTicker, useMeasurementsStore } from 'common';
 import styles from './StateIndicator.module.scss';
 import { getStateFromEnum, stateToColor } from 'state';
-import { memo, useState } from 'react';
+import { memo, useContext, useState } from 'react';
+import { LostConnectionContext } from 'services/connections';
 
 interface Props {
     measurementId: string;
@@ -13,8 +14,12 @@ export const StateIndicator = memo(({ measurementId, icon }: Props) => {
         (state) => state.getEnumMeasurementInfo(measurementId).getUpdate
     );
 
+    const lostConnection = useContext(LostConnectionContext);
+
     const [variant, setVariant] = useState(getValue());
-    const state = getStateFromEnum(measurementId, variant);
+    const state = lostConnection
+        ? 'fault'
+        : getStateFromEnum(measurementId, variant);
 
     useGlobalTicker(() => {
         setVariant(getValue());
@@ -27,7 +32,9 @@ export const StateIndicator = memo(({ measurementId, icon }: Props) => {
         >
             <img className={styles.icon} src={icon} />
 
-            <p className={styles.title}>{variant}</p>
+            <p className={styles.title}>
+                {lostConnection ? 'DISCONNECTED' : variant}
+            </p>
 
             <img className={styles.icon} src={icon} />
         </div>
