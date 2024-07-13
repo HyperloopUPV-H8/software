@@ -88,6 +88,14 @@ export const BarIndicator = memo(
                         {lostConnection ? '-.--' : valueState?.toFixed(2)}
                     </p>
                     <p className={styles.units}>{units}</p>
+                    <div className={styles.min_max}>
+                        <p
+                            className={styles.max}
+                        >{`max: ${warningRangeMax}`}</p>
+                        <p
+                            className={styles.min}
+                        >{`min: ${warningRangeMin}`}</p>
+                    </div>
                 </div>
             </div>
         );
