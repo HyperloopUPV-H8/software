@@ -140,6 +140,19 @@ type Timestamp struct {
 	Year    uint16 `json:"year"`
 }
 
+func NowTimestamp() *Timestamp {
+	t := time.Now()
+	return &Timestamp{
+		Counter: 0,
+		Second:  uint8(t.Second()),
+		Minute:  uint8(t.Minute()),
+		Hour:    uint8(t.Hour()),
+		Day:     uint8(t.Day()),
+		Month:   uint8(t.Month()),
+		Year:    uint16(t.Year()),
+	}
+}
+
 func decodeTimestamp(reader io.Reader, endianness binary.ByteOrder) (*Timestamp, error) {
 	packet := new(Timestamp)
 	err := binary.Read(reader, endianness, packet)

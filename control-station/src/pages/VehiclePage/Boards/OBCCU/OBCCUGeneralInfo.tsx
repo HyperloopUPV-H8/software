@@ -19,6 +19,10 @@ export const OBCCUGeneralInfo = () => {
         ObccuMeasurements.dischargeCurrent
     );
 
+    const outputVoltage = getNumericMeasurementInfo(
+        ObccuMeasurements.outputVoltage
+    );
+
     return (
         <Window title="OBCCU">
             <div
@@ -72,6 +76,25 @@ export const OBCCUGeneralInfo = () => {
                             icon={thunderIcon}
                         />
                     </IndicatorStack>
+
+                    <div
+                        style={{
+                            display: 'flex',
+                            gap: '1rem',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <GaugeTag
+                            id="obccu_output_voltage"
+                            name={'Bus Voltage'}
+                            units={'Volts'}
+                            getUpdate={outputVoltage.getUpdate}
+                            strokeWidth={120}
+                            min={outputVoltage.warningRange[0] ?? 225}
+                            max={outputVoltage.warningRange[1] ?? 252}
+                        />
+                    </div>
                 </div>
             </div>
         </Window>

@@ -277,7 +277,10 @@ export const PCU = () => {
                         <BarIndicator
                             name="Frequency"
                             icon={thunderIcon}
-                            getValue={frequency.getUpdate}
+                            getValue={() => {
+                                const value = frequency.getUpdate();
+                                return value >= 1000 ? 0 : value;
+                            }}
                             safeRangeMin={frequency.range[0]!!}
                             safeRangeMax={frequency.range[1]!!}
                             warningRangeMin={frequency.warningRange[0]!!}

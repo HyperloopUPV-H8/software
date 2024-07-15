@@ -1,4 +1,4 @@
-@use "../../../styles/fonts.scss";
+@use '../../../styles/fonts.scss';
 
 .textData {
     display: flex;
@@ -17,7 +17,7 @@
         font-size: map-get($map: fonts.$font-sizes, $key: x-small);
         font-weight: map-get($map: fonts.$font-weights, $key: light);
         font-style: italic;
-        font-size: .6rem;
+        font-size: 0.6rem;
     }
 
     .value {
@@ -31,5 +31,11 @@
         font-family: map-get($map: fonts.$font-families, $key: roboto);
         font-size: map-get($map: fonts.$font-sizes, $key: small);
         font-weight: map-get($map: fonts.$font-weights, $key: normal);
+    }
+
+    .min,
+    .max {
+        font-weight: 300;
+        font-size: 12px;
     }
 }

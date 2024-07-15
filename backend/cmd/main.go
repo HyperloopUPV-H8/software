@@ -248,17 +248,11 @@ func main() {
 	for _, board := range info.Addresses.Boards {
 		boardIps = append(boardIps, board)
 	}
-	err = source.SetBPFFilter(getFilter(boardIps, info.Addresses.Backend, info.Ports.UDP, info.Ports.TcpClient, info.Ports.TcpServer))
+	err = source.SetBPFFilter(getFilter(boardIps, info.Addresses.Backend, info.Ports.UDP))
 	if err != nil {
 		panic("failed to compile bpf filter")
 	}
-	go func() {
-		sniffer := sniffer.New(source, &layers.LayerTypeEthernet, trace.Logger)
-		for {
-			errChan := transp.HandleSniffer(sniffer)
-			trace.Error().Stack().Err(<-errChan).Msg("sniffer crashed, restarting...")
-		}
-	}()
+	go transp.HandleSniffer(sniffer.New(source, &layers.LayerTypeEthernet, trace.Logger))
 
 	// <--- http server --->
 	podDataHandle, err := h.HandleDataJSON("podData.json", pod_data.GetDataOnlyPodData(podData))
@@ -534,15 +528,11 @@ func getOps(units utils.Units) data.ConversionDescriptor {
 	return output
 }
 
-func getFilter(boardAddrs []net.IP, backendAddr net.IP, udpPort uint16, tcpClientPort uint16, tcpServerPort uint16) string {
+func getFilter(boardAddrs []net.IP, backendAddr net.IP, udpPort uint16) string {
 	ipipFilter := getIPIPfilter()
-	udpFilter := getUDPFilter(boardAddrs, udpPort)
-	tcpFilter := getTCPFilter(boardAddrs, tcpServerPort, tcpClientPort)
-	// noBackend := "not host 192.168.0.9"
+	udpFilter := getUDPFilter(boardAddrs, backendAddr, udpPort)
 
-	// filter := fmt.Sprintf("((%s) or (%s) or (%s)) and (%s)", ipipFilter, udpFilter, tcpFilter, noBackend)
-
-	filter := fmt.Sprintf("(%s) or (%s) or (%s)", ipipFilter, udpFilter, tcpFilter)
+	filter := fmt.Sprintf("(%s) or (%s)", ipipFilter, udpFilter)
 
 	trace.Trace().Any("addrs", boardAddrs).Str("filter", filter).Msg("new filter")
 	return filter
@@ -552,7 +542,7 @@ func getIPIPfilter() string {
 	return "ip[9] == 4"
 }
 
-func getUDPFilter(addrs []net.IP, port uint16) string {
+func getUDPFilter(addrs []net.IP, backendAddr net.IP, port uint16) string {
 	udpPort := fmt.Sprintf("udp port %d", port)
 	udpAddrs := common.Map(addrs, func(addr net.IP) string {
 		return fmt.Sprintf("(src host %s)", addr)
@@ -560,27 +550,5 @@ func getUDPFilter(addrs []net.IP, port uint16) string {
 
 	udpAddrsStr := strings.Join(udpAddrs, " or ")
 
-	return fmt.Sprintf("(%s) and (%s)", udpPort, udpAddrsStr)
-}
-
-func getTCPFilter(addrs []net.IP, serverPort uint16, clientPort uint16) string {
-	ports := fmt.Sprintf("tcp port %d or %d", serverPort, clientPort)
-	notSynFinRst := "tcp[tcpflags] & (tcp-fin | tcp-syn | tcp-rst) == 0"
-	notJustAck := "tcp[tcpflags] | tcp-ack != 16"
-	nonZeroPayload := "tcp[tcpflags] & tcp-push != 0"
-
-	srcAddresses := common.Map(addrs, func(addr net.IP) string {
-		return fmt.Sprintf("(src host %s)", addr)
-	})
-
-	srcAddressesStr := strings.Join(srcAddresses, " or ")
-
-	dstAddresses := common.Map(addrs, func(addr net.IP) string {
-		return fmt.Sprintf("(dst host %s)", addr)
-	})
-
-	dstAddressesStr := strings.Join(dstAddresses, " or ")
-
-	filter := fmt.Sprintf("(%s) and (%s) and (%s) and (%s) and (%s) and (%s)", ports, notSynFinRst, notJustAck, nonZeroPayload, srcAddressesStr, dstAddressesStr)
-	return filter
+	return fmt.Sprintf("(%s) and (%s) and (dst host %s)", udpPort, udpAddrsStr, backendAddr)
 }

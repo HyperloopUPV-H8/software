@@ -11,14 +11,17 @@ import (
 )
 
 func NewTransport(baseLogger zerolog.Logger) *Transport {
-	return &Transport{
+	transport := &Transport{
 		connectionsMx: &sync.Mutex{},
 		connections:   make(map[abstraction.TransportTarget]net.Conn),
 		idToTarget:    make(map[abstraction.PacketId]abstraction.TransportTarget),
 		ipToTarget:    make(map[string]abstraction.TransportTarget),
 
-		logger: baseLogger,
+		logger:  baseLogger,
+		errChan: make(chan error, 100),
 	}
+	go transport.consumeErrors()
+	return transport
 }
 
 func (transport *Transport) WithDecoder(decoder *presentation.Decoder) *Transport {

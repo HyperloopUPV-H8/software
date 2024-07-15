@@ -64,4 +64,5 @@ export enum ObccuMeasurements {
     imdState = 'OBCCU/STATUS',
     contactorsState = 'OBCCU/contactors_state',
     generalState = 'OBCCU/Board_state',
+    outputVoltage = 'VCU/output_voltage',
 }

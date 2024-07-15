@@ -89,11 +89,11 @@ func (sniffer *Sniffer) ReadNext() (network.Payload, error) {
 				socket.SrcPort = uint16(udp.SrcPort)
 				socket.DstPort = uint16(udp.DstPort)
 				gotPorts = true
-			case layers.LayerTypeTCP:
-				tcp := sniffer.decoder.TCP()
-				socket.SrcPort = uint16(tcp.SrcPort)
-				socket.DstPort = uint16(tcp.DstPort)
-				gotPorts = true
+				// case layers.LayerTypeTCP:
+				// 	tcp := sniffer.decoder.TCP()
+				// 	socket.SrcPort = uint16(tcp.SrcPort)
+				// 	socket.DstPort = uint16(tcp.DstPort)
+				// 	gotPorts = true
 			}
 		}
 

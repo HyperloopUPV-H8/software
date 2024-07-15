@@ -41,6 +41,8 @@ export const GaugeTag = memo(
                     name={name}
                     units={units}
                     value={value}
+                    min={min}
+                    max={max}
                     lostConnection={lostConnection}
                 ></TextData>
             </article>
