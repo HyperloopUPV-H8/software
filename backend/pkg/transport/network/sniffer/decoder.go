@@ -6,10 +6,10 @@ import (
 )
 
 type decoder struct {
-	eth    layers.Ethernet
-	ipv4   layers.IPv4
-	ipipv4 layers.IPv4
-	// tcp     layers.TCP
+	eth     layers.Ethernet
+	ipv4    layers.IPv4
+	ipipv4  layers.IPv4
+	tcp     layers.TCP
 	udp     layers.UDP
 	payload gopacket.Payload
 
@@ -18,7 +18,7 @@ type decoder struct {
 
 func newDecoder(first gopacket.LayerType) *decoder {
 	dec := new(decoder)
-	dec.parser = gopacket.NewDecodingLayerParser(first, &dec.eth, &dec.ipv4, &dec.ipipv4, &dec.udp, &dec.payload)
+	dec.parser = gopacket.NewDecodingLayerParser(first, &dec.eth, &dec.ipv4, &dec.ipipv4, &dec.tcp, &dec.udp, &dec.payload)
 	dec.parser.IgnoreUnsupported = true
 	return dec
 
@@ -36,6 +36,10 @@ func (dec *decoder) IPv4() layers.IPv4 {
 
 func (dec *decoder) UDP() layers.UDP {
 	return dec.udp
+}
+
+func (dec *decoder) TCP() layers.TCP {
+	return dec.tcp
 }
 
 func (dec *decoder) Payload() []byte {
