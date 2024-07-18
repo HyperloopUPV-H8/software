@@ -63,6 +63,7 @@ var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 var enableSNTP = flag.Bool("sntp", false, "enables a simple SNTP server on port 123")
 var networkDevice = flag.Int("dev", -1, "index of the network device to use, overrides device prompt")
 var blockprofile = flag.Int("blockprofile", 0, "number of block profiles to include")
+var playbackFile = flag.String("playback", "", "")
 
 func main() {
 	flag.Parse()
@@ -244,11 +245,21 @@ func main() {
 	if err != nil {
 		panic("failed to obtain sniffer source: " + err.Error())
 	}
+
+	if *playbackFile != "" {
+		source, err = pcap.OpenOffline(*playbackFile)
+		if err != nil {
+			panic("failed to obtain sniffer source: " + err.Error())
+		}
+	}
+
 	boardIps := make([]net.IP, 0)
 	for _, board := range info.Addresses.Boards {
 		boardIps = append(boardIps, board)
 	}
-	err = source.SetBPFFilter(getFilter(boardIps, info.Addresses.Backend, info.Ports.UDP))
+	filter := getFilter(boardIps, info.Addresses.Backend, info.Ports.UDP)
+	trace.Warn().Str("filter", filter).Msg("filter")
+	err = source.SetBPFFilter(filter)
 	if err != nil {
 		panic("failed to compile bpf filter")
 	}

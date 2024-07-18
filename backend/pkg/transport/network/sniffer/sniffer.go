@@ -76,6 +76,7 @@ func (sniffer *Sniffer) ReadNext() (network.Payload, error) {
 	gotPorts := false
 	gotIp := false
 	layerArr := zerolog.Arr()
+	payloadData := []byte{}
 	for _, layer := range packetLayers {
 		if !gotIp && layer == layers.LayerTypeIPv4 {
 			ip := sniffer.decoder.IPv4()
@@ -94,6 +95,8 @@ func (sniffer *Sniffer) ReadNext() (network.Payload, error) {
 				socket.SrcPort = uint16(tcp.SrcPort)
 				socket.DstPort = uint16(tcp.DstPort)
 				gotPorts = true
+			case gopacket.LayerTypePayload:
+				payloadData = sniffer.decoder.Payload()
 			}
 		}
 
@@ -123,7 +126,7 @@ func (sniffer *Sniffer) ReadNext() (network.Payload, error) {
 
 	return network.Payload{
 		Socket:    socket,
-		Data:      sniffer.decoder.Payload(),
+		Data:      payloadData,
 		Timestamp: captureInfo.Timestamp,
 	}, nil
 }
