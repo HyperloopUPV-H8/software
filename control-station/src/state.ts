@@ -1,6 +1,7 @@
 import {
     BmslMeasurements,
     EnumMeasurement,
+    LcuMeasurements,
     Measurement,
     ObccuMeasurements,
     PcuMeasurements,
@@ -68,6 +69,10 @@ const enumStates: { [meas_id: string]: { [enum_variant: string]: State } } = {
         OPERATIONAL: 'stable',
     },
     [VcuMeasurements.generalState]: {
+        FAULT: 'fault',
+        OPERATIONAL: 'stable',
+    },
+    [LcuMeasurements.generalState]: {
         FAULT: 'fault',
         OPERATIONAL: 'stable',
     },

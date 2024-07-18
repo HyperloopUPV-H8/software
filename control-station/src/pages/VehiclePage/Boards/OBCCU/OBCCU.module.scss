@@ -5,12 +5,14 @@
     flex-flow: row;
     justify-content: space-between;
     gap: 0.5rem;
+    width: 100%;
 
     .column {
         display: flex;
         flex-flow: column;
         justify-content: space-between;
         gap: 0.5rem;
+        width: 100%;
     }
 }
 
