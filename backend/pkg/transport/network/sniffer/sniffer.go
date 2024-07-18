@@ -95,9 +95,11 @@ func (sniffer *Sniffer) ReadNext() (network.Payload, error) {
 				socket.SrcPort = uint16(tcp.SrcPort)
 				socket.DstPort = uint16(tcp.DstPort)
 				gotPorts = true
-			case gopacket.LayerTypePayload:
-				payloadData = sniffer.decoder.Payload()
 			}
+		}
+
+		if layer == gopacket.LayerTypePayload {
+			payloadData = sniffer.decoder.Payload()
 		}
 
 		layerArr = layerArr.Str(layer.String())
