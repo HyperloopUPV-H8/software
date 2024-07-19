@@ -54,8 +54,7 @@ export const emergencyStopOrders: Order[] = [
 ];
 
 export const desiredOrders = [
-    0, 902, 903, 215, 216, 210, 355, 356, 357, 360, 609, 619, 614, 615, 621,
-    625, 293, 294,
+    0, 902, 903, 216, 210, 355, 356, 357, 360, 609, 619, 614, 293, 294,
 ];
 
 export function getHardcodedOrders(boardOrders: BoardOrders[]): BoardOrders[] {
