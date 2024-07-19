@@ -22,14 +22,6 @@ export default function FixedOrders(_: Props) {
                 brightness={1.3}
             />
             <BigOrderButton
-                orders={brakeOrders}
-                label="Brake / Stop"
-                shortcut="b"
-                icon={<BrakeIcon />}
-                className={`${styles.emergency_button} ${styles.brake_stop}`}
-                brightness={1.8}
-            />
-            <BigOrderButton
                 orders={emergencyStopOrders}
                 label="Emergency Stop"
                 shortcut=" "
