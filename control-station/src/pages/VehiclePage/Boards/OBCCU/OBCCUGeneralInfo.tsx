@@ -1,4 +1,8 @@
-import { ObccuMeasurements, useMeasurementsStore } from 'common';
+import {
+    LcuMeasurements,
+    ObccuMeasurements,
+    useMeasurementsStore,
+} from 'common';
 import { IndicatorStack } from 'components/IndicatorStack/IndicatorStack';
 import { StateIndicator } from 'components/StateIndicator/StateIndicator';
 import { Window } from 'components/Window/Window';
@@ -19,9 +23,21 @@ export const OBCCUGeneralInfo = () => {
         ObccuMeasurements.dischargeCurrent
     );
 
-    const outputVoltage = getNumericMeasurementInfo(
+    const mainOutputVoltage = getNumericMeasurementInfo(
         ObccuMeasurements.outputVoltage
     );
+    const individualOutputVoltages = [
+        getNumericMeasurementInfo(LcuMeasurements.busVoltage1),
+        getNumericMeasurementInfo(LcuMeasurements.busVoltage2),
+        getNumericMeasurementInfo(LcuMeasurements.busVoltage3),
+        getNumericMeasurementInfo(LcuMeasurements.busVoltage4),
+        getNumericMeasurementInfo(LcuMeasurements.busVoltage5),
+        getNumericMeasurementInfo(LcuMeasurements.busVoltage6),
+        getNumericMeasurementInfo(LcuMeasurements.busVoltage7),
+        getNumericMeasurementInfo(LcuMeasurements.busVoltage8),
+        getNumericMeasurementInfo(LcuMeasurements.busVoltage9),
+        getNumericMeasurementInfo(LcuMeasurements.busVoltage10),
+    ];
 
     return (
         <Window title="OBCCU">
@@ -89,10 +105,15 @@ export const OBCCUGeneralInfo = () => {
                             id="obccu_output_voltage"
                             name={'Bus Voltage'}
                             units={'Volts'}
-                            getUpdate={outputVoltage.getUpdate}
+                            getUpdate={() =>
+                                individualOutputVoltages.reduce(
+                                    (prev, curr) => prev + curr.getUpdate(),
+                                    0
+                                ) / individualOutputVoltages.length
+                            }
                             strokeWidth={120}
-                            min={outputVoltage.warningRange[0] ?? 225}
-                            max={outputVoltage.warningRange[1] ?? 252}
+                            min={mainOutputVoltage.warningRange[0] ?? 225}
+                            max={mainOutputVoltage.warningRange[1] ?? 252}
                         />
                     </div>
                 </div>

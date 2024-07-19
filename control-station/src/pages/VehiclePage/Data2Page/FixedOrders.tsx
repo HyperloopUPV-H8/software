@@ -7,6 +7,9 @@ import styles from './FixedOrders.module.scss';
 
 export type Props = {};
 
+// ORDERS:
+//
+
 export default function FixedOrders(_: Props) {
     return (
         <div className={styles.fixed_orders}>
@@ -61,38 +64,20 @@ export const emergencyStopOrders: Order[] = [
     },
 ];
 
-export const hardcodedOrderIds = {
-    set_regulator_pressure: 210,
-    brake: 215,
-    unbrake: 216,
-    disable_emergency_tape: 217,
-    enable_emergency_tape: 218,
-    start_vertical_levitation: 356,
-    stop_levitation: 357,
-    start_horizontal_levitation: 360,
-    test_current_control: 607,
-    stop_pcu_control: 609,
-    test_speed_control: 619,
-    test_svpwm: 615,
-    open_contactors: 902,
-    close_contactors: 903,
-};
+export const desiredOrders = [
+    0, 902, 903, 215, 216, 210, 355, 356, 357, 360, 609, 619, 614, 615, 293,
+    294,
+];
 
 export function getHardcodedOrders(boardOrders: BoardOrders[]): BoardOrders[] {
-    const foundOrders = [] as OrderDescription[];
-    const wantedOrdersIds = Object.values(hardcodedOrderIds);
     for (const board of boardOrders) {
-        for (const order of board.orders) {
-            if (wantedOrdersIds.includes(order.id)) {
-                foundOrders.push(order);
-            }
-        }
-        for (const stateOrder of board.stateOrders) {
-            if (wantedOrdersIds.includes(stateOrder.id)) {
-                foundOrders.push(stateOrder);
-            }
-        }
+        board.orders = board.orders.filter((order) =>
+            desiredOrders.includes(order.id)
+        );
+        board.stateOrders = board.stateOrders.filter((order) =>
+            desiredOrders.includes(order.id)
+        );
     }
 
-    return [{ name: 'General Orders', orders: foundOrders, stateOrders: [] }];
+    return boardOrders;
 }

@@ -22,7 +22,7 @@ export const Data2Page = () => {
             <div className={styles.column}>
                 <Window title="Orders" className={styles.orders}>
                     <div className={styles.order_column}>
-                        <Orders boards={boardOrders} />
+                        <Orders boards={getHardcodedOrders(boardOrders)} />
                         <FixedOrders />
                     </div>
                 </Window>

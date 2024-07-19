@@ -33,6 +33,16 @@ export const LcuMeasurements = {
     rotationRoll: 'LCU/pos_rot_x',
     rotationYaw: 'LCU/pos_rot_z',
     generalState: 'LCU/general_state',
+    busVoltage1: 'LCU/lcu_vbat_1',
+    busVoltage2: 'LCU/lcu_vbat_2',
+    busVoltage3: 'LCU/lcu_vbat_3',
+    busVoltage4: 'LCU/lcu_vbat_4',
+    busVoltage5: 'LCU/lcu_vbat_5',
+    busVoltage6: 'LCU/lcu_vbat_6',
+    busVoltage7: 'LCU/lcu_vbat_7',
+    busVoltage8: 'LCU/lcu_vbat_8',
+    busVoltage9: 'LCU/lcu_vbat_9',
+    busVoltage10: 'LCU/lcu_vbat_10',
 };
 
 export const LcuOrders = {
