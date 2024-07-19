@@ -7,9 +7,6 @@ import styles from './FixedOrders.module.scss';
 
 export type Props = {};
 
-// ORDERS:
-//
-
 export default function FixedOrders(_: Props) {
     return (
         <div className={styles.fixed_orders}>
