@@ -8,6 +8,7 @@ import { BMSL } from '../Boards/BMSL/BMSL';
 import { useEmergencyOrders } from 'hooks/useEmergencyOrders';
 import Connections from '../Windows/Connections';
 import { Connection, useConnections } from 'common';
+import { PCU } from '../Boards/PCU/PCU';
 
 export const Data1Page = () => {
     useEmergencyOrders();
@@ -32,7 +33,7 @@ export const Data1Page = () => {
             </div>
 
             <div className={styles.column}>
-                <BCU />
+                <PCU />
                 <Connections />
             </div>
         </div>

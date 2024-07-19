@@ -1,7 +1,7 @@
 .fixed_orders {
     display: grid;
     grid-template:
-        'open_contactors brake_stop'
+        'open_contactors open_contactors'
         'emergency_stop emergency_stop'
         / 1fr 1fr;
     gap: 1rem;

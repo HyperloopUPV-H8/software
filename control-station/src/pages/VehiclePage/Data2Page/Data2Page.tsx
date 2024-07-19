@@ -16,19 +16,6 @@ export const Data2Page = () => {
             </div>
 
             <div className={styles.column}>
-                <PCU />
-            </div>
-
-            <div className={styles.column}>
-                <Window title="Orders" className={styles.orders}>
-                    <div className={styles.order_column}>
-                        <Orders boards={getHardcodedOrders(boardOrders)} />
-                        <FixedOrders />
-                    </div>
-                </Window>
-            </div>
-
-            <div className={styles.column}>
                 <Window title="Messages" className={styles.messages}>
                     <MessagesContainer />
                 </Window>
@@ -39,6 +26,15 @@ export const Data2Page = () => {
 
                 <Window title="Logger">
                     <Logger />
+                </Window>
+            </div>
+
+            <div className={styles.column}>
+                <Window title="Orders" className={styles.orders}>
+                    <div className={styles.order_column}>
+                        <Orders boards={getHardcodedOrders(boardOrders)} />
+                        <FixedOrders />
+                    </div>
                 </Window>
             </div>
         </div>
