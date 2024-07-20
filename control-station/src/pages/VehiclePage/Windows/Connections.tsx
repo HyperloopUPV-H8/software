@@ -24,6 +24,10 @@ export default function Connections(_: Props) {
                             icon={plugIcon}
                             measurementId={VcuMeasurements.generalState}
                         />
+                        <StateIndicator
+                            icon={plugIcon}
+                            measurementId={VcuMeasurements.specificState}
+                        />
                     </IndicatorStack>
                 </div>
                 <div className={styles.row}>
@@ -46,6 +50,10 @@ export default function Connections(_: Props) {
                             <StateIndicator
                                 icon={plugIcon}
                                 measurementId={PcuMeasurements.generalState}
+                            />
+                            <StateIndicator
+                                icon={plugIcon}
+                                measurementId={PcuMeasurements.specificState}
                             />
                             <StateIndicator
                                 icon={plugIcon}
