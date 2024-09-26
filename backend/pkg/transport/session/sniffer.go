@@ -1,6 +1,7 @@
 package session
 
 import (
+	"errors"
 	"fmt"
 	"io"
 
@@ -61,12 +62,17 @@ func (demux *SnifferDemux) ReadPackets(reader packetReader) {
 	for {
 		payload, err := reader.ReadNext()
 		if err != nil {
+			if errors.Is(err, io.EOF) {
+				close(demux.errorChan)
+				return
+			}
+
 			if _, ok := err.(sniffer.ErrMissingLayers); ok {
 				continue
 			}
 			demux.logger.Error().Stack().Err(err).Msg("read next")
 			demux.errorChan <- err
-			return
+			continue
 		}
 		payloadLogger := demux.logger.With().Str(
 			"from", fmt.Sprintf("%s:%d", payload.Socket.SrcIP, payload.Socket.SrcPort),

@@ -1,4 +1,8 @@
-import { ObccuMeasurements, useMeasurementsStore } from 'common';
+import {
+    LcuMeasurements,
+    ObccuMeasurements,
+    useMeasurementsStore,
+} from 'common';
 import { IndicatorStack } from 'components/IndicatorStack/IndicatorStack';
 import { StateIndicator } from 'components/StateIndicator/StateIndicator';
 import { Window } from 'components/Window/Window';
@@ -19,6 +23,22 @@ export const OBCCUGeneralInfo = () => {
         ObccuMeasurements.dischargeCurrent
     );
 
+    const mainOutputVoltage = getNumericMeasurementInfo(
+        ObccuMeasurements.outputVoltage
+    );
+    const individualOutputVoltages = [
+        getNumericMeasurementInfo(LcuMeasurements.busVoltage1),
+        getNumericMeasurementInfo(LcuMeasurements.busVoltage2),
+        getNumericMeasurementInfo(LcuMeasurements.busVoltage3),
+        getNumericMeasurementInfo(LcuMeasurements.busVoltage4),
+        getNumericMeasurementInfo(LcuMeasurements.busVoltage5),
+        getNumericMeasurementInfo(LcuMeasurements.busVoltage6),
+        getNumericMeasurementInfo(LcuMeasurements.busVoltage7),
+        getNumericMeasurementInfo(LcuMeasurements.busVoltage8),
+        getNumericMeasurementInfo(LcuMeasurements.busVoltage9),
+        getNumericMeasurementInfo(LcuMeasurements.busVoltage10),
+    ];
+
     return (
         <Window title="OBCCU">
             <div
@@ -36,13 +56,6 @@ export const OBCCUGeneralInfo = () => {
                         gap: '.5rem',
                     }}
                 >
-                    <IndicatorStack>
-                        <StateIndicator
-                            measurementId={ObccuMeasurements.generalState}
-                            icon={pluggedIcon}
-                        />
-                    </IndicatorStack>
-
                     <div
                         style={{
                             display: 'flex',
@@ -79,6 +92,30 @@ export const OBCCUGeneralInfo = () => {
                             icon={thunderIcon}
                         />
                     </IndicatorStack>
+
+                    <div
+                        style={{
+                            display: 'flex',
+                            gap: '1rem',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <GaugeTag
+                            id="obccu_output_voltage"
+                            name={'Bus Voltage'}
+                            units={'Volts'}
+                            getUpdate={() =>
+                                individualOutputVoltages.reduce(
+                                    (prev, curr) => prev + curr.getUpdate(),
+                                    0
+                                ) / individualOutputVoltages.length
+                            }
+                            strokeWidth={120}
+                            min={mainOutputVoltage.warningRange[0] ?? 225}
+                            max={mainOutputVoltage.warningRange[1] ?? 252}
+                        />
+                    </div>
                 </div>
             </div>
         </Window>

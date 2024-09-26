@@ -68,16 +68,6 @@ export const LevitationUnit = ({ unitIndex, kind, imageSide }: Props) => {
             ? getNumericMeasurementInfo(airgapMeasurements[unitIndex + 2])
             : undefined;
 
-    console.log(
-        unitIndex,
-        currentMeasurements[unitIndex],
-        temperatureMeasurements[unitIndex],
-        airgapMeasurements[unitIndex],
-        current,
-        temperature,
-        airgap
-    );
-
     return (
         <div className={styles.levitationUnitWrapper}>
             {imageSide === 'left' &&
@@ -91,8 +81,8 @@ export const LevitationUnit = ({ unitIndex, kind, imageSide }: Props) => {
                                       2
                                 : airgap.getUpdate
                         }
-                        rangeMin={airgap.warningRange[0] ?? 0}
-                        rangeMax={airgap.warningRange[1] ?? 0}
+                        rangeMin={airgap.warningRange[0]!!}
+                        rangeMax={airgap.warningRange[1]!!}
                         side={imageSide}
                     />
                 ) : (
@@ -105,34 +95,44 @@ export const LevitationUnit = ({ unitIndex, kind, imageSide }: Props) => {
                                       2
                                 : airgap.getUpdate
                         }
-                        rangeMin={airgap.warningRange[0] ?? 0}
-                        rangeMax={airgap.warningRange[1] ?? 0}
+                        rangeMin={airgap.warningRange[0]!!}
+                        rangeMax={airgap.warningRange[1]!!}
                     />
                 ))}
-            <IndicatorStack>
+            <IndicatorStack className={styles.levitationUnitMeasurements}>
                 <BarIndicator
                     icon={batteryFilled}
-                    title="Current"
+                    name="Current"
                     getValue={current.getUpdate}
                     units={current.units}
-                    safeRangeMin={current.range[0] ?? -25}
-                    safeRangeMax={current.range[1] ?? 25}
-                    warningRangeMin={current.warningRange[0] ?? -50}
-                    warningRangeMax={current.warningRange[1] ?? 50}
+                    safeRangeMin={current.range[0]!!}
+                    safeRangeMax={current.range[1]!!}
+                    warningRangeMin={current.warningRange[0]!!}
+                    warningRangeMax={current.warningRange[1]!!}
                 />
                 <BarIndicator
                     icon={thermometerFilled}
-                    title="Temperature"
+                    name="Temperature"
                     getValue={temperature.getUpdate}
                     units={temperature.units}
-                    safeRangeMin={temperature.range[0] ?? 0}
-                    safeRangeMax={temperature.range[1] ?? 40}
-                    warningRangeMin={temperature.warningRange[0] ?? -10}
-                    warningRangeMax={temperature.warningRange[1] ?? 80}
+                    safeRangeMin={temperature.range[0]!!}
+                    safeRangeMax={temperature.range[1]!!}
+                    warningRangeMin={temperature.warningRange[0]!!}
+                    warningRangeMax={temperature.warningRange[1]!!}
                 />
                 <BarIndicator
                     icon={airgapIcon}
-                    title="Airgap"
+                    name="Airgap"
+                    color={
+                        unitIndex == 6 || unitIndex == 7
+                            ? 'transparent'
+                            : undefined
+                    }
+                    backgroundColor={
+                        unitIndex == 6 || unitIndex == 7
+                            ? 'transparent'
+                            : undefined
+                    }
                     getValue={
                         unitIndex == 6 || unitIndex == 7
                             ? () =>
@@ -141,10 +141,26 @@ export const LevitationUnit = ({ unitIndex, kind, imageSide }: Props) => {
                             : airgap.getUpdate
                     }
                     units={airgap.units}
-                    safeRangeMin={airgap.range[0] ?? 0}
-                    safeRangeMax={airgap.range[1] ?? 0}
-                    warningRangeMin={airgap.warningRange[0] ?? 0}
-                    warningRangeMax={airgap.warningRange[1] ?? 0}
+                    safeRangeMin={
+                        unitIndex == 6 || unitIndex == 7
+                            ? null!!
+                            : airgap.range[0]!!
+                    }
+                    safeRangeMax={
+                        unitIndex == 6 || unitIndex == 7
+                            ? null!!
+                            : airgap.range[1]!!
+                    }
+                    warningRangeMin={
+                        unitIndex == 6 || unitIndex == 7
+                            ? null!!
+                            : airgap.warningRange[0]!!
+                    }
+                    warningRangeMax={
+                        unitIndex == 6 || unitIndex == 7
+                            ? null!!
+                            : airgap.warningRange[1]!!
+                    }
                 />
             </IndicatorStack>
             {imageSide === 'right' &&
@@ -158,8 +174,8 @@ export const LevitationUnit = ({ unitIndex, kind, imageSide }: Props) => {
                                       2
                                 : airgap.getUpdate
                         }
-                        rangeMin={airgap.warningRange[0] ?? 0}
-                        rangeMax={airgap.warningRange[1] ?? 0}
+                        rangeMin={airgap.warningRange[0]!!}
+                        rangeMax={airgap.warningRange[1]!!}
                         side={imageSide}
                     />
                 ) : (
@@ -172,8 +188,8 @@ export const LevitationUnit = ({ unitIndex, kind, imageSide }: Props) => {
                                       2
                                 : airgap.getUpdate
                         }
-                        rangeMin={airgap.warningRange[0] ?? 0}
-                        rangeMax={airgap.warningRange[1] ?? 0}
+                        rangeMin={airgap.warningRange[0]!!}
+                        rangeMax={airgap.warningRange[1]!!}
                     />
                 ))}
         </div>

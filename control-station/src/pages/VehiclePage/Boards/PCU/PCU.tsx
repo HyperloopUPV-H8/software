@@ -8,6 +8,8 @@ import thermometerIcon from 'assets/svg/thermometer-filled.svg';
 import { StateIndicator } from 'components/StateIndicator/StateIndicator';
 import thunderIcon from 'assets/svg/thunder-filled.svg';
 import pluggedIcon from 'assets/svg/plugged-icon.svg';
+import { LostConnectionContext } from 'services/connections';
+import { useContext } from 'react';
 
 export const PCU = () => {
     const getNumericMeasurementInfo = useMeasurementsStore(
@@ -44,6 +46,8 @@ export const PCU = () => {
 
     const frequency = getNumericMeasurementInfo(PcuMeasurements.frequency);
 
+    const lostConnection = useContext(LostConnectionContext);
+
     return (
         <Window title="PCU">
             <div className={styles.container}>
@@ -57,14 +61,29 @@ export const PCU = () => {
                                 className={styles.chart}
                                 length={35}
                                 items={[
-                                    motorACurrentU,
-                                    motorACurrentV,
-                                    motorACurrentW,
+                                    lostConnection
+                                        ? {
+                                              ...motorACurrentU,
+                                              getUpdate: () => 0,
+                                          }
+                                        : motorACurrentU,
+                                    lostConnection
+                                        ? {
+                                              ...motorACurrentV,
+                                              getUpdate: () => 0,
+                                          }
+                                        : motorACurrentV,
+                                    lostConnection
+                                        ? {
+                                              ...motorACurrentW,
+                                              getUpdate: () => 0,
+                                          }
+                                        : motorACurrentW,
                                 ]}
                             />
                             <IndicatorStack>
                                 <BarIndicator
-                                    title="Peak current"
+                                    name="Peak current"
                                     icon={thunderIcon}
                                     getValue={motorAPeakCurrent.getUpdate}
                                     safeRangeMin={motorAPeakCurrent.range[0]!!}
@@ -78,7 +97,7 @@ export const PCU = () => {
                                     units={motorAPeakCurrent.units}
                                 />
                                 <BarIndicator
-                                    title="Current U"
+                                    name="Current U"
                                     icon={thunderIcon}
                                     getValue={motorACurrentU.getUpdate}
                                     safeRangeMin={motorACurrentU.range[0]!!}
@@ -94,7 +113,7 @@ export const PCU = () => {
                                     backgroundColor="#FFE7CF"
                                 />
                                 <BarIndicator
-                                    title="Current V"
+                                    name="Current V"
                                     icon={thunderIcon}
                                     getValue={motorACurrentV.getUpdate}
                                     safeRangeMin={motorACurrentV.range[0]!!}
@@ -110,7 +129,7 @@ export const PCU = () => {
                                     backgroundColor="#CEF3FF"
                                 />
                                 <BarIndicator
-                                    title="Current W"
+                                    name="Current W"
                                     icon={thunderIcon}
                                     getValue={motorACurrentW.getUpdate}
                                     safeRangeMin={motorACurrentW.range[0]!!}
@@ -129,7 +148,7 @@ export const PCU = () => {
 
                             <IndicatorStack>
                                 <BarIndicator
-                                    title="Temperature"
+                                    name="Temperature"
                                     icon={thermometerIcon}
                                     getValue={motorATemp.getUpdate}
                                     safeRangeMin={motorATemp.range[0]!!}
@@ -151,14 +170,29 @@ export const PCU = () => {
                                 className={styles.chart}
                                 length={35}
                                 items={[
-                                    motorBCurrentU,
-                                    motorBCurrentV,
-                                    motorBCurrentW,
+                                    lostConnection
+                                        ? {
+                                              ...motorBCurrentU,
+                                              getUpdate: () => 0,
+                                          }
+                                        : motorBCurrentU,
+                                    lostConnection
+                                        ? {
+                                              ...motorBCurrentV,
+                                              getUpdate: () => 0,
+                                          }
+                                        : motorBCurrentV,
+                                    lostConnection
+                                        ? {
+                                              ...motorBCurrentW,
+                                              getUpdate: () => 0,
+                                          }
+                                        : motorBCurrentW,
                                 ]}
                             />
                             <IndicatorStack>
                                 <BarIndicator
-                                    title="Peak current"
+                                    name="Peak current"
                                     icon={thunderIcon}
                                     getValue={motorBPeakCurrent.getUpdate}
                                     safeRangeMin={motorBPeakCurrent.range[0]!!}
@@ -172,7 +206,7 @@ export const PCU = () => {
                                     units="A"
                                 />
                                 <BarIndicator
-                                    title="Current U"
+                                    name="Current U"
                                     icon={thunderIcon}
                                     getValue={motorBCurrentU.getUpdate}
                                     safeRangeMin={motorBCurrentU.range[0]!!}
@@ -188,7 +222,7 @@ export const PCU = () => {
                                     backgroundColor="#FFE7CF"
                                 />
                                 <BarIndicator
-                                    title="Current V"
+                                    name="Current V"
                                     icon={thunderIcon}
                                     getValue={motorBCurrentV.getUpdate}
                                     safeRangeMin={motorBCurrentV.range[0]!!}
@@ -204,7 +238,7 @@ export const PCU = () => {
                                     backgroundColor="#CEF3FF"
                                 />
                                 <BarIndicator
-                                    title="Current W"
+                                    name="Current W"
                                     icon={thunderIcon}
                                     getValue={motorBCurrentW.getUpdate}
                                     safeRangeMin={motorBCurrentW.range[0]!!}
@@ -223,7 +257,7 @@ export const PCU = () => {
 
                             <IndicatorStack>
                                 <BarIndicator
-                                    title="Temperature"
+                                    name="Temperature"
                                     icon={thermometerIcon}
                                     getValue={motorBTemp.getUpdate}
                                     safeRangeMin={motorBTemp.range[0]!!}
@@ -240,14 +274,13 @@ export const PCU = () => {
                         </div>
                     </div>
                     <IndicatorStack className={styles.frequency}>
-                        <StateIndicator
-                            measurementId={PcuMeasurements.generalState}
-                            icon={pluggedIcon}
-                        />
                         <BarIndicator
-                            title="Frequency"
+                            name="Frequency"
                             icon={thunderIcon}
-                            getValue={frequency.getUpdate}
+                            getValue={() => {
+                                const value = frequency.getUpdate();
+                                return value >= 1000 ? 0 : value;
+                            }}
                             safeRangeMin={frequency.range[0]!!}
                             safeRangeMax={frequency.range[1]!!}
                             warningRangeMin={frequency.warningRange[0]!!}

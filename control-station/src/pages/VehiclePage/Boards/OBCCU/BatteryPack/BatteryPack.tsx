@@ -59,7 +59,7 @@ export const BatteryPack = memo(
             >
                 <BarIndicator
                     icon={batteryIcon}
-                    title="SoC"
+                    name="SoC"
                     getValue={stateOfChargeMeasurement.getUpdate}
                     safeRangeMin={stateOfChargeMeasurement.range[0]!!}
                     safeRangeMax={stateOfChargeMeasurement.range[1]!!}
@@ -69,7 +69,7 @@ export const BatteryPack = memo(
                 />
                 <BarIndicator
                     icon={thermometerIcon}
-                    title="Temperature"
+                    name="Temperature"
                     getValue={temperatureMeasurement.getUpdate}
                     safeRangeMin={temperatureMeasurement.range[0]!!}
                     safeRangeMax={temperatureMeasurement.range[1]!!}
@@ -79,7 +79,7 @@ export const BatteryPack = memo(
                 />
                 <BarIndicator
                     icon={thunderIcon}
-                    title="Max Cell"
+                    name="Max Cell"
                     getValue={maxCellMeasurement.getUpdate}
                     safeRangeMin={maxCellMeasurement.range[0]!!}
                     safeRangeMax={maxCellMeasurement.range[1]!!}
@@ -89,7 +89,7 @@ export const BatteryPack = memo(
                 />
                 <BarIndicator
                     icon={thunderIcon}
-                    title="Min Cell"
+                    name="Min Cell"
                     getValue={minCellMeasurement.getUpdate}
                     safeRangeMin={minCellMeasurement.range[0]!!}
                     safeRangeMax={minCellMeasurement.range[1]!!}
@@ -99,7 +99,7 @@ export const BatteryPack = memo(
                 />
                 <BarIndicator
                     icon={thunderIcon}
-                    title="Voltage"
+                    name="Voltage"
                     getValue={voltageMeasurement.getUpdate}
                     safeRangeMin={voltageMeasurement.range[0]!!}
                     safeRangeMax={voltageMeasurement.range[1]!!}

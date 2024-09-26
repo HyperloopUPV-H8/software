@@ -5,6 +5,8 @@ import { IndicatorStack } from 'components/IndicatorStack/IndicatorStack';
 import { BarIndicator } from 'components/BarIndicator/BarIndicator';
 import batteryIcon from 'assets/svg/battery-filled.svg';
 import thermometerIcon from 'assets/svg/thermometer-filled.svg';
+import { StateIndicator } from 'components/StateIndicator/StateIndicator';
+import pluggedIcon from 'assets/svg/plugged-icon.svg';
 
 export const BMSL = () => {
     const getNumericMeasurementInfo = useMeasurementsStore(
@@ -23,6 +25,9 @@ export const BMSL = () => {
 
     const totalVoltage = getNumericMeasurementInfo(
         BmslMeasurements.totalVoltage
+    );
+    const stateOfCharge = getNumericMeasurementInfo(
+        BmslMeasurements.stateOfCharge
     );
     const dischargeCurrent = getNumericMeasurementInfo(
         BmslMeasurements.dischargeCurrent
@@ -44,6 +49,8 @@ export const BMSL = () => {
                         display: 'flex',
                         flexFlow: 'row',
                         gap: '.5rem',
+                        justifyContent: 'center',
+                        alignItems: 'center',
                     }}
                 >
                     <GaugeTag
@@ -56,12 +63,12 @@ export const BMSL = () => {
                         max={totalVoltage.warningRange[1] ?? 252}
                     />
                     <GaugeTag
-                        id="bmsl_general_current"
+                        id="bmsl_discharge_current"
                         name={'Current'}
                         units={'Amps'}
                         getUpdate={dischargeCurrent.getUpdate}
                         strokeWidth={120}
-                        min={dischargeCurrent.warningRange[0] ?? 0}
+                        min={dischargeCurrent.warningRange[0] ?? 20}
                         max={dischargeCurrent.warningRange[1] ?? 100}
                     />
                 </div>
@@ -69,7 +76,20 @@ export const BMSL = () => {
                 <IndicatorStack>
                     <BarIndicator
                         icon={batteryIcon}
-                        title="Cell 1"
+                        name="SoC"
+                        getValue={stateOfCharge.getUpdate}
+                        safeRangeMin={stateOfCharge.range[0]!!}
+                        safeRangeMax={stateOfCharge.range[1]!!}
+                        warningRangeMin={stateOfCharge.warningRange[0]!!}
+                        warningRangeMax={stateOfCharge.warningRange[1]!!}
+                        units={stateOfCharge.units}
+                    />
+                </IndicatorStack>
+
+                <IndicatorStack>
+                    <BarIndicator
+                        icon={batteryIcon}
+                        name="Cell 1"
                         getValue={cell1.getUpdate}
                         safeRangeMin={cell1.range[0]!!}
                         safeRangeMax={cell1.range[1]!!}
@@ -79,7 +99,7 @@ export const BMSL = () => {
                     />
                     <BarIndicator
                         icon={batteryIcon}
-                        title="Cell 2"
+                        name="Cell 2"
                         getValue={cell2.getUpdate}
                         safeRangeMin={cell2.range[0]!!}
                         safeRangeMax={cell2.range[1]!!}
@@ -89,7 +109,7 @@ export const BMSL = () => {
                     />
                     <BarIndicator
                         icon={batteryIcon}
-                        title="Cell 3"
+                        name="Cell 3"
                         getValue={cell3.getUpdate}
                         safeRangeMin={cell3.range[0]!!}
                         safeRangeMax={cell3.range[1]!!}
@@ -99,7 +119,7 @@ export const BMSL = () => {
                     />
                     <BarIndicator
                         icon={batteryIcon}
-                        title="Cell 4"
+                        name="Cell 4"
                         getValue={cell4.getUpdate}
                         safeRangeMin={cell4.range[0]!!}
                         safeRangeMax={cell4.range[1]!!}
@@ -109,7 +129,7 @@ export const BMSL = () => {
                     />
                     <BarIndicator
                         icon={batteryIcon}
-                        title="Cell 5"
+                        name="Cell 5"
                         getValue={cell5.getUpdate}
                         safeRangeMin={cell5.range[0]!!}
                         safeRangeMax={cell5.range[1]!!}
@@ -119,7 +139,7 @@ export const BMSL = () => {
                     />
                     <BarIndicator
                         icon={batteryIcon}
-                        title="Cell 6"
+                        name="Cell 6"
                         getValue={cell6.getUpdate}
                         safeRangeMin={cell6.range[0]!!}
                         safeRangeMax={cell6.range[1]!!}
@@ -132,7 +152,7 @@ export const BMSL = () => {
                 <IndicatorStack>
                     <BarIndicator
                         icon={thermometerIcon}
-                        title="Temp 1"
+                        name="Temp 1"
                         getValue={temp1.getUpdate}
                         safeRangeMin={temp1.range[0]!!}
                         safeRangeMax={temp1.range[1]!!}
@@ -142,7 +162,7 @@ export const BMSL = () => {
                     />
                     <BarIndicator
                         icon={thermometerIcon}
-                        title="Temp 2"
+                        name="Temp 2"
                         getValue={temp2.getUpdate}
                         safeRangeMin={temp2.range[0]!!}
                         safeRangeMax={temp2.range[1]!!}

@@ -5,6 +5,8 @@ import { ColorfulChart, BcuMeasurements, useMeasurementsStore } from 'common';
 import { IndicatorStack } from 'components/IndicatorStack/IndicatorStack';
 import { BarIndicator } from 'components/BarIndicator/BarIndicator';
 import thunderIcon from 'assets/svg/thunder-filled.svg';
+import { useContext } from 'react';
+import { LostConnectionContext } from 'services/connections';
 
 export const BCU = () => {
     const getNumericMeasurementInfo = useMeasurementsStore(
@@ -31,6 +33,8 @@ export const BCU = () => {
         BcuMeasurements.bpu2CurrentW
     );
 
+    const lostConnection = useContext(LostConnectionContext);
+
     return (
         <Window title="BCU">
             <div className={styles.container}>
@@ -44,14 +48,29 @@ export const BCU = () => {
                                 className={styles.chart}
                                 length={35}
                                 items={[
-                                    bpu1CurrentU,
-                                    bpu1CurrentV,
-                                    bpu1CurrentW,
+                                    lostConnection
+                                        ? {
+                                              ...bpu1CurrentU,
+                                              getUpdate: () => 0,
+                                          }
+                                        : bpu1CurrentU,
+                                    lostConnection
+                                        ? {
+                                              ...bpu1CurrentV,
+                                              getUpdate: () => 0,
+                                          }
+                                        : bpu1CurrentV,
+                                    lostConnection
+                                        ? {
+                                              ...bpu1CurrentW,
+                                              getUpdate: () => 0,
+                                          }
+                                        : bpu1CurrentW,
                                 ]}
                             />
                             <IndicatorStack>
                                 <BarIndicator
-                                    title="Current U"
+                                    name="Current U"
                                     icon={thunderIcon}
                                     getValue={bpu1CurrentU.getUpdate}
                                     safeRangeMin={bpu1CurrentU.range[0]!!}
@@ -67,7 +86,7 @@ export const BCU = () => {
                                     backgroundColor="#FFE7CF"
                                 />
                                 <BarIndicator
-                                    title="Current V"
+                                    name="Current V"
                                     icon={thunderIcon}
                                     getValue={bpu1CurrentV.getUpdate}
                                     safeRangeMin={bpu1CurrentV.range[0]!!}
@@ -83,7 +102,7 @@ export const BCU = () => {
                                     backgroundColor="#CEF3FF"
                                 />
                                 <BarIndicator
-                                    title="Current W"
+                                    name="Current W"
                                     icon={thunderIcon}
                                     getValue={bpu1CurrentW.getUpdate}
                                     safeRangeMin={bpu1CurrentW.range[0]!!}
@@ -107,14 +126,29 @@ export const BCU = () => {
                                 className={styles.chart}
                                 length={35}
                                 items={[
-                                    bpu2CurrentU,
-                                    bpu2CurrentV,
-                                    bpu2CurrentW,
+                                    lostConnection
+                                        ? {
+                                              ...bpu2CurrentU,
+                                              getUpdate: () => 0,
+                                          }
+                                        : bpu2CurrentU,
+                                    lostConnection
+                                        ? {
+                                              ...bpu2CurrentV,
+                                              getUpdate: () => 0,
+                                          }
+                                        : bpu2CurrentV,
+                                    lostConnection
+                                        ? {
+                                              ...bpu2CurrentW,
+                                              getUpdate: () => 0,
+                                          }
+                                        : bpu2CurrentW,
                                 ]}
                             />
                             <IndicatorStack>
                                 <BarIndicator
-                                    title="Current U"
+                                    name="Current U"
                                     icon={thunderIcon}
                                     getValue={bpu2CurrentU.getUpdate}
                                     safeRangeMin={bpu2CurrentU.range[0]!!}
@@ -130,7 +164,7 @@ export const BCU = () => {
                                     backgroundColor="#FFE7CF"
                                 />
                                 <BarIndicator
-                                    title="Current V"
+                                    name="Current V"
                                     icon={thunderIcon}
                                     getValue={bpu2CurrentV.getUpdate}
                                     safeRangeMin={bpu2CurrentV.range[0]!!}
@@ -146,7 +180,7 @@ export const BCU = () => {
                                     backgroundColor="#CEF3FF"
                                 />
                                 <BarIndicator
-                                    title="Current W"
+                                    name="Current W"
                                     icon={thunderIcon}
                                     getValue={bpu2CurrentW.getUpdate}
                                     safeRangeMin={bpu2CurrentW.range[0]!!}

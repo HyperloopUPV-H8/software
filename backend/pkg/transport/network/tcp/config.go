@@ -37,9 +37,10 @@ func NewClientConfig(laddr net.Addr) ClientConfig {
 type backoffFunction = func(int) time.Duration
 
 const (
-	defaultBackoffMin time.Duration = 100 * time.Millisecond
-	defaultBackoffExp float64       = 1.5
-	defaultBackoffMax time.Duration = 5 * time.Second
+	defaultBackoffMin          time.Duration = 100 * time.Millisecond
+	defaultBackoffExp          float64       = 1.5
+	defaultBackoffMax          time.Duration = 5 * time.Second
+	defaultBackoffRetriesClamp int           = 12
 )
 
 // NewExponentialBackoff returns an exponential backoff function with the given paramenters.
@@ -47,6 +48,9 @@ const (
 // It follows this formula: delay = (min * (exp ^ n); delay < max ? delay : max
 func NewExponentialBackoff(min time.Duration, exp float64, max time.Duration) backoffFunction {
 	return func(n int) time.Duration {
+		if n > defaultBackoffRetriesClamp {
+			n = defaultBackoffRetriesClamp
+		}
 		curr := time.Duration(float64(min) * math.Trunc(math.Pow(exp, float64(n))))
 		if curr >= max {
 			return max

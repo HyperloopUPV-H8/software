@@ -9,6 +9,8 @@ import (
 const (
 	// PacketEvent is triggered when a packet is sent or received
 	PacketEvent abstraction.TransportEvent = "packet"
+	// ErrorEvent is triggered when an error arises somewhere
+	ErrorEvent abstraction.TransportEvent = "error"
 	// FileWriteEvent is used to request a file write through tftp
 	FileWriteEvent abstraction.TransportEvent = "file-push"
 	// FileReadEvent is used to request a file read through tftp

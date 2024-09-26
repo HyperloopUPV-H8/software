@@ -2,7 +2,8 @@ import styles from './BrakeVisualizer.module.scss';
 import brakeContracted from 'assets/svg/brake-contracted.svg';
 import brakeExtended from 'assets/svg/brake-extended.svg';
 import { useGlobalTicker } from 'common';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { LostConnectionContext } from 'services/connections';
 
 interface Props {
     getStatus: () => string;
@@ -11,6 +12,7 @@ interface Props {
 
 export const BrakeVisualizer = ({ getStatus, rotation }: Props) => {
     const [status, setStatus] = useState(getStatus());
+    const lostConnection = useContext(LostConnectionContext);
 
     useGlobalTicker(() => {
         setStatus(getStatus());
@@ -24,9 +26,15 @@ export const BrakeVisualizer = ({ getStatus, rotation }: Props) => {
             }}
         >
             <img
-                src={status == 'EXTENDED' ? brakeExtended : brakeContracted}
+                src={
+                    status == 'EXTENDED' || lostConnection
+                        ? brakeExtended
+                        : brakeContracted
+                }
                 alt={
-                    status == 'EXTENDED' ? 'Brake Extended' : 'Brake Contracted'
+                    status == 'EXTENDED' || lostConnection
+                        ? 'Brake Extended'
+                        : 'Brake Contracted'
                 }
             />
         </div>

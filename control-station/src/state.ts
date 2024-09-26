@@ -1,5 +1,7 @@
 import {
+    BmslMeasurements,
     EnumMeasurement,
+    LcuMeasurements,
     Measurement,
     ObccuMeasurements,
     PcuMeasurements,
@@ -38,6 +40,9 @@ const enumStates: { [meas_id: string]: { [enum_variant: string]: State } } = {
     [VcuMeasurements.lcuConnection]: {
         LCU_Connected: 'stable',
     },
+    [VcuMeasurements.bmslConnection]: {
+        BMSL_Connected: 'stable',
+    },
     [ObccuMeasurements.contactorsState]: {
         OPEN: 'stable',
         PRECHARGE: 'warning',
@@ -59,7 +64,15 @@ const enumStates: { [meas_id: string]: { [enum_variant: string]: State } } = {
         FAULT: 'fault',
         OPERATIONAL: 'stable',
     },
+    [BmslMeasurements.generalState]: {
+        FAULT: 'fault',
+        OPERATIONAL: 'stable',
+    },
     [VcuMeasurements.generalState]: {
+        FAULT: 'fault',
+        OPERATIONAL: 'stable',
+    },
+    [LcuMeasurements.generalState]: {
         FAULT: 'fault',
         OPERATIONAL: 'stable',
     },
@@ -87,8 +100,11 @@ export function getState(meas: Measurement): State {
     }
 }
 
-export function getStateFromEnum(_: EnumMeasurement): State {
-    return 'stable';
+export function getStateFromEnum(id: string, value: string): State {
+    if (enumStates[id] != undefined && enumStates[id][value] != undefined) {
+        return enumStates[id][value];
+    }
+    return 'ignore';
 }
 
 export function getStateFromRange(

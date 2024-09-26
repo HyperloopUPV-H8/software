@@ -4,29 +4,20 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/boards"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/protection"
 
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	blcu_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/blcu"
 	connection_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/connection"
-	data_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/data"
 	logger_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/logger"
 	message_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/message"
 	order_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/order"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
-	data_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/data"
 	order_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/order"
-	protection_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/protection"
-	state_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/state"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
-	blcu_packet "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/blcu"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/order"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/protection"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/state"
 	"github.com/rs/zerolog"
 )
 
@@ -44,87 +35,6 @@ type Vehicle struct {
 	ipToBoardId   map[string]abstraction.BoardId
 
 	trace zerolog.Logger
-}
-
-// Notification is the method invoked by transport to notify of a new event (e.g.packet received)
-func (vehicle *Vehicle) Notification(notification abstraction.TransportNotification) {
-	vehicle.trace.Trace().Type("notification", notification).Msg("notification")
-
-	packet, ok := notification.(transport.PacketNotification)
-	if !ok {
-		vehicle.trace.Warn().Type("notification", notification).Msg("unexpected notification type")
-		return
-	}
-
-	switch p := packet.Packet.(type) {
-	case *data.Packet:
-		update := vehicle.updateFactory.NewUpdate(p)
-		err := vehicle.broker.Push(data_topic.NewPush(&update))
-		if err != nil {
-			vehicle.trace.Error().Stack().Err(err).Msg("broker push")
-		}
-
-		err = vehicle.logger.PushRecord(&data_logger.Record{
-			Packet:    p,
-			From:      packet.From,
-			To:        packet.To,
-			Timestamp: packet.Timestamp,
-		})
-
-		if err != nil && !errors.Is(err, logger.ErrLoggerNotRunning{}) {
-			vehicle.trace.Error().Stack().Err(err).Msg("logger push")
-		}
-
-	case *protection.Packet:
-		boardId := vehicle.ipToBoardId[strings.Split(packet.From, ":")[0]]
-		err := vehicle.broker.Push(message_topic.Push(p, boardId))
-		if err != nil {
-			vehicle.trace.Error().Stack().Err(err).Msg("broker push")
-		}
-
-		err = vehicle.logger.PushRecord(&protection_logger.Record{
-			Packet:    p,
-			BoardId:   boardId,
-			From:      packet.From,
-			To:        packet.To,
-			Timestamp: packet.Timestamp,
-		})
-
-		if err != nil && !errors.Is(err, logger.ErrLoggerNotRunning{}) {
-			vehicle.trace.Error().Stack().Err(err).Msg("logger push")
-		}
-
-	case *state.Space:
-		err := vehicle.logger.PushRecord(&state_logger.Record{
-			Packet:    p,
-			From:      packet.From,
-			To:        packet.To,
-			Timestamp: packet.Timestamp,
-		})
-
-		if err != nil && !errors.Is(err, logger.ErrLoggerNotRunning{}) {
-			vehicle.trace.Error().Stack().Err(err).Msg("logger push")
-		}
-
-	case *order.Add:
-		err := vehicle.broker.Push(order_topic.NewAdd(p))
-
-		if err != nil {
-			vehicle.trace.Error().Stack().Err(err).Msg("add state orders")
-		}
-	case *order.Remove:
-		err := vehicle.broker.Push(order_topic.NewRemove(p))
-
-		if err != nil {
-			vehicle.trace.Error().Stack().Err(err).Msg("remove state orders")
-		}
-	case *blcu_packet.Ack:
-		vehicle.boards[boards.BlcuId].Notify(abstraction.BoardNotification(
-			&boards.AckNotification{
-				ID: boards.AckId,
-			},
-		))
-	}
 }
 
 // UserPush is the method invoked by boards to signal the user has sent information to the back
@@ -238,4 +148,16 @@ func (vehicle *Vehicle) ConnectionUpdate(target abstraction.TransportTarget, isC
 		vehicle.updateFactory.ClearPacketsFor(target)
 		vehicle.broker.Push(order_topic.NewStateClear(string(target)))
 	}
+}
+
+func (vehicle *Vehicle) notifyError(name string, err error) {
+	packet := protection.NewPacket(1666, protection.FaultSeverity)
+	packet.Kind = protection.ErrorHandlerKind
+	packet.Name = name
+	packet.Timestamp = protection.NowTimestamp()
+	packet.Type = protection.IntType
+	packet.Data = &protection.ErrorHandler{
+		Error: err.Error(),
+	}
+	vehicle.broker.Push(message_topic.Push(packet, 255))
 }

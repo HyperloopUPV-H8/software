@@ -15,6 +15,10 @@ func NewMovingAverage[N Numeric](order uint) *MovingAverage[N] {
 }
 
 func (avg *MovingAverage[N]) Add(value N) N {
+	if avg == nil {
+		return 0
+	}
+
 	if avg.length < avg.Order() {
 		avg.addElem(value)
 	} else {
@@ -38,6 +42,10 @@ func (avg *MovingAverage[N]) Order() int {
 }
 
 func (avg *MovingAverage[N]) Resize(order uint) N {
+	if avg == nil {
+		return 0
+	}
+
 	if order > uint(avg.Order()) {
 		avg.Grow(order - uint(avg.Order()))
 	} else if order < uint(avg.Order()) {

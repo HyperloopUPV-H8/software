@@ -3,15 +3,15 @@ import styles from './BarIndicator.module.scss';
 import {
     getPercentageFromRange,
     getStateFromRange,
-    State,
     stateToColor,
     stateToColorBackground,
 } from 'state';
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useContext, useEffect, useRef, useState } from 'react';
+import { LostConnectionContext } from 'services/connections';
 
 interface Props {
     icon?: string;
-    title: string;
+    name: string;
     getValue: () => number;
     safeRangeMin: number;
     warningRangeMin: number;
@@ -20,12 +20,13 @@ interface Props {
     units?: string;
     color?: string;
     backgroundColor?: string;
+    className?: string;
 }
 
 export const BarIndicator = memo(
     ({
         icon,
-        title,
+        name,
         getValue,
         safeRangeMin,
         warningRangeMin,
@@ -34,71 +35,66 @@ export const BarIndicator = memo(
         units,
         color,
         backgroundColor,
+        className,
     }: Props) => {
         const [valueState, setValueState] = useState<number>(0);
-        const percentage = useRef<number>(0);
-        const state = useRef<State>(
-            getStateFromRange(
-                valueState,
-                safeRangeMin,
-                safeRangeMax,
-                warningRangeMin,
-                warningRangeMax
-            )
-        );
+        const lostConnection = useContext(LostConnectionContext);
+
+        const percentage = lostConnection
+            ? 100
+            : getPercentageFromRange(
+                  valueState,
+                  warningRangeMin,
+                  warningRangeMax
+              );
+        const state = lostConnection
+            ? 'fault'
+            : getStateFromRange(
+                  valueState,
+                  safeRangeMin,
+                  safeRangeMax,
+                  warningRangeMin,
+                  warningRangeMax
+              );
 
         useGlobalTicker(() => {
             setValueState(getValue());
         });
 
-        useEffect(() => {
-            percentage.current = getPercentageFromRange(
-                valueState,
-                warningRangeMin,
-                warningRangeMax
-            );
-            state.current = getStateFromRange(
-                valueState,
-                safeRangeMin,
-                safeRangeMax,
-                warningRangeMin,
-                warningRangeMax
-            );
-        });
-
         return (
-            <div className={styles.bar_indicator}>
+            <div
+                className={`${styles.bar_indicator} ${className}`}
+                style={{
+                    backgroundColor:
+                        backgroundColor != undefined
+                            ? backgroundColor
+                            : stateToColorBackground[state],
+                }}
+            >
                 <div
-                    className={styles.background}
+                    className={styles.range_bar}
                     style={{
-                        backgroundColor:
-                            backgroundColor != undefined
-                                ? backgroundColor
-                                : stateToColorBackground[state.current],
+                        width: percentage + '%',
+                        color: color != undefined ? color : stateToColor[state],
                     }}
-                >
-                    <div
-                        className={styles.range_bar}
-                        style={{
-                            width: percentage.current + '%',
-                            color:
-                                color != undefined
-                                    ? color
-                                    : stateToColor[state.current],
-                        }}
-                    />
-                </div>
+                />
 
-                <div className={styles.infoContainer}>
-                    <div className={styles.iconName}>
-                        <img className={styles.icon} src={icon} alt="" />
-                        <div className={styles.title}>{title}</div>
-                    </div>
-                    <div className={styles.valueUnits}>
-                        <div className={styles.value}>
-                            {valueState?.toFixed(2)}
-                        </div>
-                        <div className={styles.unit}>{units}</div>
+                <div className={styles.name_display}>
+                    <img className={styles.icon} src={icon} />
+                    <p className={styles.name}>{name}</p>
+                </div>
+                <div className={styles.value_display}>
+                    <p className={styles.value}>
+                        {lostConnection ? '-.--' : valueState?.toFixed(2)}
+                    </p>
+                    <p className={styles.units}>{units}</p>
+                    <div className={styles.min_max}>
+                        <p
+                            className={styles.max}
+                        >{`max: ${warningRangeMax}`}</p>
+                        <p
+                            className={styles.min}
+                        >{`min: ${warningRangeMin}`}</p>
                     </div>
                 </div>
             </div>

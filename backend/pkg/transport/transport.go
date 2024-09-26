@@ -39,6 +39,8 @@ type Transport struct {
 	api abstraction.TransportAPI
 
 	logger zerolog.Logger
+
+	errChan chan error
 }
 
 // HandleClient connects to the specified client and handles its messages. This method blocks.
@@ -53,6 +55,7 @@ func (transport *Transport) HandleClient(config tcp.ClientConfig, remote string)
 		if err != nil {
 			transport.logger.Debug().Stack().Err(err).Str("remoteAddress", remote).Msg("dial failed")
 			if !config.TryReconnect {
+				transport.errChan <- err
 				return err
 			}
 
@@ -62,11 +65,13 @@ func (transport *Transport) HandleClient(config tcp.ClientConfig, remote string)
 		err = transport.handleTCPConn(conn)
 		if errors.Is(err, error(ErrTargetAlreadyConnected{})) {
 			transport.logger.Warn().Stack().Err(err).Str("remoteAddress", remote).Msg("multiple connections for same target")
+			transport.errChan <- err
 			return err
 		}
 		if err != nil {
 			transport.logger.Debug().Stack().Err(err).Str("remoteAddress", remote).Msg("dial failed")
 			if !config.TryReconnect {
+				transport.errChan <- err
 				return err
 			}
 
@@ -83,7 +88,9 @@ func (transport *Transport) HandleServer(config tcp.ServerConfig, local string) 
 		server.AddToWhitelist(addr)
 	}
 	server.OnConnection(transport.handleTCPConn)
-	return server.Listen()
+	err := server.Listen()
+	transport.errChan <- err
+	return err
 }
 
 // handleTCPConn is used to handle the specific TCP connections to the boards. It detects errors caused
@@ -93,12 +100,14 @@ func (transport *Transport) handleTCPConn(conn net.Conn) error {
 		transport.logger.Trace().Str("remoteAddress", conn.RemoteAddr().String()).Msg("setting connection linger")
 		err := tcpConn.SetLinger(0)
 		if err != nil {
+			transport.errChan <- err
 			transport.logger.Error().Stack().Err(err).Str("remoteAddress", conn.RemoteAddr().String()).Msg("set linger")
 		}
 
 		transport.logger.Trace().Str("remoteAddress", conn.RemoteAddr().String()).Msg("setting connection no delay")
 		err = tcpConn.SetNoDelay(true)
 		if err != nil {
+			transport.errChan <- err
 			transport.logger.Error().Stack().Err(err).Str("remoteAddress", conn.RemoteAddr().String()).Msg("set no delay")
 		}
 	}
@@ -107,7 +116,9 @@ func (transport *Transport) handleTCPConn(conn net.Conn) error {
 	if !ok {
 		conn.Close()
 		transport.logger.Warn().Str("remoteAddress", conn.RemoteAddr().(*net.TCPAddr).IP.String()).Msg("ip target not found")
-		return ErrUnknownTarget{Remote: conn.RemoteAddr()}
+		err := ErrUnknownTarget{Remote: conn.RemoteAddr()}
+		transport.errChan <- err
+		return err
 	}
 
 	connectionLogger := transport.logger.With().Str("remoteAddress", conn.RemoteAddr().String()).Str("target", string(target)).Logger()
@@ -123,6 +134,7 @@ func (transport *Transport) handleTCPConn(conn net.Conn) error {
 		}
 		return nil
 	}(); err != nil {
+		transport.errChan <- err
 		return err
 	}
 
@@ -153,7 +165,9 @@ func (transport *Transport) handleTCPConn(conn net.Conn) error {
 			packet, err := transport.decoder.DecodeNext(conn)
 			if err != nil {
 				connectionLogger.Error().Stack().Err(err).Msg("decode")
-				break
+				transport.errChan <- err
+				transport.SendFault()
+				return
 			}
 
 			from := conn.RemoteAddr().String()
@@ -167,6 +181,7 @@ func (transport *Transport) handleTCPConn(conn net.Conn) error {
 	err := <-errChan
 	if err != nil {
 		connectionLogger.Error().Stack().Err(err).Msg("")
+		transport.errChan <- err
 	}
 	return err
 }
@@ -175,16 +190,19 @@ func (transport *Transport) handleTCPConn(conn net.Conn) error {
 // might additional means to pass information around (e.g. file read and write)
 func (transport *Transport) SendMessage(message abstraction.TransportMessage) error {
 	transport.logger.Info().Type("type", message).Msg("sending")
+	err := error(nil)
 	switch msg := message.(type) {
 	case PacketMessage:
-		return transport.handlePacketEvent(msg)
+		err = transport.handlePacketEvent(msg)
 	case FileWriteMessage:
-		return transport.handleFileWrite(msg)
+		err = transport.handleFileWrite(msg)
 	case FileReadMessage:
-		return transport.handleFileRead(msg)
+		err = transport.handleFileRead(msg)
 	default:
-		return ErrUnrecognizedEvent{message.Event()}
+		err = ErrUnrecognizedEvent{message.Event()}
 	}
+	transport.errChan <- err
+	return err
 }
 
 // handlePacketEvent is used to send an order to one of the connected boards
@@ -193,7 +211,9 @@ func (transport *Transport) handlePacketEvent(message PacketMessage) error {
 	target, ok := transport.idToTarget[message.Id()]
 	if !ok {
 		eventLogger.Debug().Msg("target not found")
-		return ErrUnrecognizedId{Id: message.Id()}
+		err := ErrUnrecognizedId{Id: message.Id()}
+		transport.errChan <- err
+		return err
 	}
 	eventLogger = eventLogger.With().Str("target", string(target)).Logger()
 	eventLogger.Info().Msg("sending")
@@ -204,17 +224,22 @@ func (transport *Transport) handlePacketEvent(message PacketMessage) error {
 		conn, ok := transport.connections[target]
 		if !ok {
 			eventLogger.Warn().Msg("target not connected")
-			return nil, ErrConnClosed{Target: target}
+
+			err := ErrConnClosed{Target: target}
+			transport.errChan <- err
+			return nil, err
 		}
 		return conn, nil
 	}()
 	if err != nil {
+		transport.errChan <- err
 		return err
 	}
 
 	data, err := transport.encoder.Encode(message.Packet)
 	if err != nil {
 		eventLogger.Error().Stack().Err(err).Msg("encode")
+		transport.errChan <- err
 		return err
 	}
 
@@ -225,6 +250,7 @@ func (transport *Transport) handlePacketEvent(message PacketMessage) error {
 		totalWritten += n
 		if err != nil {
 			eventLogger.Error().Stack().Err(err).Msg("write")
+			transport.errChan <- err
 			return err
 		}
 	}
@@ -236,20 +262,26 @@ func (transport *Transport) handlePacketEvent(message PacketMessage) error {
 // handleFileWrite writes a file through tftp to the blcu
 func (transport *Transport) handleFileWrite(message FileWriteMessage) error {
 	_, err := transport.tftp.WriteFile(message.Filename(), tftp.BinaryMode, message)
+	transport.errChan <- err
 	return err
 }
 
 // handleFileRead reads a file through tftp from the blcu
 func (transport *Transport) handleFileRead(message FileReadMessage) error {
 	_, err := transport.tftp.ReadFile(message.Filename(), tftp.BinaryMode, message)
+	transport.errChan <- err
 	return err
 }
 
 // HandleSniffer starts listening for packets on the provided sniffer and handles them.
-func (transport *Transport) HandleSniffer(sniffer *sniffer.Sniffer) <-chan error {
+//
+// This function will block until the sniffer is closed
+func (transport *Transport) HandleSniffer(sniffer *sniffer.Sniffer) {
 	demux, errChan := session.NewSnifferDemux(transport.handleConversation, transport.logger)
-	demux.ReadPackets(sniffer)
-	return errChan
+	go demux.ReadPackets(sniffer)
+	for err := range errChan {
+		transport.errChan <- err
+	}
 }
 
 // handleConversation is called when the sniffer detects a new conversation and handles its specific packets
@@ -262,7 +294,9 @@ func (transport *Transport) handleConversation(socket network.Socket, reader io.
 			packet, err := transport.decoder.DecodeNext(reader)
 			if err != nil {
 				conversationLogger.Error().Stack().Err(err).Msg("decode")
-				return // TODO: handle error
+				transport.errChan <- err
+				transport.SendFault()
+				return
 			}
 
 			transport.api.Notification(NewPacketNotification(packet, srcAddr, dstAddr, time.Now()))
@@ -274,4 +308,17 @@ func (transport *Transport) handleConversation(socket network.Socket, reader io.
 func (transport *Transport) SetAPI(api abstraction.TransportAPI) {
 	transport.logger.Trace().Type("api", api).Msg("set api")
 	transport.api = api
+}
+
+func (transport *Transport) consumeErrors() {
+	for err := range transport.errChan {
+		transport.api.Notification(NewErrorNotification(err))
+	}
+}
+
+func (transport *Transport) SendFault() {
+	// err := transport.SendMessage(NewPacketMessage(data.NewPacket(0)))
+	// if err != nil {
+	// transport.errChan <- err
+	// }
 }

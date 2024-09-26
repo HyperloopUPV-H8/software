@@ -4,7 +4,7 @@ import { PCU } from '../Boards/PCU/PCU';
 import { Orders, useOrders } from 'common';
 import { Connections, Logger, MessagesContainer } from 'common';
 import { Window } from 'components/Window/Window';
-import { getHardcodedOrders } from './hardcodedOrders';
+import FixedOrders, { getHardcodedOrders } from './FixedOrders';
 
 export const Data2Page = () => {
     const boardOrders = useOrders();
@@ -16,12 +16,12 @@ export const Data2Page = () => {
             </div>
 
             <div className={styles.column}>
-                <PCU />
-            </div>
+                <Window title="Messages" className={styles.messages}>
+                    <MessagesContainer />
+                </Window>
 
-            <div className={styles.column}>
-                <Window title="Orders" className={styles.orders}>
-                    <Orders boards={getHardcodedOrders(boardOrders)} />
+                <Window title="Connections">
+                    <Connections />
                 </Window>
 
                 <Window title="Logger">
@@ -30,12 +30,11 @@ export const Data2Page = () => {
             </div>
 
             <div className={styles.column}>
-                <Window title="Messages" className={styles.messages}>
-                    <MessagesContainer />
-                </Window>
-
-                <Window title="Connections">
-                    <Connections />
+                <Window title="Orders" className={styles.orders}>
+                    <div className={styles.order_column}>
+                        <Orders boards={getHardcodedOrders(boardOrders)} />
+                        <FixedOrders />
+                    </div>
                 </Window>
             </div>
         </div>
