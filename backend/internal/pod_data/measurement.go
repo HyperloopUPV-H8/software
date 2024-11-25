@@ -5,13 +5,13 @@ import (
 	"strings"
 
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/ade"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/adj"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/utils"
 )
 
 const EnumType = "enum"
 
-func getMeasurements(adeMeasurements []ade.Measurement, globalUnits map[string]utils.Operations) ([]Measurement, error) {
+func getMeasurements(adeMeasurements []adj.Measurement, globalUnits map[string]utils.Operations) ([]Measurement, error) {
 	measurements := make([]Measurement, 0)
 	mErrors := common.NewErrorList()
 
@@ -33,7 +33,7 @@ func getMeasurements(adeMeasurements []ade.Measurement, globalUnits map[string]u
 	return measurements, nil
 }
 
-func getMeasurement(adeMeas ade.Measurement, globalUnits map[string]utils.Operations) (Measurement, error) {
+func getMeasurement(adeMeas adj.Measurement, globalUnits map[string]utils.Operations) (Measurement, error) {
 	if isNumeric(adeMeas.Type) {
 		return getNumericMeasurement(adeMeas, globalUnits)
 	} else if adeMeas.Type == "bool" {
@@ -45,7 +45,7 @@ func getMeasurement(adeMeas ade.Measurement, globalUnits map[string]utils.Operat
 	}
 }
 
-func getNumericMeasurement(adeMeas ade.Measurement, globalUnits map[string]utils.Operations) (NumericMeasurement, error) {
+func getNumericMeasurement(adeMeas adj.Measurement, globalUnits map[string]utils.Operations) (NumericMeasurement, error) {
 	measErrs := common.NewErrorList()
 
 	safeRange, err := utils.ParseRange(adeMeas.SafeRange)
@@ -88,7 +88,7 @@ func getNumericMeasurement(adeMeas ade.Measurement, globalUnits map[string]utils
 	}, nil
 }
 
-func getEnumMeasurement(adeMeas ade.Measurement) EnumMeasurement {
+func getEnumMeasurement(adeMeas adj.Measurement) EnumMeasurement {
 	return EnumMeasurement{
 		Id:      adeMeas.Id,
 		Name:    adeMeas.Name,
@@ -105,7 +105,7 @@ func getEnumMembers(enumExp string) []string {
 	return strings.Split(trimmedEnumExp[firstParenthesisIndex+1:lastParenthesisIndex], ",")
 }
 
-func getBooleanMeasurement(adeMeas ade.Measurement) BooleanMeasurement {
+func getBooleanMeasurement(adeMeas adj.Measurement) BooleanMeasurement {
 	return BooleanMeasurement{
 		Id:   adeMeas.Id,
 		Name: adeMeas.Name,

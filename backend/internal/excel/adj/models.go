@@ -1,6 +1,6 @@
-package ade
+package adj
 
-type ADE struct {
+type ADJ struct {
 	Info   Info
 	Boards map[string]Board
 }

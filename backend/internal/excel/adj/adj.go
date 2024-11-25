@@ -1,4 +1,4 @@
-package ade
+package adj
 
 import (
 	"strings"
@@ -13,7 +13,7 @@ const (
 	BoardPrefix = "BOARD "
 )
 
-func CreateADE(file *excelize.File) (ADE, error) {
+func CreateADJ(file *excelize.File) (ADE, error) {
 	doc, err := document.CreateDocument(file)
 
 	if err != nil {

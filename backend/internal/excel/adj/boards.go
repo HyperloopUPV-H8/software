@@ -1,4 +1,4 @@
-package ade
+package adj
 
 import (
 	"errors"

@@ -2,18 +2,27 @@ package document
 
 import (
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
+	"github.com/go-git/go-git/v5"
 	"github.com/xuri/excelize/v2"
 )
 
 func CreateDocument(file *excelize.File) (Document, error) {
-	fileSheets, err := getFileSheets(file)
-
+	_, err := git.PlainClone("", false, &git.CloneOptions{
+		URL: "https://github.com/HyperloopUPV-H8/JSON_ADE.git",
+	})
 	if err != nil {
 		return Document{}, err
 	}
 
+	sheets, err := getFileSheets(file)
+	if err != nil {
+		return Document{}, err
+	}
+
+	rectSheets := getRectSheets(sheets)
+
 	return Document{
-		Sheets: getRectSheets(fileSheets),
+		Sheets: rectSheets,
 	}, nil
 }
 
