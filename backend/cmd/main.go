@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"flag"
 	"fmt"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/adj"
 	"log"
 	"net"
 	"net/http"
@@ -87,14 +88,11 @@ func main() {
 	runtime.SetBlockProfileRate(*blockprofile)
 	config := getConfig("./config.toml")
 
-	file, err := excel.Download(excel.DownloadConfig(config.Excel.Download))
-	if err != nil {
-		trace.Fatal().Err(err).Msg("downloading file")
-	}
+	// <--- ADJ --->
 
-	ade, err := ade.CreateADE(file)
+	adj, err := adj.NewADJ()
 	if err != nil {
-		trace.Fatal().Err(err).Msg("creating ade")
+		trace.Fatal().Err(err).Msg("setting up ADJ")
 	}
 
 	info, err := info.NewInfo(ade.Info)
