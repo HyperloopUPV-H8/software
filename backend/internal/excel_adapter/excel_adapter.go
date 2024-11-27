@@ -1,19 +1,17 @@
 package excel_adapter
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/fatih/color"
 
-	ade_linter "github.com/HyperloopUPV-H8/ade-linter"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/excel_adapter/internals"
 	internalModels "github.com/HyperloopUPV-H8/h9-backend/internal/excel_adapter/internals/models"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/excel_adapter/models"
 	trace "github.com/rs/zerolog/log"
-	"github.com/xuri/excelize/v2"
 )
 
 type ExcelAdapterConfig struct {
@@ -63,24 +61,18 @@ func (adapter ExcelAdapter) GetGlobalInfo() models.GlobalInfo {
 func fetchDocument(downloadConfig internals.DownloadConfig, parseConfig internals.ParseConfig) internalModels.Document {
 	trace.Info().Str("id", downloadConfig.Id).Str("path", downloadConfig.Path).Str("name", downloadConfig.Name).Msg("fetch document")
 
-	errDownloading := internals.DownloadFile(downloadConfig)
-	if errDownloading != nil {
-		trace.Error().Stack().Err(errDownloading).Msg("")
-		trace.Warn().Str("id", downloadConfig.Id).Str("path", downloadConfig.Path).Str("name", downloadConfig.Name).Msg("using local document")
-	}
-
-	file, err := excelize.OpenFile(filepath.Join(downloadConfig.Path, downloadConfig.Name))
+	file, err := os.Open(downloadConfig.Path)
 	if err != nil {
-		trace.Fatal().Stack().Err(err).Msg("")
+		trace.Fatal().Stack().Err(err).Msg("Error abriendo el archivo JSON")
+	}
+	defer file.Close()
+
+	var document internalModels.Document
+	if err := json.NewDecoder(file).Decode(&document); err != nil {
+		trace.Fatal().Stack().Err(err).Msg("Error decodificando JSON")
 	}
 
-	if !ade_linter.Lint(file) {
-		if !promptContinue() {
-			os.Exit(1)
-		}
-	}
-
-	return internals.GetDocument(file, parseConfig)
+	return document
 }
 
 func promptContinue() bool {
