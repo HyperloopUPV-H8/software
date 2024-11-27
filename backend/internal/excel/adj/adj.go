@@ -13,18 +13,18 @@ const (
 	BoardPrefix = "BOARD "
 )
 
-func CreateADJ(file *excelize.File) (ADE, error) {
+func CreateADJ(file *excelize.File) (ADJ, error) {
 	doc, err := document.CreateDocument(file)
 
 	if err != nil {
-		return ADE{}, err
+		return ADJ{}, err
 	}
-	adeErrors := common.NewErrorList()
+	ADJErrors := common.NewErrorList()
 
 	info, err := getInfo(doc)
 
 	if err != nil {
-		adeErrors.Add(err)
+		ADJErrors.Add(err)
 	}
 
 	boardSheets := FilterMap(doc.Sheets, func(name string, _ document.Sheet) bool {
@@ -34,22 +34,22 @@ func CreateADJ(file *excelize.File) (ADE, error) {
 	boards, err := getBoards(boardSheets)
 
 	if err != nil {
-		adeErrors.Add(err)
+		ADJErrors.Add(err)
 	}
 
-	if len(adeErrors) > 0 {
-		return ADE{}, adeErrors
+	if len(ADJErrors) > 0 {
+		return ADJ{}, ADJErrors
 	}
 
 	if err != nil {
-		adeErrors.Add(err)
+		ADJErrors.Add(err)
 	}
 
-	if len(adeErrors) > 0 {
-		return ADE{}, adeErrors
+	if len(ADJErrors) > 0 {
+		return ADJ{}, ADJErrors
 	}
 
-	return ADE{
+	return ADJ{
 		Info:   info,
 		Boards: boards,
 	}, nil

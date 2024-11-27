@@ -1,6 +1,7 @@
 package document
 
 import (
+	"encoding/json"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
 	"github.com/go-git/go-git/v5"
 	"github.com/xuri/excelize/v2"
@@ -19,14 +20,14 @@ func CreateDocument(file *excelize.File) (Document, error) {
 		return Document{}, err
 	}
 
-	rectSheets := getRectSheets(sheets)
+	rectSheets := getRectSheets(sheets) //TODO remodel into JSON_ADE format
 
 	return Document{
 		Sheets: rectSheets,
 	}, nil
 }
 
-func getFileSheets(file *excelize.File) (map[string][][]string, error) {
+func getFileSheets(file *json.RawMessage) (map[string][][]string, error) {
 	fileSheets := make(map[string][][]string)
 	sheetMap := file.GetSheetMap()
 	sheetsErrs := common.NewErrorList()
