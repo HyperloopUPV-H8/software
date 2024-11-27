@@ -25,7 +25,7 @@ type ExcelAdapter struct {
 }
 
 func New(config ExcelAdapterConfig) ExcelAdapter {
-	document := fetchDocument(config.Download, config.Parse)
+	document := fetchDocument(config.Download)
 
 	return ExcelAdapter{
 		document: document,
@@ -58,7 +58,7 @@ func (adapter ExcelAdapter) GetGlobalInfo() models.GlobalInfo {
 	}
 }
 
-func fetchDocument(downloadConfig internals.DownloadConfig, parseConfig internals.ParseConfig) internalModels.Document {
+func fetchDocument(downloadConfig internals.DownloadConfig) internalModels.Document {
 	trace.Info().Str("id", downloadConfig.Id).Str("path", downloadConfig.Path).Str("name", downloadConfig.Name).Msg("fetch document")
 
 	file, err := os.Open(downloadConfig.Path)
