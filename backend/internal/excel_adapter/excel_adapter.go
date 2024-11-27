@@ -76,7 +76,7 @@ func fetchDocument(downloadConfig internals.DownloadConfig, parseConfig internal
 }
 
 func promptContinue() bool {
-	fmt.Print(color.WhiteString("Continue with incorrect ADE?"), " ", color.MagentaString("[Y/n]: "))
+	fmt.Print(color.WhiteString("Continue with incorrect ADJ?"), " ", color.MagentaString("[Y/n]: "))
 
 	for {
 		var selection string
