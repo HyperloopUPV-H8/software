@@ -11,22 +11,4 @@ connections = "/backend"
 files = "/"
 
 [vehicle]
-boards = ["VCU"]
-
-[excel.download]
-id = "1NyNaAOw_6iWtnCpEg73AtSSFx1fMdhPRmmdOhjgjCZI"
-name = "ade.xlsx"
-path = "."
-
-[excel.parse]
-global_sheet_prefix = "GLOBAL "
-board_sheet_prefix = "BOARD "
-table_prefix = "[TABLE] "
-[excel.parse.global]
-address_table = "addresses"
-backend_key = "Backend"
-blcu_address_key = "BLCU"
-units_table = "units"
-ports_table = "ports"
-board_ids_table = "board_ids"
-message_ids_table = "message_ids"
+boardsList = ["VCU"]
