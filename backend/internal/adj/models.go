@@ -10,7 +10,7 @@ type Info struct {
 	Addresses  map[string]string `json:"addresses"`
 	Units      map[string]string `json:"units"`
 	MessageIds map[string]string `json:"message_ids"`
-	BoardIds   map[string]string
+	BoardIds   map[string]uint16
 }
 
 type Board struct {
