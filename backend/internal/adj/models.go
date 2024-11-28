@@ -1,16 +1,16 @@
-package ade
+package adj
 
-type ADE struct {
+type ADJ struct {
 	Info   Info
 	Boards map[string]Board
 }
 
 type Info struct {
-	Addresses  map[string]string
-	Units      map[string]string
-	Ports      map[string]string
+	Ports      map[string]string `json:"ports"`
+	Addresses  map[string]string `json:"addresses"`
+	Units      map[string]string `json:"units"`
+	MessageIds map[string]string `json:"message_ids"`
 	BoardIds   map[string]string
-	MessageIds map[string]string
 }
 
 type Board struct {

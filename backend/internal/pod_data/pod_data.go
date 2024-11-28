@@ -4,11 +4,11 @@ import (
 	"strconv"
 
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/ade"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/adj"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/utils"
 )
 
-func NewPodData(adeBoards map[string]ade.Board, globalUnits map[string]utils.Operations) (PodData, error) {
+func NewPodData(adeBoards map[string]adj.Board, globalUnits map[string]utils.Operations) (PodData, error) {
 	boards := make([]Board, 0)
 	boardErrs := common.NewErrorList()
 
@@ -32,7 +32,7 @@ func NewPodData(adeBoards map[string]ade.Board, globalUnits map[string]utils.Ope
 
 }
 
-func getBoard(adeBoard ade.Board, globalUnits map[string]utils.Operations) (Board, error) {
+func getBoard(adeBoard adj.Board, globalUnits map[string]utils.Operations) (Board, error) {
 	boardErrs := common.NewErrorList()
 	packets, err := getPackets(adeBoard.Packets)
 
@@ -58,7 +58,7 @@ func getBoard(adeBoard ade.Board, globalUnits map[string]utils.Operations) (Boar
 	}, nil
 }
 
-func getPackets(adePackets []ade.Packet) ([]Packet, error) {
+func getPackets(adePackets []adj.Packet) ([]Packet, error) {
 	packets := make([]Packet, 0)
 	packetErrors := common.NewErrorList()
 
@@ -81,7 +81,7 @@ func getPackets(adePackets []ade.Packet) ([]Packet, error) {
 	return packets, nil
 }
 
-func getPacket(packet ade.Packet) (Packet, error) {
+func getPacket(packet adj.Packet) (Packet, error) {
 	id, err := strconv.ParseUint(packet.Id, 10, 16)
 	if err != nil {
 		return Packet{}, err
@@ -98,7 +98,7 @@ func getPacket(packet ade.Packet) (Packet, error) {
 	}, nil
 }
 
-func assemblePackets(packets []Packet, measurements []Measurement, structures []ade.Structure) []Packet {
+func assemblePackets(packets []Packet, measurements []Measurement, structures []adj.Structure) []Packet {
 	assembledPackets := make([]Packet, 0)
 
 	for _, structure := range structures {

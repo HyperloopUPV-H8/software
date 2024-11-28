@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/ade"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/adj"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/utils"
 )
 
@@ -14,7 +14,7 @@ import (
 
 const BackendKey = "Backend"
 
-func NewInfo(adeInfo ade.Info) (Info, error) {
+func NewInfo(adeInfo adj.Info) (Info, error) {
 	infoErrs := common.NewErrorList()
 
 	addresses, err := parseAddresses(adeInfo.Addresses)
