@@ -20,6 +20,14 @@ type Board struct {
 	Structures   []Structure
 }
 
+type BoardJSON struct {
+	ID                string   `json:"board_id"`
+	IP                string   `json:"board_ip"`
+	MeasurementsPaths []string `json:"measurements"`
+	PacketsPaths      []string `json:"packets"`
+	// StructuresPaths   []string `json:"structures"` // TODO: Issued in JSON_ADE #1
+}
+
 type Packet struct {
 	Id   string
 	Name string
