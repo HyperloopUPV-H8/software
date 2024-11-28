@@ -150,8 +150,8 @@ func getBoardMeasurements(measurementsPaths []string) ([]Measurement, error) {
 	return measurements, nil
 }
 
-func getBoardIds(boards map[string]string) (map[string]string, error) {
-	var boardIds map[string]string
+func getBoardIds(boards map[string]string) (map[string]uint16, error) {
+	var boardIds map[string]uint16
 	for boardName, boardPath := range boards {
 		if _, err := os.Stat(boardPath); os.IsNotExist(err) {
 			return nil, err

@@ -21,7 +21,7 @@ type Board struct {
 }
 
 type BoardJSON struct {
-	ID                string   `json:"board_id"`
+	ID                uint16   `json:"board_id"`
 	IP                string   `json:"board_ip"`
 	MeasurementsPaths []string `json:"measurements"`
 	PacketsPaths      []string `json:"packets"`
