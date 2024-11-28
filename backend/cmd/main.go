@@ -95,12 +95,7 @@ func main() {
 		trace.Fatal().Err(err).Msg("setting up ADJ")
 	}
 
-	info, err := info.NewInfo(ade.Info)
-	if err != nil {
-		trace.Fatal().Err(err).Msg("creating info")
-	}
-
-	podData, err := pod_data.NewPodData(ade.Boards, info.Units)
+	podData, err := pod_data.NewPodData(adj.Boards, adj.Info.Units)
 	if err != nil {
 		fmt.Println(err)
 		trace.Fatal().Err(err).Msg("creating podData")
