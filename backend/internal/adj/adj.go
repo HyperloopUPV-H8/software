@@ -27,9 +27,9 @@ func NewADJ() (*ADJ, error) {
 		return nil, err
 	}
 
-	boards, err := getBoards(boardsList)
+	boards, err := getBoards(info, boardsList)
 
-	info.BoardIds, err = getBoardIds(info, boardsList)
+	info.BoardIds, err = getBoardIds(boardsList)
 
 	adj := &ADJ{
 		Info:   info,
@@ -152,4 +152,23 @@ func getBoardMeasurements(measurementsPaths []string) ([]Measurement, error) {
 
 func getBoardIds(boards map[string]string) (map[string]string, error) {
 	var boardIds map[string]string
+	for boardName, boardPath := range boards {
+		if _, err := os.Stat(boardPath); os.IsNotExist(err) {
+			return nil, err
+		}
+
+		boardRaw, err := os.ReadFile(boardPath)
+		if err != nil {
+			return nil, err
+		}
+
+		var boardJSON BoardJSON
+		if err = json.Unmarshal(boardRaw, &boardJSON); err != nil {
+			return nil, err
+		}
+
+		boardIds[boardName] = boardJSON.ID
+	}
+
+	return boardIds, nil
 }
