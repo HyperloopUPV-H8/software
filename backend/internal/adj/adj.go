@@ -2,6 +2,7 @@ package adj
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/go-git/go-git/v5"
 	"os"
 )
@@ -28,7 +29,7 @@ func NewADJ() (*ADJ, error) {
 
 	boards, err := getBoards(boardsList)
 
-	info.BoardIds, err = getBoardIds(boardsList)
+	info.BoardIds, err = getBoardIds(info, boardsList)
 
 	adj := &ADJ{
 		Info:   info,
@@ -60,7 +61,7 @@ func downloadADJ() (json.RawMessage, json.RawMessage, error) {
 	return info, boardsList, nil
 }
 
-func getBoards(boardsList map[string]string) (map[string]Board, error) {
+func getBoards(info Info, boardsList map[string]string) (map[string]Board, error) {
 	var boards map[string]Board
 	for boardName, boardPath := range boardsList {
 		if _, err := os.Stat(boardPath); os.IsNotExist(err) {
@@ -77,19 +78,76 @@ func getBoards(boardsList map[string]string) (map[string]Board, error) {
 			return nil, err
 		}
 
-		go checkBoardIP(boardJSON.IP) // TODO: Implement this function
+		if info.Addresses[boardName] != boardJSON.IP {
+			return nil, errors.New("the IP of the board does not match the one in the general info")
+		}
 
 		var board Board
 
 		board.Name = boardName
-		board.Packets = getBoardPackets(boardJSON.PacketsPaths)
-		board.Measurements = getBoardMeasurements(boardJSON.MeasurementsPaths)
+
+		board.Packets, err = getBoardPackets(boardJSON.PacketsPaths)
+		if err != nil {
+			return nil, err
+		}
+
+		board.Measurements, err = getBoardMeasurements(boardJSON.MeasurementsPaths)
+		if err != nil {
+			return nil, err
+		}
+
 		// board.Structures = getBoardStructures( boardJSON.StructuresPaths) // TODO: Issued in JSON_ADE #1
 
 		boards[boardName] = board
 	}
 
 	return boards, nil
+}
+
+func getBoardPackets(packetsPaths []string) ([]Packet, error) {
+	var packets []Packet
+	for _, packetPath := range packetsPaths {
+		if _, err := os.Stat(packetPath); os.IsNotExist(err) {
+			continue
+		}
+
+		packetRaw, err := os.ReadFile(packetPath)
+		if err != nil {
+			return nil, err
+		}
+
+		var packet Packet
+		if err = json.Unmarshal(packetRaw, &packet); err != nil {
+			return nil, err
+		}
+
+		packets = append(packets, packet)
+	}
+
+	return packets, nil
+}
+
+func getBoardMeasurements(measurementsPaths []string) ([]Measurement, error) {
+	var measurements []Measurement
+	for _, measurementPath := range measurementsPaths {
+		if _, err := os.Stat(measurementPath); os.IsNotExist(err) {
+			continue
+		}
+
+		measurementRaw, err := os.ReadFile(measurementPath)
+		if err != nil {
+			return nil, err
+		}
+
+		var measurement Measurement
+		if err = json.Unmarshal(measurementRaw, &measurement); err != nil {
+			return nil, err
+		}
+
+		measurements = append(measurements, measurement)
+	}
+
+	return measurements, nil
 }
 
 func getBoardIds(boards map[string]string) (map[string]string, error) {
