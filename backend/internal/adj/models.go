@@ -6,7 +6,7 @@ type ADJ struct {
 }
 
 type Info struct {
-	Ports      map[string]string `json:"ports"`
+	Ports      map[string]uint16 `json:"ports"`
 	Addresses  map[string]string `json:"addresses"`
 	Units      map[string]string `json:"units"`
 	MessageIds map[string]string `json:"message_ids"`
