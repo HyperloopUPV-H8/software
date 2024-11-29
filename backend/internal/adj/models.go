@@ -9,12 +9,13 @@ type Info struct {
 	Ports      map[string]uint16 `json:"ports"`
 	Addresses  map[string]string `json:"addresses"`
 	Units      map[string]string `json:"units"`
-	MessageIds map[string]string `json:"message_ids"`
+	MessageIds map[string]uint16 `json:"message_ids"`
 	BoardIds   map[string]uint16
 }
 
 type Board struct {
 	Name         string
+	IP           string
 	Packets      []Packet
 	Measurements []Measurement
 	Structures   []Structure

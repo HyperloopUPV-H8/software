@@ -85,6 +85,7 @@ func getBoards(info Info, boardsList map[string]string) (map[string]Board, error
 		var board Board
 
 		board.Name = boardName
+		board.IP = boardJSON.IP
 
 		board.Packets, err = getBoardPackets(boardJSON.PacketsPaths)
 		if err != nil {
