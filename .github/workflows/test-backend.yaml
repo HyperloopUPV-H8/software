@@ -9,9 +9,6 @@ on:
         - backend/**
     workflow_dispatch:
 
-env:
-  SECRET: ${{ secrets.SECRET }}
-
 jobs:
   test-backend:
     name: "Test backend"
@@ -34,11 +31,6 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update && sudo apt-get install -y libpcap-dev
-
-      - name: "Load secret"
-        working-directory: "${{env.BACKEND_DIR}}"
-        run: |
-          ./load-secret.sh "$SECRET"
 
       - name: Test with Go
         working-directory: "${{env.BACKEND_DIR}}"
