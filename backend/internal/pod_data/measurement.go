@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/HyperloopUPV-H8/h9-backend/internal/adj"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/adj"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/utils"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/utils"
 )
 
 const EnumType = "enum"
@@ -114,7 +114,7 @@ func getBooleanMeasurement(adeMeas adj.Measurement) BooleanMeasurement {
 }
 
 func isNumeric(kind string) bool {
-	return (kind == "uint8" ||
+	return kind == "uint8" ||
 		kind == "uint16" ||
 		kind == "uint32" ||
 		kind == "uint64" ||
@@ -123,5 +123,5 @@ func isNumeric(kind string) bool {
 		kind == "int32" ||
 		kind == "int64" ||
 		kind == "float32" ||
-		kind == "float64")
+		kind == "float64"
 }
