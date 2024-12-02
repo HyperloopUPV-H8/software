@@ -1,7 +1,6 @@
 name: Build control station
 
 on:
-    workflow_call:
     workflow_dispatch:
     pull_request:
         paths:
