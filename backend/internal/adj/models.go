@@ -1,15 +1,17 @@
 package adj
 
+import "github.com/HyperloopUPV-H8/h9-backend/internal/utils"
+
 type ADJ struct {
 	Info   Info
 	Boards map[string]Board
 }
 
 type Info struct {
-	Ports      map[string]uint16 `json:"ports"`
-	Addresses  map[string]string `json:"addresses"`
-	Units      map[string]string `json:"units"`
-	MessageIds map[string]uint16 `json:"message_ids"`
+	Ports      map[string]uint16           `json:"ports"`
+	Addresses  map[string]string           `json:"addresses"`
+	Units      map[string]utils.Operations `json:"units"`
+	MessageIds map[string]uint16           `json:"message_ids"`
 	BoardIds   map[string]uint16
 }
 

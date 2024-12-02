@@ -97,8 +97,6 @@ func getBoards(info Info, boardsList map[string]string) (map[string]Board, error
 			return nil, err
 		}
 
-		// board.Structures = getBoardStructures( boardJSON.StructuresPaths) // TODO: Issued in JSON_ADE #1
-
 		boards[boardName] = board
 	}
 

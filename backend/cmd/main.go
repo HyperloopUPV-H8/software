@@ -6,7 +6,6 @@ import (
 	"encoding/binary"
 	"flag"
 	"fmt"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/excel/utils"
 
 	"log"
 	"net"
@@ -24,6 +23,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/pod_data"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/utils"
 	vehicle_models "github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker"
