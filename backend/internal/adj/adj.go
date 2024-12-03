@@ -8,7 +8,8 @@ import (
 )
 
 const (
-	RepoUrl = "https://github.com/HyperloopUPV-H8/JSON_ADE.git" // URL of the ADJ repository
+	RepoUrl  = "https://github.com/HyperloopUPV-H8/JSON_ADE.git" // URL of the ADJ repository
+	RepoPath = "./JSON_ADE/"                                     // Path where the ADJ repository is cloned
 )
 
 func NewADJ() (*ADJ, error) {
@@ -40,25 +41,35 @@ func NewADJ() (*ADJ, error) {
 }
 
 func downloadADJ() (json.RawMessage, json.RawMessage, error) {
-	_, err := git.PlainClone("", false, &git.CloneOptions{
-		URL: RepoUrl,
-	})
-	if err != nil {
-		return nil, nil, err
+	if !checkRepo() {
+		_, err := git.PlainClone(RepoPath, true, &git.CloneOptions{
+			URL: RepoUrl,
+		})
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
 	// The BoardIds are applied in the NewADJ function by the getBoardIds function
-	info, err := os.ReadFile("general_info.json")
+	info, err := os.ReadFile(RepoPath + "general_info.json")
 	if err != nil {
 		return nil, nil, err
 	}
 
-	boardsList, err := os.ReadFile("boards.json")
+	boardsList, err := os.ReadFile(RepoPath + "boards.json")
 	if err != nil {
 		return nil, nil, err
 	}
 
 	return info, boardsList, nil
+}
+
+func checkRepo() bool {
+	if _, err := os.Stat(RepoPath); os.IsNotExist(err) {
+		return false
+	}
+
+	return true
 }
 
 func getBoards(info Info, boardsList map[string]string) (map[string]Board, error) {
