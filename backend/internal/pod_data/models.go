@@ -28,14 +28,14 @@ type Measurement interface {
 }
 
 type NumericMeasurement struct {
-	Id           string        `json:"id"` // Remove json tags
-	Name         string        `json:"name"`
-	Type         string        `json:"type"`
-	Units        []string      `json:"units"`
-	DisplayUnits []utils.Units `json:"-"`
-	PodUnits     []utils.Units `json:"-"`
-	SafeRange    []*float64    `json:"safeRange"`
-	WarningRange []*float64    `json:"warningRange"`
+	Id           string      `json:"id"` // Remove json tags
+	Name         string      `json:"name"`
+	Type         string      `json:"type"`
+	Units        string      `json:"units"`
+	DisplayUnits utils.Units `json:"-"`
+	PodUnits     utils.Units `json:"-"`
+	SafeRange    []*float64  `json:"safeRange"`
+	WarningRange []*float64  `json:"warningRange"`
 }
 
 func (m NumericMeasurement) GetId() string {
