@@ -49,7 +49,7 @@ func NewADJ() (*ADJ, error) {
 
 func downloadADJ() (json.RawMessage, json.RawMessage, error) {
 	if !checkRepo() {
-		_, err := git.PlainClone(RepoPath, true, &git.CloneOptions{
+		_, err := git.PlainClone(RepoPath, false, &git.CloneOptions{
 			URL: RepoUrl,
 		})
 		if err != nil {
