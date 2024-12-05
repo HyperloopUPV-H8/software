@@ -7,18 +7,11 @@ type ADJ struct {
 	Boards map[string]Board
 }
 
-type JsonInfo struct {
-	Ports      []map[string]uint16           `json:"ports"`
-	Addresses  []map[string]string           `json:"addresses"`
-	Units      []map[string]utils.Operations `json:"units"`
-	MessageIds []map[string]uint16           `json:"message_ids"`
-}
-
 type Info struct {
-	Ports      map[string]uint16
-	Addresses  map[string]string
-	Units      map[string]utils.Operations
-	MessageIds map[string]uint16
+	Ports      map[string]uint16           `json:"ports"`
+	Addresses  map[string]string           `json:"addresses"`
+	Units      map[string]utils.Operations `json:"units"`
+	MessageIds map[string]uint16           `json:"message_ids"`
 	BoardIds   map[string]uint16
 }
 
@@ -35,7 +28,6 @@ type BoardJSON struct {
 	IP                string   `json:"board_ip"`
 	MeasurementsPaths []string `json:"measurements"`
 	PacketsPaths      []string `json:"packets"`
-	// StructuresPaths   []string `json:"structures"` // TODO: Issued in JSON_ADE #1
 }
 
 type Packet struct {

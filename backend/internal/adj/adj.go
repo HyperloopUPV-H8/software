@@ -2,8 +2,6 @@ package adj
 
 import (
 	"encoding/json"
-	"errors"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/utils"
 	"github.com/go-git/go-git/v5"
 	"os"
 )
@@ -19,16 +17,10 @@ func NewADJ() (*ADJ, error) {
 		return nil, err
 	}
 
-	var JsonInfo JsonInfo
 	var info Info
-	if err := json.Unmarshal(infoRaw, &JsonInfo); err != nil {
+	if err := json.Unmarshal(infoRaw, &info); err != nil {
 		return nil, err
 	}
-
-	info.Ports = utils.ConvertToMap_Str_Uint16(JsonInfo.Ports)
-	info.Addresses = utils.ConvertToMap_Str_Str(JsonInfo.Addresses)
-	info.Units = utils.ConvertToMap_Str_Op(JsonInfo.Units)
-	info.MessageIds = utils.ConvertToMap_Str_Uint16(JsonInfo.MessageIds)
 
 	var boardsList map[string]string
 	if err := json.Unmarshal(boardsRaw, &boardsList); err != nil {
@@ -96,12 +88,7 @@ func getBoards(info Info, boardsList map[string]string) (map[string]Board, error
 			return nil, err
 		}
 
-		if info.Addresses[boardName] != boardJSON.IP {
-			return nil, errors.New("the IP of the board does not match the one in the general info")
-		}
-
 		var board Board
-
 		board.Name = boardName
 		board.IP = boardJSON.IP
 
