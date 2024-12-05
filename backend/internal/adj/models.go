@@ -7,7 +7,7 @@ type ADJ struct {
 	Boards map[string]Board
 }
 
-type JSON_Info struct {
+type JsonInfo struct {
 	Ports      []map[string]uint16           `json:"ports"`
 	Addresses  []map[string]string           `json:"addresses"`
 	Units      []map[string]utils.Operations `json:"units"`

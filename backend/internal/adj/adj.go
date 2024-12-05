@@ -19,7 +19,7 @@ func NewADJ() (*ADJ, error) {
 		return nil, err
 	}
 
-	var JsonInfo JSON_Info
+	var JsonInfo JsonInfo
 	var info Info
 	if err := json.Unmarshal(infoRaw, &JsonInfo); err != nil {
 		return nil, err
