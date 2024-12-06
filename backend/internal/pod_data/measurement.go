@@ -11,12 +11,12 @@ import (
 
 const EnumType = "enum"
 
-func getMeasurements(adeMeasurements []adj.Measurement, globalUnits map[string]utils.Operations) ([]Measurement, error) {
+func getMeasurements(boardMeasurements []adj.Measurement, globalUnits map[string]utils.Operations) ([]Measurement, error) {
 	measurements := make([]Measurement, 0)
 	mErrors := common.NewErrorList()
 
-	for _, adeMeas := range adeMeasurements {
-		meas, err := getMeasurement(adeMeas, globalUnits)
+	for _, adjMeas := range boardMeasurements {
+		meas, err := getMeasurement(adjMeas, globalUnits)
 
 		if err != nil {
 			mErrors.Add(err)

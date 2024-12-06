@@ -40,6 +40,8 @@ func NewADJ() (*ADJ, error) {
 
 	info.BoardIds, err = getBoardIds(boardsList)
 
+	info.Addresses, err = getAddresses(boards)
+
 	adj := &ADJ{
 		Info:   info,
 		Boards: boards,
@@ -197,4 +199,13 @@ func getBoardStructures(board Board) []Structure {
 	}
 
 	return structures
+}
+
+func getAddresses(boards map[string]Board) (map[string]string, error) {
+	var addresses map[string]string
+	for boardName, board := range boards {
+		addresses[boardName] = board.IP
+	}
+
+	return addresses, nil
 }

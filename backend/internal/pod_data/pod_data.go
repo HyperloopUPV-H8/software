@@ -8,12 +8,12 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
 )
 
-func NewPodData(adeBoards map[string]adj.Board, globalUnits map[string]utils.Operations) (PodData, error) {
+func NewPodData(adjBoards map[string]adj.Board, globalUnits map[string]utils.Operations) (PodData, error) {
 	boards := make([]Board, 0)
 	boardErrs := common.NewErrorList()
 
-	for _, adeBoard := range adeBoards {
-		board, err := getBoard(adeBoard, globalUnits)
+	for _, adjBoard := range adjBoards {
+		board, err := getBoard(adjBoard, globalUnits)
 
 		if err != nil {
 			boardErrs.Add(err)
@@ -29,56 +29,28 @@ func NewPodData(adeBoards map[string]adj.Board, globalUnits map[string]utils.Ope
 	return PodData{
 		Boards: boards,
 	}, nil
-
 }
 
-func getBoard(adeBoard adj.Board, globalUnits map[string]utils.Operations) (Board, error) {
-	boardErrs := common.NewErrorList()
-	packets, err := getPackets(adeBoard.Packets)
+func getBoard(adjBoard adj.Board, globalUnits map[string]utils.Operations) (Board, error) {
+	var board Board
+	board.Name = adjBoard.Name
 
-	if err != nil {
-		boardErrs.Add(err)
-	}
-
-	measurements, err := getMeasurements(adeBoard.Measurements, globalUnits)
-
-	if err != nil {
-		boardErrs.Add(err)
-	}
-
-	if len(boardErrs) > 0 {
-		return Board{}, boardErrs
-	}
-
-	assembledPackets := assemblePackets(packets, measurements, adeBoard.Structures)
-
-	return Board{
-		Name:    adeBoard.Name,
-		Packets: sortPackets(assembledPackets),
-	}, nil
-}
-
-func getPackets(adePackets []adj.Packet) ([]Packet, error) {
 	packets := make([]Packet, 0)
-	packetErrors := common.NewErrorList()
 
-	for _, packet := range adePackets {
-		packet, err := getPacket(packet)
-
+	for _, adjPacket := range adjBoard.Packets {
+		packet, err := getPacket(adjPacket)
 		if err != nil {
-			//TODO: use stack error
-			packetErrors.Add(err)
-			continue
+			return Board{}, err
 		}
+
+		packet.Measurements, err = getMeasurements(adjBoard.Measurements, globalUnits)
 
 		packets = append(packets, packet)
 	}
 
-	if len(packetErrors) > 0 {
-		return nil, packetErrors
-	}
+	board.Packets = packets
 
-	return packets, nil
+	return board, nil
 }
 
 func getPacket(packet adj.Packet) (Packet, error) {
@@ -96,45 +68,6 @@ func getPacket(packet adj.Packet) (Packet, error) {
 		CycleTime:    0,
 		Measurements: make([]Measurement, 0),
 	}, nil
-}
-
-func assemblePackets(packets []Packet, measurements []Measurement, structures []adj.Structure) []Packet {
-	assembledPackets := make([]Packet, 0)
-
-	for _, structure := range structures {
-		index := common.FindIndex(packets, func(packet Packet) bool {
-			return packet.Name == structure.Packet
-		})
-
-		if index == -1 {
-			//TODO: trace
-			continue
-		}
-
-		packets[index].Measurements = findMeasurements(measurements, structure.Measurements)
-
-		assembledPackets = append(assembledPackets, packets[index])
-	}
-
-	return assembledPackets
-}
-
-func findMeasurements(measurements []Measurement, measIds []string) []Measurement {
-	foundMeasurements := make([]Measurement, 0)
-	for _, measId := range measIds {
-		index := common.FindIndex(measurements, func(meas Measurement) bool {
-			return meas.GetId() == measId
-		})
-
-		if index == -1 {
-			//TODO: TRACE
-			continue
-		}
-
-		foundMeasurements = append(foundMeasurements, measurements[index])
-	}
-
-	return foundMeasurements
 }
 
 const DataType = "data"
