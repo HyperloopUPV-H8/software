@@ -2,6 +2,7 @@ package adj
 
 import (
 	"encoding/json"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/utils"
 	"github.com/go-git/go-git/v5"
 	"os"
 )
@@ -17,9 +18,17 @@ func NewADJ() (*ADJ, error) {
 		return nil, err
 	}
 
-	var info Info
-	if err := json.Unmarshal(infoRaw, &info); err != nil {
+	var infoJSON InfoJSON
+	if err := json.Unmarshal(infoRaw, &infoJSON); err != nil {
 		return nil, err
+	}
+
+	var info Info
+	for key, value := range infoJSON.Units {
+		info.Units[key], err = utils.NewOperations(value)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var boardsList map[string]string
@@ -27,7 +36,7 @@ func NewADJ() (*ADJ, error) {
 		return nil, err
 	}
 
-	boards, err := getBoards(info, boardsList)
+	boards, err := getBoards(boardsList)
 
 	info.BoardIds, err = getBoardIds(boardsList)
 
@@ -71,7 +80,7 @@ func checkRepo() bool {
 	return true
 }
 
-func getBoards(info Info, boardsList map[string]string) (map[string]Board, error) {
+func getBoards(boardsList map[string]string) (map[string]Board, error) {
 	var boards map[string]Board
 	for boardName, boardPath := range boardsList {
 		if _, err := os.Stat(boardPath); os.IsNotExist(err) {
