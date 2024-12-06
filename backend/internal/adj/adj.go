@@ -2,9 +2,11 @@ package adj
 
 import (
 	"encoding/json"
+	"os"
+	"path"
+
 	"github.com/HyperloopUPV-H8/h9-backend/internal/utils"
 	"github.com/go-git/go-git/v5"
-	"os"
 )
 
 const (
@@ -24,27 +26,12 @@ func NewADJ() (*ADJ, error) {
 		return nil, err
 	}
 
-	// TESTING
-	for key, value := range infoJSON.Ports {
-		println("Ports: ", key, value)
-	}
-	for key, value := range infoJSON.Addresses {
-		println("Addresses: ", key, value)
+	var info Info = Info{
+		Ports:      infoJSON.Ports,
+		MessageIds: infoJSON.MessageIds,
+		Units:      make(map[string]utils.Operations),
 	}
 	for key, value := range infoJSON.Units {
-		println("Units: ", key, value)
-	}
-	for key, value := range infoJSON.MessageIds {
-		println("MessageIds: ", key, value)
-	}
-	for key, value := range infoJSON.BoardIds {
-		println("BoardIds: ", key, value)
-	}
-
-	var info Info
-	for key, value := range infoJSON.Units {
-		info.Units = make(map[string]utils.Operations)
-
 		info.Units[key], err = utils.NewOperations(value)
 		if err != nil {
 			return nil, err
@@ -66,10 +53,22 @@ func NewADJ() (*ADJ, error) {
 	}
 
 	boards, err := getBoards(boardsList.Boards)
+	if err != nil {
+		return nil, err
+	}
 
 	info.BoardIds, err = getBoardIds(boardsList.Boards)
+	if err != nil {
+		return nil, err
+	}
 
 	info.Addresses, err = getAddresses(boards)
+	if err != nil {
+		return nil, err
+	}
+	for target, address := range infoJSON.Addresses {
+		info.Addresses[target] = address
+	}
 
 	adj := &ADJ{
 		Info:   info,
@@ -112,13 +111,10 @@ func checkRepo() bool {
 }
 
 func getBoards(boardsList map[string]string) (map[string]Board, error) {
-	var boards map[string]Board
+	boards := make(map[string]Board, len(boardsList))
 	for boardName, boardPath := range boardsList {
-		if _, err := os.Stat(boardPath); os.IsNotExist(err) {
-			return nil, err
-		}
-
-		boardRaw, err := os.ReadFile(boardPath)
+		fullPath := path.Join(RepoPath, boardPath)
+		boardRaw, err := os.ReadFile(fullPath)
 		if err != nil {
 			return nil, err
 		}
@@ -128,9 +124,10 @@ func getBoards(boardsList map[string]string) (map[string]Board, error) {
 			return nil, err
 		}
 
-		var board Board
-		board.Name = boardName
-		board.IP = boardJSON.IP
+		board := Board{
+			Name: boardName,
+			IP:   boardJSON.IP,
+		}
 
 		board.Packets, err = getBoardPackets(boardJSON.PacketsPaths)
 		if err != nil {
@@ -197,13 +194,10 @@ func getBoardMeasurements(measurementsPaths []string) ([]Measurement, error) {
 }
 
 func getBoardIds(boards map[string]string) (map[string]uint16, error) {
-	var boardIds map[string]uint16
+	boardIds := make(map[string]uint16, len(boards))
 	for boardName, boardPath := range boards {
-		if _, err := os.Stat(boardPath); os.IsNotExist(err) {
-			return nil, err
-		}
-
-		boardRaw, err := os.ReadFile(boardPath)
+		fullPath := path.Join(RepoPath, boardPath)
+		boardRaw, err := os.ReadFile(fullPath)
 		if err != nil {
 			return nil, err
 		}
@@ -220,18 +214,19 @@ func getBoardIds(boards map[string]string) (map[string]uint16, error) {
 }
 
 func getBoardStructures(board Board) []Structure {
-	var structures []Structure
-	for _, packet := range board.Packets {
-		var structure Structure
-		structure.Packet = packet
-		structure.Measurements = board.Measurements
+	structures := make([]Structure, len(board.Packets))
+	for i, packet := range board.Packets {
+		structures[i] = Structure{
+			Packet:       packet,
+			Measurements: board.Measurements,
+		}
 	}
 
 	return structures
 }
 
 func getAddresses(boards map[string]Board) (map[string]string, error) {
-	var addresses map[string]string
+	addresses := make(map[string]string, len(boards))
 	for boardName, board := range boards {
 		addresses[boardName] = board.IP
 	}

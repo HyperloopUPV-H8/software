@@ -256,14 +256,9 @@ func main() {
 		}
 	}
 
-	boardIps := make([]net.IP, 0)
-	for boardName, _ := range adj.Info.BoardIds {
+	boardIps := make([]net.IP, 0, len(adj.Info.BoardIds))
+	for boardName := range adj.Info.BoardIds {
 		boardIps = append(boardIps, net.ParseIP(adj.Info.Addresses[boardName]))
-	}
-
-	boardIpsStr := make([]string, 0)
-	for boardName, _ := range adj.Info.BoardIds {
-		boardIpsStr = append(boardIpsStr, adj.Info.Addresses[boardName])
 	}
 
 	filter := getFilter(boardIps, net.ParseIP(adj.Info.Addresses[BACKEND]), adj.Info.Ports[UDP])
