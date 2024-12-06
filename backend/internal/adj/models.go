@@ -23,6 +23,13 @@ type Info struct {
 	BoardIds   map[string]uint16
 }
 
+type BoardJSON struct {
+	ID                uint16   `json:"board_id"`
+	IP                string   `json:"board_ip"`
+	MeasurementsPaths []string `json:"measurements"`
+	PacketsPaths      []string `json:"packets"`
+}
+
 type Board struct {
 	Name         string
 	IP           string
@@ -31,27 +38,20 @@ type Board struct {
 	Structures   []Structure
 }
 
-type BoardJSON struct {
-	ID                uint16   `json:"board_id"`
-	IP                string   `json:"board_ip"`
-	MeasurementsPaths []string `json:"measurements"`
-	PacketsPaths      []string `json:"packets"`
-}
-
 type Packet struct {
-	Id   string
-	Name string
-	Type string
+	Id   string `json:"id"`
+	Name string `json:"name"`
+	Type string `json:"type"`
 }
 
 type Measurement struct {
-	Id           string
-	Name         string
-	Type         string
-	PodUnits     string
-	DisplayUnits string
-	SafeRange    string
-	WarningRange string
+	Id           string     `json:"id"`
+	Name         string     `json:"name"`
+	Type         string     `json:"type"`
+	PodUnits     string     `json:"podUnits"`
+	DisplayUnits string     `json:"displayUnits"`
+	SafeRange    []*float64 `json:"safeRange"`
+	WarningRange []*float64 `json:"warningRange"`
 }
 
 type Structure struct {

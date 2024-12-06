@@ -20,25 +20,54 @@ func NewADJ() (*ADJ, error) {
 
 	var infoJSON InfoJSON
 	if err := json.Unmarshal(infoRaw, &infoJSON); err != nil {
+		println("Info JSON unmarshal error")
 		return nil, err
+	}
+
+	// TESTING
+	for key, value := range infoJSON.Ports {
+		println("Ports: ", key, value)
+	}
+	for key, value := range infoJSON.Addresses {
+		println("Addresses: ", key, value)
+	}
+	for key, value := range infoJSON.Units {
+		println("Units: ", key, value)
+	}
+	for key, value := range infoJSON.MessageIds {
+		println("MessageIds: ", key, value)
+	}
+	for key, value := range infoJSON.BoardIds {
+		println("BoardIds: ", key, value)
 	}
 
 	var info Info
 	for key, value := range infoJSON.Units {
+		info.Units = make(map[string]utils.Operations)
+
 		info.Units[key], err = utils.NewOperations(value)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	var boardsList map[string]string
+	type BoardList struct {
+		Boards map[string]string `json:"boards"`
+	}
+
+	var boardsList BoardList
 	if err := json.Unmarshal(boardsRaw, &boardsList); err != nil {
 		return nil, err
 	}
 
-	boards, err := getBoards(boardsList)
+	// TESTING
+	for key, value := range boardsList.Boards {
+		println("Boards: ", key, value)
+	}
 
-	info.BoardIds, err = getBoardIds(boardsList)
+	boards, err := getBoards(boardsList.Boards)
+
+	info.BoardIds, err = getBoardIds(boardsList.Boards)
 
 	info.Addresses, err = getAddresses(boards)
 

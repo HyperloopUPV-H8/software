@@ -48,17 +48,9 @@ func getMeasurement(adeMeas adj.Measurement, globalUnits map[string]utils.Operat
 func getNumericMeasurement(adeMeas adj.Measurement, globalUnits map[string]utils.Operations) (NumericMeasurement, error) {
 	measErrs := common.NewErrorList()
 
-	safeRange, err := utils.ParseRange(adeMeas.SafeRange)
+	safeRange := adeMeas.SafeRange
 
-	if err != nil {
-		measErrs.Add(err)
-	}
-
-	warningRange, err := utils.ParseRange(adeMeas.WarningRange)
-
-	if err != nil {
-		measErrs.Add(err)
-	}
+	warningRange := adeMeas.WarningRange
 
 	displayUnits, err := utils.ParseUnits(adeMeas.DisplayUnits, globalUnits)
 
