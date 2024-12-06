@@ -111,6 +111,8 @@ func getBoards(boardsList map[string]string) (map[string]Board, error) {
 			return nil, err
 		}
 
+		board.Structures = getBoardStructures(board)
+
 		boards[boardName] = board
 	}
 
@@ -184,4 +186,15 @@ func getBoardIds(boards map[string]string) (map[string]uint16, error) {
 	}
 
 	return boardIds, nil
+}
+
+func getBoardStructures(board Board) []Structure {
+	var structures []Structure
+	for _, packet := range board.Packets {
+		var structure Structure
+		structure.Packet = packet
+		structure.Measurements = board.Measurements
+	}
+
+	return structures
 }
