@@ -28,7 +28,6 @@ type Board struct {
 	IP           string
 	Packets      []Packet
 	Measurements []Measurement
-	Structures   []Structure
 }
 
 type BoardJSON struct {
@@ -52,9 +51,4 @@ type Measurement struct {
 	DisplayUnits string
 	SafeRange    string
 	WarningRange string
-}
-
-type Structure struct {
-	Packet       string
-	Measurements []string
 }
