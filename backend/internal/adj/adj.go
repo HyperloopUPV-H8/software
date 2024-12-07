@@ -179,16 +179,17 @@ func getBoardPackets(packetsPaths []string) ([]Packet, error) {
 			return nil, err
 		}
 
+		// Magic happens here
 		var packet Packet
 		type PacketJSON struct {
 			Packet []Packet `json:"packets"`
 		}
 
-		packetJSON := PacketJSON{}
-		if err = json.Unmarshal(packetRaw, &packetJSON); err != nil {
+		packetsJSON := PacketJSON{}
+		if err = json.Unmarshal(packetRaw, &packetsJSON); err != nil {
 			return nil, err
 		}
-		for _, packetTMP := range packetJSON.Packet {
+		for _, packetTMP := range packetsJSON.Packet {
 			packet = packetTMP
 
 			println("Packet Name: ", packet.Name) // TESTING
@@ -212,12 +213,22 @@ func getBoardMeasurements(measurementsPaths []string) ([]Measurement, error) {
 			return nil, err
 		}
 
+		// Absolutely doing tricks on it AGAIN - @msanlli
 		var measurement Measurement
-		if err = json.Unmarshal(measurementRaw, &measurement); err != nil {
-			return nil, err
+		type MeasurementJSON struct {
+			Measurements []Measurement `json:"measurements"`
 		}
 
-		measurements = append(measurements, measurement)
+		measurementsJSON := MeasurementJSON{}
+		if err = json.Unmarshal(measurementRaw, &measurementsJSON); err != nil {
+			return nil, err
+		}
+		for _, measurementTMP := range measurementsJSON.Measurements {
+			measurement = measurementTMP
+
+			println("Packet Name: ", measurementTMP.Name) // TESTING
+			measurements = append(measurements, measurement)
+		}
 	}
 
 	return measurements, nil
