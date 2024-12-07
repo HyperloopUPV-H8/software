@@ -47,11 +47,6 @@ func NewADJ() (ADJ, error) {
 		return ADJ{}, err
 	}
 
-	// TESTING
-	for key, value := range boardsList.Boards {
-		println("Boards: ", key, value)
-	}
-
 	boards, err := getBoards(boardsList.Boards)
 	if err != nil {
 		return ADJ{}, err
@@ -114,7 +109,6 @@ func getBoards(boardsList map[string]string) (map[string]Board, error) {
 	boards := make(map[string]Board, len(boardsList))
 	for boardName, boardPath := range boardsList {
 		fullPath := path.Join(RepoPath, boardPath)
-		println("Full path: ", fullPath) // TESTING
 		boardRaw, err := os.ReadFile(fullPath)
 		if err != nil {
 			return nil, err
@@ -127,15 +121,12 @@ func getBoards(boardsList map[string]string) (map[string]Board, error) {
 
 		measPathsFr := make([]string, 0)
 		for _, measPath := range boardJSON.MeasurementsPaths {
-			println(path.Join(RepoPath, "boards", boardName, measPath))
 			measPathsFr = append(measPathsFr, path.Join(RepoPath, "boards", boardName, measPath))
 		}
 		boardJSON.MeasurementsPaths = measPathsFr
 
-		// Absolutely doing tricks on it - @msanlli
 		packetPathsFr := make([]string, 0)
 		for _, packetPath := range boardJSON.PacketsPaths {
-			println(path.Join(RepoPath, "boards", boardName, packetPath))
 			packetPathsFr = append(packetPathsFr, path.Join(RepoPath, "boards", boardName, packetPath))
 		}
 		boardJSON.PacketsPaths = packetPathsFr
@@ -144,10 +135,6 @@ func getBoards(boardsList map[string]string) (map[string]Board, error) {
 			Name: boardName,
 			IP:   boardJSON.IP,
 		}
-
-		// TESTING
-		println("Board name: ", boardName)
-		println("Board IP: ", board.IP)
 
 		board.Packets, err = getBoardPackets(boardJSON.PacketsPaths)
 		if err != nil {
@@ -171,7 +158,6 @@ func getBoardPackets(packetsPaths []string) ([]Packet, error) {
 	packets := make([]Packet, 0)
 	for _, packetPath := range packetsPaths {
 		if _, err := os.Stat(packetPath); os.IsNotExist(err) {
-			println("I suck at coding") // TESTING
 			continue
 		}
 

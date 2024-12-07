@@ -44,7 +44,6 @@ func getMeasurement(adeMeas adj.Measurement, globalUnits map[string]utils.Operat
 	} else {
 		return nil, fmt.Errorf("type %s not recognized", adeMeas.Type)
 	}
-	println("Generated Measurement is: ", tmp.GetName())
 	return tmp, err
 }
 
