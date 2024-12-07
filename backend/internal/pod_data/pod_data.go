@@ -49,26 +49,12 @@ func getBoard(adjBoard adj.Board, globalUnits map[string]utils.Operations) (Boar
 		for idx, measurement := range adjPacket.Variables {
 			for _, measure := range adjBoard.Measurements {
 				if measure.Name == measurement.Name {
-					adjPacket.Variables[idx].Type = measure.Type
-					adjPacket.Variables[idx].Name = measure.Name
-					adjPacket.Variables[idx].DisplayUnits = measure.DisplayUnits
-					adjPacket.Variables[idx].EnumValues = measure.EnumValues
-					adjPacket.Variables[idx].Id = measure.Id
-
+					adjPacket.Variables[idx] = measure
 				}
 			}
 		}
-		for _, updatedMeas := range adjPacket.Variables {
-			println("After insertion:\n\tMeasurement name: ", updatedMeas.Name, "\n\tMeasurement type", updatedMeas.Type)
-		}
 		packet.Measurements, err = getMeasurements(adjPacket, globalUnits) // TODO: Check if this is correct
 		packets = append(packets, packet)
-		println("Generated packet at pod data", packet.Name)
-		println("Generated packet at pod data", packet.Id)
-		println("Number of measurements inside packet", len(packet.Measurements))
-		for _, vari := range packet.Measurements {
-			println("Measurement inside packet: ", vari.GetName())
-		}
 	}
 
 	board.Packets = packets
