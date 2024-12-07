@@ -45,13 +45,8 @@ func getBoard(adjBoard adj.Board, globalUnits map[string]utils.Operations) (Boar
 		if err != nil {
 			return Board{}, err
 		}
-		/////////////////// HACKY, bad time complexity, but it will work
-		for idx, measurement := range adjPacket.Variables {
-			for _, measure := range adjBoard.Measurements {
-				if measure.Id == measurement.Name {
-					adjPacket.Variables[idx] = measure
-				}
-			}
+		for idx, packetVariable := range adjPacket.Variables {
+			adjPacket.Variables[idx] = adjBoard.LookUpMeasurements[packetVariable.Name]
 		}
 		packet.Measurements, err = getMeasurements(adjPacket, globalUnits) // TODO: Check if this is correct
 		packets = append(packets, packet)

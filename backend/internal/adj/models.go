@@ -31,11 +31,12 @@ type BoardJSON struct {
 }
 
 type Board struct {
-	Name         string
-	IP           string
-	Packets      []Packet
-	Measurements []Measurement
-	Structures   []Structure
+	Name               string
+	IP                 string
+	Packets            []Packet
+	Measurements       []Measurement
+	Structures         []Structure
+	LookUpMeasurements map[string]Measurement
 }
 
 type Packet struct {

@@ -135,7 +135,6 @@ func getBoards(boardsList map[string]string) (map[string]Board, error) {
 			Name: boardName,
 			IP:   boardJSON.IP,
 		}
-
 		board.Packets, err = getBoardPackets(boardJSON.PacketsPaths)
 		if err != nil {
 			return nil, err
@@ -145,7 +144,11 @@ func getBoards(boardsList map[string]string) (map[string]Board, error) {
 		if err != nil {
 			return nil, err
 		}
+		board.LookUpMeasurements = make(map[string]Measurement, len(board.Measurements))
 
+		for _, measurement := range board.Measurements {
+			board.LookUpMeasurements[measurement.Id] = measurement
+		}
 		board.Structures = getBoardStructures(board)
 
 		boards[boardName] = board
