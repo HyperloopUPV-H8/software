@@ -15,6 +15,12 @@ func getMeasurements(boardMeasurements []adj.Measurement, globalUnits map[string
 	measurements := make([]Measurement, 0)
 	mErrors := common.NewErrorList()
 
+	// TESTING
+	println("I'm here")
+	for _, adjMeas := range boardMeasurements {
+		println(adjMeas.Id) // TESTING
+	}
+
 	for _, adjMeas := range boardMeasurements {
 		meas, err := getMeasurement(adjMeas, globalUnits)
 
@@ -34,6 +40,7 @@ func getMeasurements(boardMeasurements []adj.Measurement, globalUnits map[string
 }
 
 func getMeasurement(adeMeas adj.Measurement, globalUnits map[string]utils.Operations) (Measurement, error) {
+	println(adeMeas.Id) // TESTING
 	if isNumeric(adeMeas.Type) {
 		return getNumericMeasurement(adeMeas, globalUnits)
 	} else if adeMeas.Type == "bool" {

@@ -12,6 +12,12 @@ func NewPodData(adjBoards map[string]adj.Board, globalUnits map[string]utils.Ope
 	boards := make([]Board, 0)
 	boardErrs := common.NewErrorList()
 
+	// TESTING
+	for _, value := range adjBoards {
+		for _, val := range value.Packets {
+			println(val.Id)
+		}
+	}
 	for _, adjBoard := range adjBoards {
 		board, err := getBoard(adjBoard, globalUnits)
 
@@ -37,13 +43,20 @@ func getBoard(adjBoard adj.Board, globalUnits map[string]utils.Operations) (Boar
 
 	packets := make([]Packet, 0)
 
+	// TESTING
+	println("I'm here")
+
+	for _, adjPacket := range adjBoard.Packets {
+		println(adjPacket.Id)
+	}
+
 	for _, adjPacket := range adjBoard.Packets {
 		packet, err := getPacket(adjPacket)
 		if err != nil {
 			return Board{}, err
 		}
 
-		packet.Measurements, err = getMeasurements(adjBoard.Measurements, globalUnits)
+		packet.Measurements, err = getMeasurements(adjBoard.Measurements, globalUnits) // TODO: Check if this is correct
 
 		packets = append(packets, packet)
 	}

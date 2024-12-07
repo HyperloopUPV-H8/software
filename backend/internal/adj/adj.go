@@ -114,6 +114,7 @@ func getBoards(boardsList map[string]string) (map[string]Board, error) {
 	boards := make(map[string]Board, len(boardsList))
 	for boardName, boardPath := range boardsList {
 		fullPath := path.Join(RepoPath, boardPath)
+		println("Full path: ", fullPath) // TESTING
 		boardRaw, err := os.ReadFile(fullPath)
 		if err != nil {
 			return nil, err
@@ -124,14 +125,31 @@ func getBoards(boardsList map[string]string) (map[string]Board, error) {
 			return nil, err
 		}
 
+		// Absolutely doing tricks on it - @msanlli
+		packetPathsFr := make([]string, 0)
+		for _, packetPath := range boardJSON.PacketsPaths {
+			println(path.Join(RepoPath, "boards", boardName, packetPath))
+			packetPathsFr = append(packetPathsFr, path.Join(RepoPath, "boards", boardName, packetPath))
+		}
+		boardJSON.PacketsPaths = packetPathsFr
+
 		board := Board{
 			Name: boardName,
 			IP:   boardJSON.IP,
 		}
 
+		// TESTING
+		println("Board name: ", boardName)
+		println("Board IP: ", board.IP)
+
 		board.Packets, err = getBoardPackets(boardJSON.PacketsPaths)
 		if err != nil {
 			return nil, err
+		}
+
+		// TESTING
+		for _, packet := range board.Packets {
+			println("Packet ID: ", packet.Id)
 		}
 
 		board.Measurements, err = getBoardMeasurements(boardJSON.MeasurementsPaths)
@@ -148,9 +166,11 @@ func getBoards(boardsList map[string]string) (map[string]Board, error) {
 }
 
 func getBoardPackets(packetsPaths []string) ([]Packet, error) {
-	var packets []Packet
+	packets := make([]Packet, 0)
 	for _, packetPath := range packetsPaths {
+		println(packetPath)
 		if _, err := os.Stat(packetPath); os.IsNotExist(err) {
+			println("I suck at coding") // TESTING
 			continue
 		}
 
@@ -160,18 +180,28 @@ func getBoardPackets(packetsPaths []string) ([]Packet, error) {
 		}
 
 		var packet Packet
-		if err = json.Unmarshal(packetRaw, &packet); err != nil {
-			return nil, err
+		type PacketJSON struct {
+			Packet []Packet `json:"packets"`
 		}
 
-		packets = append(packets, packet)
+		packetJSON := PacketJSON{}
+		if err = json.Unmarshal(packetRaw, &packetJSON); err != nil {
+			return nil, err
+		}
+		for _, packetTMP := range packetJSON.Packet {
+			packet = packetTMP
+
+			println("Packet Name: ", packet.Name) // TESTING
+			packets = append(packets, packet)
+		}
 	}
 
 	return packets, nil
 }
 
 func getBoardMeasurements(measurementsPaths []string) ([]Measurement, error) {
-	var measurements []Measurement
+	measurements := make([]Measurement, len(measurementsPaths))
+
 	for _, measurementPath := range measurementsPaths {
 		if _, err := os.Stat(measurementPath); os.IsNotExist(err) {
 			continue
