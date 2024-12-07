@@ -108,13 +108,8 @@ func main() {
 
 	//
 	// TESTING
-	//
-	for _, value := range adj.Boards {
-		println("Boards at main===============")
-		for _, v := range value.Measurements {
-			println("Measurements at main", v.Name)
-		}
-	}
+	// //
+
 	//
 
 	// poops itself
