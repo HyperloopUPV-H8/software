@@ -1,8 +1,9 @@
 package pod_data
 
 import (
-	"github.com/HyperloopUPV-H8/h9-backend/internal/utils"
 	"strconv"
+
+	"github.com/HyperloopUPV-H8/h9-backend/internal/utils"
 
 	"github.com/HyperloopUPV-H8/h9-backend/internal/adj"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
@@ -12,12 +13,6 @@ func NewPodData(adjBoards map[string]adj.Board, globalUnits map[string]utils.Ope
 	boards := make([]Board, 0)
 	boardErrs := common.NewErrorList()
 
-	// TESTING
-	for _, value := range adjBoards {
-		for _, val := range value.Packets {
-			println("packet id at pod_data:", val.Id)
-		}
-	}
 	for _, adjBoard := range adjBoards {
 		board, err := getBoard(adjBoard, globalUnits)
 
@@ -44,25 +39,36 @@ func getBoard(adjBoard adj.Board, globalUnits map[string]utils.Operations) (Boar
 	packets := make([]Packet, 0)
 
 	// TESTING
-	for _, adjPacket := range adjBoard.Packets {
-		println("at pod_data packets, packetID:", adjPacket.Id)
-	}
-
-	for _, adjMeas := range adjBoard.Measurements {
-		println("at pod data, measurements:", adjMeas.Name)
-	}
 
 	for _, adjPacket := range adjBoard.Packets {
 		packet, err := getPacket(adjPacket) // Black magic fuck
 		if err != nil {
 			return Board{}, err
 		}
-		for _, adjMeasurement := range adjBoard.Measurements {
-			println("at pod data, measurements:", adjMeasurement.Name)
-		}
-		packet.Measurements, err = getMeasurements(adjBoard.Measurements, globalUnits) // TODO: Check if this is correct
+		/////////////////// HACKY, bad time complexity, but it will work
+		for idx, measurement := range adjPacket.Variables {
+			for _, measure := range adjBoard.Measurements {
+				if measure.Name == measurement.Name {
+					adjPacket.Variables[idx].Type = measure.Type
+					adjPacket.Variables[idx].Name = measure.Name
+					adjPacket.Variables[idx].DisplayUnits = measure.DisplayUnits
+					adjPacket.Variables[idx].EnumValues = measure.EnumValues
+					adjPacket.Variables[idx].Id = measure.Id
 
+				}
+			}
+		}
+		for _, updatedMeas := range adjPacket.Variables {
+			println("After insertion:\n\tMeasurement name: ", updatedMeas.Name, "\n\tMeasurement type", updatedMeas.Type)
+		}
+		packet.Measurements, err = getMeasurements(adjPacket, globalUnits) // TODO: Check if this is correct
 		packets = append(packets, packet)
+		println("Generated packet at pod data", packet.Name)
+		println("Generated packet at pod data", packet.Id)
+		println("Number of measurements inside packet", len(packet.Measurements))
+		for _, vari := range packet.Measurements {
+			println("Measurement inside packet: ", vari.GetName())
+		}
 	}
 
 	board.Packets = packets
