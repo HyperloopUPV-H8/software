@@ -42,7 +42,6 @@ func getMeasurement(adeMeas adj.Measurement, globalUnits map[string]utils.Operat
 	} else if strings.HasPrefix(adeMeas.Type, "enum") {
 		tmp = getEnumMeasurement(adeMeas)
 	} else {
-		println("no valid type")
 		return nil, fmt.Errorf("type %s not recognized", adeMeas.Type)
 	}
 	println("Generated Measurement is: ", tmp.GetName())
