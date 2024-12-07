@@ -100,11 +100,24 @@ func main() {
 
 	// <--- ADJ --->
 
+	// Already did tricks on it
 	adj, err := adj_module.NewADJ()
 	if err != nil {
 		trace.Fatal().Err(err).Msg("setting up ADJ")
 	}
 
+	//
+	// TESTING
+	//
+	for _, value := range adj.Boards {
+		println("Boards at main===============")
+		for _, v := range value.Measurements {
+			println("Measurements at main", v.Name)
+		}
+	}
+	//
+
+	// poops itself
 	podData, err := pod_data.NewPodData(adj.Boards, adj.Info.Units)
 	if err != nil {
 		fmt.Println(err)

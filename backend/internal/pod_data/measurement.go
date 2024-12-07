@@ -16,9 +16,9 @@ func getMeasurements(boardMeasurements []adj.Measurement, globalUnits map[string
 	mErrors := common.NewErrorList()
 
 	// TESTING
-	println("I'm here")
+	println("I'm at meas")
 	for _, adjMeas := range boardMeasurements {
-		println(adjMeas.Id) // TESTING
+		println("at meas:", adjMeas.Name) // TESTING
 	}
 
 	for _, adjMeas := range boardMeasurements {

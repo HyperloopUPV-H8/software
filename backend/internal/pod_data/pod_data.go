@@ -15,7 +15,7 @@ func NewPodData(adjBoards map[string]adj.Board, globalUnits map[string]utils.Ope
 	// TESTING
 	for _, value := range adjBoards {
 		for _, val := range value.Packets {
-			println(val.Id)
+			println("packet id at pod_data:", val.Id)
 		}
 	}
 	for _, adjBoard := range adjBoards {
@@ -44,18 +44,22 @@ func getBoard(adjBoard adj.Board, globalUnits map[string]utils.Operations) (Boar
 	packets := make([]Packet, 0)
 
 	// TESTING
-	println("I'm here")
-
 	for _, adjPacket := range adjBoard.Packets {
-		println(adjPacket.Id)
+		println("at pod_data packets, packetID:", adjPacket.Id)
+	}
+
+	for _, adjMeas := range adjBoard.Measurements {
+		println("at pod data, measurements:", adjMeas.Name)
 	}
 
 	for _, adjPacket := range adjBoard.Packets {
-		packet, err := getPacket(adjPacket)
+		packet, err := getPacket(adjPacket) // Black magic fuck
 		if err != nil {
 			return Board{}, err
 		}
-
+		for _, adjMeasurement := range adjBoard.Measurements {
+			println("at pod data, measurements:", adjMeasurement.Name)
+		}
 		packet.Measurements, err = getMeasurements(adjBoard.Measurements, globalUnits) // TODO: Check if this is correct
 
 		packets = append(packets, packet)

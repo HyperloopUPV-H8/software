@@ -14,16 +14,16 @@ const (
 	RepoPath = "./JSON_ADE/"                                     // Path where the ADJ repository is cloned
 )
 
-func NewADJ() (*ADJ, error) {
+func NewADJ() (ADJ, error) {
 	infoRaw, boardsRaw, err := downloadADJ()
 	if err != nil {
-		return nil, err
+		return ADJ{}, err
 	}
 
 	var infoJSON InfoJSON
 	if err := json.Unmarshal(infoRaw, &infoJSON); err != nil {
 		println("Info JSON unmarshal error")
-		return nil, err
+		return ADJ{}, err
 	}
 
 	var info Info = Info{
@@ -34,7 +34,7 @@ func NewADJ() (*ADJ, error) {
 	for key, value := range infoJSON.Units {
 		info.Units[key], err = utils.NewOperations(value)
 		if err != nil {
-			return nil, err
+			return ADJ{}, err
 		}
 	}
 
@@ -44,7 +44,7 @@ func NewADJ() (*ADJ, error) {
 
 	var boardsList BoardList
 	if err := json.Unmarshal(boardsRaw, &boardsList); err != nil {
-		return nil, err
+		return ADJ{}, err
 	}
 
 	// TESTING
@@ -54,23 +54,23 @@ func NewADJ() (*ADJ, error) {
 
 	boards, err := getBoards(boardsList.Boards)
 	if err != nil {
-		return nil, err
+		return ADJ{}, err
 	}
 
 	info.BoardIds, err = getBoardIds(boardsList.Boards)
 	if err != nil {
-		return nil, err
+		return ADJ{}, err
 	}
 
 	info.Addresses, err = getAddresses(boards)
 	if err != nil {
-		return nil, err
+		return ADJ{}, err
 	}
 	for target, address := range infoJSON.Addresses {
 		info.Addresses[target] = address
 	}
 
-	adj := &ADJ{
+	adj := ADJ{
 		Info:   info,
 		Boards: boards,
 	}
@@ -125,6 +125,13 @@ func getBoards(boardsList map[string]string) (map[string]Board, error) {
 			return nil, err
 		}
 
+		measPathsFr := make([]string, 0)
+		for _, measPath := range boardJSON.MeasurementsPaths {
+			println(path.Join(RepoPath, "boards", boardName, measPath))
+			measPathsFr = append(measPathsFr, path.Join(RepoPath, "boards", boardName, measPath))
+		}
+		boardJSON.MeasurementsPaths = measPathsFr
+
 		// Absolutely doing tricks on it - @msanlli
 		packetPathsFr := make([]string, 0)
 		for _, packetPath := range boardJSON.PacketsPaths {
@@ -153,6 +160,9 @@ func getBoards(boardsList map[string]string) (map[string]Board, error) {
 		}
 
 		board.Measurements, err = getBoardMeasurements(boardJSON.MeasurementsPaths)
+		for _, measurement := range board.Measurements {
+			println(" @ getBoards, Measurement ID: ", measurement.Name)
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -180,7 +190,6 @@ func getBoardPackets(packetsPaths []string) ([]Packet, error) {
 		}
 
 		// Magic happens here
-		var packet Packet
 		type PacketJSON struct {
 			Packet []Packet `json:"packets"`
 		}
@@ -190,10 +199,8 @@ func getBoardPackets(packetsPaths []string) ([]Packet, error) {
 			return nil, err
 		}
 		for _, packetTMP := range packetsJSON.Packet {
-			packet = packetTMP
-
-			println("Packet Name: ", packet.Name) // TESTING
-			packets = append(packets, packet)
+			println("Packet Name: ", packetTMP.Name) // TESTING
+			packets = append(packets, packetTMP)
 		}
 	}
 
@@ -201,7 +208,7 @@ func getBoardPackets(packetsPaths []string) ([]Packet, error) {
 }
 
 func getBoardMeasurements(measurementsPaths []string) ([]Measurement, error) {
-	measurements := make([]Measurement, len(measurementsPaths))
+	measurements := make([]Measurement, 0)
 
 	for _, measurementPath := range measurementsPaths {
 		if _, err := os.Stat(measurementPath); os.IsNotExist(err) {
@@ -214,7 +221,6 @@ func getBoardMeasurements(measurementsPaths []string) ([]Measurement, error) {
 		}
 
 		// Absolutely doing tricks on it AGAIN - @msanlli
-		var measurement Measurement
 		type MeasurementJSON struct {
 			Measurements []Measurement `json:"measurements"`
 		}
@@ -224,10 +230,8 @@ func getBoardMeasurements(measurementsPaths []string) ([]Measurement, error) {
 			return nil, err
 		}
 		for _, measurementTMP := range measurementsJSON.Measurements {
-			measurement = measurementTMP
-
 			println("Packet Name: ", measurementTMP.Name) // TESTING
-			measurements = append(measurements, measurement)
+			measurements = append(measurements, measurementTMP)
 		}
 	}
 

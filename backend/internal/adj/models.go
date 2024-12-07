@@ -52,6 +52,7 @@ type Measurement struct {
 	DisplayUnits string     `json:"displayUnits"`
 	SafeRange    []*float64 `json:"safeRange"`
 	WarningRange []*float64 `json:"warningRange"`
+	EnumValues   []string   `json:"enumValues"`
 }
 
 type Structure struct {
