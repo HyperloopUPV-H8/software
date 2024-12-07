@@ -39,9 +39,10 @@ type Board struct {
 }
 
 type Packet struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
-	Type string `json:"type"`
+	Id        string        `json:"id"`
+	Name      string        `json:"name"`
+	Type      string        `json:"type"`
+	Variables []Measurement `json:"variables"`
 }
 
 type Measurement struct {
