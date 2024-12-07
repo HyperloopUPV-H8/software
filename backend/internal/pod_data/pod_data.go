@@ -48,7 +48,7 @@ func getBoard(adjBoard adj.Board, globalUnits map[string]utils.Operations) (Boar
 		/////////////////// HACKY, bad time complexity, but it will work
 		for idx, measurement := range adjPacket.Variables {
 			for _, measure := range adjBoard.Measurements {
-				if measure.Name == measurement.Name {
+				if measure.Id == measurement.Name {
 					adjPacket.Variables[idx] = measure
 				}
 			}
