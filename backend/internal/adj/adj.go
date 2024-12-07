@@ -154,15 +154,7 @@ func getBoards(boardsList map[string]string) (map[string]Board, error) {
 			return nil, err
 		}
 
-		// TESTING
-		for _, packet := range board.Packets {
-			println("Packet ID: ", packet.Id)
-		}
-
 		board.Measurements, err = getBoardMeasurements(boardJSON.MeasurementsPaths)
-		for _, measurement := range board.Measurements {
-			println(" @ getBoards, Measurement ID: ", measurement.Name)
-		}
 		if err != nil {
 			return nil, err
 		}
@@ -178,7 +170,6 @@ func getBoards(boardsList map[string]string) (map[string]Board, error) {
 func getBoardPackets(packetsPaths []string) ([]Packet, error) {
 	packets := make([]Packet, 0)
 	for _, packetPath := range packetsPaths {
-		println(packetPath)
 		if _, err := os.Stat(packetPath); os.IsNotExist(err) {
 			println("I suck at coding") // TESTING
 			continue
@@ -199,7 +190,6 @@ func getBoardPackets(packetsPaths []string) ([]Packet, error) {
 			return nil, err
 		}
 		for _, packetTMP := range packetsJSON.Packet {
-			println("Packet Name: ", packetTMP.Name) // TESTING
 			packets = append(packets, packetTMP)
 		}
 	}
@@ -230,7 +220,6 @@ func getBoardMeasurements(measurementsPaths []string) ([]Measurement, error) {
 			return nil, err
 		}
 		for _, measurementTMP := range measurementsJSON.Measurements {
-			println("Packet Name: ", measurementTMP.Name) // TESTING
 			measurements = append(measurements, measurementTMP)
 		}
 	}
