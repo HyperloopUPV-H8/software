@@ -1,0 +1,31 @@
+.data1_page {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 1rem;
+}
+
+.column {
+    display: flex;
+    flex-flow: column;
+    gap: 1rem;
+
+    &:nth-child(1) {
+        width: 27vw;
+    }
+
+    &:nth-child(2) {
+        width: 12vw;
+    }
+
+    &:nth-child(3) {
+        width: 12vw;
+    }
+
+    &:nth-child(4) {
+        width: 16vw;
+    }
+
+    &:nth-child(5) {
+        width: 26vw;
+    }
+}

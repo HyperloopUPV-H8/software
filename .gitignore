@@ -1,8 +1,8 @@
 build
 profiles
 
-# GOOGLE API KEY
-secret.json
+# ADJ
+JSON_ADE
 
 # MacOS Files
 .DS_Store

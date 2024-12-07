@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"flag"
 	"fmt"
+
 	"log"
 	"net"
 	"net/http"
@@ -18,13 +19,11 @@ import (
 	"strings"
 	"time"
 
+	adj_module "github.com/HyperloopUPV-H8/h9-backend/internal/adj"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/excel"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/ade"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/utils"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/info"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/pod_data"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/update_factory"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/utils"
 	vehicle_models "github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker"
@@ -57,12 +56,25 @@ import (
 	trace "github.com/rs/zerolog/log"
 )
 
+const (
+	BACKEND          = "backend"
+	BLCU             = "blcu"
+	TcpClient        = "TCP_CLIENT"
+	TcpServer        = "TCP_SERVER"
+	UDP              = "UDP"
+	SNTP             = "SNTP"
+	BlcuAck          = "blcu_ack"
+	AddStateOrder    = "add_state_order"
+	RemoveStateOrder = "remove_state_order"
+)
+
 var traceLevel = flag.String("trace", "info", "set the trace level (\"fatal\", \"error\", \"warn\", \"info\", \"debug\", \"trace\")")
 var traceFile = flag.String("log", "trace.json", "set the trace log file")
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 var enableSNTP = flag.Bool("sntp", false, "enables a simple SNTP server on port 123")
 var networkDevice = flag.Int("dev", -1, "index of the network device to use, overrides device prompt")
 var blockprofile = flag.Int("blockprofile", 0, "number of block profiles to include")
+var playbackFile = flag.String("playback", "", "")
 
 func main() {
 	flag.Parse()
@@ -86,22 +98,14 @@ func main() {
 	runtime.SetBlockProfileRate(*blockprofile)
 	config := getConfig("./config.toml")
 
-	file, err := excel.Download(excel.DownloadConfig(config.Excel.Download))
+	// <--- ADJ --->
+
+	adj, err := adj_module.NewADJ()
 	if err != nil {
-		trace.Fatal().Err(err).Msg("downloading file")
+		trace.Fatal().Err(err).Msg("setting up ADJ")
 	}
 
-	ade, err := ade.CreateADE(file)
-	if err != nil {
-		trace.Fatal().Err(err).Msg("creating ade")
-	}
-
-	info, err := info.NewInfo(ade.Info)
-	if err != nil {
-		trace.Fatal().Err(err).Msg("creating info")
-	}
-
-	podData, err := pod_data.NewPodData(ade.Boards, info.Units)
+	podData, err := pod_data.NewPodData(adj.Boards, adj.Info.Units)
 	if err != nil {
 		fmt.Println(err)
 		trace.Fatal().Err(err).Msg("creating podData")
@@ -122,7 +126,7 @@ func main() {
 		}
 	}
 
-	vehicleOrders, err := vehicle_models.NewVehicleOrders(podData.Boards, config.Excel.Parse.Global.BLCUAddressKey)
+	vehicleOrders, err := vehicle_models.NewVehicleOrders(podData.Boards, adj.Info.Addresses[BLCU])
 	if err != nil {
 		trace.Fatal().Err(err).Msg("creating vehicleOrders")
 	}
@@ -166,7 +170,7 @@ func main() {
 	orderTopic := order_topic.NewSendTopic()
 	loggerTopic := logger_topic.NewEnableTopic()
 	boardIdToBoard := make(map[abstraction.BoardId]string)
-	for name, id := range info.BoardIds {
+	for name, id := range adj.Info.BoardIds {
 		boardIdToBoard[abstraction.BoardId(id)] = name
 	}
 	messageTopic := message_topic.NewUpdateTopic(boardIdToBoard)
@@ -190,8 +194,8 @@ func main() {
 
 	// <--- vehicle --->
 	ipToBoardId := make(map[string]abstraction.BoardId)
-	for name, ip := range info.Addresses.Boards {
-		ipToBoardId[ip.String()] = abstraction.BoardId(info.BoardIds[name])
+	for name, ip := range adj.Info.Addresses {
+		ipToBoardId[ip] = abstraction.BoardId(adj.Info.BoardIds[name])
 	}
 
 	vehicle := vehicle.New(trace.Logger)
@@ -204,7 +208,7 @@ func main() {
 
 	// <--- transport --->
 	// Load and set packet decoder and encoder
-	decoder, encoder := getTransportDecEnc(info, podData)
+	decoder, encoder := getTransportDecEnc(adj.Info, podData)
 	transp.WithDecoder(decoder).WithEncoder(encoder)
 
 	// Set package id to target map
@@ -212,7 +216,7 @@ func main() {
 		for _, packet := range board.Packets {
 			transp.SetIdTarget(abstraction.PacketId(packet.Id), abstraction.TransportTarget(board.Name))
 		}
-		transp.SetTargetIp(info.Addresses.Boards[board.Name].String(), abstraction.TransportTarget(board.Name))
+		transp.SetTargetIp(adj.Info.Addresses[board.Name], abstraction.TransportTarget(board.Name))
 	}
 
 	// Start handling TCP client connections
@@ -220,14 +224,14 @@ func main() {
 	serverTargets := make(map[string]abstraction.TransportTarget)
 	for _, board := range podData.Boards {
 		if !common.Contains(config.Vehicle.Boards, board.Name) {
-			serverTargets[fmt.Sprintf("%s:%d", info.Addresses.Boards[board.Name], info.Ports.TcpClient)] = abstraction.TransportTarget(board.Name)
+			serverTargets[fmt.Sprintf("%s:%d", adj.Info.Addresses[board.Name], adj.Info.Ports[TcpClient])] = abstraction.TransportTarget(board.Name)
 			continue
 		}
-		backendTcpClientAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", info.Addresses.Backend.String(), info.Ports.TcpClient+uint16(i)))
+		backendTcpClientAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", adj.Info.Addresses[BACKEND], adj.Info.Ports[TcpClient]+uint16(i)))
 		if err != nil {
 			panic("Failed to resolve local backend TCP client address")
 		}
-		go transp.HandleClient(tcp.NewClientConfig(backendTcpClientAddr), fmt.Sprintf("%s:%d", info.Addresses.Boards[board.Name], info.Ports.TcpServer))
+		go transp.HandleClient(tcp.NewClientConfig(backendTcpClientAddr), fmt.Sprintf("%s:%d", adj.Info.Addresses[board.Name], adj.Info.Ports[TcpServer]))
 		i++
 	}
 
@@ -237,28 +241,33 @@ func main() {
 			KeepAlive: time.Second,
 		},
 		Context: context.TODO(),
-	}, fmt.Sprintf("%s:%d", info.Addresses.Backend, info.Ports.TcpServer))
+	}, fmt.Sprintf("%s:%d", adj.Info.Addresses[BACKEND], adj.Info.Ports[TcpServer]))
 
 	// Start handling the sniffer
 	source, err := pcap.OpenLive(dev.Name, 1500, true, pcap.BlockForever)
 	if err != nil {
 		panic("failed to obtain sniffer source: " + err.Error())
 	}
-	boardIps := make([]net.IP, 0)
-	for _, board := range info.Addresses.Boards {
-		boardIps = append(boardIps, board)
+
+	if *playbackFile != "" {
+		source, err = pcap.OpenOffline(*playbackFile)
+		if err != nil {
+			panic("failed to obtain sniffer source: " + err.Error())
+		}
 	}
-	err = source.SetBPFFilter(getFilter(boardIps, info.Addresses.Backend, info.Ports.UDP, info.Ports.TcpClient, info.Ports.TcpServer))
+
+	boardIps := make([]net.IP, 0, len(adj.Info.BoardIds))
+	for boardName := range adj.Info.BoardIds {
+		boardIps = append(boardIps, net.ParseIP(adj.Info.Addresses[boardName]))
+	}
+
+	filter := getFilter(boardIps, net.ParseIP(adj.Info.Addresses[BACKEND]), adj.Info.Ports[UDP])
+	trace.Warn().Str("filter", filter).Msg("filter")
+	err = source.SetBPFFilter(filter)
 	if err != nil {
 		panic("failed to compile bpf filter")
 	}
-	go func() {
-		sniffer := sniffer.New(source, &layers.LayerTypeEthernet, trace.Logger)
-		for {
-			errChan := transp.HandleSniffer(sniffer)
-			trace.Error().Stack().Err(<-errChan).Msg("sniffer crashed, restarting...")
-		}
-	}()
+	go transp.HandleSniffer(sniffer.New(source, &layers.LayerTypeEthernet, trace.Logger))
 
 	// <--- http server --->
 	podDataHandle, err := h.HandleDataJSON("podData.json", pod_data.GetDataOnlyPodData(podData))
@@ -269,8 +278,8 @@ func main() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error creating orderData handler: %v\n", err)
 	}
-	uploadableBords := common.Filter(common.Keys(info.Addresses.Boards), func(item string) bool {
-		return item != config.Excel.Parse.Global.BLCUAddressKey
+	uploadableBords := common.Filter(common.Keys(adj.Info.Addresses), func(item string) bool {
+		return item != adj.Info.Addresses[BLCU]
 	})
 	programableBoardsHandle, err := h.HandleDataJSON("programableBoards.json", uploadableBords)
 	if err != nil {
@@ -294,7 +303,7 @@ func main() {
 
 	// <--- SNTP --->
 	if *enableSNTP {
-		sntpAddr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", info.Addresses.Backend, info.Ports.SNTP))
+		sntpAddr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", adj.Info.Addresses[BACKEND], adj.Info.Ports[SNTP]))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error resolving sntp address: %v\n", err)
 			os.Exit(1)
@@ -424,7 +433,7 @@ func getConfig(path string) Config {
 	return config
 }
 
-func getTransportDecEnc(info info.Info, podData pod_data.PodData) (*presentation.Decoder, *presentation.Encoder) {
+func getTransportDecEnc(info adj_module.Info, podData pod_data.PodData) (*presentation.Decoder, *presentation.Encoder) {
 	decoder := presentation.NewDecoder(binary.LittleEndian, trace.Logger)
 	encoder := presentation.NewEncoder(binary.LittleEndian, trace.Logger)
 
@@ -487,13 +496,14 @@ func getTransportDecEnc(info info.Info, podData pod_data.PodData) (*presentation
 		encoder.SetPacketEncoder(id, dataEncoder)
 	}
 
-	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds.BlcuAck), blcu_packet.NewDecoder())
+	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds[BlcuAck]), blcu_packet.NewDecoder())
 
+	// TODO Solve this foking mess
 	stateOrdersDecoder := order.NewDecoder(binary.LittleEndian)
-	stateOrdersDecoder.SetActionId(abstraction.PacketId(info.MessageIds.AddStateOrder), stateOrdersDecoder.DecodeAdd)
-	stateOrdersDecoder.SetActionId(abstraction.PacketId(info.MessageIds.RemoveStateOrder), stateOrdersDecoder.DecodeRemove)
-	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds.AddStateOrder), stateOrdersDecoder)
-	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds.RemoveStateOrder), stateOrdersDecoder)
+	stateOrdersDecoder.SetActionId(abstraction.PacketId(info.MessageIds[AddStateOrder]), stateOrdersDecoder.DecodeAdd)
+	stateOrdersDecoder.SetActionId(abstraction.PacketId(info.MessageIds[RemoveStateOrder]), stateOrdersDecoder.DecodeRemove)
+	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds[AddStateOrder]), stateOrdersDecoder)
+	decoder.SetPacketDecoder(abstraction.PacketId(info.MessageIds[RemoveStateOrder]), stateOrdersDecoder)
 
 	protectionDecoder := protection.NewDecoder(binary.LittleEndian)
 	protectionDecoder.SetSeverity(1000, protection.FaultSeverity).SetSeverity(2000, protection.WarningSeverity).SetSeverity(3000, protection.OkSeverity)
@@ -534,15 +544,11 @@ func getOps(units utils.Units) data.ConversionDescriptor {
 	return output
 }
 
-func getFilter(boardAddrs []net.IP, backendAddr net.IP, udpPort uint16, tcpClientPort uint16, tcpServerPort uint16) string {
+func getFilter(boardAddrs []net.IP, backendAddr net.IP, udpPort uint16) string {
 	ipipFilter := getIPIPfilter()
-	udpFilter := getUDPFilter(boardAddrs, udpPort)
-	tcpFilter := getTCPFilter(boardAddrs, tcpServerPort, tcpClientPort)
-	// noBackend := "not host 192.168.0.9"
+	udpFilter := getUDPFilter(boardAddrs, backendAddr, udpPort)
 
-	// filter := fmt.Sprintf("((%s) or (%s) or (%s)) and (%s)", ipipFilter, udpFilter, tcpFilter, noBackend)
-
-	filter := fmt.Sprintf("(%s) or (%s) or (%s)", ipipFilter, udpFilter, tcpFilter)
+	filter := fmt.Sprintf("(%s) or (%s)", ipipFilter, udpFilter)
 
 	trace.Trace().Any("addrs", boardAddrs).Str("filter", filter).Msg("new filter")
 	return filter
@@ -552,7 +558,7 @@ func getIPIPfilter() string {
 	return "ip[9] == 4"
 }
 
-func getUDPFilter(addrs []net.IP, port uint16) string {
+func getUDPFilter(addrs []net.IP, backendAddr net.IP, port uint16) string {
 	udpPort := fmt.Sprintf("udp port %d", port)
 	udpAddrs := common.Map(addrs, func(addr net.IP) string {
 		return fmt.Sprintf("(src host %s)", addr)
@@ -560,27 +566,5 @@ func getUDPFilter(addrs []net.IP, port uint16) string {
 
 	udpAddrsStr := strings.Join(udpAddrs, " or ")
 
-	return fmt.Sprintf("(%s) and (%s)", udpPort, udpAddrsStr)
-}
-
-func getTCPFilter(addrs []net.IP, serverPort uint16, clientPort uint16) string {
-	ports := fmt.Sprintf("tcp port %d or %d", serverPort, clientPort)
-	notSynFinRst := "tcp[tcpflags] & (tcp-fin | tcp-syn | tcp-rst) == 0"
-	notJustAck := "tcp[tcpflags] | tcp-ack != 16"
-	nonZeroPayload := "tcp[tcpflags] & tcp-push != 0"
-
-	srcAddresses := common.Map(addrs, func(addr net.IP) string {
-		return fmt.Sprintf("(src host %s)", addr)
-	})
-
-	srcAddressesStr := strings.Join(srcAddresses, " or ")
-
-	dstAddresses := common.Map(addrs, func(addr net.IP) string {
-		return fmt.Sprintf("(dst host %s)", addr)
-	})
-
-	dstAddressesStr := strings.Join(dstAddresses, " or ")
-
-	filter := fmt.Sprintf("(%s) and (%s) and (%s) and (%s) and (%s) and (%s)", ports, notSynFinRst, notJustAck, nonZeroPayload, srcAddressesStr, dstAddressesStr)
-	return filter
+	return fmt.Sprintf("(%s) and (%s) and (dst host %s)", udpPort, udpAddrsStr, backendAddr)
 }

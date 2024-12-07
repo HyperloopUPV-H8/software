@@ -1,4 +1,3 @@
-
 import {
     Measurement,
     NumericMeasurement,
@@ -14,7 +13,11 @@ import {
 } from '../adapters';
 import { create } from 'zustand';
 import { isNumericType } from '../BackendTypes';
-import { BooleanMeasurement, EnumMeasurement, NumericValue } from '../models/PodData/Measurement';
+import {
+    BooleanMeasurement,
+    EnumMeasurement,
+    NumericValue,
+} from '../models/PodData/Measurement';
 
 export type Measurements = Record<string, Measurement>;
 export type MeasurementId = string;
@@ -29,6 +32,7 @@ export type NumericMeasurementInfo = {
     readonly id: MeasurementId;
     readonly name: MeasurementName;
     readonly range: [number | null, number | null];
+    readonly warningRange: [number | null, number | null];
     readonly color: MeasurementColor;
     readonly units: MeasurementUnits;
     readonly getUpdate: UpdateFunctionNumeric;
@@ -85,7 +89,6 @@ export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
      * @param {Record<string, PacketUpdate>} measurements
      */
     updateMeasurements: (measurements: Record<string, PacketUpdate>) => {
-
         const measurementsDraft = get().measurements;
 
         for (const update of Object.values(measurements)) {
@@ -162,11 +165,19 @@ export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
     },
 
     getMeasurement: (id: string) => {
-        return get().measurements[id];
+        const measurements = get().measurements;
+        if (!(id in measurements)) {
+            return measurementFallback(id);
+        }
+        return measurements[id];
     },
 
-    getBooleanMeasurementInfo: (id: string) : BooleanMeasurementInfo => {
-        const meas = get().measurements[id] as BooleanMeasurement;
+    getBooleanMeasurementInfo: (id: string): BooleanMeasurementInfo => {
+        const measurements = get().measurements;
+        if (!(id in measurements)) {
+            return booleanFallback(id);
+        }
+        const meas = measurements[id] as BooleanMeasurement;
         return {
             id: meas.id,
             name: meas.name,
@@ -174,30 +185,39 @@ export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
                 const meas = get().measurements[id] as BooleanMeasurement;
                 if (meas == undefined) return false;
                 return meas.value;
-            }
+            },
         };
     },
 
-    getEnumMeasurementInfo: (id: string) : EnumMeasurementInfo => {
-        const meas = get().measurements[id] as EnumMeasurement;
+    getEnumMeasurementInfo: (id: string): EnumMeasurementInfo => {
+        const measurements = get().measurements;
+        if (!(id in measurements)) {
+            return enumFallback(id);
+        }
+        const meas = measurements[id] as EnumMeasurement;
         return {
             id: meas.id,
             name: meas.name,
             getUpdate: () => {
                 const meas = get().measurements[id] as EnumMeasurement;
-                if (meas == undefined) return "Default";
+                if (meas == undefined) return 'Default';
                 return meas.value;
-            }
+            },
         };
     },
 
-    getNumericMeasurementInfo: (id: string) : NumericMeasurementInfo => {
-        const meas = get().measurements[id] as NumericMeasurement;
+    getNumericMeasurementInfo: (id: string): NumericMeasurementInfo => {
+        const measurements = get().measurements;
+        if (!(id in measurements)) {
+            return numericFallback(id);
+        }
+        const meas = measurements[id] as NumericMeasurement;
         return {
             id: meas.id,
             name: meas.name,
             units: meas.units,
             range: meas.safeRange,
+            warningRange: meas.warningRange,
             getUpdate: () => {
                 const meas = get().measurements[id] as NumericMeasurement;
                 if (meas == undefined) return 0;
@@ -263,4 +283,52 @@ function getRandomColor() {
     const b = Math.floor(Math.random() * 256);
 
     return `rgb(${r}, ${g}, ${b})`;
+}
+
+function numericFallback(id: string): NumericMeasurementInfo {
+    return {
+        id: id,
+        name: id,
+        units: id,
+        range: [null, null],
+        warningRange: [null, null],
+        getUpdate: () => {
+            return 0;
+        },
+        color: getRandomColor(),
+    };
+}
+function booleanFallback(id: string): BooleanMeasurementInfo {
+    return {
+        id: id,
+        name: id,
+        getUpdate: () => {
+            return false;
+        },
+    };
+}
+function enumFallback(id: string): EnumMeasurementInfo {
+    return {
+        id: id,
+        name: id,
+        getUpdate: () => {
+            return id;
+        },
+    };
+}
+
+function measurementFallback(id: string): Measurement {
+    return {
+        id: id,
+        name: id,
+        type: 'float64',
+        value: {
+            last: 0,
+            average: 0,
+            showLatest: false,
+        },
+        units: '',
+        safeRange: [null, null],
+        warningRange: [null, null],
+    };
 }

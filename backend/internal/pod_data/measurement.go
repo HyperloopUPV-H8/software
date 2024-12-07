@@ -4,20 +4,19 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/HyperloopUPV-H8/h9-backend/internal/adj"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/ade"
-	"github.com/HyperloopUPV-H8/h9-backend/internal/excel/utils"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/utils"
 )
 
 const EnumType = "enum"
 
-func getMeasurements(adeMeasurements []ade.Measurement, globalUnits map[string]utils.Operations) ([]Measurement, error) {
+func getMeasurements(packet adj.Packet, globalUnits map[string]utils.Operations) ([]Measurement, error) {
 	measurements := make([]Measurement, 0)
 	mErrors := common.NewErrorList()
 
-	for _, adeMeas := range adeMeasurements {
-		meas, err := getMeasurement(adeMeas, globalUnits)
-
+	for _, adjMeas := range packet.Variables {
+		meas, err := getMeasurement(adjMeas, globalUnits)
 		if err != nil {
 			mErrors.Add(err)
 			continue
@@ -33,37 +32,27 @@ func getMeasurements(adeMeasurements []ade.Measurement, globalUnits map[string]u
 	return measurements, nil
 }
 
-func getMeasurement(adeMeas ade.Measurement, globalUnits map[string]utils.Operations) (Measurement, error) {
+func getMeasurement(adeMeas adj.Measurement, globalUnits map[string]utils.Operations) (Measurement, error) {
+	var tmp Measurement
+	var err error
 	if isNumeric(adeMeas.Type) {
-		m, err := getNumericMeasurement(adeMeas, globalUnits)
-
-		if err != nil {
-			return nil, err
-		}
-		return m, nil
+		tmp, err = getNumericMeasurement(adeMeas, globalUnits)
 	} else if adeMeas.Type == "bool" {
-		return getBooleanMeasurement(adeMeas), nil
+		tmp = getBooleanMeasurement(adeMeas)
 	} else if strings.HasPrefix(adeMeas.Type, "enum") {
-		return getEnumMeasurement(adeMeas), nil
+		tmp = getEnumMeasurement(adeMeas)
 	} else {
 		return nil, fmt.Errorf("type %s not recognized", adeMeas.Type)
 	}
+	return tmp, err
 }
 
-func getNumericMeasurement(adeMeas ade.Measurement, globalUnits map[string]utils.Operations) (NumericMeasurement, error) {
+func getNumericMeasurement(adeMeas adj.Measurement, globalUnits map[string]utils.Operations) (NumericMeasurement, error) {
 	measErrs := common.NewErrorList()
 
-	safeRange, err := utils.ParseRange(adeMeas.SafeRange)
+	safeRange := adeMeas.SafeRange
 
-	if err != nil {
-		measErrs.Add(err)
-	}
-
-	warningRange, err := utils.ParseRange(adeMeas.WarningRange)
-
-	if err != nil {
-		measErrs.Add(err)
-	}
+	warningRange := adeMeas.WarningRange
 
 	displayUnits, err := utils.ParseUnits(adeMeas.DisplayUnits, globalUnits)
 
@@ -93,24 +82,20 @@ func getNumericMeasurement(adeMeas ade.Measurement, globalUnits map[string]utils
 	}, nil
 }
 
-func getEnumMeasurement(adeMeas ade.Measurement) EnumMeasurement {
+func getEnumMeasurement(adeMeas adj.Measurement) EnumMeasurement {
 	return EnumMeasurement{
 		Id:      adeMeas.Id,
 		Name:    adeMeas.Name,
 		Type:    EnumType,
-		Options: getEnumMembers(adeMeas.Type),
+		Options: getEnumMembers(adeMeas.EnumValues),
 	}
 }
 
-func getEnumMembers(enumExp string) []string {
-	trimmedEnumExp := strings.Replace(enumExp, " ", "", -1)
-	firstParenthesisIndex := strings.Index(trimmedEnumExp, "(")
-	lastParenthesisIndex := strings.LastIndex(trimmedEnumExp, ")")
-
-	return strings.Split(trimmedEnumExp[firstParenthesisIndex+1:lastParenthesisIndex], ",")
+func getEnumMembers(enumExp []string) []string {
+	return enumExp
 }
 
-func getBooleanMeasurement(adeMeas ade.Measurement) BooleanMeasurement {
+func getBooleanMeasurement(adeMeas adj.Measurement) BooleanMeasurement {
 	return BooleanMeasurement{
 		Id:   adeMeas.Id,
 		Name: adeMeas.Name,
@@ -119,7 +104,7 @@ func getBooleanMeasurement(adeMeas ade.Measurement) BooleanMeasurement {
 }
 
 func isNumeric(kind string) bool {
-	return (kind == "uint8" ||
+	return kind == "uint8" ||
 		kind == "uint16" ||
 		kind == "uint32" ||
 		kind == "uint64" ||
@@ -128,5 +113,5 @@ func isNumeric(kind string) bool {
 		kind == "int32" ||
 		kind == "int64" ||
 		kind == "float32" ||
-		kind == "float64")
+		kind == "float64"
 }

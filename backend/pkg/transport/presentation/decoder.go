@@ -72,7 +72,8 @@ func (decoder *Decoder) DecodeNext(reader io.Reader) (abstraction.Packet, error)
 	dec, ok := decoder.idToDecoder[id]
 	if !ok {
 		decoder.logger.Warn().Uint16("id", uint16(id)).Msg("no decoder set")
-		return nil, ErrUnexpectedId{Id: id}
+		err := ErrUnexpectedId{Id: id}
+		return nil, err
 	}
 
 	decoder.logger.Debug().Uint16("id", uint16(id)).Type("decoder", dec).Msg("decoding")

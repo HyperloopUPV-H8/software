@@ -1,45 +1,51 @@
-import { useGlobalTicker, useMeasurementsStore, useSubscribe } from "common";
-import styles from "./VehiclePage.module.scss";
-
-import { Pagination } from "components/Pagination/Pagination";
-import { PageWrapper } from "pages/PageWrapper/PageWrapper";
-import { Outlet } from "react-router-dom";
-import { useOrders } from "useOrders";
-import { fetchFromBackend } from "services/HTTPHandler";
-import { useEffect, useState } from "react";
+import styles from './VehiclePage.module.scss';
+import { Pagination } from 'components/Pagination/Pagination';
+import { PageWrapper } from 'pages/PageWrapper/PageWrapper';
+import { Outlet } from 'react-router-dom';
+import { usePodDataUpdate } from 'hooks/usePodDataUpdate';
+import { Connection, useConnections } from 'common';
+import { LostConnectionContext } from 'services/connections';
 
 export const VehiclePage = () => {
-    
-    const [podData, setPodData] = useState(null);
-    const initMeasurements = useMeasurementsStore(state => state.initMeasurements);
+    usePodDataUpdate();
 
-    useEffect(() => {
-        const fetchPodDataAsync = async () => {
-            const data = await fetchPodData();
-            setPodData(data);
-        };
-        fetchPodDataAsync();
-    }, []);
-
-    useEffect(() => {
-        if (podData) {
-            initMeasurements(podData);
-        }
-    }, [podData, initMeasurements]);
-
-    useOrders();
+    const connections = useConnections();
 
     return (
-        <PageWrapper title="Vehicle">
-            <Outlet />
-            <Pagination routes={["first", "second", "thirst"]} />
-        </PageWrapper>
+        <LostConnectionContext.Provider
+            value={any(
+                [...connections.boards, connections.backend],
+                isDisconnected
+            )}
+        >
+            <PageWrapper title="Vehicle">
+                <Outlet />
+                <div className={styles.pagination_position}>
+                    <Pagination routes={['data-1', 'data-2']} />
+                </div>
+            </PageWrapper>
+        </LostConnectionContext.Provider>
     );
 };
 
-async function fetchPodData() {
-    const response = await fetchFromBackend(
-        import.meta.env.VITE_POD_DATA_DESCRIPTION_PATH
-    );
-    return response.json();
+function isDisconnected(connection: Connection): boolean {
+    return !connection.isConnected;
+}
+
+function all<T>(data: T[], condition: (value: T) => boolean): boolean {
+    for (const value of data) {
+        if (!condition(value)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function any<T>(data: T[], condition: (value: T) => boolean): boolean {
+    for (const value of data) {
+        if (condition(value)) {
+            return true;
+        }
+    }
+    return false;
 }

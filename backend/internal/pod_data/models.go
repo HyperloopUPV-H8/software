@@ -1,6 +1,6 @@
 package pod_data
 
-import "github.com/HyperloopUPV-H8/h9-backend/internal/excel/utils"
+import "github.com/HyperloopUPV-H8/h9-backend/internal/utils"
 
 type PodData struct {
 	Boards []Board `json:"boards"`

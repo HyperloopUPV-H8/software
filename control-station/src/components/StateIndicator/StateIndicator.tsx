@@ -1,41 +1,42 @@
-import { EnumMeasurement, getEnumMeasurement, NumericMeasurement, useGlobalTicker, useMeasurementsStore } from "common";
-import styles from "./StateIndicator.module.scss"
-import { getStateFromEnum, State, stateToColorBackground } from "state";
-import { memo, useEffect, useRef, useState } from "react";
+import { useGlobalTicker, useMeasurementsStore } from 'common';
+import styles from './StateIndicator.module.scss';
+import { getStateFromEnum, stateToColor } from 'state';
+import { memo, useContext, useState } from 'react';
+import { LostConnectionContext } from 'services/connections';
 
 interface Props {
     measurementId: string;
-    icon?: string;
+    icon: string;
 }
 
-export const StateIndicator = memo(({measurementId, icon}: Props) => {
-    const getMeasurement = useMeasurementsStore(state => state.getMeasurement)
-    const [measurement, setMeasurement] = useState<EnumMeasurement>(getMeasurement(measurementId) as EnumMeasurement)
-    const state = useRef<State>(getStateFromEnum(measurement as EnumMeasurement))
+export const StateIndicator = memo(({ measurementId, icon }: Props) => {
+    const getValue = useMeasurementsStore(
+        (state) => state.getEnumMeasurementInfo(measurementId).getUpdate
+    );
+
+    const lostConnection = useContext(LostConnectionContext);
+
+    const [variant, setVariant] = useState(getValue());
+    const state = lostConnection
+        ? 'fault'
+        : getStateFromEnum(measurementId, variant);
 
     useGlobalTicker(() => {
-        setMeasurement(getMeasurement(measurementId) as EnumMeasurement)
-    })
-
-    useEffect(() => {
-        state.current = getStateFromEnum(measurement as EnumMeasurement)
-    })
+        setVariant(getValue());
+    });
 
     return (
-        <div className={styles.wrapper}
-            style={{backgroundColor: stateToColorBackground[state.current]}}
+        <div
+            className={styles.state_indicator}
+            style={{ backgroundColor: stateToColor[state] }}
         >
-            <div className={styles.icon}>
-                <img src={icon} alt="State icon" />
-            </div>
+            <img className={styles.icon} src={icon} />
 
-                <div className={styles.title}>
-                    {/* {measurement.type} */}
-                </div>
-                
-            <div className={styles.icon}>
-                <img src={icon} alt="State icon" />
-            </div>
+            <p className={styles.title}>
+                {lostConnection ? 'DISCONNECTED' : variant}
+            </p>
+
+            <img className={styles.icon} src={icon} />
         </div>
-    )
-})
+    );
+});

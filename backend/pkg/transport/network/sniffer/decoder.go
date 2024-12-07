@@ -34,12 +34,12 @@ func (dec *decoder) IPv4() layers.IPv4 {
 	return dec.ipipv4
 }
 
-func (dec *decoder) TCP() layers.TCP {
-	return dec.tcp
-}
-
 func (dec *decoder) UDP() layers.UDP {
 	return dec.udp
+}
+
+func (dec *decoder) TCP() layers.TCP {
+	return dec.tcp
 }
 
 func (dec *decoder) Payload() []byte {
