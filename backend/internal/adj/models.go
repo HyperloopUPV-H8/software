@@ -7,20 +7,20 @@ type ADJ struct {
 	Boards map[string]Board
 }
 
-type Info struct {
-	Ports      map[string]uint16           `json:"ports"`
-	Addresses  map[string]string           `json:"addresses"`
-	Units      map[string]utils.Operations `json:"units"`
-	MessageIds map[string]uint16           `json:"message_ids"`
+type InfoJSON struct {
+	Ports      map[string]uint16 `json:"ports"`
+	Addresses  map[string]string
+	Units      map[string]string `json:"units"`
+	MessageIds map[string]uint16 `json:"message_ids"`
 	BoardIds   map[string]uint16
 }
 
-type Board struct {
-	Name         string
-	IP           string
-	Packets      []Packet
-	Measurements []Measurement
-	Structures   []Structure
+type Info struct {
+	Ports      map[string]uint16
+	Addresses  map[string]string
+	Units      map[string]utils.Operations
+	MessageIds map[string]uint16
+	BoardIds   map[string]uint16
 }
 
 type BoardJSON struct {
@@ -30,23 +30,34 @@ type BoardJSON struct {
 	PacketsPaths      []string `json:"packets"`
 }
 
+type Board struct {
+	Name               string
+	IP                 string
+	Packets            []Packet
+	Measurements       []Measurement
+	Structures         []Structure
+	LookUpMeasurements map[string]Measurement
+}
+
 type Packet struct {
-	Id   string
-	Name string
-	Type string
+	Id        string        `json:"id"`
+	Name      string        `json:"name"`
+	Type      string        `json:"type"`
+	Variables []Measurement `json:"variables"`
 }
 
 type Measurement struct {
-	Id           string
-	Name         string
-	Type         string
-	PodUnits     string
-	DisplayUnits string
-	SafeRange    string
-	WarningRange string
+	Id           string     `json:"id"`
+	Name         string     `json:"name"`
+	Type         string     `json:"type"`
+	PodUnits     string     `json:"podUnits"`
+	DisplayUnits string     `json:"displayUnits"`
+	SafeRange    []*float64 `json:"safeRange"`
+	WarningRange []*float64 `json:"warningRange"`
+	EnumValues   []string   `json:"enumValues"`
 }
 
 type Structure struct {
-	Packet       string
-	Measurements []string
+	Packet       Packet
+	Measurements []Measurement
 }
