@@ -1,9 +1,6 @@
 build
 profiles
 
-# ADJ
-JSON_ADE
-
 # MacOS Files
 .DS_Store
 
