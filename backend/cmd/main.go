@@ -570,5 +570,5 @@ func getUDPFilter(addrs []net.IP, backendAddr net.IP, port uint16) string {
 	srcUdpAddrsStr := strings.Join(srcUdpAddrs, " or ")
 	dstUdpAddrsStr := strings.Join(dstUdpAddrs, " or ")
 
-	return fmt.Sprintf("(%s) and (%s) and (%s or dst host %s)", udpPort, srcUdpAddrsStr, dstUdpAddrsStr, backendAddr)
+	return fmt.Sprintf("(%s) and (%s) and (%s or (dst host %s))", udpPort, srcUdpAddrsStr, dstUdpAddrsStr, backendAddr)
 }
