@@ -1,5 +1,7 @@
 import os
 import json
+from collections import Counter
+
 
 def validate_json_structure(data):
     errors = []
@@ -72,15 +74,24 @@ def validate_json_structure(data):
 
     return errors
 
-def validate_json_folder(folder_path):
-    
-    boards_file_path = os.path.join(folder_path, "boards.json")
 
+
+def validate_json_folder(folder_path):
+    boards_file_path = os.path.join(folder_path, "boards.json")
+    
     try:
-        
         with open(boards_file_path, 'r') as boards_file:
             boards_data = json.load(boards_file)
             boards = boards_data.get("boards", {})
+            
+            
+            board_keys = list(boards.keys())
+            duplicate_keys = [key for key in board_keys if board_keys.count(key) > 1]
+            
+            if duplicate_keys:
+                print(f"Error: El archivo boards.json contiene claves duplicadas: {', '.join(duplicate_keys)}")
+                return  
+
     except json.JSONDecodeError as e:
         print(f"Error al decodificar JSON en {boards_file_path}: {e}")
         return
@@ -88,6 +99,7 @@ def validate_json_folder(folder_path):
         print(f"Error al procesar el archivo {boards_file_path}: {e}")
         return
 
+    
     for board_name, board_file_path in boards.items():
         full_path = os.path.join(folder_path, board_file_path)
         try:
@@ -103,8 +115,14 @@ def validate_json_folder(folder_path):
         except json.JSONDecodeError as e:
             print(f"Error al decodificar JSON en {full_path}: {e}")
         except Exception as e:
-            print(f"Error al procesar el archivo {full_path}: {e}")
+            print(f"Error al procesar el archivo {full_path}: {e}") 
 
 
+
+
+if os.path.exists('./JSON_ADE/'):
+    print("La carpeta JSON_ADE existe")
+else:
+    print("La carpeta JSON_ADE no existe")
 if __name__ == "__main__":
     validate_json_folder("./JSON_ADE/") 
