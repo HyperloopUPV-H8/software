@@ -92,11 +92,14 @@ func getEnumMeasurement(adeMeas adj.Measurement) EnumMeasurement {
 }
 
 func getEnumMembers(enumExp string) []string {
-	trimmedEnumExp := strings.Replace(enumExp, " ", "", -1)
-	firstParenthesisIndex := strings.Index(trimmedEnumExp, "(")
-	lastParenthesisIndex := strings.LastIndex(trimmedEnumExp, ")")
+	if enumExp == "enum" {
+		return []string{}
+	} else {
+		firstParenthesisIndex := strings.Index(enumExp, "(")
+		lastParenthesisIndex := strings.LastIndex(enumExp, ")")
 
-	return strings.Split(trimmedEnumExp[firstParenthesisIndex+1:lastParenthesisIndex], ",")
+		return strings.Split(enumExp[firstParenthesisIndex+1:lastParenthesisIndex], ",")
+	}
 }
 
 func getBooleanMeasurement(adeMeas adj.Measurement) BooleanMeasurement {
