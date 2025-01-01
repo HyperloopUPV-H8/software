@@ -38,8 +38,6 @@ func getBoard(adjBoard adj.Board, globalUnits map[string]utils.Operations) (Boar
 
 	packets := make([]Packet, 0)
 
-	// TESTING
-
 	for _, adjPacket := range adjBoard.Packets {
 		packet, err := getPacket(adjPacket) // Black magic fuck
 		if err != nil {
