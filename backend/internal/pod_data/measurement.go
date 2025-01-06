@@ -11,13 +11,12 @@ import (
 
 const EnumType = "enum"
 
-func getMeasurements(adeMeasurements []adj.Measurement, globalUnits map[string]utils.Operations) ([]Measurement, error) {
+func getMeasurements(packet adj.Packet, globalUnits map[string]utils.Operations) ([]Measurement, error) {
 	measurements := make([]Measurement, 0)
 	mErrors := common.NewErrorList()
 
-	for _, adeMeas := range adeMeasurements {
-		meas, err := getMeasurement(adeMeas, globalUnits)
-
+	for _, adjMeas := range packet.Variables {
+		meas, err := getMeasurement(adjMeas, globalUnits)
 		if err != nil {
 			mErrors.Add(err)
 			continue
@@ -34,40 +33,33 @@ func getMeasurements(adeMeasurements []adj.Measurement, globalUnits map[string]u
 }
 
 func getMeasurement(adeMeas adj.Measurement, globalUnits map[string]utils.Operations) (Measurement, error) {
+	var tmp Measurement
+	var err error
 	if isNumeric(adeMeas.Type) {
-		return getNumericMeasurement(adeMeas, globalUnits)
+		tmp, err = getNumericMeasurement(adeMeas, globalUnits)
 	} else if adeMeas.Type == "bool" {
-		return getBooleanMeasurement(adeMeas), nil
+		tmp = getBooleanMeasurement(adeMeas)
 	} else if strings.HasPrefix(adeMeas.Type, "enum") {
-		return getEnumMeasurement(adeMeas), nil
+		tmp = getEnumMeasurement(adeMeas)
 	} else {
 		return nil, fmt.Errorf("type %s not recognized", adeMeas.Type)
 	}
+	return tmp, err
 }
 
 func getNumericMeasurement(adeMeas adj.Measurement, globalUnits map[string]utils.Operations) (NumericMeasurement, error) {
 	measErrs := common.NewErrorList()
 
-	safeRange, err := utils.ParseRange(adeMeas.SafeRange)
+	safeRange := adeMeas.SafeRange
 
-	if err != nil {
-		measErrs.Add(err)
-	}
-
-	warningRange, err := utils.ParseRange(adeMeas.WarningRange)
-
-	if err != nil {
-		measErrs.Add(err)
-	}
+	warningRange := adeMeas.WarningRange
 
 	displayUnits, err := utils.ParseUnits(adeMeas.DisplayUnits, globalUnits)
-
 	if err != nil {
 		measErrs.Add(err)
 	}
 
 	podUnits, err := utils.ParseUnits(adeMeas.PodUnits, globalUnits)
-
 	if err != nil {
 		measErrs.Add(err)
 	}
@@ -93,16 +85,8 @@ func getEnumMeasurement(adeMeas adj.Measurement) EnumMeasurement {
 		Id:      adeMeas.Id,
 		Name:    adeMeas.Name,
 		Type:    EnumType,
-		Options: getEnumMembers(adeMeas.Type),
+		Options: adeMeas.EnumValues,
 	}
-}
-
-func getEnumMembers(enumExp string) []string {
-	trimmedEnumExp := strings.Replace(enumExp, " ", "", -1)
-	firstParenthesisIndex := strings.Index(trimmedEnumExp, "(")
-	lastParenthesisIndex := strings.LastIndex(trimmedEnumExp, ")")
-
-	return strings.Split(trimmedEnumExp[firstParenthesisIndex+1:lastParenthesisIndex], ",")
 }
 
 func getBooleanMeasurement(adeMeas adj.Measurement) BooleanMeasurement {

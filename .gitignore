@@ -1,8 +1,6 @@
 build
 profiles
-
-# GOOGLE API KEY
-secret.json
+backend/cmd/cmd
 
 # MacOS Files
 .DS_Store
