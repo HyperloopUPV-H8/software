@@ -7,11 +7,12 @@ type ADJ struct {
 	Boards map[string]Board
 }
 
-type JsonInfo struct {
-	Ports      []map[string]uint16           `json:"ports"`
-	Addresses  []map[string]string           `json:"addresses"`
-	Units      []map[string]utils.Operations `json:"units"`
-	MessageIds []map[string]uint16           `json:"message_ids"`
+type InfoJSON struct {
+	Ports      map[string]uint16 `json:"ports"`
+	Addresses  map[string]string
+	Units      map[string]string `json:"units"`
+	MessageIds map[string]uint16 `json:"message_ids"`
+	BoardIds   map[string]uint16
 }
 
 type Info struct {
@@ -22,39 +23,41 @@ type Info struct {
 	BoardIds   map[string]uint16
 }
 
-type Board struct {
-	Name         string
-	IP           string
-	Packets      []Packet
-	Measurements []Measurement
-	Structures   []Structure
-}
-
 type BoardJSON struct {
 	ID                uint16   `json:"board_id"`
 	IP                string   `json:"board_ip"`
 	MeasurementsPaths []string `json:"measurements"`
 	PacketsPaths      []string `json:"packets"`
-	// StructuresPaths   []string `json:"structures"` // TODO: Issued in JSON_ADE #1
+}
+
+type Board struct {
+	Name               string
+	IP                 string
+	Packets            []Packet
+	Measurements       []Measurement
+	Structures         []Structure
+	LookUpMeasurements map[string]Measurement
 }
 
 type Packet struct {
-	Id   string
-	Name string
-	Type string
+	Id        string        `json:"id"`
+	Name      string        `json:"name"`
+	Type      string        `json:"type"`
+	Variables []Measurement `json:"variables"`
 }
 
 type Measurement struct {
-	Id           string
-	Name         string
-	Type         string
-	PodUnits     string
-	DisplayUnits string
-	SafeRange    string
-	WarningRange string
+	Id           string     `json:"id"`
+	Name         string     `json:"name"`
+	Type         string     `json:"type"`
+	PodUnits     string     `json:"podUnits"`
+	DisplayUnits string     `json:"displayUnits"`
+	SafeRange    []*float64 `json:"safeRange"`
+	WarningRange []*float64 `json:"warningRange"`
+	EnumValues   []string   `json:"enumValues"`
 }
 
 type Structure struct {
-	Packet       string
-	Measurements []string
+	Packet       Packet
+	Measurements []Measurement
 }

@@ -1,0 +1,4 @@
+[submodule "backend/cmd/JSON_ADE"]
+	path = backend/cmd/JSON_ADE
+	url = https://github.com/HyperloopUPV-H8/JSON_ADE.git
+	branch = main
