@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/HyperloopUPV-H8/software/backend/internal/adj"
+	"github.com/HyperloopUPV-H8/h9-backend/internal/adj"
 )
 
 type PacketGenerator struct {
