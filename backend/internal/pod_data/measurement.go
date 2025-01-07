@@ -55,13 +55,11 @@ func getNumericMeasurement(adeMeas adj.Measurement, globalUnits map[string]utils
 	warningRange := adeMeas.WarningRange
 
 	displayUnits, err := utils.ParseUnits(adeMeas.DisplayUnits, globalUnits)
-
 	if err != nil {
 		measErrs.Add(err)
 	}
 
 	podUnits, err := utils.ParseUnits(adeMeas.PodUnits, globalUnits)
-
 	if err != nil {
 		measErrs.Add(err)
 	}
@@ -87,12 +85,8 @@ func getEnumMeasurement(adeMeas adj.Measurement) EnumMeasurement {
 		Id:      adeMeas.Id,
 		Name:    adeMeas.Name,
 		Type:    EnumType,
-		Options: getEnumMembers(adeMeas.EnumValues),
+		Options: adeMeas.EnumValues,
 	}
-}
-
-func getEnumMembers(enumExp []string) []string {
-	return enumExp
 }
 
 func getBooleanMeasurement(adeMeas adj.Measurement) BooleanMeasurement {

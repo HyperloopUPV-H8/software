@@ -1,8 +1,6 @@
 build
 profiles
-
-# ADJ
-JSON_ADE
+backend/cmd/cmd
 
 # MacOS Files
 .DS_Store
