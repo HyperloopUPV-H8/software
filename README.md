@@ -24,6 +24,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for ways to contribute to the Control S
 - [Marc Sanchis Llinares](https://github.com/msanlli)
 - [Sergio Moreno Suay](https://github.com/smorsua)
 - [Felipe Zaballa Martinez](https://github.com/lipezaballa)
+- [Andrés de la Torre Mora](https://github.com/andresdlt03)
 - [Alejandro Losa](https://github.com/Losina24)
 
 ### About
