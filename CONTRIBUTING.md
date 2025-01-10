@@ -22,7 +22,7 @@ If the issue is not created yet, go to the issues page and create a new *task* i
 * If the issue is specific to one module (e.g. backend, ethernet view, etc.) start the title with `[module_name]`, changing *module_name* to the appropiate one.
 * Add the appropiate labels: is the issue related to the *frontend*, the *backend*, is it a *documentation* task? Try to identify these before creating the issue.
 * Assign yourself (or the member who will work on it) so they get notified with updates and everyone knows what everyone is doing.
-* Add the issue to the `Software H9` project to keep track of its progress.
+* Add the issue to the `Software HX` project to keep track of its progress.
 * Assign the issue to a milestone if possible.
 * Describe the task briefly. Write some lines on the task itself, what should be done, any details, notes on it, etc.
 * Add related issues / PRs. This is not required, but is useful, specially when tasks get blocked by other tasks.
@@ -36,7 +36,7 @@ Of course don't become too obsessed with this, it's always best to try out somet
 
 It is also recommended to ask other members their points of view, what they are doing, dependencies they might have, etc. To get more ideas and ensure your changes won't screw with other person changes.
 
-Also make sure to take notes, maybe in `software-docs` or as a comment on the issue, with anything relevant you found from this research. It might even be necessary to open new issues if you find anything outside the scope of the task.
+Also make sure to take notes and create a wiki entry with anything relevant you found from this research. It might even be necessary to open new issues if you find anything outside the scope of the task.
 
 But once again, don't take more than a day doing this.
 
@@ -66,7 +66,7 @@ Examples of good branch names are: `backend/tcp-keepalive-error`, `ethernet-view
 
 Some bad examples are: `abc`, `backend/minor-fixes` or `unrelated-module/some-feature`.
 
-### writing code
+### Writing code
 
 With the latest changes ready, the new branch created, and everything set up, you are ready to write code at last. These are some guidelines on how to make good changes:
 
@@ -74,7 +74,7 @@ With the latest changes ready, the new branch created, and everything set up, yo
 * Keep commits atomic. These are commits that change just one specific thing, allowing the app to be compiled before and after.
 * Don't extend a branch life time, try to merge changes as soon as possible. If there are a lot of changes create multiple PRs and do it progresively.
 * Keep PRs small. Of course there are exceptions to this and sometimes a PR will have more lines than others.
-* Document what you do, dedicate some time to write down the why and how of your changes. Documentation not that related to the code should be written to `software-docs`.
+* Document what you do, dedicate some time to write down the why and how of your changes. Documentation not that related to the code should be written to the wiki.
 * Try to test the code. Prepare at least a primitive test to ensure it works, of course, it is better if tests are automatic, but in some cases, it is just easier to check by hand.
 
 ## 4. Open pull request
