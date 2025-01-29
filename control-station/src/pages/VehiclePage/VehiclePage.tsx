@@ -21,7 +21,7 @@ export const VehiclePage = () => {
             <PageWrapper title="Vehicle">
                 <Outlet />
                 <div className={styles.pagination_position}>
-                    <Pagination routes={['data-1', 'data-2']} />
+                    <Pagination routes={['data-1', 'data-2', 'guiBooster']} />
                 </div>
             </PageWrapper>
         </LostConnectionContext.Provider>

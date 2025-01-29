@@ -1,0 +1,118 @@
+body, html{
+    overflow: auto;
+    background-color: #C4D7E5;
+}
+.modules{
+    width: 150vh; 
+    height: 80vh; 
+    background-image: url("../../assets/images/contactores.png");
+    background-size: contain;
+    background-position: center;
+    border-radius: 20px;
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 20px;
+}
+.box1{
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 20px; 
+    margin-bottom: 70px;
+}
+.box2{
+    border: 1px solid #FFE7CF;
+    width: 80%;
+    height: 150px;
+    border-radius: 20px;
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    position: relative;
+}.box3{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content:center;
+}
+.voltaje{
+    border-right: #FFE7CF solid 1px;
+    width: 50%;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.intensity{
+    width: 50%;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+}
+.h2{
+    color: #EF7E30;
+    font-family: 'IBM Plex Mono', monospace;
+    width: 100%;
+    background-color: #FFE7CF;
+    text-align: center;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    font-weight: bold;
+    position: absolute;
+    transform: translateY(-100%);
+}
+.title{
+    text-align: center;
+    width: 100%;
+    border-top-left-radius: 20px;
+    border-top-right-radius:20px ;
+    height: 20px;
+}
+.h3{
+    color: #EF7E30;
+    font-family: 'IBM Plex Mono', monospace;
+    margin: 0;
+}
+.p{
+    color: #EF7E30;
+    font-family: 'IBM Plex Mono', monospace;
+    background-color: #FFE7CF;
+    border-radius: 15px;
+    margin-top: 2.5px;
+    margin-bottom: 2.5px;
+    padding: 2px;
+    width: 80%;
+}
+.flex{
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+.flexCells{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+    width: 85%;
+    border-radius: 20px;
+    border: 1px solid #FFE7CF;
+    padding: 10px;
+    margin-top: 10px;
+    background-color: white;
+}
+.cell{
+    display: flex;
+    justify-content: center;
+    background-color: white;
+    width: 90%;
+    height: 26px;
+    border: 1px solid #E28D52;
+    border-radius: 5px;
+}
