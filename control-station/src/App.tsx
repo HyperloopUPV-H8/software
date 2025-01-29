@@ -21,7 +21,6 @@ export const App = () => {
                         items={[
                             { path: '/vehicle', icon: <Wheel /> },
                             { path: '/cameras', icon: <Cameras /> },
-                            { path: '/guiBooster', icon: <Gui />}
                         ]}
                     />
                     <Outlet />
