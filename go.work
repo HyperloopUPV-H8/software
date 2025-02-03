@@ -2,7 +2,6 @@ go 1.21.3
 
 use (
 	./backend
-	./packet-sender
 	./state-order-tester
 	./scripts
 )
