@@ -208,17 +208,17 @@ func (pg *PacketGenerator) AddPacket(boardName string, packet adj.Packet) {
 		HexValue:     "",
 		Count:        0,
 		CycleTime:    0,
-		Measurements: getMeasurements(packet.Values),
+		Measurements: getMeasurements(packet.Variables),
 	})
 
 }
 
-func getMeasurements(values []adj.Measurement) []Measurement {
-	measurements := make([]Measurement, 0, len(values))
-	for _, value := range values {
+func getMeasurements(variables []adj.Measurement) []Measurement {
+	measurements := make([]Measurement, 0, len(variables))
+	for _, value := range variables {
 		measurements = append(measurements,
 			Measurement{
-				ID:   value.ID,
+				ID:   value.Id,
 				Name: value.Name,
 				Type: value.Type,
 				//TODO: make sure added property (Value) doesn't break stuff
@@ -232,37 +232,17 @@ func getMeasurements(values []adj.Measurement) []Measurement {
 	return measurements
 }
 
-func parseRange(literal string) []float64 { // adaptar con rangos del ADJ??
-	if literal == "" {
+func parseRange(literal []*float64) []float64 {
+	if len(literal) == 0 {
 		return make([]float64, 0)
-	}
-
-	strRange := strings.Split(strings.TrimSuffix(strings.TrimPrefix(strings.Replace(literal, " ", "", -1), "["), "]"), ",")
-
-	if len(strRange) != 2 {
-		log.Fatalf("pod data: parseRange: invalid range %s\n", literal)
 	}
 
 	numRange := make([]float64, 0)
 
-	if strRange[0] != "" {
-		lowerBound, errLowerBound := strconv.ParseFloat(strRange[0], 64)
-
-		if errLowerBound != nil {
-			log.Fatal("error parsing lower bound")
+	for _, val := range literal {
+		if val != nil {
+			numRange = append(numRange, *val)
 		}
-
-		numRange = append(numRange, lowerBound)
-	}
-
-	if strRange[1] != "" {
-		upperBound, errUpperBound := strconv.ParseFloat(strRange[1], 64)
-
-		if errUpperBound != nil {
-			log.Fatal("error parsing lower bound")
-		}
-
-		numRange = append(numRange, upperBound)
 	}
 
 	return numRange
