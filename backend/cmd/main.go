@@ -100,7 +100,7 @@ func main() {
 
 	// <--- ADJ --->
 
-	adj, err := adj_module.NewADJ()
+	adj, err := adj_module.NewADJ(config.AdjBranch)
 	if err != nil {
 		trace.Fatal().Err(err).Msg("setting up ADJ")
 	}
