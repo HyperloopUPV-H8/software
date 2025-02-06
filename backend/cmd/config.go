@@ -6,6 +6,7 @@ import (
 )
 
 type Config struct {
-	Vehicle vehicle.Config
-	Server  server.Config
+	Vehicle   vehicle.Config
+	Server    server.Config
+	AdjBranch string
 }
