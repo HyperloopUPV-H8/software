@@ -13,9 +13,9 @@ import (
 
 const (
 	lip   string = "127.0.0.3"
-	lport uint16 = 50400
+	lport uint16 = 3000
 	rip   string = "127.0.0.4"
-	rport uint16 = 50400
+	rport uint16 = 3000
 )
 
 /* package main
