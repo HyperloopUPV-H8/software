@@ -96,11 +96,12 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 	runtime.SetBlockProfileRate(*blockprofile)
+
 	config := getConfig("./config.toml")
 
 	// <--- ADJ --->
 
-	adj, err := adj_module.NewADJ(config.AdjBranch)
+	adj, err := adj_module.NewADJ(config.Adj.Branch)
 	if err != nil {
 		trace.Fatal().Err(err).Msg("setting up ADJ")
 	}
