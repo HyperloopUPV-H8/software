@@ -7,8 +7,6 @@ import (
 	"os"
 	"os/signal"
 	"time"
-
-	"github.com/joho/godotenv"
 )
 
 const (
@@ -61,12 +59,6 @@ func generatePackets(adjInstance adj.ADJ) []adj.Packet {
 }*/
 
 func main() {
-	err := godotenv.Load(".env")
-
-	if err != nil {
-		log.Fatal("Error loading .env", err)
-	}
-
 	_ = createListener(lip, lport, rip, rport)
 	conn := getConn(lip, lport, rip, rport)
 	defer conn.Close()
