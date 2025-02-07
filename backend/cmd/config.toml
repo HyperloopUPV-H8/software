@@ -14,4 +14,4 @@ files = "/"
 boardsList = ["VCU"]
 
 [adj]
-branch = "" # Leave blank when using ADJ as a submodule
+branch = "main" # Leave blank when using ADJ as a submodule
