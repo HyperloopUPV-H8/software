@@ -1,35 +1,35 @@
 import React from "react";
-import "./Module.scss";
+import styles from "./Module.module.scss";
 
 interface ModuleProps {
     id: string | number;
 }
 const Module: React.FC<ModuleProps> = ({ id }) => {
     const cells = Array.from({ length: 48 }, (_, index) => (
-        <div key={index} className="cell"></div>
+        <div key={index} className={styles.cells}></div>
     ));
 
     return (
-        <div className="box1">
-            <div className="box2">
-                <article className="title">
-                    <h2 className="h2">Module {id}</h2>
+        <div className={styles.boxContainer1}>
+            <div className={styles.boxContainer2}>
+                <article className={styles.titleDecorationModule}>
+                    <h2 className={styles.h2Module}>Module {id}</h2>
                 </article>
-                <div className="box3">
-                    <div className="voltaje">
-                        <h3 className="h3">Voltaje</h3>
-                        <p className="p">max </p>
-                        <p className="p">min </p>
-                        <p className="p">mean </p>
+                <div className={styles.boxContainer3}>
+                    <div className={styles.voltajeContainer}>
+                        <h3 className={styles.h3}>Voltaje</h3>
+                        <p className={styles.p}>max </p>
+                        <p className={styles.p}>min </p>
+                        <p className={styles.p}>mean </p>
                     </div>
-                    <div className="intensity">
-                        <h3 className="h3">Intensity</h3>
-                        <p className="p">max </p>
-                        <p className="p">min </p>
+                    <div className={styles.intensityContainer}>
+                        <h3 className={styles.h3}>Intensity</h3>
+                        <p className={styles.p}>max </p>
+                        <p className={styles.p}>min </p>
                     </div>
                 </div>
             </div>
-            <div className="flexCells">{cells}</div>
+            <div className={styles.flexCells}>{cells}</div>
         </div>
     );
 };

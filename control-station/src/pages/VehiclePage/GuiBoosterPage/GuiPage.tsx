@@ -1,9 +1,7 @@
 import React from "react";
-import "./GuiPage.scss";
+import styles from "./GuiPage.module.scss";
 import Module from "../../../components/GuiModules/Module";
 import { Messages } from "../Messages/Messages";
-import { OrdersContainer } from "../../../../../ethernet-view/src/components/OrdersContainer/OrdersContainer";
-import { Pagination } from "../../../components/Pagination/Pagination";
 
 interface ModuleData {
     id: number;
@@ -18,27 +16,36 @@ const modules: ModuleData[] = [
 
 export function GuiPage() {
     return (
-        <div className="boosterGui">
-            <header className="header">
+        <div>
+            <header className={styles.header}>
                 <h1>Booster GUI</h1>
-                <div className="line"></div>
+                <div className={styles.boosterDecorationLine}></div>
             </header>
-            <main className="main">
-                <div className="modules">
-                    {modules.map((module) => (
-                        <Module key={module.id} id={module.id} />
-                    ))}
+            <main className={styles.boosterMainContainer}>
+                <div className={styles.boosterContainer}>
+                    <div className={styles.statusContainer}>
+                        <div className={styles.status}>
+                            <h3>V total: </h3>
+                            <div className={styles.value}></div>
+                            <h3>BCU status: </h3>
+                            <div className={styles.value}></div>
+                            <h3>CONST status: </h3>
+                            <div className={styles.value}></div>
+                        </div>
+                    </div>
+                    <div className={styles.modulesContainer}>
+                        {modules.map((module) => (
+                            <Module key={module.id} id={module.id} />
+                        ))}
+                    </div>
                 </div>
-                <div className="messagesAndOrders">
-                    <div className="messages">
+                <div className={styles.messagesAndOrders}>
+                    <div className={styles.messages}>
                         <Messages />
                     </div>
-                    <div className="orders">orders</div>
+                    <div className={styles.orders}>orders</div>
                 </div>
             </main>
-            {/* <footer className="footer">
-                <Pagination routes={routes}/>
-            </footer> */}
         </div>
     );
 }
