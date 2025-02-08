@@ -12,6 +12,7 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"os/exec"
 	"os/signal"
 	"path"
 	"runtime"
@@ -96,13 +97,21 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 	runtime.SetBlockProfileRate(*blockprofile)
+
 	config := getConfig("./config.toml")
 
 	// <--- ADJ --->
 
-	adj, err := adj_module.NewADJ()
+	adj, err := adj_module.NewADJ(config.Adj.Branch)
 	if err != nil {
 		trace.Fatal().Err(err).Msg("setting up ADJ")
+	}
+
+	test := exec.Command("python3", "testadj.py")
+	out, err := test.CombinedOutput()
+	if err != nil || len(out) != 0 {
+		fmt.Printf("\nPython test failed:\nError: %v\nOutput: %s\n", err, string(out))
+		os.Exit(1)
 	}
 
 	podData, err := pod_data.NewPodData(adj.Boards, adj.Info.Units)
@@ -558,7 +567,7 @@ func getIPIPfilter() string {
 	return "ip[9] == 4"
 }
 
-func getUDPFilter(addrs []net.IP, backendAddr net.IP, port uint16) string {
+func getUDPFilter(addrs []net.IP, backendAddr net.IP, _ uint16) string {
 	udpPort := "udp" // TODO use proper ports for the filter
 	srcUdpAddrs := common.Map(addrs, func(addr net.IP) string {
 		return fmt.Sprintf("(src host %s)", addr)
