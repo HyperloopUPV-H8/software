@@ -132,14 +132,10 @@ func updateRepo(AdjBranch string) error {
 
 		branch := head.Name().Short()
 
-		println("actual branch is: ", branch)
-
 		worktree, err := repo.Worktree()
 		if err != nil {
 			return err
 		}
-
-		println(head.Name().Short(), AdjBranch)
 
 		if branch != AdjBranch {
 			localBranchRef := plumbing.NewBranchReferenceName(AdjBranch)
@@ -155,7 +151,7 @@ func updateRepo(AdjBranch string) error {
 					Branch: localBranchRef,
 					Create: true,
 					Force:  true,
-					Hash: remoteRef.Hash(),
+					Hash:   remoteRef.Hash(),
 				})
 				if err != nil {
 					println(err.Error())
@@ -164,7 +160,7 @@ func updateRepo(AdjBranch string) error {
 			} else {
 				err = worktree.Checkout(&git.CheckoutOptions{
 					Branch: localBranchRef,
-					Force: true,
+					Force:  true,
 				})
 			}
 		}
