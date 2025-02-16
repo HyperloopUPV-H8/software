@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	RepoUrl  = "https://github.com/HyperloopUPV-H8/JSON_ADE.git" // URL of the ADJ repository
-	RepoPath = "./JSON_ADE/"                                     // Path where the ADJ repository is cloned
+	RepoUrl  = "https://github.com/HyperloopUPV-H8/adj.git" // URL of the ADJ repository
+	RepoPath = "./adj/"                                     // Path where the ADJ repository is cloned
 )
 
 func NewADJ(AdjBranch string) (ADJ, error) {
