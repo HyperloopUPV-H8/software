@@ -75,11 +75,11 @@
     color: #EF7E30;
     font-family: 'IBM Plex Mono', monospace;
     background-color: #FFE7CF;
-    border-radius: 15px;
+    border-radius: 10px;
     margin-top: 2.5px;
     margin-bottom: 2.5px;
-    padding: 2px;
-    width: 80%;
+    padding: 0px 0px 5px 6px;
+    width: 85%;
 }
 
 .flexCells {
@@ -94,12 +94,26 @@
     background-color: white;
 }
 
-.cells {
-    display: flex;
-    justify-content: center;
-    background-color: white;
-    width: 90%;
+.cell {
+    width: 65px;
     height: 30px;
-    border: 1.7px solid #E28D52;
+    border: 1px solid orange;
     border-radius: 5px;
-}
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .red {
+    background-color: red;
+  }
+  
+  .yellow {
+    background-color: rgb(255, 255, 0);
+  }
+  
+  .green {
+    background-color: rgb(33, 240, 33);
+  }
+  
