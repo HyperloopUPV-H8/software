@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./GuiPage.module.scss";
 import Module from "../../../components/GuiModules/Module";
 import { Messages } from "../Messages/Messages";
-import { BcuMeasurements, Orders, useMeasurementsStore } from "common"; 
+import { Orders, useMeasurementsStore } from "common";
 
 interface ModuleData {
     id: number | string;
@@ -83,8 +83,9 @@ export function GuiPage() {
                     <div className={styles.messages}>
                         <Messages />
                     </div>
+
                     <div className={styles.orders}></div>
-                    <Orders boards={[]} /> 
+                    <Orders boards={[]} />
                 </div>
             </main>
         </div>

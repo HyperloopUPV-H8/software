@@ -6,7 +6,7 @@ interface CellProps {
     value: number;
 }
 
-const Module: React.FC<{ id: string }> = ({ id }) => {
+const Module: React.FC<{ id: string | number }> = ({ id }) => {
     const numericInfo = useMeasurementsStore(
         (state) => state.getNumericMeasurementInfo(`module/${id}`)
     );
