@@ -4,6 +4,7 @@ import 'styles/scrollbars.scss';
 import styles from './App.module.scss';
 import { Sidebar } from 'components/Sidebar/Sidebar';
 import { ReactComponent as Wheel } from 'assets/svg/wheel.svg';
+import { ReactComponent as Gui } from  'assets/svg/gui.svg';
 import { ReactComponent as Cameras } from 'assets/svg/cameras.svg';
 import { ReactComponent as TeamLogo } from 'assets/svg/team_logo.svg';
 import { SplashScreen, WsHandlerProvider, useLoadBackend } from 'common';

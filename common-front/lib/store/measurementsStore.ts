@@ -261,7 +261,6 @@ function createMeasurementsFromPodDataAdapter(
             }
         }
     }
-
     return measurements;
 }
 
