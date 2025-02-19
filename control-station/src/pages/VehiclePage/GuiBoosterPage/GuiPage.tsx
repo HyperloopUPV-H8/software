@@ -20,12 +20,10 @@ export function GuiPage() {
     const voltageTotalMeasurement = useMeasurementsStore((state) =>
         state.getNumericMeasurementInfo("total_voltage_high")
     );
-    console.log(voltageTotalMeasurement);
     
     const bcuVoltageMeasurement = useMeasurementsStore((state) =>
         state.getNumericMeasurementInfo("vdc")
     );
-    console.log("BCU Voltage Measurement:", bcuVoltageMeasurement);
 
     const constStatusMeasurement = useMeasurementsStore((state) =>
         state.getBooleanMeasurementInfo("const_status")
