@@ -58,14 +58,25 @@ type Measurement struct {
 }
 
 type MeasurementJSON struct {
-	Id           string   `json:"id"`
-	Name         string   `json:"name"`
-	Type         string   `json:"type"`
-	PodUnits     string   `json:"podUnits"`
-	DisplayUnits string   `json:"displayUnits"`
-	Below        *float64 `json:"below"`
-	Above        *float64 `json:"above"`
-	EnumValues   []string `json:"enumValues"`
+	Id           string       `json:"id"`
+	Name         string       `json:"name"`
+	Type         string       `json:"type"`
+	PodUnits     string       `json:"podUnits"`
+	DisplayUnits string       `json:"displayUnits"`
+	Below        BelowOrAbove `json:"below"`
+	Above        BelowOrAbove `json:"above"`
+	OutOfRange   OutOfRange   `json:"out_of_range"`
+	EnumValues   []string     `json:"enumValues"`
+}
+
+type BelowOrAbove struct {
+	Safe    *float64 `json:"safe"`
+	Warning *float64 `json:"warning"`
+}
+
+type OutOfRange struct {
+	Safe    []*float64 `json:"safe"`
+	Warning []*float64 `json:"warning"`
 }
 
 type Range struct {
