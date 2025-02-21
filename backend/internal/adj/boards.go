@@ -114,7 +114,7 @@ func getBoardMeasurements(measurementsPaths []string) ([]Measurement, error) {
 		}
 	}
 
-	measurements, err := getRanges(measurementsTMP)
+	measurements, err := measTranslate(measurementsTMP)
 	if err != nil {
 		return nil, err
 	}
@@ -122,8 +122,46 @@ func getBoardMeasurements(measurementsPaths []string) ([]Measurement, error) {
 	return measurements, nil
 }
 
-func getRanges(measurementsTMP []MeasurementJSON) ([]Measurement, error) {
-	return nil, nil
+func measTranslate(measurementsTMP []MeasurementJSON) ([]Measurement, error) {
+	measurements := make([]Measurement, 0)
+
+	for _, measJSON := range measurementsTMP {
+		safeRange, warningRange, err := getRanges(measJSON)
+		if err != nil {
+			return nil, err
+		}
+
+		measurements = append(measurements, Measurement{
+			Id:           measJSON.Id,
+			Name:         measJSON.Name,
+			Type:         measJSON.Type,
+			PodUnits:     measJSON.PodUnits,
+			DisplayUnits: measJSON.DisplayUnits,
+			EnumValues:   measJSON.EnumValues,
+			SafeRange:    safeRange,
+			WarningRange: warningRange,
+		})
+	}
+
+	return measurements, nil
+}
+
+func getRanges(measTMP MeasurementJSON) ([]*float64, []*float64, error) {
+	safeRange := make([]*float64, 0)
+	warningRange := make([]*float64, 0)
+
+	if measTMP.OutOfRange.Safe == nil && measTMP.OutOfRange.Warning == nil {
+		safeRange = append(safeRange, measTMP.Below.Safe)
+		safeRange = append(safeRange, measTMP.Above.Safe)
+
+		warningRange = append(warningRange, measTMP.Below.Warning)
+		warningRange = append(warningRange, measTMP.Above.Warning)
+	} else {
+		safeRange = measTMP.OutOfRange.Safe
+		warningRange = measTMP.OutOfRange.Warning
+	}
+
+	return safeRange, warningRange, nil
 }
 
 func getBoardIds(boards map[string]string) (map[string]uint16, error) {
