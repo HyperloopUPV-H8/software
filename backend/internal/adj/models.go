@@ -40,21 +40,35 @@ type Board struct {
 }
 
 type Packet struct {
-	Id        string        `json:"id"`
-	Name      string        `json:"name"`
-	Type      string        `json:"type"`
-	Variables []Measurement `json:"variables"`
+	Id           uint16 `json:"id"`
+	Name         string `json:"name"`
+	Type         string `json:"type"`
+	Variables    []Measurement
+	VariablesIds []string `json:"variables"`
 }
 
 type Measurement struct {
-	Id           string     `json:"id"`
-	Name         string     `json:"name"`
-	Type         string     `json:"type"`
-	PodUnits     string     `json:"podUnits"`
-	DisplayUnits string     `json:"displayUnits"`
-	SafeRange    []*float64 `json:"safeRange"`
-	WarningRange []*float64 `json:"warningRange"`
-	EnumValues   []string   `json:"enumValues"`
+	Id           string   `json:"id"`
+	Name         string   `json:"name"`
+	Type         string   `json:"type"`
+	PodUnits     string   `json:"podUnits"`
+	DisplayUnits string   `json:"displayUnits"`
+	EnumValues   []string `json:"enumValues"`
+	SafeRange    []*float64
+	WarningRange []*float64
+	Below        BelowOrAbove `json:"below"`
+	Above        BelowOrAbove `json:"above"`
+	OutOfRange   OutOfRange   `json:"out_of_range"`
+}
+
+type BelowOrAbove struct {
+	Safe    *float64 `json:"safe"`
+	Warning *float64 `json:"warning"`
+}
+
+type OutOfRange struct {
+	Safe    []*float64 `json:"safe"`
+	Warning []*float64 `json:"warning"`
 }
 
 type Structure struct {
