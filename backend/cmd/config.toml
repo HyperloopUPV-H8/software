@@ -11,4 +11,4 @@ connections = "/backend"
 files = "/"
 
 [adj]
-branch = "" # Leave blank when using ADJ as a submodule
+branch = "" # Leave blank when using ADJ as a submodule (like this: "")
