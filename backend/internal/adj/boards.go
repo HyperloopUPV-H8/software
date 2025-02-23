@@ -36,7 +36,8 @@ func getBoards(boardsList map[string]string) (map[string]Board, error) {
 			Name: boardName,
 			IP:   boardJSON.IP,
 		}
-		board.Packets, err = getBoardPackets(boardJSON.PacketsPaths)
+
+		boardPackets, err := getBoardPackets(boardJSON.PacketsPaths)
 		if err != nil {
 			return nil, err
 		}
@@ -45,11 +46,14 @@ func getBoards(boardsList map[string]string) (map[string]Board, error) {
 		if err != nil {
 			return nil, err
 		}
-		board.LookUpMeasurements = make(map[string]Measurement, len(board.Measurements))
 
+		board.LookUpMeasurements = make(map[string]Measurement, len(board.Measurements))
 		for _, measurement := range board.Measurements {
 			board.LookUpMeasurements[measurement.Id] = measurement
 		}
+
+		board.Packets = lookUpMeas(boardPackets, board.LookUpMeasurements)
+
 		board.Structures = getBoardStructures(board)
 
 		boards[boardName] = board
@@ -58,8 +62,25 @@ func getBoards(boardsList map[string]string) (map[string]Board, error) {
 	return boards, nil
 }
 
+func lookUpMeas(packetsTMP []Packet, lookUpMeas map[string]Measurement) []Packet {
+	packetsFNL := make([]Packet, 0)
+	for _, packetTMP := range packetsTMP {
+		measFNL := make([]Measurement, 0)
+		for _, measId := range packetTMP.VariablesIds {
+			meas := lookUpMeas[measId]
+			measFNL = append(measFNL, meas)
+		}
+
+		packetTMP.Variables = measFNL
+		packetsFNL = append(packetsFNL, packetTMP)
+	}
+
+	return packetsFNL
+}
+
 func getBoardPackets(packetsPaths []string) ([]Packet, error) {
 	packets := make([]Packet, 0)
+
 	for _, packetPath := range packetsPaths {
 		if _, err := os.Stat(packetPath); os.IsNotExist(err) {
 			continue
@@ -70,51 +91,43 @@ func getBoardPackets(packetsPaths []string) ([]Packet, error) {
 			return nil, err
 		}
 
-		// Magic happens here
-		type PacketJSON struct {
-			Packet []Packet `json:"packets"`
-		}
+		packet := make([]Packet, 0)
 
-		packetsJSON := PacketJSON{}
-		if err = json.Unmarshal(packetRaw, &packetsJSON); err != nil {
+		if err = json.Unmarshal(packetRaw, &packet); err != nil {
 			return nil, err
 		}
-		for _, packetTMP := range packetsJSON.Packet {
-			packets = append(packets, packetTMP)
-		}
+
+		packets = append(packets, packet...)
 	}
 
 	return packets, nil
 }
 
+// Absolutely doing tricks on it AGAIN, AGAIN - @msanlli
 func getBoardMeasurements(measurementsPaths []string) ([]Measurement, error) {
-	measurementsTMP := make([]MeasurementJSON, 0)
+	measurementsJSON := make([]Measurement, 0)
 
 	for _, measurementPath := range measurementsPaths {
 		if _, err := os.Stat(measurementPath); os.IsNotExist(err) {
+			println("ADJ Error: Measurement file path not found")
 			continue
 		}
+
+		measTMP := make([]Measurement, 0)
 
 		measurementRaw, err := os.ReadFile(measurementPath)
 		if err != nil {
 			return nil, err
 		}
 
-		// Absolutely doing tricks on it AGAIN - @msanlli
-		type MeasurementsJSON struct {
-			Measurements []MeasurementJSON `json:"measurements"`
-		}
-
-		measurementsJSON := MeasurementsJSON{}
-		if err = json.Unmarshal(measurementRaw, &measurementsJSON); err != nil {
+		if err = json.Unmarshal(measurementRaw, &measTMP); err != nil {
 			return nil, err
 		}
-		for _, measurementTMP := range measurementsJSON.Measurements {
-			measurementsTMP = append(measurementsTMP, measurementTMP)
-		}
+
+		measurementsJSON = append(measurementsJSON, measTMP...)
 	}
 
-	measurements, err := measTranslate(measurementsTMP)
+	measurements, err := measTranslate(measurementsJSON)
 	if err != nil {
 		return nil, err
 	}
@@ -122,43 +135,60 @@ func getBoardMeasurements(measurementsPaths []string) ([]Measurement, error) {
 	return measurements, nil
 }
 
-func measTranslate(measurementsTMP []MeasurementJSON) ([]Measurement, error) {
+func measTranslate(measurementsTMP []Measurement) ([]Measurement, error) {
 	measurements := make([]Measurement, 0)
 
 	for _, measJSON := range measurementsTMP {
-		safeRange, warningRange, err := getRanges(measJSON)
+		var err error
+
+		measJSON.SafeRange, measJSON.WarningRange, err = getRanges(measJSON)
 		if err != nil {
 			return nil, err
 		}
 
-		measurements = append(measurements, Measurement{
-			Id:           measJSON.Id,
-			Name:         measJSON.Name,
-			Type:         measJSON.Type,
-			PodUnits:     measJSON.PodUnits,
-			DisplayUnits: measJSON.DisplayUnits,
-			EnumValues:   measJSON.EnumValues,
-			SafeRange:    safeRange,
-			WarningRange: warningRange,
-		})
+		measurements = append(measurements, measJSON)
 	}
 
 	return measurements, nil
 }
 
-func getRanges(measTMP MeasurementJSON) ([]*float64, []*float64, error) {
+func getRanges(measTMP Measurement) ([]*float64, []*float64, error) {
 	safeRange := make([]*float64, 0)
 	warningRange := make([]*float64, 0)
 
 	if measTMP.OutOfRange.Safe == nil && measTMP.OutOfRange.Warning == nil {
-		safeRange = append(safeRange, measTMP.Below.Safe)
-		safeRange = append(safeRange, measTMP.Above.Safe)
+		if measTMP.Below.Safe == nil {
+			safeRange = nil
+		} else {
+			safeRange = append(safeRange, measTMP.Below.Safe)
+		}
 
-		warningRange = append(warningRange, measTMP.Below.Warning)
-		warningRange = append(warningRange, measTMP.Above.Warning)
+		if measTMP.Above.Safe == nil {
+			safeRange = nil
+		} else {
+			safeRange = append(safeRange, measTMP.Above.Safe)
+		}
+
+		if measTMP.Below.Warning == nil {
+			warningRange = nil
+		} else {
+			warningRange = append(warningRange, measTMP.Below.Warning)
+		}
+
+		if measTMP.Above.Warning == nil {
+			warningRange = nil
+		} else {
+			warningRange = append(warningRange, measTMP.Above.Warning)
+		}
+	} else if measTMP.OutOfRange.Safe == nil {
+		safeRange = nil
+		warningRange = append(warningRange, measTMP.OutOfRange.Warning...)
+	} else if measTMP.OutOfRange.Warning == nil {
+		safeRange = append(safeRange, measTMP.OutOfRange.Safe...)
+		warningRange = nil
 	} else {
-		safeRange = measTMP.OutOfRange.Safe
-		warningRange = measTMP.OutOfRange.Warning
+		safeRange = append(safeRange, measTMP.OutOfRange.Safe...)
+		warningRange = append(warningRange, measTMP.OutOfRange.Warning...)
 	}
 
 	return safeRange, warningRange, nil
