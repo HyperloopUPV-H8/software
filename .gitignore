@@ -1,7 +1,7 @@
 build
 profiles
 backend/cmd/cmd
-backend/cmd/adj
+backend/cmd/adj/
 
 # MacOS Files
 .DS_Store
