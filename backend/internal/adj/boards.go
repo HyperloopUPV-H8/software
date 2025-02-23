@@ -56,6 +56,12 @@ func getBoards(boardsList map[string]string) (map[string]Board, error) {
 
 		board.Structures = getBoardStructures(board)
 
+		// DEBUG
+		for _, meas := range board.Measurements {
+			println(meas.SafeRange[0], ", ", meas.SafeRange[1])
+			println(meas.WarningRange[0], ", ", meas.WarningRange[1])
+		}
+
 		boards[boardName] = board
 	}
 
@@ -157,35 +163,38 @@ func getRanges(measTMP Measurement) ([]*float64, []*float64, error) {
 	warningRange := make([]*float64, 0)
 
 	if measTMP.OutOfRange.Safe == nil && measTMP.OutOfRange.Warning == nil {
-		if measTMP.Below.Safe == nil {
-			safeRange = nil
+		if measTMP.Below.Safe == nil && measTMP.Below.Warning == nil && measTMP.Above.Safe == nil && measTMP.Above.Warning == nil {
+			safeRange = append(safeRange, []*float64{nil, nil}...)
+			warningRange = append(warningRange, []*float64{nil, nil}...)
+		} else if measTMP.Below.Safe == nil {
+			safeRange = append(safeRange, []*float64{nil}...)
 		} else {
 			safeRange = append(safeRange, measTMP.Below.Safe)
 		}
 
 		if measTMP.Above.Safe == nil {
-			safeRange = nil
+			safeRange = append(safeRange, []*float64{nil}...)
 		} else {
 			safeRange = append(safeRange, measTMP.Above.Safe)
 		}
 
 		if measTMP.Below.Warning == nil {
-			warningRange = nil
+			warningRange = append(warningRange, []*float64{nil}...)
 		} else {
 			warningRange = append(warningRange, measTMP.Below.Warning)
 		}
 
 		if measTMP.Above.Warning == nil {
-			warningRange = nil
+			warningRange = append(warningRange, []*float64{nil}...)
 		} else {
 			warningRange = append(warningRange, measTMP.Above.Warning)
 		}
 	} else if measTMP.OutOfRange.Safe == nil {
-		safeRange = nil
+		safeRange = append(safeRange, []*float64{nil, nil}...)
 		warningRange = append(warningRange, measTMP.OutOfRange.Warning...)
 	} else if measTMP.OutOfRange.Warning == nil {
 		safeRange = append(safeRange, measTMP.OutOfRange.Safe...)
-		warningRange = nil
+		warningRange = append(warningRange, []*float64{nil, nil}...)
 	} else {
 		safeRange = append(safeRange, measTMP.OutOfRange.Safe...)
 		warningRange = append(warningRange, measTMP.OutOfRange.Warning...)
