@@ -10,8 +10,5 @@ programable_boards = "/uploadableBoards"
 connections = "/backend"
 files = "/"
 
-[vehicle]
-boardsList = ["VCU"]
-
 [adj]
-branch = "main" # Leave blank when using ADJ as a submodule
+branch = "" # Leave blank when using ADJ as a submodule (like this: "")

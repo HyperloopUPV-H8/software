@@ -115,7 +115,7 @@ def validate_json_folder(folder_path):
             print(f"Error al procesar el archivo {full_path}: {e}")
 
 
-if os.path.exists('./JSON_ADE/') == False:
-    print("La carpeta JSON_ADE no existe")
+if os.path.exists('./adj/') == False:
+    print("La carpeta ./adj/ no existe")
 if __name__ == "__main__":
-    validate_json_folder("./JSON_ADE/")
+    validate_json_folder("./adj/")
