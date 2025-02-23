@@ -36,9 +36,6 @@ func getMeasurement(adjMeas adj.Measurement, globalUnits map[string]utils.Operat
 	var tmp Measurement
 	var err error
 
-	// DEBUG
-	println("Meas type: ", adjMeas.Type)
-
 	if isNumeric(adjMeas.Type) {
 		tmp, err = getNumericMeasurement(adjMeas, globalUnits)
 	} else if adjMeas.Type == "bool" {
