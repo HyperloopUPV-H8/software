@@ -2,6 +2,7 @@ build
 profiles
 backend/cmd/cmd
 backend/cmd/adj/
+.ropeproject
 
 # MacOS Files
 .DS_Store
