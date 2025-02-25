@@ -15,7 +15,7 @@ export const Data1Page = () => {
 
     return (
         <div className={styles.data1_page}>
-            <div className={styles.column}>
+            {/* <div className={styles.column}>
                 <OBCCUBatteries />
             </div>
 
@@ -35,7 +35,7 @@ export const Data1Page = () => {
             <div className={styles.column}>
                 <PCU />
                 <Connections />
-            </div>
+            </div> */}
         </div>
     );
 };
