@@ -1,0 +1,119 @@
+.boxContainer1 {
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 20px; 
+    margin-bottom: 20px;
+}
+
+.boxContainer2 {
+    border: 2.5px solid #FFE7CF;
+    width: 80%;
+    height: 150px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    position: relative;
+    background-color: white;
+}
+
+.boxContainer3 {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content:center;
+}
+
+.voltajeContainer {
+    border-right: #FFE7CF solid 2.5px;
+    width: 50%;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.intensityContainer {
+    width: 50%;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+}
+
+.h2Module {
+    color: #EF7E30;
+    font-family: 'IBM Plex Mono', monospace;
+    width: 100%;
+    background-color: #FFE7CF;
+    text-align: center;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    font-weight: bold;
+    position: absolute;
+    transform: translateY(-100%);
+}
+
+.titleDecorationModule {
+    text-align: center;
+    width: 100%;
+    border-top-left-radius: 20px;
+    border-top-right-radius:20px ;
+    height: 20px;
+}
+
+.h3 {
+    color: #EF7E30;
+    font-family: 'IBM Plex Mono', monospace;
+    margin: 0;
+}
+
+.p {
+    color: #EF7E30;
+    font-family: 'IBM Plex Mono', monospace;
+    background-color: #FFE7CF;
+    border-radius: 10px;
+    margin-top: 2.5px;
+    margin-bottom: 2.5px;
+    padding: 0px 0px 5px 6px;
+    width: 85%;
+}
+
+.flexCells {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+    width: 90%;
+    border-radius: 20px;
+    border: 2.5px solid #FFE7CF;
+    padding: 10px;
+    margin-top: 10px;
+    background-color: white;
+}
+
+.cell {
+    width: 65px;
+    height: 30px;
+    border: 1px solid orange;
+    border-radius: 5px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .red {
+    background-color: red;
+  }
+  
+  .yellow {
+    background-color: rgb(255, 255, 0);
+  }
+  
+  .green {
+    background-color: rgb(33, 240, 33);
+  }
+  
