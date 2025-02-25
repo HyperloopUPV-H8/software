@@ -56,12 +56,6 @@ func getBoards(boardsList map[string]string) (map[string]Board, error) {
 
 		board.Structures = getBoardStructures(board)
 
-		// DEBUG
-		for _, meas := range board.Measurements {
-			println(meas.SafeRange[0], ", ", meas.SafeRange[1])
-			println(meas.WarningRange[0], ", ", meas.WarningRange[1])
-		}
-
 		boards[boardName] = board
 	}
 

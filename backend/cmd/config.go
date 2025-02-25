@@ -8,8 +8,14 @@ import (
 type Adj struct {
 	Branch string
 }
+
+type Network struct {
+	Manual bool
+}
+
 type Config struct {
 	Vehicle vehicle.Config
 	Server  server.Config
+	Network Network
 	Adj     Adj
 }
