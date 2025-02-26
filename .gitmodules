@@ -1,4 +1,0 @@
-[submodule "backend/cmd/adj"]
-	path = backend/cmd/adj
-	url = https://github.com/HyperloopUPV-H8/adj.git
-	branch = main
