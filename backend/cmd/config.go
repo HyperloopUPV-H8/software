@@ -7,6 +7,7 @@ import (
 
 type Adj struct {
 	Branch string
+	Test   bool
 }
 
 type Network struct {
@@ -16,6 +17,6 @@ type Network struct {
 type Config struct {
 	Vehicle vehicle.Config
 	Server  server.Config
-	Network Network
 	Adj     Adj
+	Network Network
 }
