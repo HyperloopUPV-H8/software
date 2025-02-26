@@ -3,9 +3,12 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/json"
 	"log"
 	"math"
 	"math/rand"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -15,6 +18,12 @@ import (
 
 type PacketGenerator struct {
 	packets []Packet
+	boards  map[string]Board
+}
+
+type Board struct {
+	Path    string   `json:"path"`
+	Packets []Packet `json:"packets"`
 }
 
 func New() PacketGenerator {
@@ -24,6 +33,7 @@ func New() PacketGenerator {
 	}
 
 	packets := make([]Packet, 0)
+	boards := loadBoards()
 
 	for _, board := range adj.Boards {
 		for _, packet := range board.Packets {
@@ -49,9 +59,53 @@ func New() PacketGenerator {
 
 	pg := PacketGenerator{
 		packets: packets,
+		boards:  boards,
 	}
 
 	return pg
+}
+
+func loadBoards() map[string]Board {
+	boards := make(map[string]Board)
+
+	boardFiles, err := filepath.Glob("JSON_ADE/boards/*/*.json")
+	if err != nil {
+		log.Fatalf("Failed to read board files: %v\n", err)
+	}
+
+	for _, boardFile := range boardFiles {
+		data, err := os.ReadFile(boardFile)
+		if err != nil {
+			log.Fatalf("Failed to read board file %s: %v\n", boardFile, err)
+		}
+
+		var board Board
+		err = json.Unmarshal(data, &board)
+		if err != nil {
+			log.Fatalf("Failed to unmarshal board file %s: %v\n", boardFile, err)
+		}
+
+		boardName := strings.TrimSuffix(filepath.Base(boardFile), filepath.Ext(boardFile))
+		boards[boardName] = board
+	}
+
+	return boards
+}
+
+func (pg *PacketGenerator) SelectPacket(boardName string, packetName string) *Packet {
+	board, exists := pg.boards[boardName]
+	if !exists {
+		log.Fatalf("Board %s not found\n", boardName)
+	}
+
+	for _, packet := range board.Packets {
+		if packet.Name == packetName {
+			return &packet
+		}
+	}
+
+	log.Fatalf("Packet %s not found in board %s\n", packetName, boardName)
+	return nil
 }
 
 func (pg *PacketGenerator) CreateRandomPacket() []byte {

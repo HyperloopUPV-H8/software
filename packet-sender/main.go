@@ -64,6 +64,26 @@ func main() {
 	defer conn.Close()
 
 	packetGenerator := New()
+	fmt.Println("Select a board:")
+	for boardName := range packetGenerator.boards {
+		fmt.Println(boardName)
+	}
+
+	var selectedBoard string
+	fmt.Scanln(&selectedBoard)
+	fmt.Println("Select a packet:")
+	for _, packetName := range packetGenerator.boards[selectedBoard].Packets {
+		fmt.Println(packetName)
+	}
+
+	var selectedPacket string
+	fmt.Scanln(&selectedPacket)
+
+	packet := packetGenerator.SelectPacket(selectedBoard, selectedPacket)
+	if packet == nil {
+		log.Fatalf("Failed to select packet")
+	}
+
 	fmt.Println("Sending packets")
 
 	count := make(chan struct{}, 10000)
