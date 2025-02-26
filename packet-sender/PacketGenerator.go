@@ -66,26 +66,49 @@ func New() PacketGenerator {
 }
 
 func loadBoards() map[string]Board {
-	boards := make(map[string]Board)
-
-	boardFiles, err := filepath.Glob("JSON_ADE/boards/*/*.json")
+	data, err := os.ReadFile("JSON_ADE/boards.json") //should be changed to adj
 	if err != nil {
-		log.Fatalf("Failed to read board files: %v\n", err)
+		log.Fatalf("Failed to read boards.json: %v\n", err)
 	}
 
-	for _, boardFile := range boardFiles {
-		data, err := os.ReadFile(boardFile)
+	var boards map[string]Board
+	err = json.Unmarshal(data, &boards)
+	if err != nil {
+		log.Fatalf("Failed to unmarshal boards.json: %v\n", err)
+	}
+
+	for boardName, board := range boards {
+		boardPath := filepath.Join("JSON_ADE", board.Path) //should be changed to adj
+		boardData, err := os.ReadFile(boardPath)
 		if err != nil {
-			log.Fatalf("Failed to read board file %s: %v\n", boardFile, err)
+			log.Fatalf("Failed to read board file %s: %v\n", boardPath, err)
 		}
 
-		var board Board
-		err = json.Unmarshal(data, &board)
+		var boardDetails struct {
+			Packets []string `json:"packets"`
+		}
+		err = json.Unmarshal(boardData, &boardDetails)
 		if err != nil {
-			log.Fatalf("Failed to unmarshal board file %s: %v\n", boardFile, err)
+			log.Fatalf("Failed to unmarshal board file %s: %v\n", boardPath, err)
 		}
 
-		boardName := strings.TrimSuffix(filepath.Base(boardFile), filepath.Ext(boardFile))
+		for _, packetFile := range boardDetails.Packets {
+			packetData, err := os.ReadFile(filepath.Join(filepath.Dir(board.Path), packetFile))
+			if err != nil {
+				log.Fatalf("Failed to read packet file %s: %v\n", packetFile, err)
+			}
+
+			var packetDetails struct {
+				Packets []Packet `json:"packets"`
+			}
+			err = json.Unmarshal(packetData, &packetDetails)
+			if err != nil {
+				log.Fatalf("Failed to unmarshal packet file %s: %v\n", packetFile, err)
+			}
+
+			board.Packets = append(board.Packets, packetDetails.Packets...)
+		}
+
 		boards[boardName] = board
 	}
 
