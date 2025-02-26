@@ -21,3 +21,4 @@ manual = false
 
 [adj]
 branch = "sw-bcu" # Leave blank when using ADJ as a submodule (like this: "")
+test = true
