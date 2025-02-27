@@ -81,7 +81,7 @@ func loadBoards() map[string]Board {
 		boardPath := filepath.Join("JSON_ADE", board.Path) //should be changed to adj
 		boardData, err := os.ReadFile(boardPath)
 		if err != nil {
-			log.Fatalf("Failed to read board file %s: %v\n", boardPath, err)
+			log.Fatalf("Failed to read board file %s: %v\n", boardPath, err) //TO DO: error JSON_ADE should not be a board file
 		}
 
 		var boardDetails struct {
