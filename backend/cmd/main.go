@@ -381,7 +381,6 @@ func selectDev(adjAddr map[string]string, conf Config) (pcap.Interface, error) {
 		for _, dev := range devs {
 			for _, addr := range dev.Addresses {
 				if addr.IP.String() == adjAddr["backend"] {
-					println(dev.Name)
 					return dev, nil
 				}
 			}
