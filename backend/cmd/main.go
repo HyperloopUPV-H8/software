@@ -381,7 +381,6 @@ func selectDev(adjAddr map[string]string, conf Config) (pcap.Interface, error) {
 		for _, dev := range devs {
 			for _, addr := range dev.Addresses {
 				if addr.IP.String() == adjAddr["backend"] {
-					println(dev.Name)
 					return dev, nil
 				}
 			}
@@ -583,8 +582,8 @@ func getIPIPfilter() string {
 	return "ip[9] == 4"
 }
 
-func getUDPFilter(addrs []net.IP, backendAddr net.IP, _ uint16) string {
-	udpPort := "udp" // TODO use proper ports for the filter
+func getUDPFilter(addrs []net.IP, backendAddr net.IP, port uint16) string {
+	udpPort := fmt.Sprintf("udp port %d", port) // TODO use proper ports for the filter
 	srcUdpAddrs := common.Map(addrs, func(addr net.IP) string {
 		return fmt.Sprintf("(src host %s)", addr)
 	})
