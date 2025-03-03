@@ -583,8 +583,8 @@ func getIPIPfilter() string {
 	return "ip[9] == 4"
 }
 
-func getUDPFilter(addrs []net.IP, backendAddr net.IP, _ uint16) string {
-	udpPort := "udp" // TODO use proper ports for the filter
+func getUDPFilter(addrs []net.IP, backendAddr net.IP, port uint16) string {
+	udpPort := fmt.Sprint(port) // TODO use proper ports for the filter
 	srcUdpAddrs := common.Map(addrs, func(addr net.IP) string {
 		return fmt.Sprintf("(src host %s)", addr)
 	})
