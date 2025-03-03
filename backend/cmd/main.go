@@ -131,7 +131,7 @@ func main() {
 
 		dev = devs[*networkDevice]
 	} else {
-		dev, err = selectDev()
+		dev, err = selectDev(adj.Info.Addresses, config)
 		if err != nil {
 			trace.Fatal().Err(err).Msg("Error selecting device")
 		}
@@ -356,26 +356,40 @@ func createPid(path string) {
 	}
 }
 
-func selectDev() (pcap.Interface, error) {
+func selectDev(adjAddr map[string]string, conf Config) (pcap.Interface, error) {
 	devs, err := pcap.FindAllDevs()
 	if err != nil {
 		return pcap.Interface{}, err
 	}
 
-	cyan := color.New(color.FgCyan)
+	if conf.Network.Manual {
+		cyan := color.New(color.FgCyan)
 
-	cyan.Print("select a device: ")
-	fmt.Printf("(0-%d)\n", len(devs)-1)
-	for i, dev := range devs {
-		displayDev(i, dev)
+		cyan.Print("select a device: ")
+		fmt.Printf("(0-%d)\n", len(devs)-1)
+		for i, dev := range devs {
+			displayDev(i, dev)
+		}
+
+		dev, err := acceptInput(len(devs))
+		if err != nil {
+			return pcap.Interface{}, err
+		}
+
+		return devs[dev], nil
+	} else {
+		for _, dev := range devs {
+			for _, addr := range dev.Addresses {
+				if addr.IP.String() == adjAddr["backend"] {
+					println(dev.Name)
+					return dev, nil
+				}
+			}
+		}
+
+		log.Fatal("backend address not found in any device")
+		return pcap.Interface{}, nil
 	}
-
-	dev, err := acceptInput(len(devs))
-	if err != nil {
-		return pcap.Interface{}, err
-	}
-
-	return devs[dev], nil
 }
 
 func displayDev(i int, dev pcap.Interface) {
