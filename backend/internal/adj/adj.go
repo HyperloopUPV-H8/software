@@ -36,21 +36,17 @@ func NewADJ(AdjBranch string) (ADJ, error) {
 		}
 	}
 
-	type BoardList struct {
-		Boards map[string]string `json:"boards"`
-	}
-
-	var boardsList BoardList
+	var boardsList map[string]string
 	if err := json.Unmarshal(boardsRaw, &boardsList); err != nil {
 		return ADJ{}, err
 	}
 
-	boards, err := getBoards(boardsList.Boards)
+	boards, err := getBoards(boardsList)
 	if err != nil {
 		return ADJ{}, err
 	}
 
-	info.BoardIds, err = getBoardIds(boardsList.Boards)
+	info.BoardIds, err = getBoardIds(boardsList)
 	if err != nil {
 		return ADJ{}, err
 	}
