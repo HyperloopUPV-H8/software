@@ -12,7 +12,6 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
-	"os/exec"
 	"os/signal"
 	"path"
 	"runtime"
@@ -105,15 +104,6 @@ func main() {
 	adj, err := adj_module.NewADJ(config.Adj.Branch)
 	if err != nil {
 		trace.Fatal().Err(err).Msg("setting up ADJ")
-	}
-
-	if config.Adj.Test {
-		test := exec.Command("python3", "testadj.py")
-		out, err := test.CombinedOutput()
-		if err != nil || len(out) != 0 {
-			fmt.Printf("\nPython test failed:\nError: %v\nOutput: %s\n", err, string(out))
-			os.Exit(1)
-		}
 	}
 
 	podData, err := pod_data.NewPodData(adj.Boards, adj.Info.Units)

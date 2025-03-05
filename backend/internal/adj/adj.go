@@ -2,7 +2,9 @@ package adj
 
 import (
 	"encoding/json"
+	"log"
 	"os"
+	"os/exec"
 
 	"github.com/HyperloopUPV-H8/h9-backend/internal/utils"
 )
@@ -71,6 +73,13 @@ func downloadADJ(AdjBranch string) (json.RawMessage, json.RawMessage, error) {
 	updateRepo(AdjBranch)
 
 	// The BoardIds are applied in the NewADJ function by the getBoardIds function
+	//Execute the script testadj.py
+	test := exec.Command("python3", "testadj.py")
+	out, err := test.CombinedOutput()
+	if err != nil || len(out) != 0 {
+		log.Fatalf("python test failed:\nError: %v\nOutput: %s\n", err, string(out))
+	}
+
 	info, err := os.ReadFile(RepoPath + "general_info.json")
 	if err != nil {
 		return nil, nil, err
