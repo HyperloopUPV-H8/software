@@ -66,7 +66,7 @@ func New() PacketGenerator {
 }
 
 func loadBoards() map[string]Board {
-	data, err := os.ReadFile("JSON_ADE/boards.json") //should be changed to adj
+	data, err := os.ReadFile("JSON_ADE/boards.json") //to do  change to adj
 	if err != nil {
 		log.Fatalf("Failed to read boards.json: %v\n", err)
 	}
@@ -78,10 +78,10 @@ func loadBoards() map[string]Board {
 	}
 
 	for boardName, board := range boards {
-		boardPath := filepath.Join("JSON_ADE", board.Path) //should be changed to adj
+		boardPath := filepath.Join("JSON_ADE", board.Path) //to do  change to adj
 		boardData, err := os.ReadFile(boardPath)
 		if err != nil {
-			log.Fatalf("Failed to read board file %s: %v\n", boardPath, err) //TO DO: error JSON_ADE should not be a board file
+			log.Fatalf("Failed to read board file %s: %v\n", boardPath, err)
 		}
 
 		var boardDetails struct {
@@ -93,9 +93,10 @@ func loadBoards() map[string]Board {
 		}
 
 		for _, packetFile := range boardDetails.Packets {
-			packetData, err := os.ReadFile(filepath.Join(filepath.Dir(board.Path), packetFile))
+			packetPath := filepath.Join(filepath.Dir(boardPath), packetFile)
+			packetData, err := os.ReadFile(packetPath)
 			if err != nil {
-				log.Fatalf("Failed to read packet file %s: %v\n", packetFile, err)
+				log.Fatalf("Failed to read packet file %s: %v\n", packetPath, err)
 			}
 
 			var packetDetails struct {
@@ -103,7 +104,7 @@ func loadBoards() map[string]Board {
 			}
 			err = json.Unmarshal(packetData, &packetDetails)
 			if err != nil {
-				log.Fatalf("Failed to unmarshal packet file %s: %v\n", packetFile, err)
+				log.Fatalf("Failed to unmarshal packet file %s: %v\n", packetPath, err)
 			}
 
 			board.Packets = append(board.Packets, packetDetails.Packets...)
@@ -295,10 +296,9 @@ func getMeasurements(variables []adj.Measurement) []Measurement {
 	for _, value := range variables {
 		measurements = append(measurements,
 			Measurement{
-				ID:   value.Id,
-				Name: value.Name,
-				Type: value.Type,
-				//TODO: make sure added property (Value) doesn't break stuff
+				ID:           value.Id,
+				Name:         value.Name,
+				Type:         value.Type,
 				Value:        getDefaultValue(value.Type),
 				Units:        value.DisplayUnits,
 				SafeRange:    parseRange(value.SafeRange),
