@@ -73,7 +73,7 @@ func downloadADJ(AdjBranch string) (json.RawMessage, json.RawMessage, error) {
 	updateRepo(AdjBranch)
 
 	// The BoardIds are applied in the NewADJ function by the getBoardIds function
-	//Execute the script testadj.py
+	//Execute the script testadj.py (fix bug)
 	test := exec.Command("python3", "testadj.py")
 	out, err := test.CombinedOutput()
 	if err != nil || len(out) != 0 {
