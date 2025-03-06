@@ -2,7 +2,9 @@ package adj
 
 import (
 	"encoding/json"
+	"log"
 	"os"
+	"os/exec"
 
 	"github.com/HyperloopUPV-H8/h9-backend/internal/utils"
 )
@@ -12,8 +14,8 @@ const (
 	RepoPath = "./adj/"                                     // Path where the ADJ repository is cloned
 )
 
-func NewADJ(AdjBranch string) (ADJ, error) {
-	infoRaw, boardsRaw, err := downloadADJ(AdjBranch)
+func NewADJ(AdjBranch string, test bool) (ADJ, error) {
+	infoRaw, boardsRaw, err := downloadADJ(AdjBranch, test)
 	if err != nil {
 		return ADJ{}, err
 	}
@@ -36,21 +38,17 @@ func NewADJ(AdjBranch string) (ADJ, error) {
 		}
 	}
 
-	type BoardList struct {
-		Boards map[string]string `json:"boards"`
-	}
-
-	var boardsList BoardList
+	var boardsList map[string]string
 	if err := json.Unmarshal(boardsRaw, &boardsList); err != nil {
 		return ADJ{}, err
 	}
 
-	boards, err := getBoards(boardsList.Boards)
+	boards, err := getBoards(boardsList)
 	if err != nil {
 		return ADJ{}, err
 	}
 
-	info.BoardIds, err = getBoardIds(boardsList.Boards)
+	info.BoardIds, err = getBoardIds(boardsList)
 	if err != nil {
 		return ADJ{}, err
 	}
@@ -71,10 +69,18 @@ func NewADJ(AdjBranch string) (ADJ, error) {
 	return adj, nil
 }
 
-func downloadADJ(AdjBranch string) (json.RawMessage, json.RawMessage, error) {
+func downloadADJ(AdjBranch string, test bool) (json.RawMessage, json.RawMessage, error) {
 	updateRepo(AdjBranch)
 
-	// The BoardIds are applied in the NewADJ function by the getBoardIds function
+	//Execute the script testadj.py if indicated in config.toml
+	if test {
+		test := exec.Command("python3", "testadj.py")
+		out, err := test.CombinedOutput()
+		if err != nil || len(out) != 0 {
+			log.Fatalf("python test failed:\nError: %v\nOutput: %s\n", err, string(out))
+		}
+	}
+
 	info, err := os.ReadFile(RepoPath + "general_info.json")
 	if err != nil {
 		return nil, nil, err
