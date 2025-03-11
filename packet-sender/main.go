@@ -72,14 +72,16 @@ func main() {
 	var selectedBoard string
 	fmt.Scanln(&selectedBoard)
 	fmt.Println("Select a packet:")
-	for _, packetName := range packetGenerator.boards[selectedBoard].Packets {
-		fmt.Println(packetName)
+	for _, packet := range packetGenerator.boards[selectedBoard].Packets {
+		fmt.Println(packet.Name)
+
 	}
 
 	var selectedPacket string
 	fmt.Scanln(&selectedPacket)
 
 	packet := packetGenerator.SelectPacket(selectedBoard, selectedPacket)
+
 	if packet == nil {
 		log.Fatalf("Failed to select packet")
 	}

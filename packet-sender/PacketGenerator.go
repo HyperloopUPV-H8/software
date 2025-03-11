@@ -66,7 +66,8 @@ func New() PacketGenerator {
 }
 
 func loadBoards() map[string]Board {
-	data, err := os.ReadFile("JSON_ADE/boards.json") //to do  change to adj
+	data, err := os.ReadFile("JSON_ADE/boards.json") // adj
+
 	if err != nil {
 		log.Fatalf("Failed to read boards.json: %v\n", err)
 	}
@@ -78,7 +79,8 @@ func loadBoards() map[string]Board {
 	}
 
 	for boardName, board := range boards {
-		boardPath := filepath.Join("JSON_ADE", board.Path) //to do  change to adj
+		boardPath := filepath.Join("", board.Path) //adj
+
 		boardData, err := os.ReadFile(boardPath)
 		if err != nil {
 			log.Fatalf("Failed to read board file %s: %v\n", boardPath, err)
