@@ -3,12 +3,9 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
-	"encoding/json"
 	"log"
 	"math"
 	"math/rand"
-	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -18,30 +15,36 @@ import (
 
 type PacketGenerator struct {
 	packets []Packet
-	boards  map[string]Board
+	boards  map[string]adj.Board
 }
 
 type Board struct {
-	Path    string   `json:"path"`
-	Packets []Packet `json:"packets"`
+	Path        string   `json:"path"`
+	PacketFiles []string `json:"packets"`
+	Packets     []Packet `json:"-"`
 }
 
 func New() PacketGenerator {
-	adj, err := adj.NewADJ()
+	adjBranch := "software" //for testing, can be changed
+	adjInstance, err := adj.NewADJ(adjBranch)
 	if err != nil {
 		log.Fatalf("Failed to load ADJ: %v\n", err)
 	}
 
 	packets := make([]Packet, 0)
-	boards := loadBoards()
+	boards := adjInstance.Boards
 
-	for _, board := range adj.Boards {
+	for _, board := range adjInstance.Boards {
+		if board.Packets == nil {
+			log.Fatalf("No packets found for board %s\n", board.Name)
+		}
+
 		for _, packet := range board.Packets {
 			if packet.Type != "data" {
 				continue
 			}
 
-			id, err := strconv.ParseUint(packet.Id, 10, 16)
+			id, err := strconv.ParseUint(strconv.Itoa(int(packet.Id)), 10, 16)
 			if err != nil {
 				log.Fatalf("data transfer: AddPacket: %s\n", err)
 			}
@@ -65,59 +68,6 @@ func New() PacketGenerator {
 	return pg
 }
 
-func loadBoards() map[string]Board {
-	data, err := os.ReadFile("JSON_ADE/boards.json") // adj
-
-	if err != nil {
-		log.Fatalf("Failed to read boards.json: %v\n", err)
-	}
-
-	var boards map[string]Board
-	err = json.Unmarshal(data, &boards)
-	if err != nil {
-		log.Fatalf("Failed to unmarshal boards.json: %v\n", err)
-	}
-
-	for boardName, board := range boards {
-		boardPath := filepath.Join("", board.Path) //adj
-
-		boardData, err := os.ReadFile(boardPath)
-		if err != nil {
-			log.Fatalf("Failed to read board file %s: %v\n", boardPath, err)
-		}
-
-		var boardDetails struct {
-			Packets []string `json:"packets"`
-		}
-		err = json.Unmarshal(boardData, &boardDetails)
-		if err != nil {
-			log.Fatalf("Failed to unmarshal board file %s: %v\n", boardPath, err)
-		}
-
-		for _, packetFile := range boardDetails.Packets {
-			packetPath := filepath.Join(filepath.Dir(boardPath), packetFile)
-			packetData, err := os.ReadFile(packetPath)
-			if err != nil {
-				log.Fatalf("Failed to read packet file %s: %v\n", packetPath, err)
-			}
-
-			var packetDetails struct {
-				Packets []Packet `json:"packets"`
-			}
-			err = json.Unmarshal(packetData, &packetDetails)
-			if err != nil {
-				log.Fatalf("Failed to unmarshal packet file %s: %v\n", packetPath, err)
-			}
-
-			board.Packets = append(board.Packets, packetDetails.Packets...)
-		}
-
-		boards[boardName] = board
-	}
-
-	return boards
-}
-
 func (pg *PacketGenerator) SelectPacket(boardName string, packetName string) *Packet {
 	board, exists := pg.boards[boardName]
 	if !exists {
@@ -126,7 +76,14 @@ func (pg *PacketGenerator) SelectPacket(boardName string, packetName string) *Pa
 
 	for _, packet := range board.Packets {
 		if packet.Name == packetName {
-			return &packet
+			return &Packet{
+				ID:           packet.Id,
+				Name:         packet.Name,
+				HexValue:     "",
+				Count:        0,
+				CycleTime:    0,
+				Measurements: getMeasurements(packet.Variables),
+			}
 		}
 	}
 
@@ -158,7 +115,6 @@ func (pg *PacketGenerator) CreateRandomPacket() []byte {
 		} else {
 			return nil
 		}
-
 	}
 
 	return buff.Bytes()
@@ -277,7 +233,7 @@ func (pg *PacketGenerator) AddPacket(boardName string, packet adj.Packet) {
 		return
 	}
 
-	id, err := strconv.ParseUint(packet.Id, 10, 16)
+	id, err := strconv.ParseUint(strconv.Itoa(int(packet.Id)), 10, 16)
 	if err != nil {
 		log.Fatalf("data transfer: AddPacket: %s\n", err)
 	}
