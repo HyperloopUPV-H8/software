@@ -12,6 +12,7 @@ import './index.css';
 import { vehicleRoute } from 'pages/VehiclePage/vehicleRoute';
 import { camerasRoute } from 'pages/CamerasPage/camerasRoute';
 import { tubeRoute } from 'pages/TubePage/tubeRoute';
+import { guiRoute } from 'pages/VehiclePage/GuiBoosterPage/guiRoute';
 import { ConfigProvider, GlobalTicker } from 'common';
 
 const router = createBrowserRouter([
@@ -23,6 +24,8 @@ const router = createBrowserRouter([
             vehicleRoute,
             camerasRoute,
             tubeRoute,
+            guiRoute,
+
         ],
     },
 ]);
