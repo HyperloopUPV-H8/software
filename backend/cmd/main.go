@@ -53,6 +53,7 @@ import (
 	"github.com/google/gopacket/pcap"
 	"github.com/jmaralo/sntp"
 	"github.com/pelletier/go-toml/v2"
+	"github.com/pkg/browser"
 	trace "github.com/rs/zerolog/log"
 )
 
@@ -101,7 +102,7 @@ func main() {
 
 	// <--- ADJ --->
 
-	adj, err := adj_module.NewADJ(config.Adj.Branch)
+	adj, err := adj_module.NewADJ(config.Adj.Branch, config.Adj.Test)
 	if err != nil {
 		trace.Fatal().Err(err).Msg("setting up ADJ")
 	}
@@ -323,6 +324,9 @@ func main() {
 			}
 		}()
 	}
+
+	browser.OpenURL("http://" + config.Server["ethernet-view"].Addr)
+	browser.OpenURL("http://" + config.Server["control-station"].Addr)
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)

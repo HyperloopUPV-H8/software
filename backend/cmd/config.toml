@@ -1,3 +1,5 @@
+[vehicle]
+boards = ["HVSCU", "PCU"]
 [server.ethernet-view]
 address = "127.0.0.1:4040"
 static = "./ethernet-view"
@@ -16,9 +18,8 @@ order_data = "/orderStructures"
 programable_boards = "/uploadableBoards"
 connections = "/backend"
 files = "/"
-[network]
-manual = false
-
 [adj]
 branch = "sw-bcu" # Leave blank when using ADJ as a submodule (like this: "")
 test = true
+[network]
+manual = false
