@@ -1,17 +1,16 @@
 .boxContainer1 {
-    width: 90%;
+    width: 30%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     border-radius: 20px; 
-    margin-bottom: 20px;
 }
 
 .boxContainer2 {
     border: 2.5px solid #FFE7CF;
-    width: 80%;
-    height: 150px;
+    width: 65%;
+    height: 140px;
     border-radius: 20px;
     display: flex;
     flex-direction: column;
@@ -25,23 +24,15 @@
     flex-direction: row;
     width: 100%;
     justify-content:center;
+    padding: 5px;
 }
 
 .voltajeContainer {
-    border-right: #FFE7CF solid 2.5px;
-    width: 50%;
+    width: 100%;
     padding: 10px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-}
-
-.intensityContainer {
-    width: 50%;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    justify-content: left;
 }
 
 .h2Module {
@@ -79,20 +70,24 @@
     margin-top: 2.5px;
     margin-bottom: 2.5px;
     padding: 0px 0px 5px 6px;
-    width: 85%;
+    width: 50%;
 }
 
 .flexCells {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 5px;
-    width: 90%;
+    gap: 9px; 
+    justify-content: center; 
+    align-items: center;
+    width: fit-content; 
+    margin: 5 auto; 
     border-radius: 20px;
     border: 2.5px solid #FFE7CF;
     padding: 10px;
     margin-top: 10px;
     background-color: white;
 }
+
 
 .cell {
     width: 65px;
@@ -105,15 +100,51 @@
     justify-content: center;
   }
   
-  .red {
+.red {
     background-color: red;
-  }
+}
   
-  .yellow {
-    background-color: rgb(255, 255, 0);
-  }
-  
-  .green {
+.green {
     background-color: rgb(33, 240, 33);
-  }
+}
   
+.lightOrange1 {
+    background-color: #FFA500;
+}
+
+.lightOrange2 {
+    background-color: #FFCC80;
+}
+
+.voltageTotal {
+    display: inline-block;
+    width: 40%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-align: center;
+    padding: 5px 10px;
+    border-radius: 15px;
+    background-color: #FFE7CF;  
+    font-size: 0.8rem;
+    color: #EF7E30;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .value {
+    height: 50px;
+    font-size: 25px;
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    text-align: center;
+  }
+  .voltageRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+    text-align: center;
+    padding-bottom: 5px;
+    padding-right: 5px;
+}
