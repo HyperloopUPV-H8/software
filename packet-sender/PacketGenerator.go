@@ -18,7 +18,7 @@ type PacketGenerator struct {
 }
 
 func New() PacketGenerator {
-	adj, err := adj.NewADJ()
+	adj, err := adj.NewADJ("main", true)
 	if err != nil {
 		log.Fatalf("Failed to load ADJ: %v\n", err)
 	}
@@ -31,7 +31,7 @@ func New() PacketGenerator {
 				continue
 			}
 
-			id, err := strconv.ParseUint(packet.Id, 10, 16)
+			id, err := strconv.ParseUint(strconv.Itoa(int(packet.Id)), 10, 16)
 			if err != nil {
 				log.Fatalf("data transfer: AddPacket: %s\n", err)
 			}
@@ -197,7 +197,7 @@ func (pg *PacketGenerator) AddPacket(boardName string, packet adj.Packet) {
 		return
 	}
 
-	id, err := strconv.ParseUint(packet.Id, 10, 16)
+	id, err := strconv.ParseUint(strconv.Itoa(int(packet.Id)), 10, 16)
 	if err != nil {
 		log.Fatalf("data transfer: AddPacket: %s\n", err)
 	}
