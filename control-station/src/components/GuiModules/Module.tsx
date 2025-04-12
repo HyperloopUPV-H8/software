@@ -28,7 +28,7 @@ const Module: React.FC<{ id: string | number }> = ({ id }) => {
             if (value > max) return styles.red;
             if (value >= min && value <= max) return styles.green;
         }
-        return styles.yellow;
+        return styles.lightOrange2;
     };
 
     const Cell: React.FC<CellProps> = ({ value }) => {
@@ -44,18 +44,15 @@ const Module: React.FC<{ id: string | number }> = ({ id }) => {
                 </article>
                 <div className={styles.boxContainer3}>
                     <div className={styles.voltajeContainer}>
-                        <h3 className={styles.h3}>Voltage</h3>
+                        <div className={styles.voltageRow}>
+                            <h3 className={styles.h3}>Voltage</h3>
+                            <span className={styles.voltageTotal}>{} V</span>
+                        </div>
                         <p className={styles.p}>max: {numericInfo.range[1]} V</p>
                         <p className={styles.p}>min: {numericInfo.range[0]} V</p>
-                        <p className={styles.p}>mean: {cellValues.reduce((a, b) => a + b, 0) / cellValues.length}</p>
-                    </div>
-                    <div className={styles.intensityContainer}>
-                        <h3 className={styles.h3}>Intensity</h3>
-                        <p className={styles.p}>max: {numericInfo.range[1]} A</p> 
-                        <p className={styles.p}>min: {numericInfo.range[0]} A</p>
+                        </div>
                     </div>
                 </div>
-            </div>
             <div className={styles.flexCells}>
                 {cellValues.map((value, index) => (
                     <Cell key={index} value={value} />

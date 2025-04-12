@@ -21,7 +21,7 @@ export function GuiPage() {
         state.getNumericMeasurementInfo("total_voltage_high")
     );
     
-    const bcuVoltageMeasurement = useMeasurementsStore((state) =>
+    const currentMeasurement = useMeasurementsStore((state) =>
         state.getNumericMeasurementInfo("vdc")
     );
 
@@ -40,36 +40,48 @@ export function GuiPage() {
     }, [voltageTotalMeasurement, constStatusMeasurement]);
 
     useEffect(() => {
-        if (bcuVoltageMeasurement?.getUpdate) {
-            const newValue = bcuVoltageMeasurement.getUpdate();
+        if (currentMeasurement?.getUpdate) {
+            const newValue = currentMeasurement.getUpdate();
             console.log("Nuevo valor BCU Voltage:", newValue);
             setBcuVoltage(newValue);
         }
-    }, [bcuVoltageMeasurement]);
+    }, [currentMeasurement]);
 
     return (
         <div>
-            <header className={styles.header}>
-                <h1>Booster GUI</h1>
-                <div className={styles.boosterDecorationLine}></div>
-            </header>
             <main className={styles.boosterMainContainer}>
                 <div className={styles.boosterContainer}>
                     <div className={styles.statusContainer}>
-                        <div className={styles.status}>
+                        <div className={styles.statusFirstLabel}>
                             <h3>V total:</h3>
                             <div className={styles.value}>
                                 <span>{voltageTotal} V</span>
                             </div>
 
-                            <h3>BCU status:</h3>
+                            <h3>Current:</h3>
                             <div className={styles.value}>
                                 <span>{bcuVoltage} V</span>
                             </div>
 
-                            <h3>CONST status:</h3>
+                            <h3>Contactors status:</h3>
                             <div className={styles.value}>
                                 <span>{constStatus ? "On" : "Off"}</span> {/* Muestra On/Off para el estado de los contactores */}
+                            </div>
+                        </div>
+                        <div className={styles.statusFirstLabel}>
+                            <h3>BCU status:</h3>
+                            <div className={styles.value}>
+                                <span>{voltageTotal} -</span>
+                            </div>
+
+                            <h3>Temperature total:</h3>
+                            <div className={styles.value}>
+                                <span>{bcuVoltage} ºC</span>
+                            </div>
+
+                            <h3>Charge:</h3>
+                            <div className={styles.value}>
+                                <span>{} %</span> {/* Muestra On/Off para el estado de los contactores */}
                             </div>
                         </div>
                     </div>

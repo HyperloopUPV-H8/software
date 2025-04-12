@@ -27,11 +27,28 @@
 .statusContainer {
   width: 100%; 
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
   margin: 20px;
 }
 
-.status {
+.statusFirstLabel {
+  width: 95%; 
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  border: 2.5px solid #FFE7CF;
+  border-radius: 20px;
+  text-align: center;
+  background-color: #FFF7EC;
+  color: #EF7E30;
+  font-family: 'IBM Plex Mono', monospace;
+  margin-bottom: 10px;
+}
+
+.statusSecondLabel {
   display: flex;
   flex-direction: row;
   justify-content: space-around;
@@ -44,7 +61,6 @@
   color: #EF7E30;
   font-family: 'IBM Plex Mono', monospace;
 }
-
 .value {
   border: 1.5px solid #EF7E30;
   border-radius: 1.2rem;
@@ -96,6 +112,10 @@ p {
 
 .messagesAndOrders {
   margin-top: 20px;
+  overflow: hidden;
+  flex-grow: 1; 
+  width: 100%;
+  max-width: 25vw;
 }
 
 .orders {
