@@ -18,7 +18,7 @@ type PacketGenerator struct {
 }
 
 func New() PacketGenerator {
-	adj, err := adj.NewADJ("main", true)
+	adj, err := adj.NewADJ("HVSCU-Cabinet", false)
 	if err != nil {
 		log.Fatalf("Failed to load ADJ: %v\n", err)
 	}
@@ -55,30 +55,65 @@ func New() PacketGenerator {
 }
 
 func (pg *PacketGenerator) CreateRandomPacket() []byte {
+	if len(pg.packets) == 0 {
+
+		return nil
+	}
+
 	randomIndex := rand.Int63n(int64(len(pg.packets)))
 	randomPacket := pg.packets[randomIndex]
 
-	buff := bytes.NewBuffer(make([]byte, 0))
+	if len(randomPacket.Measurements) == 0 {
 
+		log.Printf("El paquete con ID %d no tiene measurements\n", randomPacket.ID)
+		return nil
+	}
+
+	buff := bytes.NewBuffer(make([]byte, 0))
 	binary.Write(buff, binary.LittleEndian, randomPacket.ID)
 
 	for _, measurement := range randomPacket.Measurements {
 		if strings.Contains(measurement.Type, "enum") {
-			binary.Write(buff, binary.LittleEndian, uint8(rand.Int63n(int64(len(strings.Split(strings.ReplaceAll(strings.TrimSuffix(strings.TrimPrefix(measurement.Type, "enum("), ")"), " ", ""), ","))))))
+
+			list := strings.Split(strings.ReplaceAll(strings.TrimSuffix(strings.TrimPrefix(measurement.Type, "enum("), ")"), " ", ""), ",")
+			if len(list) == 0 {
+
+				log.Printf("Lista vacía para enum: %v\n", measurement.Type)
+				continue
+			}
+
+			randomIndex := rand.Int63n(int64(len(list)))
+			if randomIndex >= 0 && randomIndex < int64(len(list)) {
+				binary.Write(buff, binary.LittleEndian, uint8(randomIndex))
+			} else {
+
+				log.Printf("Índice fuera de rango para enum: %v, índice: %d, longitud: %d\n", measurement.Type, randomIndex, len(list))
+				continue
+			}
 		} else if measurement.Type == "bool" {
+
 			binary.Write(buff, binary.LittleEndian, rand.Int31n(2) == 1)
 		} else if measurement.Type != "string" {
+
 			var number float64
-			if len(measurement.WarningRange) == 0 {
-				number = mapNumberToRange(rand.Float64(), measurement.WarningRange, measurement.Type)
-			} else {
-				number = mapNumberToRange(rand.Float64(), []float64{measurement.WarningRange[0] * 0.8, measurement.WarningRange[1] * 1.2}, measurement.Type)
+			if len(measurement.WarningRange) < 2 {
+
+				continue
 			}
+
+			number = mapNumberToRange(
+				rand.Float64(),
+				[]float64{
+					measurement.WarningRange[0] * 0.8,
+					measurement.WarningRange[1] * 1.2,
+				},
+				measurement.Type,
+			)
 			writeNumberAsBytes(number, measurement.Type, buff)
 		} else {
-			return nil
-		}
 
+			continue
+		}
 	}
 
 	return buff.Bytes()
