@@ -18,6 +18,9 @@ import (
 	"runtime/pprof"
 	"strings"
 	"time"
+	"encoding/json"
+	"path/filepath"
+	"regexp"
 
 	adj_module "github.com/HyperloopUPV-H8/h9-backend/internal/adj"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
@@ -76,9 +79,14 @@ var enableSNTP = flag.Bool("sntp", false, "enables a simple SNTP server on port 
 var networkDevice = flag.Int("dev", -1, "index of the network device to use, overrides device prompt")
 var blockprofile = flag.Int("blockprofile", 0, "number of block profiles to include")
 var playbackFile = flag.String("playback", "", "")
+var version= "2.2.6" // this variables needs to be changed when a new version is released
 
 func main() {
+	versionFlag := flag.Bool("version", false, "Muestra la versión del backend")
 	flag.Parse()
+	if *versionFlag {
+        fmt.Println("Hyperloop UPV H8 Backend Version:", version)
+        os.Exit(0)
 	traceFile := initTrace(*traceLevel, *traceFile)
 	defer traceFile.Close()
 
@@ -99,6 +107,14 @@ func main() {
 	runtime.SetBlockProfileRate(*blockprofile)
 
 	config := getConfig("./config.toml")
+	if version == "" || version == "0.0.0" {
+		fmt.Printf("⚠️  No se ha definido una versión en el backend. Hay una última versión disponible: %s\n", latestVersion)
+	} else if isOlderVersion(version, latestVersion) {
+		fmt.Println("⚠️  Hay una nueva versión del backend disponible.")
+	} else {
+		fmt.Println("✅ Estás usando la última versión.")
+	}
+	
 
 	// <--- ADJ --->
 
@@ -589,4 +605,42 @@ func getUDPFilter(addrs []net.IP, backendAddr net.IP, port uint16) string {
 	dstUdpAddrsStr := strings.Join(dstUdpAddrs, " or ")
 
 	return fmt.Sprintf("(%s) and (%s) and (%s or (dst host %s))", udpPort, srcUdpAddrsStr, dstUdpAddrsStr, backendAddr)
+}
+
+type GitHubRelease struct {
+	TagName string `json:"tag_name"`
+}
+
+func getLatestVersionFromGitHub() (string, error) {
+	resp, err := http.Get("https://api.github.com/repos/HyperloopUPV-H8/software/releases/latest")
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	var release GitHubRelease
+	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
+		return "", err
+	}
+
+	version := strings.TrimPrefix(release.TagName, "v")
+	return version, nil
+}
+
+func isOlderVersion(current, latest string) bool {
+	cParts := strings.Split(current, ".")
+	lParts := strings.Split(latest, ".")
+
+	for i := 0; i < len(cParts) && i < len(lParts); i++ {
+		cNum, _ := strconv.Atoi(cParts[i])
+		lNum, _ := strconv.Atoi(lParts[i])
+
+		if cNum < lNum {
+			return true
+		} else if cNum > lNum {
+			return false
+		}
+	}
+
+	return len(cParts) < len(lParts)
 }
