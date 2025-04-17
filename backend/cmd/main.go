@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 
+	"encoding/json"
 	"log"
 	"net"
 	"net/http"
@@ -16,11 +17,11 @@ import (
 	"path"
 	"runtime"
 	"runtime/pprof"
+
 	"strings"
 	"time"
-	"encoding/json"
-	"path/filepath"
-	"regexp"
+
+	"github.com/hashicorp/go-version"
 
 	adj_module "github.com/HyperloopUPV-H8/h9-backend/internal/adj"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
@@ -79,14 +80,15 @@ var enableSNTP = flag.Bool("sntp", false, "enables a simple SNTP server on port 
 var networkDevice = flag.Int("dev", -1, "index of the network device to use, overrides device prompt")
 var blockprofile = flag.Int("blockprofile", 0, "number of block profiles to include")
 var playbackFile = flag.String("playback", "", "")
-var version= "2.2.6" // this variables needs to be changed when a new version is released
+var currentVersion = "2.2.6" // this variable needs to be changed when a new version is released
 
 func main() {
 	versionFlag := flag.Bool("version", false, "Muestra la versión del backend")
 	flag.Parse()
 	if *versionFlag {
-        fmt.Println("Hyperloop UPV H8 Backend Version:", version)
-        os.Exit(0)
+		fmt.Println("Hyperloop UPV H8 Backend Version:", currentVersion)
+		os.Exit(0)
+	}
 	traceFile := initTrace(*traceLevel, *traceFile)
 	defer traceFile.Close()
 
@@ -107,14 +109,29 @@ func main() {
 	runtime.SetBlockProfileRate(*blockprofile)
 
 	config := getConfig("./config.toml")
-	if version == "" || version == "0.0.0" {
-		fmt.Printf("⚠️  No se ha definido una versión en el backend. Hay una última versión disponible: %s\n", latestVersion)
-	} else if isOlderVersion(version, latestVersion) {
-		fmt.Println("⚠️  Hay una nueva versión del backend disponible.")
-	} else {
-		fmt.Println("✅ Estás usando la última versión.")
+	latestVersionStr, err := getLatestVersionFromGitHub()
+	if err != nil {
+		fmt.Println("Error fetching latest version:", err)
+		return
 	}
-	
+
+	current, err := version.NewVersion(currentVersion)
+	if err != nil {
+		fmt.Println("Invalid current version:", err)
+		return
+	}
+
+	latest, err := version.NewVersion(latestVersionStr)
+	if err != nil {
+		fmt.Println("Invalid latest version:", err)
+		return
+	}
+
+	if latest.GreaterThan(current) {
+		fmt.Printf("There is a new version available: %s (current version: %s)\n", latest, current)
+	} else {
+		fmt.Printf("You are using the latest version: %s\n", current)
+	}
 
 	// <--- ADJ --->
 
@@ -625,22 +642,4 @@ func getLatestVersionFromGitHub() (string, error) {
 
 	version := strings.TrimPrefix(release.TagName, "v")
 	return version, nil
-}
-
-func isOlderVersion(current, latest string) bool {
-	cParts := strings.Split(current, ".")
-	lParts := strings.Split(latest, ".")
-
-	for i := 0; i < len(cParts) && i < len(lParts); i++ {
-		cNum, _ := strconv.Atoi(cParts[i])
-		lNum, _ := strconv.Atoi(lParts[i])
-
-		if cNum < lNum {
-			return true
-		} else if cNum > lNum {
-			return false
-		}
-	}
-
-	return len(cParts) < len(lParts)
 }
