@@ -20,29 +20,11 @@ type PacketGenerator struct {
 }
 
 func New() PacketGenerator {
-	excelAdapter := excelAdapter.New(excelAdapter.ExcelAdapterConfig{
-		Download: internals.DownloadConfig{
-			Id:   "1NyNaAOw_6iWtnCpEg73AtSSFx1fMdhPRmmdOhjgjCZI",
-			Path: ".",
-			Name: "ade.xlsx",
-		},
-		Parse: internals.ParseConfig{
-			GlobalSheetPrefix: "GLOBAL ",
-			BoardSheetPrefix:  "BOARD ",
-			TablePrefix:       "[TABLE] ",
-			Global: internals.GlobalParseConfig{
-				AddressTable:    "addresses",
-				BackendKey:      "Backend",
-				BLCUAddressKey:  "BLCU",
-				UnitsTable:      "units",
-				PortsTable:      "ports",
-				BoardIdsTable:   "board_ids",
-				MessageIdsTable: "message_ids",
-			},
-		},
-	})
+	adj, err := adj.NewADJ("HVSCU-Cabinet", true)
+	if err != nil {
+		log.Fatalf("Failed to load ADJ: %v\n", err)
+	}
 
-	boards := excelAdapter.GetBoards()
 	packets := make([]Packet, 0)
 
 	for _, board := range boards {

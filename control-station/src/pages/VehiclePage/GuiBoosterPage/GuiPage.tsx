@@ -2,104 +2,133 @@ import { useEffect, useState } from "react";
 import styles from "./GuiPage.module.scss";
 import Module from "../../../components/GuiModules/Module";
 import { Messages } from "../Messages/Messages";
-import { Orders, useMeasurementsStore } from "common";
+import { Orders, useMeasurementsStore, NumericMeasurementInfo } from "common";
 
 interface ModuleData {
-    id: number | string;
-    name: string;
-};
+  id: number | string;
+  name: string;
+}
 
 const modules: ModuleData[] = [
-    { id: 1, name: "Module 1" },
-    { id: 2, name: "Module 2" },
-    { id: 3, name: "Module 3" },
+  { id: 1, name: "Module 1" },
+  { id: 2, name: "Module 2" },
+  { id: 3, name: "Module 3" },
 ];
 
 export function GuiPage() {
+  // Medidas
+  const totalSupercapsVoltageInfo = useMeasurementsStore((state) =>
+    state.getNumericMeasurementInfo("total_supercaps_voltage")
+  );
+  const currentMeasurementInfo = useMeasurementsStore((state) =>
+    state.getNumericMeasurementInfo("output_current")
+  );
+  const temperatureMeasurementInfo = useMeasurementsStore((state) =>
+    state.getNumericMeasurementInfo("temperature_total")
+  );
 
-    const voltageTotalMeasurement = useMeasurementsStore((state) =>
-        state.getNumericMeasurementInfo("total_voltage_high")
-    );
-    
-    const currentMeasurement = useMeasurementsStore((state) =>
-        state.getNumericMeasurementInfo("vdc")
-    );
+  // Enums
+  const contactorsStateInfo = useMeasurementsStore((state) =>
+    state.getMeasurement("contactors_state")
+  );
+  const bcuGeneralStateInfo = useMeasurementsStore((state) =>
+    state.getMeasurement("bcu_general_state")
+  );
 
-    const constStatusMeasurement = useMeasurementsStore((state) =>
-        state.getBooleanMeasurementInfo("const_status")
-    );
+  // Estados
+  const [voltageTotal, setVoltageTotal] = useState<number | null>(null);
+  const [current, setCurrent] = useState<number | null>(null);
+  const [temperature, setTemperature] = useState<number | null>(null);
+  const [contactorsState, setContactorsState] = useState<string | null>(null);
+  const [bcuState, setBcuState] = useState<string | null>(null);
 
-    const [voltageTotal, setVoltageTotal] = useState<number | null>(null);
-    const [bcuVoltage, setBcuVoltage] = useState<number | null>(null);
-    const [constStatus, setConstStatus] = useState<boolean>(false);
+  // Efectos
+  useEffect(() => {
+    setVoltageTotal(totalSupercapsVoltageInfo?.getUpdate() ?? null); // Si `getUpdate()` es el método adecuado
+  }, [totalSupercapsVoltageInfo]);
+  
+  useEffect(() => {
+    setCurrent(currentMeasurementInfo?.getUpdate() ?? null); // Similar para otras mediciones
+  }, [currentMeasurementInfo]);
+  
+  useEffect(() => {
+    setTemperature(temperatureMeasurementInfo?.getUpdate() ?? null); 
+  }, [temperatureMeasurementInfo]);
+  
 
-    useEffect(() => {
-        // (VER)
-        setVoltageTotal(voltageTotalMeasurement?.getUpdate() || null);
-        setConstStatus(constStatusMeasurement.getUpdate());
-    }, [voltageTotalMeasurement, constStatusMeasurement]);
+  useEffect(() => {
+    const value = contactorsStateInfo?.value;
+    setContactorsState(typeof value === "string" ? value : null);
+  }, [contactorsStateInfo]);
 
-    useEffect(() => {
-        if (currentMeasurement?.getUpdate) {
-            const newValue = currentMeasurement.getUpdate();
-            console.log("Nuevo valor BCU Voltage:", newValue);
-            setBcuVoltage(newValue);
-        }
-    }, [currentMeasurement]);
+  useEffect(() => {
+    const value = bcuGeneralStateInfo?.value;
+    setBcuState(typeof value === "string" ? value : null);
+  }, [bcuGeneralStateInfo]);
 
-    return (
-        <div>
-            <main className={styles.boosterMainContainer}>
-                <div className={styles.boosterContainer}>
-                    <div className={styles.statusContainer}>
-                        <div className={styles.statusFirstLabel}>
-                            <h3>V total:</h3>
-                            <div className={styles.value}>
-                                <span>{voltageTotal} V</span>
-                            </div>
-
-                            <h3>Current:</h3>
-                            <div className={styles.value}>
-                                <span>{bcuVoltage} V</span>
-                            </div>
-
-                            <h3>Contactors status:</h3>
-                            <div className={styles.value}>
-                                <span>{constStatus ? "On" : "Off"}</span> {/* Muestra On/Off para el estado de los contactores */}
-                            </div>
-                        </div>
-                        <div className={styles.statusFirstLabel}>
-                            <h3>BCU status:</h3>
-                            <div className={styles.value}>
-                                <span>{voltageTotal} -</span>
-                            </div>
-
-                            <h3>Temperature total:</h3>
-                            <div className={styles.value}>
-                                <span>{bcuVoltage} ºC</span>
-                            </div>
-
-                            <h3>Charge:</h3>
-                            <div className={styles.value}>
-                                <span>{} %</span> {/* Muestra On/Off para el estado de los contactores */}
-                            </div>
-                        </div>
-                    </div>
-                    <div className={styles.modulesContainer}>
-                        {modules.map((module) => (
-                            <Module key={module.id} id={module.id} />
-                        ))}
-                    </div>
+  return (
+    <div>
+      <main className={styles.boosterMainContainer}>
+        <div className={styles.boosterContainer}>
+          <div className={styles.statusContainer}>
+            <div className={styles.statusRow1}>
+              <div className={styles.statusItem}>
+                <h3>V total:</h3>
+                <div className={styles.value}>
+                  <span>{voltageTotal ?? "-"} V</span>
                 </div>
-                <div className={styles.messagesAndOrders}>
-                    <div className={styles.messages}>
-                        <Messages />
-                    </div>
-
-                    <div className={styles.orders}></div>
-                    <Orders boards={[]} />
+              </div>
+              <div className={styles.statusItem}>
+                <h3>Current:</h3>
+                <div className={styles.value}>
+                  <span>{current ?? "-"} A</span>
                 </div>
-            </main>
+              </div>
+              <div className={styles.statusItem}>
+                <h3>Contactors status:</h3>
+                <div className={styles.value}>
+                  <span>{contactorsState ?? "-"}</span>
+                </div>
+              </div>
+            </div>
+            <div className={styles.statusRow2}>
+              <div className={styles.statusItem}>
+                <h3>BCU status:</h3>
+                <div className={styles.value}>
+                  <span>{bcuState ?? "-"}</span>
+                </div>
+              </div>
+              <div className={styles.statusItem}>
+                <h3>Temperature total:</h3>
+                <div className={styles.value}>
+                  <span>{temperature ?? "-"} ºC</span>
+                </div>
+              </div>
+              <div className={styles.statusItem}>
+                <h3>Charge:</h3>
+                <div className={styles.value}>
+                  <span>- %</span> 
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.modulesContainer}>
+            {modules.map((module) => (
+              <Module key={module.id} id={module.id} />
+            ))}
+          </div>
         </div>
-    );
+
+        <div className={styles.messagesAndOrders}>
+          <div className={styles.messages}>
+            <Messages />
+          </div>
+          <div className={styles.orders}>
+            <Orders boards={[]} />
+          </div>
+        </div>
+      </main>
+    </div>
+  );
 }

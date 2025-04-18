@@ -7,7 +7,7 @@
 
 .boosterMainContainer{
   display: flex;
-  justify-content: start; 
+  justify-content: start;
   align-items: start;
   width: 100%;
 }
@@ -17,24 +17,60 @@
   background-color: white;
   border-radius: 20px;
   display: flex;
-  flex-direction: column; 
-  align-items: center; 
+  flex-direction: column;
+  align-items: center;
   overflow: hidden;
   box-sizing: border-box;
   margin: 20px;
 }
 
 .statusContainer {
-  width: 100%; 
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   margin: 20px;
+  display: flex;
+  flex-direction: column; /* Cambiado a columna */
+  justify-content: center;
+  align-items: center;
+  width: 90%;
 }
 
+.statusRow1, .statusRow2 {
+  background-color: #FFE7CF;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 5px; /* Espacio entre filas */
+}
+
+.statusItem{
+  color: #EF7E30;
+  font-family: 'IBM Plex Mono', monospace;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+}
+
+.value{
+  color: #EF7E30;
+  font-family: 'IBM Plex Mono', monospace;
+  border: 1.5px solid #EF7E30;
+  border-radius: 1.2rem;
+  font-size: 25px;
+  height: 100px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
 .statusFirstLabel {
-  width: 95%; 
+  width: 95%;
   display: flex;
   flex-direction: row;
   justify-content: space-around;
@@ -55,7 +91,7 @@
   align-items: center;
   border: 2.5px solid #FFE7CF;
   border-radius: 20px;
-  width: 95%; 
+  width: 95%;
   text-align: center;
   background-color: #FFF7EC;
   color: #EF7E30;
@@ -64,11 +100,12 @@
 .value {
   border: 1.5px solid #EF7E30;
   border-radius: 1.2rem;
-  width: 12%;
-  height: 50px;
+  width: 40%;
+  height: 40px;
   font-size: 25px;
+  margin-left: 5px;
   display: flex;
-  justify-content: center; 
+  justify-content: center;
   align-items: center;
   text-align: center;
 }
@@ -77,7 +114,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 20px; 
+  gap: 20px;
   width: 100%;
 }
 
@@ -113,7 +150,7 @@ p {
 .messagesAndOrders {
   margin-top: 20px;
   overflow: hidden;
-  flex-grow: 1; 
+  flex-grow: 1;
   width: 100%;
   max-width: 25vw;
 }
@@ -130,8 +167,8 @@ p {
 .voltageValueContainer {
   display: inline-block;
   padding: 5px 10px;
-  border: 1px solid #EF7E30; 
-  border-radius: 15px;  
+  border: 1px solid #EF7E30;
+  border-radius: 15px;
 }
 
 .voltageValue {
