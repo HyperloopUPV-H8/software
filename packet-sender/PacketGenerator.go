@@ -10,8 +10,6 @@ import (
 	"strings"
 	"time"
 
-	excelAdapter "github.com/HyperloopUPV-H8/h9-backend/pkg/excel_adapter"
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/excel_adapter/internals"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/excel_adapter/models"
 )
 
