@@ -65,7 +65,7 @@ func (pg *PacketGenerator) CreateRandomPacket() []byte {
 
 	if len(randomPacket.Measurements) == 0 {
 
-		log.Printf("El paquete con ID %d no tiene measurements\n", randomPacket.ID)
+		log.Printf("The packet with ID %d has no measurements\n", randomPacket.ID)
 		return nil
 	}
 
@@ -78,7 +78,7 @@ func (pg *PacketGenerator) CreateRandomPacket() []byte {
 			list := strings.Split(strings.ReplaceAll(strings.TrimSuffix(strings.TrimPrefix(measurement.Type, "enum("), ")"), " ", ""), ",")
 			if len(list) == 0 {
 
-				log.Printf("Lista vacía para enum: %v\n", measurement.Type)
+				log.Printf("Empty list for enum: %v\n", measurement.Type)
 				continue
 			}
 
@@ -87,7 +87,7 @@ func (pg *PacketGenerator) CreateRandomPacket() []byte {
 				binary.Write(buff, binary.LittleEndian, uint8(randomIndex))
 			} else {
 
-				log.Printf("Índice fuera de rango para enum: %v, índice: %d, longitud: %d\n", measurement.Type, randomIndex, len(list))
+				log.Printf("Index out of range for enum: %v, index: %d, length: %d\n", measurement.Type, randomIndex, len(list))
 				continue
 			}
 		} else if measurement.Type == "bool" {
