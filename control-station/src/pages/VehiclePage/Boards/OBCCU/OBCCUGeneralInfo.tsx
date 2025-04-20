@@ -11,7 +11,7 @@
 // import { GaugeTag } from 'components/GaugeTag/GaugeTag';
 // import pluggedIcon from 'assets/svg/plugged-icon.svg';
 
-// export const OBCCUGeneralInfo = () => {
+export const OBCCUGeneralInfo = () => {
 //     const getNumericMeasurementInfo = useMeasurementsStore(
 //         (state) => state.getNumericMeasurementInfo
 //     );
@@ -120,4 +120,4 @@
 //             </div>
 //         </Window>
 //     );
-// };
+};
