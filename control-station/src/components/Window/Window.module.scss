@@ -7,6 +7,7 @@
     border-radius: 0.8rem;
     filter: var(--shadow);
     overflow: hidden;
+    width: 100%;
 }
 
 .header {
@@ -24,4 +25,5 @@
     background-color: colors.getColor('primary', 99);
     overflow: scroll;
     height: 100%;
+    width: 100%;
 }
