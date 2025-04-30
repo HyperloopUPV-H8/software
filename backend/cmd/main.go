@@ -53,6 +53,7 @@ import (
 	"github.com/google/gopacket/pcap"
 	"github.com/jmaralo/sntp"
 	"github.com/pelletier/go-toml/v2"
+	"github.com/pkg/browser"
 	trace "github.com/rs/zerolog/log"
 )
 
@@ -96,11 +97,12 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 	runtime.SetBlockProfileRate(*blockprofile)
+
 	config := getConfig("./config.toml")
 
 	// <--- ADJ --->
 
-	adj, err := adj_module.NewADJ()
+	adj, err := adj_module.NewADJ(config.Adj.Branch, config.Adj.Test)
 	if err != nil {
 		trace.Fatal().Err(err).Msg("setting up ADJ")
 	}
@@ -120,7 +122,7 @@ func main() {
 
 		dev = devs[*networkDevice]
 	} else {
-		dev, err = selectDev()
+		dev, err = selectDev(adj.Info.Addresses, config)
 		if err != nil {
 			trace.Fatal().Err(err).Msg("Error selecting device")
 		}
@@ -323,6 +325,9 @@ func main() {
 		}()
 	}
 
+	browser.OpenURL("http://" + config.Server["ethernet-view"].Addr)
+	browser.OpenURL("http://" + config.Server["control-station"].Addr)
+
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
@@ -345,26 +350,39 @@ func createPid(path string) {
 	}
 }
 
-func selectDev() (pcap.Interface, error) {
+func selectDev(adjAddr map[string]string, conf Config) (pcap.Interface, error) {
 	devs, err := pcap.FindAllDevs()
 	if err != nil {
 		return pcap.Interface{}, err
 	}
 
-	cyan := color.New(color.FgCyan)
+	if conf.Network.Manual {
+		cyan := color.New(color.FgCyan)
 
-	cyan.Print("select a device: ")
-	fmt.Printf("(0-%d)\n", len(devs)-1)
-	for i, dev := range devs {
-		displayDev(i, dev)
+		cyan.Print("select a device: ")
+		fmt.Printf("(0-%d)\n", len(devs)-1)
+		for i, dev := range devs {
+			displayDev(i, dev)
+		}
+
+		dev, err := acceptInput(len(devs))
+		if err != nil {
+			return pcap.Interface{}, err
+		}
+
+		return devs[dev], nil
+	} else {
+		for _, dev := range devs {
+			for _, addr := range dev.Addresses {
+				if addr.IP.String() == adjAddr["backend"] {
+					return dev, nil
+				}
+			}
+		}
+
+		log.Fatal("backend address not found in any device")
+		return pcap.Interface{}, nil
 	}
-
-	dev, err := acceptInput(len(devs))
-	if err != nil {
-		return pcap.Interface{}, err
-	}
-
-	return devs[dev], nil
 }
 
 func displayDev(i int, dev pcap.Interface) {
@@ -559,7 +577,7 @@ func getIPIPfilter() string {
 }
 
 func getUDPFilter(addrs []net.IP, backendAddr net.IP, port uint16) string {
-	udpPort := "udp" // TODO use proper ports for the filter
+	udpPort := fmt.Sprintf("udp port %d", port) // TODO use proper ports for the filter
 	srcUdpAddrs := common.Map(addrs, func(addr net.IP) string {
 		return fmt.Sprintf("(src host %s)", addr)
 	})

@@ -1,14 +1,25 @@
-
-[server.local]
-address = "127.0.0.1:4000"
-static = "./static"
-
-[server.local.endpoints]
+[vehicle]
+boards = ["HVSCU", "PCU"]
+[server.ethernet-view]
+address = "127.0.0.1:4040"
+static = "./ethernet-view"
+[server.ethernet-view.endpoints]
 pod_data = "/podDataStructure"
 order_data = "/orderStructures"
 programable_boards = "/uploadableBoards"
 connections = "/backend"
 files = "/"
-
-[vehicle]
-boardsList = ["VCU"]
+[server.control-station]
+address = "127.0.0.1:4000"
+static = "./control-station"
+[server.control-station.endpoints]
+pod_data = "/podDataStructure"
+order_data = "/orderStructures"
+programable_boards = "/uploadableBoards"
+connections = "/backend"
+files = "/"
+[adj]
+branch = "sw-bcu" # Leave blank when using ADJ as a submodule (like this: "")
+test = true
+[network]
+manual = false
