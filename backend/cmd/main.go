@@ -111,26 +111,26 @@ func main() {
 	config := getConfig("./config.toml")
 	latestVersionStr, err := getLatestVersionFromGitHub()
 	if err != nil {
-		fmt.Println("Error fetching latest version:", err)
-		return
-	}
-
-	current, err := version.NewVersion(currentVersion)
-	if err != nil {
-		fmt.Println("Invalid current version:", err)
-		return
-	}
-
-	latest, err := version.NewVersion(latestVersionStr)
-	if err != nil {
-		fmt.Println("Invalid latest version:", err)
-		return
-	}
-
-	if latest.GreaterThan(current) {
-		fmt.Printf("There is a new version available: %s (current version: %s)\n", latest, current)
+		fmt.Println("Warning:", err)
+		fmt.Println("Skipping version check. Proceeding with the current version:", currentVersion)
 	} else {
-		fmt.Printf("You are using the latest version: %s\n", current)
+		current, err := version.NewVersion(currentVersion)
+		if err != nil {
+			fmt.Println("Invalid current version:", err)
+			return
+		}
+
+		latest, err := version.NewVersion(latestVersionStr)
+		if err != nil {
+			fmt.Println("Invalid latest version:", err)
+			return
+		}
+
+		if latest.GreaterThan(current) {
+			fmt.Printf("There is a new version available: %s (current version: %s)\n", latest, current)
+		} else {
+			fmt.Printf("You are using the latest version: %s\n", current)
+		}
 	}
 
 	// <--- ADJ --->
@@ -631,13 +631,13 @@ type GitHubRelease struct {
 func getLatestVersionFromGitHub() (string, error) {
 	resp, err := http.Get("https://api.github.com/repos/HyperloopUPV-H8/software/releases/latest")
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("unable to connect to the internet: %w", err)
 	}
 	defer resp.Body.Close()
 
 	var release GitHubRelease
 	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
-		return "", err
+		return "", fmt.Errorf("error decoding GitHub response: %w", err)
 	}
 
 	version := strings.TrimPrefix(release.TagName, "v")
