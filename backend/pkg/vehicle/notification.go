@@ -55,8 +55,8 @@ func (vehicle *Vehicle) handlePacketNotification(notification transport.PacketNo
 
 		err = vehicle.logger.PushRecord(&data_logger.Record{
 			Packet:    p,
-			From:      notification.From,
-			To:        notification.To,
+			From:      vehicle.idToBoardName[uint16(vehicle.ipToBoardId[strings.Split(notification.From, ":")[0]])],
+			To:        vehicle.idToBoardName[uint16(vehicle.ipToBoardId[strings.Split(notification.To, ":")[0]])],
 			Timestamp: notification.Timestamp,
 		})
 
