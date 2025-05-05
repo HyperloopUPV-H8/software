@@ -1,6 +1,7 @@
 package main
 
 import (
+	"archive/zip"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -34,7 +35,7 @@ func main() {
 func detectOS() string {
 	switch runtime.GOOS {
 	case "windows":
-		return "backend-windows-64"
+		return "backend-windows-64.exe" // Incluye la extensión .exe para Windows
 	case "darwin":
 		if strings.Contains(runtime.GOARCH, "arm") {
 			return "backend-macos-m1-64"
@@ -58,6 +59,7 @@ func updateFromGit() {
 		fmt.Fprintf(os.Stderr, "Error running git pull: %v\n", err)
 		os.Exit(1)
 	}
+
 	// Run `go mod tidy` to update dependencies
 	cmd = exec.Command("go", "mod", "tidy")
 	cmd.Dir = "../backend"
@@ -83,7 +85,7 @@ func updateFromGit() {
 
 func updateFromBinaries(osType string) {
 	// Search for and delete old binaries in the same directory as updater.exe
-	binaries := []string{"backend-windows-64", "backend-linux-64", "backend-macos-64", "backend-macos-m1-64"}
+	binaries := []string{"backend-windows-64.exe", "backend-linux-64", "backend-macos-64", "backend-macos-m1-64"}
 	for _, binary := range binaries {
 		if _, err := os.Stat("./" + binary); err == nil {
 			fmt.Printf("Deleting old binary: %s\n", binary)
@@ -100,29 +102,27 @@ func updateFromBinaries(osType string) {
 		os.Exit(1)
 	}
 
-	fileName := osType
-	if runtime.GOOS == "windows" {
-		fileName += ".exe"
-	}
+	// Construct the ZIP file URL
+	zipFileName := fmt.Sprintf("control-station-v%s.zip", strings.ReplaceAll(latestVersion, ".", "-"))
+	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/v%s/%s", repoOwner, repoName, latestVersion, zipFileName)
+	fmt.Printf("Downloading ZIP from: %s\n", url)
 
-	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/v%s/%s", repoOwner, repoName, latestVersion, fileName)
-	fmt.Printf("Downloading binary from: %s\n", url)
-
-	// Download the binary directly to the file
-	err = downloadFile("./"+fileName, url)
+	// Download the ZIP file
+	err = downloadFile("./"+zipFileName, url)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error downloading the binary: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error downloading the ZIP file: %v\n", err)
 		os.Exit(1)
 	}
 
-	// Make the binary executable
-	if err := os.Chmod("./"+fileName, 0755); err != nil {
-		fmt.Fprintf(os.Stderr, "Error making the binary executable: %v\n", err)
+	// Extract the binary from the ZIP file
+	binaryPath, err := extractBinaryFromZip("./"+zipFileName, osType)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error extracting the binary: %v\n", err)
 		os.Exit(1)
 	}
 
-	// Launch the downloaded binary
-	launchExecutable("./" + fileName)
+	// Launch the extracted binary
+	launchExecutable(binaryPath)
 }
 
 func downloadFile(filepath string, url string) error {
@@ -143,6 +143,46 @@ func downloadFile(filepath string, url string) error {
 	// Write the body to file
 	_, err = io.Copy(out, resp.Body)
 	return err
+}
+
+func extractBinaryFromZip(zipPath, binaryName string) (string, error) {
+	// Open the ZIP file
+	r, err := zip.OpenReader(zipPath)
+	if err != nil {
+		return "", err
+	}
+	defer r.Close()
+
+	// Iterate through the files in the ZIP
+	for _, f := range r.File {
+		if f.Name == binaryName {
+			// Open the file inside the ZIP
+			rc, err := f.Open()
+			if err != nil {
+				return "", err
+			}
+			defer rc.Close()
+
+			// Create the output file
+			outPath := "./" + binaryName
+			outFile, err := os.Create(outPath)
+			if err != nil {
+				return "", err
+			}
+			defer outFile.Close()
+
+			// Copy the contents of the file
+			_, err = io.Copy(outFile, rc)
+			if err != nil {
+				return "", err
+			}
+
+			// Return the path to the extracted binary
+			return outPath, nil
+		}
+	}
+
+	return "", fmt.Errorf("binary %s not found in ZIP", binaryName)
 }
 
 func getLatestVersion() (string, error) {
