@@ -13,6 +13,7 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"os/exec"
 	"os/signal"
 	"path"
 	"runtime"
@@ -83,7 +84,7 @@ var playbackFile = flag.String("playback", "", "")
 var currentVersion = "2.2.6" // this variable needs to be changed when a new version is released
 
 func main() {
-	versionFlag := flag.Bool("version", false, "Muestra la versión del backend")
+	versionFlag := flag.Bool("version", false, "Show the backend version")
 	flag.Parse()
 	if *versionFlag {
 		fmt.Println("Hyperloop UPV H8 Backend Version:", currentVersion)
@@ -128,6 +129,24 @@ func main() {
 
 		if latest.GreaterThan(current) {
 			fmt.Printf("There is a new version available: %s (current version: %s)\n", latest, current)
+			fmt.Print("Do you want to update? (y/n): ")
+
+			var response string
+			fmt.Scanln(&response)
+
+			if strings.ToLower(response) == "y" {
+				fmt.Println("Launching updater to update the backend...")
+
+				err := launchUpdater()
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error launching updater: %v\n", err)
+					os.Exit(1)
+				}
+
+				os.Exit(0)
+			} else {
+				fmt.Println("Skipping update. Proceeding with the current version.")
+			}
 		} else {
 			fmt.Printf("You are using the latest version: %s\n", current)
 		}
@@ -642,4 +661,14 @@ func getLatestVersionFromGitHub() (string, error) {
 
 	version := strings.TrimPrefix(release.TagName, "v")
 	return version, nil
+}
+
+func launchUpdater() error {
+	updaterPath := "./updater.exe"
+
+	cmd := exec.Command(updaterPath)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	return cmd.Start()
 }
