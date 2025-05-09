@@ -39,7 +39,7 @@ func updateRepo(AdjBranch string) error {
 		}
 
 		// If the clone is succesful, delete the temp files
-		if err = os.RemoveAll(RepoPath); err != nil {
+		if err = os.RemoveAll(tempPath); err != nil {
 			return err
 		}
 
