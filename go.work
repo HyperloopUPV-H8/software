@@ -5,4 +5,5 @@ use (
 	./scripts
 	./state-order-tester
 	./updater
+	./packet-sender
 )

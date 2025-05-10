@@ -25,7 +25,6 @@ const router = createBrowserRouter([
             camerasRoute,
             tubeRoute,
             guiRoute,
-
         ],
     },
 ]);
