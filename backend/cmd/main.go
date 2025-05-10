@@ -16,6 +16,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"path"
+	"path/filepath"
 	"runtime"
 	"runtime/pprof"
 
@@ -81,7 +82,7 @@ var enableSNTP = flag.Bool("sntp", false, "enables a simple SNTP server on port 
 var networkDevice = flag.Int("dev", -1, "index of the network device to use, overrides device prompt")
 var blockprofile = flag.Int("blockprofile", 0, "number of block profiles to include")
 var playbackFile = flag.String("playback", "", "")
-var currentVersion = "2.2.6" // this variable needs to be changed when a new version is released
+var currentVersion = "2.2.3" // this variable needs to be changed when a new version is released
 
 func main() {
 	versionFlag := flag.Bool("version", false, "Show the backend version")
@@ -137,10 +138,50 @@ func main() {
 			if strings.ToLower(response) == "y" {
 				fmt.Println("Launching updater to update the backend...")
 
-				err := launchUpdater()
+				// Get the directory of the current executable
+				execPath, err := os.Executable()
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "Error launching updater: %v\n", err)
+					fmt.Fprintf(os.Stderr, "Error getting executable path: %v\n", err)
 					os.Exit(1)
+				}
+				execDir := filepath.Dir(execPath)
+
+				backendPath := filepath.Join(execDir, "..", "..", "backend")
+
+				if _, err := os.Stat(backendPath); err == nil {
+
+					fmt.Println("Backend folder detected. Building and launching updater...")
+
+					updaterPath := filepath.Join(execDir, "..", "..", "updater")
+
+					cmd := exec.Command("go", "build", "-o", filepath.Join(updaterPath, "updater.exe"), updaterPath)
+					cmd.Stdout = os.Stdout
+					cmd.Stderr = os.Stderr
+					if err := cmd.Run(); err != nil {
+						fmt.Fprintf(os.Stderr, "Error building updater: %v\n", err)
+						os.Exit(1)
+					}
+
+					updaterExe := filepath.Join(updaterPath, "updater.exe")
+					cmd = exec.Command(updaterExe)
+					cmd.Stdout = os.Stdout
+					cmd.Stderr = os.Stderr
+					if err := cmd.Run(); err != nil {
+						fmt.Fprintf(os.Stderr, "Error launching updater: %v\n", err)
+						os.Exit(1)
+					}
+				} else {
+
+					fmt.Println("Backend folder not detected. Launching existing updater...")
+
+					updaterExe := filepath.Join(execDir, "updater.exe")
+					cmd := exec.Command(updaterExe)
+					cmd.Stdout = os.Stdout
+					cmd.Stderr = os.Stderr
+					if err := cmd.Run(); err != nil {
+						fmt.Fprintf(os.Stderr, "Error launching updater: %v\n", err)
+						os.Exit(1)
+					}
 				}
 
 				os.Exit(0)
