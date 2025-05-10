@@ -83,14 +83,49 @@ func updateFromGit() {
 	launchExecutable("../backend/cmd/cmd")
 }
 
+// Check if a process is running by its name
+func isProcessRunning(processName string) (bool, error) {
+	cmd := exec.Command("tasklist", "/FI", fmt.Sprintf("IMAGENAME eq %s", processName))
+	output, err := cmd.Output()
+	if err != nil {
+		return false, err
+	}
+	return strings.Contains(string(output), processName), nil
+}
+
+// Stop a process by its name
+func stopProcess(processName string) error {
+	cmd := exec.Command("taskkill", "/IM", processName, "/F")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
 func updateFromBinaries(osType string) {
-	// Search for and delete old binaries in the same directory as updater.exe
+
 	binaries := []string{"backend-windows-64.exe", "backend-linux-64", "backend-macos-64", "backend-macos-m1-64"}
 	for _, binary := range binaries {
 		if _, err := os.Stat("./" + binary); err == nil {
+			// Check if the backend process is running
+			isRunning, err := isProcessRunning(binary)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error checking if process is running: %v\n", err)
+				os.Exit(1)
+			}
+
+			// Stop the process if it's running
+			if isRunning {
+				fmt.Printf("Process %s is running. Stopping it...\n", binary)
+				if err := stopProcess(binary); err != nil {
+					fmt.Fprintf(os.Stderr, "Error stopping process %s: %v\n", binary, err)
+					os.Exit(1)
+				}
+			}
+
 			fmt.Printf("Deleting old binary: %s\n", binary)
 			if err := os.Remove("./" + binary); err != nil {
 				fmt.Fprintf(os.Stderr, "Error deleting old binary: %v\n", err)
+				os.Exit(1)
 			}
 		}
 	}
