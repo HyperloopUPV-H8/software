@@ -82,15 +82,25 @@ var enableSNTP = flag.Bool("sntp", false, "enables a simple SNTP server on port 
 var networkDevice = flag.Int("dev", -1, "index of the network device to use, overrides device prompt")
 var blockprofile = flag.Int("blockprofile", 0, "number of block profiles to include")
 var playbackFile = flag.String("playback", "", "")
-var currentVersion = "2.2.6" // this variable needs to be changed when a new version is released
+var currentVersion string
 
 func main() {
+
+	versionFile := "VERSION.md"
+	versionData, err := os.ReadFile(versionFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error reading version file (%s): %v\n", versionFile, err)
+		os.Exit(1)
+	}
+	currentVersion = strings.TrimSpace(string(versionData))
+
 	versionFlag := flag.Bool("version", false, "Show the backend version")
 	flag.Parse()
 	if *versionFlag {
-		fmt.Println("Hyperloop UPV H8 Backend Version:", currentVersion)
+		fmt.Println("Hyperloop UPV Backend Version:", currentVersion)
 		os.Exit(0)
 	}
+
 	traceFile := initTrace(*traceLevel, *traceFile)
 	defer traceFile.Close()
 
