@@ -93,12 +93,14 @@ func isProcessRunning(processName string) (bool, error) {
 	return strings.Contains(string(output), processName), nil
 }
 
-// Stop a process by its name
 func stopProcess(processName string) error {
 	cmd := exec.Command("taskkill", "/IM", processName, "/F")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("taskkill failed: %v - output: %s", err, output)
+	}
+	fmt.Printf("Process %s stopped successfully.\n", processName)
+	return nil
 }
 
 func updateFromBinaries(osType string) {
