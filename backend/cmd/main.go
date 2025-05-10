@@ -164,6 +164,7 @@ func main() {
 
 					updaterExe := filepath.Join(updaterPath, "updater.exe")
 					cmd = exec.Command(updaterExe)
+					cmd.Dir = updaterPath
 					cmd.Stdout = os.Stdout
 					cmd.Stderr = os.Stderr
 					if err := cmd.Run(); err != nil {
@@ -176,6 +177,7 @@ func main() {
 
 					updaterExe := filepath.Join(execDir, "updater.exe")
 					cmd := exec.Command(updaterExe)
+					cmd.Dir = filepath.Dir(updaterExe)
 					cmd.Stdout = os.Stdout
 					cmd.Stderr = os.Stderr
 					if err := cmd.Run(); err != nil {
