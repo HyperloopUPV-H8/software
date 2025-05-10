@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 )
 
 const (
@@ -104,7 +105,6 @@ func stopProcess(processName string) error {
 }
 
 func updateFromBinaries(osType string) {
-
 	binaries := []string{"backend-windows-64.exe", "backend-linux-64", "backend-macos-64", "backend-macos-m1-64"}
 	for _, binary := range binaries {
 		if _, err := os.Stat("./" + binary); err == nil {
@@ -122,11 +122,22 @@ func updateFromBinaries(osType string) {
 					fmt.Fprintf(os.Stderr, "Error stopping process %s: %v\n", binary, err)
 					os.Exit(1)
 				}
+				time.Sleep(500 * time.Millisecond) // waits 1/2 second to ensure the process is stopped
 			}
 
 			fmt.Printf("Deleting old binary: %s\n", binary)
-			if err := os.Remove("./" + binary); err != nil {
-				fmt.Fprintf(os.Stderr, "Error deleting old binary: %v\n", err)
+			deleted := false
+			for i := 0; i < 5; i++ {
+				if err := os.Remove("./" + binary); err == nil {
+					deleted = true
+					break
+				} else {
+					fmt.Printf("Retrying delete (%d/5)...\n", i+1)
+					time.Sleep(300 * time.Millisecond)
+				}
+			}
+			if !deleted {
+				fmt.Fprintf(os.Stderr, "Error deleting old binary after multiple attempts.\n")
 				os.Exit(1)
 			}
 		}
