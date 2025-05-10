@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"time"
@@ -16,49 +18,15 @@ const (
 	rport uint16 = 8000
 )
 
-/* package main
-
-import (
-	"encoding/json"
-	"fmt"
-	"log"
-
-	"github.com/HyperloopUPV-H8/h9-backend/internal/adj"
-)
-
 func main() {
+	// Start UDP packet sender in a goroutine
+	go startUDPPacketSender()
 
-	adjInstance, err := adj.NewADJ()
-	if err != nil {
-		log.Fatalf("Error initializing ADJ: %v", err)
-	}
-
-
-	packets := generatePackets(adjInstance)
-
-
-	output, err := json.MarshalIndent(packets, "", "  ")
-	if err != nil {
-		log.Fatalf("Error marshalling packets: %v", err)
-	}
-
-	fmt.Println(string(output))
+	// Start HTTP server
+	startHTTPServer()
 }
 
-
-func generatePackets(adjInstance adj.ADJ) []adj.Packet {
-	var allPackets []adj.Packet
-
-	for _, board := range adjInstance.Boards {
-		for _, packet := range board.Packets {
-			allPackets = append(allPackets, packet)
-		}
-	}
-
-	return allPackets
-}*/
-
-func main() {
+func startUDPPacketSender() {
 	_ = createListener(lip, lport, rip, rport)
 	conn := getConn(lip, lport, rip, rport)
 	defer conn.Close()
@@ -86,7 +54,6 @@ func main() {
 
 			count <- struct{}{}
 		}
-
 	}()
 
 	interrupt := make(chan os.Signal, 1)
@@ -102,7 +69,39 @@ func main() {
 			return
 		}
 	}
+}
 
+func startHTTPServer() {
+	mux := http.NewServeMux()
+
+	// Define mock responses for the required endpoints
+	mux.HandleFunc("/podDataStructure", func(w http.ResponseWriter, r *http.Request) {
+		mockPodData := map[string]string{"message": "Mock pod data"}
+		respondWithJSON(w, mockPodData)
+	})
+
+	mux.HandleFunc("/orderStructures", func(w http.ResponseWriter, r *http.Request) {
+		mockOrderData := map[string]string{"message": "Mock order data"}
+		respondWithJSON(w, mockOrderData)
+	})
+
+	mux.HandleFunc("/uploadableBoards", func(w http.ResponseWriter, r *http.Request) {
+		mockBoards := []string{"Board1", "Board2", "Board3"}
+		respondWithJSON(w, mockBoards)
+	})
+
+	// Start the HTTP server
+	serverAddr := "127.0.0.1:4040"
+	fmt.Printf("Starting HTTP server on %s\n", serverAddr)
+	err := http.ListenAndServe(serverAddr, mux)
+	if err != nil {
+		log.Fatalf("Error starting HTTP server: %v", err)
+	}
+}
+
+func respondWithJSON(w http.ResponseWriter, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
 }
 
 func getConn(lip string, lport uint16, rip string, rport uint16) *net.UDPConn {
