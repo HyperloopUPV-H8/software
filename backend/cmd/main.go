@@ -82,7 +82,7 @@ var enableSNTP = flag.Bool("sntp", false, "enables a simple SNTP server on port 
 var networkDevice = flag.Int("dev", -1, "index of the network device to use, overrides device prompt")
 var blockprofile = flag.Int("blockprofile", 0, "number of block profiles to include")
 var playbackFile = flag.String("playback", "", "")
-var currentVersion = "2.2.3" // this variable needs to be changed when a new version is released
+var currentVersion = "2.2.6" // this variable needs to be changed when a new version is released
 
 func main() {
 	versionFlag := flag.Bool("version", false, "Show the backend version")
@@ -704,14 +704,4 @@ func getLatestVersionFromGitHub() (string, error) {
 
 	version := strings.TrimPrefix(release.TagName, "v")
 	return version, nil
-}
-
-func launchUpdater() error {
-	updaterPath := "./updater.exe"
-
-	cmd := exec.Command(updaterPath)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	return cmd.Start()
 }
