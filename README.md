@@ -18,15 +18,6 @@ The main project file is inside `backend/cmd`. Ensure you have the proper `confi
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for ways to contribute to the Control Station.
 
-### Authors
-
-- [Juan Martinez Alonso](https://github.com/jmaralo)
-- [Marc Sanchis Llinares](https://github.com/msanlli)
-- [Sergio Moreno Suay](https://github.com/smorsua)
-- [Felipe Zaballa Martinez](https://github.com/lipezaballa)
-- [Andrés de la Torre Mora](https://github.com/andresdlt03)
-- [Alejandro Losa](https://github.com/Losina24)
-
 ### About
 
 HyperloopUPV is a student team based at Universitat Politècnica de València (Spain), which works every year to develop the transport of the future, the hyperloop. Check out [our website](https://hyperloopupv.com/#/)

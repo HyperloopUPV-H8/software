@@ -7,17 +7,23 @@ import (
 	"flag"
 	"fmt"
 
+	"encoding/json"
 	"log"
 	"net"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"os/exec"
 	"os/signal"
 	"path"
+	"path/filepath"
 	"runtime"
 	"runtime/pprof"
+
 	"strings"
 	"time"
+
+	"github.com/hashicorp/go-version"
 
 	adj_module "github.com/HyperloopUPV-H8/h9-backend/internal/adj"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
@@ -76,9 +82,25 @@ var enableSNTP = flag.Bool("sntp", false, "enables a simple SNTP server on port 
 var networkDevice = flag.Int("dev", -1, "index of the network device to use, overrides device prompt")
 var blockprofile = flag.Int("blockprofile", 0, "number of block profiles to include")
 var playbackFile = flag.String("playback", "", "")
+var currentVersion string
 
 func main() {
+
+	versionFile := "VERSION.md"
+	versionData, err := os.ReadFile(versionFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error reading version file (%s): %v\n", versionFile, err)
+		os.Exit(1)
+	}
+	currentVersion = strings.TrimSpace(string(versionData))
+
+	versionFlag := flag.Bool("version", false, "Show the backend version")
 	flag.Parse()
+	if *versionFlag {
+		fmt.Println("Hyperloop UPV Backend Version:", currentVersion)
+		os.Exit(0)
+	}
+
 	traceFile := initTrace(*traceLevel, *traceFile)
 	defer traceFile.Close()
 
@@ -99,6 +121,89 @@ func main() {
 	runtime.SetBlockProfileRate(*blockprofile)
 
 	config := getConfig("./config.toml")
+	latestVersionStr, err := getLatestVersionFromGitHub()
+	if err != nil {
+		fmt.Println("Warning:", err)
+		fmt.Println("Skipping version check. Proceeding with the current version:", currentVersion)
+	} else {
+		current, err := version.NewVersion(currentVersion)
+		if err != nil {
+			fmt.Println("Invalid current version:", err)
+			return
+		}
+
+		latest, err := version.NewVersion(latestVersionStr)
+		if err != nil {
+			fmt.Println("Invalid latest version:", err)
+			return
+		}
+
+		if latest.GreaterThan(current) {
+			fmt.Printf("There is a new version available: %s (current version: %s)\n", latest, current)
+			fmt.Print("Do you want to update? (y/n): ")
+
+			var response string
+			fmt.Scanln(&response)
+
+			if strings.ToLower(response) == "y" {
+				fmt.Println("Launching updater to update the backend...")
+
+				// Get the directory of the current executable
+				execPath, err := os.Executable()
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error getting executable path: %v\n", err)
+					os.Exit(1)
+				}
+				execDir := filepath.Dir(execPath)
+
+				backendPath := filepath.Join(execDir, "..", "..", "backend")
+
+				if _, err := os.Stat(backendPath); err == nil {
+
+					fmt.Println("Backend folder detected. Building and launching updater...")
+
+					updaterPath := filepath.Join(execDir, "..", "..", "updater")
+
+					cmd := exec.Command("go", "build", "-o", filepath.Join(updaterPath, "updater.exe"), updaterPath)
+					cmd.Stdout = os.Stdout
+					cmd.Stderr = os.Stderr
+					if err := cmd.Run(); err != nil {
+						fmt.Fprintf(os.Stderr, "Error building updater: %v\n", err)
+						os.Exit(1)
+					}
+
+					updaterExe := filepath.Join(updaterPath, "updater.exe")
+					cmd = exec.Command(updaterExe)
+					cmd.Dir = updaterPath
+					cmd.Stdout = os.Stdout
+					cmd.Stderr = os.Stderr
+					if err := cmd.Run(); err != nil {
+						fmt.Fprintf(os.Stderr, "Error launching updater: %v\n", err)
+						os.Exit(1)
+					}
+				} else {
+
+					fmt.Println("Backend folder not detected. Launching existing updater...")
+
+					updaterExe := filepath.Join(execDir, "updater.exe")
+					cmd := exec.Command(updaterExe)
+					cmd.Dir = filepath.Dir(updaterExe)
+					cmd.Stdout = os.Stdout
+					cmd.Stderr = os.Stderr
+					if err := cmd.Run(); err != nil {
+						fmt.Fprintf(os.Stderr, "Error launching updater: %v\n", err)
+						os.Exit(1)
+					}
+				}
+
+				os.Exit(0)
+			} else {
+				fmt.Println("Skipping update. Proceeding with the current version.")
+			}
+		} else {
+			fmt.Printf("You are using the latest version: %s\n", current)
+		}
+	}
 
 	// <--- ADJ --->
 
@@ -589,4 +694,24 @@ func getUDPFilter(addrs []net.IP, backendAddr net.IP, port uint16) string {
 	dstUdpAddrsStr := strings.Join(dstUdpAddrs, " or ")
 
 	return fmt.Sprintf("(%s) and (%s) and (%s or (dst host %s))", udpPort, srcUdpAddrsStr, dstUdpAddrsStr, backendAddr)
+}
+
+type GitHubRelease struct {
+	TagName string `json:"tag_name"`
+}
+
+func getLatestVersionFromGitHub() (string, error) {
+	resp, err := http.Get("https://api.github.com/repos/HyperloopUPV-H8/software/releases/latest")
+	if err != nil {
+		return "", fmt.Errorf("unable to connect to the internet: %w", err)
+	}
+	defer resp.Body.Close()
+
+	var release GitHubRelease
+	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
+		return "", fmt.Errorf("error decoding GitHub response: %w", err)
+	}
+
+	version := strings.TrimPrefix(release.TagName, "v")
+	return version, nil
 }

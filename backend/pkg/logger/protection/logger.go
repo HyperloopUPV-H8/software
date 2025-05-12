@@ -118,8 +118,9 @@ func (sublogger *Logger) createFile(boardId abstraction.BoardId) (*os.File, erro
 	}
 
 	filename := path.Join(
-		"logger", "protections",
+		"logger",
 		logger.Timestamp.Format(logger.TimestampFormat),
+		"protections",
 		fmt.Sprintf("%s.csv", boardName),
 	)
 

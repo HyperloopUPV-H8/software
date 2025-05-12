@@ -59,8 +59,9 @@ func (sublogger *Logger) Start() error {
 
 func (sublogger *Logger) createFile() (*os.File, error) {
 	filename := path.Join(
-		"logger", "order",
+		"logger",
 		logger.Timestamp.Format(logger.TimestampFormat),
+		"order",
 		"order.csv",
 	)
 
