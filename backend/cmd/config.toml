@@ -19,7 +19,7 @@ programable_boards = "/uploadableBoards"
 connections = "/backend"
 files = "/"
 [adj]
-branch = "sw-bcu" # Leave blank when using ADJ as a submodule (like this: "")
+branch = "main" # Leave blank when using ADJ as a submodule (like this: "")
 test = true
 [network]
 manual = false
