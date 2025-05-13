@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"time"
 
 	"github.com/pelletier/go-toml/v2"
@@ -21,12 +22,12 @@ const (
 )
 
 type ServerConfig struct {
-	Addr      string
+	Addr      string `toml:"address"`
 	Endpoints struct {
-		PodData           string
-		OrderData         string
-		ProgramableBoards string
-	}
+		PodData           string `toml:"pod_data"`
+		OrderData         string `toml:"order_data"`
+		ProgramableBoards string `toml:"programable_boards"`
+	} `toml:"endpoints"`
 }
 
 type Config struct {
@@ -110,21 +111,19 @@ func startUDPPacketSender() {
 func startHTTPServer(serverConfig ServerConfig) {
 	mux := http.NewServeMux()
 
-	// Mock endpoints (creo que no hacen falta, solo con escuchar sirve creo)
-	mux.HandleFunc(serverConfig.Endpoints.PodData, func(w http.ResponseWriter, r *http.Request) {
-		mockPodData := map[string]string{"message": "Mock pod data"}
-		respondWithJSON(w, mockPodData)
-	})
+	if strings.TrimSpace(serverConfig.Endpoints.PodData) == "" {
+		serverConfig.Endpoints.PodData = "/podData"
+	}
+	if strings.TrimSpace(serverConfig.Endpoints.OrderData) == "" {
+		serverConfig.Endpoints.OrderData = "/orderData"
+	}
+	if strings.TrimSpace(serverConfig.Endpoints.ProgramableBoards) == "" {
+		serverConfig.Endpoints.ProgramableBoards = "/programableBoards"
+	}
 
-	mux.HandleFunc(serverConfig.Endpoints.OrderData, func(w http.ResponseWriter, r *http.Request) {
-		mockOrderData := map[string]string{"message": "Mock order data"}
-		respondWithJSON(w, mockOrderData)
-	})
-
-	mux.HandleFunc(serverConfig.Endpoints.ProgramableBoards, func(w http.ResponseWriter, r *http.Request) {
-		mockBoards := []string{"Board1", "Board2", "Board3"}
-		respondWithJSON(w, mockBoards)
-	})
+	mux.HandleFunc(serverConfig.Endpoints.PodData, emptyHandler)
+	mux.HandleFunc(serverConfig.Endpoints.OrderData, emptyHandler)
+	mux.HandleFunc(serverConfig.Endpoints.ProgramableBoards, emptyHandler)
 
 	fmt.Printf("Starting HTTP server on %s\n", serverConfig.Addr)
 	err := http.ListenAndServe(serverConfig.Addr, mux)
@@ -133,9 +132,10 @@ func startHTTPServer(serverConfig ServerConfig) {
 	}
 }
 
-func respondWithJSON(w http.ResponseWriter, data interface{}) {
+func emptyHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(data)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"status": "OK"})
 }
 
 func getConn(lip string, lport uint16, rip string, rport uint16) *net.UDPConn {
