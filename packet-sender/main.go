@@ -9,6 +9,8 @@ import (
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/pelletier/go-toml/v2"
 )
 
 const (
@@ -18,12 +20,46 @@ const (
 	rport uint16 = 8000
 )
 
-func main() {
-	// Start UDP packet sender in a goroutine
-	go startUDPPacketSender()
+type ServerConfig struct {
+	Addr      string
+	Endpoints struct {
+		PodData           string
+		OrderData         string
+		ProgramableBoards string
+	}
+}
 
-	// Start HTTP server
-	startHTTPServer()
+type Config struct {
+	Server map[string]ServerConfig
+}
+
+func main() {
+
+	config := getConfig("./config.toml")
+
+	serverConfig, ok := config.Server["ethernet-view"]
+	if !ok {
+		log.Fatalf("Server configuration for 'ethernet-view' not found")
+	}
+
+	go startHTTPServer(serverConfig)
+
+	startUDPPacketSender()
+}
+
+func getConfig(path string) Config {
+	configFile, err := os.ReadFile(path)
+	if err != nil {
+		log.Fatalf("Error reading config file: %v", err)
+	}
+
+	var config Config
+	err = toml.Unmarshal(configFile, &config)
+	if err != nil {
+		log.Fatalf("Error unmarshaling config file: %v", err)
+	}
+
+	return config
 }
 
 func startUDPPacketSender() {
@@ -71,29 +107,27 @@ func startUDPPacketSender() {
 	}
 }
 
-func startHTTPServer() {
+func startHTTPServer(serverConfig ServerConfig) {
 	mux := http.NewServeMux()
 
-	// Define mock responses for the required endpoints
-	mux.HandleFunc("/podDataStructure", func(w http.ResponseWriter, r *http.Request) {
+	// Mock endpoints (creo que no hacen falta, solo con escuchar sirve creo)
+	mux.HandleFunc(serverConfig.Endpoints.PodData, func(w http.ResponseWriter, r *http.Request) {
 		mockPodData := map[string]string{"message": "Mock pod data"}
 		respondWithJSON(w, mockPodData)
 	})
 
-	mux.HandleFunc("/orderStructures", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(serverConfig.Endpoints.OrderData, func(w http.ResponseWriter, r *http.Request) {
 		mockOrderData := map[string]string{"message": "Mock order data"}
 		respondWithJSON(w, mockOrderData)
 	})
 
-	mux.HandleFunc("/uploadableBoards", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(serverConfig.Endpoints.ProgramableBoards, func(w http.ResponseWriter, r *http.Request) {
 		mockBoards := []string{"Board1", "Board2", "Board3"}
 		respondWithJSON(w, mockBoards)
 	})
 
-	// Start the HTTP server
-	serverAddr := "127.0.0.1:4040"
-	fmt.Printf("Starting HTTP server on %s\n", serverAddr)
-	err := http.ListenAndServe(serverAddr, mux)
+	fmt.Printf("Starting HTTP server on %s\n", serverConfig.Addr)
+	err := http.ListenAndServe(serverConfig.Addr, mux)
 	if err != nil {
 		log.Fatalf("Error starting HTTP server: %v", err)
 	}

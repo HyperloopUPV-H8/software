@@ -6,7 +6,7 @@ toolchain go1.23.1
 
 require (
 	github.com/HyperloopUPV-H8/h9-backend v0.0.0-00010101000000-000000000000
-	github.com/joho/godotenv v1.4.0
+	github.com/pelletier/go-toml/v2 v2.0.7
 )
 
 require (
