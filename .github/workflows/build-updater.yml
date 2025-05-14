@@ -40,7 +40,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: updater-linux
-        path: "${{env.UPDATER_DIR}}/output/updater/*"
+        path: "${{env.UPDATER_DIR}}/output/updaters/*"
         retention-days: 3
         compression-level: 9
 
@@ -71,13 +71,13 @@ jobs:
         GOARCH: amd64
         GOOS: windows
       run: |
-        go build -o ..\output\backend-windows-64.exe
+        go build -o ..\output\updaters\backend-windows-64.exe
 
     - name: "Upload build"
       uses: actions/upload-artifact@v4
       with:
         name: updater-windows
-        path: "${{env.UPDATER_DIR}}\\output\\updater\\*"
+        path: "${{env.UPDATER_DIR}}\\output\\updaters\\*"
         retention-days: 3
         compression-level: 9
       
@@ -108,21 +108,21 @@ jobs:
         GOARCH: amd64
         GOOS: darwin
       run: |
-        go build -o ../output/updater-macos-64
+        go build -o ../output/updaters/updater-macos-64
     
     - name: "Build (apple 64 bit)"
-      working-directory: "${{env.UPDATER_DIR}}/cmd"
+      working-directory: "${{env.UPDATER_DIR}}"
       env:
         CGO_ENABLED: 1
         GOARCH: arm64
         GOOS: darwin
       run: |
-        go build -o ../output/updater-macos-m1-64
+        go build -o ../output/updaters/updater-macos-m1-64
       
     - name: "Upload build"
       uses: actions/upload-artifact@v4
       with:
         name: updater-macos
-        path: "${{env.BACKEND_DIR}}/output/*"
+        path: "${{env.UPDATER_DIR}}/output/updaters/*"
         retention-days: 3
         compression-level: 9
