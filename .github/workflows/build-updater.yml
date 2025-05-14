@@ -123,6 +123,6 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: updater-macos
-        path: "${{env.BACKEND_DIR}}/output/*"
+        path: "${{env.UPDATER_DIR}}/output/*"
         retention-days: 3
         compression-level: 9
