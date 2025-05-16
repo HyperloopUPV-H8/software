@@ -194,43 +194,46 @@ func downloadFile(filepath string, url string) error {
 }
 
 func extractBinaryFromZip(zipPath, binaryName string) (string, error) {
-	// Open the ZIP file
 	r, err := zip.OpenReader(zipPath)
 	if err != nil {
 		return "", err
 	}
 	defer r.Close()
 
-	// Iterate through the files in the ZIP
+	var binaryPath string
+	parentDir, _ := filepath.Abs(filepath.Join(".", ".."))
+
 	for _, f := range r.File {
-		if f.Name == binaryName {
-			// Open the file inside the ZIP
+		baseName := filepath.Base(f.Name)
+		if baseName == binaryName || baseName == "VERSION.md" {
 			rc, err := f.Open()
 			if err != nil {
 				return "", err
 			}
 			defer rc.Close()
 
-			// Create the output file
-			outPath := "./" + binaryName
+			outPath := filepath.Join(parentDir, baseName)
 			outFile, err := os.Create(outPath)
 			if err != nil {
 				return "", err
 			}
 			defer outFile.Close()
 
-			// Copy the contents of the file
 			_, err = io.Copy(outFile, rc)
 			if err != nil {
 				return "", err
 			}
 
-			// Return the path to the extracted binary
-			return outPath, nil
+			if baseName == binaryName {
+				binaryPath = outPath
+			}
 		}
 	}
 
-	return "", fmt.Errorf("binary %s not found in ZIP", binaryName)
+	if binaryPath == "" {
+		return "", fmt.Errorf("binary %s not found in ZIP", binaryName)
+	}
+	return binaryPath, nil
 }
 
 func getLatestVersion() (string, error) {
