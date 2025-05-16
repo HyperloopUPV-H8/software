@@ -49,6 +49,7 @@ func (client *Client) Dial() (net.Conn, error) {
 
 		if err == nil {
 			client.logger.Info().Msg("connected")
+			client.currentRetries = 0
 			return conn, nil
 		}
 		if client.config.Context.Err() != nil {
