@@ -39,6 +39,7 @@ func (client *Client) Dial() (net.Conn, error) {
 	var err error
 	var conn net.Conn
 	client.logger.Info().Msg("dialing")
+	// The max connection retries will not work because the for loop never completes, it always returns and the function is called again by transport.
 	for client.config.MaxConnectionRetries <= 0 || client.currentRetries < client.config.MaxConnectionRetries {
 		client.currentRetries++
 		conn, err = client.config.DialContext(client.config.Context, "tcp", client.address)
