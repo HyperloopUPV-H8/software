@@ -8,7 +8,7 @@ type Props = {
     borderRadius?: string;
 };
 
-const LiveStreamPlayer: React.FC<Props> = ({ src, width = '100%', height = '100%', borderRadius = '8px' }) => {
+export const LiveStreamPlayer = ({ src, width = '100%', height = '100%', borderRadius = '8px' }: Props) => {
     const videoRef = useRef<HTMLVideoElement | null>(null);
 
     useEffect(() => {
@@ -24,20 +24,16 @@ const LiveStreamPlayer: React.FC<Props> = ({ src, width = '100%', height = '100%
 
                 return () => hls.destroy();
             } else {
-                console.error('HLS no soportado');
+                console.error('HLS not supported');
             }
         }
     }, [src]);
 
     return (
-        <div>
-            <video
-                ref={videoRef}
-                controls
-                style={{ width: width, height: height, borderRadius: borderRadius }}
-            />
-        </div>
+        <video
+            ref={videoRef}
+            controls
+            style={{ width: width, height: height, borderRadius: borderRadius }}
+        />
     );
 };
-
-export default LiveStreamPlayer;
