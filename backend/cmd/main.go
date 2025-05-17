@@ -184,10 +184,32 @@ func main() {
 				} else {
 
 					fmt.Println("Backend folder not detected. Launching existing updater...")
+					osType := detectOS()
 
-					updaterExe := filepath.Join(execDir, "updater.exe")
+					execPath, err := os.Executable()
+					if err != nil {
+						fmt.Fprintf(os.Stderr, "Error getting executable path: %v\n", err)
+						os.Exit(1)
+					}
+					updatersDir := filepath.Join(filepath.Dir(execPath), "updaters")
+
+					var updaterExe string
+					switch osType {
+					case "updaters/updater-windows-64.exe":
+						updaterExe = filepath.Join(updatersDir, "updater-windows-64")
+					case "updaters/updater-linux":
+						updaterExe = filepath.Join(updatersDir, "updater-linux")
+					case "updaters/updater-macos-m1":
+						updaterExe = filepath.Join(updatersDir, "updater-macos-m1")
+					case "updaters/updater-macos-64":
+						updaterExe = filepath.Join(updatersDir, "updater-macos-64")
+					default:
+						fmt.Fprintf(os.Stderr, "Unsupported updater: %s\n", osType)
+						os.Exit(1)
+					}
+
 					cmd := exec.Command(updaterExe)
-					cmd.Dir = filepath.Dir(updaterExe)
+					cmd.Dir = updatersDir
 					cmd.Stdout = os.Stdout
 					cmd.Stderr = os.Stderr
 					if err := cmd.Run(); err != nil {
@@ -714,4 +736,21 @@ func getLatestVersionFromGitHub() (string, error) {
 
 	version := strings.TrimPrefix(release.TagName, "v")
 	return version, nil
+}
+func detectOS() string {
+	switch runtime.GOOS {
+	case "windows":
+		return "updaters/updater-windows-64.exe"
+	case "darwin":
+		if strings.Contains(runtime.GOARCH, "arm") {
+			return "updaters/updater-macos-m1"
+		}
+		return "updaters/updater-macos-64"
+	case "linux":
+		return "updaters/updater-linux"
+	default:
+		fmt.Fprintf(os.Stderr, "Unsupported operating system: %s\n", runtime.GOOS)
+		os.Exit(1)
+		return ""
+	}
 }
