@@ -34,6 +34,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker"
 	connection_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/connection"
+	blcu_topics "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/blcu"
 	data_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/data"
 	logger_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/logger"
 	message_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/message"
@@ -317,6 +318,7 @@ func main() {
 	upgrader := websocket.NewUpgrader(connections, trace.Logger)
 	pool := websocket.NewPool(connections, trace.Logger)
 	broker.SetPool(pool)
+	blcu_topics.RegisterTopics(broker, pool)
 
 	// <--- transport --->
 	transp := transport.NewTransport(trace.Logger)
