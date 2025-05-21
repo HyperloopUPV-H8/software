@@ -7,24 +7,58 @@ import (
 	"os"
 	"os/signal"
 	"time"
-
-	"github.com/joho/godotenv"
 )
 
 const (
 	lip   string = "127.0.0.3"
-	lport uint16 = 50400
+	lport uint16 = 8000
 	rip   string = "127.0.0.4"
-	rport uint16 = 50400
+	rport uint16 = 8000
+)
+
+/* package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+
+	"github.com/HyperloopUPV-H8/h9-backend/internal/adj"
 )
 
 func main() {
-	err := godotenv.Load(".env")
 
+	adjInstance, err := adj.NewADJ()
 	if err != nil {
-		log.Fatal("Error loading .env", err)
+		log.Fatalf("Error initializing ADJ: %v", err)
 	}
 
+
+	packets := generatePackets(adjInstance)
+
+
+	output, err := json.MarshalIndent(packets, "", "  ")
+	if err != nil {
+		log.Fatalf("Error marshalling packets: %v", err)
+	}
+
+	fmt.Println(string(output))
+}
+
+
+func generatePackets(adjInstance adj.ADJ) []adj.Packet {
+	var allPackets []adj.Packet
+
+	for _, board := range adjInstance.Boards {
+		for _, packet := range board.Packets {
+			allPackets = append(allPackets, packet)
+		}
+	}
+
+	return allPackets
+}*/
+
+func main() {
 	_ = createListener(lip, lport, rip, rport)
 	conn := getConn(lip, lport, rip, rport)
 	defer conn.Close()

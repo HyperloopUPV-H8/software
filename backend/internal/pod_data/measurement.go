@@ -11,11 +11,11 @@ import (
 
 const EnumType = "enum"
 
-func getMeasurements(packet adj.Packet, globalUnits map[string]utils.Operations) ([]Measurement, error) {
+func getMeasurements(measurementsADJ []adj.Measurement, globalUnits map[string]utils.Operations) ([]Measurement, error) {
 	measurements := make([]Measurement, 0)
 	mErrors := common.NewErrorList()
 
-	for _, adjMeas := range packet.Variables {
+	for _, adjMeas := range measurementsADJ {
 		meas, err := getMeasurement(adjMeas, globalUnits)
 		if err != nil {
 			mErrors.Add(err)
@@ -32,34 +32,31 @@ func getMeasurements(packet adj.Packet, globalUnits map[string]utils.Operations)
 	return measurements, nil
 }
 
-func getMeasurement(adeMeas adj.Measurement, globalUnits map[string]utils.Operations) (Measurement, error) {
+func getMeasurement(adjMeas adj.Measurement, globalUnits map[string]utils.Operations) (Measurement, error) {
 	var tmp Measurement
 	var err error
-	if isNumeric(adeMeas.Type) {
-		tmp, err = getNumericMeasurement(adeMeas, globalUnits)
-	} else if adeMeas.Type == "bool" {
-		tmp = getBooleanMeasurement(adeMeas)
-	} else if strings.HasPrefix(adeMeas.Type, "enum") {
-		tmp = getEnumMeasurement(adeMeas)
+
+	if isNumeric(adjMeas.Type) {
+		tmp, err = getNumericMeasurement(adjMeas, globalUnits)
+	} else if adjMeas.Type == "bool" {
+		tmp = getBooleanMeasurement(adjMeas)
+	} else if strings.HasPrefix(adjMeas.Type, "enum") {
+		tmp = getEnumMeasurement(adjMeas)
 	} else {
-		return nil, fmt.Errorf("type %s not recognized", adeMeas.Type)
+		return nil, fmt.Errorf("type %s not recognized", adjMeas.Type)
 	}
 	return tmp, err
 }
 
-func getNumericMeasurement(adeMeas adj.Measurement, globalUnits map[string]utils.Operations) (NumericMeasurement, error) {
+func getNumericMeasurement(adjMeas adj.Measurement, globalUnits map[string]utils.Operations) (NumericMeasurement, error) {
 	measErrs := common.NewErrorList()
 
-	safeRange := adeMeas.SafeRange
-
-	warningRange := adeMeas.WarningRange
-
-	displayUnits, err := utils.ParseUnits(adeMeas.DisplayUnits, globalUnits)
+	displayUnits, err := utils.ParseUnits(adjMeas.DisplayUnits, globalUnits)
 	if err != nil {
 		measErrs.Add(err)
 	}
 
-	podUnits, err := utils.ParseUnits(adeMeas.PodUnits, globalUnits)
+	podUnits, err := utils.ParseUnits(adjMeas.PodUnits, globalUnits)
 	if err != nil {
 		measErrs.Add(err)
 	}
@@ -69,31 +66,31 @@ func getNumericMeasurement(adeMeas adj.Measurement, globalUnits map[string]utils
 	}
 
 	return NumericMeasurement{
-		Id:           adeMeas.Id,
-		Name:         adeMeas.Name,
-		Type:         adeMeas.Type,
+		Id:           adjMeas.Id,
+		Name:         adjMeas.Name,
+		Type:         adjMeas.Type,
 		Units:        displayUnits.Name,
 		DisplayUnits: displayUnits,
 		PodUnits:     podUnits,
-		SafeRange:    safeRange,
-		WarningRange: warningRange,
+		SafeRange:    adjMeas.SafeRange,
+		WarningRange: adjMeas.WarningRange,
 	}, nil
 }
 
-func getEnumMeasurement(adeMeas adj.Measurement) EnumMeasurement {
+func getEnumMeasurement(adjMeas adj.Measurement) EnumMeasurement {
 	return EnumMeasurement{
-		Id:      adeMeas.Id,
-		Name:    adeMeas.Name,
+		Id:      adjMeas.Id,
+		Name:    adjMeas.Name,
 		Type:    EnumType,
-		Options: adeMeas.EnumValues,
+		Options: adjMeas.EnumValues,
 	}
 }
 
-func getBooleanMeasurement(adeMeas adj.Measurement) BooleanMeasurement {
+func getBooleanMeasurement(adjMeas adj.Measurement) BooleanMeasurement {
 	return BooleanMeasurement{
-		Id:   adeMeas.Id,
-		Name: adeMeas.Name,
-		Type: adeMeas.Type,
+		Id:   adjMeas.Id,
+		Name: adjMeas.Name,
+		Type: adjMeas.Type,
 	}
 }
 

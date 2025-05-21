@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/excel_adapter/models"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/adj"
 )
 
 type PacketGenerator struct {
@@ -18,31 +18,31 @@ type PacketGenerator struct {
 }
 
 func New() PacketGenerator {
-	adj, err := adj.NewADJ("HVSCU-Cabinet", true)
+	adj, err := adj.NewADJ("HVSCU-Cabinet", false)
 	if err != nil {
 		log.Fatalf("Failed to load ADJ: %v\n", err)
 	}
 
 	packets := make([]Packet, 0)
 
-	for _, board := range boards {
+	for _, board := range adj.Boards {
 		for _, packet := range board.Packets {
-			if packet.Description.Type != "data" {
+			if packet.Type != "data" {
 				continue
 			}
 
-			id, err := strconv.ParseUint(packet.Description.ID, 10, 16)
+			id, err := strconv.ParseUint(strconv.Itoa(int(packet.Id)), 10, 16)
 			if err != nil {
 				log.Fatalf("data transfer: AddPacket: %s\n", err)
 			}
 
 			packets = append(packets, Packet{
 				ID:           uint16(id),
-				Name:         packet.Description.Name,
+				Name:         packet.Name,
 				HexValue:     "",
 				Count:        0,
 				CycleTime:    0,
-				Measurements: getMeasurements(packet.Values),
+				Measurements: getMeasurements(packet.Variables),
 			})
 		}
 	}
@@ -55,30 +55,65 @@ func New() PacketGenerator {
 }
 
 func (pg *PacketGenerator) CreateRandomPacket() []byte {
+	if len(pg.packets) == 0 {
+
+		return nil
+	}
+
 	randomIndex := rand.Int63n(int64(len(pg.packets)))
 	randomPacket := pg.packets[randomIndex]
 
-	buff := bytes.NewBuffer(make([]byte, 0))
+	if len(randomPacket.Measurements) == 0 {
 
+		log.Printf("The packet with ID %d has no measurements\n", randomPacket.ID)
+		return nil
+	}
+
+	buff := bytes.NewBuffer(make([]byte, 0))
 	binary.Write(buff, binary.LittleEndian, randomPacket.ID)
 
 	for _, measurement := range randomPacket.Measurements {
 		if strings.Contains(measurement.Type, "enum") {
-			binary.Write(buff, binary.LittleEndian, uint8(rand.Int63n(int64(len(strings.Split(strings.ReplaceAll(strings.TrimSuffix(strings.TrimPrefix(measurement.Type, "enum("), ")"), " ", ""), ","))))))
+
+			list := strings.Split(strings.ReplaceAll(strings.TrimSuffix(strings.TrimPrefix(measurement.Type, "enum("), ")"), " ", ""), ",")
+			if len(list) == 0 {
+
+				log.Printf("Empty list for enum: %v\n", measurement.Type)
+				continue
+			}
+
+			randomIndex := rand.Int63n(int64(len(list)))
+			if randomIndex >= 0 && randomIndex < int64(len(list)) {
+				binary.Write(buff, binary.LittleEndian, uint8(randomIndex))
+			} else {
+
+				log.Printf("Index out of range for enum: %v, index: %d, length: %d\n", measurement.Type, randomIndex, len(list))
+				continue
+			}
 		} else if measurement.Type == "bool" {
+
 			binary.Write(buff, binary.LittleEndian, rand.Int31n(2) == 1)
 		} else if measurement.Type != "string" {
+
 			var number float64
-			if len(measurement.WarningRange) == 0 {
-				number = mapNumberToRange(rand.Float64(), measurement.WarningRange, measurement.Type)
-			} else {
-				number = mapNumberToRange(rand.Float64(), []float64{measurement.WarningRange[0] * 0.8, measurement.WarningRange[1] * 1.2}, measurement.Type)
+			if len(measurement.WarningRange) < 2 {
+
+				continue
 			}
+
+			number = mapNumberToRange(
+				rand.Float64(),
+				[]float64{
+					measurement.WarningRange[0] * 0.8,
+					measurement.WarningRange[1] * 1.2,
+				},
+				measurement.Type,
+			)
 			writeNumberAsBytes(number, measurement.Type, buff)
 		} else {
-			return nil
-		}
 
+			continue
+		}
 	}
 
 	return buff.Bytes()
@@ -192,33 +227,33 @@ func writeNumberAsBytes(number float64, numberType string, buff *bytes.Buffer) {
 	}
 }
 
-func (pg *PacketGenerator) AddPacket(boardName string, packet models.Packet) {
-	if packet.Description.Type != "data" {
+func (pg *PacketGenerator) AddPacket(boardName string, packet adj.Packet) {
+	if packet.Type != "data" {
 		return
 	}
 
-	id, err := strconv.ParseUint(packet.Description.ID, 10, 16)
+	id, err := strconv.ParseUint(strconv.Itoa(int(packet.Id)), 10, 16)
 	if err != nil {
 		log.Fatalf("data transfer: AddPacket: %s\n", err)
 	}
 
 	pg.packets = append(pg.packets, Packet{
 		ID:           uint16(id),
-		Name:         packet.Description.Name,
+		Name:         packet.Name,
 		HexValue:     "",
 		Count:        0,
 		CycleTime:    0,
-		Measurements: getMeasurements(packet.Values),
+		Measurements: getMeasurements(packet.Variables),
 	})
 
 }
 
-func getMeasurements(values []models.Value) []Measurement {
-	measurements := make([]Measurement, 0, len(values))
-	for _, value := range values {
+func getMeasurements(variables []adj.Measurement) []Measurement {
+	measurements := make([]Measurement, 0, len(variables))
+	for _, value := range variables {
 		measurements = append(measurements,
 			Measurement{
-				ID:   value.ID,
+				ID:   value.Id,
 				Name: value.Name,
 				Type: value.Type,
 				//TODO: make sure added property (Value) doesn't break stuff
@@ -232,37 +267,17 @@ func getMeasurements(values []models.Value) []Measurement {
 	return measurements
 }
 
-func parseRange(literal string) []float64 {
-	if literal == "" {
+func parseRange(literal []*float64) []float64 {
+	if len(literal) == 0 {
 		return make([]float64, 0)
-	}
-
-	strRange := strings.Split(strings.TrimSuffix(strings.TrimPrefix(strings.Replace(literal, " ", "", -1), "["), "]"), ",")
-
-	if len(strRange) != 2 {
-		log.Fatalf("pod data: parseRange: invalid range %s\n", literal)
 	}
 
 	numRange := make([]float64, 0)
 
-	if strRange[0] != "" {
-		lowerBound, errLowerBound := strconv.ParseFloat(strRange[0], 64)
-
-		if errLowerBound != nil {
-			log.Fatal("error parsing lower bound")
+	for _, val := range literal {
+		if val != nil {
+			numRange = append(numRange, *val)
 		}
-
-		numRange = append(numRange, lowerBound)
-	}
-
-	if strRange[1] != "" {
-		upperBound, errUpperBound := strconv.ParseFloat(strRange[1], 64)
-
-		if errUpperBound != nil {
-			log.Fatal("error parsing lower bound")
-		}
-
-		numRange = append(numRange, upperBound)
 	}
 
 	return numRange
