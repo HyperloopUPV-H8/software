@@ -3,6 +3,7 @@ import styles from "components/Navbar/NavbarItem/NavbarItem.module.scss";
 export type NavbarItemData = {
     icon: string;
     page: string;
+    
 };
 
 type Props = {
