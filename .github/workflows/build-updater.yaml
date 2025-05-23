@@ -18,8 +18,10 @@ jobs:
       UPDATER_DIR: ./updater
 
     steps:
-    - name: Install packages
-      run: apk update && apk add --no-cache gcc go
+    - name: Install packages (incl. git!)
+      run: |
+        apk update
+        apk add --no-cache gcc go git
 
     - uses: actions/checkout@v4
 
@@ -27,16 +29,17 @@ jobs:
       working-directory: ${{ env.UPDATER_DIR }}
       run: mkdir -p output
 
-    - name: Build (64 bit)
+    - name: Build (64-bit Linux)
       working-directory: ${{ env.UPDATER_DIR }}
       env:
         CGO_ENABLED: 1
         GOARCH: amd64
         GOOS: linux
       run: |
-        go build -ldflags '-linkmode external -extldflags "-static"' -o output/updater-linux-64
+        go build -ldflags '-linkmode external -extldflags "-static"' \
+          -o output/updater-linux-64
 
-    - name: Upload build
+    - name: Upload Linux build
       uses: actions/upload-artifact@v4
       with:
         name: updater-linux
@@ -54,7 +57,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Setup Go
+    - name: Setup Go (with cache)
       uses: actions/setup-go@v4
       with:
         go-version: "1.21.3"
@@ -64,16 +67,15 @@ jobs:
       working-directory: ${{ env.UPDATER_DIR }}
       run: mkdir output
 
-    - name: Build (64 bit)
+    - name: Build (64-bit Windows)
       working-directory: ${{ env.UPDATER_DIR }}
       env:
         CGO_ENABLED: 1
         GOARCH: amd64
         GOOS: windows
-      run: |
-        go build -o output\\updater-windows-64.exe
+      run: go build -o output\\updater-windows-64.exe
 
-    - name: Upload build
+    - name: Upload Windows build
       uses: actions/upload-artifact@v4
       with:
         name: updater-windows
@@ -89,37 +91,35 @@ jobs:
       UPDATER_DIR: ./updater
 
     steps:
-    - name: Setup Go
+    - uses: actions/checkout@v3
+
+    - name: Setup Go (with cache)
       uses: actions/setup-go@v4
       with:
         go-version: "1.21.3"
         cache-dependency-path: updater/go.sum
 
-    - uses: actions/checkout@v3
-
     - name: Create output path
       working-directory: ${{ env.UPDATER_DIR }}
       run: mkdir -p output
 
-    - name: Build (Intel 64)
+    - name: Build (Intel macOS)
       working-directory: ${{ env.UPDATER_DIR }}
       env:
         CGO_ENABLED: 1
         GOARCH: amd64
         GOOS: darwin
-      run: |
-        go build -o output/updater-macos-64
+      run: go build -o output/updater-macos-64
 
-    - name: Build (Apple M1/ARM64)
+    - name: Build (Apple Silicon)
       working-directory: ${{ env.UPDATER_DIR }}
       env:
         CGO_ENABLED: 1
         GOARCH: arm64
         GOOS: darwin
-      run: |
-        go build -o output/updater-macos-m1-64
+      run: go build -o output/updater-macos-m1-64
 
-    - name: Upload build
+    - name: Upload macOS build
       uses: actions/upload-artifact@v4
       with:
         name: updater-macos
