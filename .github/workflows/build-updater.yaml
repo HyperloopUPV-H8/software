@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-updater-linux:
-    name: "Build updater for linux"
+    name: "Build updater for Linux"
     runs-on: ubuntu-latest
 
     container:
@@ -18,19 +18,17 @@ jobs:
       UPDATER_DIR: ./updater
 
     steps:
-    - name: "Install packages"
+    - name: Install packages
       run: apk update && apk add --no-cache gcc go
 
     - uses: actions/checkout@v4
-      with:
-        sparse-checkout: updater
 
-    - name: "Create output path"
-      working-directory: "${{env.UPDATER_DIR}}"
-      run: mkdir -p ./output
+    - name: Create output path
+      working-directory: ${{ env.UPDATER_DIR }}
+      run: mkdir -p output
 
-    - name: "Build (64 bit)"
-      working-directory: "${{env.UPDATER_DIR}}"
+    - name: Build (64 bit)
+      working-directory: ${{ env.UPDATER_DIR }}
       env:
         CGO_ENABLED: 1
         GOARCH: amd64
@@ -38,36 +36,36 @@ jobs:
       run: |
         go build -ldflags '-linkmode external -extldflags "-static"' -o output/updater-linux-64
 
-    - name: "Upload build"
+    - name: Upload build
       uses: actions/upload-artifact@v4
       with:
         name: updater-linux
-        path: "${{env.UPDATER_DIR}}/output/*"
+        path: ${{ env.UPDATER_DIR }}/output/*
         retention-days: 3
         compression-level: 9
 
   build-updater-windows:
-    name: "Build updater for windows"
+    name: "Build updater for Windows"
     runs-on: windows-latest
 
     env:
-      UPDATER_DIR: ".\\updater"
+      UPDATER_DIR: .\\updater
 
     steps:
     - uses: actions/checkout@v3
 
-    - name: "Setup Go"
+    - name: Setup Go
       uses: actions/setup-go@v4
       with:
         go-version: "1.21.3"
-        cache-dependency-path: "${{env.UPDATER_DIR}}\\go.sum"
+        cache-dependency-path: updater\\go.sum
 
-    - name: "Create output path"
-      working-directory: "${{env.UPDATER_DIR}}"
-      run: mkdir .\output
+    - name: Create output path
+      working-directory: ${{ env.UPDATER_DIR }}
+      run: mkdir output
 
-    - name: "Build (64 bit)"
-      working-directory: "${{env.UPDATER_DIR}}"
+    - name: Build (64 bit)
+      working-directory: ${{ env.UPDATER_DIR }}
       env:
         CGO_ENABLED: 1
         GOARCH: amd64
@@ -75,11 +73,11 @@ jobs:
       run: |
         go build -o output\\updater-windows-64.exe
 
-    - name: "Upload build"
+    - name: Upload build
       uses: actions/upload-artifact@v4
       with:
         name: updater-windows
-        path: "${{env.UPDATER_DIR}}\\output\\*"
+        path: ${{ env.UPDATER_DIR }}\\output\\*
         retention-days: 3
         compression-level: 9
 
@@ -91,23 +89,20 @@ jobs:
       UPDATER_DIR: ./updater
 
     steps:
-    - name: "Install packages"
-      run: brew install libpcap || true
-
-    - name: "Setup Go"
+    - name: Setup Go
       uses: actions/setup-go@v4
       with:
         go-version: "1.21.3"
-        cache-dependency-path: "${{env.UPDATER_DIR}}/go.sum"
+        cache-dependency-path: updater/go.sum
 
     - uses: actions/checkout@v3
 
-    - name: "Create output path"
-      working-directory: "${{env.UPDATER_DIR}}"
-      run: mkdir -p ./output
+    - name: Create output path
+      working-directory: ${{ env.UPDATER_DIR }}
+      run: mkdir -p output
 
-    - name: "Build (64 bit Intel)"
-      working-directory: "${{env.UPDATER_DIR}}"
+    - name: Build (Intel 64)
+      working-directory: ${{ env.UPDATER_DIR }}
       env:
         CGO_ENABLED: 1
         GOARCH: amd64
@@ -115,8 +110,8 @@ jobs:
       run: |
         go build -o output/updater-macos-64
 
-    - name: "Build (64 bit ARM/M1)"
-      working-directory: "${{env.UPDATER_DIR}}"
+    - name: Build (Apple M1/ARM64)
+      working-directory: ${{ env.UPDATER_DIR }}
       env:
         CGO_ENABLED: 1
         GOARCH: arm64
@@ -124,10 +119,10 @@ jobs:
       run: |
         go build -o output/updater-macos-m1-64
 
-    - name: "Upload build"
+    - name: Upload build
       uses: actions/upload-artifact@v4
       with:
         name: updater-macos
-        path: "${{env.UPDATER_DIR}}/output/*"
+        path: ${{ env.UPDATER_DIR }}/output/*
         retention-days: 3
         compression-level: 9
