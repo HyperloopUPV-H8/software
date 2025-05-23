@@ -1,5 +1,8 @@
 name: Build updater
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
   pull_request:
@@ -8,121 +11,89 @@ on:
 
 jobs:
   build-updater-linux:
-    name: "Build updater for Linux"
+    name: Build updater for Linux
     runs-on: ubuntu-latest
 
-    container:
-      image: golang:alpine
-
-    env:
-      UPDATER_DIR: ./updater
-
     steps:
-    - name: Install packages (incl. git!)
-      run: |
-        apk update
-        apk add --no-cache gcc go git
+      - uses: actions/checkout@v4
 
-    - uses: actions/checkout@v4
+      - name: Set up Go (v4, with module caching)
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21.3'
+          cache: modules
 
-    - name: Create output path
-      working-directory: ${{ env.UPDATER_DIR }}
-      run: mkdir -p output
+      - name: Create output dir
+        run: mkdir -p updater/output
 
-    - name: Build (64-bit Linux)
-      working-directory: ${{ env.UPDATER_DIR }}
-      env:
-        CGO_ENABLED: 1
-        GOARCH: amd64
-        GOOS: linux
-      run: |
-        go build -ldflags '-linkmode external -extldflags "-static"' \
-          -o output/updater-linux-64
+      - name: Build (Linux amd64)
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+            go build -o updater/output/updater-linux-64 ./updater
 
-    - name: Upload Linux build
-      uses: actions/upload-artifact@v4
-      with:
-        name: updater-linux
-        path: ${{ env.UPDATER_DIR }}/output/*
-        retention-days: 3
-        compression-level: 9
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: updater-linux
+          path: updater/output/*
 
   build-updater-windows:
-    name: "Build updater for Windows"
+    name: Build updater for Windows
     runs-on: windows-latest
 
-    env:
-      UPDATER_DIR: .\\updater
-
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-    - name: Setup Go (with cache)
-      uses: actions/setup-go@v4
-      with:
-        go-version: "1.21.3"
-        cache-dependency-path: updater\\go.sum
+      - name: Set up Go (v4, with module caching)
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21.3'
+          cache: modules
 
-    - name: Create output path
-      working-directory: ${{ env.UPDATER_DIR }}
-      run: mkdir output
+      - name: Create output dir
+        shell: pwsh
+        run: New-Item -ItemType Directory -Path updater\output -Force
 
-    - name: Build (64-bit Windows)
-      working-directory: ${{ env.UPDATER_DIR }}
-      env:
-        CGO_ENABLED: 1
-        GOARCH: amd64
-        GOOS: windows
-      run: go build -o output\\updater-windows-64.exe
+      - name: Build (Windows amd64)
+        shell: pwsh
+        run: |
+          $Env:CGO_ENABLED = '0'
+          go build -o updater\output\updater-windows-64.exe ./updater
 
-    - name: Upload Windows build
-      uses: actions/upload-artifact@v4
-      with:
-        name: updater-windows
-        path: ${{ env.UPDATER_DIR }}\\output\\*
-        retention-days: 3
-        compression-level: 9
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: updater-windows
+          path: updater\output\*
 
   build-updater-mac:
-    name: "Build updater for macOS"
+    name: Build updater for macOS
     runs-on: macos-latest
 
-    env:
-      UPDATER_DIR: ./updater
-
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-    - name: Setup Go (with cache)
-      uses: actions/setup-go@v4
-      with:
-        go-version: "1.21.3"
-        cache-dependency-path: updater/go.sum
+      - name: Set up Go (v4, with module caching)
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21.3'
+          cache: modules
 
-    - name: Create output path
-      working-directory: ${{ env.UPDATER_DIR }}
-      run: mkdir -p output
+      - name: Create output dir
+        run: mkdir -p updater/output
 
-    - name: Build (Intel macOS)
-      working-directory: ${{ env.UPDATER_DIR }}
-      env:
-        CGO_ENABLED: 1
-        GOARCH: amd64
-        GOOS: darwin
-      run: go build -o output/updater-macos-64
+      - name: Build (macOS Intel)
+        run: |
+          CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 \
+            go build -o updater/output/updater-macos-64 ./updater
 
-    - name: Build (Apple Silicon)
-      working-directory: ${{ env.UPDATER_DIR }}
-      env:
-        CGO_ENABLED: 1
-        GOARCH: arm64
-        GOOS: darwin
-      run: go build -o output/updater-macos-m1-64
+      - name: Build (macOS ARM64)
+        run: |
+          CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 \
+            go build -o updater/output/updater-macos-m1-64 ./updater
 
-    - name: Upload macOS build
-      uses: actions/upload-artifact@v4
-      with:
-        name: updater-macos
-        path: ${{ env.UPDATER_DIR }}/output/*
-        retention-days: 3
-        compression-level: 9
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: updater-macos
+          path: updater/output/*
