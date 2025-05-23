@@ -2,15 +2,17 @@ name: Build updater
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - updater/**
 
 jobs:
-  build-backend-linux:
+  build-updater-linux:
     name: "Build updater for linux"
     runs-on: ubuntu-latest
 
-    # Runs on alpine because it is easier to statically link the library
     container:
-      image: golang:alpine 
+      image: golang:alpine
 
     env:
       UPDATER_DIR: ./updater
@@ -25,7 +27,7 @@ jobs:
 
     - name: "Create output path"
       working-directory: "${{env.UPDATER_DIR}}"
-      run: mkdir ./output
+      run: mkdir -p ./output
 
     - name: "Build (64 bit)"
       working-directory: "${{env.UPDATER_DIR}}"
@@ -34,17 +36,17 @@ jobs:
         GOARCH: amd64
         GOOS: linux
       run: |
-        go build -ldflags '-linkmode external -extldflags "-static"' -o ../output/updaters/updater-linux-64
+        go build -ldflags '-linkmode external -extldflags "-static"' -o output/updater-linux-64
 
     - name: "Upload build"
       uses: actions/upload-artifact@v4
       with:
         name: updater-linux
-        path: "${{env.UPDATER_DIR}}/output/updaters/*"
+        path: "${{env.UPDATER_DIR}}/output/*"
         retention-days: 3
         compression-level: 9
 
-  build-backend-windows:
+  build-updater-windows:
     name: "Build updater for windows"
     runs-on: windows-latest
 
@@ -71,58 +73,61 @@ jobs:
         GOARCH: amd64
         GOOS: windows
       run: |
-        go build -o ..\output\updaters\backend-windows-64.exe
+        go build -o output\\updater-windows-64.exe
 
     - name: "Upload build"
       uses: actions/upload-artifact@v4
       with:
         name: updater-windows
-        path: "${{env.UPDATER_DIR}}\\output\\updaters\\*"
+        path: "${{env.UPDATER_DIR}}\\output\\*"
         retention-days: 3
         compression-level: 9
-      
-  build-backend-mac:
+
+  build-updater-mac:
     name: "Build updater for macOS"
     runs-on: macos-latest
-      
+
     env:
-      BACKEND_DIR: ./updater
-      
+      UPDATER_DIR: ./updater
+
     steps:
+    - name: "Install packages"
+      run: brew install libpcap || true
+
     - name: "Setup Go"
       uses: actions/setup-go@v4
       with:
         go-version: "1.21.3"
         cache-dependency-path: "${{env.UPDATER_DIR}}/go.sum"
-    
+
     - uses: actions/checkout@v3
-      
+
     - name: "Create output path"
       working-directory: "${{env.UPDATER_DIR}}"
-      run: mkdir ./output
-      
-    - name: "Build (64 bit)"
+      run: mkdir -p ./output
+
+    - name: "Build (64 bit Intel)"
       working-directory: "${{env.UPDATER_DIR}}"
       env:
         CGO_ENABLED: 1
         GOARCH: amd64
         GOOS: darwin
       run: |
-        go build -o ../output/updaters/updater-macos-64
-    
-    - name: "Build (apple 64 bit)"
+        go build -o output/updater-macos-64
+
+    - name: "Build (64 bit ARM/M1)"
       working-directory: "${{env.UPDATER_DIR}}"
       env:
         CGO_ENABLED: 1
         GOARCH: arm64
         GOOS: darwin
       run: |
-        go build -o ../output/updaters/updater-macos-m1-64
-      
+        go build -o output/updater-macos-m1-64
+
     - name: "Upload build"
       uses: actions/upload-artifact@v4
       with:
         name: updater-macos
-        path: "${{env.UPDATER_DIR}}/output/updaters/*"
+        path: "${{env.UPDATER_DIR}}/output/*"
         retention-days: 3
         compression-level: 9
