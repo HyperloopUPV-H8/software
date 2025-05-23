@@ -21,7 +21,12 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.21.3'
+          go-version: "1.21.3"
+          cache-dependency-path: updater/go.sum
+
+      - name: Ensure dependencies
+        working-directory: updater
+        run: go mod tidy
 
       - name: Make output dir
         run: mkdir -p updater/output
@@ -51,7 +56,13 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.21.3'
+          go-version: "1.21.3"
+          cache-dependency-path: updater\go.sum
+
+      - name: Ensure dependencies
+        working-directory: updater
+        shell: pwsh
+        run: go mod tidy
 
       - name: Make output dir
         shell: pwsh
@@ -83,7 +94,12 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.21.3'
+          go-version: "1.21.3"
+          cache-dependency-path: updater/go.sum
+
+      - name: Ensure dependencies
+        working-directory: updater
+        run: go mod tidy
 
       - name: Make output dir
         run: mkdir -p updater/output
