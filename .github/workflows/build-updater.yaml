@@ -18,6 +18,9 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Mark workspace as safe
+        run: git config --global --add safe.directory $GITHUB_WORKSPACE
+
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
@@ -52,6 +55,10 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Mark workspace as safe
+        shell: pwsh
+        run: git config --global --add safe.directory $Env:GITHUB_WORKSPACE
 
       - name: Set up Go
         uses: actions/setup-go@v4
@@ -90,6 +97,9 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Mark workspace as safe
+        run: git config --global --add safe.directory $GITHUB_WORKSPACE
 
       - name: Set up Go
         uses: actions/setup-go@v4
