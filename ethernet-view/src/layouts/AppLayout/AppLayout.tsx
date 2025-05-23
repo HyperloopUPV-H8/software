@@ -2,6 +2,8 @@
 import styles from "./AppLayout.module.scss"
 import Testing from "assets/svg/testing.svg"
 import Logger from "assets/svg/logger.svg"
+import Chart from "assets/svg/chart.svg"
+
 import { Navbar } from "components/Navbar/Navbar"
 import { ReactNode } from "react"
 
@@ -12,7 +14,6 @@ interface Props {
 }
 
 export const AppLayout = ({children, pageShown, setPageShown} : Props) => {
-
     return (
         <div className={styles.appLayout}>
             <Navbar items={[
@@ -23,6 +24,10 @@ export const AppLayout = ({children, pageShown, setPageShown} : Props) => {
                 {
                     icon: Logger,
                     page: "logger"
+                },
+                {
+                    icon: Chart,
+                    page: "chart"
                 }
                 ]}
                 pageShown={pageShown}
