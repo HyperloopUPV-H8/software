@@ -10,15 +10,21 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install build-essential and libpcap-dev
+      - name: Install build-essential and libpcap-dev on Linux
         if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get update && sudo apt-get install -y build-essential libpcap-dev
+      
+      - name: Install Windows dependencies
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install -y npcap
+          choco install -y zip
 
       - name: Set up Go
         uses: actions/setup-go@v4
@@ -40,10 +46,9 @@ jobs:
 
       - name: Prepare Folder Structure
         run: |
-          mkdir -p release/backend
-          mkdir -p release/updater
-          mkdir -p release/control-station/static
-          mkdir -p release/ethernet-view/static
+          mkdir -p control-station
+          mkdir -p control-station/updater
+          mkdir -p control-station/ethernet-view
         shell: bash
 
       ############################################
@@ -53,41 +58,36 @@ jobs:
       - name: Build backend for Linux
         if: matrix.os == 'ubuntu-latest'
         run: |
-          GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -o release/backend/backend-linux-64 ./backend/cmd
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -o control-station/backend ./backend/cmd
 
       - name: Build backend for Windows
+        if: matrix.os == 'windows-latest'
         run: |
-          GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go build -o release/backend/backend-windows-64.exe ./backend/cmd
+          GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go build -o control-station/backend.exe ./backend/cmd
 
-      - name: Build backend for macOS Intel
+      - name: Build backend for macOS
         if: matrix.os == 'macos-latest'
         run: |
-          GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -o release/backend/backend-macos-64 ./backend/cmd
-
-      - name: Build backend for macOS ARM64
-        if: matrix.os == 'macos-latest'
-        run: |
-          GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build -o release/backend/backend-macos-m1 ./backend/cmd
+          GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -o control-station/backend ./backend/cmd
 
       ############################################
       # UPDATER BUILDS
       ############################################
 
       - name: Build updater for Linux
+        if: matrix.os == 'ubuntu-latest'
         run: |
-          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o release/updater/updater-linux ./updater
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o control-station/updater/updater ./updater
 
       - name: Build updater for Windows
+        if: matrix.os == 'windows-latest'
         run: |
-          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -o release/updater/updater-windows.exe ./updater
+          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -o control-station/updater/updater.exe ./updater
 
-      - name: Build updater for macOS Intel
+      - name: Build updater for macOS
+        if: matrix.os == 'macos-latest'
         run: |
-          GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -o release/updater/updater-macos-64 ./updater
-
-      - name: Build updater for macOS ARM64
-        run: |
-          GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -o release/updater/updater-macos-m1 ./updater
+          GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -o control-station/updater/updater ./updater
 
       ############################################
       # FRONTEND BUILDS
@@ -107,19 +107,9 @@ jobs:
           npm install
           npm run build
 
-      - name: Rename control-station artifact for platform
+      - name: Copy control-station static files
         run: |
-          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-            mv ./control-station/static ./control-station-linux-x64
-          elif [ "${{ matrix.os }}" == "macos-latest" ]; then
-            if [ "$(uname -m)" == "arm64" ]; then
-              mv ./control-station/static ./control-station-macos-arm
-            else
-              mv ./control-station/static ./control-station-macos-x64
-            fi
-          elif [ "${{ matrix.os }}" == "windows-latest" ]; then
-            mv ./control-station/static ./control-station-windows-x64.exe
-          fi
+          cp -r ./control-station/static/* ./control-station/ || true
 
       - name: Upload control-station artifact
         uses: actions/upload-artifact@v4
@@ -143,9 +133,15 @@ jobs:
       # BUILD testadj
       ############################################
 
-      - name: Bundle testadj.py
+      - name: Bundle testadj.py for Linux/macOS
+        if: matrix.os != 'windows-latest'
         run: |
-          pyinstaller --onefile backend/cmd/testadj.py --distpath release/
+          pyinstaller --onefile backend/cmd/testadj.py --distpath control-station/
+          
+      - name: Bundle testadj.py for Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          pyinstaller --onefile backend/cmd/testadj.py --distpath control-station/ --name testadj.exe
 
       ############################################
       # PACKAGE METADATA
@@ -153,42 +149,50 @@ jobs:
 
       - name: Copy additional files
         run: |
-          cp backend/cmd/config.toml release/
-          cp backend/cmd/VERSION.md release/
-          cp README.md release/
-
-      - name: Ensure control-station directory exists
-        run: mkdir -p ./release/control-station/static
+          cp backend/cmd/config.toml control-station/
+          cp backend/cmd/VERSION.md control-station/
+          cp README.md control-station/
 
       - name: Download control-station artifact
         uses: actions/download-artifact@v4
         with:
           name: control-station-${{ matrix.os }}
-          path: ./release/
+          path: ./control-station/
 
       - name: Ensure ethernet-view directory exists
-        run: mkdir -p ./release/ethernet-view/static
+        run: mkdir -p ./control-station/ethernet-view
 
       - name: Download ethernet-view artifact
         uses: actions/download-artifact@v4
         with:
           name: ethernet-view-${{ matrix.os }}
-          path: ./release/ethernet-view/static
+          path: ./control-station/ethernet-view/
 
-      - name: Create platform-specific ZIP
+      - name: Create Linux ZIP
+        if: matrix.os == 'ubuntu-latest'
         run: |
           mkdir -p release-zips
-          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-            zip -r release-zips/release-linux-x64.zip release/backend/backend-linux-64 release/control-station release/ethernet-view release/testadj release/config.toml release/VERSION.md release/README.md release/updater
-          elif [ "${{ matrix.os }}" == "macos-latest" ]; then
-            if [ "$(uname -m)" == "arm64" ]; then
-              zip -r release-zips/release-macos-arm.zip release/backend/backend-macos-m1 release/control-station release/ethernet-view release/testadj release/config.toml release/VERSION.md release/README.md release/updater
-            else
-              zip -r release-zips/release-macos-x64.zip release/backend/backend-macos-64 release/control-station release/ethernet-view release/testadj release/config.toml release/VERSION.md release/README.md release/updater
-            fi
-          elif [ "${{ matrix.os }}" == "windows-latest" ]; then
-            zip -r release-zips/release-windows-x64.zip release/backend/backend-windows-64.exe release/control-station release/ethernet-view release/testadj.exe release/config.toml release/VERSION.md release/README.md release/updater
-          fi
+          cd control-station && zip -r ../release-zips/control-station-linux-x64.zip .
+        
+      - name: Create macOS x64 ZIP
+        if: matrix.os == 'macos-latest'
+        run: |
+          mkdir -p release-zips
+          cd control-station && zip -r ../release-zips/control-station-macos-x64.zip .
+          
+      - name: Create macOS ARM ZIP (on x64 runner)
+        if: matrix.os == 'macos-latest'
+        run: |
+          # Build ARM version specifically for this ZIP
+          GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build -o control-station/backend ./backend/cmd
+          GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -o control-station/updater/updater ./updater
+          cd control-station && zip -r ../release-zips/control-station-macos-arm.zip .
+          
+      - name: Create Windows ZIP
+        if: matrix.os == 'windows-latest'
+        run: |
+          mkdir -p release-zips
+          cd control-station && zip -r ../release-zips/control-station-windows-x64.zip .
 
       ############################################
       # CREATE DRAFT RELEASE
@@ -200,6 +204,6 @@ jobs:
           tag_name: "v${{ github.run_number }}"
           name: "Draft Release v${{ github.run_number }}"
           draft: true
-          files: release-zips/release-*.zip
+          files: release-zips/control-station-*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
