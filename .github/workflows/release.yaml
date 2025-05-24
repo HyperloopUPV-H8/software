@@ -69,7 +69,7 @@ jobs:
       
       - name: Build backend
         run: ${{ matrix.build_cmd }}
-        shell: ${{ matrix.os == 'windows-latest' && 'pwsh' || 'bash' }}
+        shell: ${{ runner.os == 'Windows' && 'pwsh' || 'bash' }}
       
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -171,7 +171,7 @@ jobs:
       - name: Ensure dependencies
         working-directory: updater
         run: go mod tidy
-        shell: ${{ matrix.os == 'windows-latest' && 'pwsh' || 'bash' }}
+        shell: ${{ runner.os == 'Windows' && 'pwsh' || 'bash' }}
       
       - name: Create output directory
         run: mkdir -p updater/output
@@ -179,7 +179,7 @@ jobs:
       
       - name: Build updater
         run: ${{ matrix.build_cmd }}
-        shell: ${{ matrix.os == 'windows-latest' && 'pwsh' || 'bash' }}
+        shell: ${{ runner.os == 'Windows' && 'pwsh' || 'bash' }}
       
       - name: Upload artifact
         uses: actions/upload-artifact@v4
