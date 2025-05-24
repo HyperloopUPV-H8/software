@@ -1,4 +1,4 @@
-name: Full Release Build
+name: Release
 
 on:
   workflow_dispatch:
@@ -11,6 +11,9 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Install libpcap-dev
+        run: sudo apt-get update && sudo apt-get install -y libpcap-dev
 
       - name: Set up Go
         uses: actions/setup-go@v4
