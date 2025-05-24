@@ -64,14 +64,30 @@ jobs:
           go-version: "1.21.3"
           cache-dependency-path: backend/go.sum
       
-      - name: Create output directory
+      - name: Create output directory (Linux)
+        if: matrix.os == 'ubuntu-latest'
         run: mkdir -p backend/output
-        shell: ${{ matrix.os != 'windows-latest' && 'sh' || 'bash' }}
+        shell: sh
+        
+      - name: Create output directory (macOS)
+        if: matrix.os == 'macos-latest'
+        run: mkdir -p backend/output
+        shell: bash
+        
+      - name: Create output directory (Windows)
+        if: matrix.os == 'windows-latest'
+        run: mkdir -p backend/output
+        shell: bash
       
-      - name: Build backend (Linux/macOS)
-        if: matrix.os != 'windows-latest'
+      - name: Build backend (Linux)
+        if: matrix.os == 'ubuntu-latest'
         run: ${{ matrix.build_cmd }}
         shell: sh
+        
+      - name: Build backend (macOS)
+        if: matrix.os == 'macos-latest'
+        run: ${{ matrix.build_cmd }}
+        shell: bash
         
       - name: Build backend (Windows)
         if: matrix.os == 'windows-latest'
@@ -175,8 +191,14 @@ jobs:
           go-version: "1.21.3"
           cache-dependency-path: updater/go.sum
       
-      - name: Ensure dependencies (Linux/macOS)
-        if: matrix.os != 'windows-latest'
+      - name: Ensure dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        working-directory: updater
+        run: go mod tidy
+        shell: bash
+        
+      - name: Ensure dependencies (macOS)
+        if: matrix.os == 'macos-latest'
         working-directory: updater
         run: go mod tidy
         shell: bash
@@ -187,12 +209,28 @@ jobs:
         run: go mod tidy
         shell: pwsh
       
-      - name: Create output directory
+      - name: Create output directory (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: mkdir -p updater/output
+        shell: bash
+        
+      - name: Create output directory (macOS)
+        if: matrix.os == 'macos-latest'
+        run: mkdir -p updater/output
+        shell: bash
+        
+      - name: Create output directory (Windows)
+        if: matrix.os == 'windows-latest'
         run: mkdir -p updater/output
         shell: bash
       
-      - name: Build updater (Linux/macOS)
-        if: matrix.os != 'windows-latest'
+      - name: Build updater (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: ${{ matrix.build_cmd }}
+        shell: bash
+        
+      - name: Build updater (macOS)
+        if: matrix.os == 'macos-latest'
         run: ${{ matrix.build_cmd }}
         shell: bash
         
