@@ -23,7 +23,7 @@ jobs:
             container:
               image: golang:alpine
             setup: |
-              apk update && apk add --no-cache libpcap-dev musl-dev gcc go
+              apk update && apk add --no-cache libpcap-dev musl-dev gcc go bash
             build_cmd: |
               cd backend/cmd
               CGO_ENABLED=1 GOARCH=amd64 GOOS=linux go build -ldflags '-linkmode external -extldflags "-static"' -o ../output/backend-linux-amd64
@@ -66,12 +66,12 @@ jobs:
       
       - name: Create output directory
         run: mkdir -p backend/output
-        shell: bash
+        shell: ${{ matrix.os != 'windows-latest' && 'sh' || 'bash' }}
       
       - name: Build backend (Linux/macOS)
         if: matrix.os != 'windows-latest'
         run: ${{ matrix.build_cmd }}
-        shell: bash
+        shell: sh
         
       - name: Build backend (Windows)
         if: matrix.os == 'windows-latest'
