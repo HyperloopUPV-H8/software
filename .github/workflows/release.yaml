@@ -143,11 +143,17 @@ jobs:
           cp backend/cmd/VERSION.md release/
           cp README.md release/
 
+      - name: Ensure control-station directory exists
+        run: mkdir -p ./release/control-station/static
+
       - name: Download control-station artifact
         uses: actions/download-artifact@v4
         with:
           name: control-station
           path: ./release/control-station/static
+
+      - name: Ensure ethernet-view directory exists
+        run: mkdir -p ./release/ethernet-view/static
 
       - name: Download ethernet-view artifact
         uses: actions/download-artifact@v4
