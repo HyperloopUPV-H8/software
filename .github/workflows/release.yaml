@@ -7,6 +7,10 @@ on:
         description: 'Release version'
         required: true
         default: ''
+      draft:
+        description: 'Create as draft release'
+        type: boolean
+        default: true
   release:
     types: [created]
 
@@ -301,10 +305,18 @@ jobs:
           cp -r artifacts/backend-windows/* release/backends/
           cp -r artifacts/backend-macos/* release/backends/
           
-          # Copy updaters
-          cp -r artifacts/updater-linux/* release/updaters/
-          cp -r artifacts/updater-windows/* release/updaters/
-          cp -r artifacts/updater-macos/* release/updaters/
+          # Copy updaters to appropriate folders by platform
+          mkdir -p release/linux release/windows release/macos release/macos-arm64
+          
+          # Copy Linux updater
+          cp artifacts/updater-linux/updater-linux-amd64 release/linux/updater
+          
+          # Copy Windows updater
+          cp artifacts/updater-windows/updater-windows-amd64.exe release/windows/updater.exe
+          
+          # Copy macOS updaters
+          cp artifacts/updater-macos/updater-macos-amd64 release/macos/updater
+          cp artifacts/updater-macos/updater-macos-arm64 release/macos-arm64/updater
           
           # Copy frontends
           cp -r artifacts/ethernet-view/* release/frontends/ethernet-view/
@@ -327,7 +339,30 @@ jobs:
           retention-days: 7
           compression-level: 9
       
-      - name: Upload to release
+      - name: Create Release
+        if: github.event_name == 'workflow_dispatch'
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          release_name: Release ${{ github.event.inputs.version }}
+          draft: ${{ github.event.inputs.draft }}
+          prerelease: false
+          
+      - name: Upload to workflow dispatch release
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./software-release-${{ github.event.inputs.version }}.zip
+          asset_name: software-release-${{ github.event.inputs.version }}.zip
+          asset_content_type: application/zip
+          
+      - name: Upload to existing release
         if: github.event_name == 'release'
         uses: actions/upload-release-asset@v1
         env:
