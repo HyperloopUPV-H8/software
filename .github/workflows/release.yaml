@@ -285,56 +285,115 @@ jobs:
     needs: [build-backend, build-frontend, build-updater, prepare-common-files]
     runs-on: ubuntu-latest
     steps:
-      - name: Create release directories
-        run: |
-          mkdir -p release
-          mkdir -p release/backends
-          mkdir -p release/updaters
-          mkdir -p release/frontends/ethernet-view
-          mkdir -p release/frontends/control-station
-      
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
       
-      - name: Organize release files
-        run: |
-          # Copy backends
-          cp -r artifacts/backend-linux/* release/backends/
-          cp -r artifacts/backend-windows/* release/backends/
-          cp -r artifacts/backend-macos/* release/backends/
-          
-          # Copy updaters to appropriate folders by platform
-          mkdir -p release/linux release/windows release/macos release/macos-arm64
-          
-          # Copy Linux updater
-          cp artifacts/updater-linux/updater-linux-amd64 release/linux/updater
-          
-          # Copy Windows updater
-          cp artifacts/updater-windows/updater-windows-amd64.exe release/windows/updater.exe
-          
-          # Copy macOS updaters
-          cp artifacts/updater-macos/updater-macos-amd64 release/macos/updater
-          cp artifacts/updater-macos/updater-macos-arm64 release/macos-arm64/updater
-          
-          # Copy frontends
-          cp -r artifacts/ethernet-view/* release/frontends/ethernet-view/
-          cp -r artifacts/control-station/* release/frontends/control-station/
-          
-          # Copy common files
-          cp -r artifacts/common-files/* release/
-      
-      - name: Create release archive
+      - name: Create release directories for each platform
         run: |
           VERSION="${{ github.event.inputs.version || github.event.release.tag_name || 'latest' }}"
-          cd release
-          zip -r ../software-release-$VERSION.zip .
+          
+          # Create directory structure for each platform
+          mkdir -p release-linux
+          mkdir -p release-windows
+          mkdir -p release-macos
+          mkdir -p release-macos-arm64
+          
+          # Setup frontend directories for each platform
+          for platform in release-linux release-windows release-macos release-macos-arm64; do
+            mkdir -p $platform/frontends/ethernet-view
+            mkdir -p $platform/frontends/control-station
+          done
       
-      - name: Upload release package
+      - name: Organize Linux release files
+        run: |
+          VERSION="${{ github.event.inputs.version || github.event.release.tag_name || 'latest' }}"
+          
+          # Copy Linux backend
+          cp artifacts/backend-linux/backend-linux-amd64 release-linux/backend
+          
+          # Copy Linux updater
+          cp artifacts/updater-linux/updater-linux-amd64 release-linux/updater
+          
+          # Copy frontends
+          cp -r artifacts/ethernet-view/* release-linux/frontends/ethernet-view/
+          cp -r artifacts/control-station/* release-linux/frontends/control-station/
+          
+          # Copy common files
+          cp -r artifacts/common-files/* release-linux/
+          
+          # Create Linux release archive
+          cd release-linux
+          zip -r ../software-release-linux-$VERSION.zip .
+      
+      - name: Organize Windows release files
+        run: |
+          VERSION="${{ github.event.inputs.version || github.event.release.tag_name || 'latest' }}"
+          
+          # Copy Windows backend
+          cp artifacts/backend-windows/backend-windows-amd64.exe release-windows/backend.exe
+          
+          # Copy Windows updater
+          cp artifacts/updater-windows/updater-windows-amd64.exe release-windows/updater.exe
+          
+          # Copy frontends
+          cp -r artifacts/ethernet-view/* release-windows/frontends/ethernet-view/
+          cp -r artifacts/control-station/* release-windows/frontends/control-station/
+          
+          # Copy common files
+          cp -r artifacts/common-files/* release-windows/
+          
+          # Create Windows release archive
+          cd release-windows
+          zip -r ../software-release-windows-$VERSION.zip .
+      
+      - name: Organize macOS Intel release files
+        run: |
+          VERSION="${{ github.event.inputs.version || github.event.release.tag_name || 'latest' }}"
+          
+          # Copy macOS Intel backend
+          cp artifacts/backend-macos/backend-macos-amd64 release-macos/backend
+          
+          # Copy macOS Intel updater
+          cp artifacts/updater-macos/updater-macos-amd64 release-macos/updater
+          
+          # Copy frontends
+          cp -r artifacts/ethernet-view/* release-macos/frontends/ethernet-view/
+          cp -r artifacts/control-station/* release-macos/frontends/control-station/
+          
+          # Copy common files
+          cp -r artifacts/common-files/* release-macos/
+          
+          # Create macOS Intel release archive
+          cd release-macos
+          zip -r ../software-release-macos-intel-$VERSION.zip .
+      
+      - name: Organize macOS ARM64 release files
+        run: |
+          VERSION="${{ github.event.inputs.version || github.event.release.tag_name || 'latest' }}"
+          
+          # Copy macOS ARM64 backend
+          cp artifacts/backend-macos/backend-macos-arm64 release-macos-arm64/backend
+          
+          # Copy macOS ARM64 updater
+          cp artifacts/updater-macos/updater-macos-arm64 release-macos-arm64/updater
+          
+          # Copy frontends
+          cp -r artifacts/ethernet-view/* release-macos-arm64/frontends/ethernet-view/
+          cp -r artifacts/control-station/* release-macos-arm64/frontends/control-station/
+          
+          # Copy common files
+          cp -r artifacts/common-files/* release-macos-arm64/
+          
+          # Create macOS ARM64 release archive
+          cd release-macos-arm64
+          zip -r ../software-release-macos-arm64-$VERSION.zip .
+      
+      - name: Upload release packages
         uses: actions/upload-artifact@v4
         with:
-          name: software-release
+          name: software-releases
           path: software-release-*.zip
           retention-days: 7
           compression-level: 9
@@ -351,24 +410,90 @@ jobs:
           draft: ${{ github.event.inputs.draft }}
           prerelease: false
           
-      - name: Upload to workflow dispatch release
+      - name: Upload Linux package to release
         if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./software-release-${{ github.event.inputs.version }}.zip
-          asset_name: software-release-${{ github.event.inputs.version }}.zip
+          asset_path: ./software-release-linux-${{ github.event.inputs.version }}.zip
+          asset_name: software-release-linux-${{ github.event.inputs.version }}.zip
           asset_content_type: application/zip
           
-      - name: Upload to existing release
+      - name: Upload Windows package to release
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./software-release-windows-${{ github.event.inputs.version }}.zip
+          asset_name: software-release-windows-${{ github.event.inputs.version }}.zip
+          asset_content_type: application/zip
+          
+      - name: Upload macOS Intel package to release
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./software-release-macos-intel-${{ github.event.inputs.version }}.zip
+          asset_name: software-release-macos-intel-${{ github.event.inputs.version }}.zip
+          asset_content_type: application/zip
+          
+      - name: Upload macOS ARM64 package to release
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./software-release-macos-arm64-${{ github.event.inputs.version }}.zip
+          asset_name: software-release-macos-arm64-${{ github.event.inputs.version }}.zip
+          asset_content_type: application/zip
+          
+      - name: Upload Linux package to existing release
         if: github.event_name == 'release'
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./software-release-${{ github.event.release.tag_name }}.zip
-          asset_name: software-release-${{ github.event.release.tag_name }}.zip
+          asset_path: ./software-release-linux-${{ github.event.release.tag_name }}.zip
+          asset_name: software-release-linux-${{ github.event.release.tag_name }}.zip
+          asset_content_type: application/zip
+          
+      - name: Upload Windows package to existing release
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./software-release-windows-${{ github.event.release.tag_name }}.zip
+          asset_name: software-release-windows-${{ github.event.release.tag_name }}.zip
+          asset_content_type: application/zip
+          
+      - name: Upload macOS Intel package to existing release
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./software-release-macos-intel-${{ github.event.release.tag_name }}.zip
+          asset_name: software-release-macos-intel-${{ github.event.release.tag_name }}.zip
+          asset_content_type: application/zip
+          
+      - name: Upload macOS ARM64 package to existing release
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./software-release-macos-arm64-${{ github.event.release.tag_name }}.zip
+          asset_name: software-release-macos-arm64-${{ github.event.release.tag_name }}.zip
           asset_content_type: application/zip
