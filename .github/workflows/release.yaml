@@ -106,14 +106,24 @@ jobs:
         run: |
           npm install
           npm run build
-          cp -r static/* ../../release/control-station/static/
+
+      - name: Upload control-station artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: control-station
+          path: ./control-station/static/*
 
       - name: Build ethernet-view
         working-directory: ./ethernet-view
         run: |
           npm install
           npm run build
-          cp -r static/* ../../release/ethernet-view/static/
+
+      - name: Upload ethernet-view artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ethernet-view
+          path: ./ethernet-view/static/*
 
       ############################################
       # BUILD testadj
@@ -132,6 +142,18 @@ jobs:
           cp backend/cmd/config.toml release/
           cp backend/cmd/VERSION.md release/
           cp README.md release/
+
+      - name: Download control-station artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: control-station
+          path: ./release/control-station/static
+
+      - name: Download ethernet-view artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ethernet-view
+          path: ./release/ethernet-view/static
 
       - name: Create final ZIP
         run: |
