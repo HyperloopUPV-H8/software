@@ -107,11 +107,25 @@ jobs:
           npm install
           npm run build
 
+      - name: Rename control-station artifact for platform
+        run: |
+          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+            mv ./control-station/static ./control-station-linux-x64
+          elif [ "${{ matrix.os }}" == "macos-latest" ]; then
+            if [ "$(uname -m)" == "arm64" ]; then
+              mv ./control-station/static ./control-station-macos-arm
+            else
+              mv ./control-station/static ./control-station-macos-x64
+            fi
+          elif [ "${{ matrix.os }}" == "windows-latest" ]; then
+            mv ./control-station/static ./control-station-windows-x64.exe
+          fi
+
       - name: Upload control-station artifact
         uses: actions/upload-artifact@v4
         with:
           name: control-station-${{ matrix.os }}
-          path: ./control-station/static/*
+          path: ./control-station-*
 
       - name: Build ethernet-view
         working-directory: ./ethernet-view
@@ -150,7 +164,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: control-station-${{ matrix.os }}
-          path: ./release/control-station/static
+          path: ./release/
 
       - name: Ensure ethernet-view directory exists
         run: mkdir -p ./release/ethernet-view/static
