@@ -175,10 +175,20 @@ jobs:
           name: ethernet-view-${{ matrix.os }}
           path: ./release/ethernet-view/static
 
-      - name: Create final ZIP
+      - name: Create platform-specific ZIP
         run: |
-          cd release
-          zip -r ../control-station.zip .
+          mkdir -p release-zips
+          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+            zip -r release-zips/release-linux-x64.zip release/backend/backend-linux-64 release/control-station release/ethernet-view release/testadj release/config.toml release/VERSION.md release/README.md release/updater
+          elif [ "${{ matrix.os }}" == "macos-latest" ]; then
+            if [ "$(uname -m)" == "arm64" ]; then
+              zip -r release-zips/release-macos-arm.zip release/backend/backend-macos-m1 release/control-station release/ethernet-view release/testadj release/config.toml release/VERSION.md release/README.md release/updater
+            else
+              zip -r release-zips/release-macos-x64.zip release/backend/backend-macos-64 release/control-station release/ethernet-view release/testadj release/config.toml release/VERSION.md release/README.md release/updater
+            fi
+          elif [ "${{ matrix.os }}" == "windows-latest" ]; then
+            zip -r release-zips/release-windows-x64.zip release/backend/backend-windows-64.exe release/control-station release/ethernet-view release/testadj.exe release/config.toml release/VERSION.md release/README.md release/updater
+          fi
 
       ############################################
       # CREATE DRAFT RELEASE
