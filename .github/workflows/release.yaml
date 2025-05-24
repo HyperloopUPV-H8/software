@@ -2,208 +2,280 @@ name: Release
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version'
+        required: true
+        default: ''
+  release:
+    types: [created]
 
 jobs:
-  build-and-release:
-    name: Build & Package All Components
+  build-backend:
+    name: Build Backend
     runs-on: ${{ matrix.os }}
-
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            name: linux
+            container: 
+              image: golang:alpine
+            setup: |
+              apk update && apk add --no-cache libpcap-dev musl-dev gcc go
+            build_cmd: |
+              cd backend/cmd
+              CGO_ENABLED=1 GOARCH=amd64 GOOS=linux go build -ldflags '-linkmode external -extldflags "-static"' -o ../output/backend-linux-amd64
+            artifact_name: backend-linux
+            
+          - os: windows-latest
+            name: windows
+            setup: |
+              echo "Setting up Windows environment"
+            build_cmd: |
+              cd backend\cmd
+              $env:CGO_ENABLED="1"
+              $env:GOARCH="amd64"
+              $env:GOOS="windows"
+              go build -o ..\output\backend-windows-amd64.exe
+            artifact_name: backend-windows
+            
+          - os: macos-latest
+            name: macos
+            setup: |
+              brew install libpcap
+            build_cmd: |
+              cd backend/cmd
+              CGO_ENABLED=1 GOARCH=amd64 GOOS=darwin go build -o ../output/backend-macos-amd64
+              CGO_ENABLED=1 GOARCH=arm64 GOOS=darwin go build -o ../output/backend-macos-arm64
+            artifact_name: backend-macos
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Install build-essential and libpcap-dev on Linux
-        if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get update && sudo apt-get install -y build-essential libpcap-dev
+      - uses: actions/checkout@v4
       
-      - name: Install Windows dependencies
-        if: matrix.os == 'windows-latest'
-        run: |
-          choco install -y npcap
-          choco install -y zip
-
-      - name: Set up Go
+      - name: Setup environment
+        run: ${{ matrix.setup }}
+      
+      - name: Setup Go
+        if: matrix.os != 'ubuntu-latest'
         uses: actions/setup-go@v4
         with:
           go-version: "1.21.3"
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
+          cache-dependency-path: backend/go.sum
+      
+      - name: Create output directory
+        run: mkdir -p backend/output
+        shell: bash
+      
+      - name: Build backend
+        run: ${{ matrix.build_cmd }}
+        shell: ${{ matrix.os == 'windows-latest' && 'pwsh' || 'bash' }}
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          python-version: "3.11"
+          name: ${{ matrix.artifact_name }}
+          path: backend/output/*
+          retention-days: 7
+          compression-level: 9
 
-      - name: Set up Node.js
+  build-frontend:
+    name: Build Frontends
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-
-      - name: Install PyInstaller
-        run: pip install pyinstaller
-
-      - name: Prepare Folder Structure
-        run: |
-          mkdir -p control-station
-          mkdir -p control-station/updater
-          mkdir -p control-station/ethernet-view
-        shell: bash
-
-      ############################################
-      # BACKEND BUILDS
-      ############################################
-
-      - name: Build backend for Linux
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -o control-station/backend ./backend/cmd
-
-      - name: Build backend for Windows
-        if: matrix.os == 'windows-latest'
-        run: |
-          GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go build -o control-station/backend.exe ./backend/cmd
-
-      - name: Build backend for macOS
-        if: matrix.os == 'macos-latest'
-        run: |
-          GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -o control-station/backend ./backend/cmd
-
-      ############################################
-      # UPDATER BUILDS
-      ############################################
-
-      - name: Build updater for Linux
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o control-station/updater/updater ./updater
-
-      - name: Build updater for Windows
-        if: matrix.os == 'windows-latest'
-        run: |
-          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -o control-station/updater/updater.exe ./updater
-
-      - name: Build updater for macOS
-        if: matrix.os == 'macos-latest'
-        run: |
-          GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -o control-station/updater/updater ./updater
-
-      ############################################
-      # FRONTEND BUILDS
-      ############################################
-
-      - name: Install common-front dependencies
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Build common front dependencies
         working-directory: ./common-front
-        run: npm install
-
-      - name: Build common-front
-        working-directory: ./common-front
-        run: npm run build
-
-      - name: Build control-station
-        working-directory: ./control-station
         run: |
           npm install
           npm run build
-
-      - name: Copy control-station static files
-        run: |
-          cp -r ./control-station/static/* ./control-station/ || true
-
-      - name: Upload control-station artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: control-station-${{ matrix.os }}
-          path: ./control-station-*
-
-      - name: Build ethernet-view
+      
+      - name: Build ethernet view
         working-directory: ./ethernet-view
         run: |
           npm install
           npm run build
-
-      - name: Upload ethernet-view artifact
+          
+      - name: Upload ethernet view artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ethernet-view-${{ matrix.os }}
-          path: ./ethernet-view/static/*
-
-      ############################################
-      # BUILD testadj
-      ############################################
-
-      - name: Bundle testadj.py for Linux/macOS
-        if: matrix.os != 'windows-latest'
-        run: |
-          pyinstaller --onefile backend/cmd/testadj.py --distpath control-station/
+          name: ethernet-view
+          path: ethernet-view/static/*
+          retention-days: 7
+          compression-level: 9
           
-      - name: Bundle testadj.py for Windows
-        if: matrix.os == 'windows-latest'
+      - name: Build control station
+        working-directory: ./control-station
         run: |
-          pyinstaller --onefile backend/cmd/testadj.py --distpath control-station/ --name testadj.exe
+          npm install
+          npm run build
+          
+      - name: Upload control station artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: control-station
+          path: control-station/static/*
+          retention-days: 7
+          compression-level: 9
 
-      ############################################
-      # PACKAGE METADATA
-      ############################################
+  build-updater:
+    name: Build Updater
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            name: linux
+            build_cmd: |
+              CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o updater/output/updater-linux-amd64 ./updater
+            artifact_name: updater-linux
+            
+          - os: windows-latest
+            name: windows
+            build_cmd: |
+              $Env:CGO_ENABLED='0'
+              $Env:GOOS='windows'
+              $Env:GOARCH='amd64'
+              go build -o updater\output\updater-windows-amd64.exe ./updater
+            artifact_name: updater-windows
+            
+          - os: macos-latest
+            name: macos
+            build_cmd: |
+              CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o updater/output/updater-macos-amd64 ./updater
+              CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o updater/output/updater-macos-arm64 ./updater
+            artifact_name: updater-macos
 
-      - name: Copy additional files
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Mark workspace as safe
+        run: git config --global --add safe.directory $GITHUB_WORKSPACE
+        shell: bash
+      
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.21.3"
+          cache-dependency-path: updater/go.sum
+      
+      - name: Ensure dependencies
+        working-directory: updater
+        run: go mod tidy
+        shell: ${{ matrix.os == 'windows-latest' && 'pwsh' || 'bash' }}
+      
+      - name: Create output directory
+        run: mkdir -p updater/output
+        shell: bash
+      
+      - name: Build updater
+        run: ${{ matrix.build_cmd }}
+        shell: ${{ matrix.os == 'windows-latest' && 'pwsh' || 'bash' }}
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: updater/output/*
+          retention-days: 7
+          compression-level: 9
+
+  prepare-common-files:
+    name: Prepare Common Files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Create common files directory
+        run: mkdir -p common-files
+      
+      - name: Copy config.toml
+        run: cp backend/cmd/config.toml common-files/
+      
+      - name: Copy testadj.py
+        run: cp backend/cmd/testadj.py common-files/
+      
+      - name: Copy README.md
+        run: cp README.md common-files/
+      
+      - name: Copy VERSION.md
+        run: cp backend/cmd/VERSION.md common-files/
+      
+      - name: Upload common files artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: common-files
+          path: common-files/*
+          retention-days: 7
+          compression-level: 9
+
+  package-release:
+    name: Package Release
+    needs: [build-backend, build-frontend, build-updater, prepare-common-files]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release directories
         run: |
-          cp backend/cmd/config.toml control-station/
-          cp backend/cmd/VERSION.md control-station/
-          cp README.md control-station/
-
-      - name: Download control-station artifact
+          mkdir -p release
+          mkdir -p release/backends
+          mkdir -p release/updaters
+          mkdir -p release/frontends/ethernet-view
+          mkdir -p release/frontends/control-station
+      
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          name: control-station-${{ matrix.os }}
-          path: ./control-station/
-
-      - name: Ensure ethernet-view directory exists
-        run: mkdir -p ./control-station/ethernet-view
-
-      - name: Download ethernet-view artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ethernet-view-${{ matrix.os }}
-          path: ./control-station/ethernet-view/
-
-      - name: Create Linux ZIP
-        if: matrix.os == 'ubuntu-latest'
+          path: artifacts
+      
+      - name: Organize release files
         run: |
-          mkdir -p release-zips
-          cd control-station && zip -r ../release-zips/control-station-linux-x64.zip .
-        
-      - name: Create macOS x64 ZIP
-        if: matrix.os == 'macos-latest'
-        run: |
-          mkdir -p release-zips
-          cd control-station && zip -r ../release-zips/control-station-macos-x64.zip .
+          # Copy backends
+          cp -r artifacts/backend-linux/* release/backends/
+          cp -r artifacts/backend-windows/* release/backends/
+          cp -r artifacts/backend-macos/* release/backends/
           
-      - name: Create macOS ARM ZIP (on x64 runner)
-        if: matrix.os == 'macos-latest'
-        run: |
-          # Build ARM version specifically for this ZIP
-          GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build -o control-station/backend ./backend/cmd
-          GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -o control-station/updater/updater ./updater
-          cd control-station && zip -r ../release-zips/control-station-macos-arm.zip .
+          # Copy updaters
+          cp -r artifacts/updater-linux/* release/updaters/
+          cp -r artifacts/updater-windows/* release/updaters/
+          cp -r artifacts/updater-macos/* release/updaters/
           
-      - name: Create Windows ZIP
-        if: matrix.os == 'windows-latest'
+          # Copy frontends
+          cp -r artifacts/ethernet-view/* release/frontends/ethernet-view/
+          cp -r artifacts/control-station/* release/frontends/control-station/
+          
+          # Copy common files
+          cp -r artifacts/common-files/* release/
+      
+      - name: Create release archive
         run: |
-          mkdir -p release-zips
-          cd control-station && zip -r ../release-zips/control-station-windows-x64.zip .
-
-      ############################################
-      # CREATE DRAFT RELEASE
-      ############################################
-
-      - name: Create Draft GitHub Release
-        uses: softprops/action-gh-release@v1
+          VERSION="${{ github.event.inputs.version || github.event.release.tag_name || 'latest' }}"
+          cd release
+          zip -r ../software-release-$VERSION.zip .
+      
+      - name: Upload release package
+        uses: actions/upload-artifact@v4
         with:
-          tag_name: "v${{ github.run_number }}"
-          name: "Draft Release v${{ github.run_number }}"
-          draft: true
-          files: release-zips/control-station-*.zip
+          name: software-release
+          path: software-release-*.zip
+          retention-days: 7
+          compression-level: 9
+      
+      - name: Upload to release
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./software-release-${{ github.event.release.tag_name }}.zip
+          asset_name: software-release-${{ github.event.release.tag_name }}.zip
+          asset_content_type: application/zip
