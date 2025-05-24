@@ -1,0 +1,141 @@
+name: Full Release Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    name: Build & Package All Components
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.21.3"
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+
+      - name: Prepare Folder Structure
+        run: |
+          mkdir -p release/backend
+          mkdir -p release/updater
+          mkdir -p release/control-station/static
+          mkdir -p release/ethernet-view/static
+
+      ############################################
+      # BACKEND BUILDS
+      ############################################
+
+      - name: Build backend for Linux
+        run: |
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -o release/backend/backend-linux-64 ./backend/cmd
+
+      - name: Build backend for Windows
+        run: |
+          GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go build -o release/backend/backend-windows-64.exe ./backend/cmd
+
+      - name: Build backend for macOS Intel
+        run: |
+          GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -o release/backend/backend-macos-64 ./backend/cmd
+
+      - name: Build backend for macOS ARM64
+        run: |
+          GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build -o release/backend/backend-macos-m1 ./backend/cmd
+
+      ############################################
+      # UPDATER BUILDS
+      ############################################
+
+      - name: Build updater for Linux
+        run: |
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o release/updater/updater-linux ./updater
+
+      - name: Build updater for Windows
+        run: |
+          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -o release/updater/updater-windows.exe ./updater
+
+      - name: Build updater for macOS Intel
+        run: |
+          GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -o release/updater/updater-macos-64 ./updater
+
+      - name: Build updater for macOS ARM64
+        run: |
+          GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -o release/updater/updater-macos-m1 ./updater
+
+      ############################################
+      # FRONTEND BUILDS
+      ############################################
+
+      - name: Install common-front dependencies
+        working-directory: ./common-front
+        run: npm install
+
+      - name: Build common-front
+        working-directory: ./common-front
+        run: npm run build
+
+      - name: Build control-station
+        working-directory: ./control-station
+        run: |
+          npm install
+          npm run build
+          cp -r static/* ../../release/control-station/static/
+
+      - name: Build ethernet-view
+        working-directory: ./ethernet-view
+        run: |
+          npm install
+          npm run build
+          cp -r static/* ../../release/ethernet-view/static/
+
+      ############################################
+      # BUILD testadj
+      ############################################
+
+      - name: Bundle testadj.py
+        run: |
+          pyinstaller --onefile backend/cmd/testadj.py --distpath release/
+
+      ############################################
+      # PACKAGE METADATA
+      ############################################
+
+      - name: Copy additional files
+        run: |
+          cp backend/cmd/config.toml release/
+          cp backend/cmd/VERSION.md release/
+          cp README.md release/
+
+      - name: Create final ZIP
+        run: |
+          cd release
+          zip -r ../control-station.zip .
+
+      ############################################
+      # CREATE DRAFT RELEASE
+      ############################################
+
+      - name: Create Draft GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: "v${{ github.run_number }}"
+          name: "Draft Release v${{ github.run_number }}"
+          draft: true
+          files: control-station.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
