@@ -50,6 +50,7 @@ jobs:
       ############################################
 
       - name: Build backend for Linux
+        if: matrix.os == 'ubuntu-latest'
         run: |
           GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -o release/backend/backend-linux-64 ./backend/cmd
 
