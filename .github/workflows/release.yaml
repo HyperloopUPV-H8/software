@@ -19,15 +19,12 @@ jobs:
         include:
           - os: ubuntu-latest
             name: linux
-            container: 
-              image: golang:alpine
             setup: |
               apk update && apk add --no-cache libpcap-dev musl-dev gcc go
             build_cmd: |
               cd backend/cmd
               CGO_ENABLED=1 GOARCH=amd64 GOOS=linux go build -ldflags '-linkmode external -extldflags "-static"' -o ../output/backend-linux-amd64
             artifact_name: backend-linux
-            shell: bash
             
           - os: windows-latest
             name: windows
@@ -40,7 +37,6 @@ jobs:
               $env:GOOS="windows"
               go build -o ..\output\backend-windows-amd64.exe
             artifact_name: backend-windows
-            shell: pwsh
             
           - os: macos-latest
             name: macos
@@ -51,7 +47,6 @@ jobs:
               CGO_ENABLED=1 GOARCH=amd64 GOOS=darwin go build -o ../output/backend-macos-amd64
               CGO_ENABLED=1 GOARCH=arm64 GOOS=darwin go build -o ../output/backend-macos-arm64
             artifact_name: backend-macos
-            shell: bash
 
     steps:
       - uses: actions/checkout@v4
@@ -70,9 +65,15 @@ jobs:
         run: mkdir -p backend/output
         shell: bash
       
-      - name: Build backend
+      - name: Build backend (Linux/macOS)
+        if: matrix.os != 'windows-latest'
         run: ${{ matrix.build_cmd }}
-        shell: ${{ matrix.shell }}
+        shell: bash
+        
+      - name: Build backend (Windows)
+        if: matrix.os == 'windows-latest'
+        run: ${{ matrix.build_cmd }}
+        shell: pwsh
       
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -139,7 +140,6 @@ jobs:
             build_cmd: |
               CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o updater/output/updater-linux-amd64 ./updater
             artifact_name: updater-linux
-            shell: bash
             
           - os: windows-latest
             name: windows
@@ -149,7 +149,6 @@ jobs:
               $Env:GOARCH='amd64'
               go build -o updater\output\updater-windows-amd64.exe ./updater
             artifact_name: updater-windows
-            shell: pwsh
             
           - os: macos-latest
             name: macos
@@ -157,7 +156,6 @@ jobs:
               CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o updater/output/updater-macos-amd64 ./updater
               CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o updater/output/updater-macos-arm64 ./updater
             artifact_name: updater-macos
-            shell: bash
 
     steps:
       - uses: actions/checkout@v4
@@ -174,18 +172,31 @@ jobs:
           go-version: "1.21.3"
           cache-dependency-path: updater/go.sum
       
-      - name: Ensure dependencies
+      - name: Ensure dependencies (Linux/macOS)
+        if: matrix.os != 'windows-latest'
         working-directory: updater
         run: go mod tidy
-        shell: ${{ matrix.shell }}
+        shell: bash
+        
+      - name: Ensure dependencies (Windows)
+        if: matrix.os == 'windows-latest'
+        working-directory: updater
+        run: go mod tidy
+        shell: pwsh
       
       - name: Create output directory
         run: mkdir -p updater/output
         shell: bash
       
-      - name: Build updater
+      - name: Build updater (Linux/macOS)
+        if: matrix.os != 'windows-latest'
         run: ${{ matrix.build_cmd }}
-        shell: ${{ matrix.shell }}
+        shell: bash
+        
+      - name: Build updater (Windows)
+        if: matrix.os == 'windows-latest'
+        run: ${{ matrix.build_cmd }}
+        shell: pwsh
       
       - name: Upload artifact
         uses: actions/upload-artifact@v4
