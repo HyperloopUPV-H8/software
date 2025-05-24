@@ -110,7 +110,7 @@ jobs:
       - name: Upload control-station artifact
         uses: actions/upload-artifact@v4
         with:
-          name: control-station
+          name: control-station-${{ matrix.os }}
           path: ./control-station/static/*
 
       - name: Build ethernet-view
@@ -122,7 +122,7 @@ jobs:
       - name: Upload ethernet-view artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ethernet-view
+          name: ethernet-view-${{ matrix.os }}
           path: ./ethernet-view/static/*
 
       ############################################
@@ -149,7 +149,7 @@ jobs:
       - name: Download control-station artifact
         uses: actions/download-artifact@v4
         with:
-          name: control-station
+          name: control-station-${{ matrix.os }}
           path: ./release/control-station/static
 
       - name: Ensure ethernet-view directory exists
@@ -158,7 +158,7 @@ jobs:
       - name: Download ethernet-view artifact
         uses: actions/download-artifact@v4
         with:
-          name: ethernet-view
+          name: ethernet-view-${{ matrix.os }}
           path: ./release/ethernet-view/static
 
       - name: Create final ZIP
