@@ -14,11 +14,14 @@ jobs:
   build-backend:
     name: Build Backend
     runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
     strategy:
       matrix:
         include:
           - os: ubuntu-latest
             name: linux
+            container:
+              image: golang:alpine
             setup: |
               apk update && apk add --no-cache libpcap-dev musl-dev gcc go
             build_cmd: |
