@@ -6,7 +6,11 @@ on:
 jobs:
   build-and-release:
     name: Build & Package All Components
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
 
     steps:
       - name: Checkout Repository
@@ -53,10 +57,12 @@ jobs:
           GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go build -o release/backend/backend-windows-64.exe ./backend/cmd
 
       - name: Build backend for macOS Intel
+        if: matrix.os == 'macos-latest'
         run: |
           GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -o release/backend/backend-macos-64 ./backend/cmd
 
       - name: Build backend for macOS ARM64
+        if: matrix.os == 'macos-latest'
         run: |
           GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build -o release/backend/backend-macos-m1 ./backend/cmd
 
