@@ -33,8 +33,8 @@ import (
 	vehicle_models "github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker"
-	connection_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/connection"
 	blcu_topics "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/blcu"
+	connection_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/connection"
 	data_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/data"
 	logger_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/logger"
 	message_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/message"
@@ -206,16 +206,23 @@ func main() {
 						updaterExe = filepath.Join(updatersDir, "updater-macos-64")
 					default:
 						fmt.Fprintf(os.Stderr, "Unsupported updater: %s\n", osType)
-						os.Exit(1)
+						fmt.Println("Skipping update. Proceeding with the current version.")
+						// break
 					}
 
-					cmd := exec.Command(updaterExe)
-					cmd.Dir = updatersDir
-					cmd.Stdout = os.Stdout
-					cmd.Stderr = os.Stderr
-					if err := cmd.Run(); err != nil {
-						fmt.Fprintf(os.Stderr, "Error launching updater: %v\n", err)
-						os.Exit(1)
+					if _, err := os.Stat(updaterExe); err == nil {
+						cmd := exec.Command(updaterExe)
+						cmd.Dir = updatersDir
+						cmd.Stdout = os.Stdout
+						cmd.Stderr = os.Stderr
+						if err := cmd.Run(); err != nil {
+							fmt.Fprintf(os.Stderr, "Error launching updater: %v\n", err)
+							os.Exit(1)
+						}
+						os.Exit(0)
+					} else {
+						fmt.Fprintf(os.Stderr, "Updater not found: %s\n", updaterExe)
+						fmt.Println("Skipping update. Proceeding with the current version.")
 					}
 				}
 
