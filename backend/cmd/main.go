@@ -219,14 +219,12 @@ func main() {
 							fmt.Fprintf(os.Stderr, "Error launching updater: %v\n", err)
 							os.Exit(1)
 						}
-						os.Exit(0)
 					} else {
 						fmt.Fprintf(os.Stderr, "Updater not found: %s\n", updaterExe)
 						fmt.Println("Skipping update. Proceeding with the current version.")
 					}
 				}
 
-				os.Exit(0)
 			} else {
 				fmt.Println("Skipping update. Proceeding with the current version.")
 			}
