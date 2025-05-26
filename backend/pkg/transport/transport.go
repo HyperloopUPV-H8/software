@@ -208,6 +208,37 @@ func (transport *Transport) SendMessage(message abstraction.TransportMessage) er
 // handlePacketEvent is used to send an order to one of the connected boards
 func (transport *Transport) handlePacketEvent(message PacketMessage) error {
 	eventLogger := transport.logger.With().Str("type", fmt.Sprintf("%T", message.Packet)).Uint16("id", uint16(message.Id())).Logger()
+
+	if message.Id() == 0 {
+		eventLogger.Info().Msg("broadcasting packet id 0")
+		data, err := transport.encoder.Encode(message.Packet)
+		if err != nil {
+			eventLogger.Error().Stack().Err(err).Msg("encode")
+			transport.errChan <- err
+			return err
+		}
+
+		transport.connectionsMx.Lock()
+		defer transport.connectionsMx.Unlock()
+		for target, conn := range transport.connections {
+			eventLogger := eventLogger.With().Str("target", string(target)).Logger()
+
+			totalWritten := 0
+			for totalWritten < len(data) {
+				n, err := conn.Write(data[totalWritten:])
+				eventLogger.Trace().Int("amount", n).Msg("written chunk")
+				totalWritten += n
+				if err != nil {
+					eventLogger.Error().Stack().Err(err).Msg("write")
+					transport.errChan <- err
+					return err
+				}
+			}
+			eventLogger.Info().Msg("sent")
+		}
+		return nil
+	}
+
 	target, ok := transport.idToTarget[message.Id()]
 	if !ok {
 		eventLogger.Debug().Msg("target not found")
