@@ -24,4 +24,4 @@ test = true
 [network]
 manual = false
 [transport]
-propagate_fault = false
+propagate_fault = true
