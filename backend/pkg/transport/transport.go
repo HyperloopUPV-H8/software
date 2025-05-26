@@ -330,6 +330,15 @@ func (transport *Transport) handleConversation(socket network.Socket, reader io.
 				return
 			}
 
+			// Intercept packets with id == 0 and replicate
+			if packet.Id() == 0 {
+				conversationLogger.Info().Msg("replicating packet with id 0 to all boards")
+				err := transport.handlePacketEvent(NewPacketMessage(packet))
+				if err != nil {
+					conversationLogger.Error().Err(err).Msg("failed to replicate packet")
+				}
+			}
+
 			transport.api.Notification(NewPacketNotification(packet, srcAddr, dstAddr, time.Now()))
 		}
 	}()
