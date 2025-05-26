@@ -172,6 +172,14 @@ func (transport *Transport) handleTCPConn(conn net.Conn) error {
 				return
 			}
 
+			if transport.propagateFault && packet.Id() == 0 {
+				connectionLogger.Info().Msg("replicating packet with id 0 to all boards")
+				err := transport.handlePacketEvent(NewPacketMessage(packet))
+				if err != nil {
+					connectionLogger.Error().Err(err).Msg("failed to replicate packet")
+				}
+			}
+
 			from := conn.RemoteAddr().String()
 			to := conn.LocalAddr().String()
 
