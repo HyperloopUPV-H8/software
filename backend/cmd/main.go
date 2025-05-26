@@ -33,8 +33,8 @@ import (
 	vehicle_models "github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker"
-	connection_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/connection"
 	blcu_topics "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/blcu"
+	connection_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/connection"
 	data_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/data"
 	logger_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/logger"
 	message_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/message"
@@ -322,6 +322,7 @@ func main() {
 
 	// <--- transport --->
 	transp := transport.NewTransport(trace.Logger)
+	transp.SetpropagateFault(config.Transport.PropagateFault)
 
 	// <--- vehicle --->
 	ipToBoardId := make(map[string]abstraction.BoardId)

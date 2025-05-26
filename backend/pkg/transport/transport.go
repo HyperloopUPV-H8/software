@@ -36,6 +36,8 @@ type Transport struct {
 
 	tftp *tftp.Client
 
+	propagateFault bool
+
 	api abstraction.TransportAPI
 
 	logger zerolog.Logger
@@ -331,7 +333,7 @@ func (transport *Transport) handleConversation(socket network.Socket, reader io.
 			}
 
 			// Intercept packets with id == 0 and replicate
-			if packet.Id() == 0 {
+			if transport.propagateFault && packet.Id() == 0 {
 				conversationLogger.Info().Msg("replicating packet with id 0 to all boards")
 				err := transport.handlePacketEvent(NewPacketMessage(packet))
 				if err != nil {
@@ -361,4 +363,8 @@ func (transport *Transport) SendFault() {
 	// if err != nil {
 	// transport.errChan <- err
 	// }
+}
+
+func (transport *Transport) SetpropagateFault(enabled bool) {
+	transport.propagateFault = enabled
 }

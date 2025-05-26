@@ -23,3 +23,5 @@ branch = "main" # Leave blank when using ADJ as a submodule (like this: "")
 test = true
 [network]
 manual = false
+[transport]
+propagate_fault = false
