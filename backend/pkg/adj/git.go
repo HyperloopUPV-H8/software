@@ -1,6 +1,7 @@
 package adj
 
 import (
+	"log"
 	"os"
 	"path/filepath"
 
@@ -35,6 +36,7 @@ func updateRepo(AdjBranch string) error {
 		_, err = git.PlainClone(tempPath, false, cloneOptions)
 		if err != nil {
 			// If the clone fails, work with the local ADJ
+			log.Printf("Warning: Could not clone ADJ branch '%s' from remote. Working with local ADJ. Error: %v", AdjBranch, err)
 			return nil
 		}
 
