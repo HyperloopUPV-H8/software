@@ -14,9 +14,14 @@ type Network struct {
 	Manual bool
 }
 
+type Transport struct {
+	PropagateFault bool
+}
+
 type Config struct {
-	Vehicle vehicle.Config
-	Server  server.Config
-	Adj     Adj
-	Network Network
+	Vehicle   vehicle.Config
+	Server    server.Config
+	Adj       Adj
+	Network   Network
+	Transport Transport
 }
