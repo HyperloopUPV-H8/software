@@ -33,8 +33,8 @@ import (
 	vehicle_models "github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker"
-	connection_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/connection"
 	blcu_topics "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/blcu"
+	connection_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/connection"
 	data_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/data"
 	logger_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/logger"
 	message_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/message"
@@ -87,7 +87,7 @@ var currentVersion string
 
 func main() {
 
-	versionFile := "VERSION.md"
+	versionFile := "VERSION.txt"
 	versionData, err := os.ReadFile(versionFile)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error reading version file (%s): %v\n", versionFile, err)
@@ -185,41 +185,35 @@ func main() {
 				} else {
 
 					fmt.Println("Backend folder not detected. Launching existing updater...")
-					osType := detectOS()
 
 					execPath, err := os.Executable()
 					if err != nil {
 						fmt.Fprintf(os.Stderr, "Error getting executable path: %v\n", err)
 						os.Exit(1)
 					}
-					updatersDir := filepath.Join(filepath.Dir(execPath), "updaters")
-
-					var updaterExe string
-					switch osType {
-					case "updaters/updater-windows-64.exe":
-						updaterExe = filepath.Join(updatersDir, "updater-windows-64")
-					case "updaters/updater-linux":
-						updaterExe = filepath.Join(updatersDir, "updater-linux")
-					case "updaters/updater-macos-m1":
-						updaterExe = filepath.Join(updatersDir, "updater-macos-m1")
-					case "updaters/updater-macos-64":
-						updaterExe = filepath.Join(updatersDir, "updater-macos-64")
-					default:
-						fmt.Fprintf(os.Stderr, "Unsupported updater: %s\n", osType)
-						os.Exit(1)
+					execDir := filepath.Dir(execPath)
+          
+					updaterExe := filepath.Join(execDir, "updater")
+					// En Windows el ejecutable lleva extensión .exe
+					if runtime.GOOS == "windows" {
+						updaterExe += ".exe"
 					}
 
-					cmd := exec.Command(updaterExe)
-					cmd.Dir = updatersDir
-					cmd.Stdout = os.Stdout
-					cmd.Stderr = os.Stderr
-					if err := cmd.Run(); err != nil {
-						fmt.Fprintf(os.Stderr, "Error launching updater: %v\n", err)
-						os.Exit(1)
+					if _, err := os.Stat(updaterExe); err == nil {
+						cmd := exec.Command(updaterExe)
+						cmd.Dir = execDir
+						cmd.Stdout = os.Stdout
+						cmd.Stderr = os.Stderr
+						if err := cmd.Run(); err != nil {
+							fmt.Fprintf(os.Stderr, "Error launching updater: %v\n", err)
+							os.Exit(1)
+						}
+					} else {
+						fmt.Fprintf(os.Stderr, "Updater not found: %s\n", updaterExe)
+						fmt.Println("Skipping update. Proceeding with the current version.")
 					}
 				}
 
-				os.Exit(0)
 			} else {
 				fmt.Println("Skipping update. Proceeding with the current version.")
 			}
@@ -322,6 +316,7 @@ func main() {
 
 	// <--- transport --->
 	transp := transport.NewTransport(trace.Logger)
+	transp.SetpropagateFault(config.Transport.PropagateFault)
 
 	// <--- vehicle --->
 	ipToBoardId := make(map[string]abstraction.BoardId)
@@ -742,14 +737,9 @@ func getLatestVersionFromGitHub() (string, error) {
 func detectOS() string {
 	switch runtime.GOOS {
 	case "windows":
-		return "updaters/updater-windows-64.exe"
-	case "darwin":
-		if strings.Contains(runtime.GOARCH, "arm") {
-			return "updaters/updater-macos-m1"
-		}
-		return "updaters/updater-macos-64"
-	case "linux":
-		return "updaters/updater-linux"
+		return "updater.exe"
+	case "darwin", "linux":
+		return "updater"
 	default:
 		fmt.Fprintf(os.Stderr, "Unsupported operating system: %s\n", runtime.GOOS)
 		os.Exit(1)

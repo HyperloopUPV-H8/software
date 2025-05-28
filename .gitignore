@@ -10,3 +10,7 @@ backend/cmd/cmd
 .idea/
 .vscode/
 .prettierrc
+
+# Claude
+CLAUDE.md
+.claude
