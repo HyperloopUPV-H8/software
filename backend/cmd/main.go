@@ -316,6 +316,7 @@ func main() {
 
 	// <--- transport --->
 	transp := transport.NewTransport(trace.Logger)
+	transp.SetpropagateFault(config.Transport.PropagateFault)
 
 	// <--- vehicle --->
 	ipToBoardId := make(map[string]abstraction.BoardId)
