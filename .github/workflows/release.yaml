@@ -269,8 +269,10 @@ jobs:
       - name: Copy README.md
         run: cp README.md common-files/
       
-      - name: Copy VERSION.md
-        run: cp backend/cmd/VERSION.md common-files/
+      - name: Create VERSION.txt
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          echo "$VERSION" > common-files/VERSION.txt
       
       - name: Upload common files artifact
         uses: actions/upload-artifact@v4
@@ -292,7 +294,7 @@ jobs:
       
       - name: Create release directories for each platform
         run: |
-          VERSION="${{ github.event.inputs.version || github.event.release.tag_name || 'latest' }}"
+          VERSION="${{ github.event.inputs.version }}"
           
           # Create directory structure for each platform
           mkdir -p release-linux
@@ -302,7 +304,7 @@ jobs:
       
       - name: Organize Linux release files
         run: |
-          VERSION="${{ github.event.inputs.version || github.event.release.tag_name || 'latest' }}"
+          VERSION="${{ github.event.inputs.version }}"
           
           # Copy Linux backend
           cp artifacts/backend-linux/backend-linux-amd64 release-linux/backend
@@ -325,7 +327,7 @@ jobs:
       
       - name: Organize Windows release files
         run: |
-          VERSION="${{ github.event.inputs.version || github.event.release.tag_name || 'latest' }}"
+          VERSION="${{ github.event.inputs.version }}"
           
           # Copy Windows backend
           cp artifacts/backend-windows/backend-windows-amd64.exe release-windows/backend.exe
@@ -348,7 +350,7 @@ jobs:
       
       - name: Organize macOS Intel release files
         run: |
-          VERSION="${{ github.event.inputs.version || github.event.release.tag_name || 'latest' }}"
+          VERSION="${{ github.event.inputs.version }}"
           
           # Copy macOS Intel backend
           cp artifacts/backend-macos/backend-macos-amd64 release-macos/backend
@@ -371,7 +373,7 @@ jobs:
       
       - name: Organize macOS ARM64 release files
         run: |
-          VERSION="${{ github.event.inputs.version || github.event.release.tag_name || 'latest' }}"
+          VERSION="${{ github.event.inputs.version }}"
           
           # Copy macOS ARM64 backend
           cp artifacts/backend-macos/backend-macos-arm64 release-macos-arm64/backend
