@@ -185,7 +185,6 @@ func main() {
 				} else {
 
 					fmt.Println("Backend folder not detected. Launching existing updater...")
-					updaterName := detectOS()
 
 					execPath, err := os.Executable()
 					if err != nil {
@@ -193,20 +192,28 @@ func main() {
 						os.Exit(1)
 					}
 					execDir := filepath.Dir(execPath)
+          
+					updaterExe := filepath.Join(execDir, "updater")
+					// En Windows el ejecutable lleva extensión .exe
+					if runtime.GOOS == "windows" {
+						updaterExe += ".exe"
+					}
 
-					updaterExe := filepath.Join(execDir, updaterName)
-
-					cmd := exec.Command(updaterExe)
-					cmd.Dir = execDir
-					cmd.Stdout = os.Stdout
-					cmd.Stderr = os.Stderr
-					if err := cmd.Run(); err != nil {
-						fmt.Fprintf(os.Stderr, "Error launching updater: %v\n", err)
-						os.Exit(1)
+					if _, err := os.Stat(updaterExe); err == nil {
+						cmd := exec.Command(updaterExe)
+						cmd.Dir = execDir
+						cmd.Stdout = os.Stdout
+						cmd.Stderr = os.Stderr
+						if err := cmd.Run(); err != nil {
+							fmt.Fprintf(os.Stderr, "Error launching updater: %v\n", err)
+							os.Exit(1)
+						}
+					} else {
+						fmt.Fprintf(os.Stderr, "Updater not found: %s\n", updaterExe)
+						fmt.Println("Skipping update. Proceeding with the current version.")
 					}
 				}
 
-				os.Exit(0)
 			} else {
 				fmt.Println("Skipping update. Proceeding with the current version.")
 			}
