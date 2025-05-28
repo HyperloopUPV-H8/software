@@ -93,6 +93,7 @@ func main() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Warning: error reading version file (%s): %v\n", versionFile, err)
 		checkUpdate = false
+		fmt.Println("Skipping version check. Proceeding with the current version.", currentVersion)
 	} else {
 		currentVersion = strings.TrimSpace(string(versionData))
 	}
