@@ -87,7 +87,7 @@ var currentVersion string
 
 func main() {
 
-	versionFile := "VERSION.md"
+	versionFile := "VERSION.txt"
 	versionData, err := os.ReadFile(versionFile)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error reading version file (%s): %v\n", versionFile, err)
@@ -192,7 +192,7 @@ func main() {
 						os.Exit(1)
 					}
 					execDir := filepath.Dir(execPath)
-
+          
 					updaterExe := filepath.Join(execDir, "updater")
 					// En Windows el ejecutable lleva extensión .exe
 					if runtime.GOOS == "windows" {
@@ -737,14 +737,9 @@ func getLatestVersionFromGitHub() (string, error) {
 func detectOS() string {
 	switch runtime.GOOS {
 	case "windows":
-		return "updaters/updater-windows-64.exe"
-	case "darwin":
-		if strings.Contains(runtime.GOARCH, "arm") {
-			return "updaters/updater-macos-m1"
-		}
-		return "updaters/updater-macos-64"
-	case "linux":
-		return "updaters/updater-linux"
+		return "updater.exe"
+	case "darwin", "linux":
+		return "updater"
 	default:
 		fmt.Fprintf(os.Stderr, "Unsupported operating system: %s\n", runtime.GOOS)
 		os.Exit(1)
