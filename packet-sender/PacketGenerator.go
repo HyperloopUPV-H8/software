@@ -3,46 +3,51 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
+	"io"
 	"log"
 	"math"
 	"math/rand"
-	"strconv"
+	"os"
+	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
-	"github.com/HyperloopUPV-H8/h9-backend/pkg/adj"
+	adj_module "github.com/HyperloopUPV-H8/h9-backend/pkg/adj"
 )
 
 type PacketGenerator struct {
-	packets []Packet
+	packets []adj_module.Packet
 }
 
 func New() PacketGenerator {
-	adj, err := adj.NewADJ("HVSCU-Cabinet", false)
+
+	err := CopyDir(path.Join("..", "backend", "cmd", "adj"), "adj")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	adj, err := adj_module.NewADJ("", false)
 	if err != nil {
 		log.Fatalf("Failed to load ADJ: %v\n", err)
 	}
 
-	packets := make([]Packet, 0)
+	boards := adj.Boards
 
-	for _, board := range adj.Boards {
+	packets := make([]adj_module.Packet, 0)
+
+	for _, board := range boards {
 		for _, packet := range board.Packets {
 			if packet.Type != "data" {
 				continue
 			}
 
-			id, err := strconv.ParseUint(strconv.Itoa(int(packet.Id)), 10, 16)
-			if err != nil {
-				log.Fatalf("data transfer: AddPacket: %s\n", err)
-			}
-
-			packets = append(packets, Packet{
-				ID:           uint16(id),
+			packets = append(packets, adj_module.Packet{
+				Id:           packet.Id,
 				Name:         packet.Name,
-				HexValue:     "",
-				Count:        0,
-				CycleTime:    0,
-				Measurements: getMeasurements(packet.Variables),
+				Type:         packet.Type,
+				Variables:    packet.Variables,
+				VariablesIds: packet.VariablesIds,
 			})
 		}
 	}
@@ -56,64 +61,43 @@ func New() PacketGenerator {
 
 func (pg *PacketGenerator) CreateRandomPacket() []byte {
 	if len(pg.packets) == 0 {
-
 		return nil
 	}
 
 	randomIndex := rand.Int63n(int64(len(pg.packets)))
 	randomPacket := pg.packets[randomIndex]
 
-	if len(randomPacket.Measurements) == 0 {
-
-		log.Printf("The packet with ID %d has no measurements\n", randomPacket.ID)
+	if len(randomPacket.VariablesIds) == 0 {
+		log.Printf("The packet with ID %d has no measurements\n", randomPacket.Id)
 		return nil
 	}
 
 	buff := bytes.NewBuffer(make([]byte, 0))
-	binary.Write(buff, binary.LittleEndian, randomPacket.ID)
 
-	for _, measurement := range randomPacket.Measurements {
+	binary.Write(buff, binary.LittleEndian, randomPacket.Id)
+
+	for _, measurement := range randomPacket.Variables {
 		if strings.Contains(measurement.Type, "enum") {
-
-			list := strings.Split(strings.ReplaceAll(strings.TrimSuffix(strings.TrimPrefix(measurement.Type, "enum("), ")"), " ", ""), ",")
-			if len(list) == 0 {
-
-				log.Printf("Empty list for enum: %v\n", measurement.Type)
-				continue
-			}
-
-			randomIndex := rand.Int63n(int64(len(list)))
-			if randomIndex >= 0 && randomIndex < int64(len(list)) {
-				binary.Write(buff, binary.LittleEndian, uint8(randomIndex))
-			} else {
-
-				log.Printf("Index out of range for enum: %v, index: %d, length: %d\n", measurement.Type, randomIndex, len(list))
-				continue
-			}
+			binary.Write(buff, binary.LittleEndian, uint8(rand.Int63n(int64(len(strings.Split(strings.ReplaceAll(strings.TrimSuffix(strings.TrimPrefix(measurement.Type, "enum("), ")"), " ", ""), ","))))))
 		} else if measurement.Type == "bool" {
-
 			binary.Write(buff, binary.LittleEndian, rand.Int31n(2) == 1)
 		} else if measurement.Type != "string" {
-
 			var number float64
-			if len(measurement.WarningRange) < 2 {
-
-				continue
+			if len(measurement.WarningRange) == 0 {
+				number = mapNumberToRange(rand.Float64(), measurement.WarningRange, measurement.Type)
+			} else if measurement.WarningRange[0] != nil && measurement.WarningRange[1] != nil {
+				low := *measurement.WarningRange[0] * 0.8
+				high := *measurement.WarningRange[1] * 1.2
+				number = mapNumberToRange(rand.Float64(), []*float64{&low, &high}, measurement.Type)
+			} else {
+				// Fallback if any bound is nil
+				number = mapNumberToRange(rand.Float64(), []*float64{}, measurement.Type)
 			}
-
-			number = mapNumberToRange(
-				rand.Float64(),
-				[]float64{
-					measurement.WarningRange[0] * 0.8,
-					measurement.WarningRange[1] * 1.2,
-				},
-				measurement.Type,
-			)
 			writeNumberAsBytes(number, measurement.Type, buff)
 		} else {
-
-			continue
+			return nil
 		}
+
 	}
 
 	return buff.Bytes()
@@ -125,9 +109,9 @@ func (pg *PacketGenerator) CreateSinePacket() []byte {
 
 	buff := bytes.NewBuffer(make([]byte, 0))
 
-	binary.Write(buff, binary.LittleEndian, randomPacket.ID)
+	binary.Write(buff, binary.LittleEndian, randomPacket.Id)
 
-	for _, measurement := range randomPacket.Measurements {
+	for _, measurement := range randomPacket.Variables {
 		if strings.Contains(measurement.Type, "enum") {
 			binary.Write(buff, binary.LittleEndian, uint8(1))
 		} else if measurement.Type != "string" {
@@ -151,11 +135,11 @@ func generateSinusoidalValue() float64 {
 	return value
 }
 
-func mapNumberToRange(number float64, numberRange []float64, numberType string) float64 {
+func mapNumberToRange(number float64, numberRange []*float64, numberType string) float64 {
 	if len(numberRange) == 0 {
 		return number * getTypeMaxValue(numberType)
 	} else {
-		return (number * (numberRange[1] - numberRange[0])) + numberRange[0]
+		return (number * (*numberRange[1] - *numberRange[0])) + *numberRange[0]
 	}
 }
 
@@ -227,88 +211,39 @@ func writeNumberAsBytes(number float64, numberType string, buff *bytes.Buffer) {
 	}
 }
 
-func (pg *PacketGenerator) AddPacket(boardName string, packet adj.Packet) {
-	if packet.Type != "data" {
-		return
-	}
-
-	id, err := strconv.ParseUint(strconv.Itoa(int(packet.Id)), 10, 16)
-	if err != nil {
-		log.Fatalf("data transfer: AddPacket: %s\n", err)
-	}
-
-	pg.packets = append(pg.packets, Packet{
-		ID:           uint16(id),
-		Name:         packet.Name,
-		HexValue:     "",
-		Count:        0,
-		CycleTime:    0,
-		Measurements: getMeasurements(packet.Variables),
-	})
-
-}
-
-func getMeasurements(variables []adj.Measurement) []Measurement {
-	measurements := make([]Measurement, 0, len(variables))
-	for _, value := range variables {
-		measurements = append(measurements,
-			Measurement{
-				ID:   value.Id,
-				Name: value.Name,
-				Type: value.Type,
-				//TODO: make sure added property (Value) doesn't break stuff
-				Value:        getDefaultValue(value.Type),
-				Units:        value.DisplayUnits,
-				SafeRange:    parseRange(value.SafeRange),
-				WarningRange: parseRange(value.WarningRange),
-			},
-		)
-	}
-	return measurements
-}
-
-func parseRange(literal []*float64) []float64 {
-	if len(literal) == 0 {
-		return make([]float64, 0)
-	}
-
-	numRange := make([]float64, 0)
-
-	for _, val := range literal {
-		if val != nil {
-			numRange = append(numRange, *val)
+// Copies a directory recursively from src to dst
+func CopyDir(src string, dst string) error {
+	return filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
 		}
+		relPath, err := filepath.Rel(src, path)
+		if err != nil {
+			return err
+		}
+		targetPath := filepath.Join(dst, relPath)
+		if info.IsDir() {
+			return os.MkdirAll(targetPath, info.Mode())
+		}
+		// Copy file
+		return copyFile(path, targetPath, info.Mode())
+	})
+}
+
+func copyFile(src, dst string, perm os.FileMode) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
 	}
-
-	return numRange
-}
-
-func getDefaultValue(valueType string) any {
-	switch valueType {
-	case "uint8", "uint16", "uint32", "uint64", "int8", "int16", "int32", "int64", "float32", "float64":
-		return 0
-	case "bool":
-		return false
-	default:
-		return "Default"
+	defer in.Close()
+	out, err := os.Create(dst)
+	if err != nil {
+		return err
 	}
-}
-
-type Packet struct {
-	ID           uint16        `json:"id"`
-	Name         string        `json:"name"`
-	HexValue     string        `json:"hexValue"`
-	Count        uint16        `json:"count"`
-	CycleTime    int64         `json:"cycleTime"`
-	Measurements []Measurement `json:"measurements"`
-}
-
-type Measurement struct {
-	ID           string    `json:"id"`
-	Name         string    `json:"name"`
-	Type         string    `json:"type"`
-	Value        any       `json:"value"`
-	Units        string    `json:"units"`
-	SafeRange    []float64 `json:"safeRange"`
-	WarningRange []float64 `json:"warningRange"`
+	defer out.Close()
+	_, err = io.Copy(out, in)
+	if err != nil {
+		return err
+	}
+	return out.Chmod(perm)
 }

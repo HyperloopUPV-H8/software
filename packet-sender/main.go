@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	lip   string = "127.0.0.3"
+	lip   string = "127.0.0.1"
 	lport uint16 = 8000
-	rip   string = "127.0.0.4"
+	rip   string = "127.0.0.9"
 	rport uint16 = 8000
 )
 
@@ -64,6 +64,7 @@ func main() {
 	defer conn.Close()
 
 	packetGenerator := New()
+	fmt.Printf("Loaded %d packets\n", len(packetGenerator.packets))
 	fmt.Println("Sending packets")
 
 	count := make(chan struct{}, 10000)
