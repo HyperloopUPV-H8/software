@@ -199,7 +199,7 @@ func extractBinaryFromZip(zipPath, binaryName string) (string, error) {
 	defer r.Close()
 
 	var binaryPath string
-	parentDir, _ := filepath.Abs(filepath.Join(".", ".."))
+	parentDir, _ := filepath.Abs(".")
 
 	for _, f := range r.File {
 		baseName := filepath.Base(f.Name)
