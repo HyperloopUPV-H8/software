@@ -3,12 +3,12 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 	"io"
 	"log"
 	"math"
 	"math/rand"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -20,57 +20,38 @@ type PacketGenerator struct {
 	packets []adj_module.Packet
 }
 
-func New() PacketGenerator {
-	var err error
-	err = os.RemoveAll("adj")
-	if err != nil {
-		log.Fatalf("Failed to delete ADJ")
-	}
-
-	err = CopyDir(path.Join("..", "backend", "cmd", "adj"), "adj")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	adj, err := adj_module.NewADJ("", false)
-	if err != nil {
-		log.Fatalf("Failed to load ADJ: %v\n", err)
-	}
-
-	boards := adj.Boards
+func getBoardPackets(boardconn *boardConn) {
 
 	packets := make([]adj_module.Packet, 0)
 
-	for _, board := range boards {
-		for _, packet := range board.Packets {
-			if packet.Type != "data" {
-				continue
-			}
-
-			packets = append(packets, adj_module.Packet{
-				Id:           packet.Id,
-				Name:         packet.Name,
-				Type:         packet.Type,
-				Variables:    packet.Variables,
-				VariablesIds: packet.VariablesIds,
-			})
+	for _, packet := range boardconn.board.Packets {
+		if packet.Type != "data" {
+			continue
 		}
+
+		packets = append(packets, adj_module.Packet{
+			Id:           packet.Id,
+			Name:         packet.Name,
+			Type:         packet.Type,
+			Variables:    packet.Variables,
+			VariablesIds: packet.VariablesIds,
+		})
 	}
 
-	pg := PacketGenerator{
-		packets: packets,
-	}
+	boardconn.packets = packets
 
-	return pg
+	for _, p := range packets {
+		fmt.Println("Loaded packet ID:", p.Id)
+	}
 }
 
-func (pg *PacketGenerator) CreateRandomPacket() []byte {
-	if len(pg.packets) == 0 {
+func (board *boardConn) CreateRandomPacket() []byte {
+	if len(board.packets) == 0 {
 		return nil
 	}
 
-	randomIndex := rand.Int63n(int64(len(pg.packets)))
-	randomPacket := pg.packets[randomIndex]
+	randomIndex := rand.Int63n(int64(len(board.packets)))
+	randomPacket := board.packets[randomIndex]
 
 	if len(randomPacket.VariablesIds) == 0 {
 		log.Printf("The packet with ID %d has no measurements\n", randomPacket.Id)
@@ -108,9 +89,9 @@ func (pg *PacketGenerator) CreateRandomPacket() []byte {
 	return buff.Bytes()
 }
 
-func (pg *PacketGenerator) CreateSinePacket() []byte {
-	randomIndex := rand.Int63n(int64(len(pg.packets)))
-	randomPacket := pg.packets[randomIndex]
+func (board *boardConn) CreateSinePacket() []byte {
+	randomIndex := rand.Int63n(int64(len(board.packets)))
+	randomPacket := board.packets[randomIndex]
 
 	buff := bytes.NewBuffer(make([]byte, 0))
 

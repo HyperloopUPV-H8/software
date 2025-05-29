@@ -1,19 +1,17 @@
 package main
 
 import (
+	"encoding/binary"
 	"fmt"
 	"log"
+	"math/rand"
 	"net"
 	"os"
 	"os/signal"
+	"path"
 	"time"
-)
 
-const (
-	lip   string = "127.0.0.1"
-	lport uint16 = 8000
-	rip   string = "127.0.0.9"
-	rport uint16 = 8000
+	adj_module "github.com/HyperloopUPV-H8/h9-backend/pkg/adj"
 )
 
 /* package main
@@ -58,36 +56,68 @@ func generatePackets(adjInstance adj.ADJ) []adj.Packet {
 	return allPackets
 }*/
 
-func main() {
-	_ = createListener(lip, lport, rip, rport)
-	conn := getConn(lip, lport, rip, rport)
-	defer conn.Close()
+type boardConn struct {
+	conn    *net.UDPConn
+	packets []adj_module.Packet
+	board   adj_module.Board
+}
 
-	packetGenerator := New()
-	fmt.Printf("Loaded %d packets\n", len(packetGenerator.packets))
-	fmt.Println("Sending packets")
+func main() {
+
+	adj := getADJ()
+
+	backend_address := adj.Info.Addresses["BACKEND"]
+	backend_port := adj.Info.Ports["UDP"]
+
+	// Create a listener so the packets don't get lost (the backend will sniff them)
+	listener, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.ParseIP(backend_address), Port: int(backend_port)})
+	if err != nil {
+		log.Fatalf("Error creando listener UDP: %v", err)
+	}
+	defer listener.Close()
+
+	conns := getConns(adj)
+
+	defer func() {
+		for _, c := range conns {
+			c.conn.Close()
+		}
+	}()
+
+	// Get the list of packets for each board
+	for i := range conns {
+		getBoardPackets(&conns[i])
+	}
 
 	count := make(chan struct{}, 10000)
 	start := time.Now()
 	prev := time.Now()
 	go func() {
+		ticker := time.NewTicker(10 * time.Millisecond)
+		defer ticker.Stop()
 		for {
-			packet := packetGenerator.CreateRandomPacket()
+			<-ticker.C
+
+			// Get a random board to send the packet from
+			randomIndex := rand.Int63n(int64(len(conns)))
+			randomBoard := conns[randomIndex]
+
+			packet := randomBoard.CreateRandomPacket()
 			fmt.Println(time.Since(prev))
 			prev = time.Now()
 
-			if packet == nil {
+			if packet == nil || len(packet) < 2 {
 				continue
 			}
-			_, err := conn.Write(packet)
 
+			fmt.Printf("Enviando paquete ID: %d, tamaño: %d\n", binary.LittleEndian.Uint16(packet), len(packet))
+			_, err := randomBoard.conn.Write(packet)
 			if err != nil {
 				continue
 			}
 
 			count <- struct{}{}
 		}
-
 	}()
 
 	interrupt := make(chan os.Signal, 1)
@@ -104,6 +134,23 @@ func main() {
 		}
 	}
 
+}
+
+func getConns(adj adj_module.ADJ) []boardConn {
+	conns := make([]boardConn, 0)
+	backend_address := adj.Info.Addresses["BACKEND"]
+	backend_port := adj.Info.Ports["UDP"]
+
+	for _, board := range adj.Boards {
+		conn := getConn(board.IP, 0, backend_address, backend_port)
+		conns = append(conns, boardConn{
+			conn:    conn,
+			packets: []adj_module.Packet{},
+			board:   board,
+		})
+	}
+
+	return conns
 }
 
 func getConn(lip string, lport uint16, rip string, rport uint16) *net.UDPConn {
@@ -124,20 +171,23 @@ func getConn(lip string, lport uint16, rip string, rport uint16) *net.UDPConn {
 	return conn
 }
 
-func createListener(lip string, lport uint16, rip string, rport uint16) *net.UDPConn {
-	_, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", lip, lport))
+func getADJ() adj_module.ADJ {
+	var err error
+	err = os.RemoveAll("adj")
 	if err != nil {
-		log.Fatalf("resolve address: %s\n", err)
-	}
-	laddr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", rip, rport))
-	if err != nil {
-		log.Fatalf("resolve address: %s\n", err)
-	}
-	listener, err := net.ListenUDP("udp", laddr)
-
-	if err != nil {
-		log.Fatal("Error creating udp connection", err)
+		log.Fatalf("Failed to delete ADJ")
 	}
 
-	return listener
+	// Copy the ADJ from the backend folder to ensure they are the same
+	err = CopyDir(path.Join("..", "backend", "cmd", "adj"), "adj")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	adj, err := adj_module.NewADJ("", false)
+	if err != nil {
+		log.Fatalf("Failed to load ADJ: %v\n", err)
+	}
+
+	return adj
 }
