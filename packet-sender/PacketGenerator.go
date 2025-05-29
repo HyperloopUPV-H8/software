@@ -21,8 +21,13 @@ type PacketGenerator struct {
 }
 
 func New() PacketGenerator {
+	var err error
+	err = os.RemoveAll("adj")
+	if err != nil {
+		log.Fatalf("Failed to delete ADJ")
+	}
 
-	err := CopyDir(path.Join("..", "backend", "cmd", "adj"), "adj")
+	err = CopyDir(path.Join("..", "backend", "cmd", "adj"), "adj")
 	if err != nil {
 		log.Fatal(err)
 	}
