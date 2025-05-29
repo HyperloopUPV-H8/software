@@ -714,15 +714,3 @@ func getLatestVersionFromGitHub() (string, error) {
 	version := strings.TrimPrefix(release.TagName, "v")
 	return version, nil
 }
-func detectOS() string {
-	switch runtime.GOOS {
-	case "windows":
-		return "updater.exe"
-	case "darwin", "linux":
-		return "updater"
-	default:
-		fmt.Fprintf(os.Stderr, "Unsupported operating system: %s\n", runtime.GOOS)
-		os.Exit(1)
-		return ""
-	}
-}
