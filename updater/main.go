@@ -21,7 +21,7 @@ const (
 
 func main() {
 	// Detect the operating system
-	osType := detectOS()
+	zipName := getZipName()
 
 	// Check if the `../backend/` folder exists
 	if _, err := os.Stat("../backend"); err == nil {
@@ -29,21 +29,21 @@ func main() {
 		updateFromGit()
 	} else {
 		fmt.Println("Directory '../backend' not found. Checking binaries...")
-		updateFromBinaries(osType)
+		updateFromBinaries(zipName)
 	}
 }
 
-func detectOS() string {
+func getZipName() string {
 	switch runtime.GOOS {
 	case "windows":
-		return "backend-windows-64.exe" // Incluye la extensión .exe para Windows
+		return "windows"
 	case "darwin":
 		if strings.Contains(runtime.GOARCH, "arm") {
-			return "backend-macos-m1-64"
+			return "macos-arm64"
 		}
-		return "backend-macos-64"
+		return "macos-intel"
 	case "linux":
-		return "backend-linux-64"
+		return "linux"
 	default:
 		fmt.Fprintf(os.Stderr, "Unsupported operating system: %s\n", runtime.GOOS)
 		os.Exit(1)
@@ -104,42 +104,41 @@ func stopProcess(processName string) error {
 	return nil
 }
 
-func updateFromBinaries(osType string) {
-	binaries := []string{"backend-windows-64.exe", "backend-linux-64", "backend-macos-64", "backend-macos-m1-64"}
-	for _, binary := range binaries {
-		if _, err := os.Stat("./" + binary); err == nil {
-			// Check if the backend process is running
-			isRunning, err := isProcessRunning(binary)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error checking if process is running: %v\n", err)
+func updateFromBinaries(zipBase string) {
+	binary := "backend"
+	if runtime.GOOS == "windows" {
+		binary += ".exe"
+	}
+
+	// Stop and remove old binary if exists
+	if _, err := os.Stat("./" + binary); err == nil {
+		isRunning, err := isProcessRunning(binary)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error checking if process is running: %v\n", err)
+			os.Exit(1)
+		}
+		if isRunning {
+			fmt.Printf("Process %s is running. Stopping it...\n", binary)
+			if err := stopProcess(binary); err != nil {
+				fmt.Fprintf(os.Stderr, "Error stopping process %s: %v\n", binary, err)
 				os.Exit(1)
 			}
-
-			// Stop the process if it's running
-			if isRunning {
-				fmt.Printf("Process %s is running. Stopping it...\n", binary)
-				if err := stopProcess(binary); err != nil {
-					fmt.Fprintf(os.Stderr, "Error stopping process %s: %v\n", binary, err)
-					os.Exit(1)
-				}
-				time.Sleep(500 * time.Millisecond) // waits 1/2 second to ensure the process is stopped
+			time.Sleep(500 * time.Millisecond)
+		}
+		fmt.Printf("Deleting old binary: %s\n", binary)
+		deleted := false
+		for i := 0; i < 5; i++ {
+			if err := os.Remove("./" + binary); err == nil {
+				deleted = true
+				break
+			} else {
+				fmt.Printf("Retrying delete (%d/5)...\n", i+1)
+				time.Sleep(300 * time.Millisecond)
 			}
-
-			fmt.Printf("Deleting old binary: %s\n", binary)
-			deleted := false
-			for i := 0; i < 5; i++ {
-				if err := os.Remove("./" + binary); err == nil {
-					deleted = true
-					break
-				} else {
-					fmt.Printf("Retrying delete (%d/5)...\n", i+1)
-					time.Sleep(300 * time.Millisecond)
-				}
-			}
-			if !deleted {
-				fmt.Fprintf(os.Stderr, "Error deleting old binary after multiple attempts.\n")
-				os.Exit(1)
-			}
+		}
+		if !deleted {
+			fmt.Fprintf(os.Stderr, "Error deleting old binary after multiple attempts.\n")
+			os.Exit(1)
 		}
 	}
 
@@ -150,8 +149,7 @@ func updateFromBinaries(osType string) {
 		os.Exit(1)
 	}
 
-	// Construct the ZIP file URL
-	zipFileName := fmt.Sprintf("control-station-v%s.zip", strings.ReplaceAll(latestVersion, ".", "-"))
+	zipFileName := fmt.Sprintf("%s-%s.zip", zipBase, latestVersion)
 	url := fmt.Sprintf("https://github.com/%s/%s/releases/download/v%s/%s", repoOwner, repoName, latestVersion, zipFileName)
 	fmt.Printf("Downloading ZIP from: %s\n", url)
 
@@ -162,8 +160,8 @@ func updateFromBinaries(osType string) {
 		os.Exit(1)
 	}
 
-	// Extract the binary from the ZIP file
-	binaryPath, err := extractBinaryFromZip("./"+zipFileName, osType)
+	// Extract the binary and VERSION.md from the ZIP file
+	binaryPath, err := extractBinaryFromZip("./"+zipFileName, binary)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error extracting the binary: %v\n", err)
 		os.Exit(1)
@@ -201,11 +199,11 @@ func extractBinaryFromZip(zipPath, binaryName string) (string, error) {
 	defer r.Close()
 
 	var binaryPath string
-	parentDir, _ := filepath.Abs(filepath.Join(".", ".."))
+	parentDir, _ := filepath.Abs(".")
 
 	for _, f := range r.File {
 		baseName := filepath.Base(f.Name)
-		if baseName == binaryName || baseName == "VERSION.md" {
+		if baseName == binaryName || baseName == "VERSION.txt" {
 			rc, err := f.Open()
 			if err != nil {
 				return "", err
