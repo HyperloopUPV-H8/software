@@ -21,7 +21,7 @@ export const ProtectionMessageView = ({ message, className }: Props) => {
                     name={message.name}
                 />
             </div>
-            <ProtectionView protection={message.payload} />
+            <ProtectionView protection={message} />
         </div>
     );
 };
