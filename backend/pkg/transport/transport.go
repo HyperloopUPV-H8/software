@@ -13,6 +13,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tcp"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tftp"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/session"
 	"github.com/rs/zerolog"
@@ -51,18 +52,25 @@ type Transport struct {
 func (transport *Transport) HandleClient(config tcp.ClientConfig, remote string) error {
 	client := tcp.NewClient(remote, config, transport.logger)
 	defer transport.logger.Warn().Str("remoteAddress", remote).Msg("abort connection")
+	var hasConnected = false
 
 	for {
 		conn, err := client.Dial()
 		if err != nil {
 			transport.logger.Debug().Stack().Err(err).Str("remoteAddress", remote).Msg("dial failed")
 			if !config.TryReconnect {
+				if hasConnected {
+					transport.SendFault()
+				}
+
 				transport.errChan <- err
 				return err
 			}
 
 			continue
 		}
+
+		hasConnected = true
 
 		err = transport.handleTCPConn(conn)
 		if errors.Is(err, error(ErrTargetAlreadyConnected{})) {
@@ -73,6 +81,7 @@ func (transport *Transport) HandleClient(config tcp.ClientConfig, remote string)
 		if err != nil {
 			transport.logger.Debug().Stack().Err(err).Str("remoteAddress", remote).Msg("dial failed")
 			if !config.TryReconnect {
+				transport.SendFault()
 				transport.errChan <- err
 				return err
 			}
@@ -367,10 +376,10 @@ func (transport *Transport) consumeErrors() {
 }
 
 func (transport *Transport) SendFault() {
-	// err := transport.SendMessage(NewPacketMessage(data.NewPacket(0)))
-	// if err != nil {
-	// transport.errChan <- err
-	// }
+	err := transport.SendMessage(NewPacketMessage(data.NewPacket(0)))
+	if err != nil {
+		transport.errChan <- err
+	}
 }
 
 func (transport *Transport) SetpropagateFault(enabled bool) {
