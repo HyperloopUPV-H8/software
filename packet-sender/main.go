@@ -14,48 +14,6 @@ import (
 	adj_module "github.com/HyperloopUPV-H8/h9-backend/pkg/adj"
 )
 
-/* package main
-
-import (
-	"encoding/json"
-	"fmt"
-	"log"
-
-	"github.com/HyperloopUPV-H8/h9-backend/internal/adj"
-)
-
-func main() {
-
-	adjInstance, err := adj.NewADJ()
-	if err != nil {
-		log.Fatalf("Error initializing ADJ: %v", err)
-	}
-
-
-	packets := generatePackets(adjInstance)
-
-
-	output, err := json.MarshalIndent(packets, "", "  ")
-	if err != nil {
-		log.Fatalf("Error marshalling packets: %v", err)
-	}
-
-	fmt.Println(string(output))
-}
-
-
-func generatePackets(adjInstance adj.ADJ) []adj.Packet {
-	var allPackets []adj.Packet
-
-	for _, board := range adjInstance.Boards {
-		for _, packet := range board.Packets {
-			allPackets = append(allPackets, packet)
-		}
-	}
-
-	return allPackets
-}*/
-
 type boardConn struct {
 	conn    *net.UDPConn
 	packets []adj_module.Packet
