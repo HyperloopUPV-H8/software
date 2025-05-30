@@ -1,4 +1,4 @@
-import { Protection, ProtectionMessage } from "../../../../../..";
+import { ProtectionMessage } from "../../../../../..";
 import styles from "./ProtectionView.module.scss";
 
 type Props = {
