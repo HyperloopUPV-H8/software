@@ -138,11 +138,9 @@ func main() {
 
 func getConns(adj adj_module.ADJ) []boardConn {
 	conns := make([]boardConn, 0)
-	backend_address := adj.Info.Addresses["BACKEND"]
-	backend_port := adj.Info.Ports["UDP"]
 
 	for _, board := range adj.Boards {
-		conn := getConn(board.IP, 0, backend_address, backend_port)
+		conn := getConn(board.IP, 0, "127.0.0.9", 8000)
 		conns = append(conns, boardConn{
 			conn:    conn,
 			packets: []adj_module.Packet{},
