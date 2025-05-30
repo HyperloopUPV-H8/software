@@ -71,7 +71,7 @@ func main() {
 			fmt.Println(time.Since(prev))
 			prev = time.Now()
 
-			if packet == nil || len(packet) < 2 {
+			if len(packet) < 2 {
 				continue
 			}
 
