@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
 
 	"github.com/HyperloopUPV-H8/h9-backend/internal/utils"
 )
@@ -72,12 +73,37 @@ func NewADJ(AdjBranch string, test bool) (ADJ, error) {
 func downloadADJ(AdjBranch string, test bool) (json.RawMessage, json.RawMessage, error) {
 	updateRepo(AdjBranch)
 
-	//Execute the script testadj.py if indicated in config.toml
+	//Execute the testadj executable if indicated in config.toml
 	if test {
-		test := exec.Command("python3", "testadj.py")
-		out, err := test.CombinedOutput()
-		if err != nil || len(out) != 0 {
-			log.Fatalf("python test failed:\nError: %v\nOutput: %s\n", err, string(out))
+		// Try to find the testadj executable
+		testadj := "./testadj"
+		if _, err := os.Stat(testadj); os.IsNotExist(err) {
+			// If not found in current directory, try with extension for Windows
+			if runtime.GOOS == "windows" {
+				testadj = "./testadj.exe"
+			}
+			// If still not found, fall back to Python script
+			if _, err := os.Stat(testadj); os.IsNotExist(err) {
+				test := exec.Command("python3", "testadj.py")
+				out, err := test.CombinedOutput()
+				if err != nil || len(out) != 0 {
+					log.Fatalf("python test failed:\nError: %v\nOutput: %s\n", err, string(out))
+				}
+			} else {
+				// Execute the testadj executable
+				test := exec.Command(testadj)
+				out, err := test.CombinedOutput()
+				if err != nil || len(out) != 0 {
+					log.Fatalf("testadj executable failed:\nError: %v\nOutput: %s\n", err, string(out))
+				}
+			}
+		} else {
+			// Execute the testadj executable
+			test := exec.Command(testadj)
+			out, err := test.CombinedOutput()
+			if err != nil || len(out) != 0 {
+				log.Fatalf("testadj executable failed:\nError: %v\nOutput: %s\n", err, string(out))
+			}
 		}
 	}
 
