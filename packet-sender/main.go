@@ -66,6 +66,13 @@ func main() {
 
 	adj := getADJ()
 
+	defer func() {
+		err := os.RemoveAll("adj")
+		if err != nil {
+			log.Fatalf("Failed to delete ADJ")
+		}
+	}()
+
 	backend_address := adj.Info.Addresses["BACKEND"]
 	backend_port := adj.Info.Ports["UDP"]
 
@@ -171,10 +178,6 @@ func getConn(lip string, lport uint16, rip string, rport uint16) *net.UDPConn {
 
 func getADJ() adj_module.ADJ {
 	var err error
-	err = os.RemoveAll("adj")
-	if err != nil {
-		log.Fatalf("Failed to delete ADJ")
-	}
 
 	// Copy the ADJ from the backend folder to ensure they are the same
 	err = CopyDir(path.Join("..", "backend", "cmd", "adj"), "adj")
