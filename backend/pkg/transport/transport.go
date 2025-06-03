@@ -250,12 +250,14 @@ func (transport *Transport) handlePacketEvent(message PacketMessage) error {
 	}
 
 	target, ok := transport.idToTarget[message.Id()]
-	if !ok {
-		eventLogger.Debug().Msg("target not found")
+	
+	if !ok || target == nil {
+		eventLogger.Debug().Msg("target not found or nil")
 		err := ErrUnrecognizedId{Id: message.Id()}
 		transport.errChan <- err
 		return err
 	}
+
 	eventLogger = eventLogger.With().Str("target", string(target)).Logger()
 	eventLogger.Info().Msg("sending")
 

@@ -324,6 +324,14 @@ func main() {
 		ipToBoardId[ip] = abstraction.BoardId(adj.Info.BoardIds[name])
 	}
 
+	// Set package id to target map
+	for _, board := range podData.Boards {
+		for _, packet := range board.Packets {
+			transp.SetIdTarget(abstraction.PacketId(packet.Id), abstraction.TransportTarget(board.Name))
+		}
+		transp.SetTargetIp(adj.Info.Addresses[board.Name], abstraction.TransportTarget(board.Name))
+	}
+	
 	vehicle := vehicle.New(trace.Logger)
 	vehicle.SetBroker(broker)
 	vehicle.SetLogger(loggerHandler)
@@ -337,13 +345,7 @@ func main() {
 	decoder, encoder := getTransportDecEnc(adj.Info, podData)
 	transp.WithDecoder(decoder).WithEncoder(encoder)
 
-	// Set package id to target map
-	for _, board := range podData.Boards {
-		for _, packet := range board.Packets {
-			transp.SetIdTarget(abstraction.PacketId(packet.Id), abstraction.TransportTarget(board.Name))
-		}
-		transp.SetTargetIp(adj.Info.Addresses[board.Name], abstraction.TransportTarget(board.Name))
-	}
+	
 
 	// Start handling TCP client connections
 	i := 0
