@@ -86,21 +86,7 @@ var playbackFile = flag.String("playback", "", "")
 var currentVersion string
 
 func main() {
-
-	versionFile := "VERSION.txt"
-	versionData, err := os.ReadFile(versionFile)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error reading version file (%s): %v\n", versionFile, err)
-
-	}
-	currentVersion = strings.TrimSpace(string(versionData))
-
-	versionFlag := flag.Bool("version", false, "Show the backend version")
-	flag.Parse()
-	if *versionFlag {
-		fmt.Println("Hyperloop UPV Backend Version:", currentVersion)
-		os.Exit(0)
-	}
+	update()
 
 	traceFile := initTrace(*traceLevel, *traceFile)
 	defer traceFile.Close()
@@ -122,85 +108,6 @@ func main() {
 	runtime.SetBlockProfileRate(*blockprofile)
 
 	config := getConfig("./config.toml")
-
-	execPath, err := os.Executable()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error getting executable path: %v\n", err)
-		os.Exit(1)
-	}
-	execDir := filepath.Dir(execPath)
-
-	latestVersionStr, latestErr := getLatestVersionFromGitHub()
-	backendPath := filepath.Join(execDir, "..", "..", "backend")
-	_, statErr := os.Stat(backendPath)
-	backendExists := statErr == nil
-
-	if backendExists {
-		fmt.Println("Backend folder detected.")
-		fmt.Print("Do you want to update? (y/n): ")
-		var response string
-		fmt.Scanln(&response)
-		if strings.ToLower(response) == "y" {
-			fmt.Println("Launching updater to update the backend...")
-			updaterPath := filepath.Join(execDir, "..", "..", "updater")
-			cmd := exec.Command("go", "build", "-o", filepath.Join(updaterPath, "updater.exe"), updaterPath)
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			if err := cmd.Run(); err != nil {
-				fmt.Fprintf(os.Stderr, "Error building updater: %v\n", err)
-				os.Exit(1)
-			}
-			updaterExe := filepath.Join(updaterPath, "updater.exe")
-			cmd = exec.Command(updaterExe)
-			cmd.Dir = updaterPath
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			if err := cmd.Run(); err != nil {
-				fmt.Fprintf(os.Stderr, "Error launching updater: %v\n", err)
-				os.Exit(1)
-			}
-			os.Exit(0)
-		} else {
-			fmt.Println("Skipping update. Proceeding with the current version.")
-		}
-	} else {
-		// Solo updatear si se tienen ambas versiones y latest > current
-		current, currErr := version.NewVersion(currentVersion)
-		latest, lastErr := version.NewVersion(latestVersionStr)
-		if currErr != nil || lastErr != nil || latestErr != nil {
-			fmt.Println("Warning: Could not determine versions. Skipping update. Proceeding with the current version:", currentVersion)
-		} else if latest.GreaterThan(current) {
-			fmt.Printf("There is a new version available: %s (current version: %s)\n", latest, current)
-			fmt.Print("Do you want to update? (y/n): ")
-			var response string
-			fmt.Scanln(&response)
-			if strings.ToLower(response) == "y" {
-				fmt.Println("Launching updater to update the backend...")
-				updaterExe := filepath.Join(execDir, "updater")
-				if runtime.GOOS == "windows" {
-					updaterExe += ".exe"
-				}
-				if _, err := os.Stat(updaterExe); err == nil {
-					cmd := exec.Command(updaterExe)
-					cmd.Dir = execDir
-					cmd.Stdout = os.Stdout
-					cmd.Stderr = os.Stderr
-					if err := cmd.Run(); err != nil {
-						fmt.Fprintf(os.Stderr, "Error launching updater: %v\n", err)
-						os.Exit(1)
-					}
-					os.Exit(0)
-				} else {
-					fmt.Fprintf(os.Stderr, "Updater not found: %s\n", updaterExe)
-					fmt.Println("Skipping update. Proceeding with the current version.")
-				}
-			} else {
-				fmt.Println("Skipping update. Proceeding with the current version.")
-			}
-		} else {
-			fmt.Printf("You are using the latest version: %s\n", current)
-		}
-	}
 
 	// <--- ADJ --->
 
@@ -713,4 +620,104 @@ func getLatestVersionFromGitHub() (string, error) {
 
 	version := strings.TrimPrefix(release.TagName, "v")
 	return version, nil
+}
+
+func update() {
+	versionFile := "VERSION.txt"
+	versionData, err := os.ReadFile(versionFile)
+	if err == nil {
+		currentVersion = strings.TrimSpace(string(versionData))
+
+		versionFlag := flag.Bool("version", false, "Show the backend version")
+		flag.Parse()
+		if *versionFlag {
+			fmt.Println("Hyperloop UPV Backend Version:", currentVersion)
+			os.Exit(0)
+		}
+	} else {
+		fmt.Fprintf(os.Stderr, "Error reading version file (%s): %v\n", versionFile, err)
+		return
+	}
+
+	execPath, err := os.Executable()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error getting executable path: %v\n", err)
+		os.Exit(1)
+	}
+
+	execDir := filepath.Dir(execPath)
+
+	latestVersionStr, latestErr := getLatestVersionFromGitHub()
+	backendPath := filepath.Join(execDir, "..", "..", "backend")
+	_, statErr := os.Stat(backendPath)
+	backendExists := statErr == nil
+
+	if backendExists {
+		fmt.Println("Backend folder detected.")
+		fmt.Print("Do you want to update? (y/n): ")
+		var response string
+		fmt.Scanln(&response)
+		if strings.ToLower(response) == "y" {
+			fmt.Println("Launching updater to update the backend...")
+			updaterPath := filepath.Join(execDir, "..", "..", "updater")
+			cmd := exec.Command("go", "build", "-o", filepath.Join(updaterPath, "updater.exe"), updaterPath)
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			if err := cmd.Run(); err != nil {
+				fmt.Fprintf(os.Stderr, "Error building updater: %v\n", err)
+				os.Exit(1)
+			}
+			updaterExe := filepath.Join(updaterPath, "updater.exe")
+			cmd = exec.Command(updaterExe)
+			cmd.Dir = updaterPath
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			if err := cmd.Run(); err != nil {
+				fmt.Fprintf(os.Stderr, "Error launching updater: %v\n", err)
+				os.Exit(1)
+			}
+			os.Exit(0)
+		} else {
+			fmt.Println("Skipping update. Proceeding with the current version.")
+		}
+	} else {
+		// Solo updatear si se tienen ambas versiones y latest > current
+		current, currErr := version.NewVersion(currentVersion)
+		latest, lastErr := version.NewVersion(latestVersionStr)
+		if currErr != nil || lastErr != nil || latestErr != nil {
+			fmt.Println("Warning: Could not determine versions. Skipping update. Proceeding with the current version:", currentVersion)
+		} else if latest.GreaterThan(current) {
+			fmt.Printf("There is a new version available: %s (current version: %s)\n", latest, current)
+			fmt.Print("Do you want to update? (y/n): ")
+			var response string
+			fmt.Scanln(&response)
+			if strings.ToLower(response) == "y" {
+				fmt.Println("Launching updater to update the backend...")
+				updaterExe := filepath.Join(execDir, "updater")
+				if runtime.GOOS == "windows" {
+					updaterExe += ".exe"
+				}
+				if _, err := os.Stat(updaterExe); err == nil {
+					cmd := exec.Command(updaterExe)
+					cmd.Dir = execDir
+					cmd.Stdout = os.Stdout
+					cmd.Stderr = os.Stderr
+					if err := cmd.Run(); err != nil {
+						fmt.Fprintf(os.Stderr, "Error launching updater: %v\n", err)
+						os.Exit(1)
+					}
+					os.Exit(0)
+				} else {
+					fmt.Fprintf(os.Stderr, "Updater not found: %s\n", updaterExe)
+					fmt.Println("Skipping update. Proceeding with the current version.")
+				}
+			} else {
+				fmt.Println("Skipping update. Proceeding with the current version.")
+			}
+		} else {
+			fmt.Printf("You are using the latest version: %s\n", current)
+		}
+	}
+
+	return
 }
