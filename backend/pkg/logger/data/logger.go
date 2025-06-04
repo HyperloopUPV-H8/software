@@ -137,8 +137,9 @@ func (sublogger *Logger) getFile(valueName data.ValueName) (*file.CSV, error) {
 
 func (sublogger *Logger) createFile(valueName data.ValueName) (*os.File, error) {
 	filename := path.Join(
-		"logger", "data",
+		"logger",
 		loggerHandler.Timestamp.Format(loggerHandler.TimestampFormat),
+		"data",
 		fmt.Sprintf("%s.csv", valueName),
 	)
 

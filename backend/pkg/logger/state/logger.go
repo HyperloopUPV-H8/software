@@ -94,8 +94,9 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 func (sublogger *Logger) createFile(timestamp time.Time) (*file.CSV, error) {
 	filename := path.Join(
-		"logger", "state",
+		"logger",
 		logger.Timestamp.Format(logger.TimestampFormat),
+		"state",
 		fmt.Sprintf("%s.csv", timestamp.Format(logger.TimestampFormat)),
 	)
 

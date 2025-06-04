@@ -7,17 +7,23 @@ import (
 	"flag"
 	"fmt"
 
+	"encoding/json"
 	"log"
 	"net"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"os/exec"
 	"os/signal"
 	"path"
+	"path/filepath"
 	"runtime"
 	"runtime/pprof"
+
 	"strings"
 	"time"
+
+	"github.com/hashicorp/go-version"
 
 	adj_module "github.com/HyperloopUPV-H8/h9-backend/internal/adj"
 	"github.com/HyperloopUPV-H8/h9-backend/internal/common"
@@ -27,6 +33,7 @@ import (
 	vehicle_models "github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker"
+	blcu_topics "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/blcu"
 	connection_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/connection"
 	data_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/data"
 	logger_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/logger"
@@ -53,6 +60,7 @@ import (
 	"github.com/google/gopacket/pcap"
 	"github.com/jmaralo/sntp"
 	"github.com/pelletier/go-toml/v2"
+	"github.com/pkg/browser"
 	trace "github.com/rs/zerolog/log"
 )
 
@@ -75,9 +83,11 @@ var enableSNTP = flag.Bool("sntp", false, "enables a simple SNTP server on port 
 var networkDevice = flag.Int("dev", -1, "index of the network device to use, overrides device prompt")
 var blockprofile = flag.Int("blockprofile", 0, "number of block profiles to include")
 var playbackFile = flag.String("playback", "", "")
+var currentVersion string
 
 func main() {
-	flag.Parse()
+	update()
+
 	traceFile := initTrace(*traceLevel, *traceFile)
 	defer traceFile.Close()
 
@@ -96,11 +106,12 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 	runtime.SetBlockProfileRate(*blockprofile)
+
 	config := getConfig("./config.toml")
 
 	// <--- ADJ --->
 
-	adj, err := adj_module.NewADJ()
+	adj, err := adj_module.NewADJ(config.Adj.Branch, config.Adj.Test)
 	if err != nil {
 		trace.Fatal().Err(err).Msg("setting up ADJ")
 	}
@@ -120,7 +131,7 @@ func main() {
 
 		dev = devs[*networkDevice]
 	} else {
-		dev, err = selectDev()
+		dev, err = selectDev(adj.Info.Addresses, config)
 		if err != nil {
 			trace.Fatal().Err(err).Msg("Error selecting device")
 		}
@@ -188,9 +199,11 @@ func main() {
 	upgrader := websocket.NewUpgrader(connections, trace.Logger)
 	pool := websocket.NewPool(connections, trace.Logger)
 	broker.SetPool(pool)
+	blcu_topics.RegisterTopics(broker, pool)
 
 	// <--- transport --->
 	transp := transport.NewTransport(trace.Logger)
+	transp.SetpropagateFault(config.Transport.PropagateFault)
 
 	// <--- vehicle --->
 	ipToBoardId := make(map[string]abstraction.BoardId)
@@ -323,6 +336,9 @@ func main() {
 		}()
 	}
 
+	browser.OpenURL("http://" + config.Server["ethernet-view"].Addr)
+	browser.OpenURL("http://" + config.Server["control-station"].Addr)
+
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
@@ -345,26 +361,39 @@ func createPid(path string) {
 	}
 }
 
-func selectDev() (pcap.Interface, error) {
+func selectDev(adjAddr map[string]string, conf Config) (pcap.Interface, error) {
 	devs, err := pcap.FindAllDevs()
 	if err != nil {
 		return pcap.Interface{}, err
 	}
 
-	cyan := color.New(color.FgCyan)
+	if conf.Network.Manual {
+		cyan := color.New(color.FgCyan)
 
-	cyan.Print("select a device: ")
-	fmt.Printf("(0-%d)\n", len(devs)-1)
-	for i, dev := range devs {
-		displayDev(i, dev)
+		cyan.Print("select a device: ")
+		fmt.Printf("(0-%d)\n", len(devs)-1)
+		for i, dev := range devs {
+			displayDev(i, dev)
+		}
+
+		dev, err := acceptInput(len(devs))
+		if err != nil {
+			return pcap.Interface{}, err
+		}
+
+		return devs[dev], nil
+	} else {
+		for _, dev := range devs {
+			for _, addr := range dev.Addresses {
+				if addr.IP.String() == adjAddr["backend"] {
+					return dev, nil
+				}
+			}
+		}
+
+		log.Fatal("backend address not found in any device")
+		return pcap.Interface{}, nil
 	}
-
-	dev, err := acceptInput(len(devs))
-	if err != nil {
-		return pcap.Interface{}, err
-	}
-
-	return devs[dev], nil
 }
 
 func displayDev(i int, dev pcap.Interface) {
@@ -559,7 +588,7 @@ func getIPIPfilter() string {
 }
 
 func getUDPFilter(addrs []net.IP, backendAddr net.IP, port uint16) string {
-	udpPort := "udp" // TODO use proper ports for the filter
+	udpPort := fmt.Sprintf("udp port %d", port) // TODO use proper ports for the filter
 	srcUdpAddrs := common.Map(addrs, func(addr net.IP) string {
 		return fmt.Sprintf("(src host %s)", addr)
 	})
@@ -571,4 +600,124 @@ func getUDPFilter(addrs []net.IP, backendAddr net.IP, port uint16) string {
 	dstUdpAddrsStr := strings.Join(dstUdpAddrs, " or ")
 
 	return fmt.Sprintf("(%s) and (%s) and (%s or (dst host %s))", udpPort, srcUdpAddrsStr, dstUdpAddrsStr, backendAddr)
+}
+
+type GitHubRelease struct {
+	TagName string `json:"tag_name"`
+}
+
+func getLatestVersionFromGitHub() (string, error) {
+	resp, err := http.Get("https://api.github.com/repos/HyperloopUPV-H8/software/releases/latest")
+	if err != nil {
+		return "", fmt.Errorf("unable to connect to the internet: %w", err)
+	}
+	defer resp.Body.Close()
+
+	var release GitHubRelease
+	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
+		return "", fmt.Errorf("error decoding GitHub response: %w", err)
+	}
+
+	version := strings.TrimPrefix(release.TagName, "v")
+	return version, nil
+}
+
+func update() {
+	versionFile := "VERSION.txt"
+	versionData, err := os.ReadFile(versionFile)
+	if err == nil {
+		currentVersion = strings.TrimSpace(string(versionData))
+
+		versionFlag := flag.Bool("version", false, "Show the backend version")
+		flag.Parse()
+		if *versionFlag {
+			fmt.Println("Hyperloop UPV Backend Version:", currentVersion)
+			os.Exit(0)
+		}
+	} else {
+		fmt.Fprintf(os.Stderr, "Error reading version file (%s): %v\n", versionFile, err)
+		return
+	}
+
+	execPath, err := os.Executable()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error getting executable path: %v\n", err)
+		os.Exit(1)
+	}
+
+	execDir := filepath.Dir(execPath)
+
+	latestVersionStr, latestErr := getLatestVersionFromGitHub()
+	backendPath := filepath.Join(execDir, "..", "..", "backend")
+	_, statErr := os.Stat(backendPath)
+	backendExists := statErr == nil
+
+	if backendExists {
+		fmt.Println("Backend folder detected.")
+		fmt.Print("Do you want to update? (y/n): ")
+		var response string
+		fmt.Scanln(&response)
+		if strings.ToLower(response) == "y" {
+			fmt.Println("Launching updater to update the backend...")
+			updaterPath := filepath.Join(execDir, "..", "..", "updater")
+			cmd := exec.Command("go", "build", "-o", filepath.Join(updaterPath, "updater.exe"), updaterPath)
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			if err := cmd.Run(); err != nil {
+				fmt.Fprintf(os.Stderr, "Error building updater: %v\n", err)
+				os.Exit(1)
+			}
+			updaterExe := filepath.Join(updaterPath, "updater.exe")
+			cmd = exec.Command(updaterExe)
+			cmd.Dir = updaterPath
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			if err := cmd.Run(); err != nil {
+				fmt.Fprintf(os.Stderr, "Error launching updater: %v\n", err)
+				os.Exit(1)
+			}
+			os.Exit(0)
+		} else {
+			fmt.Println("Skipping update. Proceeding with the current version.")
+		}
+	} else {
+		// Solo updatear si se tienen ambas versiones y latest > current
+		current, currErr := version.NewVersion(currentVersion)
+		latest, lastErr := version.NewVersion(latestVersionStr)
+		if currErr != nil || lastErr != nil || latestErr != nil {
+			fmt.Println("Warning: Could not determine versions. Skipping update. Proceeding with the current version:", currentVersion)
+		} else if latest.GreaterThan(current) {
+			fmt.Printf("There is a new version available: %s (current version: %s)\n", latest, current)
+			fmt.Print("Do you want to update? (y/n): ")
+			var response string
+			fmt.Scanln(&response)
+			if strings.ToLower(response) == "y" {
+				fmt.Println("Launching updater to update the backend...")
+				updaterExe := filepath.Join(execDir, "updater")
+				if runtime.GOOS == "windows" {
+					updaterExe += ".exe"
+				}
+				if _, err := os.Stat(updaterExe); err == nil {
+					cmd := exec.Command(updaterExe)
+					cmd.Dir = execDir
+					cmd.Stdout = os.Stdout
+					cmd.Stderr = os.Stderr
+					if err := cmd.Run(); err != nil {
+						fmt.Fprintf(os.Stderr, "Error launching updater: %v\n", err)
+						os.Exit(1)
+					}
+					os.Exit(0)
+				} else {
+					fmt.Fprintf(os.Stderr, "Updater not found: %s\n", updaterExe)
+					fmt.Println("Skipping update. Proceeding with the current version.")
+				}
+			} else {
+				fmt.Println("Skipping update. Proceeding with the current version.")
+			}
+		} else {
+			fmt.Printf("You are using the latest version: %s\n", current)
+		}
+	}
+
+	return
 }
