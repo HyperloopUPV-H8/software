@@ -251,7 +251,7 @@ func (transport *Transport) handlePacketEvent(message PacketMessage) error {
 
 	target, ok := transport.idToTarget[message.Id()]
 	
-	if !ok || target == nil {
+	if !ok {
 		eventLogger.Debug().Msg("target not found or nil")
 		err := ErrUnrecognizedId{Id: message.Id()}
 		transport.errChan <- err

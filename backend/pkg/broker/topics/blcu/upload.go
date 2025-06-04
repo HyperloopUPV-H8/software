@@ -3,6 +3,7 @@ package blcu
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/boards"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
@@ -22,11 +23,11 @@ func (upload *Upload) Topic() abstraction.BrokerTopic {
 
 type UploadRequest struct {
 	Board string `json:"board"`
-	Data  []byte `json:"data"`
+	Data  []byte `json:"file"`
 }
 
 func (request UploadRequest) Topic() abstraction.BrokerTopic {
-	return "blcu/uploadRequest"
+	return "blcu/upload"
 }
 
 func (upload *Upload) Push(push abstraction.BrokerPush) error {
