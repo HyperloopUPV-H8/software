@@ -76,4 +76,4 @@ Follow the existing markdown style and include:
 
 ---
 
-*Last updated: $(date '2025-06-03')*
+*Last updated: 2025-06-03*
