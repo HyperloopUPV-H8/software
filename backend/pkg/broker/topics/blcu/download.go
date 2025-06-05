@@ -29,19 +29,32 @@ func (request DownloadRequest) Topic() abstraction.BrokerTopic {
 }
 
 func (download *Download) Push(push abstraction.BrokerPush) error {
-	switch push.Topic() {
-	case boards.DownloadSuccess{}.Topic():
+	switch p := push.(type) {
+	case *boards.DownloadSuccess:
+		// Send success response with the downloaded data
+		response := map[string]interface{}{
+			"percentage": 100,
+			"failure":    false,
+			"file":       p.Data, // The downloaded file data
+		}
+		payload, _ := json.Marshal(response)
 		err := download.pool.Write(download.client, websocket.Message{
-			Topic:   push.Topic(),
-			Payload: nil,
+			Topic:   DownloadName,
+			Payload: payload,
 		})
 		if err != nil {
 			return err
 		}
-	case boards.DownloadFailure{}.Topic():
+	case *boards.DownloadFailure:
+		// Send failure response
+		response := map[string]interface{}{
+			"percentage": 0,
+			"failure":    true,
+		}
+		payload, _ := json.Marshal(response)
 		err := download.pool.Write(download.client, websocket.Message{
-			Topic:   push.Topic(),
-			Payload: nil,
+			Topic:   DownloadName,
+			Payload: payload,
 		})
 		if err != nil {
 			return err
