@@ -393,9 +393,12 @@ jobs:
           # Copy common files
           cp -r artifacts/common-files/* release-linux/
           
+          # Set executable permissions
+          chmod +x release-linux/backend release-linux/updater release-linux/testadj
+          
           # Create Linux release archive
           cd release-linux
-          zip -r ../linux-$VERSION.zip .
+          tar -czf ../linux-$VERSION.tar.gz .
       
       - name: Organize Windows release files
         run: |
@@ -445,9 +448,12 @@ jobs:
           # Copy common files
           cp -r artifacts/common-files/* release-macos/
           
+          # Set executable permissions
+          chmod +x release-macos/backend release-macos/updater release-macos/testadj
+          
           # Create macOS Intel release archive
           cd release-macos
-          zip -r ../macos-intel-$VERSION.zip .
+          tar -czf ../macos-intel-$VERSION.tar.gz .
       
       - name: Organize macOS ARM64 release files
         run: |
@@ -471,15 +477,20 @@ jobs:
           # Copy common files
           cp -r artifacts/common-files/* release-macos-arm64/
           
+          # Set executable permissions
+          chmod +x release-macos-arm64/backend release-macos-arm64/updater release-macos-arm64/testadj
+          
           # Create macOS ARM64 release archive
           cd release-macos-arm64
-          zip -r ../macos-arm64-$VERSION.zip .
+          tar -czf ../macos-arm64-$VERSION.tar.gz .
       
       - name: Upload release packages
         uses: actions/upload-artifact@v4
         with:
           name: releases
-          path: "*.zip"
+          path: |
+            *.tar.gz
+            *.zip
           retention-days: 7
           compression-level: 9
       
@@ -502,9 +513,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./linux-${{ github.event.inputs.version }}.zip
-          asset_name: linux-${{ github.event.inputs.version }}.zip
-          asset_content_type: application/zip
+          asset_path: ./linux-${{ github.event.inputs.version }}.tar.gz
+          asset_name: linux-${{ github.event.inputs.version }}.tar.gz
+          asset_content_type: application/gzip
           
       - name: Upload Windows package to release
         if: github.event_name == 'workflow_dispatch'
@@ -524,9 +535,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./macos-intel-${{ github.event.inputs.version }}.zip
-          asset_name: macos-intel-${{ github.event.inputs.version }}.zip
-          asset_content_type: application/zip
+          asset_path: ./macos-intel-${{ github.event.inputs.version }}.tar.gz
+          asset_name: macos-intel-${{ github.event.inputs.version }}.tar.gz
+          asset_content_type: application/gzip
           
       - name: Upload macOS ARM64 package to release
         if: github.event_name == 'workflow_dispatch'
@@ -535,9 +546,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./macos-arm64-${{ github.event.inputs.version }}.zip
-          asset_name: macos-arm64-${{ github.event.inputs.version }}.zip
-          asset_content_type: application/zip
+          asset_path: ./macos-arm64-${{ github.event.inputs.version }}.tar.gz
+          asset_name: macos-arm64-${{ github.event.inputs.version }}.tar.gz
+          asset_content_type: application/gzip
           
       - name: Upload Linux package to existing release
         if: github.event_name == 'release'
@@ -546,9 +557,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./linux-${{ github.event.release.tag_name }}.zip
-          asset_name: linux-${{ github.event.release.tag_name }}.zip
-          asset_content_type: application/zip
+          asset_path: ./linux-${{ github.event.release.tag_name }}.tar.gz
+          asset_name: linux-${{ github.event.release.tag_name }}.tar.gz
+          asset_content_type: application/gzip
           
       - name: Upload Windows package to existing release
         if: github.event_name == 'release'
@@ -568,9 +579,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./macos-intel-${{ github.event.release.tag_name }}.zip
-          asset_name: macos-intel-${{ github.event.release.tag_name }}.zip
-          asset_content_type: application/zip
+          asset_path: ./macos-intel-${{ github.event.release.tag_name }}.tar.gz
+          asset_name: macos-intel-${{ github.event.release.tag_name }}.tar.gz
+          asset_content_type: application/gzip
           
       - name: Upload macOS ARM64 package to existing release
         if: github.event_name == 'release'
@@ -579,6 +590,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./macos-arm64-${{ github.event.release.tag_name }}.zip
-          asset_name: macos-arm64-${{ github.event.release.tag_name }}.zip
-          asset_content_type: application/zip
+          asset_path: ./macos-arm64-${{ github.event.release.tag_name }}.tar.gz
+          asset_name: macos-arm64-${{ github.event.release.tag_name }}.tar.gz
+          asset_content_type: application/gzip
