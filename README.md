@@ -14,7 +14,7 @@ Download the latest release, unzip it and run the executable compatible with you
 
 ### For Developers
 
-See [DEVELOPMENT.md](./DEVELOPMENT.md) for detailed setup instructions. Quick start:
+See our comprehensive [Documentation](./docs/README.md) or jump to [Getting Started](./docs/guides/getting-started.md). Quick start:
 
 ```bash
 # Clone and setup
@@ -34,7 +34,17 @@ When using the Control Station make sure that you have configured your IP as the
 
 To change the ADJ branch from `main`, change the option `adj/branch` at the end of the `config.toml` with the name of the branch you want to use or leave it blank if you'll be making use of a custom ADJ.
 
-### Contributing
+## Documentation
+
+📚 **[Complete Documentation](./docs/README.md)** - All guides and references
+
+### Quick Links
+- 🚀 **[Getting Started](./docs/guides/getting-started.md)** - New user guide
+- 🛠️ **[Development Setup](./docs/development/DEVELOPMENT.md)** - Developer environment setup  
+- 🏗️ **[Architecture](./docs/architecture/README.md)** - System design overview
+- 🔧 **[Troubleshooting](./docs/troubleshooting/BLCU_FIX_SUMMARY.md)** - Common issues and fixes
+
+## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for ways to contribute to the Control Station.
 
