@@ -101,7 +101,7 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) error {
 		))
 
 	case blcu_topic.UploadName:
-		upload := push.(*blcu_topic.UploadRequest)
+		upload := push.(blcu_topic.UploadRequest)
 
 		vehicle.boards[boards.BlcuId].Notify(abstraction.BoardNotification(
 			&boards.UploadEvent{
