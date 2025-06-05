@@ -89,28 +89,46 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) error {
 			status.Fulfill(status.Enable())
 		}
 
-	case blcu_topic.DownloadName:
+	case "blcu/downloadRequest":
 		download := push.(*blcu_topic.DownloadRequest)
 
-		vehicle.boards[boards.BlcuId].Notify(abstraction.BoardNotification(
-			&boards.DownloadEvent{
-				BoardEvent: boards.AckId,
-				BoardID:    boards.BlcuId,
-				Board:      download.Board,
-			},
-		))
+		if board, exists := vehicle.boards[boards.BlcuId]; exists {
+			board.Notify(abstraction.BoardNotification(
+				&boards.DownloadEvent{
+					BoardEvent: boards.DownloadEventId,
+					BoardID:    boards.BlcuId,
+					Board:      download.Board,
+				},
+			))
+		} else {
+			fmt.Fprintf(os.Stderr, "BLCU board not registered\n")
+		}
 
-	case blcu_topic.UploadName:
-		upload := push.(*blcu_topic.UploadRequest)
+	case "blcu/uploadRequest":
+		// Handle both UploadRequest and UploadRequestInternal
+		var uploadEvent *boards.UploadEvent
+		switch u := push.(type) {
+		case *blcu_topic.UploadRequestInternal:
+			uploadEvent = &boards.UploadEvent{
+				BoardEvent: boards.UploadEventId,
+				Board:      u.Board,
+				Data:       u.Data,
+				Length:     len(u.Data),
+			}
+		case *blcu_topic.UploadRequest:
+			// This shouldn't happen as the handler should convert to Internal
+			fmt.Fprintf(os.Stderr, "received raw UploadRequest, expected UploadRequestInternal\n")
+			return nil
+		default:
+			fmt.Fprintf(os.Stderr, "unknown upload type: %T\n", push)
+			return nil
+		}
 
-		vehicle.boards[boards.BlcuId].Notify(abstraction.BoardNotification(
-			&boards.UploadEvent{
-				BoardEvent: boards.AckId,
-				Board:      upload.Board,
-				Data:       upload.Data,
-				Length:     len(upload.Data),
-			},
-		))
+		if board, exists := vehicle.boards[boards.BlcuId]; exists {
+			board.Notify(abstraction.BoardNotification(uploadEvent))
+		} else {
+			fmt.Fprintf(os.Stderr, "BLCU board not registered\n")
+		}
 
 	default:
 		fmt.Printf("unknow topic %s\n", push.Topic())
