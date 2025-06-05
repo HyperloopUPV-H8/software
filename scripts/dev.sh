@@ -6,6 +6,15 @@ set -e
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
+# Detect OS
+OS="unknown"
+case "$(uname -s)" in
+    Linux*)     OS="linux";;
+    Darwin*)    OS="macos";;
+    CYGWIN*|MINGW*|MSYS*) OS="windows";;
+    *)          OS="unknown";;
+esac
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -14,7 +23,9 @@ NC='\033[0m' # No Color
 
 print_header() {
     echo -e "${GREEN}🚄 Hyperloop H10 Development Environment${NC}"
-    echo -e "${GREEN}=====================================>${NC}"
+    echo -e "${GREEN}=======================================${NC}"
+    echo -e "${YELLOW}OS: $OS${NC}"
+    echo ""
 }
 
 print_usage() {
@@ -103,8 +114,37 @@ run_packet_sender() {
 }
 
 run_all_tmux() {
+    if [ "$OS" = "windows" ]; then
+        echo -e "${YELLOW}Note: Running all services in parallel on Windows...${NC}"
+        echo -e "${YELLOW}Use Ctrl+C to stop all services${NC}"
+        
+        # Start all services in background
+        (cd "$PROJECT_ROOT/backend/cmd" && go run .) &
+        PID_BACKEND=$!
+        
+        (cd "$PROJECT_ROOT/ethernet-view" && npm run dev) &
+        PID_ETHERNET=$!
+        
+        (cd "$PROJECT_ROOT/control-station" && npm run dev) &
+        PID_CONTROL=$!
+        
+        (cd "$PROJECT_ROOT/packet-sender" && go run .) &
+        PID_PACKET=$!
+        
+        echo -e "${GREEN}All services started. PIDs: Backend=$PID_BACKEND, Ethernet=$PID_ETHERNET, Control=$PID_CONTROL, Packet=$PID_PACKET${NC}"
+        
+        # Wait for any process to exit or Ctrl+C
+        wait
+        
+        # Kill all background processes
+        kill $PID_BACKEND $PID_ETHERNET $PID_CONTROL $PID_PACKET 2>/dev/null || true
+        echo -e "${YELLOW}All services stopped${NC}"
+        return
+    fi
+
     if ! command -v tmux >/dev/null 2>&1; then
-        echo -e "${RED}Error: tmux is required to run all services${NC}"
+        echo -e "${RED}Error: tmux is required to run all services on Unix systems${NC}"
+        echo -e "${YELLOW}Tip: Install tmux or run services individually${NC}"
         exit 1
     fi
 
