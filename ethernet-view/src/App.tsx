@@ -7,7 +7,6 @@ import { AppLayout } from "layouts/AppLayout/AppLayout";
 import { useState } from "react";
 import { LoggerPage } from "pages/LoggerPage/LoggerPage";
 
-
 function App() {
 
     const isProduction = import.meta.env.PROD;
