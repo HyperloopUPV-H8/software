@@ -32,6 +32,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/internal/utils"
 	vehicle_models "github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/boards"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker"
 	blcu_topics "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/blcu"
 	connection_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/connection"
@@ -218,6 +219,16 @@ func main() {
 	vehicle.SetIpToBoardId(ipToBoardId)
 	vehicle.SetIdToBoardName(idToBoard)
 	vehicle.SetTransport(transp)
+
+	// <--- BLCU Board --->
+	// Register BLCU board for handling bootloader operations
+	if blcuIP, exists := adj.Info.Addresses[BLCU]; exists {
+		blcuBoard := boards.New(blcuIP)
+		vehicle.AddBoard(blcuBoard)
+		trace.Info().Str("ip", blcuIP).Msg("BLCU board registered")
+	} else {
+		trace.Warn().Msg("BLCU address not found in ADJ")
+	}
 
 	// <--- transport --->
 	// Load and set packet decoder and encoder
