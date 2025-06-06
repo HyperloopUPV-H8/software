@@ -44,7 +44,7 @@ Choose your platform and follow the appropriate steps:
 ```powershell
 # Clone the repository
 git clone https://github.com/HyperloopUPV-H8/software.git
-cd h9-backend
+cd software
 
 # Allow script execution
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
@@ -60,7 +60,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```cmd
 REM Clone the repository
 git clone https://github.com/HyperloopUPV-H8/software.git
-cd h9-backend
+cd software
 
 REM Setup dependencies
 scripts\dev.cmd setup
@@ -73,7 +73,7 @@ scripts\dev.cmd all
 ```bash
 # Clone the repository
 git clone https://github.com/HyperloopUPV-H8/software.git
-cd h9-backend
+cd software
 
 # Make scripts executable
 chmod +x scripts/dev.sh
@@ -175,7 +175,7 @@ Located in: `backend/cmd/adj/boards/[BOARD_NAME]/`
 
 ### For Contributors
 1. Read [Contributing Guidelines](../../CONTRIBUTING.md)
-2. Explore existing [GitHub Issues](https://github.com/HyperloopUPV-H8/h9-backend/issues)
+2. Explore existing [GitHub Issues](https://github.com/HyperloopUPV-H8/software/issues)
 3. Join the development discussion
 
 ## Troubleshooting
@@ -203,7 +203,7 @@ Located in: `backend/cmd/adj/boards/[BOARD_NAME]/`
 ### Getting Help
 
 - **Documentation**: Check the [troubleshooting guide](../troubleshooting/common-issues.md)
-- **Issues**: Search and create [GitHub Issues](https://github.com/HyperloopUPV-H8/h9-backend/issues)
+- **Issues**: Search and create [GitHub Issues](https://github.com/HyperloopUPV-H8/software/issues)
 - **Community**: Join the development discussion
 
 ## Success Indicators
