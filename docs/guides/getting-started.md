@@ -43,7 +43,7 @@ Choose your platform and follow the appropriate steps:
 #### Windows (PowerShell - Recommended)
 ```powershell
 # Clone the repository
-git clone https://github.com/HyperloopUPV-H8/h9-backend.git
+git clone https://github.com/HyperloopUPV-H8/software.git
 cd h9-backend
 
 # Allow script execution
@@ -59,7 +59,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 #### Windows (Command Prompt)
 ```cmd
 REM Clone the repository
-git clone https://github.com/HyperloopUPV-H8/h9-backend.git
+git clone https://github.com/HyperloopUPV-H8/software.git
 cd h9-backend
 
 REM Setup dependencies
@@ -72,7 +72,7 @@ scripts\dev.cmd all
 #### macOS/Linux
 ```bash
 # Clone the repository
-git clone https://github.com/HyperloopUPV-H8/h9-backend.git
+git clone https://github.com/HyperloopUPV-H8/software.git
 cd h9-backend
 
 # Make scripts executable
