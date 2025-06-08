@@ -99,9 +99,17 @@ The Hyperloop H10 Control Station is a real-time monitoring and control system d
 - Plugin-based architecture for new sensors
 - Horizontal scaling capabilities
 
+## Communication Protocols
+
+Comprehensive documentation for all communication layers:
+
+- [**Protocols Overview**](./protocols.md) - High-level communication architecture
+- [**Message Structures**](./message-structures.md) - Complete message format specifications  
+- [**Binary Protocol**](./binary-protocol.md) - Vehicle ↔ Backend wire protocol
+- [**WebSocket API**](./websocket-api.md) - Backend ↔ Frontend API specification
+
 ## Related Documentation
 
 - [Backend Architecture](backend.md) - Detailed backend design
 - [Frontend Architecture](frontend.md) - Frontend application structure
-- [Communication Protocols](protocols.md) - Network and data protocols
 - [Development Setup](../development/DEVELOPMENT.md) - Getting started guide
