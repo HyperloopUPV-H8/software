@@ -18,10 +18,17 @@ type Transport struct {
 	PropagateFault bool
 }
 
+type Blcu struct {
+	IP              string
+	DownloadOrderId uint16
+	UploadOrderId   uint16
+}
+
 type Config struct {
 	Vehicle   vehicle.Config
 	Server    server.Config
 	Adj       Adj
 	Network   Network
 	Transport Transport
+	Blcu      Blcu
 }
