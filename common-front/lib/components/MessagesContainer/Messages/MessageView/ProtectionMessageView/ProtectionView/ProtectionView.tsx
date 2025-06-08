@@ -1,8 +1,8 @@
-import { Protection } from "../../../../../..";
+import { ProtectionMessage } from "../../../../../..";
 import styles from "./ProtectionView.module.scss";
 
 type Props = {
-    protection: Protection;
+    protection: ProtectionMessage;
 };
 
 const DECIMALS = 2;
@@ -13,43 +13,43 @@ export const ProtectionView = ({ protection }: Props) => {
     return <div className={styles.protectionView}>{ProtectionText}</div>;
 };
 
-function getProtectionText(protection: Protection) {
-    switch (protection.kind) {
+function getProtectionText(protection: ProtectionMessage) {
+    switch (protection.payload.kind) {
         case "OUT_OF_BOUNDS":
             return (
                 <>
                     <span>
                         {" "}
-                        Want: [{protection.data.bounds[0].toFixed(
+                        Want: [{protection.payload.data.bounds[0].toFixed(
                             DECIMALS
-                        )}, {protection.data.bounds[1].toFixed(DECIMALS)}]
+                        )}, {protection.payload.data.bounds[1].toFixed(DECIMALS)}]
                     </span>{" "}
-                    <span>Got: {protection.data.value.toFixed(DECIMALS)}</span>
+                    <span>Got: {protection.payload.data.value.toFixed(DECIMALS)}</span>
                 </>
             );
         case "UPPER_BOUND":
             return (
                 <>
                     <span>
-                        Want: x {"<"} {protection.data.bound.toFixed(DECIMALS)}
+                        Want: [{protection.name}] {"<"} {protection.payload.data.bound.toFixed(DECIMALS)}
                     </span>{" "}
-                    <span>Got: {protection.data.value.toFixed(DECIMALS)}</span>
+                    <span>Got: {protection.payload.data.value.toFixed(DECIMALS)}</span>
                 </>
             );
         case "LOWER_BOUND":
             return (
                 <>
                     <span>
-                        Want: x {">"} {protection.data.bound.toFixed(DECIMALS)}
+                        Want: [{protection.name}] {">"} {protection.payload.data.bound.toFixed(DECIMALS)}
                     </span>{" "}
-                    <span>Got: {protection.data.value.toFixed(DECIMALS)}</span>
+                    <span>Got: {protection.payload.data.value.toFixed(DECIMALS)}</span>
                 </>
             );
         case "EQUALS":
             return (
                 <>
                     <span>
-                        Mustn't be {protection.data.value.toFixed(DECIMALS)}
+                        Mustn't be {protection.payload.data.value.toFixed(DECIMALS)}
                     </span>
                 </>
             );
@@ -57,19 +57,19 @@ function getProtectionText(protection: Protection) {
             return (
                 <>
                     <span>
-                        Must be {protection.data.want.toFixed(DECIMALS)} but is{" "}
-                        {protection.data.value.toFixed(DECIMALS)}
+                        Must be {protection.payload.data.want.toFixed(DECIMALS)} but is{" "}
+                        {protection.payload.data.value.toFixed(DECIMALS)}
                     </span>
                 </>
             );
         case "TIME_ACCUMULATION":
             return (
                 <span>
-                    Value was {protection.data.value.toFixed(DECIMALS)} for{" "}
-                    {protection.data.timelimit.toFixed(DECIMALS)} seconds
+                    Value was {protection.payload.data.value.toFixed(DECIMALS)} for{" "}
+                    {protection.payload.data.timelimit.toFixed(DECIMALS)} seconds
                 </span>
             );
         case "ERROR_HANDLER":
-            return <span>{protection.data}</span>;
+            return <span>{protection.payload.data}</span>;
     }
 }

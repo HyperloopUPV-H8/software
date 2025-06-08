@@ -12,7 +12,6 @@ interface Props {
 }
 
 export const AppLayout = ({children, pageShown, setPageShown} : Props) => {
-
     return (
         <div className={styles.appLayout}>
             <Navbar items={[

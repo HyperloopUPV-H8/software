@@ -13,6 +13,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tcp"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tftp"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/session"
 	"github.com/rs/zerolog"
@@ -36,6 +37,8 @@ type Transport struct {
 
 	tftp *tftp.Client
 
+	propagateFault bool
+
 	api abstraction.TransportAPI
 
 	logger zerolog.Logger
@@ -49,18 +52,25 @@ type Transport struct {
 func (transport *Transport) HandleClient(config tcp.ClientConfig, remote string) error {
 	client := tcp.NewClient(remote, config, transport.logger)
 	defer transport.logger.Warn().Str("remoteAddress", remote).Msg("abort connection")
+	var hasConnected = false
 
 	for {
 		conn, err := client.Dial()
 		if err != nil {
 			transport.logger.Debug().Stack().Err(err).Str("remoteAddress", remote).Msg("dial failed")
 			if !config.TryReconnect {
+				if hasConnected {
+					transport.SendFault()
+				}
+
 				transport.errChan <- err
 				return err
 			}
 
 			continue
 		}
+
+		hasConnected = true
 
 		err = transport.handleTCPConn(conn)
 		if errors.Is(err, error(ErrTargetAlreadyConnected{})) {
@@ -71,6 +81,7 @@ func (transport *Transport) HandleClient(config tcp.ClientConfig, remote string)
 		if err != nil {
 			transport.logger.Debug().Stack().Err(err).Str("remoteAddress", remote).Msg("dial failed")
 			if !config.TryReconnect {
+				transport.SendFault()
 				transport.errChan <- err
 				return err
 			}
@@ -170,6 +181,14 @@ func (transport *Transport) handleTCPConn(conn net.Conn) error {
 				return
 			}
 
+			if transport.propagateFault && packet.Id() == 0 {
+				connectionLogger.Info().Msg("replicating packet with id 0 to all boards")
+				err := transport.handlePacketEvent(NewPacketMessage(packet))
+				if err != nil {
+					connectionLogger.Error().Err(err).Msg("failed to replicate packet")
+				}
+			}
+
 			from := conn.RemoteAddr().String()
 			to := conn.LocalAddr().String()
 
@@ -208,6 +227,37 @@ func (transport *Transport) SendMessage(message abstraction.TransportMessage) er
 // handlePacketEvent is used to send an order to one of the connected boards
 func (transport *Transport) handlePacketEvent(message PacketMessage) error {
 	eventLogger := transport.logger.With().Str("type", fmt.Sprintf("%T", message.Packet)).Uint16("id", uint16(message.Id())).Logger()
+
+	if message.Id() == 0 {
+		eventLogger.Info().Msg("broadcasting packet id 0")
+		data, err := transport.encoder.Encode(message.Packet)
+		if err != nil {
+			eventLogger.Error().Stack().Err(err).Msg("encode")
+			transport.errChan <- err
+			return err
+		}
+
+		transport.connectionsMx.Lock()
+		defer transport.connectionsMx.Unlock()
+		for target, conn := range transport.connections {
+			eventLogger := eventLogger.With().Str("target", string(target)).Logger()
+
+			totalWritten := 0
+			for totalWritten < len(data) {
+				n, err := conn.Write(data[totalWritten:])
+				eventLogger.Trace().Int("amount", n).Msg("written chunk")
+				totalWritten += n
+				if err != nil {
+					eventLogger.Error().Stack().Err(err).Msg("write")
+					transport.errChan <- err
+					return err
+				}
+			}
+			eventLogger.Info().Msg("sent")
+		}
+		return nil
+	}
+
 	target, ok := transport.idToTarget[message.Id()]
 	if !ok {
 		eventLogger.Debug().Msg("target not found")
@@ -299,6 +349,15 @@ func (transport *Transport) handleConversation(socket network.Socket, reader io.
 				return
 			}
 
+			// Intercept packets with id == 0 and replicate
+			if transport.propagateFault && packet.Id() == 0 {
+				conversationLogger.Info().Msg("replicating packet with id 0 to all boards")
+				err := transport.handlePacketEvent(NewPacketMessage(packet))
+				if err != nil {
+					conversationLogger.Error().Err(err).Msg("failed to replicate packet")
+				}
+			}
+
 			transport.api.Notification(NewPacketNotification(packet, srcAddr, dstAddr, time.Now()))
 		}
 	}()
@@ -317,8 +376,12 @@ func (transport *Transport) consumeErrors() {
 }
 
 func (transport *Transport) SendFault() {
-	// err := transport.SendMessage(NewPacketMessage(data.NewPacket(0)))
-	// if err != nil {
-	// transport.errChan <- err
-	// }
+	err := transport.SendMessage(NewPacketMessage(data.NewPacket(0)))
+	if err != nil {
+		transport.errChan <- err
+	}
+}
+
+func (transport *Transport) SetpropagateFault(enabled bool) {
+	transport.propagateFault = enabled
 }

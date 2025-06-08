@@ -15,7 +15,9 @@ const (
 	BlcuName = "BLCU"
 	BlcuId   = abstraction.BoardId(1)
 
-	AckId = "1"
+	AckId = abstraction.BoardEvent("ACK")
+	DownloadEventId = abstraction.BoardEvent("DOWNLOAD")
+	UploadEventId = abstraction.BoardEvent("UPLOAD")
 
 	BlcuDownloadOrderId = 1
 	BlcuUploadOrderId   = 2
@@ -39,21 +41,21 @@ func (boards *BLCU) Id() abstraction.BoardId {
 
 func (boards *BLCU) Notify(boardNotification abstraction.BoardNotification) {
 	switch notification := boardNotification.(type) {
-	case AckNotification:
+	case *AckNotification:
 		boards.ackChan <- struct{}{}
 
-	case DownloadEvent:
-		err := boards.download(notification)
+	case *DownloadEvent:
+		err := boards.download(*notification)
 		if err != nil {
 			fmt.Println(ErrDownloadFailure{
 				Timestamp: time.Now(),
 				Inner:     err,
 			}.Error())
 		}
-	case UploadEvent:
-		err := boards.upload(notification)
+	case *UploadEvent:
+		err := boards.upload(*notification)
 		if err != nil {
-			fmt.Println(ErrDownloadFailure{
+			fmt.Println(ErrUploadFailure{
 				Timestamp: time.Now(),
 				Inner:     err,
 			}.Error())

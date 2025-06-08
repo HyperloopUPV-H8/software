@@ -1,13 +1,10 @@
 module packet_sender
 
-go 1.21.3
+go 1.23.0
 
-toolchain go1.23.1
+toolchain go1.24.2
 
-require (
-	github.com/HyperloopUPV-H8/h9-backend v0.0.0-00010101000000-000000000000
-	github.com/joho/godotenv v1.4.0
-)
+require github.com/HyperloopUPV-H8/h9-backend v0.0.0-00010101000000-000000000000
 
 require (
 	dario.cat/mergo v1.0.0 // indirect
@@ -26,10 +23,10 @@ require (
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/skeema/knownhosts v1.2.2 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
-	golang.org/x/crypto v0.21.0 // indirect
+	golang.org/x/crypto v0.36.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
-	golang.org/x/net v0.22.0 // indirect
-	golang.org/x/sys v0.18.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/tools v0.13.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )

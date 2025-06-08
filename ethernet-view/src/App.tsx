@@ -8,7 +8,6 @@ import { useState } from "react";
 import { LoggerPage } from "pages/LoggerPage/LoggerPage";
 import { CamerasPage } from "pages/CamerasPage/CamerasPage";
 
-
 function App() {
 
     const isProduction = import.meta.env.PROD;

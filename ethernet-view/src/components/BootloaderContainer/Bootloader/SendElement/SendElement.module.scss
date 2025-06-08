@@ -12,7 +12,7 @@
 }
 
 .fileIcon {
-    font-size: 1.8rem;
+    font-size: 0.9rem;
     color: orange;
 }
 
@@ -22,17 +22,17 @@
     flex-direction: column;
     gap: 0.5rem;
     text-overflow: ellipsis;
+    font-size: 1rem;
 }
 
 .name {
     flex: 1 1 0;
-
     font-weight: bold;
     text-overflow: ellipsis;
 }
 
 .removeBtn {
-    color: #bebebe;
-    font-size: 0.8rem;
     cursor: pointer;
+    width: 25px;
+    height: 25px;
 }
