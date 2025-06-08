@@ -40,7 +40,7 @@ type BLCU struct {
 
 func New(ip string) *BLCU {
 	return NewWithTFTPConfig(ip, TFTPConfig{
-		BlockSize:      512,
+		BlockSize:      131072, // 128kB
 		Retries:        3,
 		TimeoutMs:      5000,
 		BackoffFactor:  2,
