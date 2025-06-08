@@ -1,27 +1,48 @@
+# Hyperloop UPV Backend Configuration
+# Configuration file for the H10 Control Station backend server
+
+# Vehicle Configuration
 [vehicle]
-boards = ["HVSCU", "PCU"]
+boards = ["HVSCU", "PCU", "BLCU"]
+
+# BLCU (Boot Loader Control Unit) Configuration
+[blcu]
+ip = "127.0.0.1"      # TFTP server IP address
+download_order_id = 1 # Packet ID for download orders (0 = use default)
+upload_order_id = 2   # Packet ID for upload orders (0 = use default)
+
+# Server Configuration
 [server.ethernet-view]
 address = "127.0.0.1:4040"
 static = "./ethernet-view"
+
 [server.ethernet-view.endpoints]
 pod_data = "/podDataStructure"
 order_data = "/orderStructures"
 programable_boards = "/uploadableBoards"
 connections = "/backend"
 files = "/"
+
 [server.control-station]
 address = "127.0.0.1:4000"
 static = "./control-station"
+
 [server.control-station.endpoints]
 pod_data = "/podDataStructure"
 order_data = "/orderStructures"
 programable_boards = "/uploadableBoards"
 connections = "/backend"
 files = "/"
+
+# ADJ (Architecture Description JSON) Configuration
 [adj]
-branch = "main" # Leave blank when using ADJ as a submodule (like this: "")
-test = true
+branch = "software" # Leave blank when using ADJ as a submodule (like this: "")
+test = true         # Enable test mode
+
+# Network Configuration
 [network]
-manual = false
+manual = true # Manual network device selection
+
+# Transport Configuration
 [transport]
-propagate_fault = true
+propagate_fault = true # Propagate fault messages like VCU
