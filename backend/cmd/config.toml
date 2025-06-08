@@ -45,4 +45,11 @@ manual = true # Manual network device selection
 
 # Transport Configuration
 [transport]
-propagate_fault = true # Propagate fault messages like VCU
+propagate_fault = true
+
+[tftp]
+block_size = 131072   # TFTP block size in bytes (128kB)
+retries = 3          # Maximum number of retries before aborting transfer
+timeout_ms = 5000    # Timeout between retries in milliseconds
+backoff_factor = 2   # Backoff multiplier for retry delays
+enable_progress = true # Enable progress callbacks during transfers

@@ -23,16 +23,36 @@ const (
 	BlcuUploadOrderId   = 2
 )
 
+type TFTPConfig struct {
+	BlockSize      int
+	Retries        int
+	TimeoutMs      int
+	BackoffFactor  int
+	EnableProgress bool
+}
+
 type BLCU struct {
-	api     abstraction.BoardAPI
-	ackChan chan struct{}
-	ip      string
+	api        abstraction.BoardAPI
+	ackChan    chan struct{}
+	ip         string
+	tftpConfig TFTPConfig
 }
 
 func New(ip string) *BLCU {
+	return NewWithTFTPConfig(ip, TFTPConfig{
+		BlockSize:      131072, // 128kB
+		Retries:        3,
+		TimeoutMs:      5000,
+		BackoffFactor:  2,
+		EnableProgress: true,
+	})
+}
+
+func NewWithTFTPConfig(ip string, tftpConfig TFTPConfig) *BLCU {
 	return &BLCU{
-		ackChan: make(chan struct{}),
-		ip:      ip,
+		ackChan:    make(chan struct{}),
+		ip:         ip,
+		tftpConfig: tftpConfig,
 	}
 }
 func (boards *BLCU) Id() abstraction.BoardId {
@@ -96,7 +116,11 @@ func (boards *BLCU) download(notification DownloadEvent) error {
 
 	// TODO! Notify on progress
 
-	client, err := tftp.NewClient(boards.ip)
+	client, err := tftp.NewClient(boards.ip,
+		tftp.WithBlockSize(boards.tftpConfig.BlockSize),
+		tftp.WithRetries(boards.tftpConfig.Retries),
+		tftp.WithTimeout(time.Duration(boards.tftpConfig.TimeoutMs) * time.Millisecond),
+	)
 	if err != nil {
 		return ErrNewClientFailed{
 			Addr:      boards.ip,
@@ -164,7 +188,11 @@ func (boards *BLCU) upload(notification UploadEvent) error {
 
 	// TODO! Notify on progress
 
-	client, err := tftp.NewClient(boards.ip)
+	client, err := tftp.NewClient(boards.ip,
+		tftp.WithBlockSize(boards.tftpConfig.BlockSize),
+		tftp.WithRetries(boards.tftpConfig.Retries),
+		tftp.WithTimeout(time.Duration(boards.tftpConfig.TimeoutMs) * time.Millisecond),
+	)
 	if err != nil {
 		return ErrNewClientFailed{
 			Addr:      boards.ip,

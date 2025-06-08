@@ -221,18 +221,16 @@ func main() {
 	vehicle.SetTransport(transp)
 
 	// <--- BLCU Board --->
-	// Register BLCU board for handling bootloader operations if configured
-	if common.Contains(config.Vehicle.Boards, "BLCU") {
-		// Use BLCU address from config, ADJ, or default localhost
-		blcuIP := config.Blcu.IP
-		if blcuIP == "" {
-			if adjBlcuIP, exists := adj.Info.Addresses[BLCU]; exists {
-				blcuIP = adjBlcuIP
-			} else {
-				blcuIP = "127.0.0.1"  // Default TFTP server address
-			}
+	// Register BLCU board for handling bootloader operations
+	if blcuIP, exists := adj.Info.Addresses[BLCU]; exists {
+		tftpConfig := boards.TFTPConfig{
+			BlockSize:      config.TFTP.BlockSize,
+			Retries:        config.TFTP.Retries,
+			TimeoutMs:      config.TFTP.TimeoutMs,
+			BackoffFactor:  config.TFTP.BackoffFactor,
+			EnableProgress: config.TFTP.EnableProgress,
 		}
-		blcuBoard := boards.New(blcuIP)
+		blcuBoard := boards.NewWithTFTPConfig(blcuIP, tftpConfig)
 		vehicle.AddBoard(blcuBoard)
 		trace.Info().Str("ip", blcuIP).Msg("BLCU board registered")
 	}

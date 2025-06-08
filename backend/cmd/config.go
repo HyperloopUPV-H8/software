@@ -18,10 +18,18 @@ type Transport struct {
 	PropagateFault bool
 }
 
+type TFTP struct {
+	BlockSize      int  `toml:"block_size"`
+	Retries        int  `toml:"retries"`
+	TimeoutMs      int  `toml:"timeout_ms"`
+	BackoffFactor  int  `toml:"backoff_factor"`
+	EnableProgress bool `toml:"enable_progress"`
+
 type Blcu struct {
 	IP              string
 	DownloadOrderId uint16
 	UploadOrderId   uint16
+
 }
 
 type Config struct {
@@ -30,5 +38,6 @@ type Config struct {
 	Adj       Adj
 	Network   Network
 	Transport Transport
+	TFTP      TFTP
 	Blcu      Blcu
 }
