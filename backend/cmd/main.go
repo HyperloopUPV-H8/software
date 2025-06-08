@@ -221,13 +221,20 @@ func main() {
 	vehicle.SetTransport(transp)
 
 	// <--- BLCU Board --->
-	// Register BLCU board for handling bootloader operations
-	if blcuIP, exists := adj.Info.Addresses[BLCU]; exists {
+	// Register BLCU board for handling bootloader operations if configured
+	if common.Contains(config.Vehicle.Boards, "BLCU") {
+		// Use BLCU address from config, ADJ, or default localhost
+		blcuIP := config.Blcu.IP
+		if blcuIP == "" {
+			if adjBlcuIP, exists := adj.Info.Addresses[BLCU]; exists {
+				blcuIP = adjBlcuIP
+			} else {
+				blcuIP = "127.0.0.1"  // Default TFTP server address
+			}
+		}
 		blcuBoard := boards.New(blcuIP)
 		vehicle.AddBoard(blcuBoard)
 		trace.Info().Str("ip", blcuIP).Msg("BLCU board registered")
-	} else {
-		trace.Warn().Msg("BLCU address not found in ADJ")
 	}
 
 	// <--- transport --->
@@ -241,6 +248,33 @@ func main() {
 			transp.SetIdTarget(abstraction.PacketId(packet.Id), abstraction.TransportTarget(board.Name))
 		}
 		transp.SetTargetIp(adj.Info.Addresses[board.Name], abstraction.TransportTarget(board.Name))
+	}
+
+	// Set BLCU packet ID mappings if BLCU is configured
+	if common.Contains(config.Vehicle.Boards, "BLCU") {
+		// Use configurable packet IDs or defaults
+		downloadOrderId := config.Blcu.DownloadOrderId
+		uploadOrderId := config.Blcu.UploadOrderId
+		if downloadOrderId == 0 {
+			downloadOrderId = boards.BlcuDownloadOrderId
+		}
+		if uploadOrderId == 0 {
+			uploadOrderId = boards.BlcuUploadOrderId
+		}
+		
+		transp.SetIdTarget(abstraction.PacketId(downloadOrderId), abstraction.TransportTarget("BLCU"))
+		transp.SetIdTarget(abstraction.PacketId(uploadOrderId), abstraction.TransportTarget("BLCU"))
+		
+		// Use BLCU address from config, ADJ, or default
+		blcuIP := config.Blcu.IP
+		if blcuIP == "" {
+			if adjBlcuIP, exists := adj.Info.Addresses[BLCU]; exists {
+				blcuIP = adjBlcuIP
+			} else {
+				blcuIP = "127.0.0.1"
+			}
+		}
+		transp.SetTargetIp(blcuIP, abstraction.TransportTarget("BLCU"))
 	}
 
 	// Start handling TCP client connections
