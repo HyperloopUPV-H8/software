@@ -25,3 +25,10 @@ test = true
 manual = false
 [transport]
 propagate_fault = true
+
+[tftp]
+block_size = 512      # TFTP block size in bytes (default: 512)
+retries = 3          # Maximum number of retries before aborting transfer
+timeout_ms = 5000    # Timeout between retries in milliseconds
+backoff_factor = 2   # Backoff multiplier for retry delays
+enable_progress = true # Enable progress callbacks during transfers

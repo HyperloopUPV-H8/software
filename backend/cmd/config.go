@@ -18,10 +18,19 @@ type Transport struct {
 	PropagateFault bool
 }
 
+type TFTP struct {
+	BlockSize      int  `toml:"block_size"`
+	Retries        int  `toml:"retries"`
+	TimeoutMs      int  `toml:"timeout_ms"`
+	BackoffFactor  int  `toml:"backoff_factor"`
+	EnableProgress bool `toml:"enable_progress"`
+}
+
 type Config struct {
 	Vehicle   vehicle.Config
 	Server    server.Config
 	Adj       Adj
 	Network   Network
 	Transport Transport
+	TFTP      TFTP
 }

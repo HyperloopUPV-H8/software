@@ -223,7 +223,14 @@ func main() {
 	// <--- BLCU Board --->
 	// Register BLCU board for handling bootloader operations
 	if blcuIP, exists := adj.Info.Addresses[BLCU]; exists {
-		blcuBoard := boards.New(blcuIP)
+		tftpConfig := boards.TFTPConfig{
+			BlockSize:      config.TFTP.BlockSize,
+			Retries:        config.TFTP.Retries,
+			TimeoutMs:      config.TFTP.TimeoutMs,
+			BackoffFactor:  config.TFTP.BackoffFactor,
+			EnableProgress: config.TFTP.EnableProgress,
+		}
+		blcuBoard := boards.NewWithTFTPConfig(blcuIP, tftpConfig)
 		vehicle.AddBoard(blcuBoard)
 		trace.Info().Str("ip", blcuIP).Msg("BLCU board registered")
 	} else {
