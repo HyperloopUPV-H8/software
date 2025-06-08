@@ -24,6 +24,12 @@ type TFTP struct {
 	TimeoutMs      int  `toml:"timeout_ms"`
 	BackoffFactor  int  `toml:"backoff_factor"`
 	EnableProgress bool `toml:"enable_progress"`
+
+type Blcu struct {
+	IP              string
+	DownloadOrderId uint16
+	UploadOrderId   uint16
+
 }
 
 type Config struct {
@@ -33,4 +39,5 @@ type Config struct {
 	Network   Network
 	Transport Transport
 	TFTP      TFTP
+	Blcu      Blcu
 }
