@@ -87,8 +87,8 @@ var playbackFile = flag.String("playback", "", "")
 var currentVersion string
 
 func main() {
-	update()
-
+	// update() // FIXME: Updater disabled due to cross-platform and reliability issues
+	
 	traceFile := initTrace(*traceLevel, *traceFile)
 	defer traceFile.Close()
 
@@ -665,6 +665,8 @@ func getLatestVersionFromGitHub() (string, error) {
 	return version, nil
 }
 
+// FIXME: Updater system disabled due to multiple critical issues
+// See GitHub issue for full details on problems and proposed solutions
 func update() {
 	versionFile := "VERSION.txt"
 	versionData, err := os.ReadFile(versionFile)
