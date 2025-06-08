@@ -87,7 +87,7 @@ func (download *Download) handleDownload(message *websocket.Message) error {
 		return err
 	}
 
-	pushErr := download.api.UserPush(downloadRequest)
+	pushErr := download.api.UserPush(&downloadRequest)
 	return pushErr
 }
 
