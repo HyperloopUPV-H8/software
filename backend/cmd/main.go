@@ -287,7 +287,42 @@ func main() {
 		if err != nil {
 			panic("Failed to resolve local backend TCP client address")
 		}
-		go transp.HandleClient(tcp.NewClientConfig(backendTcpClientAddr), fmt.Sprintf("%s:%d", adj.Info.Addresses[board.Name], adj.Info.Ports[TcpServer]))
+		// Create TCP client config with custom parameters from config
+		clientConfig := tcp.NewClientConfig(backendTcpClientAddr)
+		
+		// Apply custom timeout if specified
+		if config.TCP.ConnectionTimeout > 0 {
+			clientConfig.Timeout = time.Duration(config.TCP.ConnectionTimeout) * time.Millisecond
+		}
+		
+		// Apply custom keep-alive if specified
+		if config.TCP.KeepAlive > 0 {
+			clientConfig.KeepAlive = time.Duration(config.TCP.KeepAlive) * time.Millisecond
+		}
+		
+		// Apply custom backoff parameters
+		if config.TCP.BackoffMinMs > 0 || config.TCP.BackoffMaxMs > 0 || config.TCP.BackoffMultiplier > 0 {
+			minBackoff := 100 * time.Millisecond // default
+			maxBackoff := 5 * time.Second // default
+			multiplier := 1.5 // default
+			
+			if config.TCP.BackoffMinMs > 0 {
+				minBackoff = time.Duration(config.TCP.BackoffMinMs) * time.Millisecond
+			}
+			if config.TCP.BackoffMaxMs > 0 {
+				maxBackoff = time.Duration(config.TCP.BackoffMaxMs) * time.Millisecond
+			}
+			if config.TCP.BackoffMultiplier > 0 {
+				multiplier = config.TCP.BackoffMultiplier
+			}
+			
+			clientConfig.ConnectionBackoffFunction = tcp.NewExponentialBackoff(minBackoff, multiplier, maxBackoff)
+		}
+		
+		// Apply max retries (0 or negative means infinite)
+		clientConfig.MaxConnectionRetries = config.TCP.MaxRetries
+		
+		go transp.HandleClient(clientConfig, fmt.Sprintf("%s:%d", adj.Info.Addresses[board.Name], adj.Info.Ports[TcpServer]))
 		i++
 	}
 
