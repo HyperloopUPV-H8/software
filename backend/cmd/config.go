@@ -15,7 +15,7 @@ type Network struct {
 }
 
 type Transport struct {
-	PropagateFault bool
+	PropagateFault bool `toml:"propagate_fault"`
 }
 
 type TFTP struct {
@@ -27,9 +27,18 @@ type TFTP struct {
 }
 
 type Blcu struct {
-	IP              string
-	DownloadOrderId uint16
-	UploadOrderId   uint16
+	IP              string `toml:"ip"`
+	DownloadOrderId uint16 `toml:"download_order_id"`
+	UploadOrderId   uint16 `toml:"upload_order_id"`
+}
+
+type TCP struct {
+	BackoffMinMs       int     `toml:"backoff_min_ms"`        // Minimum backoff duration in milliseconds
+	BackoffMaxMs       int     `toml:"backoff_max_ms"`        // Maximum backoff duration in milliseconds
+	BackoffMultiplier  float64 `toml:"backoff_multiplier"`    // Exponential backoff multiplier
+	MaxRetries         int     `toml:"max_retries"`           // Maximum number of retries before cycling (0 or negative = infinite)
+	ConnectionTimeout  int     `toml:"connection_timeout_ms"` // Connection timeout in milliseconds
+	KeepAlive          int     `toml:"keep_alive_ms"`         // Keep-alive interval in milliseconds
 }
 
 type Config struct {
@@ -39,5 +48,6 @@ type Config struct {
 	Network   Network
 	Transport Transport
 	TFTP      TFTP
+	TCP       TCP
 	Blcu      Blcu
 }
