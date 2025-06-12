@@ -3,11 +3,12 @@ package boards
 import (
 	"bytes"
 	"fmt"
+	"time"
+
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tftp"
 	dataPacket "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
-	"time"
 )
 
 // TODO! Get from ADE
@@ -15,12 +16,12 @@ const (
 	BlcuName = "BLCU"
 	BlcuId   = abstraction.BoardId(1)
 
-	AckId = abstraction.BoardEvent("ACK")
+	AckId           = abstraction.BoardEvent("ACK")
 	DownloadEventId = abstraction.BoardEvent("DOWNLOAD")
-	UploadEventId = abstraction.BoardEvent("UPLOAD")
+	UploadEventId   = abstraction.BoardEvent("UPLOAD")
 
-	BlcuDownloadOrderId = 1
-	BlcuUploadOrderId   = 2
+	BlcuDownloadOrderId = 701
+	BlcuUploadOrderId   = 700
 )
 
 type TFTPConfig struct {
@@ -119,7 +120,7 @@ func (boards *BLCU) download(notification DownloadEvent) error {
 	client, err := tftp.NewClient(boards.ip,
 		tftp.WithBlockSize(boards.tftpConfig.BlockSize),
 		tftp.WithRetries(boards.tftpConfig.Retries),
-		tftp.WithTimeout(time.Duration(boards.tftpConfig.TimeoutMs) * time.Millisecond),
+		tftp.WithTimeout(time.Duration(boards.tftpConfig.TimeoutMs)*time.Millisecond),
 	)
 	if err != nil {
 		return ErrNewClientFailed{
@@ -191,7 +192,7 @@ func (boards *BLCU) upload(notification UploadEvent) error {
 	client, err := tftp.NewClient(boards.ip,
 		tftp.WithBlockSize(boards.tftpConfig.BlockSize),
 		tftp.WithRetries(boards.tftpConfig.Retries),
-		tftp.WithTimeout(time.Duration(boards.tftpConfig.TimeoutMs) * time.Millisecond),
+		tftp.WithTimeout(time.Duration(boards.tftpConfig.TimeoutMs)*time.Millisecond),
 	)
 	if err != nil {
 		return ErrNewClientFailed{
