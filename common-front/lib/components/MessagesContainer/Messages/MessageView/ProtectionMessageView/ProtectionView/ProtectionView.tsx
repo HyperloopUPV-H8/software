@@ -7,6 +7,10 @@ type Props = {
 
 const DECIMALS = 2;
 
+function safeFixed(val: any, decimals = DECIMALS) {
+    return typeof val === "number" ? val.toFixed(decimals) : String(val);
+}
+
 export const ProtectionView = ({ protection }: Props) => {
     const ProtectionText = getProtectionText(protection);
 
@@ -20,36 +24,35 @@ function getProtectionText(protection: ProtectionMessage) {
                 <>
                     <span>
                         {" "}
-                        Want: [{protection.payload.data.bounds[0].toFixed(
-                            DECIMALS
-                        )}, {protection.payload.data.bounds[1].toFixed(DECIMALS)}]
+                        Want: [
+                        {safeFixed(protection.payload.data.bounds?.[0])}, {safeFixed(protection.payload.data.bounds?.[1])}]
                     </span>{" "}
-                    <span>Got: {protection.payload.data.value.toFixed(DECIMALS)}</span>
+                    <span>Got: {safeFixed(protection.payload.data.value)}</span>
                 </>
             );
         case "UPPER_BOUND":
             return (
                 <>
                     <span>
-                        Want: [{protection.name}] {"<"} {protection.payload.data.bound.toFixed(DECIMALS)}
+                        Want: [{protection.name}] {"<"} {safeFixed(protection.payload.data.bound)}
                     </span>{" "}
-                    <span>Got: {protection.payload.data.value.toFixed(DECIMALS)}</span>
+                    <span>Got: {safeFixed(protection.payload.data.value)}</span>
                 </>
             );
         case "LOWER_BOUND":
             return (
                 <>
                     <span>
-                        Want: [{protection.name}] {">"} {protection.payload.data.bound.toFixed(DECIMALS)}
+                        Want: [{protection.name}] {">"} {safeFixed(protection.payload.data.bound)}
                     </span>{" "}
-                    <span>Got: {protection.payload.data.value.toFixed(DECIMALS)}</span>
+                    <span>Got: {safeFixed(protection.payload.data.value)}</span>
                 </>
             );
         case "EQUALS":
             return (
                 <>
                     <span>
-                        Mustn't be {protection.payload.data.value.toFixed(DECIMALS)}
+                        Mustn't be {safeFixed(protection.payload.data.value)}
                     </span>
                 </>
             );
@@ -57,16 +60,16 @@ function getProtectionText(protection: ProtectionMessage) {
             return (
                 <>
                     <span>
-                        Must be {protection.payload.data.want.toFixed(DECIMALS)} but is{" "}
-                        {protection.payload.data.value.toFixed(DECIMALS)}
+                        Must be {safeFixed(protection.payload.data.want)} but is{" "}
+                        {safeFixed(protection.payload.data.value)}
                     </span>
                 </>
             );
         case "TIME_ACCUMULATION":
             return (
                 <span>
-                    Value was {protection.payload.data.value.toFixed(DECIMALS)} for{" "}
-                    {protection.payload.data.timelimit.toFixed(DECIMALS)} seconds
+                    Value was {safeFixed(protection.payload.data.value)} for{" "}
+                    {safeFixed(protection.payload.data.timelimit)} seconds
                 </span>
             );
         case "ERROR_HANDLER":
