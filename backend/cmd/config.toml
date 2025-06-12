@@ -38,8 +38,8 @@ keep_alive_ms = 1000         # Keep-alive interval in milliseconds
 # BLCU (Boot Loader Control Unit) Configuration
 [blcu]
 ip = "127.0.0.1"      # TFTP server IP address
-download_order_id = 1 # Packet ID for download orders (0 = use default)
-upload_order_id = 2   # Packet ID for upload orders (0 = use default)
+download_order_id = 701 # Packet ID for download orders (0 = use default)
+upload_order_id = 700   # Packet ID for upload orders (0 = use default)
 
 # TFTP Configuration
 [tftp]
