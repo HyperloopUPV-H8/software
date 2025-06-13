@@ -91,7 +91,7 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) error {
 
 	case "blcu/downloadRequest":
 		download := push.(*blcu_topic.DownloadRequest)
-
+		// TODO: get BLCU id from ADJ
 		if board, exists := vehicle.boards[boards.BlcuId]; exists {
 			board.Notify(abstraction.BoardNotification(
 				&boards.DownloadEvent{
