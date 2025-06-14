@@ -43,7 +43,6 @@ func (vehicle *Vehicle) Notification(notification abstraction.TransportNotificat
 }
 
 func (vehicle *Vehicle) handlePacketNotification(notification transport.PacketNotification) error {
-	var from string
 	var to string
 
 	switch p := notification.Packet.(type) {
@@ -55,19 +54,20 @@ func (vehicle *Vehicle) handlePacketNotification(notification transport.PacketNo
 			return errors.Join(fmt.Errorf("update data to frontend (data with id %d from %s to %s)", p.Id(), notification.From, notification.To), err)
 		}
 
-		from_ip := strings.Split(notification.From, ":")[0]
-		to_ip := strings.Split(notification.To, ":")[0]
-
-		if from_ip == "192.168.0.9" {
-			from = "backend"
-		} else {
-			from = vehicle.idToBoardName[uint16(vehicle.ipToBoardId[from_ip])]
+		from, exists := vehicle.idToBoardName[uint16(notification.Packet.Id())]
+		if !exists {
+			from = notification.From
 		}
 
-		if to_ip == "192.168.0.9" {
+		to_ip := strings.Split(notification.To, ":")[0]
+
+		if to_ip == "192.168.0.9" || to_ip == "127.0.0.9" {
 			to = "backend"
 		} else {
-			to = vehicle.idToBoardName[uint16(vehicle.ipToBoardId[to_ip])]
+			to, exists = vehicle.idToBoardName[uint16(notification.Packet.Id())]
+			if !exists {
+				to = notification.From
+			}
 		}
 
 		err = vehicle.logger.PushRecord(&data_logger.Record{
