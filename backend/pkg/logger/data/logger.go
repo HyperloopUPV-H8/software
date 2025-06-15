@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -95,7 +96,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 			valueRepresentation = string(value.Variant())
 		}
 
-		saveFile, err := sublogger.getFile(valueName)
+		saveFile, err := sublogger.getFile(valueName, dataRecord.From)
 		if err != nil {
 			return err
 		}
@@ -120,7 +121,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 	return writeErr
 }
 
-func (sublogger *Logger) getFile(valueName data.ValueName) (*file.CSV, error) {
+func (sublogger *Logger) getFile(valueName data.ValueName, board string) (*file.CSV, error) {
 	sublogger.fileLock.Lock()
 	defer sublogger.fileLock.Unlock()
 
@@ -129,17 +130,18 @@ func (sublogger *Logger) getFile(valueName data.ValueName) (*file.CSV, error) {
 		return valueFile, nil
 	}
 
-	valueFileRaw, err := sublogger.createFile(valueName)
+	valueFileRaw, err := sublogger.createFile(valueName, board)
 	sublogger.saveFiles[valueName] = file.NewCSV(valueFileRaw)
 
 	return sublogger.saveFiles[valueName], err
 }
 
-func (sublogger *Logger) createFile(valueName data.ValueName) (*os.File, error) {
+func (sublogger *Logger) createFile(valueName data.ValueName, board string) (*os.File, error) {
 	filename := path.Join(
 		"logger",
 		loggerHandler.Timestamp.Format(loggerHandler.TimestampFormat),
 		"data",
+		strings.ToUpper(board),
 		fmt.Sprintf("%s.csv", valueName),
 	)
 
