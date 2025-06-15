@@ -14,7 +14,7 @@ import (
 // TODO! Get from ADE
 const (
 	BlcuName = "BLCU"
-	BlcuId   = abstraction.BoardId(1)
+	BlcuId   = abstraction.BoardId(7)
 
 	AckId           = abstraction.BoardEvent("ACK")
 	DownloadEventId = abstraction.BoardEvent("DOWNLOAD")
@@ -37,6 +37,7 @@ type BLCU struct {
 	ackChan    chan struct{}
 	ip         string
 	tftpConfig TFTPConfig
+	id         abstraction.BoardId
 }
 
 func New(ip string) *BLCU {
@@ -46,18 +47,19 @@ func New(ip string) *BLCU {
 		TimeoutMs:      5000,
 		BackoffFactor:  2,
 		EnableProgress: true,
-	})
+	}, BlcuId)
 }
 
-func NewWithTFTPConfig(ip string, tftpConfig TFTPConfig) *BLCU {
+func NewWithTFTPConfig(ip string, tftpConfig TFTPConfig, id abstraction.BoardId) *BLCU {
 	return &BLCU{
 		ackChan:    make(chan struct{}),
 		ip:         ip,
 		tftpConfig: tftpConfig,
+		id:         id,
 	}
 }
-func (boards *BLCU) Id() abstraction.BoardId {
-	return BlcuId
+func (board *BLCU) Id() abstraction.BoardId {
+	return board.id
 }
 
 func (boards *BLCU) Notify(boardNotification abstraction.BoardNotification) {
