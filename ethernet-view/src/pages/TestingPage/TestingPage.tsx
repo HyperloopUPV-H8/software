@@ -1,6 +1,6 @@
 import { useState } from "react";
-// import { SplitLayout } from "layouts/SplitLayout/SplitLayout";
-// import { Orientation } from "hooks/useSplit/Orientation";
+import { SplitLayout } from "layouts/SplitLayout/SplitLayout";
+import { Orientation } from "hooks/useSplit/Orientation";
 import { ReceiveColumn } from "pages/TestingPage/ReceiveColumn/ReceiveColumn";
 import { OrderColumn } from "pages/TestingPage/OrderColumn/OrderColumn";
 import { MessagesColumn } from "pages/TestingPage/MessagesColumn/MessagesColumn";
@@ -66,13 +66,14 @@ export const TestingPage = () => {
             </button>
           ))}
         </div>
-        <div style={{ display: "flex", height: "100%", gap: "1rem" }}>
-          {visibleComponents.map(({ key, component }) => (
-            <div key={key} style={{ flex: `1 1 ${100 / visibleComponents.length}%`, overflow: "auto" }}>
-              {component}
-            </div>
-          ))}
-        </div>
+       <SplitLayout
+          key={visibleComponents.length}
+          components={visibleComponents.map(({ component, icon }) => ({
+            component,
+            collapsedIcon: icon,
+          }))}
+          orientation={Orientation.HORIZONTAL}
+        />
       </div>
     </div>
   );
