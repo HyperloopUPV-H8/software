@@ -67,7 +67,7 @@ import (
 
 const (
 	BACKEND          = "backend"
-	BLCU             = "blcu"
+	BLCU             = "BLCU"
 	TcpClient        = "TCP_CLIENT"
 	TcpServer        = "TCP_SERVER"
 	UDP              = "UDP"
