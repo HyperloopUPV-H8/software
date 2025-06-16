@@ -232,6 +232,7 @@ func main() {
 		}
 		blcuBoard := boards.NewWithTFTPConfig(blcuIP, tftpConfig, abstraction.BoardId(adj.Info.BoardIds["BLCU"]))
 		vehicle.AddBoard(blcuBoard)
+		vehicle.SetBlcuId(abstraction.BoardId(adj.Info.BoardIds["BLCU"]))
 		trace.Info().Str("ip", blcuIP).Msg("BLCU board registered")
 	}
 
