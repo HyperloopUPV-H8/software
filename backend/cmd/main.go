@@ -432,8 +432,11 @@ func main() {
 		}()
 	}
 
-	browser.OpenURL("http://" + config.Server["ethernet-view"].Addr)
-	browser.OpenURL("http://" + config.Server["control-station"].Addr)
+	// Open browser tabs
+	if config.App.AutomaticWindowOpening {
+		browser.OpenURL("http://" + config.Server["ethernet-view"].Addr)
+		browser.OpenURL("http://" + config.Server["control-station"].Addr)
+	}
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)

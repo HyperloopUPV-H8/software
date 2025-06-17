@@ -5,13 +5,17 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/internal/vehicle"
 )
 
+type App struct {
+	AutomaticWindowOpening bool `toml:"automatic_window_opening"`
+}
+
 type Adj struct {
-	Branch string
-	Test   bool
+	Branch string `toml:"branch"`
+	Test   bool   `toml:"test"`
 }
 
 type Network struct {
-	Manual bool
+	Manual bool `toml:"manual"`
 }
 
 type Transport struct {
@@ -33,15 +37,16 @@ type Blcu struct {
 }
 
 type TCP struct {
-	BackoffMinMs       int     `toml:"backoff_min_ms"`        // Minimum backoff duration in milliseconds
-	BackoffMaxMs       int     `toml:"backoff_max_ms"`        // Maximum backoff duration in milliseconds
-	BackoffMultiplier  float64 `toml:"backoff_multiplier"`    // Exponential backoff multiplier
-	MaxRetries         int     `toml:"max_retries"`           // Maximum number of retries before cycling (0 or negative = infinite)
-	ConnectionTimeout  int     `toml:"connection_timeout_ms"` // Connection timeout in milliseconds
-	KeepAlive          int     `toml:"keep_alive_ms"`         // Keep-alive interval in milliseconds
+	BackoffMinMs      int     `toml:"backoff_min_ms"`
+	BackoffMaxMs      int     `toml:"backoff_max_ms"`
+	BackoffMultiplier float64 `toml:"backoff_multiplier"`
+	MaxRetries        int     `toml:"max_retries"`
+	ConnectionTimeout int     `toml:"connection_timeout_ms"`
+	KeepAlive         int     `toml:"keep_alive_ms"`
 }
 
 type Config struct {
+	App       App
 	Vehicle   vehicle.Config
 	Server    server.Config
 	Adj       Adj

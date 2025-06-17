@@ -7,6 +7,9 @@
 # 3. Toggle the Fault Propagation to your needs (treu/false)
 # 4. Check the TCP configuration and make sure to use the needed Keep Alive settings
 
+# Control Station general configuration
+[app]
+automatic_window_opening = "both" # Leave blank to open no windows (<blank>, ethernet-view, control-station, both)
 
 # Vehicle Configuration
 [vehicle]
@@ -14,8 +17,8 @@ boards = ["HVSCU", "PCU", "BLCU"]
 
 # ADJ (Architecture Description JSON) Configuration
 [adj]
-branch = "software" # Leave blank when using ADJ as a submodule (like this: "")
-test = true         # Enable test mode
+branch = "main" # Leave blank when using ADJ as a submodule (like this: "")
+test = true     # Enable test mode
 
 # Network Configuration
 [network]
