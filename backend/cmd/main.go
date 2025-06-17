@@ -223,17 +223,34 @@ func main() {
 	// <--- BLCU Board --->
 	// Register BLCU board for handling bootloader operations
 	if blcuIP, exists := adj.Info.Addresses[BLCU]; exists {
-		tftpConfig := boards.TFTPConfig{
-			BlockSize:      config.TFTP.BlockSize,
-			Retries:        config.TFTP.Retries,
-			TimeoutMs:      config.TFTP.TimeoutMs,
-			BackoffFactor:  config.TFTP.BackoffFactor,
-			EnableProgress: config.TFTP.EnableProgress,
+		blcuId, idExists := adj.Info.BoardIds["BLCU"]
+		if !idExists {
+			trace.Error().Msg("BLCU IP found in ADJ but board ID missing")
+		} else {
+			// Get configurable order IDs or use defaults
+			downloadOrderId := config.Blcu.DownloadOrderId
+			uploadOrderId := config.Blcu.UploadOrderId
+			if downloadOrderId == 0 {
+				downloadOrderId = boards.DefaultBlcuDownloadOrderId
+			}
+			if uploadOrderId == 0 {
+				uploadOrderId = boards.DefaultBlcuUploadOrderId
+			}
+
+			tftpConfig := boards.TFTPConfig{
+				BlockSize:      config.TFTP.BlockSize,
+				Retries:        config.TFTP.Retries,
+				TimeoutMs:      config.TFTP.TimeoutMs,
+				BackoffFactor:  config.TFTP.BackoffFactor,
+				EnableProgress: config.TFTP.EnableProgress,
+			}
+			blcuBoard := boards.NewWithConfig(blcuIP, tftpConfig, abstraction.BoardId(blcuId), downloadOrderId, uploadOrderId)
+			vehicle.AddBoard(blcuBoard)
+			vehicle.SetBlcuId(abstraction.BoardId(blcuId))
+			trace.Info().Str("ip", blcuIP).Int("id", int(blcuId)).Uint16("download_order_id", downloadOrderId).Uint16("upload_order_id", uploadOrderId).Msg("BLCU board registered")
 		}
-		blcuBoard := boards.NewWithTFTPConfig(blcuIP, tftpConfig, abstraction.BoardId(adj.Info.BoardIds["BLCU"]))
-		vehicle.AddBoard(blcuBoard)
-		vehicle.SetBlcuId(abstraction.BoardId(adj.Info.BoardIds["BLCU"]))
-		trace.Info().Str("ip", blcuIP).Msg("BLCU board registered")
+	} else {
+		trace.Warn().Msg("BLCU not found in ADJ configuration - bootloader operations unavailable")
 	}
 
 	// <--- transport --->
@@ -255,10 +272,10 @@ func main() {
 		downloadOrderId := config.Blcu.DownloadOrderId
 		uploadOrderId := config.Blcu.UploadOrderId
 		if downloadOrderId == 0 {
-			downloadOrderId = boards.BlcuDownloadOrderId
+			downloadOrderId = boards.DefaultBlcuDownloadOrderId
 		}
 		if uploadOrderId == 0 {
-			uploadOrderId = boards.BlcuUploadOrderId
+			uploadOrderId = boards.DefaultBlcuUploadOrderId
 		}
 
 		transp.SetIdTarget(abstraction.PacketId(downloadOrderId), abstraction.TransportTarget("BLCU"))
