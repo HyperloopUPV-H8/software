@@ -11,7 +11,6 @@ import (
 	dataPacket "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 )
 
-// TODO! Get from ADJ
 const (
 	BlcuName = "BLCU"
 
