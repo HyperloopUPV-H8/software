@@ -2,20 +2,21 @@ package adj
 
 import (
 	"encoding/json"
+	"log"
 	"os"
-	"path"
+	"os/exec"
+	"runtime"
 
 	"github.com/HyperloopUPV-H8/h9-backend/internal/utils"
-	"github.com/go-git/go-git/v5"
 )
 
 const (
-	RepoUrl  = "https://github.com/HyperloopUPV-H8/JSON_ADE.git" // URL of the ADJ repository
-	RepoPath = "./JSON_ADE/"                                     // Path where the ADJ repository is cloned
+	RepoUrl  = "https://github.com/HyperloopUPV-H8/adj.git" // URL of the ADJ repository
+	RepoPath = "./adj/"                                     // Path where the ADJ repository is cloned
 )
 
-func NewADJ() (ADJ, error) {
-	infoRaw, boardsRaw, err := downloadADJ()
+func NewADJ(AdjBranch string, test bool) (ADJ, error) {
+	infoRaw, boardsRaw, err := downloadADJ(AdjBranch, test)
 	if err != nil {
 		return ADJ{}, err
 	}
@@ -38,21 +39,17 @@ func NewADJ() (ADJ, error) {
 		}
 	}
 
-	type BoardList struct {
-		Boards map[string]string `json:"boards"`
-	}
-
-	var boardsList BoardList
+	var boardsList map[string]string
 	if err := json.Unmarshal(boardsRaw, &boardsList); err != nil {
 		return ADJ{}, err
 	}
 
-	boards, err := getBoards(boardsList.Boards)
+	boards, err := getBoards(boardsList)
 	if err != nil {
 		return ADJ{}, err
 	}
 
-	info.BoardIds, err = getBoardIds(boardsList.Boards)
+	info.BoardIds, err = getBoardIds(boardsList)
 	if err != nil {
 		return ADJ{}, err
 	}
@@ -73,17 +70,43 @@ func NewADJ() (ADJ, error) {
 	return adj, nil
 }
 
-func downloadADJ() (json.RawMessage, json.RawMessage, error) {
-	if !checkRepo() {
-		_, err := git.PlainClone(RepoPath, false, &git.CloneOptions{
-			URL: RepoUrl,
-		})
-		if err != nil {
-			return nil, nil, err
+func downloadADJ(AdjBranch string, test bool) (json.RawMessage, json.RawMessage, error) {
+	updateRepo(AdjBranch)
+
+	//Execute the testadj executable if indicated in config.toml
+	if test {
+		// Try to find the testadj executable
+		testadj := "./testadj"
+		if _, err := os.Stat(testadj); os.IsNotExist(err) {
+			// If not found in current directory, try with extension for Windows
+			if runtime.GOOS == "windows" {
+				testadj = "./testadj.exe"
+			}
+			// If still not found, fall back to Python script
+			if _, err := os.Stat(testadj); os.IsNotExist(err) {
+				test := exec.Command("python3", "testadj.py")
+				out, err := test.CombinedOutput()
+				if err != nil || len(out) != 0 {
+					log.Fatalf("python test failed:\nError: %v\nOutput: %s\n", err, string(out))
+				}
+			} else {
+				// Execute the testadj executable
+				test := exec.Command(testadj)
+				out, err := test.CombinedOutput()
+				if err != nil || len(out) != 0 {
+					log.Fatalf("testadj executable failed:\nError: %v\nOutput: %s\n", err, string(out))
+				}
+			}
+		} else {
+			// Execute the testadj executable
+			test := exec.Command(testadj)
+			out, err := test.CombinedOutput()
+			if err != nil || len(out) != 0 {
+				log.Fatalf("testadj executable failed:\nError: %v\nOutput: %s\n", err, string(out))
+			}
 		}
 	}
 
-	// The BoardIds are applied in the NewADJ function by the getBoardIds function
 	info, err := os.ReadFile(RepoPath + "general_info.json")
 	if err != nil {
 		return nil, nil, err
@@ -95,164 +118,4 @@ func downloadADJ() (json.RawMessage, json.RawMessage, error) {
 	}
 
 	return info, boardsList, nil
-}
-
-func checkRepo() bool {
-	if _, err := os.Stat(RepoPath); os.IsNotExist(err) {
-		return false
-	}
-
-	return true
-}
-
-func getBoards(boardsList map[string]string) (map[string]Board, error) {
-	boards := make(map[string]Board, len(boardsList))
-	for boardName, boardPath := range boardsList {
-		fullPath := path.Join(RepoPath, boardPath)
-		boardRaw, err := os.ReadFile(fullPath)
-		if err != nil {
-			return nil, err
-		}
-
-		var boardJSON BoardJSON
-		if err = json.Unmarshal(boardRaw, &boardJSON); err != nil {
-			return nil, err
-		}
-
-		measPathsFr := make([]string, 0)
-		for _, measPath := range boardJSON.MeasurementsPaths {
-			measPathsFr = append(measPathsFr, path.Join(RepoPath, "boards", boardName, measPath))
-		}
-		boardJSON.MeasurementsPaths = measPathsFr
-
-		packetPathsFr := make([]string, 0)
-		for _, packetPath := range boardJSON.PacketsPaths {
-			packetPathsFr = append(packetPathsFr, path.Join(RepoPath, "boards", boardName, packetPath))
-		}
-		boardJSON.PacketsPaths = packetPathsFr
-
-		board := Board{
-			Name: boardName,
-			IP:   boardJSON.IP,
-		}
-		board.Packets, err = getBoardPackets(boardJSON.PacketsPaths)
-		if err != nil {
-			return nil, err
-		}
-
-		board.Measurements, err = getBoardMeasurements(boardJSON.MeasurementsPaths)
-		if err != nil {
-			return nil, err
-		}
-		board.LookUpMeasurements = make(map[string]Measurement, len(board.Measurements))
-
-		for _, measurement := range board.Measurements {
-			board.LookUpMeasurements[measurement.Id] = measurement
-		}
-		board.Structures = getBoardStructures(board)
-
-		boards[boardName] = board
-	}
-
-	return boards, nil
-}
-
-func getBoardPackets(packetsPaths []string) ([]Packet, error) {
-	packets := make([]Packet, 0)
-	for _, packetPath := range packetsPaths {
-		if _, err := os.Stat(packetPath); os.IsNotExist(err) {
-			continue
-		}
-
-		packetRaw, err := os.ReadFile(packetPath)
-		if err != nil {
-			return nil, err
-		}
-
-		// Magic happens here
-		type PacketJSON struct {
-			Packet []Packet `json:"packets"`
-		}
-
-		packetsJSON := PacketJSON{}
-		if err = json.Unmarshal(packetRaw, &packetsJSON); err != nil {
-			return nil, err
-		}
-		for _, packetTMP := range packetsJSON.Packet {
-			packets = append(packets, packetTMP)
-		}
-	}
-
-	return packets, nil
-}
-
-func getBoardMeasurements(measurementsPaths []string) ([]Measurement, error) {
-	measurements := make([]Measurement, 0)
-
-	for _, measurementPath := range measurementsPaths {
-		if _, err := os.Stat(measurementPath); os.IsNotExist(err) {
-			continue
-		}
-
-		measurementRaw, err := os.ReadFile(measurementPath)
-		if err != nil {
-			return nil, err
-		}
-
-		// Absolutely doing tricks on it AGAIN - @msanlli
-		type MeasurementJSON struct {
-			Measurements []Measurement `json:"measurements"`
-		}
-
-		measurementsJSON := MeasurementJSON{}
-		if err = json.Unmarshal(measurementRaw, &measurementsJSON); err != nil {
-			return nil, err
-		}
-		for _, measurementTMP := range measurementsJSON.Measurements {
-			measurements = append(measurements, measurementTMP)
-		}
-	}
-
-	return measurements, nil
-}
-
-func getBoardIds(boards map[string]string) (map[string]uint16, error) {
-	boardIds := make(map[string]uint16, len(boards))
-	for boardName, boardPath := range boards {
-		fullPath := path.Join(RepoPath, boardPath)
-		boardRaw, err := os.ReadFile(fullPath)
-		if err != nil {
-			return nil, err
-		}
-
-		var boardJSON BoardJSON
-		if err = json.Unmarshal(boardRaw, &boardJSON); err != nil {
-			return nil, err
-		}
-
-		boardIds[boardName] = boardJSON.ID
-	}
-
-	return boardIds, nil
-}
-
-func getBoardStructures(board Board) []Structure {
-	structures := make([]Structure, len(board.Packets))
-	for i, packet := range board.Packets {
-		structures[i] = Structure{
-			Packet:       packet,
-			Measurements: board.Measurements,
-		}
-	}
-
-	return structures
-}
-
-func getAddresses(boards map[string]Board) (map[string]string, error) {
-	addresses := make(map[string]string, len(boards))
-	for boardName, board := range boards {
-		addresses[boardName] = board.IP
-	}
-
-	return addresses, nil
 }

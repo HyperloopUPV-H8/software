@@ -1,11 +1,15 @@
 import styles from './ProtectionView.module.scss';
-import { Protection } from 'common';
+import { ProtectionMessage } from 'common';
 
 type Props = {
-    protection: Protection;
+    protection: ProtectionMessage;
 };
 
 const DECIMALS = 2;
+
+function safeFixed(val: any, decimals = DECIMALS) {
+    return typeof val === "number" ? val.toFixed(decimals) : String(val);
+}
 
 export const ProtectionView = ({ protection }: Props) => {
     const ProtectionText = getProtectionText(protection);
@@ -13,64 +17,62 @@ export const ProtectionView = ({ protection }: Props) => {
     return <div className={styles.protectionView}>{ProtectionText}</div>;
 };
 
-function getProtectionText(protection: Protection) {
-    switch (protection.kind) {
-        case 'OUT_OF_BOUNDS':
+function getProtectionText(protection: ProtectionMessage) {
+    switch (protection.payload.kind) {
+        case "OUT_OF_BOUNDS":
             return (
                 <>
                     <span>
-                        {' '}
-                        Want: [{protection.data.bounds[0].toFixed(
-                            DECIMALS
-                        )}, {protection.data.bounds[1].toFixed(DECIMALS)}]
-                    </span>{' '}
-                    <span>Got: {protection.data.value.toFixed(DECIMALS)}</span>
+                        {" "}
+                        Want: [
+                        {safeFixed(protection.payload.data.bounds?.[0])}, {safeFixed(protection.payload.data.bounds?.[1])}]
+                    </span>{" "}
+                    <span>Got: {safeFixed(protection.payload.data.value)}</span>
                 </>
             );
-        case 'UPPER_BOUND':
+        case "UPPER_BOUND":
             return (
                 <>
                     <span>
-                        Want: x {'<'} {protection.data.bound.toFixed(DECIMALS)}
-                    </span>{' '}
-                    <span>Got: {protection.data.value.toFixed(DECIMALS)}</span>
+                        Want: [{protection.name}] {"<"} {safeFixed(protection.payload.data.bound)}
+                    </span>{" "}
+                    <span>Got: {safeFixed(protection.payload.data.value)}</span>
                 </>
             );
-        case 'LOWER_BOUND':
+        case "LOWER_BOUND":
             return (
                 <>
                     <span>
-                        Want: x {'>'} {protection.data.bound.toFixed(DECIMALS)}
-                    </span>{' '}
-                    <span>Got: {protection.data.value.toFixed(DECIMALS)}</span>
+                        Want: [{protection.name}] {">"} {safeFixed(protection.payload.data.bound)}
+                    </span>{" "}
+                    <span>Got: {safeFixed(protection.payload.data.value)}</span>
                 </>
             );
-        case 'EQUALS':
+        case "EQUALS":
             return (
                 <>
                     <span>
-                        Mustn't be {protection.data.value.toFixed(DECIMALS)}
+                        Mustn't be {safeFixed(protection.payload.data.value)}
                     </span>
                 </>
             );
-        case 'NOT_EQUALS':
+        case "NOT_EQUALS":
             return (
                 <>
                     <span>
-                        Must be {protection.data.want.toFixed(DECIMALS)} but is{' '}
-                        {protection.data.value.toFixed(DECIMALS)}
+                        Must be {safeFixed(protection.payload.data.want)} but is{" "}
+                        {safeFixed(protection.payload.data.value)}
                     </span>
                 </>
             );
-        case 'TIME_ACCUMULATION':
+        case "TIME_ACCUMULATION":
             return (
                 <span>
-                    Value was {protection.data.value.toFixed(DECIMALS)} for{' '}
-                    {protection.data.timelimit.toFixed(DECIMALS)} seconds
+                    Value was {safeFixed(protection.payload.data.value)} for{" "}
+                    {safeFixed(protection.payload.data.timelimit)} seconds
                 </span>
             );
-        case 'ERROR_HANDLER':
-        case 'WARNING':
-            return <span>{protection.data}</span>;
+        case "ERROR_HANDLER":
+            return <span>{protection.payload.data}</span>;
     }
 }

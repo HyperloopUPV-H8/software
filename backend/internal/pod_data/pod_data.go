@@ -1,8 +1,6 @@
 package pod_data
 
 import (
-	"strconv"
-
 	"github.com/HyperloopUPV-H8/h9-backend/internal/utils"
 
 	"github.com/HyperloopUPV-H8/h9-backend/internal/adj"
@@ -39,14 +37,17 @@ func getBoard(adjBoard adj.Board, globalUnits map[string]utils.Operations) (Boar
 	packets := make([]Packet, 0)
 
 	for _, adjPacket := range adjBoard.Packets {
-		packet, err := getPacket(adjPacket) // Black magic fuck
+		packet, err := getPacket(adjPacket)
 		if err != nil {
 			return Board{}, err
 		}
-		for idx, packetVariable := range adjPacket.Variables {
-			adjPacket.Variables[idx] = adjBoard.LookUpMeasurements[packetVariable.Name]
+
+		variablesADJ := make([]adj.Measurement, 0)
+		for _, packetVariable := range adjPacket.Variables {
+			packetVariable = adjBoard.LookUpMeasurements[packetVariable.Id]
+			variablesADJ = append(variablesADJ, packetVariable)
 		}
-		packet.Measurements, err = getMeasurements(adjPacket, globalUnits) // TODO: Check if this is correct
+		packet.Measurements, err = getMeasurements(variablesADJ, globalUnits)
 		packets = append(packets, packet)
 	}
 
@@ -56,13 +57,8 @@ func getBoard(adjBoard adj.Board, globalUnits map[string]utils.Operations) (Boar
 }
 
 func getPacket(packet adj.Packet) (Packet, error) {
-	id, err := strconv.ParseUint(packet.Id, 10, 16)
-	if err != nil {
-		return Packet{}, err
-	}
-
 	return Packet{
-		Id:           uint16(id),
+		Id:           packet.Id,
 		Name:         packet.Name,
 		Type:         packet.Type,
 		HexValue:     "000000",

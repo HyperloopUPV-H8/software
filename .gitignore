@@ -1,6 +1,7 @@
 build
 profiles
 backend/cmd/cmd
+.ropeproject
 
 # MacOS Files
 .DS_Store
@@ -9,3 +10,7 @@ backend/cmd/cmd
 .idea/
 .vscode/
 .prettierrc
+
+# Claude
+CLAUDE*
+.claude
