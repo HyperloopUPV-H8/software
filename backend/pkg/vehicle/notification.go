@@ -131,7 +131,7 @@ func (vehicle *Vehicle) handlePacketNotification(notification transport.PacketNo
 			return errors.Join(fmt.Errorf("remove state orders (state orders from %s to %s)", notification.From, notification.To), err)
 		}
 	case *blcu_packet.Ack:
-		vehicle.boards[boards.BlcuId].Notify(abstraction.BoardNotification(
+		vehicle.boards[vehicle.BlcuId].Notify(abstraction.BoardNotification(
 			&boards.AckNotification{
 				ID: boards.AckId,
 			},

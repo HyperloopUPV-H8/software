@@ -11,17 +11,16 @@ import (
 	dataPacket "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 )
 
-// TODO! Get from ADE
 const (
 	BlcuName = "BLCU"
-	BlcuId   = abstraction.BoardId(1)
 
 	AckId           = abstraction.BoardEvent("ACK")
 	DownloadEventId = abstraction.BoardEvent("DOWNLOAD")
 	UploadEventId   = abstraction.BoardEvent("UPLOAD")
 
-	BlcuDownloadOrderId = 701
-	BlcuUploadOrderId   = 700
+	// Default order IDs - can be overridden via config.toml
+	DefaultBlcuDownloadOrderId = 701
+	DefaultBlcuUploadOrderId   = 700
 )
 
 type TFTPConfig struct {
@@ -33,12 +32,16 @@ type TFTPConfig struct {
 }
 
 type BLCU struct {
-	api        abstraction.BoardAPI
-	ackChan    chan struct{}
-	ip         string
-	tftpConfig TFTPConfig
+	api             abstraction.BoardAPI
+	ackChan         chan struct{}
+	ip              string
+	tftpConfig      TFTPConfig
+	id              abstraction.BoardId
+	downloadOrderId uint16
+	uploadOrderId   uint16
 }
 
+// Deprecated: Use NewWithConfig with proper board ID and order IDs from configuration
 func New(ip string) *BLCU {
 	return NewWithTFTPConfig(ip, TFTPConfig{
 		BlockSize:      131072, // 128kB
@@ -46,18 +49,33 @@ func New(ip string) *BLCU {
 		TimeoutMs:      5000,
 		BackoffFactor:  2,
 		EnableProgress: true,
-	})
+	}, 0) // Board ID 0 indicates missing configuration
 }
 
-func NewWithTFTPConfig(ip string, tftpConfig TFTPConfig) *BLCU {
+// Deprecated: Use NewWithConfig for proper order ID configuration
+func NewWithTFTPConfig(ip string, tftpConfig TFTPConfig, id abstraction.BoardId) *BLCU {
 	return &BLCU{
-		ackChan:    make(chan struct{}),
-		ip:         ip,
-		tftpConfig: tftpConfig,
+		ackChan:         make(chan struct{}),
+		ip:              ip,
+		tftpConfig:      tftpConfig,
+		id:              id,
+		downloadOrderId: DefaultBlcuDownloadOrderId,
+		uploadOrderId:   DefaultBlcuUploadOrderId,
 	}
 }
-func (boards *BLCU) Id() abstraction.BoardId {
-	return BlcuId
+
+func NewWithConfig(ip string, tftpConfig TFTPConfig, id abstraction.BoardId, downloadOrderId, uploadOrderId uint16) *BLCU {
+	return &BLCU{
+		ackChan:         make(chan struct{}),
+		ip:              ip,
+		tftpConfig:      tftpConfig,
+		id:              id,
+		downloadOrderId: downloadOrderId,
+		uploadOrderId:   uploadOrderId,
+	}
+}
+func (board *BLCU) Id() abstraction.BoardId {
+	return board.id
 }
 
 func (boards *BLCU) Notify(boardNotification abstraction.BoardNotification) {
@@ -96,7 +114,7 @@ func (boards *BLCU) SetAPI(api abstraction.BoardAPI) {
 func (boards *BLCU) download(notification DownloadEvent) error {
 	// Notify the BLCU
 	ping := dataPacket.NewPacketWithValues(
-		abstraction.PacketId(BlcuDownloadOrderId),
+		abstraction.PacketId(boards.downloadOrderId),
 		map[dataPacket.ValueName]dataPacket.Value{
 			BlcuName: dataPacket.NewEnumValue(dataPacket.EnumVariant(notification.Board)),
 		},
@@ -169,7 +187,7 @@ func (boards *BLCU) download(notification DownloadEvent) error {
 }
 
 func (boards *BLCU) upload(notification UploadEvent) error {
-	ping := dataPacket.NewPacketWithValues(abstraction.PacketId(BlcuUploadOrderId),
+	ping := dataPacket.NewPacketWithValues(abstraction.PacketId(boards.uploadOrderId),
 		map[dataPacket.ValueName]dataPacket.Value{
 			BlcuName: dataPacket.NewEnumValue(dataPacket.EnumVariant(notification.Board)),
 		},

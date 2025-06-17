@@ -67,7 +67,7 @@ import (
 
 const (
 	BACKEND          = "backend"
-	BLCU             = "blcu"
+	BLCU             = "BLCU"
 	TcpClient        = "TCP_CLIENT"
 	TcpServer        = "TCP_SERVER"
 	UDP              = "UDP"
@@ -88,7 +88,7 @@ var currentVersion string
 
 func main() {
 	// update() // FIXME: Updater disabled due to cross-platform and reliability issues
-	
+
 	traceFile := initTrace(*traceLevel, *traceFile)
 	defer traceFile.Close()
 
@@ -223,16 +223,34 @@ func main() {
 	// <--- BLCU Board --->
 	// Register BLCU board for handling bootloader operations
 	if blcuIP, exists := adj.Info.Addresses[BLCU]; exists {
-		tftpConfig := boards.TFTPConfig{
-			BlockSize:      config.TFTP.BlockSize,
-			Retries:        config.TFTP.Retries,
-			TimeoutMs:      config.TFTP.TimeoutMs,
-			BackoffFactor:  config.TFTP.BackoffFactor,
-			EnableProgress: config.TFTP.EnableProgress,
+		blcuId, idExists := adj.Info.BoardIds["BLCU"]
+		if !idExists {
+			trace.Error().Msg("BLCU IP found in ADJ but board ID missing")
+		} else {
+			// Get configurable order IDs or use defaults
+			downloadOrderId := config.Blcu.DownloadOrderId
+			uploadOrderId := config.Blcu.UploadOrderId
+			if downloadOrderId == 0 {
+				downloadOrderId = boards.DefaultBlcuDownloadOrderId
+			}
+			if uploadOrderId == 0 {
+				uploadOrderId = boards.DefaultBlcuUploadOrderId
+			}
+
+			tftpConfig := boards.TFTPConfig{
+				BlockSize:      config.TFTP.BlockSize,
+				Retries:        config.TFTP.Retries,
+				TimeoutMs:      config.TFTP.TimeoutMs,
+				BackoffFactor:  config.TFTP.BackoffFactor,
+				EnableProgress: config.TFTP.EnableProgress,
+			}
+			blcuBoard := boards.NewWithConfig(blcuIP, tftpConfig, abstraction.BoardId(blcuId), downloadOrderId, uploadOrderId)
+			vehicle.AddBoard(blcuBoard)
+			vehicle.SetBlcuId(abstraction.BoardId(blcuId))
+			trace.Info().Str("ip", blcuIP).Int("id", int(blcuId)).Uint16("download_order_id", downloadOrderId).Uint16("upload_order_id", uploadOrderId).Msg("BLCU board registered")
 		}
-		blcuBoard := boards.NewWithTFTPConfig(blcuIP, tftpConfig)
-		vehicle.AddBoard(blcuBoard)
-		trace.Info().Str("ip", blcuIP).Msg("BLCU board registered")
+	} else {
+		trace.Warn().Msg("BLCU not found in ADJ configuration - bootloader operations unavailable")
 	}
 
 	// <--- transport --->
@@ -254,15 +272,15 @@ func main() {
 		downloadOrderId := config.Blcu.DownloadOrderId
 		uploadOrderId := config.Blcu.UploadOrderId
 		if downloadOrderId == 0 {
-			downloadOrderId = boards.BlcuDownloadOrderId
+			downloadOrderId = boards.DefaultBlcuDownloadOrderId
 		}
 		if uploadOrderId == 0 {
-			uploadOrderId = boards.BlcuUploadOrderId
+			uploadOrderId = boards.DefaultBlcuUploadOrderId
 		}
-		
+
 		transp.SetIdTarget(abstraction.PacketId(downloadOrderId), abstraction.TransportTarget("BLCU"))
 		transp.SetIdTarget(abstraction.PacketId(uploadOrderId), abstraction.TransportTarget("BLCU"))
-		
+
 		// Use BLCU address from config, ADJ, or default
 		blcuIP := config.Blcu.IP
 		if blcuIP == "" {
@@ -289,23 +307,23 @@ func main() {
 		}
 		// Create TCP client config with custom parameters from config
 		clientConfig := tcp.NewClientConfig(backendTcpClientAddr)
-		
+
 		// Apply custom timeout if specified
 		if config.TCP.ConnectionTimeout > 0 {
 			clientConfig.Timeout = time.Duration(config.TCP.ConnectionTimeout) * time.Millisecond
 		}
-		
+
 		// Apply custom keep-alive if specified
 		if config.TCP.KeepAlive > 0 {
 			clientConfig.KeepAlive = time.Duration(config.TCP.KeepAlive) * time.Millisecond
 		}
-		
+
 		// Apply custom backoff parameters
 		if config.TCP.BackoffMinMs > 0 || config.TCP.BackoffMaxMs > 0 || config.TCP.BackoffMultiplier > 0 {
 			minBackoff := 100 * time.Millisecond // default
-			maxBackoff := 5 * time.Second // default
-			multiplier := 1.5 // default
-			
+			maxBackoff := 5 * time.Second        // default
+			multiplier := 1.5                    // default
+
 			if config.TCP.BackoffMinMs > 0 {
 				minBackoff = time.Duration(config.TCP.BackoffMinMs) * time.Millisecond
 			}
@@ -315,13 +333,13 @@ func main() {
 			if config.TCP.BackoffMultiplier > 0 {
 				multiplier = config.TCP.BackoffMultiplier
 			}
-			
+
 			clientConfig.ConnectionBackoffFunction = tcp.NewExponentialBackoff(minBackoff, multiplier, maxBackoff)
 		}
-		
+
 		// Apply max retries (0 or negative means infinite)
 		clientConfig.MaxConnectionRetries = config.TCP.MaxRetries
-		
+
 		go transp.HandleClient(clientConfig, fmt.Sprintf("%s:%d", adj.Info.Addresses[board.Name], adj.Info.Ports[TcpServer]))
 		i++
 	}

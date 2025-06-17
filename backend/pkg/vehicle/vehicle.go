@@ -33,6 +33,7 @@ type Vehicle struct {
 	updateFactory *update_factory.UpdateFactory
 	idToBoardName map[uint16]string
 	ipToBoardId   map[string]abstraction.BoardId
+	BlcuId        abstraction.BoardId
 
 	trace zerolog.Logger
 }
@@ -92,11 +93,11 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) error {
 	case "blcu/downloadRequest":
 		download := push.(*blcu_topic.DownloadRequest)
 
-		if board, exists := vehicle.boards[boards.BlcuId]; exists {
+		if board, exists := vehicle.boards[vehicle.BlcuId]; exists {
 			board.Notify(abstraction.BoardNotification(
 				&boards.DownloadEvent{
 					BoardEvent: boards.DownloadEventId,
-					BoardID:    boards.BlcuId,
+					BoardID:    vehicle.BlcuId,
 					Board:      download.Board,
 				},
 			))
@@ -124,7 +125,7 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) error {
 			return nil
 		}
 
-		if board, exists := vehicle.boards[boards.BlcuId]; exists {
+		if board, exists := vehicle.boards[vehicle.BlcuId]; exists {
 			board.Notify(abstraction.BoardNotification(uploadEvent))
 		} else {
 			fmt.Fprintf(os.Stderr, "BLCU board not registered\n")
