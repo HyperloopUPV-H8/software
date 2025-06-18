@@ -32,6 +32,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/internal/utils"
 	vehicle_models "github.com/HyperloopUPV-H8/h9-backend/internal/vehicle/models"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/boards"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker"
 	blcu_topics "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/blcu"
 	connection_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/connection"
@@ -66,7 +67,7 @@ import (
 
 const (
 	BACKEND          = "backend"
-	BLCU             = "blcu"
+	BLCU             = "BLCU"
 	TcpClient        = "TCP_CLIENT"
 	TcpServer        = "TCP_SERVER"
 	UDP              = "UDP"
@@ -86,21 +87,7 @@ var playbackFile = flag.String("playback", "", "")
 var currentVersion string
 
 func main() {
-
-	versionFile := "VERSION.txt"
-	versionData, err := os.ReadFile(versionFile)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error reading version file (%s): %v\n", versionFile, err)
-		os.Exit(1)
-	}
-	currentVersion = strings.TrimSpace(string(versionData))
-
-	versionFlag := flag.Bool("version", false, "Show the backend version")
-	flag.Parse()
-	if *versionFlag {
-		fmt.Println("Hyperloop UPV Backend Version:", currentVersion)
-		os.Exit(0)
-	}
+	// update() // FIXME: Updater disabled due to cross-platform and reliability issues
 
 	traceFile := initTrace(*traceLevel, *traceFile)
 	defer traceFile.Close()
@@ -122,105 +109,6 @@ func main() {
 	runtime.SetBlockProfileRate(*blockprofile)
 
 	config := getConfig("./config.toml")
-	latestVersionStr, err := getLatestVersionFromGitHub()
-	if err != nil {
-		fmt.Println("Warning:", err)
-		fmt.Println("Skipping version check. Proceeding with the current version:", currentVersion)
-	} else {
-		current, err := version.NewVersion(currentVersion)
-		if err != nil {
-			fmt.Println("Invalid current version:", err)
-			return
-		}
-
-		latest, err := version.NewVersion(latestVersionStr)
-		if err != nil {
-			fmt.Println("Invalid latest version:", err)
-			return
-		}
-
-		if latest.GreaterThan(current) {
-			fmt.Printf("There is a new version available: %s (current version: %s)\n", latest, current)
-			fmt.Print("Do you want to update? (y/n): ")
-
-			var response string
-			fmt.Scanln(&response)
-
-			if strings.ToLower(response) == "y" {
-				fmt.Println("Launching updater to update the backend...")
-
-				// Get the directory of the current executable
-				execPath, err := os.Executable()
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "Error getting executable path: %v\n", err)
-					os.Exit(1)
-				}
-				execDir := filepath.Dir(execPath)
-
-				backendPath := filepath.Join(execDir, "..", "..", "backend")
-
-				if _, err := os.Stat(backendPath); err == nil {
-
-					fmt.Println("Backend folder detected. Building and launching updater...")
-
-					updaterPath := filepath.Join(execDir, "..", "..", "updater")
-
-					cmd := exec.Command("go", "build", "-o", filepath.Join(updaterPath, "updater.exe"), updaterPath)
-					cmd.Stdout = os.Stdout
-					cmd.Stderr = os.Stderr
-					if err := cmd.Run(); err != nil {
-						fmt.Fprintf(os.Stderr, "Error building updater: %v\n", err)
-						os.Exit(1)
-					}
-
-					updaterExe := filepath.Join(updaterPath, "updater.exe")
-					cmd = exec.Command(updaterExe)
-					cmd.Dir = updaterPath
-					cmd.Stdout = os.Stdout
-					cmd.Stderr = os.Stderr
-					if err := cmd.Run(); err != nil {
-						fmt.Fprintf(os.Stderr, "Error launching updater: %v\n", err)
-						os.Exit(1)
-					}
-				} else {
-
-					fmt.Println("Backend folder not detected. Launching existing updater...")
-
-					execPath, err := os.Executable()
-					if err != nil {
-						fmt.Fprintf(os.Stderr, "Error getting executable path: %v\n", err)
-						os.Exit(1)
-					}
-					execDir := filepath.Dir(execPath)
-          
-					updaterExe := filepath.Join(execDir, "updater")
-					// En Windows el ejecutable lleva extensión .exe
-					if runtime.GOOS == "windows" {
-						updaterExe += ".exe"
-					}
-
-					if _, err := os.Stat(updaterExe); err == nil {
-						cmd := exec.Command(updaterExe)
-						cmd.Dir = execDir
-						cmd.Stdout = os.Stdout
-						cmd.Stderr = os.Stderr
-						if err := cmd.Run(); err != nil {
-							fmt.Fprintf(os.Stderr, "Error launching updater: %v\n", err)
-							os.Exit(1)
-						}
-					} else {
-						fmt.Fprintf(os.Stderr, "Updater not found: %s\n", updaterExe)
-						fmt.Println("Skipping update. Proceeding with the current version.")
-					}
-				}
-
-			} else {
-				fmt.Println("Skipping update. Proceeding with the current version.")
-			}
-		} else {
-			fmt.Printf("You are using the latest version: %s\n", current)
-		}
-	}
 
 	// <--- ADJ --->
 
@@ -332,6 +220,39 @@ func main() {
 	vehicle.SetIdToBoardName(idToBoard)
 	vehicle.SetTransport(transp)
 
+	// <--- BLCU Board --->
+	// Register BLCU board for handling bootloader operations
+	if blcuIP, exists := adj.Info.Addresses[BLCU]; exists {
+		blcuId, idExists := adj.Info.BoardIds["BLCU"]
+		if !idExists {
+			trace.Error().Msg("BLCU IP found in ADJ but board ID missing")
+		} else {
+			// Get configurable order IDs or use defaults
+			downloadOrderId := config.Blcu.DownloadOrderId
+			uploadOrderId := config.Blcu.UploadOrderId
+			if downloadOrderId == 0 {
+				downloadOrderId = boards.DefaultBlcuDownloadOrderId
+			}
+			if uploadOrderId == 0 {
+				uploadOrderId = boards.DefaultBlcuUploadOrderId
+			}
+
+			tftpConfig := boards.TFTPConfig{
+				BlockSize:      config.TFTP.BlockSize,
+				Retries:        config.TFTP.Retries,
+				TimeoutMs:      config.TFTP.TimeoutMs,
+				BackoffFactor:  config.TFTP.BackoffFactor,
+				EnableProgress: config.TFTP.EnableProgress,
+			}
+			blcuBoard := boards.NewWithConfig(blcuIP, tftpConfig, abstraction.BoardId(blcuId), downloadOrderId, uploadOrderId)
+			vehicle.AddBoard(blcuBoard)
+			vehicle.SetBlcuId(abstraction.BoardId(blcuId))
+			trace.Info().Str("ip", blcuIP).Int("id", int(blcuId)).Uint16("download_order_id", downloadOrderId).Uint16("upload_order_id", uploadOrderId).Msg("BLCU board registered")
+		}
+	} else {
+		trace.Warn().Msg("BLCU not found in ADJ configuration - bootloader operations unavailable")
+	}
+
 	// <--- transport --->
 	// Load and set packet decoder and encoder
 	decoder, encoder := getTransportDecEnc(adj.Info, podData)
@@ -343,6 +264,33 @@ func main() {
 			transp.SetIdTarget(abstraction.PacketId(packet.Id), abstraction.TransportTarget(board.Name))
 		}
 		transp.SetTargetIp(adj.Info.Addresses[board.Name], abstraction.TransportTarget(board.Name))
+	}
+
+	// Set BLCU packet ID mappings if BLCU is configured
+	if common.Contains(config.Vehicle.Boards, "BLCU") {
+		// Use configurable packet IDs or defaults
+		downloadOrderId := config.Blcu.DownloadOrderId
+		uploadOrderId := config.Blcu.UploadOrderId
+		if downloadOrderId == 0 {
+			downloadOrderId = boards.DefaultBlcuDownloadOrderId
+		}
+		if uploadOrderId == 0 {
+			uploadOrderId = boards.DefaultBlcuUploadOrderId
+		}
+
+		transp.SetIdTarget(abstraction.PacketId(downloadOrderId), abstraction.TransportTarget("BLCU"))
+		transp.SetIdTarget(abstraction.PacketId(uploadOrderId), abstraction.TransportTarget("BLCU"))
+
+		// Use BLCU address from config, ADJ, or default
+		blcuIP := config.Blcu.IP
+		if blcuIP == "" {
+			if adjBlcuIP, exists := adj.Info.Addresses[BLCU]; exists {
+				blcuIP = adjBlcuIP
+			} else {
+				blcuIP = "127.0.0.1"
+			}
+		}
+		transp.SetTargetIp(blcuIP, abstraction.TransportTarget("BLCU"))
 	}
 
 	// Start handling TCP client connections
@@ -357,7 +305,42 @@ func main() {
 		if err != nil {
 			panic("Failed to resolve local backend TCP client address")
 		}
-		go transp.HandleClient(tcp.NewClientConfig(backendTcpClientAddr), fmt.Sprintf("%s:%d", adj.Info.Addresses[board.Name], adj.Info.Ports[TcpServer]))
+		// Create TCP client config with custom parameters from config
+		clientConfig := tcp.NewClientConfig(backendTcpClientAddr)
+
+		// Apply custom timeout if specified
+		if config.TCP.ConnectionTimeout > 0 {
+			clientConfig.Timeout = time.Duration(config.TCP.ConnectionTimeout) * time.Millisecond
+		}
+
+		// Apply custom keep-alive if specified
+		if config.TCP.KeepAlive > 0 {
+			clientConfig.KeepAlive = time.Duration(config.TCP.KeepAlive) * time.Millisecond
+		}
+
+		// Apply custom backoff parameters
+		if config.TCP.BackoffMinMs > 0 || config.TCP.BackoffMaxMs > 0 || config.TCP.BackoffMultiplier > 0 {
+			minBackoff := 100 * time.Millisecond // default
+			maxBackoff := 5 * time.Second        // default
+			multiplier := 1.5                    // default
+
+			if config.TCP.BackoffMinMs > 0 {
+				minBackoff = time.Duration(config.TCP.BackoffMinMs) * time.Millisecond
+			}
+			if config.TCP.BackoffMaxMs > 0 {
+				maxBackoff = time.Duration(config.TCP.BackoffMaxMs) * time.Millisecond
+			}
+			if config.TCP.BackoffMultiplier > 0 {
+				multiplier = config.TCP.BackoffMultiplier
+			}
+
+			clientConfig.ConnectionBackoffFunction = tcp.NewExponentialBackoff(minBackoff, multiplier, maxBackoff)
+		}
+
+		// Apply max retries (0 or negative means infinite)
+		clientConfig.MaxConnectionRetries = config.TCP.MaxRetries
+
+		go transp.HandleClient(clientConfig, fmt.Sprintf("%s:%d", adj.Info.Addresses[board.Name], adj.Info.Ports[TcpServer]))
 		i++
 	}
 
@@ -449,8 +432,11 @@ func main() {
 		}()
 	}
 
-	browser.OpenURL("http://" + config.Server["ethernet-view"].Addr)
-	browser.OpenURL("http://" + config.Server["control-station"].Addr)
+	// Open browser tabs
+	if config.App.AutomaticWindowOpening {
+		browser.OpenURL("http://" + config.Server["ethernet-view"].Addr)
+		browser.OpenURL("http://" + config.Server["control-station"].Addr)
+	}
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
@@ -734,15 +720,105 @@ func getLatestVersionFromGitHub() (string, error) {
 	version := strings.TrimPrefix(release.TagName, "v")
 	return version, nil
 }
-func detectOS() string {
-	switch runtime.GOOS {
-	case "windows":
-		return "updater.exe"
-	case "darwin", "linux":
-		return "updater"
-	default:
-		fmt.Fprintf(os.Stderr, "Unsupported operating system: %s\n", runtime.GOOS)
-		os.Exit(1)
-		return ""
+
+// FIXME: Updater system disabled due to multiple critical issues
+// See GitHub issue for full details on problems and proposed solutions
+func update() {
+	versionFile := "VERSION.txt"
+	versionData, err := os.ReadFile(versionFile)
+	if err == nil {
+		currentVersion = strings.TrimSpace(string(versionData))
+
+		versionFlag := flag.Bool("version", false, "Show the backend version")
+		flag.Parse()
+		if *versionFlag {
+			fmt.Println("Hyperloop UPV Backend Version:", currentVersion)
+			os.Exit(0)
+		}
+	} else {
+		fmt.Fprintf(os.Stderr, "Error reading version file (%s): %v\n", versionFile, err)
+		return
 	}
+
+	execPath, err := os.Executable()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error getting executable path: %v\n", err)
+		os.Exit(1)
+	}
+
+	execDir := filepath.Dir(execPath)
+
+	latestVersionStr, latestErr := getLatestVersionFromGitHub()
+	backendPath := filepath.Join(execDir, "..", "..", "backend")
+	_, statErr := os.Stat(backendPath)
+	backendExists := statErr == nil
+
+	if backendExists {
+		fmt.Println("Backend folder detected.")
+		fmt.Print("Do you want to update? (y/n): ")
+		var response string
+		fmt.Scanln(&response)
+		if strings.ToLower(response) == "y" {
+			fmt.Println("Launching updater to update the backend...")
+			updaterPath := filepath.Join(execDir, "..", "..", "updater")
+			cmd := exec.Command("go", "build", "-o", filepath.Join(updaterPath, "updater.exe"), updaterPath)
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			if err := cmd.Run(); err != nil {
+				fmt.Fprintf(os.Stderr, "Error building updater: %v\n", err)
+				os.Exit(1)
+			}
+			updaterExe := filepath.Join(updaterPath, "updater.exe")
+			cmd = exec.Command(updaterExe)
+			cmd.Dir = updaterPath
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			if err := cmd.Run(); err != nil {
+				fmt.Fprintf(os.Stderr, "Error launching updater: %v\n", err)
+				os.Exit(1)
+			}
+			os.Exit(0)
+		} else {
+			fmt.Println("Skipping update. Proceeding with the current version.")
+		}
+	} else {
+		// Solo updatear si se tienen ambas versiones y latest > current
+		current, currErr := version.NewVersion(currentVersion)
+		latest, lastErr := version.NewVersion(latestVersionStr)
+		if currErr != nil || lastErr != nil || latestErr != nil {
+			fmt.Println("Warning: Could not determine versions. Skipping update. Proceeding with the current version:", currentVersion)
+		} else if latest.GreaterThan(current) {
+			fmt.Printf("There is a new version available: %s (current version: %s)\n", latest, current)
+			fmt.Print("Do you want to update? (y/n): ")
+			var response string
+			fmt.Scanln(&response)
+			if strings.ToLower(response) == "y" {
+				fmt.Println("Launching updater to update the backend...")
+				updaterExe := filepath.Join(execDir, "updater")
+				if runtime.GOOS == "windows" {
+					updaterExe += ".exe"
+				}
+				if _, err := os.Stat(updaterExe); err == nil {
+					cmd := exec.Command(updaterExe)
+					cmd.Dir = execDir
+					cmd.Stdout = os.Stdout
+					cmd.Stderr = os.Stderr
+					if err := cmd.Run(); err != nil {
+						fmt.Fprintf(os.Stderr, "Error launching updater: %v\n", err)
+						os.Exit(1)
+					}
+					os.Exit(0)
+				} else {
+					fmt.Fprintf(os.Stderr, "Updater not found: %s\n", updaterExe)
+					fmt.Println("Skipping update. Proceeding with the current version.")
+				}
+			} else {
+				fmt.Println("Skipping update. Proceeding with the current version.")
+			}
+		} else {
+			fmt.Printf("You are using the latest version: %s\n", current)
+		}
+	}
+
+	return
 }

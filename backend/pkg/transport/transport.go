@@ -13,6 +13,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tcp"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tftp"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/session"
 	"github.com/rs/zerolog"
@@ -46,23 +47,39 @@ type Transport struct {
 }
 
 // HandleClient connects to the specified client and handles its messages. This method blocks.
-// This method will try to reconnect to the client if it disconnects mid way through, but after
-// enough retries, it will stop.
+// This method will continuously try to reconnect to the client if it disconnects, 
+// applying exponential backoff between attempts.
 func (transport *Transport) HandleClient(config tcp.ClientConfig, remote string) error {
 	client := tcp.NewClient(remote, config, transport.logger)
 	defer transport.logger.Warn().Str("remoteAddress", remote).Msg("abort connection")
+	var hasConnected = false
 
 	for {
 		conn, err := client.Dial()
 		if err != nil {
 			transport.logger.Debug().Stack().Err(err).Str("remoteAddress", remote).Msg("dial failed")
+			
+			// Only return if reconnection is disabled
 			if !config.TryReconnect {
+				if hasConnected {
+					transport.SendFault()
+				}
 				transport.errChan <- err
 				return err
 			}
 
+			// For ErrTooManyRetries, we still want to continue retrying
+			// The client will reset its retry counter on the next Dial() call
+			if _, ok := err.(tcp.ErrTooManyRetries); ok {
+				transport.logger.Warn().Str("remoteAddress", remote).Msg("reached max retries, will continue attempting to reconnect")
+				// Add a longer delay before restarting the retry cycle
+				time.Sleep(config.ConnectionBackoffFunction(config.MaxConnectionRetries))
+			}
+			
 			continue
 		}
+
+		hasConnected = true
 
 		err = transport.handleTCPConn(conn)
 		if errors.Is(err, error(ErrTargetAlreadyConnected{})) {
@@ -71,12 +88,14 @@ func (transport *Transport) HandleClient(config tcp.ClientConfig, remote string)
 			return err
 		}
 		if err != nil {
-			transport.logger.Debug().Stack().Err(err).Str("remoteAddress", remote).Msg("dial failed")
+			transport.logger.Debug().Stack().Err(err).Str("remoteAddress", remote).Msg("connection lost")
 			if !config.TryReconnect {
+				transport.SendFault()
 				transport.errChan <- err
 				return err
 			}
 
+			// Connection was lost, continue trying to reconnect
 			continue
 		}
 	}
@@ -367,10 +386,10 @@ func (transport *Transport) consumeErrors() {
 }
 
 func (transport *Transport) SendFault() {
-	// err := transport.SendMessage(NewPacketMessage(data.NewPacket(0)))
-	// if err != nil {
-	// transport.errChan <- err
-	// }
+	err := transport.SendMessage(NewPacketMessage(data.NewPacket(0)))
+	if err != nil {
+		transport.errChan <- err
+	}
 }
 
 func (transport *Transport) SetpropagateFault(enabled bool) {

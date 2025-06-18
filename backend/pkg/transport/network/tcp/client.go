@@ -39,27 +39,34 @@ func (client *Client) Dial() (net.Conn, error) {
 	var err error
 	var conn net.Conn
 	client.logger.Info().Msg("dialing")
-	// The max connection retries will not work because the for loop never completes, it always returns and the function is called again by transport.
+
 	for client.config.MaxConnectionRetries <= 0 || client.currentRetries < client.config.MaxConnectionRetries {
+		// Increment retry counter and calculate backoff
 		client.currentRetries++
-		conn, err = client.config.DialContext(client.config.Context, "tcp", client.address)
 
 		backoffDuration := client.config.ConnectionBackoffFunction(client.currentRetries)
-		client.logger.Error().Stack().Err(err).Dur("backoff", backoffDuration).Int("retries", client.currentRetries+1).Msg("retrying")
+		client.logger.Error().Stack().Err(err).Dur("backoff", backoffDuration).Int("retry", client.currentRetries).Msg("retrying after backoff")
+
+		// Sleep for backoff duration
 		time.Sleep(backoffDuration)
+
+		conn, err = client.config.DialContext(client.config.Context, "tcp", client.address)
 
 		if err == nil {
 			client.logger.Info().Msg("connected")
 			client.currentRetries = 0
 			return conn, nil
 		}
+
+		// Check if context was cancelled
 		if client.config.Context.Err() != nil {
 			client.logger.Error().Stack().Err(client.config.Context.Err()).Msg("canceled")
 			return nil, client.config.Context.Err()
 		}
 
+		// Check if we should retry this error
 		if netErr, ok := err.(net.Error); !client.config.TryReconnect || (!errors.Is(err, syscall.ECONNREFUSED) && (!ok || !netErr.Timeout())) {
-			client.logger.Error().Stack().Err(err).Msg("failed")
+			client.logger.Error().Stack().Err(err).Msg("failed with non-retryable error")
 			return nil, err
 		}
 	}

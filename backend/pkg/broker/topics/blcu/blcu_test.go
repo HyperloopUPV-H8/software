@@ -36,10 +36,11 @@ func (api MockAPI) UserPush(push abstraction.BrokerPush) error {
 		errorFlag = false
 		log.Printf("Output matches")
 		return nil
-	case blcu.UploadRequest:
-		if push.(blcu.UploadRequest).Board != "test" || string(push.(blcu.UploadRequest).Data) != "test" {
+	case *blcu.UploadRequestInternal:
+		req := push.(*blcu.UploadRequestInternal)
+		if req.Board != "test" || string(req.Data) != "test" {
 			errorFlag = true
-			fmt.Printf("Expected board 'test' and data 'test', got board '%s' and data '%s'\n", push.(blcu.UploadRequest).Board, string(push.(blcu.UploadRequest).Data))
+			fmt.Printf("Expected board 'test' and data 'test', got board '%s' and data '%s'\n", req.Board, string(req.Data))
 			return &OutputNotMatchingError{}
 		}
 		errorFlag = false
@@ -151,8 +152,8 @@ func TestBLCUTopic_Upload_Push(t *testing.T) {
 	upload.SetAPI(api)
 	upload.SetPool(pool)
 
-	// Simulate sending a download request
-	request := blcu.UploadRequest{Board: "test", Data: []byte("test")}
+	// Simulate sending an upload request
+	request := blcu.UploadRequest{Board: "test", File: "dGVzdA=="} // "test" in base64
 	err = upload.Push(request)
 	if err != nil {
 		t.Fatal("Error pushing upload request:", err)
@@ -188,7 +189,8 @@ func TestBLCUTopic_Upload_ClientMessage(t *testing.T) {
 	upload := blcu.Upload{}
 	upload.SetAPI(&MockAPI{})
 
-	payload := blcu.UploadRequest{Board: "test", Data: []byte("test")}
+	// Use base64 encoded data as the frontend would send
+	payload := blcu.UploadRequest{Board: "test", File: "dGVzdA=="} // "test" in base64
 	payloadBytes, _ := json.Marshal(payload)
 
 	upload.ClientMessage(websocket.ClientId{0}, &websocket.Message{

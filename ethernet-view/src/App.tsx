@@ -6,7 +6,7 @@ import { useLoadBackend } from "common";
 import { AppLayout } from "layouts/AppLayout/AppLayout";
 import { useState } from "react";
 import { LoggerPage } from "pages/LoggerPage/LoggerPage";
-
+import { CamerasPage } from "pages/CamerasPage/CamerasPage";
 
 function App() {
 
@@ -39,6 +39,14 @@ function App() {
                 }}
             >
                 <LoggerPage />
+            </div>
+            <div 
+                className="App"
+                style={{
+                    display: pageShown == "cameras" ? "block" : "none"
+                }}
+            >
+                <CamerasPage />
             </div>
         </AppLayout>
     );

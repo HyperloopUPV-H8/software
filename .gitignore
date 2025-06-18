@@ -12,5 +12,5 @@ backend/cmd/cmd
 .prettierrc
 
 # Claude
-CLAUDE.md
+CLAUDE*
 .claude

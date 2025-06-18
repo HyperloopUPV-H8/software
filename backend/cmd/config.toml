@@ -1,27 +1,78 @@
+# Hyperloop UPV Backend Configuration
+# Configuration file for the H10 Control Station backend server
+
+# <-- CHECKLIST -->
+# 1. Check that all the boards you want to use are declared in the [vehicle] section
+# 2. Set the branch you want to use for the ADJ configuration
+# 3. Toggle the Fault Propagation to your needs (treu/false)
+# 4. Check the TCP configuration and make sure to use the needed Keep Alive settings
+
+# Control Station general configuration
+[app]
+automatic_window_opening = "both" # Leave blank to open no windows (<blank>, ethernet-view, control-station, both)
+
+# Vehicle Configuration
 [vehicle]
-boards = ["HVSCU", "PCU"]
+boards = ["HVSCU", "PCU", "BLCU"]
+
+# ADJ (Architecture Description JSON) Configuration
+[adj]
+branch = "main" # Leave blank when using ADJ as a submodule (like this: "")
+test = true     # Enable test mode
+
+# Network Configuration
+[network]
+manual = false # Manual network device selection
+
+# Transport Configuration
+[transport]
+propagate_fault = true
+
+# TCP Configuration
+# These settings control how the backend reconnects to boards when connections are lost
+[tcp]
+backoff_min_ms = 100         # Minimum backoff duration in milliseconds
+backoff_max_ms = 5000        # Maximum backoff duration in milliseconds
+backoff_multiplier = 1.5     # Exponential backoff multiplier (e.g., 1.5 means each retry waits 1.5x longer)
+max_retries = 0              # Maximum retries before cycling (0 = infinite retries, recommended for persistent reconnection)
+connection_timeout_ms = 1000 # Connection timeout in milliseconds
+keep_alive_ms = 1000         # Keep-alive interval in milliseconds
+
+# BLCU (Boot Loader Control Unit) Configuration
+[blcu]
+ip = "127.0.0.1"      # TFTP server IP address
+download_order_id = 0 # Packet ID for download orders (0 = use default)
+upload_order_id = 0   # Packet ID for upload orders (0 = use default)
+
+# TFTP Configuration
+[tftp]
+block_size = 131072    # TFTP block size in bytes (128kB)
+retries = 3            # Maximum number of retries before aborting transfer
+timeout_ms = 5000      # Timeout between retries in milliseconds
+backoff_factor = 2     # Backoff multiplier for retry delays
+enable_progress = true # Enable progress callbacks during transfers
+
+# <-- DO NOT TOUCH BELOW THIS LINE -->
+
+# Server Configuration
 [server.ethernet-view]
 address = "127.0.0.1:4040"
 static = "./ethernet-view"
+
 [server.ethernet-view.endpoints]
 pod_data = "/podDataStructure"
 order_data = "/orderStructures"
 programable_boards = "/uploadableBoards"
 connections = "/backend"
 files = "/"
+
 [server.control-station]
 address = "127.0.0.1:4000"
 static = "./control-station"
+
 [server.control-station.endpoints]
 pod_data = "/podDataStructure"
 order_data = "/orderStructures"
 programable_boards = "/uploadableBoards"
 connections = "/backend"
 files = "/"
-[adj]
-branch = "main" # Leave blank when using ADJ as a submodule (like this: "")
-test = true
-[network]
-manual = false
-[transport]
-propagate_fault = true
