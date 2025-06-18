@@ -433,7 +433,12 @@ func main() {
 	}
 
 	// Open browser tabs
-	if config.App.AutomaticWindowOpening {
+	switch config.App.AutomaticWindowOpening {
+	case "ethernet-view":
+		browser.OpenURL("http://" + config.Server["ethernet-view"].Addr)
+	case "control-station":
+		browser.OpenURL("http://" + config.Server["control-station"].Addr)
+	case "both":
 		browser.OpenURL("http://" + config.Server["ethernet-view"].Addr)
 		browser.OpenURL("http://" + config.Server["control-station"].Addr)
 	}

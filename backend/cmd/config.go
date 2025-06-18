@@ -6,7 +6,7 @@ import (
 )
 
 type App struct {
-	AutomaticWindowOpening bool `toml:"automatic_window_opening"`
+	AutomaticWindowOpening string `toml:"automatic_window_opening"`
 }
 
 type Adj struct {
