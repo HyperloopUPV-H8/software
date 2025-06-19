@@ -484,11 +484,21 @@ func main() {
 			}
 		}()
 	}
-
+  
 	// Handle coordinated shutdown
 	if config.App.ShutdownMode == "coordinated" {
 		shutdownTopic := lifecycle_topic.NewShutdownTopic(lifecycleManager)
 		broker.AddTopic(lifecycle_topic.ShutdownRequestName, shutdownTopic)
+    
+	// Open browser tabs
+	switch config.App.AutomaticWindowOpening {
+	case "ethernet-view":
+		browser.OpenURL("http://" + config.Server["ethernet-view"].Addr)
+	case "control-station":
+		browser.OpenURL("http://" + config.Server["control-station"].Addr)
+	case "both":
+		browser.OpenURL("http://" + config.Server["ethernet-view"].Addr)
+		browser.OpenURL("http://" + config.Server["control-station"].Addr)
 	}
 
 	// Start dev servers in dev mode
