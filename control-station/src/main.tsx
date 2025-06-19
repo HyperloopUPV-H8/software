@@ -31,7 +31,7 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <React.StrictMode>
-        <ConfigProvider devIp="127.0.0.1" prodIp="127.0.0.1">
+        <ConfigProvider devIp="127.0.0.1" devPort={5173} prodIp="127.0.0.1">
             <GlobalTicker fps={30}>
                 <RouterProvider router={router}></RouterProvider>
             </GlobalTicker>
