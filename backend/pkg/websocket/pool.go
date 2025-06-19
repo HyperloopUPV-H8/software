@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	ws "github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/lifecycle"
 )
 
 type ClientId uuid.UUID
@@ -17,6 +18,7 @@ type Pool struct {
 	clients     map[ClientId]*Client
 	connections <-chan *Client
 	onMessage   messageCallback
+	lifecycle   *lifecycle.Manager
 
 	logger zerolog.Logger
 }
@@ -49,6 +51,10 @@ func (pool *Pool) SetOnMessage(onMessage messageCallback) {
 	pool.onMessage = onMessage
 }
 
+func (pool *Pool) SetLifecycle(lm *lifecycle.Manager) {
+	pool.lifecycle = lm
+}
+
 func (pool *Pool) listen() {
 	pool.logger.Debug().Msg("listen")
 	for client := range pool.connections {
@@ -62,6 +68,11 @@ func (pool *Pool) addCLient(id ClientId, client *Client) {
 	defer pool.clientMx.Unlock()
 	pool.logger.Info().Str("id", uuid.UUID(id).String()).Msg("new client")
 	pool.clients[id] = client
+	
+	if pool.lifecycle != nil {
+		pool.lifecycle.ClientConnected()
+	}
+	
 	go pool.handle(id, client)
 	client.SetOnClose(pool.onClose(id))
 }
@@ -133,6 +144,10 @@ func (pool *Pool) onClose(id ClientId) func() {
 
 		pool.logger.Debug().Str("id", uuid.UUID(id).String()).Msg("close")
 		delete(pool.clients, id)
+		
+		if pool.lifecycle != nil {
+			pool.lifecycle.ClientDisconnected()
+		}
 	}
 }
 

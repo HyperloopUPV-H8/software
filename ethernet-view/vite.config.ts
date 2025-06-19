@@ -22,5 +22,14 @@ export default defineConfig({
         alias: {
           common: path.resolve(__dirname, '../common-front'),
         },
-      }, 
+    },
+    server: {
+        proxy: {
+            // Proxy API calls to backend (ethernet-view backend runs on 5174)
+            '/backend': {
+                target: 'http://localhost:5174',
+                changeOrigin: true,
+            },
+        },
+    },
 });
