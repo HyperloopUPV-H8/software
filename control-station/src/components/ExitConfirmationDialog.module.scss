@@ -1,0 +1,87 @@
+@use '../styles/colors.scss';
+
+.backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal {
+    background-color: var(--color-neutral-85);
+    border-radius: 1rem;
+    padding: 2rem;
+    min-width: 400px;
+    max-width: 500px;
+    width: 90vw;
+    filter: var(--shadow);
+    
+    &.hidden {
+        display: none;
+    }
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    
+    .icon {
+        color: var(--color-warning-40);
+        font-size: 1.5rem;
+    }
+    
+    .title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--color-neutral-10);
+        margin: 0;
+    }
+}
+
+.content {
+    margin-bottom: 2rem;
+    
+    .message {
+        font-size: 1rem;
+        color: var(--color-neutral-20);
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+    
+    .submessage {
+        font-size: 0.875rem;
+        color: var(--color-neutral-30);
+        line-height: 1.4;
+    }
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.cancelButton {
+    background-color: var(--color-neutral-50) !important;
+    color: var(--color-neutral-20) !important;
+    
+    &:hover {
+        background-color: var(--color-neutral-40) !important;
+    }
+}
+
+.confirmButton {
+    background-color: var(--color-fault-40) !important;
+    
+    &:hover {
+        background-color: var(--color-fault-30) !important;
+    }
+}
