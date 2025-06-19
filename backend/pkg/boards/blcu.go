@@ -8,7 +8,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tftp"
-	dataPacket "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
+	data "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 )
 
 const (
@@ -39,6 +39,7 @@ type BLCU struct {
 	id              abstraction.BoardId
 	downloadOrderId uint16
 	uploadOrderId   uint16
+	boardsEnum      []string
 }
 
 // Deprecated: Use NewWithConfig with proper board ID and order IDs from configuration
@@ -64,7 +65,7 @@ func NewWithTFTPConfig(ip string, tftpConfig TFTPConfig, id abstraction.BoardId)
 	}
 }
 
-func NewWithConfig(ip string, tftpConfig TFTPConfig, id abstraction.BoardId, downloadOrderId, uploadOrderId uint16) *BLCU {
+func NewWithConfig(ip string, tftpConfig TFTPConfig, id abstraction.BoardId, downloadOrderId, uploadOrderId uint16, boardsEnum []string) *BLCU {
 	return &BLCU{
 		ackChan:         make(chan struct{}),
 		ip:              ip,
@@ -72,6 +73,7 @@ func NewWithConfig(ip string, tftpConfig TFTPConfig, id abstraction.BoardId, dow
 		id:              id,
 		downloadOrderId: downloadOrderId,
 		uploadOrderId:   uploadOrderId,
+		boardsEnum:      boardsEnum,
 	}
 }
 func (board *BLCU) Id() abstraction.BoardId {
@@ -113,12 +115,11 @@ func (boards *BLCU) SetAPI(api abstraction.BoardAPI) {
 
 func (boards *BLCU) download(notification DownloadEvent) error {
 	// Notify the BLCU
-	ping := dataPacket.NewPacketWithValues(
-		abstraction.PacketId(boards.downloadOrderId),
-		map[dataPacket.ValueName]dataPacket.Value{
-			BlcuName: dataPacket.NewEnumValue(dataPacket.EnumVariant(notification.Board)),
+	ping := data.NewPacketWithValues(abstraction.PacketId(boards.downloadOrderId),
+		map[data.ValueName]data.Value{
+			"target_2": data.NewEnumValue(data.EnumVariant(notification.Board)),
 		},
-		map[dataPacket.ValueName]bool{
+		map[data.ValueName]bool{
 			BlcuName: true,
 		})
 
@@ -187,13 +188,15 @@ func (boards *BLCU) download(notification DownloadEvent) error {
 }
 
 func (boards *BLCU) upload(notification UploadEvent) error {
-	ping := dataPacket.NewPacketWithValues(abstraction.PacketId(boards.uploadOrderId),
-		map[dataPacket.ValueName]dataPacket.Value{
-			BlcuName: dataPacket.NewEnumValue(dataPacket.EnumVariant(notification.Board)),
+	ping := data.NewPacketWithValues(abstraction.PacketId(boards.uploadOrderId),
+		map[data.ValueName]data.Value{
+			"target_1": data.NewEnumValue(data.EnumVariant(notification.Board)),
 		},
-		map[dataPacket.ValueName]bool{
+		map[data.ValueName]bool{
 			BlcuName: true,
 		})
+	fmt.Println(ping.Id())
+	fmt.Println(ping.GetValues())
 
 	err := boards.api.SendMessage(transport.NewPacketMessage(ping))
 	if err != nil {
@@ -272,4 +275,13 @@ func (boards *BLCU) upload(notification UploadEvent) error {
 		}
 	}
 	return nil
+}
+
+func indexOfBoard(boards []string, name string) int {
+	for i, v := range boards {
+		if v == name {
+			return i
+		}
+	}
+	return -1
 }

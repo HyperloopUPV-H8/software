@@ -244,9 +244,10 @@ func main() {
 				BackoffFactor:  config.TFTP.BackoffFactor,
 				EnableProgress: config.TFTP.EnableProgress,
 			}
-			blcuBoard := boards.NewWithConfig(blcuIP, tftpConfig, abstraction.BoardId(blcuId), downloadOrderId, uploadOrderId)
+			blcuBoard := boards.NewWithConfig(blcuIP, tftpConfig, abstraction.BoardId(blcuId), downloadOrderId, uploadOrderId, adj.Boards[BLCU].Measurements[0].EnumValues)
 			vehicle.AddBoard(blcuBoard)
 			vehicle.SetBlcuId(abstraction.BoardId(blcuId))
+
 			trace.Info().Str("ip", blcuIP).Int("id", int(blcuId)).Uint16("download_order_id", downloadOrderId).Uint16("upload_order_id", uploadOrderId).Msg("BLCU board registered")
 		}
 	} else {
