@@ -6,7 +6,15 @@ import (
 )
 
 type App struct {
-	AutomaticWindowOpening bool `toml:"automatic_window_opening"`
+	AutomaticWindowOpening string `toml:"automatic_window_opening"`
+	ShutdownMode          string `toml:"shutdown_mode"`
+	ShutdownGracePeriod   int    `toml:"shutdown_grace_period"`
+}
+
+type Dev struct {
+	DevMode              bool `toml:"dev_mode"`
+	ControlStationPort   int  `toml:"control_station_port"`
+	EthernetViewPort     int  `toml:"ethernet_view_port"`
 }
 
 type Adj struct {
@@ -47,6 +55,7 @@ type TCP struct {
 
 type Config struct {
 	App       App
+	Dev       Dev
 	Vehicle   vehicle.Config
 	Server    server.Config
 	Adj       Adj

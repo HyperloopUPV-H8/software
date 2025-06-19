@@ -7,9 +7,18 @@
 # 3. Toggle the Fault Propagation to your needs (treu/false)
 # 4. Check the TCP configuration and make sure to use the needed Keep Alive settings
 
-# Control Station general configuration
+# Application Configuration
 [app]
-automatic_window_opening = "both" # Leave blank to open no windows (<blank>, ethernet-view, control-station, both)
+# Which frontend to open automatically on backend start
+# Options: "control-station", "ethernet-view", "both", "none"
+automatic_window_opening = "both"
+
+# Shutdown behavior
+# Options: "coordinated" (frontend controls backend), "independent" (legacy behavior)
+shutdown_mode = "coordinated"
+
+# Grace period for shutdown in milliseconds
+shutdown_grace_period = 5000
 
 # Vehicle Configuration
 [vehicle]
@@ -22,7 +31,7 @@ test = true     # Enable test mode
 
 # Network Configuration
 [network]
-manual = false # Manual network device selection
+manual = true # Manual network device selection
 
 # Transport Configuration
 [transport]
@@ -53,6 +62,15 @@ backoff_factor = 2     # Backoff multiplier for retry delays
 enable_progress = true # Enable progress callbacks during transfers
 
 # <-- DO NOT TOUCH BELOW THIS LINE -->
+
+# Development mode configuration
+[dev]
+# Set to true to use development mode (dev servers, dev ports, hot reload)
+dev_mode = true
+
+# Development server ports (used when dev_mode = true)
+control_station_port = 5173
+ethernet_view_port = 5174
 
 # Server Configuration
 [server.ethernet-view]
