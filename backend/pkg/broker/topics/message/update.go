@@ -7,11 +7,14 @@ import (
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/protection"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
 	"github.com/google/uuid"
 	ws "github.com/gorilla/websocket"
 )
+
+var _ = data.Packet{}
 
 const UpdateName abstraction.BrokerTopic = "message/update"
 const SubscribeName abstraction.BrokerTopic = "message/update"
@@ -128,8 +131,17 @@ func (push *pushStruct) Data(boardID abstraction.BoardId, idToBoard map[abstract
 			Name:      string(data.Name),
 			Timestamp: data.Timestamp,
 		}
+	case *data.Packet:
+		return wrapper{
+			Kind:      "info",
+			Payload:   "Order Sent",
+			Board:     string(idToBoard[boardID]),
+			Name:      string(data.Id()),
+			Timestamp: protection.NowTimestamp(),
+		}
 	}
 	return wrapper{}
+
 }
 
 type wrapper struct {

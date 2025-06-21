@@ -54,6 +54,12 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) error {
 			return err
 		}
 
+		err = vehicle.broker.Push(message_topic.Push(packet, 1)) // TODO: Get board ID, it's currently hardcoded
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error sending info packet to the frontend: %v\n", err)
+			return err
+		}
+
 		err = vehicle.transport.SendMessage(transport.NewPacketMessage(packet))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error sending packet: %v\n", err)
@@ -66,7 +72,6 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) error {
 			To:        vehicle.idToBoardName[uint16(packet.Id())],
 			Timestamp: packet.Timestamp(),
 		})
-
 		if err != nil && !errors.Is(err, logger.ErrLoggerNotRunning{}) {
 			fmt.Fprintln(os.Stderr, "Error pushing record to logger: ", err)
 		}
