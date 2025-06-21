@@ -34,7 +34,7 @@ func TestMessageTopic_Push(t *testing.T) {
 	client := websocket.NewClient(c)
 	clientChan <- client
 
-	messageTopic := data.NewUpdateTopic(map[abstraction.BoardId]string{})
+	messageTopic := data.NewUpdateTopic()
 	messageTopic.SetAPI(api)
 	messageTopic.SetPool(pool)
 
@@ -80,7 +80,7 @@ func TestMessageTopic_ClientMessage(t *testing.T) {
 	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
 	api := broker.New(logger)
 
-	messageTopic := data.NewUpdateTopic(map[abstraction.BoardId]string{})
+	messageTopic := data.NewUpdateTopic()
 	messageTopic.SetAPI(api)
 
 	packet := protection.NewPacket(0, protection.OkSeverity)

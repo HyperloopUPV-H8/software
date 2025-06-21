@@ -26,7 +26,7 @@ type Update struct {
 	api           abstraction.BrokerAPI
 }
 
-func NewUpdateTopic(idToBoard map[abstraction.BoardId]string) *Update {
+func NewUpdateTopic() *Update {
 	return &Update{
 		subscribersMx: &sync.Mutex{},
 		subscribers:   make(map[websocket.ClientId]struct{}),

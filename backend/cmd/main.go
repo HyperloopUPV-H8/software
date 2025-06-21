@@ -181,11 +181,8 @@ func main() {
 	connectionTopic := connection_topic.NewUpdateTopic()
 	orderTopic := order_topic.NewSendTopic()
 	loggerTopic := logger_topic.NewEnableTopic()
-	boardIdToBoard := make(map[abstraction.BoardId]string)
-	for name, id := range adj.Info.BoardIds {
-		boardIdToBoard[abstraction.BoardId(id)] = name
-	}
-	messageTopic := message_topic.NewUpdateTopic(boardIdToBoard)
+
+	messageTopic := message_topic.NewUpdateTopic()
 	stateOrderTopic := order_topic.NewState(idToBoard, trace.Logger)
 
 	broker.AddTopic(data_topic.UpdateName, dataTopic)
