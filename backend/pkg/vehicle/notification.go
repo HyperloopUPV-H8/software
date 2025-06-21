@@ -84,7 +84,7 @@ func (vehicle *Vehicle) handlePacketNotification(notification transport.PacketNo
 
 	case *protection.Packet:
 		boardId := vehicle.ipToBoardId[strings.Split(notification.From, ":")[0]]
-		err := vehicle.broker.Push(message_topic.Push(p, boardId))
+		err := vehicle.broker.Push(message_topic.Push(p, vehicle.idToBoardName[uint16(p.Id())]))
 		if err != nil {
 			vehicle.trace.Error().Stack().Err(err).Msg("broker push")
 			return errors.Join(fmt.Errorf("update protection to frontend (%s protection with id %d and kind %d from %s to %s)", p.Severity(), p.Id(), p.Kind, notification.From, notification.To), err)

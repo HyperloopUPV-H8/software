@@ -60,13 +60,18 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) error {
 			return err
 		}
 
+		err = vehicle.broker.Push(message_topic.Push(packet, vehicle.idToBoardName[uint16(packet.Id())]))
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error sending info packet to the frontend: %v\n", err)
+			return err
+		}
+
 		err = vehicle.logger.PushRecord(&order_logger.Record{
 			Packet:    packet,
 			From:      "backend",
 			To:        vehicle.idToBoardName[uint16(packet.Id())],
 			Timestamp: packet.Timestamp(),
 		})
-
 		if err != nil && !errors.Is(err, logger.ErrLoggerNotRunning{}) {
 			fmt.Fprintln(os.Stderr, "Error pushing record to logger: ", err)
 		}
@@ -178,5 +183,5 @@ func (vehicle *Vehicle) notifyError(name string, err error) {
 	packet.Data = &protection.ErrorHandler{
 		Error: err.Error(),
 	}
-	vehicle.broker.Push(message_topic.Push(packet, 255))
+	vehicle.broker.Push(message_topic.Push(packet, "Error"))
 }
