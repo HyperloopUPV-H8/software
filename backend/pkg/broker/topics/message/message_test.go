@@ -39,7 +39,7 @@ func TestMessageTopic_Push(t *testing.T) {
 	messageTopic.SetPool(pool)
 
 	// Simulate sending a download request
-	request := data.Push("test", 0)
+	request := data.Push("test", "test_board")
 	err = messageTopic.Push(request)
 	if err != nil {
 		t.Fatal("Error pushing download request:", err)
@@ -84,7 +84,7 @@ func TestMessageTopic_ClientMessage(t *testing.T) {
 	messageTopic.SetAPI(api)
 
 	packet := protection.NewPacket(0, protection.OkSeverity)
-	payload := data.Push(packet, 0)
+	payload := data.Push(packet, "test_board")
 	payloadBytes, _ := json.Marshal(payload)
 	messageTopic.ClientMessage(websocket.ClientId{0}, &websocket.Message{
 		Topic:   data.SubscribeName,

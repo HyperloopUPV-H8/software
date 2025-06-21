@@ -54,7 +54,7 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) error {
 			return err
 		}
 
-		err = vehicle.broker.Push(message_topic.Push(packet, 1)) // TODO: Get board ID, it's currently hardcoded
+		err = vehicle.broker.Push(message_topic.Push(packet, vehicle.idToBoardName[uint16(packet.Id())]))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error sending info packet to the frontend: %v\n", err)
 			return err
@@ -183,5 +183,5 @@ func (vehicle *Vehicle) notifyError(name string, err error) {
 	packet.Data = &protection.ErrorHandler{
 		Error: err.Error(),
 	}
-	vehicle.broker.Push(message_topic.Push(packet, 255))
+	vehicle.broker.Push(message_topic.Push(packet, "Error"))
 }
