@@ -54,15 +54,15 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) error {
 			return err
 		}
 
-		err = vehicle.broker.Push(message_topic.Push(packet, vehicle.idToBoardName[uint16(packet.Id())]))
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error sending info packet to the frontend: %v\n", err)
-			return err
-		}
-
 		err = vehicle.transport.SendMessage(transport.NewPacketMessage(packet))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error sending packet: %v\n", err)
+			return err
+		}
+
+		err = vehicle.broker.Push(message_topic.Push(packet, vehicle.idToBoardName[uint16(packet.Id())]))
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error sending info packet to the frontend: %v\n", err)
 			return err
 		}
 
