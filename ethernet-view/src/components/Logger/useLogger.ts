@@ -13,7 +13,6 @@ export function useLogger() {
 
     function startLogging() {
         const variables = getLoggedVariableIds();
-        console.log('[LOGGER] Enviando variables al backend:', variables);
         handler.post("logger/variables", variables);
         handler.post("logger/enable", true);
     }
