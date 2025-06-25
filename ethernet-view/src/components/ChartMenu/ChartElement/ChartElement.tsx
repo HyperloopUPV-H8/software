@@ -15,7 +15,7 @@ interface Props {
 }
 
 // React component that keeps the chart render and measurements represented on it.
-export const ChartElement = memo(({ chartId, initialMeasurementId, removeChart, measurementsInChart, setMeasurementsInChart }: Props) => {
+export const ChartElement = memo(({ chartId, removeChart, measurementsInChart, setMeasurementsInChart }: Props) => {
     const getNumericMeasurementInfo = useMeasurementsStore(state => state.getNumericMeasurementInfo);
     const measurementInfos: NumericMeasurementInfo[] = measurementsInChart.map(getNumericMeasurementInfo);
 
