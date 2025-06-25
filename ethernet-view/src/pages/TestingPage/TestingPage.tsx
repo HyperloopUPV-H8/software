@@ -10,6 +10,8 @@ import incomingMessage from "assets/svg/incoming-message.svg";
 import paperAirplane from "assets/svg/paper-airplane.svg";
 import outgoingMessage from "assets/svg/outgoing-message.svg";
 import chart from "assets/svg/chart.svg";
+import { ChartInfo, ChartId } from "components/ChartMenu/ChartMenu";
+import { MeasurementId } from "common";
 
 export const TestingPage = () => {
   const [collapsed, setCollapsed] = useState({
@@ -19,6 +21,9 @@ export const TestingPage = () => {
     messages: false,
   });
 
+  const [charts, setCharts] = useState<ChartInfo[]>([]);
+  const [measurementsByChart, setMeasurementsByChart] = useState<Record<ChartId, MeasurementId[]>>({});
+
   const toggleCollapse = (key: keyof typeof collapsed) => {
     setCollapsed((prev) => ({ ...prev, [key]: !prev[key] }));
   };
@@ -27,7 +32,7 @@ export const TestingPage = () => {
     {
       key: "charts" as const,
       icon: chart,
-      component: <ChartsColumn />,
+      component: <ChartsColumn charts={charts} setCharts={setCharts} measurementsByChart={measurementsByChart} setMeasurementsByChart={setMeasurementsByChart} />, // props nuevos
       collapsed: collapsed.charts,
     },
     {
