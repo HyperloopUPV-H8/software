@@ -1,7 +1,6 @@
 import {
     Measurement,
     NumericMeasurement,
-    isNumericMeasurement,
 } from '../models';
 import {
     getBooleanMeasurement,
@@ -247,9 +246,7 @@ export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
         const measurementsDraft = get().measurements;
         for (const id in measurementsDraft) {
             const m = measurementsDraft[id];
-            if (isNumericType(m.type)) {
-                (m.value as any).log = log;
-            }
+            (m.value as any).log = log;
         }
         set((state) => ({
             ...state,
@@ -260,7 +257,7 @@ export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
     getLogVariables: () => {
         const measurements = get().measurements;
         return Object.values(measurements)
-            .filter(m => isNumericType(m.type) && (m.value as any).log)
+            .filter(m => (m.value as any).log)
             .map(m => m.id);
     },
 }));

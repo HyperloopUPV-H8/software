@@ -19,21 +19,23 @@ export type NumericMeasurement = AbstractMeasurement & {
     warningRange: [number | null, number | null];
 };
 
-export interface NumericValue {
+export type NumericValue = {
     last: number;
     average: number;
     showLatest: boolean;
-    log?: boolean; // Añadido para control de log
+    log?: boolean; 
 }
 
 export type BooleanMeasurement = AbstractMeasurement & {
     type: 'bool';
     value: boolean;
+    log?: boolean; 
 };
 
 export type EnumMeasurement = AbstractMeasurement & {
     type: 'enum';
     value: string;
+    log?: boolean; 
 };
 
 // export type ArrayMeasurement = AbstractMeasurement & {
