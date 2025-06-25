@@ -35,30 +35,40 @@ func NewClient(address string, config ClientConfig, baseLogger zerolog.Logger) C
 
 // Dial attempts to connect with the client
 func (client *Client) Dial() (net.Conn, error) {
-	client.currentRetries = 0
 
 	var err error
 	var conn net.Conn
 	client.logger.Info().Msg("dialing")
-	for ; client.config.MaxConnectionRetries <= 0 || client.currentRetries < client.config.MaxConnectionRetries; client.currentRetries++ {
+
+	for client.config.MaxConnectionRetries <= 0 || client.currentRetries < client.config.MaxConnectionRetries {
+		// Increment retry counter and calculate backoff
+		client.currentRetries++
+
+		backoffDuration := client.config.ConnectionBackoffFunction(client.currentRetries)
+		client.logger.Error().Stack().Err(err).Dur("backoff", backoffDuration).Int("retry", client.currentRetries).Msg("retrying after backoff")
+
+		// Sleep for backoff duration
+		time.Sleep(backoffDuration)
+
 		conn, err = client.config.DialContext(client.config.Context, "tcp", client.address)
+
 		if err == nil {
 			client.logger.Info().Msg("connected")
+			client.currentRetries = 0
 			return conn, nil
 		}
+
+		// Check if context was cancelled
 		if client.config.Context.Err() != nil {
 			client.logger.Error().Stack().Err(client.config.Context.Err()).Msg("canceled")
 			return nil, client.config.Context.Err()
 		}
 
+		// Check if we should retry this error
 		if netErr, ok := err.(net.Error); !client.config.TryReconnect || (!errors.Is(err, syscall.ECONNREFUSED) && (!ok || !netErr.Timeout())) {
-			client.logger.Error().Stack().Err(err).Msg("failed")
+			client.logger.Error().Stack().Err(err).Msg("failed with non-retryable error")
 			return nil, err
 		}
-
-		backoffDuration := client.config.ConnectionBackoffFunction(client.currentRetries)
-		client.logger.Debug().Stack().Err(err).Dur("backoff", backoffDuration).Int("retries", client.currentRetries+1).Msg("retrying")
-		time.Sleep(backoffDuration)
 	}
 
 	client.logger.Debug().Int("max", client.config.MaxConnectionRetries).Msg("max connection retries exceeded")

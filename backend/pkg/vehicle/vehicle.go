@@ -33,6 +33,7 @@ type Vehicle struct {
 	updateFactory *update_factory.UpdateFactory
 	idToBoardName map[uint16]string
 	ipToBoardId   map[string]abstraction.BoardId
+	BlcuId        abstraction.BoardId
 
 	trace zerolog.Logger
 }
@@ -59,13 +60,18 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) error {
 			return err
 		}
 
+		err = vehicle.broker.Push(message_topic.Push(packet, vehicle.idToBoardName[uint16(packet.Id())]))
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error sending info packet to the frontend: %v\n", err)
+			return err
+		}
+
 		err = vehicle.logger.PushRecord(&order_logger.Record{
 			Packet:    packet,
 			From:      "backend",
 			To:        vehicle.idToBoardName[uint16(packet.Id())],
 			Timestamp: packet.Timestamp(),
 		})
-
 		if err != nil && !errors.Is(err, logger.ErrLoggerNotRunning{}) {
 			fmt.Fprintln(os.Stderr, "Error pushing record to logger: ", err)
 		}
@@ -89,28 +95,46 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) error {
 			status.Fulfill(status.Enable())
 		}
 
-	case blcu_topic.DownloadName:
+	case "blcu/downloadRequest":
 		download := push.(*blcu_topic.DownloadRequest)
 
-		vehicle.boards[boards.BlcuId].Notify(abstraction.BoardNotification(
-			&boards.DownloadEvent{
-				BoardEvent: boards.AckId,
-				BoardID:    boards.BlcuId,
-				Board:      download.Board,
-			},
-		))
+		if board, exists := vehicle.boards[vehicle.BlcuId]; exists {
+			board.Notify(abstraction.BoardNotification(
+				&boards.DownloadEvent{
+					BoardEvent: boards.DownloadEventId,
+					BoardID:    vehicle.BlcuId,
+					Board:      download.Board,
+				},
+			))
+		} else {
+			fmt.Fprintf(os.Stderr, "BLCU board not registered\n")
+		}
 
-	case blcu_topic.UploadName:
-		upload := push.(*blcu_topic.UploadRequest)
+	case "blcu/uploadRequest":
+		// Handle both UploadRequest and UploadRequestInternal
+		var uploadEvent *boards.UploadEvent
+		switch u := push.(type) {
+		case *blcu_topic.UploadRequestInternal:
+			uploadEvent = &boards.UploadEvent{
+				BoardEvent: boards.UploadEventId,
+				Board:      u.Board,
+				Data:       u.Data,
+				Length:     len(u.Data),
+			}
+		case *blcu_topic.UploadRequest:
+			// This shouldn't happen as the handler should convert to Internal
+			fmt.Fprintf(os.Stderr, "received raw UploadRequest, expected UploadRequestInternal\n")
+			return nil
+		default:
+			fmt.Fprintf(os.Stderr, "unknown upload type: %T\n", push)
+			return nil
+		}
 
-		vehicle.boards[boards.BlcuId].Notify(abstraction.BoardNotification(
-			&boards.UploadEvent{
-				BoardEvent: boards.AckId,
-				Board:      upload.Board,
-				Data:       upload.Data,
-				Length:     len(upload.Data),
-			},
-		))
+		if board, exists := vehicle.boards[vehicle.BlcuId]; exists {
+			board.Notify(abstraction.BoardNotification(uploadEvent))
+		} else {
+			fmt.Fprintf(os.Stderr, "BLCU board not registered\n")
+		}
 
 	default:
 		fmt.Printf("unknow topic %s\n", push.Topic())
@@ -159,5 +183,5 @@ func (vehicle *Vehicle) notifyError(name string, err error) {
 	packet.Data = &protection.ErrorHandler{
 		Error: err.Error(),
 	}
-	vehicle.broker.Push(message_topic.Push(packet, 255))
+	vehicle.broker.Push(message_topic.Push(packet, "Error"))
 }

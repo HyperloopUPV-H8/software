@@ -1,6 +1,7 @@
 import styles from "./AppLayout.module.scss"
 import Testing from "assets/svg/testing.svg"
 import Logger from "assets/svg/logger.svg"
+import Camera from "assets/svg/camera.svg"
 import { Navbar } from "components/Navbar/Navbar"
 import { ReactNode } from "react"
 
@@ -22,6 +23,10 @@ export const AppLayout = ({children, pageShown, setPageShown} : Props) => {
                     icon: Logger,
                     page: "logger"
                 },
+                {
+                    icon: Camera,
+                    page: "cameras"
+                }
                 ]}
                 pageShown={pageShown}
                 setPageShown={setPageShown}

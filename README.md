@@ -4,28 +4,49 @@
 [![CI](https://github.com/HyperloopUPV-H8/software/actions/workflows/build-ethernet-view.yaml/badge.svg)](https://github.com/HyperloopUPV-H8/software/actions/workflows/build-ethernet-view.yaml)
 [![CI](https://github.com/HyperloopUPV-H8/software/actions/workflows/build-control-station.yaml/badge.svg)](https://github.com/HyperloopUPV-H8/software/actions/workflows/build-control-station.yaml)
 
-Hyperloop UPV's Control STtaion is a unified software solution for monitoring and commanding the pod in real time. It combines a back-end (Go) that ingests and interprets sensor data–defined via the JSON-based "ADJ" specifications–and a front-end (Typescript/React) that displays metrics, logs, and diagnostics to operators. With features like packet parsing, logging, and live dashboards, it acts as the central hub to safely interface the pod, making it easier for team members to oversee performance, detect faults, and send precise orders to the vehicle.
+Hyperloop UPV's Control Station is a unified software solution for real-time monitoring and commanding of the pod. It combines a back-end (Go) that ingests and interprets sensor data–defined via the JSON-based "ADJ" specifications–and a front-end (Typescript/React) that displays metrics, logs, and diagnostics to operators. With features like packet parsing, logging, and live dashboards, it acts as the central hub to safely interface the pod, making it easier for team members to oversee performance, detect faults, and send precise orders to the vehicle.
 
-### Installation
+## Quick Start
 
-Download the last release, unzip it and leave the executable compatible with your OS in the folder.
+### For Users
 
-### Developing
+Download the latest release, unzip it and run the executable compatible with your OS.
 
-The main project file is inside `backend/cmd`. Make sure to have the proper `config.toml` configuration and that you are in the `develop` branch. To build the project just run `go build` inside the folder. With everything set up execute the `cmd` executable, then move to `ethernet-view` and run `npm run dev`, then to the `control-station` and do the same.
+### For Developers
 
-### Contributing
+See our comprehensive [Documentation](./docs/README.md) or jump to [Getting Started](./docs/guides/getting-started.md). Quick start:
+
+```bash
+# Clone and setup
+git clone https://github.com/HyperloopUPV-H8/software.git
+cd software
+./scripts/dev.sh setup
+
+# Run services
+./scripts/dev.sh backend      # Backend server
+./scripts/dev.sh ethernet     # Ethernet view
+./scripts/dev.sh control      # Control station
+```
+
+## Configuration
+
+When using the Control Station make sure that you have configured your IP as the one specified in the ADJ—usually `192.168.0.9`. Then make sure to configure the boards you'll be making use of in the `config.toml` (at the top of the file you'll be able to see the `vehicle/boards` option, just add or remove the boards as needed following the format specified in the ADJ.
+
+To change the ADJ branch from `main`, change the option `adj/branch` at the end of the `config.toml` with the name of the branch you want to use or leave it blank if you'll be making use of a custom ADJ.
+
+## Documentation
+
+📚 **[Complete Documentation](./docs/README.md)** - All guides and references
+
+### Quick Links
+- 🚀 **[Getting Started](./docs/guides/getting-started.md)** - New user guide
+- 🛠️ **[Development Setup](./docs/development/DEVELOPMENT.md)** - Developer environment setup  
+- 🏗️ **[Architecture](./docs/architecture/README.md)** - System design overview
+- 🔧 **[Troubleshooting](./docs/troubleshooting/BLCU_FIX_SUMMARY.md)** - Common issues and fixes
+
+## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for ways to contribute to the Control Station.
-
-### Authors
-
-- [Juan Martinez Alonso](https://github.com/jmaralo)
-- [Marc Sanchis Llinares](https://github.com/msanlli)
-- [Sergio Moreno Suay](https://github.com/smorsua)
-- [Felipe Zaballa Martinez](https://github.com/lipezaballa)
-- [Andrés de la Torre Mora](https://github.com/andresdlt03)
-- [Alejandro Losa](https://github.com/Losina24)
 
 ### About
 

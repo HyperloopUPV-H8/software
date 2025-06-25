@@ -3,57 +3,98 @@ package boards
 import (
 	"bytes"
 	"fmt"
+	"time"
+
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tftp"
 	dataPacket "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
-	"time"
 )
 
-// TODO! Get from ADE
 const (
 	BlcuName = "BLCU"
-	BlcuId   = abstraction.BoardId(1)
 
-	AckId = "1"
+	AckId           = abstraction.BoardEvent("ACK")
+	DownloadEventId = abstraction.BoardEvent("DOWNLOAD")
+	UploadEventId   = abstraction.BoardEvent("UPLOAD")
 
-	BlcuDownloadOrderId = 1
-	BlcuUploadOrderId   = 2
+	// Default order IDs - can be overridden via config.toml
+	DefaultBlcuDownloadOrderId = 701
+	DefaultBlcuUploadOrderId   = 700
 )
 
-type BLCU struct {
-	api     abstraction.BoardAPI
-	ackChan chan struct{}
-	ip      string
+type TFTPConfig struct {
+	BlockSize      int
+	Retries        int
+	TimeoutMs      int
+	BackoffFactor  int
+	EnableProgress bool
 }
 
+type BLCU struct {
+	api             abstraction.BoardAPI
+	ackChan         chan struct{}
+	ip              string
+	tftpConfig      TFTPConfig
+	id              abstraction.BoardId
+	downloadOrderId uint16
+	uploadOrderId   uint16
+}
+
+// Deprecated: Use NewWithConfig with proper board ID and order IDs from configuration
 func New(ip string) *BLCU {
+	return NewWithTFTPConfig(ip, TFTPConfig{
+		BlockSize:      131072, // 128kB
+		Retries:        3,
+		TimeoutMs:      5000,
+		BackoffFactor:  2,
+		EnableProgress: true,
+	}, 0) // Board ID 0 indicates missing configuration
+}
+
+// Deprecated: Use NewWithConfig for proper order ID configuration
+func NewWithTFTPConfig(ip string, tftpConfig TFTPConfig, id abstraction.BoardId) *BLCU {
 	return &BLCU{
-		ackChan: make(chan struct{}),
-		ip:      ip,
+		ackChan:         make(chan struct{}),
+		ip:              ip,
+		tftpConfig:      tftpConfig,
+		id:              id,
+		downloadOrderId: DefaultBlcuDownloadOrderId,
+		uploadOrderId:   DefaultBlcuUploadOrderId,
 	}
 }
-func (boards *BLCU) Id() abstraction.BoardId {
-	return BlcuId
+
+func NewWithConfig(ip string, tftpConfig TFTPConfig, id abstraction.BoardId, downloadOrderId, uploadOrderId uint16) *BLCU {
+	return &BLCU{
+		ackChan:         make(chan struct{}),
+		ip:              ip,
+		tftpConfig:      tftpConfig,
+		id:              id,
+		downloadOrderId: downloadOrderId,
+		uploadOrderId:   uploadOrderId,
+	}
+}
+func (board *BLCU) Id() abstraction.BoardId {
+	return board.id
 }
 
 func (boards *BLCU) Notify(boardNotification abstraction.BoardNotification) {
 	switch notification := boardNotification.(type) {
-	case AckNotification:
+	case *AckNotification:
 		boards.ackChan <- struct{}{}
 
-	case DownloadEvent:
-		err := boards.download(notification)
+	case *DownloadEvent:
+		err := boards.download(*notification)
 		if err != nil {
 			fmt.Println(ErrDownloadFailure{
 				Timestamp: time.Now(),
 				Inner:     err,
 			}.Error())
 		}
-	case UploadEvent:
-		err := boards.upload(notification)
+	case *UploadEvent:
+		err := boards.upload(*notification)
 		if err != nil {
-			fmt.Println(ErrDownloadFailure{
+			fmt.Println(ErrUploadFailure{
 				Timestamp: time.Now(),
 				Inner:     err,
 			}.Error())
@@ -73,7 +114,7 @@ func (boards *BLCU) SetAPI(api abstraction.BoardAPI) {
 func (boards *BLCU) download(notification DownloadEvent) error {
 	// Notify the BLCU
 	ping := dataPacket.NewPacketWithValues(
-		abstraction.PacketId(BlcuDownloadOrderId),
+		abstraction.PacketId(boards.downloadOrderId),
 		map[dataPacket.ValueName]dataPacket.Value{
 			BlcuName: dataPacket.NewEnumValue(dataPacket.EnumVariant(notification.Board)),
 		},
@@ -94,7 +135,11 @@ func (boards *BLCU) download(notification DownloadEvent) error {
 
 	// TODO! Notify on progress
 
-	client, err := tftp.NewClient(boards.ip)
+	client, err := tftp.NewClient(boards.ip,
+		tftp.WithBlockSize(boards.tftpConfig.BlockSize),
+		tftp.WithRetries(boards.tftpConfig.Retries),
+		tftp.WithTimeout(time.Duration(boards.tftpConfig.TimeoutMs)*time.Millisecond),
+	)
 	if err != nil {
 		return ErrNewClientFailed{
 			Addr:      boards.ip,
@@ -142,7 +187,7 @@ func (boards *BLCU) download(notification DownloadEvent) error {
 }
 
 func (boards *BLCU) upload(notification UploadEvent) error {
-	ping := dataPacket.NewPacketWithValues(abstraction.PacketId(BlcuUploadOrderId),
+	ping := dataPacket.NewPacketWithValues(abstraction.PacketId(boards.uploadOrderId),
 		map[dataPacket.ValueName]dataPacket.Value{
 			BlcuName: dataPacket.NewEnumValue(dataPacket.EnumVariant(notification.Board)),
 		},
@@ -162,7 +207,11 @@ func (boards *BLCU) upload(notification UploadEvent) error {
 
 	// TODO! Notify on progress
 
-	client, err := tftp.NewClient(boards.ip)
+	client, err := tftp.NewClient(boards.ip,
+		tftp.WithBlockSize(boards.tftpConfig.BlockSize),
+		tftp.WithRetries(boards.tftpConfig.Retries),
+		tftp.WithTimeout(time.Duration(boards.tftpConfig.TimeoutMs)*time.Millisecond),
+	)
 	if err != nil {
 		return ErrNewClientFailed{
 			Addr:      boards.ip,

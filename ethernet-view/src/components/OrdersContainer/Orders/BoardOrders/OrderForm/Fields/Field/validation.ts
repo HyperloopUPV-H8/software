@@ -72,11 +72,13 @@ function stringIsNumber(valueStr: string, numberType: NumericType): boolean {
 }
 
 function checkUnsignedIntegerOverflow(value: number, bits: number): boolean {
-    return value >= 0 && value < 1 << bits; //FIXME: añadir unos
+    return value >= 0 && value <= Math.pow(2, bits) - 1;
 }
 
 function checkSignedIntegerOverflow(value: number, bits: number): boolean {
-    return value >= -1 << (bits - 1) && value < 1 << (bits - 1);
+    const min = -Math.pow(2, bits - 1);
+    const max = Math.pow(2, bits - 1) - 1;
+    return value >= min && value <= max;
 }
 
 function checkFloatOverflow(value: number): boolean {

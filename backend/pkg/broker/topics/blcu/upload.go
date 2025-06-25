@@ -1,6 +1,7 @@
 package blcu
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
@@ -22,31 +23,50 @@ func (upload *Upload) Topic() abstraction.BrokerTopic {
 
 type UploadRequest struct {
 	Board string `json:"board"`
-	Data  []byte `json:"data"`
+	File  string `json:"file"`  // Base64 encoded file data from frontend
 }
 
 func (request UploadRequest) Topic() abstraction.BrokerTopic {
 	return "blcu/uploadRequest"
 }
 
-func (upload *Upload) Push(push abstraction.BrokerPush) error {
-	// Switch success/failure
-	// upload.pool.Write(ID, message)
+// UploadRequestInternal is the internal representation with decoded data
+type UploadRequestInternal struct {
+	Board string
+	Data  []byte
+}
 
-	switch push.Topic() {
-	case boards.UploadSuccess{}.Topic():
+func (request UploadRequestInternal) Topic() abstraction.BrokerTopic {
+	return "blcu/uploadRequest"
+}
+
+func (upload *Upload) Push(push abstraction.BrokerPush) error {
+	switch push.(type) {
+	case *boards.UploadSuccess:
+		// Send success response
+		response := map[string]interface{}{
+			"percentage": 100,
+			"failure":    false,
+		}
+		payload, _ := json.Marshal(response)
 		err := upload.pool.Write(upload.client, websocket.Message{
-			Topic:   push.Topic(),
-			Payload: nil,
+			Topic:   UploadName,
+			Payload: payload,
 		})
 		if err != nil {
 			return err
 		}
 
-	case boards.UploadFailure{}.Topic():
+	case *boards.UploadFailure:
+		// Send failure response
+		response := map[string]interface{}{
+			"percentage": 0,
+			"failure":    true,
+		}
+		payload, _ := json.Marshal(response)
 		err := upload.pool.Write(upload.client, websocket.Message{
-			Topic:   push.Topic(),
-			Payload: nil,
+			Topic:   UploadName,
+			Payload: payload,
 		})
 		if err != nil {
 			return err
@@ -79,7 +99,19 @@ func (upload *Upload) handleUpload(message *websocket.Message) error {
 		return err
 	}
 
-	pushErr := upload.api.UserPush(uploadRequest)
+	// Decode base64 file data
+	fileData, err := base64.StdEncoding.DecodeString(uploadRequest.File)
+	if err != nil {
+		return fmt.Errorf("failed to decode base64 file data: %w", err)
+	}
+
+	// Create the internal upload event with decoded data
+	internalRequest := &UploadRequestInternal{
+		Board: uploadRequest.Board,
+		Data:  fileData,
+	}
+
+	pushErr := upload.api.UserPush(internalRequest)
 	return pushErr
 }
 
