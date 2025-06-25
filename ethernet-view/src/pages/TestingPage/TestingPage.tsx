@@ -16,8 +16,8 @@ import { MeasurementId } from "common";
 export const TestingPage = () => {
   const [collapsed, setCollapsed] = useState({
     charts: false,
-    receive: false,
-    order: false,
+    packets: false,
+    orders: false,
     messages: false,
   });
 
@@ -36,16 +36,16 @@ export const TestingPage = () => {
       collapsed: collapsed.charts,
     },
     {
-      key: "receive" as const,
+      key: "packets" as const,
       icon: incomingMessage,
       component: <ReceiveColumn />,
-      collapsed: collapsed.receive,
+      collapsed: collapsed.packets,
     },
     {
-      key: "order" as const,
+      key: "orders" as const,
       icon: paperAirplane,
       component: <OrderColumn />,
-      collapsed: collapsed.order,
+      collapsed: collapsed.orders,
     },
     {
       key: "messages" as const,
@@ -67,7 +67,7 @@ export const TestingPage = () => {
               className={`btn btn-sm btn-${collapsed[key] ? "outline-primary" : "primary"}`}
               onClick={() => toggleCollapse(key)}
             >
-              {collapsed[key] ? `Mostrar ${key}` : `Ocultar ${key}`}
+              {collapsed[key] ? `Show ${key}` : `Hide ${key}`}
             </button>
           ))}
         </div>
