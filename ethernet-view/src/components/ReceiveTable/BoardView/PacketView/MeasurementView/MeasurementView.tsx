@@ -1,3 +1,4 @@
+import React from 'react';
 import styles from './MeasurementView.module.scss';
 import {
     Measurement,
@@ -31,11 +32,30 @@ export const MeasurementView = ({ measurement }: Props) => {
         setShowMeasurementLatest(event.currentTarget.checked);
     };
 
+    const setLog = (log: boolean) => {
+        if (isNumeric && typeof measurement.value === 'object') {
+            (measurement.value as any).log = log;
+            useMeasurementsStore.setState({ measurements: { ...useMeasurementsStore.getState().measurements } });
+        }
+    };
+    // Estado visual del checkbox de log
+    const logChecked = isNumeric && typeof measurement.value === 'object' && (measurement.value as any).log === true;
+
+    // Sincronizar con los botones globales
+    React.useEffect(() => {
+        const handler = (e: any) => {
+            setLog(e.detail);
+        };
+        window.addEventListener('log-all', handler);
+        return () => window.removeEventListener('log-all', handler);
+    }, [setLog]);
+
     return (
         <>
             <span className={styles.name}>{measurement.name}</span>
             {isNumeric && (
                 <>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                     <input
                         type="checkbox"
                         defaultChecked={false}
@@ -43,6 +63,15 @@ export const MeasurementView = ({ measurement }: Props) => {
                         title="Show latest value"
                         onInput={onLatestValueChange}
                     />
+                    <input
+                        type="checkbox"
+                        checked={logChecked}
+                        className={styles.log_variable}
+                        title="Log this variable"
+                        style={{ accentColor: 'green'}}
+                        onChange={e => setLog(e.currentTarget.checked)}
+                    />
+                    </span>
                     <span ref={valueRef} className={styles.value}></span>
                     <span className={styles.units}>{measurement.units}</span>
                     <span className={styles.type}>{measurement.type}</span>
