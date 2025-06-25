@@ -246,7 +246,7 @@ export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
         const measurementsDraft = get().measurements;
         for (const id in measurementsDraft) {
             const m = measurementsDraft[id];
-            (m.value as any).log = log;
+            m.log = log;
         }
         set((state) => ({
             ...state,
@@ -257,7 +257,7 @@ export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
     getLogVariables: () => {
         const measurements = get().measurements;
         return Object.values(measurements)
-            .filter(m => (m.value as any).log)
+            .filter(m => m.log !== false)
             .map(m => m.id);
     },
 }));

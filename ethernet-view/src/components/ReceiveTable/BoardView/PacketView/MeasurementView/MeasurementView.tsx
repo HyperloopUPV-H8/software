@@ -32,21 +32,15 @@ export const MeasurementView = ({ measurement }: Props) => {
         setShowMeasurementLatest(event.currentTarget.checked);
     };
 
-    const [localLogChecked, setLocalLogChecked] = React.useState(true);
-
     const setLog = (log: boolean) => {
-        if (typeof measurement.value === 'object' && measurement.value !== null && 'log' in measurement.value) {
-            (measurement.value as any).log = log;
-        } else {
-            setLocalLogChecked(log);
-        }
-        useMeasurementsStore.setState({ measurements: { ...useMeasurementsStore.getState().measurements } });
+        useMeasurementsStore.setState(state => {
+            const measurements = { ...state.measurements };
+            measurements[measurement.id] = { ...measurements[measurement.id], log };
+            return { ...state, measurements };
+        });
     };
 
-    const logChecked =
-        typeof measurement.value === 'object' && measurement.value !== null && 'log' in measurement.value
-            ? (measurement.value as any).log !== false
-            : localLogChecked; 
+    const logChecked = useMeasurementsStore(state => state.measurements[measurement.id]?.log !== false);
 
     React.useEffect(() => {
         const handler = (e: any) => {

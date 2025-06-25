@@ -19,6 +19,7 @@ export type HandlerMessages = {
     "message/update": Subscription<MessageAdapter>;
     "logger/enable": PostRequest<boolean, boolean>;
     "logger/response": Subscription<boolean>;
+    "logger/variables": PostRequest<string[], boolean>;
     "blcu/upload": Exchange<BootloaderUploadRequest, BootloaderUploadResponse>;
     "blcu/download": Exchange<
         BootloaderDownloadRequest,
