@@ -38,10 +38,11 @@ export const MeasurementView = ({ measurement }: Props) => {
             useMeasurementsStore.setState({ measurements: { ...useMeasurementsStore.getState().measurements } });
         }
     };
-    // Estado visual del checkbox de log
-    const logChecked = isNumeric && typeof measurement.value === 'object' && (measurement.value as any).log === true;
 
-    // Sincronizar con los botones globales
+    const logChecked = isNumeric && typeof measurement.value === 'object' // Checked by default
+        ? (measurement.value as any).log !== false
+        : false;
+
     React.useEffect(() => {
         const handler = (e: any) => {
             setLog(e.detail);
@@ -65,10 +66,10 @@ export const MeasurementView = ({ measurement }: Props) => {
                     />
                     <input
                         type="checkbox"
-                        checked={logChecked}
                         className={styles.log_variable}
                         title="Log this variable"
                         style={{ accentColor: 'green'}}
+                        checked={logChecked}
                         onChange={e => setLog(e.currentTarget.checked)}
                     />
                     </span>
