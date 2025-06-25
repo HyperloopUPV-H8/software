@@ -15,73 +15,75 @@ export const LCU = () => {
         (state) => state.getNumericMeasurementInfo
     );
 
-    const pitch = getNumericMeasurementInfo(LcuMeasurements.rotationPitch);
-    const roll = getNumericMeasurementInfo(LcuMeasurements.rotationRoll);
-    const yaw = getNumericMeasurementInfo(LcuMeasurements.rotationYaw);
-    const positionY = getNumericMeasurementInfo(LcuMeasurements.positionY);
-    const positionZ = getNumericMeasurementInfo(LcuMeasurements.positionZ);
+    const pitch = getNumericMeasurementInfo(LcuMeasurements.rot_control_y);
+    const roll = getNumericMeasurementInfo(LcuMeasurements.rot_control_x);
+    const yaw = getNumericMeasurementInfo(LcuMeasurements.rot_control_z);
+    const positionY = getNumericMeasurementInfo(LcuMeasurements.dist_control_y);
+    const positionZ = getNumericMeasurementInfo(LcuMeasurements.dist_control_z);
 
     return (
-        <Window title="LCU">
+        <Window title="LCU - Current">
             <div className={styles.LCUWrapper}>
                 <div className={styles.levitationUnitsWrapper}>
                     <div className={styles.levitationUnitsColumn}>
+                        <h5 className='subtitle'>Left side</h5>
                         <LevitationUnit
                             unitIndex={1}
                             kind="hems"
-                            imageSide="left"
                         />
                         <LevitationUnit
                             unitIndex={5}
                             kind="ems"
-                            imageSide="left"
+                            
                         />
                         <LevitationUnit
                             unitIndex={7}
                             kind="ems"
-                            imageSide="left"
+                            
                         />
                         <LevitationUnit
                             unitIndex={9}
                             kind="ems"
-                            imageSide="left"
+                           
                         />
                         <LevitationUnit
                             unitIndex={3}
                             kind="hems"
-                            imageSide="left"
+                            
                         />
                     </div>
 
                     <div className={styles.levitationUnitsColumn}>
+                        <h5>Right side</h5>
                         <LevitationUnit
                             unitIndex={0}
                             kind="hems"
-                            imageSide="right"
+                            
                         />
                         <LevitationUnit
                             unitIndex={4}
                             kind="ems"
-                            imageSide="right"
+                            
                         />
                         <LevitationUnit
                             unitIndex={6}
                             kind="ems"
-                            imageSide="right"
+                            
                         />
                         <LevitationUnit
                             unitIndex={8}
                             kind="ems"
-                            imageSide="right"
+                            
                         />
                         <LevitationUnit
                             unitIndex={2}
                             kind="hems"
-                            imageSide="right"
+                            
                         />
                     </div>
                 </div>
 
+                <h5>Orientation</h5>
                 <div className={styles.rotationIndicatorsWrapper}>
                     <IndicatorStack>
                         <BarIndicator

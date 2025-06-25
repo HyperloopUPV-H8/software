@@ -15,16 +15,16 @@ export interface Props {
 }
 
 export const currentMeasurements = [
-    LcuMeasurements.coilCurrentHEMS1,
-    LcuMeasurements.coilCurrentHEMS2,
-    LcuMeasurements.coilCurrentHEMS3,
-    LcuMeasurements.coilCurrentHEMS4,
-    LcuMeasurements.coilCurrentEMS1,
-    LcuMeasurements.coilCurrentEMS2,
-    LcuMeasurements.coilCurrentEMS3,
-    LcuMeasurements.coilCurrentEMS4,
-    LcuMeasurements.coilCurrentEMS5,
-    LcuMeasurements.coilCurrentEMS6,
+    LcuMeasurements.lcu_coil_current_1,
+    LcuMeasurements.lcu_coil_current_2,
+    LcuMeasurements.lcu_coil_current_3,
+    LcuMeasurements.lcu_coil_current_4,
+    LcuMeasurements.lcu_coil_current_5,
+    LcuMeasurements.lcu_coil_current_6,
+    LcuMeasurements.lcu_coil_current_7,
+    LcuMeasurements.lcu_coil_current_8,
+    LcuMeasurements.lcu_coil_current_9,
+    LcuMeasurements.lcu_coil_current_10
 ];
 
 export const temperatureMeasurements = [
@@ -110,7 +110,7 @@ export const LevitationUnit = ({ unitIndex, kind, imageSide }: Props) => {
                     warningRangeMin={current.warningRange[0]!!}
                     warningRangeMax={current.warningRange[1]!!}
                 />
-                <BarIndicator
+                {/* <BarIndicator
                     icon={thermometerFilled}
                     name="Temperature"
                     getValue={temperature.getUpdate}
@@ -161,7 +161,7 @@ export const LevitationUnit = ({ unitIndex, kind, imageSide }: Props) => {
                             ? null!!
                             : airgap.warningRange[1]!!
                     }
-                />
+                /> */}
             </IndicatorStack>
             {imageSide === 'right' &&
                 (kind == 'ems' ? (
