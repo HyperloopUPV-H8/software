@@ -104,7 +104,6 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 				continue
 			}
 		}
-
 		var valueRepresentation string
 		switch value := value.(type) {
 		case numeric:
@@ -121,7 +120,7 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 		}
 
 		err = saveFile.Write([]string{
-			fmt.Sprint(dataRecord.Packet.Timestamp()),
+			fmt.Sprint(dataRecord.Packet.Timestamp().Format(time.StampMicro)),
 			dataRecord.From,
 			dataRecord.To,
 			valueRepresentation,
