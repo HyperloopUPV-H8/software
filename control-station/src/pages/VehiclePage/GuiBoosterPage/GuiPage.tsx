@@ -18,21 +18,21 @@ const modules: ModuleData[] = [
 export function GuiPage() {
   // Medidas
   const totalSupercapsVoltageInfo = useMeasurementsStore((state) =>
-    state.getNumericMeasurementInfo("total_supercaps_voltage")
+    state.getNumericMeasurementInfo("HVSCU-Cabinet/total_supercaps_voltage")
   );
   const currentMeasurementInfo = useMeasurementsStore((state) =>
-    state.getNumericMeasurementInfo("output_current")
+    state.getNumericMeasurementInfo("HVSCU-Cabinet/output_current")
   );
   const temperatureMeasurementInfo = useMeasurementsStore((state) =>
-    state.getNumericMeasurementInfo("temperature_total")
+    state.getNumericMeasurementInfo("HVSCU-Cabinet/temperature_total")
   );
 
   // Enums
   const contactorsStateInfo = useMeasurementsStore((state) =>
-    state.getMeasurement("contactors_state")
+    state.getMeasurement("HVSCU-Cabinet/contactors_state")
   );
   const bcuGeneralStateInfo = useMeasurementsStore((state) =>
-    state.getMeasurement("bcu_general_state")
+    state.getMeasurement("HVSCU-Cabinet/BCU_state_master_general")
   );
 
   // Estados
