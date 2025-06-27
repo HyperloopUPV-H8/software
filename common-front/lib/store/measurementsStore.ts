@@ -1,7 +1,6 @@
 import {
     Measurement,
     NumericMeasurement,
-    isNumericMeasurement,
 } from '../models';
 import {
     getBooleanMeasurement,
@@ -62,6 +61,8 @@ export interface MeasurementsStore {
     getEnumMeasurementInfo: (id: MeasurementId) => EnumMeasurementInfo;
     getMeasurementFallback: (id: MeasurementId) => Measurement;
     clearMeasurements: (board: string) => void;
+    setLogAll: (log: boolean) => void;
+    getLogVariables: () => string[];
 }
 
 export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
@@ -239,6 +240,25 @@ export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
                 value: { average: 0, last: 0 },
             }
         );
+    },
+
+    setLogAll: (log: boolean) => {
+        const measurementsDraft = get().measurements;
+        for (const id in measurementsDraft) {
+            const m = measurementsDraft[id];
+            m.log = log;
+        }
+        set((state) => ({
+            ...state,
+            measurements: measurementsDraft,
+        }));
+    },
+
+    getLogVariables: () => {
+        const measurements = get().measurements;
+        return Object.values(measurements)
+            .filter(m => m.log !== false)
+            .map(m => m.id);
     },
 }));
 
