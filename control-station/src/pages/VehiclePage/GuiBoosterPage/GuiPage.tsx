@@ -32,7 +32,7 @@ export function GuiPage() {
     state.getMeasurement("HVSCU-Cabinet/contactors_state")
   );
   const bcuGeneralStateInfo = useMeasurementsStore((state) =>
-    state.getMeasurement("HVSCU-Cabinet/BCU_state_master_general")
+    state.getMeasurement("HVSCU-Cabinet/BCU_state_master_nested")
   );
 
   // Estados
