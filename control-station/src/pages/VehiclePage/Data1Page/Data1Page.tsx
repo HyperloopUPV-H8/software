@@ -7,35 +7,30 @@ import { BCU } from '../Boards/BCU/BCU';
 import { BMSL } from '../Boards/BMSL/BMSL';
 import { useEmergencyOrders } from 'hooks/useEmergencyOrders';
 import Connections from '../Windows/Connections';
-import { Connection, useConnections } from 'common';
+import { Connection, Logger, MessagesContainer, Orders, useConnections } from '../../../../../common-front';
 import { PCU } from '../Boards/PCU/PCU';
+import { LCU } from '../Boards/LCU/LCU';
+import FixedOrders, { getHardcodedOrders } from '../Data2Page/FixedOrders';
+import { BrakeVisualizer } from 'components/BrakeVisualizer/BrakeVisualizer';
+import { LevitationUnit } from 'components/LevitationUnit/LevitationUnit';
 
 export const Data1Page = () => {
     useEmergencyOrders();
 
     return (
         <div className={styles.data1_page}>
-            {/* <div className={styles.column}>
-                <OBCCUBatteries />
+            <div className={styles.test}> </div>
+            <div></div>
+            <div></div>
+            <div className={`${styles.column} ${styles.lcu}`}>
+                <LCU />
             </div>
-
-            <div className={styles.column}>
-                <OBCCUGeneralInfo />
-                <BMSL />
+            <div >
+                <MessagesContainer />
             </div>
-
-            <div className={styles.column}>
-                <VCUPositionInfo />
+            <div>
+                <Logger />
             </div>
-
-            <div className={styles.column}>
-                <VCUBrakesInfo />
-            </div>
-
-            <div className={styles.column}>
-                <PCU />
-                <Connections />
-            </div> */}
         </div>
     );
 };
