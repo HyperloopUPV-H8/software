@@ -181,6 +181,7 @@ func main() {
 	connectionTopic := connection_topic.NewUpdateTopic()
 	orderTopic := order_topic.NewSendTopic()
 	loggerTopic := logger_topic.NewEnableTopic()
+	loggerTopic.SetDataLogger(subloggers[data_logger.Name].(*data_logger.Logger))
 
 	messageTopic := message_topic.NewUpdateTopic()
 	stateOrderTopic := order_topic.NewState(idToBoard, trace.Logger)
@@ -191,6 +192,7 @@ func main() {
 	broker.AddTopic(order_topic.StateName, stateOrderTopic)
 	broker.AddTopic(logger_topic.EnableName, loggerTopic)
 	broker.AddTopic(logger_topic.ResponseName, loggerTopic)
+	broker.AddTopic(logger_topic.VariablesName, loggerTopic)
 	broker.AddTopic(message_topic.UpdateName, messageTopic)
 
 	connections := make(chan *websocket.Client)

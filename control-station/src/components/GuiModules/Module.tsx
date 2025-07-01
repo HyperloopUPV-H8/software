@@ -11,14 +11,14 @@ interface CellProps {
 
 const Module: React.FC<{ id: string | number }> = ({ id }) => {
   const moduleMinCell = useMeasurementsStore(
-    (state) => (state.getNumericMeasurementInfo(`module_${id}_min_cell`)?.getUpdate() ?? 0)
+    (state) => (state.getNumericMeasurementInfo(`HVSCU-Cabinet/module_${id}_min_cell`)?.getUpdate() ?? 0)
   );
   const moduleMaxCell = useMeasurementsStore(
-    (state) => (state.getNumericMeasurementInfo(`module_${id}_max_cell`)?.getUpdate() ?? 0)
+    (state) => (state.getNumericMeasurementInfo(`HVSCU-Cabinet/module_${id}_max_cell`)?.getUpdate() ?? 0)
   );
 
   const moduleTotalVoltage = useMeasurementsStore(
-    (state) => (state.getNumericMeasurementInfo(`module_${id}_voltage`)?.getUpdate() ?? 0)
+    (state) => (state.getNumericMeasurementInfo(`HVSCU-Cabinet/module_${id}_voltage`)?.getUpdate() ?? 0)
   );
 
   // Estado para las celdas
@@ -28,7 +28,7 @@ const Module: React.FC<{ id: string | number }> = ({ id }) => {
     const intervalId = setInterval(() => {
       setCellValues(() =>
         Array.from({ length: 48 }, (_, i) => {
-          const variableName = `module_${id}_cell_${i + 1}_voltage`;
+          const variableName = `HVSCU-Cabinet/module_${id}_cell_${i + 1}_voltage`;
           return useMeasurementsStore.getState().getNumericMeasurementInfo(variableName)?.getUpdate() ?? 0;
         })
       );

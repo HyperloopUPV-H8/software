@@ -9,6 +9,7 @@ export type Measurement =
 type AbstractMeasurement = {
     id: string;
     name: string;
+    log?: boolean;
 };
 
 export type NumericMeasurement = AbstractMeasurement & {
@@ -23,7 +24,7 @@ export type NumericValue = {
     last: number;
     average: number;
     showLatest: boolean;
-};
+}
 
 export type BooleanMeasurement = AbstractMeasurement & {
     type: 'bool';

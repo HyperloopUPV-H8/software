@@ -1,21 +1,24 @@
 import { useSubscribe, useWsHandler } from "common";
 import { useState } from "react";
+import { useMeasurementsStore } from "common";
 
 export function useLogger() {
     const [state, setState] = useState(false);
 
     const handler = useWsHandler();
 
-    const log = (enable: boolean) => {
-        handler.post("logger/enable", enable);
-    };
+    function getLoggedVariableIds() {
+        return useMeasurementsStore.getState().getLogVariables();
+    }
 
     function startLogging() {
-        log(true);
+        const variables = getLoggedVariableIds();
+        handler.post("logger/variables", variables);
+        handler.post("logger/enable", true);
     }
 
     function stopLogging() {
-        log(false);
+        handler.post("logger/enable", false);
     }
 
     useSubscribe("logger/response", (result) => {
