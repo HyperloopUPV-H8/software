@@ -8,7 +8,7 @@ import svgr from "vite-plugin-svgr";
 export default defineConfig({
     plugins: [react(), tsconfigPaths(), svgr()],
     build: {
-        outDir: "./static",
+        outDir: "./staStic",
         minify: false,
     },
     resolve: {
@@ -17,3 +17,4 @@ export default defineConfig({
         },
     }, 
 });
+

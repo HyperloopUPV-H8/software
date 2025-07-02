@@ -3,20 +3,21 @@ import { Pagination } from 'components/Pagination/Pagination';
 import { PageWrapper } from 'pages/PageWrapper/PageWrapper';
 import { Outlet } from 'react-router-dom';
 import { usePodDataUpdate } from 'hooks/usePodDataUpdate';
-import { Connection, useConnections } from 'common';
+import { Connection, useConnections } from '../../../../common-front';
 import { LostConnectionContext } from 'services/connections';
+import { OBCCUGeneralInfo } from './Boards/OBCCU/OBCCUGeneralInfo';
 
 export const VehiclePage = () => {
     usePodDataUpdate();
-
+    
     const connections = useConnections();
 
     return (
         <LostConnectionContext.Provider
-            value={any(
+             value={any(
                 [...connections.boards, connections.backend],
-                isDisconnected
-            )}
+                 isDisconnected
+             )}
         >
             <PageWrapper title="Vehicle">
                 <Outlet />
@@ -24,7 +25,9 @@ export const VehiclePage = () => {
                     <Pagination routes={['data-1', 'data-2', 'guiBooster']} />
                 </div>
             </PageWrapper>
+        
         </LostConnectionContext.Provider>
+
     );
 };
 

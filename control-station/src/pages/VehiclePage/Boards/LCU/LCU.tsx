@@ -26,64 +26,25 @@ export const LCU = () => {
             <div className={styles.LCUWrapper}>
                 <div className={styles.levitationUnitsWrapper}>
                     <div className={styles.levitationUnitsColumn}>
-                        <h5 className='subtitle'>Left side</h5>
-                        <LevitationUnit
-                            unitIndex={1}
-                            kind="hems"
-                        />
-                        <LevitationUnit
-                            unitIndex={5}
-                            kind="ems"
-                            
-                        />
-                        <LevitationUnit
-                            unitIndex={7}
-                            kind="ems"
-                            
-                        />
-                        <LevitationUnit
-                            unitIndex={9}
-                            kind="ems"
-                           
-                        />
-                        <LevitationUnit
-                            unitIndex={3}
-                            kind="hems"
-                            
-                        />
+                        <h5 className={styles.subtitle}>Left side</h5>
+                        <LevitationUnit unitIndex={1} kind="hems" />
+                        <LevitationUnit unitIndex={5} kind="ems" />
+                        <LevitationUnit unitIndex={7} kind="ems" />
+                        <LevitationUnit unitIndex={9} kind="ems" />
+                        <LevitationUnit unitIndex={3} kind="hems" />
                     </div>
 
                     <div className={styles.levitationUnitsColumn}>
-                        <h5>Right side</h5>
-                        <LevitationUnit
-                            unitIndex={0}
-                            kind="hems"
-                            
-                        />
-                        <LevitationUnit
-                            unitIndex={4}
-                            kind="ems"
-                            
-                        />
-                        <LevitationUnit
-                            unitIndex={6}
-                            kind="ems"
-                            
-                        />
-                        <LevitationUnit
-                            unitIndex={8}
-                            kind="ems"
-                            
-                        />
-                        <LevitationUnit
-                            unitIndex={2}
-                            kind="hems"
-                            
-                        />
+                        <h5 className={styles.subtitle}>Right side</h5>
+                        <LevitationUnit unitIndex={0} kind="hems"  />
+                        <LevitationUnit unitIndex={4} kind="ems"  />
+                        <LevitationUnit unitIndex={6} kind="ems" />
+                        <LevitationUnit unitIndex={8} kind="ems" />
+                        <LevitationUnit unitIndex={2} kind="hems" />
                     </div>
                 </div>
 
-                <h5>Orientation</h5>
+                <h5 className={styles.subtitle}>Orientation</h5>
                 <div className={styles.rotationIndicatorsWrapper}>
                     <IndicatorStack>
                         <BarIndicator
@@ -94,7 +55,7 @@ export const LCU = () => {
                             safeRangeMax={pitch.range[1] ?? 0.05}
                             warningRangeMin={pitch.warningRange[0] ?? -0.1}
                             warningRangeMax={pitch.warningRange[1] ?? 0.1}
-                            units={roll.units}
+                            units={pitch.units}
                         />
                     </IndicatorStack>
                     <IndicatorStack>
@@ -110,16 +71,18 @@ export const LCU = () => {
                         />
                     </IndicatorStack>
                     <IndicatorStack>
-                        <BarIndicator
-                            icon={yawRotation}
-                            name="Yaw"
-                            getValue={yaw.getUpdate}
-                            safeRangeMin={yaw.range[0] ?? -0.005}
-                            safeRangeMax={yaw.range[1] ?? 0.005}
-                            warningRangeMin={yaw.warningRange[0] ?? -0.01}
-                            warningRangeMax={yaw.warningRange[1] ?? 0.01}
-                            units={yaw.units}
-                        />
+                        <div className={styles.rotationIndicator}>
+                            <BarIndicator
+                                icon={yawRotation}
+                                name="Yaw"
+                                getValue={yaw.getUpdate}
+                                safeRangeMin={yaw.range[0] ?? -0.005}
+                                safeRangeMax={yaw.range[1] ?? 0.005}
+                                warningRangeMin={yaw.warningRange[0] ?? -0.01}
+                                warningRangeMax={yaw.warningRange[1] ?? 0.01}
+                                units={yaw.units}
+                            />
+                        </div>
                     </IndicatorStack>
                     <IndicatorStack>
                         <BarIndicator
@@ -150,3 +113,4 @@ export const LCU = () => {
         </Window>
     );
 };
+

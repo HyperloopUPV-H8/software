@@ -1,8 +1,8 @@
 import styles from './Data2Page.module.scss';
 import { LCU } from '../Boards/LCU/LCU';
 import { PCU } from '../Boards/PCU/PCU';
-import { Orders, useOrders } from 'common';
-import { Connections, Logger, MessagesContainer } from 'common';
+import { Orders, useOrders } from '../../../../../common-front';
+import { Connections, Logger, MessagesContainer } from '../../../../../common-front';
 import { Window } from 'components/Window/Window';
 import FixedOrders, { getHardcodedOrders } from './FixedOrders';
 

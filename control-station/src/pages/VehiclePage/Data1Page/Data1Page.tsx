@@ -1,35 +1,79 @@
 import styles from './Data1Page.module.scss';
-import { OBCCUBatteries } from '../Boards/OBCCU/OBCCUBatteries';
-import { OBCCUGeneralInfo } from '../Boards/OBCCU/OBCCUGeneralInfo';
-import { VCUBrakesInfo } from '../Boards/VCU/VCUBrakesInfo';
-import { VCUPositionInfo } from '../Boards/VCU/VCUPositionInfo';
-import { BCU } from '../Boards/BCU/BCU';
-import { BMSL } from '../Boards/BMSL/BMSL';
-import { useEmergencyOrders } from 'hooks/useEmergencyOrders';
-import Connections from '../Windows/Connections';
-import { Connection, Logger, MessagesContainer, Orders, useConnections } from '../../../../../common-front';
-import { PCU } from '../Boards/PCU/PCU';
 import { LCU } from '../Boards/LCU/LCU';
-import FixedOrders, { getHardcodedOrders } from '../Data2Page/FixedOrders';
-import { BrakeVisualizer } from 'components/BrakeVisualizer/BrakeVisualizer';
-import { LevitationUnit } from 'components/LevitationUnit/LevitationUnit';
+import { HVSCU } from '../Boards/HVSCU/HVSCU';
+import { Orders, useOrders } from '../../../../../common-front';
+import { MessagesContainer } from '../../../../../common-front';
+import { Window } from 'components/Window/Window';
+import { Window2 } from 'components/Window/Window2';
+import FixedOrders, { emergencyStopOrders, getHardcodedOrders } from '../Data2Page/FixedOrders';
+import { Gauge } from 'components/GaugeTag/Gauge/Gauge';
+import { BatteryIndicator } from 'components/BatteryIndicator/BatteryIndicator';
+import { BigOrderButton } from 'components/BigOrderButton';
 
 export const Data1Page = () => {
-    useEmergencyOrders();
+    const boardOrders = useOrders();
 
     return (
         <div className={styles.data1_page}>
-            <div className={styles.test}> </div>
-            <div></div>
-            <div></div>
-            <div className={`${styles.column} ${styles.lcu}`}>
-                <LCU />
+            <div className={styles.leds}>
+                <h1>LEDS</h1>
             </div>
-            <div >
-                <MessagesContainer />
-            </div>
-            <div>
-                <Logger />
+
+            <div className={styles.main}>
+                <div className={styles.column}>
+                    <Window title="Orders" className={styles.orders}>
+                        <div className={styles.order_column}>
+                            <Orders boards={getHardcodedOrders(boardOrders)} />
+                            <FixedOrders />
+                        </div>
+                    </Window>
+                </div>
+
+                <div className={styles.column_center}>
+                    <div className={styles.break_state}>
+                    <h1>BREAK STATE</h1>
+                </div>
+                <div className={styles.pod}>
+                    <h1>POD</h1>
+                </div>
+                    <div className={styles.row}>
+                        <HVSCU />
+                        <LCU />
+                    </div>
+
+                    <div className={styles.row}>
+                        <Window2 title="High Voltage" className={styles.voltage}>
+                            <Gauge id="hv" sweep={180} strokeWidth={15} percentage={75} className="" />
+                            <BatteryIndicator />
+                        </Window2>
+
+                        <Window2 title="Low Voltage" className={styles.voltage}>
+                            <Gauge id="lv" sweep={180} strokeWidth={15} percentage={45} className="" />
+                            <BatteryIndicator />
+                        </Window2>
+
+                        <Window2 title="BOOSTER" className={styles.voltage}>
+                            <Gauge id="boost" sweep={180} strokeWidth={15} percentage={55} className="" />
+                            <BatteryIndicator />
+                        </Window2>
+                    </div>
+
+                    <div className={styles.emergency_wrapper}>
+                        <BigOrderButton
+                            orders={emergencyStopOrders}
+                            label="Emergency Stop"
+                            shortcut=" "
+                            className={`${styles.emergency_button} ${styles.emergency_stop}`}
+                            brightness={3}
+                        />
+                    </div>
+                </div>
+
+                <div className={styles.column}>
+                    <Window title="Messages" className={styles.messages}>
+                        <MessagesContainer />
+                    </Window>
+                </div>
             </div>
         </div>
     );

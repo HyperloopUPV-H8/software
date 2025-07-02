@@ -1,5 +1,5 @@
 import { useGlobalTicker } from '../../../../common-front/dist';
-import styles from './BarIndicator.module.scss';
+import styles from './BatteryIndicator.module.scss';
 import {
     getPercentageFromRange,
     getStateFromRange,
@@ -23,7 +23,7 @@ interface Props {
     className?: string;
 }
 
-export const BarIndicator = memo(
+export const BatteryIndicator = memo(
     ({
         icon,
         name,
@@ -63,7 +63,7 @@ export const BarIndicator = memo(
 
         return (
             <div
-                className={`${styles.bar_indicator} ${className}`}
+                className={`${styles.battery_indicator} ${className}`}
                 style={{
                     backgroundColor:
                         backgroundColor != undefined
@@ -88,14 +88,6 @@ export const BarIndicator = memo(
                         {lostConnection ? '-.--' : valueState?.toFixed(2)}
                     </p>
                     <p className={styles.units}>{units}</p>
-                    <div className={styles.min_max}>
-                        <p
-                            className={styles.max}
-                        >{`max: ${warningRangeMax}`}</p>
-                        <p
-                            className={styles.min}
-                        >{`min: ${warningRangeMin}`}</p>
-                    </div>
                 </div>
             </div>
         );
