@@ -3,7 +3,7 @@ import { Pagination } from 'components/Pagination/Pagination';
 import { PageWrapper } from 'pages/PageWrapper/PageWrapper';
 import { Outlet } from 'react-router-dom';
 import { usePodDataUpdate } from 'hooks/usePodDataUpdate';
-import { Connection, useConnections } from '../../../../common-front';
+import { Connection, useConnections } from 'common';
 import { LostConnectionContext } from 'services/connections';
 import { OBCCUGeneralInfo } from './Boards/OBCCU/OBCCUGeneralInfo';
 

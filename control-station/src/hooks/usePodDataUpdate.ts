@@ -1,4 +1,4 @@
-import { useMeasurementsStore, usePodDataStore, useSubscribe } from '../../../common-front/dist';
+import { useMeasurementsStore, usePodDataStore, useSubscribe } from 'common';
 
 export function usePodDataUpdate() {
     const updatePodData = usePodDataStore((state) => state.updatePodData);

@@ -1,8 +1,8 @@
 import styles from './Data1Page.module.scss';
 import { LCU } from '../Boards/LCU/LCU';
 import { HVSCU } from '../Boards/HVSCU/HVSCU';
-import { Orders, useOrders } from '../../../../../common-front';
-import { MessagesContainer } from '../../../../../common-front';
+import { Orders, useOrders } from 'common';
+import { MessagesContainer } from 'common';
 import { Window } from 'components/Window/Window';
 import { Window2 } from 'components/Window/Window2';
 import FixedOrders, { emergencyStopOrders, getHardcodedOrders } from '../Data2Page/FixedOrders';

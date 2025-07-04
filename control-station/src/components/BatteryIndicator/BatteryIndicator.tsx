@@ -1,4 +1,4 @@
-import { useGlobalTicker } from '../../../../common-front/dist';
+import { useGlobalTicker } from 'common';
 import styles from './BatteryIndicator.module.scss';
 import {
     getPercentageFromRange,

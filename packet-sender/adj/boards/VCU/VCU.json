@@ -1,8 +1,0 @@
-{
-    "board_id": 0,
-    "board_ip": "127.0.0.6",
-    "measurements": ["VCU_measurements.json"],
-    "packets": [
-        "orders.json","packets.json"
-    ]
-}

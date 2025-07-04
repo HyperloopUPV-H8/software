@@ -1,4 +1,4 @@
-import { useConnectionsStore, useMeasurementsStore, usePodDataStore, useSubscribe } from "../../../../common-front/dist";
+import { useConnectionsStore, useMeasurementsStore, usePodDataStore, useSubscribe } from "../../";
 
 export function useConnections() {
 

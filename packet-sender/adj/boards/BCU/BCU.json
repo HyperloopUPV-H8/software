@@ -1,8 +1,0 @@
-{
-    "board_id": 16,
-    "board_ip": "127.0.0.2",
-    "measurements": ["BCU_measurements.json"],
-    "packets": [
-        "control_packets.json"
-    ]
-}
