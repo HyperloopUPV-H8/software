@@ -1,0 +1,384 @@
+ [
+        {
+            "id": "new_reference_pressure",
+            "name": "New Reference Pressure",
+            "type": "float32",
+            "podUnits": "bar",
+            "displayUnits": "bar",
+            "safeRange": [0, 10],
+            "warningRange": [0, 10]
+        },
+        {
+            "id": "reference_pressure",
+            "name": "Reference Pressure",
+            "type": "float32",
+            "podUnits": "bar",
+            "displayUnits": "bar",
+            "safeRange": [0, 10],
+            "warningRange": [0, 10]
+        },
+        {
+            "id": "actual_pressure",
+            "name": "Actual Pressure",
+            "type": "float32",
+            "podUnits": "bar",
+            "displayUnits": "bar",
+            "safeRange": [0, 10],
+            "warningRange": [0, 10]
+        },
+        {
+            "id": "valve_state",
+            "name": "Valve State",
+            "type": "enum",
+            "enumValues": ["VALVE_OPEN", "VALVE_CLOSED"]
+        },
+        {
+            "id": "reed_state",
+            "name": "Reed State",
+            "type": "enum",
+            "enumValues": ["OFF", "ON"]
+        },
+        {
+            "id": "bottle_temp_1",
+            "name": "Bottle Temperature 1",
+            "type": "float64",
+            "podUnits": "ºC",
+            "displayUnits": "ºC"
+        },
+        {
+            "id": "bottle_temp_2",
+            "name": "Bottle Temperature 2",
+            "type": "float64",
+            "podUnits": "ºC",
+            "displayUnits": "ºC"
+        },
+        {
+            "id": "high_pressure",
+            "name": "High Pressure",
+            "type": "float32",
+            "podUnits": "bar",
+            "displayUnits": "bar",
+            "safeRange": [40, 200],
+            "warningRange": [0, 200]
+        },
+        {
+            "id": "low_pressure_1",
+            "name": "Low Pressure 1",
+            "type": "float32",
+            "podUnits": "bar",
+            "displayUnits": "bar"
+        },
+        {
+            "id": "low_pressure_2",
+            "name": "Low Pressure 2",
+            "type": "float32",
+            "podUnits": "bar",
+            "displayUnits": "bar"
+        },
+        {
+            "id": "direction",
+            "name": "Direction",
+            "type": "float64"
+        },
+        {
+            "id": "position",
+            "name": "Position",
+            "type": "float64",
+            "podUnits": "m",
+            "displayUnits": "m",
+            "safeRange": [0, 40],
+            "warningRange": [0, 50]
+        },
+        {
+            "id": "speed",
+            "name": "Speed",
+            "type": "float64",
+            "podUnits": "m/s",
+            "displayUnits": "m/s",
+            "safeRange": [0, 8.33],
+            "warningRange": [0, 13.88]
+        },
+        {
+            "id": "acceleration",
+            "name": "Acceleration",
+            "type": "float64",
+            "podUnits": "m/ss",
+            "displayUnits": "m/ss",
+            "safeRange": [0, 9.8],
+            "warningRange": [0, 19.6]
+        },
+        {
+            "id": "general_state",
+            "name": "General State",
+            "type": "enum",
+            "enumValues": ["CONNECTING", "OPERATIONAL", "FAULT"]
+        },
+        {
+            "id": "specific_state",
+            "name": "Specific State",
+            "type": "enum",
+            "enumValues": ["IDLE", "TAKING OFF", "STABLE LEVITATION", "PROPULSION", "LANDING", "UNLOADING", "LOADING", "TRACTION"]
+        },
+        {
+            "id": "voltage_state",
+            "name": "Voltage State",
+            "type": "enum",
+            "enumValues": ["NOT_HV", "HV"]
+        },
+        {
+            "id": "emergency_tape",
+            "name": "Emergency Tape Status",
+            "type": "enum",
+            "enumValues": ["DISABLED", "ENABLED"]
+        },
+        {
+            "id": "reed1",
+            "name": "Reed 1",
+            "type": "enum",
+            "enumValues": ["EXTENDED", "RETRACTED"]
+        },
+        {
+            "id": "reed2",
+            "name": "Reed 2",
+            "type": "enum",
+            "enumValues": ["EXTENDED", "RETRACTED"]
+        },
+        {
+            "id": "reed3",
+            "name": "Reed 3",
+            "type": "enum",
+            "enumValues": ["EXTENDED", "RETRACTED"]
+        },
+        {
+            "id": "reed4",
+            "name": "Reed 4",
+            "type": "enum",
+            "enumValues": ["EXTENDED", "RETRACTED"]
+        },
+        {
+            "id": "ldu_id",
+            "name": "LDU Id",
+            "type": "uint16",
+            "safeRange": [1, 10],
+            "warningRange": [1, 10]
+        },
+        {
+            "id": "pwm_duty_cycle",
+            "name": "Duty Cycle",
+            "type": "float32",
+            "podUnits": "%",
+            "displayUnits": "%"
+        },
+        {
+            "id": "lcu_battery_voltage",
+            "name": "Battery Voltage to set",
+            "type": "float32",
+            "podUnits": "V",
+            "displayUnits": "V",
+            "safeRange": [222, 252],
+            "warningRange": [0, 252]
+        },
+        {
+            "id": "lcu_desired_current",
+            "name": "Desired current to set",
+            "type": "float32",
+            "podUnits": "A",
+            "displayUnits": "A",
+            "safeRange": [-50, 50],
+            "warningRange": [-70, 70]
+        },
+        {
+            "id": "ldu_buffer_id",
+            "name": "LDU Buffer ID",
+            "type": "uint16",
+            "safeRange": [1, 5],
+            "warningRange": [1, 5]
+        },
+        {
+            "id": "lcu_desired_distance",
+            "name": "desired distance",
+            "type": "float32",
+            "podUnits": "m",
+            "displayUnits": "m",
+            "safeRange":[0.0001,0.030],
+            "warningRange":[0.010,0.030]
+        },
+        {
+            "id": "output_voltage",
+            "name": "output_voltage",
+            "type": "uint16",
+            "safeRange": [192, 252],
+            "warningRange": [0, 252]
+        },
+        {
+            "id": "test_duty_target",
+            "name": "test_duty_target",
+            "type": "float32",
+            "safeRange": [0, 100],
+            "warningRange": [0, 100]
+        },
+        {
+            "id": "test_duty_phase",
+            "name": "test_duty_phase",
+            "type": "uint16",
+            "safeRange": [0, 2],
+            "warningRange": [0, 2]
+        },
+        {
+            "id": "test_current_control_target_freq",
+            "name": "Target Frequency",
+            "type": "float32",
+            "podUnits": "A",
+            "displayUnits": "A",
+            "safeRange": [0, 1000]
+        },
+        {
+            "id": "test_current_control_target_curr",
+            "name": "Target Current",
+            "type": "float32",
+            "podUnits": "A",
+            "displayUnits": "A",
+            "safeRange": [-220, 220]
+        },
+        {
+            "id": "test_current_control_vdc",
+            "name": "VDC",
+            "type": "float32",
+            "podUnits": "V",
+            "displayUnits": "V",
+            "safeRange": [0, 252]
+        },
+        {
+            "id": "test_svpwm_freq",
+            "name": "Frequency",
+            "type": "float32",
+            "safeRange": [0, 100]
+        },
+        {
+            "id": "test_svpwm_vdc",
+            "name": "VDC",
+            "type": "float32",
+            "podUnits": "V",
+            "displayUnits": "V",
+            "safeRange": [0, 252]
+        },
+        {
+            "id": "test_svpwm_target_voltage",
+            "name": "Target Voltage",
+            "type": "float32",
+            "podUnits": "V",
+            "displayUnits": "V",
+            "safeRange": [0, 252]
+        },
+        {
+            "id": "test_svpwm_direction",
+            "name": "Direction",
+            "type": "enum",
+            "enumValues": ["FORWARD", "BACKWARD"]
+        },
+        {
+            "id": "target_test_speed_control_kmh",
+            "name": "Speed (kmh)",
+            "type": "float32",
+            "podUnits": "m/s",
+            "displayUnits": "km/h"
+        },
+        {
+            "id": "direction_",
+            "name": "Direction",
+            "type": "enum",
+            "enumValues": ["FORWARD", "BACKWARD"]
+        },
+        {
+            "id": "test_speed_control_direction",
+            "name": "Direction",
+            "type": "enum",
+            "enumValues": ["FORWARD", "BACKWARD"]
+        },
+        {
+            "id": "test_speed_control_vbat",
+            "name": "Vbat",
+            "type": "float32"
+        },
+        {
+            "id": "emergency_tape_value",
+            "name": "Section",
+            "type": "enum",
+            "enumValues": ["NORMAL", "EMERGENCY"]
+        },
+        {
+            "id": "pcu_connection",
+            "name": "PCU",
+            "type": "enum",
+            "enumValues": ["Disconnected", "Connected"]
+        },
+        {
+            "id": "obccu_connection",
+            "name": "OBCCU",
+            "type": "enum",
+            "enumValues": ["Disconnected", "Connected"]
+        },
+        {
+            "id": "lcu_connection",
+            "name": "LCU",
+            "type": "enum",
+            "enumValues": ["Disconnected", "Connected"]
+        },
+        {
+            "id": "bmsl_connection",
+            "name": "BMSL",
+            "type": "enum",
+            "enumValues": ["Disconnected", "Connected"]
+        },
+        {
+            "id": "bomb_connection",
+            "name": "Bomb",
+            "type": "enum",
+            "enumValues": ["Disconnected", "Connected"]
+        },
+        {
+            "id": "waterblock_temperature",
+            "name": "Waterblock temperature",
+            "type": "float32",
+            "podUnits": "ºC",
+            "displayUnits": "ºC"
+        },
+        {
+            "id": "color_rgb",
+            "name": "Color RGB",
+            "type": "enum",
+            "enumValues": ["RED", "BLUE", "GREEN", "MAGENTA", "PURPLE", "ORANGE", "TURQUOISE", "PISTACCIO_GREEN", "WHITE"]
+        },
+        {
+            "id": "driving_mosfets",
+            "name": "driving_mosfets",
+            "type": "bool"
+        },
+        {
+            "id": "waterblock_pressure",
+            "name": "Waterblock pressure",
+            "type": "float32"
+        },
+        {
+            "id": "longest_update_ms",
+            "name": "Longest update",
+            "type": "uint32"
+        },
+        {
+            "id": "lower_position_limit",
+            "name": "Lower limit",
+            "type": "float64",
+            "podUnits": "m",
+            "displayUnits": "m",
+            "warningRange": [-2, 0]
+        },
+        {
+            "id": "upper_position_limit",
+            "name": "Upper limit",
+            "type": "float64",
+            "podUnits": "m",
+            "displayUnits": "m",
+            "safeRange": [1, 36]
+        }
+    ]
+

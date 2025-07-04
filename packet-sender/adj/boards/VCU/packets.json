@@ -1,0 +1,102 @@
+[
+    {
+        "id": 211,
+        "name": "vcu_regulator_packet",
+        "type": "data",
+        "variables": [
+            "valve_state",
+            "reference_pressure", 
+            "actual_pressure"
+        ]
+    },
+    {
+        "id": 212,
+        "name": "vcu_reed_packet",
+        "type": "data",
+        "variables": [
+            "reed1",
+            "reed2",
+            "reed3",
+            "reed4"
+        ]
+    },
+    {
+        "id": 213,
+        "name": "vcu_bottle_temperature_packet",
+        "type": "data",
+        "variables": [
+            "bottle_temp_1",
+            "bottle_temp_2"
+        ]
+    },
+    {
+        "id": 214,
+        "name": "vcu_pressure_packet",
+        "type": "data",
+        "variables": [
+            "high_pressure",
+            "low_pressure_1",
+            "low_pressure_2"
+        ]
+    },
+    {
+        "id": 219,
+        "name": "encoder_packet",
+        "type": "data",
+        "variables": [
+            "direction",
+            "position",
+            "speed",
+            "acceleration"
+        ]
+    },
+    {
+        "id": 220,
+        "name": "state_machines_packet",
+        "type": "data",
+        "variables": [
+            "longest_update_ms",
+            "general_state",
+            "specific_state",
+            "voltage_state"
+        ]
+    },
+    {
+        "id": 221,
+        "name": "emergency_tape_state",
+        "type": "data",
+        "variables": [
+            "emergency_tape",
+            "emergency_tape_value"
+        ]
+    },
+    {
+        "id": 982,
+        "name": "output_vtg",
+        "type": "data",
+        "variables": [
+            "output_voltage",
+            "driving_mosfets"
+        ]
+    },
+    {
+        "id": 230,
+        "name": "Tcp_connections",
+        "type": "data",
+        "variables": [
+            "pcu_connection",
+            "obccu_connection",
+            "lcu_connection",
+            "bmsl_connection"
+        ]
+    },
+    {
+        "id": 231,
+        "name": "waterblock_data",
+        "type": "data",
+        "variables": [
+            "waterblock_temperature",
+            "waterblock_pressure"
+        ]
+    }
+]

@@ -1,0 +1,38 @@
+{
+    "ports": {
+        "TCP_CLIENT": 50401,
+        "TCP_SERVER": 50500,
+        "UDP": 8000,
+        "SNTP": 123,
+        "TFTP": 69
+    },
+    "addresses": {
+        "backend": "127.0.0.9"
+    },
+    "units": {
+        "V": "*1",
+        "A": "*1",
+        "ºC": "+273.15",
+        "m": "*1",
+        "mm": "/1000",
+        "deg": "/57.2957",
+        "Hz": "*1",
+        "Percentage": "*1",
+        "m/s": "*1",
+        "m/ss": "*1",
+        "G": "*9.8",
+        "rad": "*1",
+        "km/h": "*3.6",
+        "mrad": "/1000"
+    },
+    "message_ids": {
+        "info": 1,
+        "fault": 2,
+        "warning": 3,
+        "blcu_ack": 4,
+        "add_state_order": 5,
+        "remove_state_order": 6,
+        "state_space": 7
+    }
+}
+

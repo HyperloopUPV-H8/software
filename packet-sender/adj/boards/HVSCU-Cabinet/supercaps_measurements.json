@@ -1,0 +1,1831 @@
+[
+    {
+        "id": "total_supercaps_voltage",
+        "name": "Total Supercaps Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 400.0,
+            "warning": 446.4
+        }
+    },
+    {
+        "id": "module_1_voltage",
+        "name": "Module 1 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 133.33,
+            "warning": 148.8
+        }
+    },
+    {
+        "id": "module_1_max_cell",
+        "name": "Module 1 Max Cell Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_min_cell",
+        "name": "Module 1 Min Cell Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_average_cell",
+        "name": "Module 1 Average Cell Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_max_temp",
+        "name": "Module 1 Max Temperature",
+        "type": "float32",
+        "podUnits": "ºC",
+        "displayUnits": "ºC",
+        "out_of_range": {
+            "safe": [
+                10.5,
+                30.5
+            ],
+            "warning": [
+                5.5,
+                60.0
+            ]
+        }
+    },
+    {
+        "id": "module_1_min_temp",
+        "name": "Module 1 Min Temperature",
+        "type": "float32",
+        "podUnits": "ºC",
+        "displayUnits": "ºC",
+        "out_of_range": {
+            "safe": [
+                10.5,
+                30.5
+            ],
+            "warning": [
+                5.5,
+                60.0
+            ]
+        }
+    },
+    {
+        "id": "module_2_voltage",
+        "name": "Module 2 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 133.33,
+            "warning": 148.8
+        }
+    },
+    {
+        "id": "module_2_max_cell",
+        "name": "Module 2 Max Cell Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_min_cell",
+        "name": "Module 2 Min Cell Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_average_cell",
+        "name": "Module 2 Average Cell Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_max_temp",
+        "name": "Module 2 Max Temperature",
+        "type": "float32",
+        "podUnits": "ºC",
+        "displayUnits": "ºC",
+        "out_of_range": {
+            "safe": [
+                10.5,
+                30.5
+            ],
+            "warning": [
+                5.5,
+                60.0
+            ]
+        }
+    },
+    {
+        "id": "module_2_min_temp",
+        "name": "Module 2 Min Temperature",
+        "type": "float32",
+        "podUnits": "ºC",
+        "displayUnits": "ºC",
+        "out_of_range": {
+            "safe": [
+                10.5,
+                30.5
+            ],
+            "warning": [
+                5.5,
+                60.0
+            ]
+        }
+    },
+    {
+        "id": "module_3_voltage",
+        "name": "Module 3 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 133.33,
+            "warning": 148.8
+        }
+    },
+    {
+        "id": "module_3_max_cell",
+        "name": "Module 3 Max Cell Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_min_cell",
+        "name": "Module 3 Min Cell Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_average_cell",
+        "name": "Module 3 Average Cell Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_max_temp",
+        "name": "Module 3 Max Temperature",
+        "type": "float32",
+        "podUnits": "ºC",
+        "displayUnits": "ºC",
+        "out_of_range": {
+            "safe": [
+                10.5,
+                30.5
+            ],
+            "warning": [
+                5.5,
+                60.0
+            ]
+        }
+    },
+    {
+        "id": "module_3_min_temp",
+        "name": "Module 3 Min Temperature",
+        "type": "float32",
+        "podUnits": "ºC",
+        "displayUnits": "ºC",
+        "out_of_range": {
+            "safe": [
+                10.5,
+                30.5
+            ],
+            "warning": [
+                5.5,
+                60.0
+            ]
+        }
+    },
+    {
+        "id": "module_1_cell_1_voltage",
+        "name": "Module 1 Cell 1 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_2_voltage",
+        "name": "Module 1 Cell 2 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_3_voltage",
+        "name": "Module 1 Cell 3 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_4_voltage",
+        "name": "Module 1 Cell 4 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_5_voltage",
+        "name": "Module 1 Cell 5 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_6_voltage",
+        "name": "Module 1 Cell 6 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_7_voltage",
+        "name": "Module 1 Cell 7 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_8_voltage",
+        "name": "Module 1 Cell 8 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_9_voltage",
+        "name": "Module 1 Cell 9 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_10_voltage",
+        "name": "Module 1 Cell 10 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_11_voltage",
+        "name": "Module 1 Cell 11 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_12_voltage",
+        "name": "Module 1 Cell 12 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_13_voltage",
+        "name": "Module 1 Cell 13 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_14_voltage",
+        "name": "Module 1 Cell 14 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_15_voltage",
+        "name": "Module 1 Cell 15 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_16_voltage",
+        "name": "Module 1 Cell 16 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_17_voltage",
+        "name": "Module 1 Cell 17 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_18_voltage",
+        "name": "Module 1 Cell 18 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_19_voltage",
+        "name": "Module 1 Cell 19 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_20_voltage",
+        "name": "Module 1 Cell 20 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_21_voltage",
+        "name": "Module 1 Cell 21 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_22_voltage",
+        "name": "Module 1 Cell 22 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_23_voltage",
+        "name": "Module 1 Cell 23 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_24_voltage",
+        "name": "Module 1 Cell 24 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_25_voltage",
+        "name": "Module 1 Cell 25 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_26_voltage",
+        "name": "Module 1 Cell 26 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_27_voltage",
+        "name": "Module 1 Cell 27 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_28_voltage",
+        "name": "Module 1 Cell 28 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_29_voltage",
+        "name": "Module 1 Cell 29 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_30_voltage",
+        "name": "Module 1 Cell 30 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_31_voltage",
+        "name": "Module 1 Cell 31 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_32_voltage",
+        "name": "Module 1 Cell 32 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_33_voltage",
+        "name": "Module 1 Cell 33 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_34_voltage",
+        "name": "Module 1 Cell 34 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_35_voltage",
+        "name": "Module 1 Cell 35 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_36_voltage",
+        "name": "Module 1 Cell 36 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_37_voltage",
+        "name": "Module 1 Cell 37 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_38_voltage",
+        "name": "Module 1 Cell 38 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_39_voltage",
+        "name": "Module 1 Cell 39 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_40_voltage",
+        "name": "Module 1 Cell 40 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_41_voltage",
+        "name": "Module 1 Cell 41 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_42_voltage",
+        "name": "Module 1 Cell 42 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_43_voltage",
+        "name": "Module 1 Cell 43 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_44_voltage",
+        "name": "Module 1 Cell 44 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_45_voltage",
+        "name": "Module 1 Cell 45 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_46_voltage",
+        "name": "Module 1 Cell 46 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_47_voltage",
+        "name": "Module 1 Cell 47 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_1_cell_48_voltage",
+        "name": "Module 1 Cell 48 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_1_voltage",
+        "name": "Module 2 Cell 1 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_2_voltage",
+        "name": "Module 2 Cell 2 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_3_voltage",
+        "name": "Module 2 Cell 3 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_4_voltage",
+        "name": "Module 2 Cell 4 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_5_voltage",
+        "name": "Module 2 Cell 5 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_6_voltage",
+        "name": "Module 2 Cell 6 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_7_voltage",
+        "name": "Module 2 Cell 7 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_8_voltage",
+        "name": "Module 2 Cell 8 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_9_voltage",
+        "name": "Module 2 Cell 9 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_10_voltage",
+        "name": "Module 2 Cell 10 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_11_voltage",
+        "name": "Module 2 Cell 11 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_12_voltage",
+        "name": "Module 2 Cell 12 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_13_voltage",
+        "name": "Module 2 Cell 13 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_14_voltage",
+        "name": "Module 2 Cell 14 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_15_voltage",
+        "name": "Module 2 Cell 15 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_16_voltage",
+        "name": "Module 2 Cell 16 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_17_voltage",
+        "name": "Module 2 Cell 17 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_18_voltage",
+        "name": "Module 2 Cell 18 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_19_voltage",
+        "name": "Module 2 Cell 19 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_20_voltage",
+        "name": "Module 2 Cell 20 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_21_voltage",
+        "name": "Module 2 Cell 21 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_22_voltage",
+        "name": "Module 2 Cell 22 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_23_voltage",
+        "name": "Module 2 Cell 23 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_24_voltage",
+        "name": "Module 2 Cell 24 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_25_voltage",
+        "name": "Module 2 Cell 25 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_26_voltage",
+        "name": "Module 2 Cell 26 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_27_voltage",
+        "name": "Module 2 Cell 27 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_28_voltage",
+        "name": "Module 2 Cell 28 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_29_voltage",
+        "name": "Module 2 Cell 29 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_30_voltage",
+        "name": "Module 2 Cell 30 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_31_voltage",
+        "name": "Module 2 Cell 31 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_32_voltage",
+        "name": "Module 2 Cell 32 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_33_voltage",
+        "name": "Module 2 Cell 33 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_34_voltage",
+        "name": "Module 2 Cell 34 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_35_voltage",
+        "name": "Module 2 Cell 35 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_36_voltage",
+        "name": "Module 2 Cell 36 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_37_voltage",
+        "name": "Module 2 Cell 37 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_38_voltage",
+        "name": "Module 2 Cell 38 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_39_voltage",
+        "name": "Module 2 Cell 39 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_40_voltage",
+        "name": "Module 2 Cell 40 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_41_voltage",
+        "name": "Module 2 Cell 41 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_42_voltage",
+        "name": "Module 2 Cell 42 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_43_voltage",
+        "name": "Module 2 Cell 43 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_44_voltage",
+        "name": "Module 2 Cell 44 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_45_voltage",
+        "name": "Module 2 Cell 45 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_46_voltage",
+        "name": "Module 2 Cell 46 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_47_voltage",
+        "name": "Module 2 Cell 47 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_2_cell_48_voltage",
+        "name": "Module 2 Cell 48 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_1_voltage",
+        "name": "Module 3 Cell 1 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_2_voltage",
+        "name": "Module 3 Cell 2 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_3_voltage",
+        "name": "Module 3 Cell 3 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_4_voltage",
+        "name": "Module 3 Cell 4 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_5_voltage",
+        "name": "Module 3 Cell 5 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_6_voltage",
+        "name": "Module 3 Cell 6 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_7_voltage",
+        "name": "Module 3 Cell 7 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_8_voltage",
+        "name": "Module 3 Cell 8 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_9_voltage",
+        "name": "Module 3 Cell 9 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_10_voltage",
+        "name": "Module 3 Cell 10 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_11_voltage",
+        "name": "Module 3 Cell 11 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_12_voltage",
+        "name": "Module 3 Cell 12 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_13_voltage",
+        "name": "Module 3 Cell 13 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_14_voltage",
+        "name": "Module 3 Cell 14 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_15_voltage",
+        "name": "Module 3 Cell 15 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_16_voltage",
+        "name": "Module 3 Cell 16 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_17_voltage",
+        "name": "Module 3 Cell 17 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_18_voltage",
+        "name": "Module 3 Cell 18 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_19_voltage",
+        "name": "Module 3 Cell 19 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_20_voltage",
+        "name": "Module 3 Cell 20 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_21_voltage",
+        "name": "Module 3 Cell 21 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_22_voltage",
+        "name": "Module 3 Cell 22 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_23_voltage",
+        "name": "Module 3 Cell 23 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_24_voltage",
+        "name": "Module 3 Cell 24 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_25_voltage",
+        "name": "Module 3 Cell 25 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_26_voltage",
+        "name": "Module 3 Cell 26 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_27_voltage",
+        "name": "Module 3 Cell 27 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_28_voltage",
+        "name": "Module 3 Cell 28 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_29_voltage",
+        "name": "Module 3 Cell 29 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_30_voltage",
+        "name": "Module 3 Cell 30 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_31_voltage",
+        "name": "Module 3 Cell 31 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_32_voltage",
+        "name": "Module 3 Cell 32 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_33_voltage",
+        "name": "Module 3 Cell 33 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_34_voltage",
+        "name": "Module 3 Cell 34 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_35_voltage",
+        "name": "Module 3 Cell 35 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_36_voltage",
+        "name": "Module 3 Cell 36 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_37_voltage",
+        "name": "Module 3 Cell 37 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_38_voltage",
+        "name": "Module 3 Cell 38 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_39_voltage",
+        "name": "Module 3 Cell 39 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_40_voltage",
+        "name": "Module 3 Cell 40 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_41_voltage",
+        "name": "Module 3 Cell 41 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_42_voltage",
+        "name": "Module 3 Cell 42 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_43_voltage",
+        "name": "Module 3 Cell 43 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_44_voltage",
+        "name": "Module 3 Cell 44 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_45_voltage",
+        "name": "Module 3 Cell 45 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_46_voltage",
+        "name": "Module 3 Cell 46 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_47_voltage",
+        "name": "Module 3 Cell 47 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    },
+    {
+        "id": "module_3_cell_48_voltage",
+        "name": "Module 3 Cell 48 Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 2.78,
+            "warning": 3.1
+        }
+    }
+]

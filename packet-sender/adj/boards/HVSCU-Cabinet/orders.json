@@ -1,0 +1,78 @@
+[
+    {
+        "id": 1694,
+        "type": "order",
+        "name": "SDC Enable",
+        "variables": [
+            "sdc_enable"
+        ]
+    },
+    {
+        "id": 1695,
+        "type": "order",
+        "name": "IMD Bypass",
+        "variables": [
+            "imd_bypass"
+        ]
+    },
+    {
+        "id": 1696,
+        "type": "order",
+        "name": "Reset Supercaps",
+        "variables": []
+    },
+    {
+        "id": 1697,
+        "type": "order",
+        "name": "Charge Supercaps",
+        "variables": [
+            "target_charge_voltage"
+        ]
+    },
+    {
+        "id": 1698,
+        "type": "order",
+        "name": "Open Contactors",
+        "variables": []
+    },
+    {
+        "id": 1699,
+        "type": "order",
+        "name": "Close Contactors",
+        "variables": []
+    },
+    {
+        "id": 1799,
+        "type": "order",
+        "name": "BCU Test PWM",
+        "variables": [
+            "BCU_duty_cycle_u",
+            "BCU_duty_cycle_v",
+            "BCU_duty_cycle_w"
+        ]
+    },
+    {
+        "id": 1795,
+        "type": "order",
+        "name": "BCU Configure Commutation Parameters",
+        "variables": [
+            "BCU_commutation_frequency_hz",
+            "BCU_dead_time_ns"
+        ]
+    },
+    {
+        "id": 1794,
+        "type": "order",
+        "name": "BCU Stop",
+        "variables": []
+    },
+    {
+        "id": 1793,
+        "type": "order",
+        "name": "BCU Space Vector",
+        "variables": [
+            "BCU_space_vector_modulation_index",
+            "BCU_space_vector_modulation_frequency_hz"
+        ]
+    }
+]

@@ -1,0 +1,116 @@
+[
+    {
+        "id": "sdc_good",
+        "name": "SDC Good",
+        "type": "enum",
+        "podUnits": "",
+        "displayUnits": "",
+        "enumValues": [
+            "False",
+            "True"
+        ]
+    },
+    {
+        "id": "bus_voltage",
+        "name": "Bus Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "below": {
+            "safe": 400.0,
+            "warning": 450.0
+        }
+    },
+    {
+        "id": "contactors_state",
+        "name": "Contactors State",
+        "type": "enum",
+        "podUnits": "",
+        "displayUnits": "",
+        "enumValues": [
+            "Open",
+            "Charging",
+            "Charged",
+            "Precharge",
+            "Close"
+        ]
+    },
+    {
+        "id": "output_current",
+        "name": "Output Current",
+        "type": "float32",
+        "podUnits": "A",
+        "displayUnits": "A"
+    },
+    {
+        "id": "BCU_control_u_duty_cycle",
+        "name": "U Duty Cycle",
+        "type": "float32",
+        "podUnits": "%",
+        "displayUnits": "%"
+    },
+    {
+        "id": "BCU_control_v_duty_cycle",
+        "name": "V Duty Cycle",
+        "type": "float32",
+        "podUnits": "%",
+        "displayUnits": "%"
+    },
+    {
+        "id": "BCU_control_w_duty_cycle",
+        "name": "W Duty Cycle",
+        "type": "float32",
+        "podUnits": "%",
+        "displayUnits": "%"
+    },
+    {
+        "id": "BCU_state_master_general",
+        "name": "Master General State",
+        "type": "enum",
+        "podUnits": "",
+        "displayUnits": "",
+        "enumValues": [
+            "Connecting",
+            "Operational",
+            "Fault"
+        ]
+    },
+    {
+        "id": "BCU_state_master_nested",
+        "name": "Master Nested State",
+        "type": "enum",
+        "podUnits": "",
+        "displayUnits": "",
+        "enumValues": [
+            "Idle",
+            "Ready",
+            "Boosting",
+            "Testing"
+        ]
+    },
+    {
+        "id": "BCU_state_slave_general",
+        "name": "Slave General State",
+        "type": "enum",
+        "podUnits": "",
+        "displayUnits": "",
+        "enumValues": [
+            "Connecting",
+            "Operational",
+            "Fault"
+        ]
+    },
+    {
+        "id": "BCU_state_slave_nested",
+        "name": "Slave Nested State",
+        "type": "enum",
+        "podUnits": "",
+        "displayUnits": "",
+        "enumValues": [
+            "Idle",
+            "Ready",
+            "Boosting",
+            "Testing"
+        ]
+    }
+]

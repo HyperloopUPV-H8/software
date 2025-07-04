@@ -1,0 +1,64 @@
+[
+        {
+            "id": 0,
+            "name": "Fault",
+            "type": "data",
+            "variables": []
+        },  
+        {
+            "id": 921,
+            "name": "Total Voltage",
+            "type": "data",
+            "variables": [
+                 "total_voltage_high"
+            ]
+        },
+        {
+            "id": 922,
+            "name": "IMD",
+            "type": "data",
+            "variables": [
+                "imd_status",
+                "freq_imd",
+                "duty_imd" 
+            ]
+        },
+        {
+            "id": 924,
+            "name": "Measurements",
+            "type": "data",
+            "variables": [
+                "battery_current"
+            ]
+        },
+        {
+            "id": 925,
+            "name": "OBCPU Measurements",
+            "type": "data",
+            "variables": [
+                "obcpu_input_current",
+                "obcpu_input_voltage",
+                "obcpu_output_current",
+                "obcpu_output_voltage"
+            ]
+        },
+        {
+            "id": 926,
+            "name": "Contactors State",
+            "type": "data",
+            "variables": [
+                "contactors_state",
+                "plug_state",
+                "board_state"
+            ]
+        },
+        {
+            "id": 981,
+            "name": "Output Voltage",
+            "type": "data",
+            "variables": [
+                "output_voltage_lpus",
+                "driving_mosfets"
+            ]
+        }
+    ]

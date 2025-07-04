@@ -1,0 +1,113 @@
+[
+    {
+        "id": "target_charge_voltage",
+        "name": "Target Charge Voltage",
+        "type": "float32",
+        "podUnits": "V",
+        "displayUnits": "V",
+        "above": {
+            "warning": 100.0
+        }
+    },
+    {
+        "id": "imd_bypass",
+        "name": "Bypass IMD?",
+        "type": "enum",
+        "podUnits": "",
+        "displayUnits": "",
+        "enumValues": [
+            "Enable",
+            "Disable"
+        ]
+    },
+    {
+        "id": "sdc_enable",
+        "name": "Enable SDC?",
+        "type": "enum",
+        "podUnits": "",
+        "displayUnits": "",
+        "enumValues": [
+            "Enable",
+            "Disable"
+        ]
+    },
+    {
+        "id": "BCU_duty_cycle_u",
+        "name": "Duty Cycle U (%)",
+        "type": "float32",
+        "podUnits": "%",
+        "displayUnits": "%",
+        "out_of_range": {
+            "warning": [
+                0.0,
+                100.0
+            ]
+        }
+    },
+    {
+        "id": "BCU_duty_cycle_v",
+        "name": "Duty Cycle V (%)",
+        "type": "float32",
+        "podUnits": "%",
+        "displayUnits": "%",
+        "out_of_range": {
+            "warning": [
+                0.0,
+                100.0
+            ]
+        }
+    },
+    {
+        "id": "BCU_duty_cycle_w",
+        "name": "Duty Cycle W (%)",
+        "type": "float32",
+        "podUnits": "%",
+        "displayUnits": "%",
+        "out_of_range": {
+            "warning": [
+                0.0,
+                100.0
+            ]
+        }
+    },
+    {
+        "id": "BCU_commutation_frequency_hz",
+        "name": "Commutation Frequency (hz)",
+        "type": "uint32",
+        "podUnits": "Hz",
+        "displayUnits": "Hz",
+        "above": {
+            "warning": 50000.0
+        }
+    },
+    {
+        "id": "BCU_dead_time_ns",
+        "name": "Dead Time (ns)",
+        "type": "uint32",
+        "podUnits": "ns",
+        "displayUnits": "ns",
+        "below": {
+            "warning": 100.0
+        }
+    },
+    {
+        "id": "BCU_space_vector_modulation_index",
+        "name": "Modulation Index",
+        "type": "float32",
+        "podUnits": "",
+        "displayUnits": "",
+        "out_of_range": {
+            "warning": [
+                0.0,
+                1.1547
+            ]
+        }
+    },
+    {
+        "id": "BCU_space_vector_modulation_frequency_hz",
+        "name": "Modulation Frequency (hz)",
+        "type": "float32",
+        "podUnits": "Hz",
+        "displayUnits": "Hz"
+    }
+]

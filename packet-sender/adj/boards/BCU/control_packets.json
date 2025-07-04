@@ -1,0 +1,33 @@
+[
+    {
+        "id":900,
+        "type": "order",
+        "name":"Open Contactors",
+        "variables":[
+
+        ]
+    },
+    {
+        "id":901,
+        "type": "order",
+        "name":"Close Contactors",
+        "variables":[
+
+        ]
+    },
+    {
+        "id":2,
+        "type": "order",
+        "name":"Active Discharge",
+        "variables":[
+
+        ]
+    },{
+        "id": 24,
+        "type": "data",
+        "name": "placeholder",
+        "variables":[
+            "current_u_bpu_1_sector_1"
+        ]
+    }
+    ]

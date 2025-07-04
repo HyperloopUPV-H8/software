@@ -1,0 +1,90 @@
+ [
+        {
+            "id": "battery_current",
+            "name": "Battery Current",
+            "type": "float32",
+            "podUnits": "A",
+            "displayUnits": "A"
+        },
+        {
+            "id": "total_voltage_high",
+            "name": "Total Voltage",
+            "type": "float32",
+            "podUnits": "V",
+            "displayUnits": "V"
+        },
+        {
+            "id": "obcpu_input_current",
+            "name": "OBCPU Input Current",
+            "type": "float32",
+            "podUnits": "A",
+            "displayUnits": "A"
+        },
+        {
+            "id": "obcpu_input_voltage",
+            "name": "OBCPU Input Voltage",
+            "type": "float32",
+            "podUnits": "V",
+            "displayUnits": "V"
+        },
+        {
+            "id": "obcpu_output_current",
+            "name": "OBCPU Outpput Current",
+            "type": "float32",
+            "podUnits": "A",
+            "displayUnits": "A"
+        },
+        {
+            "id": "obcpu_output_voltage",
+            "name": "OBCPU Output Voltage",
+            "type": "float32",
+            "podUnits": "V",
+            "displayUnits": "V"
+        },
+        {
+            "id": "contactors_state",
+            "name": "Contactors State",
+            "type": "uint8"
+        },
+        {
+            "id": "plug_state",
+            "name": "Plug State",
+            "type": "uint8"
+        },
+        {
+            "id": "board_state",
+            "name": "OBCCU State",
+            "type": "uint8"
+        },
+        {
+            "id": "imd_status",
+            "name": "IMD Status",
+            "type": "uint8"
+        },
+        {
+            "id": "freq_imd",
+            "name": "IMD Frequency",
+            "type": "float32",
+            "podUnits": "Hz",
+            "displayUnits": "Hz"
+        },
+        {
+            "id": "duty_imd",
+            "name": "IMD Duty Cycle",
+            "type": "float32",
+            "podUnits": "%",
+            "displayUnits": "%"
+        },
+        {
+            "id": "output_voltage_lpus",
+            "name": "Bus Voltage",
+            "type": "float32",
+            "podUnits": "V",
+            "displayUnits": "V"
+        },
+        {
+            "id": "driving_mosfets",
+            "name": "Driving Mosfets",
+            "type": "bool"
+        }
+    ]

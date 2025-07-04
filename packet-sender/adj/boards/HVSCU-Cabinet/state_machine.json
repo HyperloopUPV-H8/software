@@ -1,0 +1,67 @@
+{
+    "states": [
+        "calibration",
+        "connecting",
+        {
+            "name": "operational",
+            "sub-states": [
+                "idle",
+                "precharge",
+                "charged",
+                "ready",
+                "boosting"
+            ]
+        },
+        "discharge",
+        "fault"
+    ],
+    "transitions": [
+        {
+            "from": "calibration",
+            "to": "connecting",
+            "description": "All sensors zeroing complete"
+        },
+        {
+            "from": "connecting",
+            "to": "operational",
+            "description": "Connection with the VCU/control station established"
+        },
+
+        {
+            "from": "operational.idle",
+            "to": "operational.precharge",
+            "description": "Start precharging the DC link"
+        },
+        {
+            "from": "operational.precharge",
+            "to": "operational.charged",
+            "description": "Precharge successfull"
+        },
+        {
+            "from": "operational.charged",
+            "to": "operational.ready",
+            "description": "Run confirmed and parameters set"
+        },
+        {
+            "from": "operational.ready",
+            "to": "operational.booster",
+            "description": "Vehicle passing through booster section"
+        },
+        {
+            "from": "operational.boosting",
+            "to": "operational.idle",
+            "description": "Vehicle exited booster section"
+        },
+
+        {
+            "from": "operational",
+            "to": "discharge",
+            "description": "Manual discharge"
+        },
+        {
+            "from": "discharge",
+            "to": "operational",
+            "description": "Manual discharge reset"
+        }
+    ]
+}
