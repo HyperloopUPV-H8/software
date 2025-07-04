@@ -31,7 +31,7 @@ export const Data1Page = () => {
 
                 <div className={styles.column_center}>
                     <div className={styles.break_state}>
-                    <h1>BREAK STATE</h1>
+                    <h1>BRAKE STATE</h1>
                 </div>
                 <div className={styles.pod}>
                     <h1>POD</h1>
