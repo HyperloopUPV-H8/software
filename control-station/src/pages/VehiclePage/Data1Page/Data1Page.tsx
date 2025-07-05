@@ -9,7 +9,8 @@ import FixedOrders, { emergencyStopOrders, getHardcodedOrders } from '../Data2Pa
 import { Gauge } from 'components/GaugeTag/Gauge/Gauge';
 import { BatteryIndicator } from 'components/BatteryIndicator/BatteryIndicator';
 import { BigOrderButton } from 'components/BigOrderButton';
-import { ChartDLIM, ChartLSM } from './Data1Charts/Data1Charts';
+import { ChartDLIM, ChartLSM } from './Data1Modules/Data1Charts';
+import { Batteries } from './Data1Modules/Data1Batteries';
 
 export const Data1Page = () => {
     const boardOrders = useOrders();
@@ -43,22 +44,7 @@ export const Data1Page = () => {
                         <LCU />
                     </div>
 
-                    <div className={styles.row}>
-                        <Window2 title="High Voltage" className={styles.voltage}>
-                            <Gauge id="hv" sweep={180} strokeWidth={15} percentage={75} className="" />
-                            <BatteryIndicator />
-                        </Window2>
-
-                        <Window2 title="Low Voltage" className={styles.voltage}>
-                            <Gauge id="lv" sweep={180} strokeWidth={15} percentage={45} className="" />
-                            <BatteryIndicator />
-                        </Window2>
-
-                        <Window2 title="BOOSTER" className={styles.voltage}>
-                            <Gauge id="boost" sweep={180} strokeWidth={15} percentage={55} className="" />
-                            <BatteryIndicator />
-                        </Window2>
-                    </div>
+                    <Batteries/>
 
                     <div className={styles.emergency_wrapper}>
                         <BigOrderButton
