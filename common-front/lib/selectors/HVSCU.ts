@@ -1,0 +1,5 @@
+export const HvscuMeasurements = {
+    CurrentReading: "HVSCU/current_reading",
+    BatteriesVoltage: "HVSCU/batteries_voltage_reading",
+    BatterySOC: "HVSCU/battery1SOC"
+};

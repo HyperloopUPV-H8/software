@@ -2,9 +2,8 @@
     width: 100%;
     display: flex;
     gap: 1rem;
-
     > * {
-        flex: 1;
+        flex: 1rem;
     }
 }
 
@@ -13,7 +12,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-
     > img {
         width: 60%;
     }

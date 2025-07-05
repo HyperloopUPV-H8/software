@@ -5,3 +5,5 @@ export * from './PCU';
 export * from './VCU';
 export * from './TCU';
 export * from './BCU';
+export * from './HVSCU';
+export * from './HVSCU-Cabinet'

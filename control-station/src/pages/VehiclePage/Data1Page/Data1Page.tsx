@@ -1,41 +1,69 @@
 import styles from './Data1Page.module.scss';
-import { OBCCUBatteries } from '../Boards/OBCCU/OBCCUBatteries';
-import { OBCCUGeneralInfo } from '../Boards/OBCCU/OBCCUGeneralInfo';
-import { VCUBrakesInfo } from '../Boards/VCU/VCUBrakesInfo';
-import { VCUPositionInfo } from '../Boards/VCU/VCUPositionInfo';
-import { BCU } from '../Boards/BCU/BCU';
-import { BMSL } from '../Boards/BMSL/BMSL';
-import { useEmergencyOrders } from 'hooks/useEmergencyOrders';
-import Connections from '../Windows/Connections';
-import { Connection, useConnections } from 'common';
-import { PCU } from '../Boards/PCU/PCU';
+import { LCU } from '../Boards/LCU/LCU';
+import { HVSCU } from '../Boards/HVSCU/HVSCU';
+import { BcuMeasurements, ColorfulChart, Orders, PcuMeasurements, useMeasurementsStore, useOrders } from 'common';
+import { MessagesContainer } from 'common';
+import { Window } from 'components/Window/Window';
+import { Window2 } from 'components/Window/Window2';
+import FixedOrders, { emergencyStopOrders, getHardcodedOrders } from '../Data2Page/FixedOrders';
+import { Gauge } from 'components/GaugeTag/Gauge/Gauge';
+import { BatteryIndicator } from 'components/BatteryIndicator/BatteryIndicator';
+import { BigOrderButton } from 'components/BigOrderButton';
+import { ChartDLIM, ChartLSM } from './Data1Modules/Data1Charts';
+import { Batteries } from './Data1Modules/Data1Batteries';
 
 export const Data1Page = () => {
-    useEmergencyOrders();
+    const boardOrders = useOrders();
 
     return (
         <div className={styles.data1_page}>
-            {/* <div className={styles.column}>
-                <OBCCUBatteries />
+            <div className={styles.leds}>
+                <h1>LEDS</h1>
             </div>
 
-            <div className={styles.column}>
-                <OBCCUGeneralInfo />
-                <BMSL />
-            </div>
+            <div className={styles.main}>
+                <div className={styles.column}>
+                    <ChartDLIM/>
+                    <Window title="Orders" className={styles.orders}>
+                        <div className={styles.order_column}>
+                            <Orders boards={getHardcodedOrders(boardOrders)} />
+                            <FixedOrders />
+                        </div>
+                    </Window>
+                </div>
 
-            <div className={styles.column}>
-                <VCUPositionInfo />
-            </div>
+                <div className={styles.column_center}>
+                    <div className={styles.break_state}>
+                    <h1>BRAKE STATE</h1>
+                </div>
+                <div className={styles.pod}>
+                    <h1>POD</h1>
+                </div>
+                    <div className={styles.row}>
+                        <HVSCU />
+                        <LCU />
+                    </div>
 
-            <div className={styles.column}>
-                <VCUBrakesInfo />
-            </div>
+                    <Batteries/>
 
-            <div className={styles.column}>
-                <PCU />
-                <Connections />
-            </div> */}
+                    <div className={styles.emergency_wrapper}>
+                        <BigOrderButton
+                            orders={emergencyStopOrders}
+                            label="Emergency Stop"
+                            shortcut=" "
+                            className={`${styles.emergency_button} ${styles.emergency_stop}`}
+                            brightness={3}
+                        />
+                    </div>
+                </div>
+
+                <div className={styles.column}>
+                    <ChartLSM/>
+                    <Window title="Messages" className={styles.messages}>
+                        <MessagesContainer />
+                    </Window>
+                </div>
+            </div>
         </div>
     );
 };

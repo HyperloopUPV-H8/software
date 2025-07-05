@@ -10,7 +10,7 @@ import EMSRepresentation from './EMSRepresentation/EMSRepresentation';
 import HEMSRepresentation from './HEMSRepresentation/HEMSRepresentation';
 export interface Props {
     unitIndex: number;
-    imageSide: 'left' | 'right';
+    imageSide: 'left' | 'right' | 'none';
     kind: 'ems' | 'hems';
 }
 
@@ -110,7 +110,7 @@ export const LevitationUnit = ({ unitIndex, kind, imageSide }: Props) => {
                     warningRangeMin={current.warningRange[0]!!}
                     warningRangeMax={current.warningRange[1]!!}
                 />
-                <BarIndicator
+                {/* <BarIndicator
                     icon={thermometerFilled}
                     name="Temperature"
                     getValue={temperature.getUpdate}
@@ -161,7 +161,7 @@ export const LevitationUnit = ({ unitIndex, kind, imageSide }: Props) => {
                             ? null!!
                             : airgap.warningRange[1]!!
                     }
-                />
+                /> */}
             </IndicatorStack>
             {imageSide === 'right' &&
                 (kind == 'ems' ? (

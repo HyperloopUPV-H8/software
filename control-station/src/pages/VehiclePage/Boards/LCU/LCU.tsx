@@ -22,66 +22,29 @@ export const LCU = () => {
     const positionZ = getNumericMeasurementInfo(LcuMeasurements.positionZ);
 
     return (
-        <Window title="LCU">
+        <Window title="LCU - Current">
             <div className={styles.LCUWrapper}>
                 <div className={styles.levitationUnitsWrapper}>
                     <div className={styles.levitationUnitsColumn}>
-                        <LevitationUnit
-                            unitIndex={1}
-                            kind="hems"
-                            imageSide="left"
-                        />
-                        <LevitationUnit
-                            unitIndex={5}
-                            kind="ems"
-                            imageSide="left"
-                        />
-                        <LevitationUnit
-                            unitIndex={7}
-                            kind="ems"
-                            imageSide="left"
-                        />
-                        <LevitationUnit
-                            unitIndex={9}
-                            kind="ems"
-                            imageSide="left"
-                        />
-                        <LevitationUnit
-                            unitIndex={3}
-                            kind="hems"
-                            imageSide="left"
-                        />
+                        <h5 className={styles.subtitle}>Left side</h5>
+                        <LevitationUnit unitIndex={1} kind="hems" imageSide={'none'} />
+                        <LevitationUnit unitIndex={5} kind="ems" imageSide={'none'} />
+                        <LevitationUnit unitIndex={7} kind="ems" imageSide={'none'} />
+                        <LevitationUnit unitIndex={9} kind="ems" imageSide={'none'} />
+                        <LevitationUnit unitIndex={3} kind="hems" imageSide={'none'} />
                     </div>
 
                     <div className={styles.levitationUnitsColumn}>
-                        <LevitationUnit
-                            unitIndex={0}
-                            kind="hems"
-                            imageSide="right"
-                        />
-                        <LevitationUnit
-                            unitIndex={4}
-                            kind="ems"
-                            imageSide="right"
-                        />
-                        <LevitationUnit
-                            unitIndex={6}
-                            kind="ems"
-                            imageSide="right"
-                        />
-                        <LevitationUnit
-                            unitIndex={8}
-                            kind="ems"
-                            imageSide="right"
-                        />
-                        <LevitationUnit
-                            unitIndex={2}
-                            kind="hems"
-                            imageSide="right"
-                        />
+                        <h5 className={styles.subtitle}>Right side</h5>
+                        <LevitationUnit unitIndex={0} kind="hems" imageSide={'none'}  />
+                        <LevitationUnit unitIndex={4} kind="ems" imageSide={'none'}  />
+                        <LevitationUnit unitIndex={6} kind="ems" imageSide={'none'} />
+                        <LevitationUnit unitIndex={8} kind="ems" imageSide={'none'} />
+                        <LevitationUnit unitIndex={2} kind="hems" imageSide={'none'} />
                     </div>
                 </div>
 
+                <h5 className={styles.subtitle}>Orientation</h5>
                 <div className={styles.rotationIndicatorsWrapper}>
                     <IndicatorStack>
                         <BarIndicator
@@ -92,7 +55,7 @@ export const LCU = () => {
                             safeRangeMax={pitch.range[1] ?? 0.05}
                             warningRangeMin={pitch.warningRange[0] ?? -0.1}
                             warningRangeMax={pitch.warningRange[1] ?? 0.1}
-                            units={roll.units}
+                            units={pitch.units}
                         />
                     </IndicatorStack>
                     <IndicatorStack>
@@ -108,16 +71,18 @@ export const LCU = () => {
                         />
                     </IndicatorStack>
                     <IndicatorStack>
-                        <BarIndicator
-                            icon={yawRotation}
-                            name="Yaw"
-                            getValue={yaw.getUpdate}
-                            safeRangeMin={yaw.range[0] ?? -0.005}
-                            safeRangeMax={yaw.range[1] ?? 0.005}
-                            warningRangeMin={yaw.warningRange[0] ?? -0.01}
-                            warningRangeMax={yaw.warningRange[1] ?? 0.01}
-                            units={yaw.units}
-                        />
+                        <div className={styles.rotationIndicator}>
+                            <BarIndicator
+                                icon={yawRotation}
+                                name="Yaw"
+                                getValue={yaw.getUpdate}
+                                safeRangeMin={yaw.range[0] ?? -0.005}
+                                safeRangeMax={yaw.range[1] ?? 0.005}
+                                warningRangeMin={yaw.warningRange[0] ?? -0.01}
+                                warningRangeMax={yaw.warningRange[1] ?? 0.01}
+                                units={yaw.units}
+                            />
+                        </div>
                     </IndicatorStack>
                     <IndicatorStack>
                         <BarIndicator
@@ -148,3 +113,4 @@ export const LCU = () => {
         </Window>
     );
 };
+
