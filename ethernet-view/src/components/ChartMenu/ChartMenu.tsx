@@ -1,5 +1,5 @@
 import styles from "components/ChartMenu/ChartMenu.module.scss";
-import { DragEvent, memo, useCallback, useState } from "react";
+import { DragEvent, memo, useCallback } from "react";
 import Sidebar from "components/ChartMenu/Sidebar/Sidebar";
 import { Section } from "./Sidebar/Section/Section";
 import { MeasurementId, useMeasurementsStore } from "common";
@@ -13,23 +13,30 @@ export type ChartInfo = {
     initialMeasurementId: MeasurementId;
 };
 
-type Props = {
+interface Props {
     sidebarSections: Section[];
-};
+    charts: ChartInfo[];
+    setCharts: React.Dispatch<React.SetStateAction<ChartInfo[]>>;
+    measurementsByChart: Record<ChartId, MeasurementId[]>;
+    setMeasurementsByChart: React.Dispatch<React.SetStateAction<Record<ChartId, MeasurementId[]>>>;
+}
 
-export const ChartMenu = memo(({ sidebarSections }: Props) => {
-
+export const ChartMenu = memo(({ sidebarSections, charts, setCharts, measurementsByChart, setMeasurementsByChart }: Props) => {
     const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
 
-    const [charts, setCharts] = useState<ChartInfo[]>([]);
-
-    const addChart = ((chartId: ChartId, initialMeasurementId: MeasurementId) => {
-        setCharts([...charts, { chartId, initialMeasurementId }]);
-    });
+    const addChart = (chartId: ChartId, initialMeasurementId: MeasurementId) => {
+        setCharts(prev => [...prev, { chartId, initialMeasurementId }]);
+        setMeasurementsByChart(prev => ({ ...prev, [chartId]: [initialMeasurementId] }));
+    };
 
     const removeChart = useCallback((chartId: ChartId) => {
         setCharts(prevCharts => prevCharts.filter(chart => chart.chartId !== chartId));
-    }, []);
+        setMeasurementsByChart(prev => {
+            const copy = { ...prev };
+            delete copy[chartId];
+            return copy;
+        });
+    }, [setCharts, setMeasurementsByChart]);
     
     const handleDrop = (ev: DragEvent<HTMLDivElement>) => {
         ev.preventDefault();
@@ -62,6 +69,8 @@ export const ChartMenu = memo(({ sidebarSections }: Props) => {
                             chartId={chart.chartId}
                             initialMeasurementId={chart.initialMeasurementId}
                             removeChart={removeChart}
+                            measurementsInChart={measurementsByChart[chart.chartId] || []}
+                            setMeasurementsInChart={(measurementIds) => setMeasurementsByChart(prev => ({ ...prev, [chart.chartId]: measurementIds }))}
                         />
                     ))}
                 </div>
@@ -69,3 +78,4 @@ export const ChartMenu = memo(({ sidebarSections }: Props) => {
         );
     }
 });
+

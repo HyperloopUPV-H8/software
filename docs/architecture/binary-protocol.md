@@ -1,383 +1,276 @@
 # Binary Protocol Specification
 
-This document defines the binary wire protocol used for communication between the vehicle and backend over TCP/UDP networks.
+This document defines the binary wire protocol used for communication between vehicle boards and the backend.
 
 ## Protocol Overview
 
-**Transport Protocols**: TCP (reliable) and UDP (fast)  
-**Byte Order**: Little-endian for all multi-byte fields  
-**Character Encoding**: ASCII for string fields  
-**Packet Format**: Fixed header + variable payload
+All communication uses a simple, efficient binary protocol with fixed headers and variable-length payloads.
 
-## Network Configuration
+### Endianness
+**All multi-byte values use little-endian byte order.**
 
-### Port Assignments
-From `adj/general_info.json`:
-- **TCP_CLIENT**: 50401 (backend connects to vehicle)
-- **TCP_SERVER**: 50500 (vehicle connects to backend)
-- **UDP**: 8000 (bidirectional communication)
-- **TFTP**: 69 (file transfers)
-- **SNTP**: 123 (time synchronization)
-
-### IP Addressing
-- **Backend**: Configurable (default: 127.0.0.9)
-- **Vehicle Boards**: Per-board IP addresses in ADJ configuration
-
-## Base Packet Structure
-
-All packets follow this structure:
-
+### Packet Structure
 ```
-Byte Offset:  0        2        4+
-             |========|========|========|
-             |   Packet ID     | Payload |
-             |   (uint16_le)   |   ...   |
-             |========|========|========|
+┌─────────────┬─────────────────────────┐
+│ Header (2B) │ Payload (variable)      │
+├─────────────┼─────────────────────────┤
+│ Packet ID   │ Data fields per ADJ     │
+│ (uint16)    │ specification           │
+└─────────────┴─────────────────────────┘
 ```
 
-**Field Descriptions**:
-- `Packet ID` (2 bytes): Little-endian uint16 identifying packet type
-- `Payload` (variable): Packet-specific binary data
+## Data Type Encoding
 
-## Data Packet Format
+### Numeric Types
+| Type | Size | Range | Encoding |
+|------|------|-------|----------|
+| uint8 | 1 byte | 0 to 255 | Raw byte |
+| uint16 | 2 bytes | 0 to 65,535 | Little-endian |
+| uint32 | 4 bytes | 0 to 4,294,967,295 | Little-endian |
+| uint64 | 8 bytes | 0 to 18,446,744,073,709,551,615 | Little-endian |
+| int8 | 1 byte | -128 to 127 | Two's complement |
+| int16 | 2 bytes | -32,768 to 32,767 | Two's complement, little-endian |
+| int32 | 4 bytes | -2,147,483,648 to 2,147,483,647 | Two's complement, little-endian |
+| int64 | 8 bytes | -9,223,372,036,854,775,808 to 9,223,372,036,854,775,807 | Two's complement, little-endian |
+| float32 | 4 bytes | IEEE 754 single precision | Little-endian |
+| float64 | 8 bytes | IEEE 754 double precision | Little-endian |
 
-### Structure
+### Boolean Type
+- Encoded as uint8: 0 = false, non-zero = true
 
-Data packets contain measurement values as defined in ADJ specifications.
+### Enum Type
+- Encoded as uint8 representing the index in the enum definition
 
+## Packet Categories
+
+### 1. Data Packets (Board → Backend)
+Used for sensor measurements and telemetry.
+
+#### Example: Temperature Sensor
 ```
-Byte Offset:  0        2        4        6        8+
-             |========|========|========|========|========|
-             |   Packet ID     |    Measurement Values     |
-             |   (uint16_le)   |     (per ADJ spec)        |
-             |========|========|========|========|========|
-```
-
-### Value Encoding
-
-Values are encoded based on their ADJ-defined data types:
-
-#### Numeric Types
-- `uint8`: 1 byte unsigned integer
-- `uint16`: 2 bytes unsigned integer (little-endian)  
-- `uint32`: 4 bytes unsigned integer (little-endian)
-- `uint64`: 8 bytes unsigned integer (little-endian)
-- `int8`: 1 byte signed integer (two's complement)
-- `int16`: 2 bytes signed integer (little-endian, two's complement)
-- `int32`: 4 bytes signed integer (little-endian, two's complement)  
-- `int64`: 8 bytes signed integer (little-endian, two's complement)
-- `float32`: 4 bytes IEEE 754 single-precision (little-endian)
-- `float64`: 8 bytes IEEE 754 double-precision (little-endian)
-
-#### Boolean Type
-- `bool`: 1 byte (0x00 = false, 0x01 = true, other values undefined)
-
-#### Enum Type
-- Encoded as underlying integer type (typically uint8)
-- Values mapped to enum variants per ADJ measurement definition
-
-### Example Data Packet
-
-**ADJ Packet Definition**:
-```json
+ADJ Definition:
 {
-    "id": 211,
-    "name": "vcu_regulator_packet",
-    "type": "data",
-    "variables": ["valve_state", "reference_pressure", "actual_pressure"]
+    "id": 100,
+    "variables": ["sensor_id", "temperature", "timestamp"]
 }
+
+Measurements:
+- sensor_id: uint8
+- temperature: float32 (°C)
+- timestamp: uint32 (milliseconds)
+
+Binary encoding:
+64 00        // Packet ID: 100
+01           // sensor_id: 1
+CD CC 8C 41  // temperature: 17.6°C (float32)
+10 27 00 00  // timestamp: 10000ms
 ```
 
-**ADJ Measurements**:
-```json
-[
-    {
-        "id": "valve_state",
-        "type": "uint8",
-        "enumValues": ["closed", "open", "error"]
-    },
-    {
-        "id": "reference_pressure", 
-        "type": "float32"
-    },
-    {
-        "id": "actual_pressure",
-        "type": "float32"  
-    }
-]
+### 2. Protection Packets (Board → Backend)
+Safety-critical notifications with severity levels.
+
+#### Packet ID Ranges
+- 1000-1999: Fault (critical failures)
+- 2000-2999: Warning (non-critical issues)
+- 3000-3999: OK (cleared conditions)
+
+#### Structure
+```
+┌──────────────┬──────────────┬──────────────┐
+│ Packet ID    │ Board ID     │ Error Code   │
+│ (uint16)     │ (uint16)     │ (uint8)      │
+└──────────────┴──────────────┴──────────────┘
 ```
 
-**Binary Representation**:
+#### Example: Overheat Fault
 ```
-Byte:     0    1    2    3    4    5    6    7    8    9   10   11
-Data:   0xD3 0x00 0x01 0x42 0x08 0x00 0x00 0x42 0x04 0x66 0x66
-Field:  [Packet ID] [valve] [  reference_pressure  ] [ actual_pressure ]
-Value:     211      1        8.5                        8.1
-```
-
-**Breakdown**:
-- Bytes 0-1: Packet ID 211 (0x00D3 little-endian)
-- Byte 2: valve_state = 1 ("open")
-- Bytes 3-6: reference_pressure = 8.5 (IEEE 754 float32)
-- Bytes 7-10: actual_pressure = 8.1 (IEEE 754 float32)
-
-## Protection Packet Format
-
-Protection packets notify of safety conditions and faults.
-
-### Complete Structure
-
-```
-Byte Offset:  0        2        4        5        6        7+
-             |========|========|========|========|========|========|
-             |   Packet ID     |  type  |  kind  |  Name String    |
-             |   (uint16_le)   |(uint8) |(uint8) |  (null-term)    |
-             |========|========|========|========|========|========|
-             |           Protection Data (variable)                 |
-             |========|========|========|========|========|========|
-             |counter |counter | second | minute | hour   | day    |
-             |(uint16)|(uint16)|(uint8) |(uint8) |(uint8) |(uint8) |
-             |========|========|========|========|========|========|
-             | month  |       year      |
-             |(uint8) |   (uint16_le)   |
-             |========|========|========|
+E8 03  // ID: 1000 (fault)
+04 00  // Board ID: 4 (LCU)
+15     // Error code: 21 (overheat)
 ```
 
-### Field Definitions
+### 3. Order Packets (Backend → Board)
+Commands sent from backend to boards.
 
-**Header Fields**:
-- `Packet ID` (2 bytes): Protection packet identifier
-- `type` (1 byte): Data type being monitored (see Protection Types)
-- `kind` (1 byte): Protection condition type (see Protection Kinds)
-- `Name` (variable): Null-terminated ASCII string identifying the protection
+#### Example: Set Current
+```
+ADJ Definition:
+{
+    "id": 9995,
+    "variables": ["ldu_id", "lcu_desired_current"]
+}
 
-**Protection Types** (`type` field):
-```
-0x00: IntType (int32)      0x06: LongType (int64)
-0x01: FloatType (float32)  0x07: Uint8Type (uint8)
-0x02: DoubleType (float64) 0x08: Uint16Type (uint16)  
-0x03: CharType (uint8)     0x09: Uint32Type (uint32)
-0x04: BoolType (bool)      0x0A: Uint64Type (uint64)
-0x05: ShortType (int16)    0x0B: Int8Type (int8)
-```
-
-**Protection Kinds** (`kind` field):
-```
-0x00: Below              - Value below threshold
-0x01: Above              - Value above threshold  
-0x02: OutOfBounds        - Value outside range
-0x03: Equals             - Value equals condition
-0x04: NotEquals          - Value not equals condition
-0x05: ErrorHandler       - System error condition
-0x06: TimeAccumulation   - Time-based fault
-0x07: Warning            - General warning
+Binary encoding:
+0B 27        // ID: 9995
+02           // ldu_id: 2
+00 00 20 40  // desired_current: 2.5A (float32)
 ```
 
-**Protection Data**: Variable-length data specific to protection kind
-**Timestamp**: RTC timestamp from vehicle (9 bytes total)
+### 4. State Order Packets
+Special packets for managing periodic order execution.
 
-### Protection Data Formats
+#### Add State Order (Enable periodic execution)
+```
+Structure:
+┌──────────────┬──────────────┬──────────────┐
+│ Packet ID    │ Board Name   │ Order IDs    │
+│ (uint16)     │ Length + Str │ Count + List │
+└──────────────┴──────────────┴──────────────┘
 
-#### Below/Above Protection
-```
-Byte Offset:  0        4        8+
-             |========|========|========|
-             |  Current Value  | Threshold |
-             |   (per type)    |(per type) |
-             |========|========|========|
-```
-
-#### OutOfBounds Protection  
-```
-Byte Offset:  0        4        8        12+
-             |========|========|========|========|
-             |  Current Value  | Min Bound | Max Bound |
-             |   (per type)    |(per type) |(per type) |
-             |========|========|========|========|
+Example:
+05 00        // ID: 5 (add_state_order)
+03           // String length: 3
+4C 43 55     // "LCU"
+02 00        // Order count: 2
+0B 27        // Order ID: 9995
+0C 27        // Order ID: 9996
 ```
 
-#### Equals/NotEquals Protection
-```
-Byte Offset:  0        4+
-             |========|========|
-             |  Current Value  |
-             |   (per type)    |
-             |========|========|
-```
+#### Remove State Order (Disable periodic execution)
+Same structure as Add State Order but with ID 6.
 
-### Example Protection Packet
+### 5. BLCU Packets
+Special packets for bootloader operations.
 
-**Scenario**: Brake pressure above safe limit
-
-**Binary Representation**:
+#### Download Order (ID: 50)
 ```
-Byte:     0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23   24
-Data:   0x02 0x00 0x01 0x01 0x62 0x72 0x61 0x6B 0x65 0x5F 0x70 0x72 0x65 0x73 0x73 0x75 0x72 0x65 0x00 0x42 0xD2 0x00 0x00 0x42
-Field:  [PktID] [typ][knd] [            "brake_pressure"             ] [  current  ] [threshold]
-Value:     2     1    1                 "brake_pressure\0"                 105.0        100.0
+32 00        // ID: 50
+[filename]   // Null-terminated string
+[file_size]  // uint32
+[checksum]   // uint32
 ```
 
-**Breakdown**:
-- Bytes 0-1: Packet ID 2 (protection packet)
-- Byte 2: type = 1 (FloatType)  
-- Byte 3: kind = 1 (Above)
-- Bytes 4-18: "brake_pressure\0" (null-terminated)
-- Bytes 19-22: Current value = 105.0 (float32)
-- Bytes 23-26: Threshold = 100.0 (float32)
-- (Timestamp bytes follow...)
-
-## Order Packet Format
-
-Order packets send commands from backend to vehicle.
-
-### Add Order Structure
+#### Upload Order (ID: 51)
 ```
-Byte Offset:  0        2        4        6+
-             |========|========|========|========|
-             |   Packet ID     | Count  | Order IDs... |
-             |   (uint16_le)   |(uint16)|  (uint16s)   |
-             |========|========|========|========|
+33 00        // ID: 51
+[filename]   // Null-terminated string
 ```
 
-### Remove Order Structure  
-```
-Byte Offset:  0        2        4        6+
-             |========|========|========|========|
-             |   Packet ID     | Count  | Order IDs... |
-             |   (uint16_le)   |(uint16)|  (uint16s)   |
-             |========|========|========|========|
-```
+## Special Packet IDs
 
-**Field Descriptions**:
-- `Packet ID`: Order packet identifier (from message_ids in general_info.json)
-- `Count`: Number of order IDs following (little-endian uint16)
-- `Order IDs`: Array of order packet IDs to add/remove (little-endian uint16s)
+### ID 0: Fault Propagation
+When any board sends a packet with ID 0, the backend immediately replicates it to all connected boards. This enables system-wide emergency stop.
 
-### Example Order Packet
-
-**Add State Order** (message_id: 5):
 ```
-Byte:     0    1    2    3    4    5    6    7
-Data:   0x05 0x00 0x02 0x00 0x10 0x00 0x11 0x00  
-Field:  [PktID] [Count] [Order1] [Order2]
-Value:     5      2       16       17
+00 00        // ID: 0 (emergency stop)
+[payload]    // Board-specific fault data
 ```
 
-Adds orders with IDs 16 and 17 to the enabled state orders list.
+## Unit Conversions
 
-## State Space Packet Format
+The protocol supports automatic unit conversions between pod units and display units.
 
-State space packets contain control system matrices.
+### Conversion Operations
+- `*X`: Multiply by X
+- `/X`: Divide by X
+- `+X`: Add X
+- `-X`: Subtract X
 
-### Structure
+### Example: Temperature Conversion
 ```
-Byte Offset:  0        2        4        8+
-             |========|========|========|========|
-             |   Packet ID     |   State Matrix   |
-             |   (uint16_le)   |   (8x15 floats)  |
-             |========|========|========|========|
-```
+Pod units: Celsius
+Display units: Kelvin
+Conversion: "+273.15"
 
-**Field Descriptions**:
-- `Packet ID`: State space packet identifier (message_id: 7)
-- `State Matrix`: 8x15 matrix of float32 values (480 bytes total)
-  - Row-major order encoding
-  - Each float32 is 4 bytes little-endian IEEE 754
-
-### Matrix Encoding
-```
-Matrix[0][0]  Matrix[0][1]  ... Matrix[0][14]   (60 bytes)
-Matrix[1][0]  Matrix[1][1]  ... Matrix[1][14]   (60 bytes)
-...
-Matrix[7][0]  Matrix[7][1]  ... Matrix[7][14]   (60 bytes)
+Wire value: 25.0°C (float32: 0x41C80000)
+Display value: 298.15K
 ```
 
-Total payload size: 480 bytes + 2 bytes packet ID = 482 bytes
+## Transport Protocols
 
-## TFTP File Transfer Protocol
+### TCP (Reliable Commands)
+- Used for: Orders, critical data, connection management
+- Port: 50500 (board → backend), 50401 (backend → board)
+- Features: Guaranteed delivery, order preservation
 
-### Protocol
-Standard TFTP (RFC 1350) over UDP port 69
-
-### Request Formats
-
-**Read Request (RRQ)**:
-```
-Opcode | Filename | 0 | Mode | 0
-   2   | string   |   | "octet" |
-```
-
-**Write Request (WRQ)**:
-```  
-Opcode | Filename | 0 | Mode | 0
-   2   | string   |   | "octet" |
-```
-
-**Data Block**:
-```
-Opcode | Block# | Data
-   3   |   2    | 0-512 bytes
-```
-
-**Acknowledgment**:
-```
-Opcode | Block#
-   4   |   2
-```
-
-**Error**:
-```
-Opcode | ErrorCode | ErrMsg | 0
-   5   |     2     | string |
-```
-
-### BLCU File Operations
-
-**Firmware Upload**: Backend writes firmware file to vehicle
-**Configuration Download**: Backend reads configuration from vehicle  
-**Log File Download**: Backend retrieves log files from vehicle
+### UDP (High-Speed Data)
+- Used for: Sensor data, non-critical telemetry
+- Port: 50400
+- Features: Low latency, no retransmission
 
 ## Error Handling
 
-### Transport Layer Errors
-- **TCP Connection Lost**: Automatic reconnection with exponential backoff
-- **UDP Packet Loss**: Statistics tracking, no retransmission
-- **Malformed Packets**: Packet discarded, connection maintained
+### Malformed Packets
+- Invalid packet ID: Log and drop
+- Incorrect length: Close connection
+- Decode failure: Send protection fault
 
-### Protocol Errors
-- **Invalid Packet ID**: Warning logged, packet skipped
-- **Payload Size Mismatch**: Packet discarded, sync recovery attempted
-- **Checksum Failure**: (Future enhancement) Packet retransmission requested
+### Connection Errors
+- TCP disconnect: Automatic reconnection
+- UDP packet loss: Update statistics
+- Timeout: Configurable retry logic
 
-### TFTP Errors
-- **File Not Found** (Error Code 1): Requested file doesn't exist
-- **Access Violation** (Error Code 2): Permission denied
-- **Disk Full** (Error Code 3): Storage space exhausted
-- **Illegal Operation** (Error Code 4): Invalid TFTP operation
+## Performance Considerations
+
+### Packet Size Limits
+- TCP: No inherent limit (fragmented as needed)
+- UDP: 1500 bytes (Ethernet MTU)
+- Recommended: Keep packets under 1000 bytes
+
+### Throughput
+- Design target: 1000+ packets/second per board
+- Actual limit: Network and processing dependent
+
+### Latency
+- TCP: ~1-5ms typical
+- UDP: <1ms typical
+- Critical path (protection): <5ms requirement
+
+## Security Notes
+
+### Current Implementation
+- No encryption (trusted network assumed)
+- No authentication
+- Basic validation only
+
+### Recommendations
+- Add packet signing for critical commands
+- Implement sequence numbers
+- Consider TLS for external connections
+
+## Debugging
+
+### Packet Capture
+Use Wireshark with these filters:
+```
+# All pod traffic
+ip.addr == 192.168.1.0/24
+
+# Specific board
+ip.addr == 192.168.1.4
+
+# UDP sensor data only
+udp.port == 50400
+```
+
+### Common Issues
+1. **Byte order mismatch**: Check endianness
+2. **Packet truncation**: Verify buffer sizes
+3. **ID not recognized**: Check ADJ configuration
+4. **Float precision**: Use float32 unless needed
 
 ## Implementation Notes
 
-### Endianness Handling
-All multi-byte integers use little-endian byte order:
-```go
-binary.LittleEndian.Uint16(data)  // Read 16-bit value
-binary.LittleEndian.Uint32(data)  // Read 32-bit value
+### C/C++ (Firmware)
+```c
+// Pack structure (GCC)
+struct __attribute__((packed)) DataPacket {
+    uint16_t id;
+    uint8_t sensor_id;
+    float temperature;
+    uint32_t timestamp;
+};
 ```
 
-### String Encoding
-- ASCII encoding for all text fields
-- Null-terminated strings where specified
-- No multi-byte character support
+### Go (Backend)
+```go
+// Use encoding/binary
+binary.Write(buffer, binary.LittleEndian, packet)
+```
 
-### Packet Validation
-- Minimum packet size: 2 bytes (packet ID only)
-- Maximum packet size: 1500 bytes (Ethernet MTU limit)
-- Payload length validation against ADJ specifications
-
-### Performance Considerations
-- **UDP Preferred**: For high-frequency data packets (>10 Hz)
-- **TCP Required**: For order packets and file transfers
-- **Buffer Sizes**: 64KB receive buffers recommended
-- **Concurrent Connections**: Support for multiple vehicle boards
-
-This binary protocol specification enables efficient, real-time communication between the vehicle systems and the backend control station.
+### Python (Testing)
+```python
+# Use struct module
+import struct
+data = struct.pack('<HBfI', id, sensor_id, temp, timestamp)
+```
