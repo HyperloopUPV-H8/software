@@ -1,6 +1,7 @@
 import { Window } from 'components/Window/Window';
 import styles from './HVSCU.module.scss';
 import { useMeasurementsStore } from 'common';
+import thunderIcon from 'assets/svg/thunder-filled.svg'
 import { StateIndicator } from 'components/StateIndicator/StateIndicator';
 
 export const HVSCU = () => {
@@ -13,7 +14,7 @@ export const HVSCU = () => {
             <div className={styles.HVSCU}>
                 <div className={styles.levitationUnitsWrapper}>
                     <div className={styles.levitationUnitsColumn}>  
-                        <div className={styles.text}><h5 className={styles.subtitle}>IMD  status</h5><StateIndicator measurementId={'HVSCU-Cabinet/imd_status'} icon={'thunder-filled.svg'} /></div>
+                        <div className={styles.text}><h5 className={styles.subtitle}>IMD  status</h5><StateIndicator measurementId={'HVSCU-Cabinet/imd_status'} icon={thunderIcon} /></div>
                         <div className={styles.text}><h5 className={styles.subtitle}>HV CHARGER status</h5><StateIndicator measurementId={'HVSCU-Cabinet/operational_state_machine_status'} icon={'battery-filled.svg'} /></div>
                         <div className={styles.text}><h5 className={styles.subtitle}>CONTACTORS  status</h5><StateIndicator measurementId={'HVSCU-Cabinet/contactors_status'} icon={'battery-filled.svg'} /></div>
                         <div className={styles.text}><h5 className={styles.subtitle}>LV  status</h5><StateIndicator measurementId={'HVSCU-Cabinet/lv_status'} icon={'battery-filled.svg'} /></div>

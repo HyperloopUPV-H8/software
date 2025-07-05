@@ -1,7 +1,7 @@
 import styles from './Data1Page.module.scss';
 import { LCU } from '../Boards/LCU/LCU';
 import { HVSCU } from '../Boards/HVSCU/HVSCU';
-import { Orders, useOrders } from 'common';
+import { BcuMeasurements, ColorfulChart, Orders, PcuMeasurements, useMeasurementsStore, useOrders } from 'common';
 import { MessagesContainer } from 'common';
 import { Window } from 'components/Window/Window';
 import { Window2 } from 'components/Window/Window2';
@@ -9,8 +9,30 @@ import FixedOrders, { emergencyStopOrders, getHardcodedOrders } from '../Data2Pa
 import { Gauge } from 'components/GaugeTag/Gauge/Gauge';
 import { BatteryIndicator } from 'components/BatteryIndicator/BatteryIndicator';
 import { BigOrderButton } from 'components/BigOrderButton';
+import { useContext } from 'react';
+import { LostConnectionContext } from 'services/connections';
 
 export const Data1Page = () => {
+    const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
+    const lostConnection = useContext(LostConnectionContext);
+    const motorACurrentU = getNumericMeasurementInfo(
+        PcuMeasurements.motorACurrentU
+    );
+    const motorACurrentV = getNumericMeasurementInfo(
+        PcuMeasurements.motorACurrentV
+    );
+    const motorACurrentW = getNumericMeasurementInfo(
+        PcuMeasurements.motorACurrentW
+    );
+    const averageCurrentU = getNumericMeasurementInfo(
+        BcuMeasurements.averageCurrentU
+    );
+    const averageCurrentV = getNumericMeasurementInfo(
+        BcuMeasurements.averageCurrentV
+    );
+    const averageCurrentW = getNumericMeasurementInfo(
+        BcuMeasurements.averageCurrentW
+    );
     const boardOrders = useOrders();
 
     return (
@@ -21,6 +43,37 @@ export const Data1Page = () => {
 
             <div className={styles.main}>
                 <div className={styles.column}>
+                    <Window title='DLIM'>
+                        <div className={styles.current_chart}>
+                            <p className={styles.chart_title}>
+                            <ColorfulChart
+                                className={styles.chart}
+                                length={35}
+                                items={[
+                                    lostConnection
+                                        ? {
+                                              ...motorACurrentU,
+                                              getUpdate: () => 0,
+                                          }
+                                        : motorACurrentU,
+                                    lostConnection
+                                        ? {
+                                              ...motorACurrentV,
+                                              getUpdate: () => 0,
+                                          }
+                                        : motorACurrentV,
+                                    lostConnection
+                                        ? {
+                                              ...motorACurrentW,
+                                              getUpdate: () => 0,
+                                          }
+                                        : motorACurrentW,
+                                ]}
+                            />
+                            </p>
+                        </div>
+
+                    </Window>
                     <Window title="Orders" className={styles.orders}>
                         <div className={styles.order_column}>
                             <Orders boards={getHardcodedOrders(boardOrders)} />
@@ -70,6 +123,37 @@ export const Data1Page = () => {
                 </div>
 
                 <div className={styles.column}>
+                    <Window title='LSM'>
+                        <div className={styles.current_chart}>
+                            <p className={styles.chart_title}>
+                            <ColorfulChart
+                                className={styles.chart}
+                                length={35}
+                                items={[
+                                    lostConnection
+                                        ? {
+                                              ...averageCurrentU,
+                                              getUpdate: () => 0,
+                                          }
+                                        : averageCurrentU,
+                                    lostConnection
+                                        ? {
+                                              ...averageCurrentV,
+                                              getUpdate: () => 0,
+                                          }
+                                        : averageCurrentV,
+                                    lostConnection
+                                        ? {
+                                              ...averageCurrentW,
+                                              getUpdate: () => 0,
+                                          }
+                                        : averageCurrentW,
+                                ]}  
+                            />
+                            </p>
+                        </div>
+
+                    </Window>
                     <Window title="Messages" className={styles.messages}>
                         <MessagesContainer />
                     </Window>
