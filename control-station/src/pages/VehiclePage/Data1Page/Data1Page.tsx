@@ -9,30 +9,9 @@ import FixedOrders, { emergencyStopOrders, getHardcodedOrders } from '../Data2Pa
 import { Gauge } from 'components/GaugeTag/Gauge/Gauge';
 import { BatteryIndicator } from 'components/BatteryIndicator/BatteryIndicator';
 import { BigOrderButton } from 'components/BigOrderButton';
-import { useContext } from 'react';
-import { LostConnectionContext } from 'services/connections';
+import { ChartDLIM, ChartLSM } from './Data1Charts/Data1Charts';
 
 export const Data1Page = () => {
-    const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
-    const lostConnection = useContext(LostConnectionContext);
-    const DLIMcurrentU = getNumericMeasurementInfo(
-        PcuMeasurements.motorACurrentU
-    );
-    const DLIMcurrentV = getNumericMeasurementInfo(
-        PcuMeasurements.motorACurrentV
-    );
-    const DLIMcurrentW = getNumericMeasurementInfo(
-        PcuMeasurements.motorACurrentW
-    );
-    const LSMaverageCurrentU = getNumericMeasurementInfo(
-        BcuMeasurements.averageCurrentU
-    );
-    const LSMaverageCurrentV = getNumericMeasurementInfo(
-        BcuMeasurements.averageCurrentV
-    );
-    const LSMaverageCurrentW = getNumericMeasurementInfo(
-        BcuMeasurements.averageCurrentW
-    );
     const boardOrders = useOrders();
 
     return (
@@ -43,37 +22,7 @@ export const Data1Page = () => {
 
             <div className={styles.main}>
                 <div className={styles.column}>
-                    <Window title='DLIM'>
-                        <div className={styles.current_chart}>
-                            <p className={styles.chart_title}>
-                            <ColorfulChart
-                                className={styles.chart}
-                                length={35}
-                                items={[
-                                    lostConnection
-                                        ? {
-                                              ...DLIMcurrentU,
-                                              getUpdate: () => 0,
-                                          }
-                                        : DLIMcurrentU,
-                                    lostConnection
-                                        ? {
-                                              ...DLIMcurrentV,
-                                              getUpdate: () => 0,
-                                          }
-                                        : DLIMcurrentV,
-                                    lostConnection
-                                        ? {
-                                              ...DLIMcurrentW,
-                                              getUpdate: () => 0,
-                                          }
-                                        : DLIMcurrentW,
-                                ]}
-                            />
-                            </p>
-                        </div>
-
-                    </Window>
+                    <ChartDLIM/>
                     <Window title="Orders" className={styles.orders}>
                         <div className={styles.order_column}>
                             <Orders boards={getHardcodedOrders(boardOrders)} />
@@ -123,37 +72,7 @@ export const Data1Page = () => {
                 </div>
 
                 <div className={styles.column}>
-                    <Window title='LSM'>
-                        <div className={styles.current_chart}>
-                            <p className={styles.chart_title}>
-                            <ColorfulChart
-                                className={styles.chart}
-                                length={35}
-                                items={[
-                                    lostConnection
-                                        ? {
-                                              ...LSMaverageCurrentU,
-                                              getUpdate: () => 0,
-                                          }
-                                        : LSMaverageCurrentU,
-                                    lostConnection
-                                        ? {
-                                              ...LSMaverageCurrentV,
-                                              getUpdate: () => 0,
-                                          }
-                                        : LSMaverageCurrentV,
-                                    lostConnection
-                                        ? {
-                                              ...LSMaverageCurrentW,
-                                              getUpdate: () => 0,
-                                          }
-                                        : LSMaverageCurrentW,
-                                ]}  
-                            />
-                            </p>
-                        </div>
-
-                    </Window>
+                    <ChartLSM/>
                     <Window title="Messages" className={styles.messages}>
                         <MessagesContainer />
                     </Window>
