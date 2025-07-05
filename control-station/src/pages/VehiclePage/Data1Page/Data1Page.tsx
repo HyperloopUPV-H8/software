@@ -15,22 +15,22 @@ import { LostConnectionContext } from 'services/connections';
 export const Data1Page = () => {
     const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
     const lostConnection = useContext(LostConnectionContext);
-    const motorACurrentU = getNumericMeasurementInfo(
+    const DLIMcurrentU = getNumericMeasurementInfo(
         PcuMeasurements.motorACurrentU
     );
-    const motorACurrentV = getNumericMeasurementInfo(
+    const DLIMcurrentV = getNumericMeasurementInfo(
         PcuMeasurements.motorACurrentV
     );
-    const motorACurrentW = getNumericMeasurementInfo(
+    const DLIMcurrentW = getNumericMeasurementInfo(
         PcuMeasurements.motorACurrentW
     );
-    const averageCurrentU = getNumericMeasurementInfo(
+    const LSMaverageCurrentU = getNumericMeasurementInfo(
         BcuMeasurements.averageCurrentU
     );
-    const averageCurrentV = getNumericMeasurementInfo(
+    const LSMaverageCurrentV = getNumericMeasurementInfo(
         BcuMeasurements.averageCurrentV
     );
-    const averageCurrentW = getNumericMeasurementInfo(
+    const LSMaverageCurrentW = getNumericMeasurementInfo(
         BcuMeasurements.averageCurrentW
     );
     const boardOrders = useOrders();
@@ -52,22 +52,22 @@ export const Data1Page = () => {
                                 items={[
                                     lostConnection
                                         ? {
-                                              ...motorACurrentU,
+                                              ...DLIMcurrentU,
                                               getUpdate: () => 0,
                                           }
-                                        : motorACurrentU,
+                                        : DLIMcurrentU,
                                     lostConnection
                                         ? {
-                                              ...motorACurrentV,
+                                              ...DLIMcurrentV,
                                               getUpdate: () => 0,
                                           }
-                                        : motorACurrentV,
+                                        : DLIMcurrentV,
                                     lostConnection
                                         ? {
-                                              ...motorACurrentW,
+                                              ...DLIMcurrentW,
                                               getUpdate: () => 0,
                                           }
-                                        : motorACurrentW,
+                                        : DLIMcurrentW,
                                 ]}
                             />
                             </p>
@@ -132,22 +132,22 @@ export const Data1Page = () => {
                                 items={[
                                     lostConnection
                                         ? {
-                                              ...averageCurrentU,
+                                              ...LSMaverageCurrentU,
                                               getUpdate: () => 0,
                                           }
-                                        : averageCurrentU,
+                                        : LSMaverageCurrentU,
                                     lostConnection
                                         ? {
-                                              ...averageCurrentV,
+                                              ...LSMaverageCurrentV,
                                               getUpdate: () => 0,
                                           }
-                                        : averageCurrentV,
+                                        : LSMaverageCurrentV,
                                     lostConnection
                                         ? {
-                                              ...averageCurrentW,
+                                              ...LSMaverageCurrentW,
                                               getUpdate: () => 0,
                                           }
-                                        : averageCurrentW,
+                                        : LSMaverageCurrentW,
                                 ]}  
                             />
                             </p>
