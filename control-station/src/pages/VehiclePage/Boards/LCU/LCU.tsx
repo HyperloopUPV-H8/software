@@ -15,11 +15,11 @@ export const LCU = () => {
         (state) => state.getNumericMeasurementInfo
     );
 
-    const pitch = getNumericMeasurementInfo(LcuMeasurements.rot_control_y);
-    const roll = getNumericMeasurementInfo(LcuMeasurements.rot_control_x);
-    const yaw = getNumericMeasurementInfo(LcuMeasurements.rot_control_z);
-    const positionY = getNumericMeasurementInfo(LcuMeasurements.dist_control_y);
-    const positionZ = getNumericMeasurementInfo(LcuMeasurements.dist_control_z);
+    const pitch = getNumericMeasurementInfo(LcuMeasurements.rotationPitch);
+    const roll = getNumericMeasurementInfo(LcuMeasurements.rotationRoll);
+    const yaw = getNumericMeasurementInfo(LcuMeasurements.rotationYaw);
+    const positionY = getNumericMeasurementInfo(LcuMeasurements.positionY);
+    const positionZ = getNumericMeasurementInfo(LcuMeasurements.positionZ);
 
     return (
         <Window title="LCU - Current">
