@@ -10,7 +10,7 @@ import EMSRepresentation from './EMSRepresentation/EMSRepresentation';
 import HEMSRepresentation from './HEMSRepresentation/HEMSRepresentation';
 export interface Props {
     unitIndex: number;
-    imageSide: 'left' | 'right';
+    imageSide: 'left' | 'right' | 'none';
     kind: 'ems' | 'hems';
 }
 
