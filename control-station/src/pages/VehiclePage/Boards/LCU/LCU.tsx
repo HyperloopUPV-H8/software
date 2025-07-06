@@ -78,7 +78,7 @@ export const LCU = () => {
                                 icon={zIndex}
                                 name="Z"
                                 getValue={positionZ.getUpdate}
-                                units='mm'
+                                units={positionZ.units}
                             />
                         </IndicatorStack>
                         <IndicatorStack>
@@ -86,7 +86,7 @@ export const LCU = () => {
                                 icon={yIndex}
                                 name="Y"
                                 getValue={positionY.getUpdate}
-                                units='mm'
+                                units={positionY.units}
                             />
                         </IndicatorStack>
                     </div>
