@@ -130,7 +130,7 @@ function Run-ControlStation {
 function Run-PacketSender {
     Set-Location "$ProjectRoot\packet-sender"
     Write-ColorOutput "Starting packet-sender..." "Yellow"
-    go run .
+    go run . run --enable-protections --enable-states --packet-interval 100ms
 }
 
 function Run-AllParallel {
@@ -143,7 +143,7 @@ function Run-AllParallel {
     Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$ProjectRoot\backend\cmd'; Write-Host 'Backend Server' -ForegroundColor Green; go run ."
     Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$ProjectRoot\ethernet-view'; Write-Host 'Ethernet View' -ForegroundColor Green; npm run dev"
     Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$ProjectRoot\control-station'; Write-Host 'Control Station' -ForegroundColor Green; npm run dev"
-    Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$ProjectRoot\packet-sender'; Write-Host 'Packet Sender' -ForegroundColor Green; go run ."
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$ProjectRoot\packet-sender'; Write-Host 'Packet Sender' -ForegroundColor Green; go run . run --enable-protections --enable-states"
     
     Write-ColorOutput "✅ All services started in separate windows" "Green"
 }
