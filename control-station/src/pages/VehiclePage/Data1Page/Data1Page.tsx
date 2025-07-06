@@ -11,15 +11,14 @@ import { BatteryIndicator } from 'components/BatteryIndicator/BatteryIndicator';
 import { BigOrderButton } from 'components/BigOrderButton';
 import { ChartDLIM, ChartLSM } from './Data1Modules/Data1Charts';
 import { Batteries } from './Data1Modules/Data1Batteries';
+import { LEDS } from './Data1Modules/Leds';
 
 export const Data1Page = () => {
     const boardOrders = useOrders();
 
     return (
         <div className={styles.data1_page}>
-            <div className={styles.leds}>
-                <h1>LEDS</h1>
-            </div>
+            <LEDS/>
 
             <div className={styles.main}>
                 <div className={styles.column}>

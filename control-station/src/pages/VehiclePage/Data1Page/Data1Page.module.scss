@@ -35,7 +35,19 @@
   gap: 1rem;
 }
 
-.leds,
+.leds {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  width: 100%;
+  height: 15px;
+  min-height: 15px;
+  max-height: 15px;
+  border: 2px solid #000;
+}
 .break_state,
 .pod {
   display: flex;
