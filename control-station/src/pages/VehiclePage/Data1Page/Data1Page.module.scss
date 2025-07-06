@@ -1,3 +1,23 @@
+.current_chart {
+  width: 100%;
+  height: 230px;
+  min-height: 230px;
+  max-height: 2300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  padding: 0;
+}
+
+.chart {
+  width: 100% !important;
+  height: 213px !important;
+  min-height: 213px !important;
+  max-height: 213px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
 .title {
   display: flex;
   flex-direction: row;
@@ -42,23 +62,29 @@
 
 .main {
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-columns: 404px 937px 404px;
   gap: 1rem;
-  width: 100%;
+  width: 1808px;
+  min-width: 1808px;
+  max-width: 1808px;
 }
 
 .column {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  width: 100%;
+  width: 404px;
+  min-width: 404px;
+  max-width: 404px;
 }
 
 .column_center {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  width: 100%;
+  width: 937px;
+  min-width: 937px;
+  max-width: 937px;
 }
 
 .row {

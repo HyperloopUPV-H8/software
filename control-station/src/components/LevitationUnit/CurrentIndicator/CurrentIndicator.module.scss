@@ -36,6 +36,9 @@
     flex-flow: row;
     align-items: center;
     gap: 4px;
+    width: 90px;
+    min-width: 90px;
+    max-width: 90px;
 }
 
 .name_display {
@@ -64,11 +67,26 @@
 .value,
 .units {
     opacity: 0.8;
-
     margin: 0;
-
     font-size: 20px;
     font-weight: 400;
+    width: 40px;
+    min-width: 40px;
+    max-width: 40px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.value {
+    opacity: 0.8;
+    margin: 0;
+    font-size: 20px;
+    font-weight: 400;
+    width: 70px;
+    min-width: 70px;
+    max-width: 70px;
+    text-align: right;
+    white-space: nowrap;
 }
 
 .min_max {
