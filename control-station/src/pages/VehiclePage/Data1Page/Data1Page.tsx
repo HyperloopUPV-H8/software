@@ -12,6 +12,7 @@ import { BigOrderButton } from 'components/BigOrderButton';
 import { ChartDLIM, ChartLSM } from './Data1Modules/Data1Charts';
 import { Batteries } from './Data1Modules/Data1Batteries';
 import { LEDS } from './Data1Modules/Leds';
+import { BrakeState } from './Data1Modules/BrakeState';
 
 export const Data1Page = () => {
     const boardOrders = useOrders();
@@ -32,9 +33,8 @@ export const Data1Page = () => {
                 </div>
 
                 <div className={styles.column_center}>
-                    <div className={styles.break_state}>
-                    <h1>BRAKE STATE</h1>
-                </div>
+                <BrakeState/>
+
                 <div className={styles.pod}>
                     <h1>POD</h1>
                 </div>
