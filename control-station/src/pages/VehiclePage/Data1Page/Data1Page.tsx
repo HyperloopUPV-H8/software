@@ -13,6 +13,7 @@ import { ChartDLIM, ChartLSM } from './Data1Modules/Data1Charts';
 import { Batteries } from './Data1Modules/Data1Batteries';
 import { LEDS } from './Data1Modules/Leds';
 import { BrakeState } from './Data1Modules/BrakeState';
+import { PodPosition } from './Data1Modules/PodPosition';
 
 export const Data1Page = () => {
     const boardOrders = useOrders();
@@ -20,7 +21,7 @@ export const Data1Page = () => {
     return (
         <div className={styles.data1_page}>
             <LEDS/>
-
+            <PodPosition/>
             <div className={styles.main}>
                 <div className={styles.column}>
                     <ChartDLIM/>
@@ -34,10 +35,6 @@ export const Data1Page = () => {
 
                 <div className={styles.column_center}>
                 <BrakeState/>
-
-                <div className={styles.pod}>
-                    <h1>POD</h1>
-                </div>
                     <div className={styles.row}>
                         <HVSCU />
                         <LCU />
