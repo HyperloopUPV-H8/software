@@ -1,10 +1,12 @@
 import styles from './Data1Page.module.scss';
 import { LCU } from '../Boards/LCU/LCU';
 import { HVSCU } from '../Boards/HVSCU/HVSCU';
-import { Orders, useOrders } from '../../../../../common-front';
+import { ColorfulChart, LinesChart, Orders, useOrders } from '../../../../../common-front';
 import { MessagesContainer } from '../../../../../common-front';
 import { Window } from 'components/Window/Window';
 import { Window2 } from 'components/Window/Window2';
+import vehicleTrack from '../../../assets/svg/vehicleTrack.svg';
+import { MdWarning } from 'react-icons/md';
 import FixedOrders, { emergencyStopOrders, getHardcodedOrders } from '../Data2Page/FixedOrders';
 import { Gauge } from 'components/GaugeTag/Gauge/Gauge';
 import { BatteryIndicator } from 'components/BatteryIndicator/BatteryIndicator';
@@ -33,8 +35,15 @@ export const Data1Page = () => {
                     <div className={styles.break_state}>
                     <h1>BREAK STATE</h1>
                 </div>
-                <div className={styles.pod}>
-                    <h1>POD</h1>
+                <div>
+                    <Window2 title="POD position" className={styles.compact}>
+                        <img
+                            src={vehicleTrack}
+                            alt="pod"
+                            className={styles.podEdit}
+                        />
+                    </Window2>
+
                 </div>
                     <div className={styles.row}>
                         <HVSCU />
@@ -61,7 +70,7 @@ export const Data1Page = () => {
                     <div className={styles.emergency_wrapper}>
                         <BigOrderButton
                             orders={emergencyStopOrders}
-                            label="Emergency Stop"
+                            label="⚠️ EMERGENCY STOP"
                             shortcut=" "
                             className={`${styles.emergency_button} ${styles.emergency_stop}`}
                             brightness={3}

@@ -1,6 +1,16 @@
 .big_order_button {
+    
     display: flex;
     flex-flow: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #FBD15B;
+    font-size: 1.5rem;
+    font-family: IBM Plex Mono, monospace;
+    font-weight: bold;
+    border-radius: 0.5rem;
     gap: 0.7rem;
     padding: 0.5rem;
+    height: 100%;
+    width: 100%;
 }

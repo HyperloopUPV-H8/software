@@ -84,3 +84,16 @@
   display: flex;
   justify-content: center;
 }
+.compact {
+  height: 200px;
+  overflow: visible;
+}
+
+.podEdit {
+  object-fit: contain;
+  display: block;
+  transform: rotate(90deg);
+  transform-origin: center;
+  max-width: 100%;
+  height: auto;
+}
