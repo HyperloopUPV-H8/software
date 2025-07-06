@@ -1,1 +1,5 @@
 adj/
+
+# Ignore markdown files (except committed documentation)
+*.md
+!PACKET_SENDER_DOCS.md
