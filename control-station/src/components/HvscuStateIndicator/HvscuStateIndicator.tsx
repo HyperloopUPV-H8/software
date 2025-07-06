@@ -1,5 +1,6 @@
-import { useGlobalTicker, useMeasurementsStore } from 'common';
+import { HvscuMeasurements, useGlobalTicker, useMeasurementsStore } from 'common';
 import styles from './HvscuStateIndicator.module.scss';
+import thunderIcon from 'assets/svg/thunder-filled.svg'
 import { getStateFromEnum, stateToColor } from 'state';
 import { memo, useContext, useState } from 'react';
 import { LostConnectionContext } from 'services/connections';
@@ -40,3 +41,32 @@ export const HvscuStateIndicator = memo(({ measurementId, icon }: Props) => {
         </div>
     );
 });
+
+export const ImdIndicator = () => {
+    const getValue = useMeasurementsStore(
+        (state) => state.getBooleanMeasurementInfo(HvscuMeasurements.IsImdOk).getUpdate
+    );
+
+    const lostConnection = useContext(LostConnectionContext);
+
+    const [IsImdOk, setVariant] = useState(getValue());
+
+    useGlobalTicker(() => {
+        setVariant(getValue());
+    });
+
+    return (
+        <div
+            className={styles.state_indicator}
+            style={{ backgroundColor: lostConnection ? '#cccccc' : IsImdOk ? '#ACF293' : '#FB3B3B' }}
+        >
+            <img className={styles.icon} src={thunderIcon} />
+
+            <p className={styles.title}>
+                {lostConnection ? 'DISCONNECTED' : IsImdOk ? 'ISOLATED' : 'SHORT CIRCUIT'}
+            </p>
+
+            <img className={styles.icon} src={thunderIcon} />
+        </div>
+    );
+};
