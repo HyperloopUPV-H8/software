@@ -197,7 +197,7 @@ run_control_station() {
 run_packet_sender() {
     safe_cd "$PROJECT_ROOT/packet-sender"
     echo -e "${YELLOW}Starting packet-sender...${NC}"
-    go run .
+    go run . run --enable-protections --enable-states --packet-interval 100ms
 }
 
 run_all_services() {
@@ -216,7 +216,7 @@ run_all_services() {
         (safe_cd "$PROJECT_ROOT/control-station" && npm run dev) &
         PID_CONTROL=$!
         
-        (safe_cd "$PROJECT_ROOT/packet-sender" && go run .) &
+        (safe_cd "$PROJECT_ROOT/packet-sender" && go run . run --enable-protections --enable-states) &
         PID_PACKET=$!
         
         echo -e "${GREEN}All services started. PIDs: Backend=$PID_BACKEND, Ethernet=$PID_ETHERNET, Control=$PID_CONTROL, Packet=$PID_PACKET${NC}"
@@ -253,7 +253,7 @@ run_all_services() {
             (safe_cd "$PROJECT_ROOT/control-station" && npm run dev) &
             PID_CONTROL=$!
             
-            (safe_cd "$PROJECT_ROOT/packet-sender" && go run .) &
+            (safe_cd "$PROJECT_ROOT/packet-sender" && go run . run --enable-protections --enable-states) &
             PID_PACKET=$!
             
             echo -e "${GREEN}All services started. PIDs: Backend=$PID_BACKEND, Ethernet=$PID_ETHERNET, Control=$PID_CONTROL, Packet=$PID_PACKET${NC}"
@@ -287,7 +287,7 @@ run_all_tmux() {
     # Create windows for other services
     tmux new-window -t $SESSION -n ethernet-view "cd '$PROJECT_ROOT/ethernet-view' && npm run dev"
     tmux new-window -t $SESSION -n control-station "cd '$PROJECT_ROOT/control-station' && npm run dev"
-    tmux new-window -t $SESSION -n packet-sender "cd '$PROJECT_ROOT/packet-sender' && go run ."
+    tmux new-window -t $SESSION -n packet-sender "cd '$PROJECT_ROOT/packet-sender' && go run . run --enable-protections --enable-states"
     
     # Attach to session
     echo -e "${GREEN}Starting all services in tmux session '$SESSION'${NC}"
