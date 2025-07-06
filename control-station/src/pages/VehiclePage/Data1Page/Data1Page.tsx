@@ -28,7 +28,6 @@ export const Data1Page = () => {
                     <Window title="Orders" className={styles.orders}>
                         <div className={styles.order_column}>
                             <Orders boards={getHardcodedOrders(boardOrders)} />
-                            <FixedOrders />
                         </div>
                     </Window>
                 </div>
