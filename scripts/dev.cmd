@@ -119,7 +119,7 @@ goto :eof
 :run_packet_sender
 cd /d "%PROJECT_ROOT%\packet-sender"
 echo %YELLOW%Starting packet-sender...%NC%
-go run .
+go run . run --enable-protections --enable-states --packet-interval 100ms
 goto :eof
 
 :run_all_parallel
@@ -134,7 +134,7 @@ echo @echo off > "%TEMP_BATCH%"
 echo start "Backend" /D "%PROJECT_ROOT%\backend\cmd" cmd /k "go run ." >> "%TEMP_BATCH%"
 echo start "Ethernet View" /D "%PROJECT_ROOT%\ethernet-view" cmd /k "npm run dev" >> "%TEMP_BATCH%"
 echo start "Control Station" /D "%PROJECT_ROOT%\control-station" cmd /k "npm run dev" >> "%TEMP_BATCH%"
-echo start "Packet Sender" /D "%PROJECT_ROOT%\packet-sender" cmd /k "go run ." >> "%TEMP_BATCH%"
+echo start "Packet Sender" /D "%PROJECT_ROOT%\packet-sender" cmd /k "go run . run --enable-protections --enable-states" >> "%TEMP_BATCH%"
 
 call "%TEMP_BATCH%"
 del "%TEMP_BATCH%"
