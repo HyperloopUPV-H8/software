@@ -57,9 +57,7 @@ export const LevitationUnit = ({ unitIndex, kind, imageSide }: Props) => {
     );
 
     const current = getNumericMeasurementInfo(currentMeasurements[unitIndex]);
-    const temperature = getNumericMeasurementInfo(
-        temperatureMeasurements[unitIndex]
-    );
+
     const airgap = getNumericMeasurementInfo(airgapMeasurements[unitIndex]);
     const airgap2 =
         unitIndex == 6 || unitIndex == 7

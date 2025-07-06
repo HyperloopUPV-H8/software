@@ -55,14 +55,29 @@
 }
 
 .rotationIndicatorsWrapper {
-  margin-top: 1rem;
+  margin-top: 0.2rem;
   display: flex;
-  justify-content: space-around;
+  flex-direction: column;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.5rem;
   border-radius: 0.5rem;
-  padding: 0rem 0rem;
+  padding: 0;
+}
+
+.rotationRow {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  justify-content: center;
+  width: 100%;
+}
+
+.positionRow {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  justify-content: center;
+  width: 100%;
 }
 
 .rotationIndicator {
