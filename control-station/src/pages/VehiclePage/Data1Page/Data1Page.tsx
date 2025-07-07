@@ -1,15 +1,10 @@
 import styles from './Data1Page.module.scss';
 import { LCU } from '../Boards/LCU/LCU';
 import { HVSCU } from '../Boards/HVSCU/HVSCU';
-import { BcuMeasurements, ColorfulChart, Orders, PcuMeasurements, useMeasurementsStore, useOrders } from 'common';
+import { Orders, useOrders } from 'common';
 import { MessagesContainer } from 'common';
 import { Window } from 'components/Window/Window';
-import { Window2 } from 'components/Window/Window2';
-import vehicleTrack from '../../../assets/svg/vehicleTrack.svg';
-import { MdWarning } from 'react-icons/md';
-import FixedOrders, { emergencyStopOrders, getHardcodedOrders } from '../Data2Page/FixedOrders';
-import { Gauge } from 'components/GaugeTag/Gauge/Gauge';
-import { BatteryIndicator } from 'components/BatteryIndicator/BatteryIndicator';
+import { emergencyStopOrders, getHardcodedOrders } from '../Data2Page/FixedOrders';
 import { BigOrderButton } from 'components/BigOrderButton';
 import { ChartDLIM, ChartLSM } from './Data1Modules/Data1Charts';
 import { Batteries } from './Data1Modules/Data1Batteries';
