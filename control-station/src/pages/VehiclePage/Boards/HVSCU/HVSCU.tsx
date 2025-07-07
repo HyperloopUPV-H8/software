@@ -1,7 +1,6 @@
 import { Window } from 'components/Window/Window';
 import styles from './HVSCU.module.scss';
 import { useMeasurementsStore } from 'common';
-import thunderIcon from 'assets/svg/thunder-filled.svg'
 import { HvscuStateIndicator, ImdIndicator } from 'components/HvscuStateIndicator/HvscuStateIndicator';
 
 export const HVSCU = () => {
