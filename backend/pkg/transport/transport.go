@@ -13,6 +13,7 @@ import (
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tcp"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tftp"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/udp"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/presentation"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/session"
@@ -342,6 +343,53 @@ func (transport *Transport) HandleSniffer(sniffer *sniffer.Sniffer) {
 	for err := range errChan {
 		transport.errChan <- err
 	}
+}
+
+// HandleUDPServer starts listening for packets on the provided UDP server and handles them.
+//
+// This function will block until the server is closed
+func (transport *Transport) HandleUDPServer(server *udp.Server) {
+	packetsCh := server.GetPackets()
+	errorsCh := server.GetErrors()
+	
+	for {
+		select {
+		case packet := <-packetsCh:
+			transport.handleUDPPacket(packet)
+		case err := <-errorsCh:
+			transport.errChan <- err
+		}
+	}
+}
+
+// handleUDPPacket handles a single UDP packet received by the UDP server
+func (transport *Transport) handleUDPPacket(udpPacket udp.Packet) {
+	srcAddr := fmt.Sprintf("%s:%d", udpPacket.SourceIP, udpPacket.SourcePort)
+	dstAddr := fmt.Sprintf("%s:%d", udpPacket.DestIP, udpPacket.DestPort)
+	
+	// Decode the packet
+	packet, err := transport.decoder.Decode(udpPacket.Payload)
+	if err != nil {
+		transport.logger.Error().
+			Str("from", srcAddr).
+			Str("to", dstAddr).
+			Err(err).
+			Msg("failed to decode UDP packet")
+		transport.errChan <- err
+		return
+	}
+	
+	// Intercept packets with id == 0 and replicate
+	if transport.propagateFault && packet.Id() == 0 {
+		transport.logger.Info().Msg("replicating packet with id 0 to all boards")
+		err := transport.handlePacketEvent(NewPacketMessage(packet))
+		if err != nil {
+			transport.logger.Error().Err(err).Msg("failed to replicate packet")
+		}
+	}
+	
+	// Send notification
+	transport.api.Notification(NewPacketNotification(packet, srcAddr, dstAddr, udpPacket.Timestamp))
 }
 
 // handleConversation is called when the sniffer detects a new conversation and handles its specific packets
