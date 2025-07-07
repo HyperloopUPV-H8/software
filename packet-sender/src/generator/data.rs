@@ -19,6 +19,11 @@ impl DataPacketGenerator {
     pub fn generate(&self, packet: &Packet) -> Result<Vec<u8>> {
         let mut buffer = encode_packet_header(packet.id);
         
+        // Handle packets with no variables (like FAULT packet with ID 0)
+        if packet.variables.is_empty() {
+            return Ok(buffer);
+        }
+        
         for variable in &packet.variables {
             let value = self.random_gen.generate_for_variable(variable)?;
             let encoded = encode_value(value, &variable.value_type)?;
@@ -30,6 +35,11 @@ impl DataPacketGenerator {
     
     pub fn generate_sine_packet(&self, packet: &Packet, time: f64) -> Result<Vec<u8>> {
         let mut buffer = encode_packet_header(packet.id);
+        
+        // Handle packets with no variables
+        if packet.variables.is_empty() {
+            return Ok(buffer);
+        }
         
         for (i, variable) in packet.variables.iter().enumerate() {
             let value = self.generate_sine_value(variable, time, i as f64)?;

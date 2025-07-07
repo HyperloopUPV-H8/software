@@ -35,17 +35,8 @@ impl PacketGenerator {
             return Err(anyhow::anyhow!("No data packets available for board {}", self.board.name));
         }
         
-        // Filter out packets with no variables
-        let valid_packets: Vec<_> = data_packets
-            .into_iter()
-            .filter(|p| !p.variables.is_empty() || p.id == 0)
-            .collect();
-        
-        if valid_packets.is_empty() {
-            return Err(anyhow::anyhow!("No valid data packets with variables for board {}", self.board.name));
-        }
-        
-        let packet = valid_packets[rand::thread_rng().gen_range(0..valid_packets.len())];
+        // For now, just pick any data packet - we handle empty packets in the generator
+        let packet = data_packets[rand::thread_rng().gen_range(0..data_packets.len())];
         self.generate_packet(packet)
     }
     
@@ -78,11 +69,6 @@ impl PacketGenerator {
     }
     
     fn generate_packet(&self, packet: &Packet) -> Result<Vec<u8>> {
-        // Skip packets with no variables (except for special packets like FAULT)
-        if packet.variables.is_empty() && packet.id != 0 {
-            return Err(anyhow::anyhow!("Packet {} has no variables", packet.name));
-        }
-        
         match packet.packet_type {
             PacketType::Data => self.data_generator.generate(packet),
             PacketType::Protection => self.protection_generator.generate(packet),
