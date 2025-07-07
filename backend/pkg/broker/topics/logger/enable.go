@@ -7,6 +7,7 @@ import (
 	"sync/atomic"
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
+	data_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/data"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
 	"github.com/google/uuid"
 	ws "github.com/gorilla/websocket"
@@ -14,6 +15,7 @@ import (
 
 const EnableName abstraction.BrokerTopic = "logger/enable"
 const ResponseName abstraction.BrokerTopic = "logger/response"
+const VariablesName abstraction.BrokerTopic = "logger/variables"
 
 type Enable struct {
 	isRunning    *atomic.Bool
@@ -21,6 +23,7 @@ type Enable struct {
 	connectionMx *sync.Mutex
 	subscribers  map[websocket.ClientId]struct{}
 	api          abstraction.BrokerAPI
+	data_logger  *data_logger.Logger
 }
 
 func NewEnableTopic() *Enable {
@@ -58,6 +61,12 @@ func (enable *Enable) ClientMessage(id websocket.ClientId, message *websocket.Me
 
 		fmt.Printf("logger/response subscribed %s\n", uuid.UUID(id).String())
 		enable.subscribers[id] = struct{}{}
+
+	case VariablesName:
+		err := enable.handleVariables(id, message)
+		if err != nil {
+			fmt.Printf("error handling logger/variables: %v\n", err)
+		}
 	default:
 		enable.connectionMx.Lock()
 		defer enable.connectionMx.Unlock()
@@ -82,6 +91,16 @@ func (enable *Enable) handleToggle(_ websocket.ClientId, message *websocket.Mess
 		enable.isRunning.Store(<-status.response)
 		enable.broadcastState()
 	}()
+	return nil
+}
+
+func (enable *Enable) handleVariables(_ websocket.ClientId, message *websocket.Message) error {
+	var allowedVars []string
+	err := json.Unmarshal(message.Payload, &allowedVars)
+	if err != nil {
+		return err
+	}
+	enable.data_logger.SetAllowedVars(allowedVars)
 	return nil
 }
 
@@ -121,6 +140,10 @@ func (enable *Enable) SetPool(pool *websocket.Pool) {
 
 func (enable *Enable) SetAPI(api abstraction.BrokerAPI) {
 	enable.api = api
+}
+
+func (enable *Enable) SetDataLogger(logger *data_logger.Logger) {
+	enable.data_logger = logger
 }
 
 type Status struct {

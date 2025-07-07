@@ -25,6 +25,7 @@ export type BrokerStructure = {
     };
     "message/update": { request: never; response: MessageAdapter };
     "logger/enable": { request: boolean; response: boolean };
+    "logger/variables": { request: string[]; response: boolean };
     "blcu/upload": {
         request: BootloaderUploadRequest;
         response: BootloaderUploadResponse;
