@@ -1,23 +1,34 @@
 .current_chart {
   width: 100%;
-  height: 230px;
-  min-height: 230px;
-  max-height: 2300px;
+  height: 100%;
+  max-height: 10em;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: stretch;
-  padding: 0;
+  padding: 0.3em;
+  margin: 0;
 }
 
 .chart {
-  width: 100% !important;
-  height: 213px !important;
-  min-height: 213px !important;
-  max-height: 213px !important;
-  margin: 0 !important;
-  padding: 0 !important;
+  width: 100%;
+  height: 8em;
+  max-height: 8em;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
+
+.chart > div,
+.chart svg {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+}
+
 .title {
   display: flex;
   flex-direction: row;
@@ -81,7 +92,7 @@
 }
 
 .break_state {
-  background-color: #F3785C;
+  background-color: #f3785c;
   color: white;
 }
 

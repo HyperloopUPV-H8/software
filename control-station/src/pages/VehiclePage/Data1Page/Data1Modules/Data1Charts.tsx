@@ -21,7 +21,6 @@ export const ChartDLIM = () => {
     return (
     <Window title='DLIM'>
         <div className={styles.current_chart}>
-            <p className={styles.chart_title}>
             <ColorfulChart
                 className={styles.chart}
                 length={35}
@@ -46,7 +45,6 @@ export const ChartDLIM = () => {
                         : DLIMcurrentW,
                 ]}
             />
-            </p>
         </div>
 
     </Window>
@@ -72,7 +70,6 @@ export const ChartLSM = () => {
     return (
     <Window title='LSM'>
         <div className={styles.current_chart}>
-            <p className={styles.chart_title}>
             <ColorfulChart
                 className={styles.chart}
                 length={35}
@@ -97,7 +94,6 @@ export const ChartLSM = () => {
                         : LSMaverageCurrentW,
                 ]}  
             />
-            </p>
         </div>
 
     </Window>
