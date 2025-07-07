@@ -5,6 +5,8 @@ import { BcuMeasurements, ColorfulChart, Orders, PcuMeasurements, useMeasurement
 import { MessagesContainer } from 'common';
 import { Window } from 'components/Window/Window';
 import { Window2 } from 'components/Window/Window2';
+import vehicleTrack from '../../../assets/svg/vehicleTrack.svg';
+import { MdWarning } from 'react-icons/md';
 import FixedOrders, { emergencyStopOrders, getHardcodedOrders } from '../Data2Page/FixedOrders';
 import { Gauge } from 'components/GaugeTag/Gauge/Gauge';
 import { BatteryIndicator } from 'components/BatteryIndicator/BatteryIndicator';
@@ -44,7 +46,7 @@ export const Data1Page = () => {
                     <div className={styles.emergency_wrapper}>
                         <BigOrderButton
                             orders={emergencyStopOrders}
-                            label="Emergency Stop"
+                            label="⚠️ EMERGENCY STOP"
                             shortcut=" "
                             className={`${styles.emergency_button} ${styles.emergency_stop}`}
                             brightness={3}
