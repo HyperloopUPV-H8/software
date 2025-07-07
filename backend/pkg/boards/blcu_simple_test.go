@@ -3,24 +3,76 @@ package boards_test
 import (
 	"testing"
 
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/boards"
 	blcu_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/blcu"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/vehicle"
 	"github.com/rs/zerolog"
 )
 
-// TestBLCUBoardRegistration tests that BLCU board can be registered
+// TestBLCUBoardRegistration tests that BLCU board can be registered with different configurations
 func TestBLCUBoardRegistration(t *testing.T) {
 	logger := zerolog.New(nil).Level(zerolog.Disabled)
 	v := vehicle.New(logger)
 	
-	// Create and register BLCU board
+	// Test deprecated constructor (should use board ID 0)
 	blcuBoard := boards.New("192.168.0.10")
 	v.AddBoard(blcuBoard)
 	
+	// Verify board is registered with ID 0 (missing configuration)
+	if blcuBoard.Id() != 0 {
+		t.Errorf("Expected board ID 0 for deprecated constructor, got %d", blcuBoard.Id())
+	}
+}
+
+// TestBLCUWithCustomConfiguration tests BLCU with custom board ID and order IDs
+func TestBLCUWithCustomConfiguration(t *testing.T) {
+	logger := zerolog.New(nil).Level(zerolog.Disabled)
+	v := vehicle.New(logger)
+	
+	// Test new constructor with custom configuration
+	tftpConfig := boards.TFTPConfig{
+		BlockSize:      131072,
+		Retries:        3,
+		TimeoutMs:      5000,
+		BackoffFactor:  2,
+		EnableProgress: true,
+	}
+	
+	customBoardId := abstraction.BoardId(7)
+	customDownloadOrderId := uint16(801)
+	customUploadOrderId := uint16(802)
+	
+	blcuBoard := boards.NewWithConfig("192.168.0.10", tftpConfig, customBoardId, customDownloadOrderId, customUploadOrderId)
+	v.AddBoard(blcuBoard)
+	
+	// Verify board is registered with custom ID
+	if blcuBoard.Id() != customBoardId {
+		t.Errorf("Expected board ID %d, got %d", customBoardId, blcuBoard.Id())
+	}
+}
+
+// TestBLCUWithDefaultConfiguration tests BLCU with default order IDs
+func TestBLCUWithDefaultConfiguration(t *testing.T) {
+	logger := zerolog.New(nil).Level(zerolog.Disabled)
+	v := vehicle.New(logger)
+	
+	// Test deprecated constructor (should use default order IDs)
+	tftpConfig := boards.TFTPConfig{
+		BlockSize:      131072,
+		Retries:        3,
+		TimeoutMs:      5000,
+		BackoffFactor:  2,
+		EnableProgress: true,
+	}
+	
+	boardId := abstraction.BoardId(7)
+	blcuBoard := boards.NewWithTFTPConfig("192.168.0.10", tftpConfig, boardId)
+	v.AddBoard(blcuBoard)
+	
 	// Verify board is registered
-	if blcuBoard.Id() != boards.BlcuId {
-		t.Errorf("Expected board ID %d, got %d", boards.BlcuId, blcuBoard.Id())
+	if blcuBoard.Id() != boardId {
+		t.Errorf("Expected board ID %d, got %d", boardId, blcuBoard.Id())
 	}
 }
 

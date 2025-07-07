@@ -1,30 +1,28 @@
 import { LcuMeasurements } from 'common';
 import styles from './LevitationUnit.module.scss';
 import { IndicatorStack } from 'components/IndicatorStack/IndicatorStack';
-import { BarIndicator } from 'components/BarIndicator/BarIndicator';
 import batteryFilled from 'assets/svg/battery-filled.svg';
-import thermometerFilled from 'assets/svg/thermometer-filled.svg';
-import airgapIcon from 'assets/svg/z-index.svg';
 import { useMeasurementsStore } from 'common';
 import EMSRepresentation from './EMSRepresentation/EMSRepresentation';
 import HEMSRepresentation from './HEMSRepresentation/HEMSRepresentation';
+import { CurrentIndicator } from './CurrentIndicator/CurrentIndicator';
 export interface Props {
     unitIndex: number;
-    imageSide: 'left' | 'right';
+    imageSide: 'left' | 'right' | 'none';
     kind: 'ems' | 'hems';
 }
 
 export const currentMeasurements = [
-    LcuMeasurements.lcu_coil_current_1,
-    LcuMeasurements.lcu_coil_current_2,
-    LcuMeasurements.lcu_coil_current_3,
-    LcuMeasurements.lcu_coil_current_4,
-    LcuMeasurements.lcu_coil_current_5,
-    LcuMeasurements.lcu_coil_current_6,
-    LcuMeasurements.lcu_coil_current_7,
-    LcuMeasurements.lcu_coil_current_8,
-    LcuMeasurements.lcu_coil_current_9,
-    LcuMeasurements.lcu_coil_current_10
+    LcuMeasurements.coilCurrentHEMS1,
+    LcuMeasurements.coilCurrentHEMS2,
+    LcuMeasurements.coilCurrentHEMS3,
+    LcuMeasurements.coilCurrentHEMS4,
+    LcuMeasurements.coilCurrentEMS1,
+    LcuMeasurements.coilCurrentEMS2,
+    LcuMeasurements.coilCurrentEMS3,
+    LcuMeasurements.coilCurrentEMS4,
+    LcuMeasurements.coilCurrentEMS5,
+    LcuMeasurements.coilCurrentEMS6,
 ];
 
 export const temperatureMeasurements = [
@@ -59,9 +57,7 @@ export const LevitationUnit = ({ unitIndex, kind, imageSide }: Props) => {
     );
 
     const current = getNumericMeasurementInfo(currentMeasurements[unitIndex]);
-    const temperature = getNumericMeasurementInfo(
-        temperatureMeasurements[unitIndex]
-    );
+
     const airgap = getNumericMeasurementInfo(airgapMeasurements[unitIndex]);
     const airgap2 =
         unitIndex == 6 || unitIndex == 7
@@ -100,9 +96,8 @@ export const LevitationUnit = ({ unitIndex, kind, imageSide }: Props) => {
                     />
                 ))}
             <IndicatorStack className={styles.levitationUnitMeasurements}>
-                <BarIndicator
+                <CurrentIndicator
                     icon={batteryFilled}
-                    name="Current"
                     getValue={current.getUpdate}
                     units={current.units}
                     safeRangeMin={current.range[0]!!}

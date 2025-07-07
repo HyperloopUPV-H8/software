@@ -14,3 +14,8 @@ backend/cmd/cmd
 # Claude
 CLAUDE*
 .claude
+
+packet-sender/packet_sender
+packet-sender/adj/
+
+*.exe

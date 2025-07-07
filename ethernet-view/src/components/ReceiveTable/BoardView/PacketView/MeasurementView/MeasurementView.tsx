@@ -1,3 +1,4 @@
+import React from 'react';
 import styles from './MeasurementView.module.scss';
 import {
     Measurement,
@@ -31,18 +32,50 @@ export const MeasurementView = ({ measurement }: Props) => {
         setShowMeasurementLatest(event.currentTarget.checked);
     };
 
+    const setLog = (log: boolean) => {
+        useMeasurementsStore.setState(state => {
+            const measurements = { ...state.measurements };
+            measurements[measurement.id] = { ...measurements[measurement.id], log };
+            return { ...state, measurements };
+        });
+    };
+
+    const logChecked = useMeasurementsStore(state => state.measurements[measurement.id]?.log !== false);
+
+    React.useEffect(() => {
+        const handler = (e: any) => {
+            setLog(e.detail);
+        };
+        window.addEventListener('log-all', handler);
+        return () => window.removeEventListener('log-all', handler);
+    }, [setLog]);
+
     return (
         <>
-            <span className={styles.name}>{measurement.name}</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
+                <input
+                    type="checkbox"
+                    className={styles.log_variable}
+                    title="Log this variable"
+                    style={{ accentColor: 'green', flexShrink: 0 }}
+                    checked={logChecked}
+                    onChange={e => setLog(e.currentTarget.checked)}
+                />
+                <span className={styles.name} style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', minWidth: 0 }}>
+                    {measurement.name}
+                </span>
+            </span>
             {isNumeric && (
                 <>
-                    <input
-                        type="checkbox"
-                        defaultChecked={false}
-                        className={styles.show_last}
-                        title="Show latest value"
-                        onInput={onLatestValueChange}
-                    />
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                        <input
+                            type="checkbox"
+                            defaultChecked={false}
+                            className={styles.show_last}
+                            title="Show latest value"
+                            onInput={onLatestValueChange}
+                        />
+                    </span>
                     <span ref={valueRef} className={styles.value}></span>
                     <span className={styles.units}>{measurement.units}</span>
                     <span className={styles.type}>{measurement.type}</span>
