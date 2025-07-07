@@ -40,42 +40,28 @@ max_retries = 0              # Maximum retries before cycling (0 = infinite retr
 connection_timeout_ms = 2000 # Timeout for the initial connection attempt
 keep_alive_ms = 30000        # Keep-alive interval in milliseconds (0 to disable)
 
-# HTTP Servers Configuration
-[[server]]
-enabled = true
-name = "ethernet-view"
+# Server Configuration
+[server.ethernet-view]
+address = "127.0.0.1:4040"
+static = "./ethernet-view"
 
-[server.cors]
-enabled = true
-allowed_origins = ["*"]
-allowed_methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-allowed_headers = ["Content-Type", "Authorization"]
-exposed_headers = ["Content-Length"]
-allow_credentials = true
-max_age = 86400
+[server.ethernet-view.endpoints]
+pod_data = "/podDataStructure"
+order_data = "/orderStructures"
+programable_boards = "/uploadableBoards"
+connections = "/backend"
+files = "/"
 
-[server.tls]
-enabled = false
-cert_file = ""
-key_file = ""
+[server.control-station]
+address = "127.0.0.1:4000"
+static = "./control-station"
 
-[server.endpoints]
-websocket = "/ws"
-pod_data = "/podData"
-order_data = "/orderData"
-order = "/order"
-logs = "/logs"
-excel = "/excel"
-uploads = "/uploads"
-programs_boards = "/programableBoards"
-blcu_info = "/blcu/info"
-blcu_upload_info = "/blcu/uploadInfo"
-blcu_upload = "/blcu/upload"
-blcu_download = "/blcu/download"
-
-[server.bind]
-addr = "0.0.0.0"
-http = 4000
+[server.control-station.endpoints]
+pod_data = "/podDataStructure"
+order_data = "/orderStructures"
+programable_boards = "/uploadableBoards"
+connections = "/backend"
+files = "/"
 
 # TFTP Configuration
 [tftp]

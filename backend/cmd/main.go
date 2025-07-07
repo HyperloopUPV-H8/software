@@ -78,6 +78,7 @@ const (
 	RemoveStateOrder = "remove_state_order"
 )
 
+var configFile = flag.String("config", "config.toml", "path to configuration file")
 var traceLevel = flag.String("trace", "info", "set the trace level (\"fatal\", \"error\", \"warn\", \"info\", \"debug\", \"trace\")")
 var traceFile = flag.String("log", "trace.json", "set the trace log file")
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
@@ -85,9 +86,25 @@ var enableSNTP = flag.Bool("sntp", false, "enables a simple SNTP server on port 
 var networkDevice = flag.Int("dev", -1, "index of the network device to use, overrides device prompt")
 var blockprofile = flag.Int("blockprofile", 0, "number of block profiles to include")
 var playbackFile = flag.String("playback", "", "")
+var versionFlag = flag.Bool("version", false, "Show the backend version")
 var currentVersion string
 
 func main() {
+	// Parse command line flags
+	flag.Parse()
+	
+	// Handle version flag
+	if *versionFlag {
+		versionFile := "VERSION.txt"
+		versionData, err := os.ReadFile(versionFile)
+		if err == nil {
+			fmt.Println("Hyperloop UPV Backend Version:", strings.TrimSpace(string(versionData)))
+		} else {
+			fmt.Println("Hyperloop UPV Backend Version: unknown")
+		}
+		os.Exit(0)
+	}
+	
 	// update() // FIXME: Updater disabled due to cross-platform and reliability issues
 
 	traceFile := initTrace(*traceLevel, *traceFile)
@@ -109,7 +126,7 @@ func main() {
 	}
 	runtime.SetBlockProfileRate(*blockprofile)
 
-	config := getConfig("./config.toml")
+	config := getConfig(*configFile)
 
 	// <--- ADJ --->
 
@@ -748,13 +765,6 @@ func update() {
 	versionData, err := os.ReadFile(versionFile)
 	if err == nil {
 		currentVersion = strings.TrimSpace(string(versionData))
-
-		versionFlag := flag.Bool("version", false, "Show the backend version")
-		flag.Parse()
-		if *versionFlag {
-			fmt.Println("Hyperloop UPV Backend Version:", currentVersion)
-			os.Exit(0)
-		}
 	} else {
 		fmt.Fprintf(os.Stderr, "Error reading version file (%s): %v\n", versionFile, err)
 		return
