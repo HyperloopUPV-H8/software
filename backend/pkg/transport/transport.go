@@ -1,6 +1,7 @@
 package transport
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -367,8 +368,11 @@ func (transport *Transport) handleUDPPacket(udpPacket udp.Packet) {
 	srcAddr := fmt.Sprintf("%s:%d", udpPacket.SourceIP, udpPacket.SourcePort)
 	dstAddr := fmt.Sprintf("%s:%d", udpPacket.DestIP, udpPacket.DestPort)
 	
+	// Create a reader from the payload
+	reader := bytes.NewReader(udpPacket.Payload)
+	
 	// Decode the packet
-	packet, err := transport.decoder.Decode(udpPacket.Payload)
+	packet, err := transport.decoder.DecodeNext(reader)
 	if err != nil {
 		transport.logger.Error().
 			Str("from", srcAddr).
