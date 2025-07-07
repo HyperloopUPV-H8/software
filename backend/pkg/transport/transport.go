@@ -47,7 +47,7 @@ type Transport struct {
 }
 
 // HandleClient connects to the specified client and handles its messages. This method blocks.
-// This method will continuously try to reconnect to the client if it disconnects, 
+// This method will continuously try to reconnect to the client if it disconnects,
 // applying exponential backoff between attempts.
 func (transport *Transport) HandleClient(config tcp.ClientConfig, remote string) error {
 	client := tcp.NewClient(remote, config, transport.logger)
@@ -58,7 +58,7 @@ func (transport *Transport) HandleClient(config tcp.ClientConfig, remote string)
 		conn, err := client.Dial()
 		if err != nil {
 			transport.logger.Debug().Stack().Err(err).Str("remoteAddress", remote).Msg("dial failed")
-			
+
 			// Only return if reconnection is disabled
 			if !config.TryReconnect {
 				if hasConnected {
@@ -75,7 +75,7 @@ func (transport *Transport) HandleClient(config tcp.ClientConfig, remote string)
 				// Add a longer delay before restarting the retry cycle
 				time.Sleep(config.ConnectionBackoffFunction(config.MaxConnectionRetries))
 			}
-			
+
 			continue
 		}
 
@@ -230,7 +230,10 @@ func (transport *Transport) SendMessage(message abstraction.TransportMessage) er
 	default:
 		err = ErrUnrecognizedEvent{message.Event()}
 	}
-	transport.errChan <- err
+	// handlePacketEvent already sends the error through the channel, so this avoids duplicates
+	if _, ok := err.(ErrConnClosed); !ok {
+		transport.errChan <- err
+	}
 	return err
 }
 
@@ -286,7 +289,6 @@ func (transport *Transport) handlePacketEvent(message PacketMessage) error {
 			eventLogger.Warn().Msg("target not connected")
 
 			err := ErrConnClosed{Target: target}
-			transport.errChan <- err
 			return nil, err
 		}
 		return conn, nil
