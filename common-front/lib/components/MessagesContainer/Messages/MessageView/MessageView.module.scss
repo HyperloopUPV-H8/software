@@ -24,12 +24,13 @@
         "icon content counter" auto
         "icon timestamp timestamp" auto / auto 1fr auto;
 
-    gap: 0.4rem 0.8rem;
+    gap: 0.2rem 0.4rem;
 
-    padding: 0.6rem;
+    padding: 0.3rem;
     background-color: var(--background-color);
-    border-radius: 1rem;
+    border-radius: 0.5rem;
     filter: (--shadow);
+    font-size: 0.8rem;
 }
 
 .icon {
@@ -48,7 +49,7 @@
 .idAndCounter {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.3rem;
 }
 
 .timestamp {
