@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(rg:*)",
+      "Bash(chmod:*)",
+      "Bash(go run:*)",
+      "Bash(go build:*)",
+      "Bash(tcpdump:*)",
+      "Bash(ls:*)",
+      "Bash(cargo:*)",
+      "Bash(mkdir:*)",
+      "Bash(git checkout:*)",
+      "Bash(git stash:*)",
+      "Bash(find:*)",
+      "Bash(timeout 5 cargo run -- --adj-path ../backend/cmd/adj list)",
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)"
+    ],
+    "deny": []
+  }
+}

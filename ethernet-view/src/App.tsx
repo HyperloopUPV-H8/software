@@ -1,7 +1,7 @@
 import "./App.css";
 import { TestingPage } from "pages/TestingPage/TestingPage";
 import { SplashScreen } from "components/SplashScreen/SplashScreen";
-import { WsHandlerProvider } from "common";
+import { WsHandlerProvider, PodDataProvider } from "common";
 import { useLoadBackend } from "common";
 import { AppLayout } from "layouts/AppLayout/AppLayout";
 import { useState } from "react";
@@ -27,7 +27,9 @@ function App() {
             >
                 {loadBackend.state === "fulfilled" && 
                     <WsHandlerProvider handler={loadBackend.wsHandler}>
-                        <TestingPage />
+                        <PodDataProvider>
+                            <TestingPage />
+                        </PodDataProvider>
                     </WsHandlerProvider>}
                 {loadBackend.state === "pending" && <SplashScreen />}
                 {loadBackend.state === "rejected" && <div>{`${loadBackend.error}`}</div>}
