@@ -102,7 +102,7 @@ function createLines(
 ): Line[] {
     return descriptions.map((description) => {
         const newHandler =
-            lines.find((line) => description.id === line.id)?.data ??
+            lines.find((line) => description.id == line.id)?.data ??
             new RangeArray([], length);
 
         const [min, max] = getLargestRange(
@@ -134,9 +134,9 @@ function createLines(
             warningRange: description.warningRange,
             getUpdate: () => description.getUpdate(),
             data:
-                lines.find((line) => description.id === line.id)?.data ??
+                lines.find((line) => description.id == line.id)?.data ??
                 new RangeArray([], length),
-            color: description.color,
+            color: 'red',
         };
     });
 }

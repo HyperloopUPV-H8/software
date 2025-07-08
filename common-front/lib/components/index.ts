@@ -20,4 +20,3 @@ export * from './Orders/useOrders';
 export * from './SplashScreen/SplashScreen';
 export * from './Caret/Caret';
 export * from './LiveStreamPlayer/LiveStreamPlayer';
-export * from './PodData';

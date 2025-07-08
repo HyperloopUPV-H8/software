@@ -60,7 +60,7 @@ export const TableUpdater = ({ children }: Props) => {
                 return;
             }
             const element = measurementElements.current.find(
-                (elem) => elem.id === item.id
+                (elem) => elem.id == item.id
             );
             if (!element) {
                 console.warn(`element of measurement ${item.id} not found`);
@@ -84,7 +84,7 @@ export const TableUpdater = ({ children }: Props) => {
         addMeasurement: (element: MeasurementElement) => {
             if (
                 !measurementElements.current.find(
-                    (item) => item.id === element.id
+                    (item) => item.id == element.id
                 )
             ) {
                 measurementElements.current.push(element);
@@ -92,7 +92,7 @@ export const TableUpdater = ({ children }: Props) => {
         },
         removeMeasurement: (id: string) => {
             measurementElements.current = measurementElements.current.filter(
-                (item) => item.id !== id
+                (item) => item.id != id
             );
         },
     };
