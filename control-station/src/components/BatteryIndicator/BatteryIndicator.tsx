@@ -70,7 +70,7 @@ export const BatteryIndicator = memo(
                     <div
                         className={styles.battery_fill}
                         style={{
-                            height: valueStateSOC + '%',
+                            height: lostConnection ? 0 : valueStateSOC + '%',
                             color: color != undefined ? color : color,
                         }}
                     />
