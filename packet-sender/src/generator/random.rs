@@ -23,9 +23,10 @@ impl RandomValueGenerator {
                 
                 // 80% chance to be within warning range
                 if rng.gen_bool(0.8) {
-                    return Ok(rng.gen_range(min..=max));
+                    // Add small epsilon to avoid potential float precision issues
+                    return Ok(rng.gen_range(min..max + f64::EPSILON));
                 } else {
-                    return Ok(rng.gen_range(extended_min..=extended_max));
+                    return Ok(rng.gen_range(extended_min..extended_max + f64::EPSILON));
                 }
             }
         }
@@ -33,7 +34,7 @@ impl RandomValueGenerator {
         // Check safe range
         if let Some(safe_range) = &variable.safe_range {
             if let (Some(min), Some(max)) = (safe_range[0], safe_range[1]) {
-                return Ok(rng.gen_range(min..=max));
+                return Ok(rng.gen_range(min..max + f64::EPSILON));
             }
         }
         
@@ -53,7 +54,8 @@ impl RandomValueGenerator {
             _ => {
                 // For numeric types, generate a value between 0 and max
                 let max = value_type.max_value();
-                rng.gen_range(0.0..=max)
+                // Use exclusive range to avoid overflow with f64::MAX
+                rng.gen_range(0.0..max)
             }
         };
         

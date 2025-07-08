@@ -151,10 +151,31 @@ fn parse_packet_with_measurements(
         for (idx, var_name) in var_names.iter().enumerate() {
             if let Some(var_id) = var_name.as_str() {
                 if let Some(measurement) = measurements_map.get(var_id) {
+                    let type_str = measurement["type"].as_str().unwrap_or("uint32");
+                    let value_type = if type_str == "enum" {
+                        // Parse enum with its values
+                        if let Some(enum_values) = measurement["enumValues"].as_array() {
+                            let values: Vec<String> = enum_values.iter()
+                                .filter_map(|v| v.as_str().map(|s| s.to_string()))
+                                .collect();
+                            if values.is_empty() {
+                                // Fallback to at least one value to prevent empty range panic
+                                ValueType::Enum(vec!["Unknown".to_string()])
+                            } else {
+                                ValueType::Enum(values)
+                            }
+                        } else {
+                            // Fallback to at least one value to prevent empty range panic
+                            ValueType::Enum(vec!["Unknown".to_string()])
+                        }
+                    } else {
+                        parse_value_type(type_str)?
+                    };
+                    
                     let variable = Variable {
                         id: idx as u16,
                         name: measurement["name"].as_str().unwrap_or(var_id).to_string(),
-                        value_type: parse_value_type(measurement["type"].as_str().unwrap_or("uint32"))?,
+                        value_type,
                         units: measurement["displayUnits"].as_str().map(|s| s.to_string()),
                         safe_range: parse_range(&measurement["safeRange"]),
                         warning_range: parse_range(&measurement["warningRange"]),
@@ -188,7 +209,11 @@ fn parse_value_type(type_str: &str) -> Result<ValueType> {
         "float32" => Ok(ValueType::Float32),
         "float64" => Ok(ValueType::Float64),
         "bool" => Ok(ValueType::Bool),
-        s if s.starts_with("enum") => Ok(ValueType::Enum(vec![])), // TODO: parse enum values
+        s if s.starts_with("enum") => {
+            // This case handles enum types that might come from other sources
+            // We provide a default value to prevent empty range panic
+            Ok(ValueType::Enum(vec!["Unknown".to_string()]))
+        }
         _ => Ok(ValueType::UInt32), // Default
     }
 }

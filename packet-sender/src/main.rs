@@ -30,7 +30,7 @@ struct Cli {
     backend_address: Option<String>,
 
     /// Backend UDP port (overrides ADJ if specified)
-    #[arg(short, long)]
+    #[arg(short = 'p', long)]
     backend_port: Option<u16>,
 
     #[command(subcommand)]
@@ -145,7 +145,7 @@ async fn main() -> Result<()> {
             println!("Press Ctrl+C to stop");
             
             // Run listener in a blocking thread
-            let handle = std::thread::spawn(move || {
+            let _handle = std::thread::spawn(move || {
                 if let Err(e) = test_listener::start_test_listener(&address) {
                     eprintln!("Listener error: {}", e);
                 }
