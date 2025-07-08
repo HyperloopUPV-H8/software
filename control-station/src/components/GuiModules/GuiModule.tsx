@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import styles from "./Module.module.scss";
+import styles from "./GuiModule.module.scss";
 
 import { useMeasurementsStore } from "common";
 
@@ -9,16 +9,16 @@ interface CellProps {
   max: number;
 }
 
-const Module: React.FC<{ id: string | number }> = ({ id }) => {
+const GuiModule: React.FC<{ id: string | number }> = ({ id }) => {
   const moduleMinCell = useMeasurementsStore(
-    (state) => (state.getNumericMeasurementInfo(`HVSCU-Cabinet/module_${id}_min_cell`)?.getUpdate() ?? 0)
+    (state) => (state.getNumericMeasurementInfo(`HVSCU-Cabinet/HVSCU-Cabinet_module_${id}_min_cell`)?.getUpdate() ?? 0)
   );
   const moduleMaxCell = useMeasurementsStore(
-    (state) => (state.getNumericMeasurementInfo(`HVSCU-Cabinet/module_${id}_max_cell`)?.getUpdate() ?? 0)
+    (state) => (state.getNumericMeasurementInfo(`HVSCU-Cabinet/HVSCU-Cabinet_module_${id}_max_cell`)?.getUpdate() ?? 0)
   );
 
   const moduleTotalVoltage = useMeasurementsStore(
-    (state) => (state.getNumericMeasurementInfo(`HVSCU-Cabinet/module_${id}_voltage`)?.getUpdate() ?? 0)
+    (state) => (state.getNumericMeasurementInfo(`HVSCU-Cabinet/HVSCU-Cabinet_module_${id}_voltage`)?.getUpdate() ?? 0)
   );
 
   // Estado para las celdas
@@ -28,7 +28,7 @@ const Module: React.FC<{ id: string | number }> = ({ id }) => {
     const intervalId = setInterval(() => {
       setCellValues(() =>
         Array.from({ length: 48 }, (_, i) => {
-          const variableName = `HVSCU-Cabinet/module_${id}_cell_${i + 1}_voltage`;
+          const variableName = `HVSCU-Cabinet/HVSCU-Cabinet_module_${id}_cell_${i + 1}_voltage`;
           return useMeasurementsStore.getState().getNumericMeasurementInfo(variableName)?.getUpdate() ?? 0;
         })
       );
@@ -64,15 +64,15 @@ const Module: React.FC<{ id: string | number }> = ({ id }) => {
         <div className={styles.voltajeContainer}>
           <div className={styles.dataStyle}>
             <p className={styles.moduleInfoLabel}>max:</p>
-            <p className={styles.p}>{`${moduleMaxCell} V`}</p>
+            <p className={styles.p}>{`${moduleMaxCell.toFixed(2)} V`}</p>
           </div>
           <div className={styles.dataStyle}>
             <p className={styles.moduleInfoLabel}>min:</p>
-            <p className={styles.p}>{`${moduleMinCell} V`}</p>
+            <p className={styles.p}>{`${moduleMinCell.toFixed(2)} V`}</p>
           </div>
           <div className={styles.dataStyle}>
             <p className={styles.moduleInfoLabel}>total:</p>
-            <p className={styles.p}>{`${moduleTotalVoltage} V`}</p>
+            <p className={styles.p}>{`${moduleTotalVoltage.toFixed(2)} V`}</p>
           </div>
         </div>
       </div>
@@ -85,5 +85,5 @@ const Module: React.FC<{ id: string | number }> = ({ id }) => {
   );
 };
 
-export default Module;
+export default GuiModule;
 

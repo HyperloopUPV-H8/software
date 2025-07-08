@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import styles from "./GuiPage.module.scss";
-import Module from "../../../components/GuiModules/Module";
+import GuiModule from "../../../components/GuiModules/GuiModule";
 import { Messages } from "../Messages/Messages";
-import { Orders, useMeasurementsStore, NumericMeasurementInfo } from "common";
+import { Orders, useMeasurementsStore, HvscuCabinetMeasurements, getBooleanMeasurement, GlobalTicker, useGlobalTicker } from "common";
 
 interface ModuleData {
   id: number | string;
@@ -16,16 +16,13 @@ const modules: ModuleData[] = [
 ];
 
 export function GuiPage() {
+  const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
   // Medidas
-  const totalSupercapsVoltageInfo = useMeasurementsStore((state) =>
-    state.getNumericMeasurementInfo("HVSCU-Cabinet/total_supercaps_voltage")
-  );
-  const currentMeasurementInfo = useMeasurementsStore((state) =>
-    state.getNumericMeasurementInfo("HVSCU-Cabinet/output_current")
-  );
-  const temperatureMeasurementInfo = useMeasurementsStore((state) =>
-    state.getNumericMeasurementInfo("HVSCU-Cabinet/temperature_total")
-  );
+  const totalSupercapsVoltageInfo = getNumericMeasurementInfo(HvscuCabinetMeasurements.TotalVoltage)
+  
+  const currentMeasurementInfo = getNumericMeasurementInfo(HvscuCabinetMeasurements.CurrentReading)
+
+  const temperatureMeasurementInfo = getNumericMeasurementInfo(HvscuCabinetMeasurements.Temperature)
 
   // Enums
   const contactorsStateInfo = useMeasurementsStore((state) =>
@@ -42,29 +39,11 @@ export function GuiPage() {
   const [contactorsState, setContactorsState] = useState<string | null>(null);
   const [bcuState, setBcuState] = useState<string | null>(null);
 
-  // Efectos
-  useEffect(() => {
-    setVoltageTotal(totalSupercapsVoltageInfo?.getUpdate() ?? null); // Si `getUpdate()` es el método adecuado
-  }, [totalSupercapsVoltageInfo]);
-  
-  useEffect(() => {
-    setCurrent(currentMeasurementInfo?.getUpdate() ?? null); // Similar para otras mediciones
-  }, [currentMeasurementInfo]);
-  
-  useEffect(() => {
-    setTemperature(temperatureMeasurementInfo?.getUpdate() ?? null); 
-  }, [temperatureMeasurementInfo]);
-  
-
-  useEffect(() => {
-    const value = contactorsStateInfo?.value;
-    setContactorsState(typeof value === "string" ? value : null);
-  }, [contactorsStateInfo]);
-
-  useEffect(() => {
-    const value = bcuGeneralStateInfo?.value;
-    setBcuState(typeof value === "string" ? value : null);
-  }, [bcuGeneralStateInfo]);
+  useGlobalTicker(() => {
+      setVoltageTotal(totalSupercapsVoltageInfo.getUpdate);
+      setCurrent(currentMeasurementInfo.getUpdate);
+      setTemperature(temperatureMeasurementInfo.getUpdate);
+  });
 
   return (
     <div>
@@ -75,13 +54,13 @@ export function GuiPage() {
               <div className={styles.statusItem}>
                 <h3>V total:</h3>
                 <div className={styles.value}>
-                  <span>{voltageTotal ?? "-"} V</span>
+                  <span>{voltageTotal?.toFixed(2) ?? "-"} V</span>
                 </div>
               </div>
               <div className={styles.statusItem}>
                 <h3>Current:</h3>
                 <div className={styles.value}>
-                  <span>{current ?? "-"} A</span>
+                  <span>{current?.toFixed(2) ?? "-"} A</span>
                 </div>
               </div>
               <div className={styles.statusItem}>
@@ -101,7 +80,7 @@ export function GuiPage() {
               <div className={styles.statusItem}>
                 <h3>Temperature total:</h3>
                 <div className={styles.value}>
-                  <span>{temperature ?? "-"} ºC</span>
+                  <span>{temperature?.toFixed(2) ?? "-"} ºC</span>
                 </div>
               </div>
               <div className={styles.statusItem}>
@@ -115,17 +94,8 @@ export function GuiPage() {
 
           <div className={styles.modulesContainer}>
             {modules.map((module) => (
-              <Module key={module.id} id={module.id} />
+              <GuiModule key={module.id} id={module.id} />
             ))}
-          </div>
-        </div>
-
-        <div className={styles.messagesAndOrders}>
-          <div className={styles.messages}>
-            <Messages />
-          </div>
-          <div className={styles.orders}>
-            <Orders boards={[]} />
           </div>
         </div>
       </main>

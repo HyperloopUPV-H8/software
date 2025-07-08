@@ -1,12 +1,8 @@
 import { Window } from 'components/Window/Window';
 import styles from './HVSCU.module.scss';
-import { useMeasurementsStore } from 'common';
 import { HvscuStateIndicator, ImdIndicator } from 'components/HvscuStateIndicator/HvscuStateIndicator';
 
 export const HVSCU = () => {
-    const getNumericMeasurementInfo = useMeasurementsStore(
-        (state) => state.getNumericMeasurementInfo
-    );
 // TODO: Get correct measurements from ADJ and correct icons
     return (
         <Window title="HVSCU - Status">

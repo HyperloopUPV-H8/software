@@ -13,7 +13,7 @@ export const Batteries = () => {
 
     const SocHigh = getNumericMeasurementInfo(HvscuMeasurements.BatterySOC);
     const SocLow = getNumericMeasurementInfo(BmslMeasurements.stateOfCharge);
-    const SocCabinet = getNumericMeasurementInfo(HvscuCabinetMeasurements.BatterySOC);
+    const SocCabinet = getNumericMeasurementInfo(HvscuCabinetMeasurements.Soc);
 
     const TotalVoltageHigh = getNumericMeasurementInfo(HvscuMeasurements.BatteriesVoltage);
     const TotalVoltageLow = getNumericMeasurementInfo(BmslMeasurements.totalVoltage);
