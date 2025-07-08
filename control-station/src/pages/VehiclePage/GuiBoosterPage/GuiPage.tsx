@@ -1,8 +1,17 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styles from "./GuiPage.module.scss";
 import GuiModule from "../../../components/GuiModules/GuiModule";
-import { Messages } from "../Messages/Messages";
-import { Orders, useMeasurementsStore, HvscuCabinetMeasurements, getBooleanMeasurement, GlobalTicker, useGlobalTicker } from "common";
+import { useMeasurementsStore, HvscuCabinetMeasurements, getBooleanMeasurement, GlobalTicker, useGlobalTicker, useOrders, BoardOrders, MessagesContainer } from "common";
+import { OrdersContainer } from "components/OrdersContainer/OrdersContainer";
+import { Window } from "components/Window/Window";
+import { getHardcodedOrders } from "../Data2Page/FixedOrders";
+
+// Función para filtrar solo las placas deseadas
+function getFilteredBoardOrders(boardOrders: BoardOrders[]): BoardOrders[] {
+  return boardOrders.filter(board => 
+    board.name === "HVSCU-Cabinet" || board.name === "BCU"
+  );
+}
 
 interface ModuleData {
   id: number | string;
@@ -17,6 +26,9 @@ const modules: ModuleData[] = [
 
 export function GuiPage() {
   const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
+  
+  const boardOrders = useOrders();
+  
   // Medidas
   const totalSupercapsVoltageInfo = getNumericMeasurementInfo(HvscuCabinetMeasurements.TotalVoltage)
   
@@ -97,6 +109,16 @@ export function GuiPage() {
               <GuiModule key={module.id} id={module.id} />
             ))}
           </div>
+        </div>
+        <div className={styles.messagesAndOrders}>
+          <Window title="Messages" className={styles.messages}>
+            <MessagesContainer />
+          </Window>
+          <Window title="Orders" className={styles.orders}>
+              <div className={styles.order_column}>
+                  <OrdersContainer boardFilter={['HVSCU-Cabinet']} boardOrdersFilter={getHardcodedOrders}/>
+              </div>
+          </Window>
         </div>
       </main>
     </div>

@@ -142,6 +142,9 @@
 .orders {
   flex: 1;
   overflow: auto;
+  height: 42vh;
+  min-height: 42vh;
+  max-height: 42vh;
 }
 
 .order_column {

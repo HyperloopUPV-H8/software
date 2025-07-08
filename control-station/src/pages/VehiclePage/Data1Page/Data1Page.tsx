@@ -11,6 +11,7 @@ import { Batteries } from './Data1Modules/Data1Batteries';
 import { LEDS } from './Data1Modules/Leds';
 import { BrakeState } from './Data1Modules/BrakeState';
 import { PodPosition } from './Data1Modules/PodPosition';
+import { OrdersContainer } from 'components/OrdersContainer/OrdersContainer';
 
 export const Data1Page = () => {
     const boardOrders = useOrders();
@@ -24,7 +25,7 @@ export const Data1Page = () => {
                     <ChartDLIM/>
                     <Window title="Orders" className={styles.orders}>
                         <div className={styles.order_column}>
-                            <Orders boards={getHardcodedOrders(boardOrders)} />
+                            <OrdersContainer boardOrdersFilter={getHardcodedOrders}/>
                         </div>
                     </Window>
                 </div>
