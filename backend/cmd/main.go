@@ -48,6 +48,7 @@ import (
 	state_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/state"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/sniffer"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/udp"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/network/tcp"
 	blcu_packet "github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/blcu"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
@@ -77,6 +78,7 @@ const (
 	RemoveStateOrder = "remove_state_order"
 )
 
+var configFile = flag.String("config", "config.toml", "path to configuration file")
 var traceLevel = flag.String("trace", "info", "set the trace level (\"fatal\", \"error\", \"warn\", \"info\", \"debug\", \"trace\")")
 var traceFile = flag.String("log", "trace.json", "set the trace log file")
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
@@ -84,9 +86,25 @@ var enableSNTP = flag.Bool("sntp", false, "enables a simple SNTP server on port 
 var networkDevice = flag.Int("dev", -1, "index of the network device to use, overrides device prompt")
 var blockprofile = flag.Int("blockprofile", 0, "number of block profiles to include")
 var playbackFile = flag.String("playback", "", "")
+var versionFlag = flag.Bool("version", false, "Show the backend version")
 var currentVersion string
 
 func main() {
+	// Parse command line flags
+	flag.Parse()
+	
+	// Handle version flag
+	if *versionFlag {
+		versionFile := "VERSION.txt"
+		versionData, err := os.ReadFile(versionFile)
+		if err == nil {
+			fmt.Println("Hyperloop UPV Backend Version:", strings.TrimSpace(string(versionData)))
+		} else {
+			fmt.Println("Hyperloop UPV Backend Version: unknown")
+		}
+		os.Exit(0)
+	}
+	
 	// update() // FIXME: Updater disabled due to cross-platform and reliability issues
 
 	traceFile := initTrace(*traceLevel, *traceFile)
@@ -108,7 +126,7 @@ func main() {
 	}
 	runtime.SetBlockProfileRate(*blockprofile)
 
-	config := getConfig("./config.toml")
+	config := getConfig(*configFile)
 
 	// <--- ADJ --->
 
@@ -124,17 +142,20 @@ func main() {
 	}
 
 	var dev pcap.Interface
-	if *networkDevice != -1 {
-		devs, err := pcap.FindAllDevs()
-		if err != nil {
-			trace.Fatal().Err(err).Msg("Getting devices")
-		}
+	if !config.Network.DevMode {
+		// Only select device if not in dev mode (sniffer requires device selection)
+		if *networkDevice != -1 {
+			devs, err := pcap.FindAllDevs()
+			if err != nil {
+				trace.Fatal().Err(err).Msg("Getting devices")
+			}
 
-		dev = devs[*networkDevice]
-	} else {
-		dev, err = selectDev(adj.Info.Addresses, config)
-		if err != nil {
-			trace.Fatal().Err(err).Msg("Error selecting device")
+			dev = devs[*networkDevice]
+		} else {
+			dev, err = selectDev(adj.Info.Addresses, config)
+			if err != nil {
+				trace.Fatal().Err(err).Msg("Error selecting device")
+			}
 		}
 	}
 
@@ -351,31 +372,43 @@ func main() {
 		Context: context.TODO(),
 	}, fmt.Sprintf("%s:%d", adj.Info.Addresses[BACKEND], adj.Info.Ports[TcpServer]))
 
-	// Start handling the sniffer
-	source, err := pcap.OpenLive(dev.Name, 1500, true, pcap.BlockForever)
-	if err != nil {
-		panic("failed to obtain sniffer source: " + err.Error())
-	}
-
-	if *playbackFile != "" {
-		source, err = pcap.OpenOffline(*playbackFile)
+	// Start handling network packets (either sniffer or UDP server based on dev mode)
+	if config.Network.DevMode {
+		// Dev mode: Use UDP server
+		trace.Info().Msg("Starting in dev mode with UDP server")
+		udpServer := udp.NewServer(adj.Info.Addresses[BACKEND], adj.Info.Ports[UDP], &trace.Logger)
+		err := udpServer.Start()
+		if err != nil {
+			panic("failed to start UDP server: " + err.Error())
+		}
+		go transp.HandleUDPServer(udpServer)
+	} else {
+		// Production mode: Use packet sniffer
+		source, err := pcap.OpenLive(dev.Name, 1500, true, pcap.BlockForever)
 		if err != nil {
 			panic("failed to obtain sniffer source: " + err.Error())
 		}
-	}
 
-	boardIps := make([]net.IP, 0, len(adj.Info.BoardIds))
-	for boardName := range adj.Info.BoardIds {
-		boardIps = append(boardIps, net.ParseIP(adj.Info.Addresses[boardName]))
-	}
+		if *playbackFile != "" {
+			source, err = pcap.OpenOffline(*playbackFile)
+			if err != nil {
+				panic("failed to obtain sniffer source: " + err.Error())
+			}
+		}
 
-	filter := getFilter(boardIps, net.ParseIP(adj.Info.Addresses[BACKEND]), adj.Info.Ports[UDP])
-	trace.Warn().Str("filter", filter).Msg("filter")
-	err = source.SetBPFFilter(filter)
-	if err != nil {
-		panic("failed to compile bpf filter")
+		boardIps := make([]net.IP, 0, len(adj.Info.BoardIds))
+		for boardName := range adj.Info.BoardIds {
+			boardIps = append(boardIps, net.ParseIP(adj.Info.Addresses[boardName]))
+		}
+
+		filter := getFilter(boardIps, net.ParseIP(adj.Info.Addresses[BACKEND]), adj.Info.Ports[UDP])
+		trace.Warn().Str("filter", filter).Msg("filter")
+		err = source.SetBPFFilter(filter)
+		if err != nil {
+			panic("failed to compile bpf filter")
+		}
+		go transp.HandleSniffer(sniffer.New(source, &layers.LayerTypeEthernet, trace.Logger))
 	}
-	go transp.HandleSniffer(sniffer.New(source, &layers.LayerTypeEthernet, trace.Logger))
 
 	// <--- http server --->
 	podDataHandle, err := h.HandleDataJSON("podData.json", pod_data.GetDataOnlyPodData(podData))
@@ -732,13 +765,6 @@ func update() {
 	versionData, err := os.ReadFile(versionFile)
 	if err == nil {
 		currentVersion = strings.TrimSpace(string(versionData))
-
-		versionFlag := flag.Bool("version", false, "Show the backend version")
-		flag.Parse()
-		if *versionFlag {
-			fmt.Println("Hyperloop UPV Backend Version:", currentVersion)
-			os.Exit(0)
-		}
 	} else {
 		fmt.Fprintf(os.Stderr, "Error reading version file (%s): %v\n", versionFile, err)
 		return
