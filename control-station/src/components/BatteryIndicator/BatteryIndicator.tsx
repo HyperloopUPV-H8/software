@@ -11,8 +11,8 @@ import { LostConnectionContext } from 'services/connections';
 
 interface Props {
     icon?: string;
-    name: string;
     getValue: () => number;
+    getValueSOC: () => number;
     safeRangeMin: number;
     warningRangeMin: number;
     safeRangeMax: number;
@@ -26,8 +26,8 @@ interface Props {
 export const BatteryIndicator = memo(
     ({
         icon,
-        name,
         getValue,
+        getValueSOC,
         safeRangeMin,
         warningRangeMin,
         safeRangeMax,
@@ -38,15 +38,9 @@ export const BatteryIndicator = memo(
         className,
     }: Props) => {
         const [valueState, setValueState] = useState<number>(0);
+        const [valueStateSOC, setValueStateSOC] = useState<number>(0);
         const lostConnection = useContext(LostConnectionContext);
 
-        const percentage = lostConnection
-            ? 100
-            : getPercentageFromRange(
-                  valueState,
-                  warningRangeMin,
-                  warningRangeMax
-              );
         const state = lostConnection
             ? 'fault'
             : getStateFromRange(
@@ -59,6 +53,7 @@ export const BatteryIndicator = memo(
 
         useGlobalTicker(() => {
             setValueState(getValue());
+            setValueStateSOC(getValueSOC)
         });
 
         return (
@@ -68,26 +63,35 @@ export const BatteryIndicator = memo(
                     backgroundColor:
                         backgroundColor != undefined
                             ? backgroundColor
-                            : stateToColorBackground[state],
+                            : 'transparent',
                 }}
             >
-                <div
-                    className={styles.range_bar}
-                    style={{
-                        width: percentage + '%',
-                        color: color != undefined ? color : stateToColor[state],
-                    }}
-                />
-
-                <div className={styles.name_display}>
-                    <img className={styles.icon} src={icon} />
-                    <p className={styles.name}>{name}</p>
+                <div className={styles.battery_container}>
+                    <div
+                        className={styles.battery_fill}
+                        style={{
+                            height: valueStateSOC + '%',
+                            color: color != undefined ? color : color,
+                        }}
+                    />
+                    <div className={styles.battery_level_text}>
+                        <span className={styles.value}>
+                            {lostConnection ? '-.-' : valueState?.toFixed(1)}
+                        </span>
+                        {units && <span className={styles.units}>{units}</span>}
+                    </div>
                 </div>
-                <div className={styles.value_display}>
-                    <p className={styles.value}>
-                        {lostConnection ? '-.--' : valueState?.toFixed(2)}
-                    </p>
-                    <p className={styles.units}>{units}</p>
+
+                <div className={styles.info_container}>
+                    <div className={styles.name_container}>
+                        {icon && <img className={styles.icon} src={icon} />}
+                    </div>
+                    
+                    <div className={styles.percentage_container}>
+                        <span className={styles.percentage}>
+                            {lostConnection ? '-.--' : valueStateSOC ? Math.round(valueStateSOC) : '-.--'}%
+                        </span>
+                    </div>
                 </div>
             </div>
         );

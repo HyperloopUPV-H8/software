@@ -10,6 +10,9 @@
     grid-row-start: 1;
     grid-column-start: 1;
     font-size: inherit;
+    z-index: 2;
+    max-width: 80%;
+    text-align: center;
 
     .name {
         font-weight: inherit;

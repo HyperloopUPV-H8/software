@@ -20,7 +20,10 @@
 
 .content {
     display: flex;
-    justify-content: flex-start;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
     padding: 0.6rem;
     background-color: colors.getColor('primary', 99);
     overflow: scroll;
