@@ -14,16 +14,16 @@ automatic_window_opening = "" # Leave blank to open no windows (<blank>, etherne
 
 # Vehicle Configuration
 [vehicle]
-boards = ["HVSCU", "PCU", "BLCU", "LCU", "BCU", "BMSL"]
+boards = ["HVSCU", "HVSCU-cabinet", "PCU", "LCU", "BCU", "BMSL"]
 
 # ADJ (Architecture Description JSON) Configuration
 [adj]
 branch = "software" # Leave blank when using ADJ as a submodule (like this: "")
-test = true     # Enable test mode
+test = true         # Enable test mode
 
 # Network Configuration
 [network]
-manual = true # Manual network device selection
+manual = true   # Manual network device selection
 dev_mode = true # IMPORTANT: Dev mode enabled - uses UDP server instead of packet sniffer
 
 # Transport Configuration
@@ -65,17 +65,17 @@ files = "/"
 
 # TFTP Configuration
 [tftp]
-block_size = 512      # TFTP block size (512 or 1468 bytes)
-retries = 3           # Number of retries for TFTP operations
-timeout_ms = 5000     # Timeout for TFTP operations in milliseconds
-backoff_factor = 2    # Backoff factor for retries
+block_size = 512       # TFTP block size (512 or 1468 bytes)
+retries = 3            # Number of retries for TFTP operations
+timeout_ms = 5000      # Timeout for TFTP operations in milliseconds
+backoff_factor = 2     # Backoff factor for retries
 enable_progress = true # Enable progress updates during transfers
 
 # BLCU Configuration
 [blcu]
-ip = "10.10.10.5"        # BLCU IP address
-download_order_id = 0     # Order ID for download operations (0 = use default)
-upload_order_id = 0       # Order ID for upload operations (0 = use default)
+ip = "10.10.10.5"     # BLCU IP address
+download_order_id = 0 # Order ID for download operations (0 = use default)
+upload_order_id = 0   # Order ID for upload operations (0 = use default)
 
 # Logging Configuration
 [logging]
