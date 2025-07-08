@@ -31,11 +31,8 @@ export const BrakeState = () => {
 
     return (
         <div className={styles.break_state} style={{backgroundColor: bgColor}}>
-            <div>
-                <img src={hand} alt="hand" style={{ height: '1em', marginRight: '0.3em', flexShrink: 0 }} />
-            </div>
             <div style={{color: textColor}}>
-                Brake State
+                {lostConnection ? 'Connection Lost' : ReedsState ? 'UNBRAKED' : 'BRAKED'}
             </div>
         </div>
     );
