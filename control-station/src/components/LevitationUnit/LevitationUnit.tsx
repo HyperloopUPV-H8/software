@@ -1,7 +1,7 @@
 import { LcuMeasurements } from 'common';
 import styles from './LevitationUnit.module.scss';
 import { IndicatorStack } from 'components/IndicatorStack/IndicatorStack';
-import batteryFilled from 'assets/svg/battery-filled.svg';
+import thunder from 'assets/svg/thunder-filled.svg';
 import { useMeasurementsStore } from 'common';
 import EMSRepresentation from './EMSRepresentation/EMSRepresentation';
 import HEMSRepresentation from './HEMSRepresentation/HEMSRepresentation';
@@ -97,7 +97,7 @@ export const LevitationUnit = ({ unitIndex, kind, imageSide }: Props) => {
                 ))}
             <IndicatorStack className={styles.levitationUnitMeasurements}>
                 <CurrentIndicator
-                    icon={batteryFilled}
+                    icon={thunder}
                     getValue={current.getUpdate}
                     units={current.units}
                     safeRangeMin={current.range[0]!!}
