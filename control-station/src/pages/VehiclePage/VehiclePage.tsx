@@ -53,3 +53,4 @@ function any<T>(data: T[], condition: (value: T) => boolean): boolean {
     return false;
 }
  */
+export{}
