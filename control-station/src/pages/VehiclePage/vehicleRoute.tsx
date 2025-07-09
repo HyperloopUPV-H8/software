@@ -1,4 +1,4 @@
-import { Data1Page } from './Data1Page/Data1Page';
+/* import { Data1Page } from './MainPage/MainPage';
 import { Data2Page } from './Data2Page/Data2Page';
 import { VehiclePage } from './VehiclePage';
 import { Navigate } from 'react-router-dom';
@@ -13,3 +13,4 @@ export const vehicleRoute = {
         { path: 'guiBooster', element: <GuiPage /> },
     ],
 };
+ */

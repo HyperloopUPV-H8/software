@@ -1,15 +1,26 @@
-import styles from './Data2Page.module.scss';
+import styles from './BatteriesPage.module.scss';
 import { LCU } from '../Boards/LCU/LCU';
-import { PCU } from '../Boards/PCU/PCU';
 import { Orders, useOrders } from 'common';
 import { Connections, Logger, MessagesContainer } from 'common';
 import { Window } from 'components/Window/Window';
 import FixedOrders, { getHardcodedOrders } from './FixedOrders';
+import { usePodDataUpdate } from 'hooks/usePodDataUpdate';
+import { Connection, useConnections } from 'common';
+import { LostConnectionContext } from 'services/connections';
 
-export const Data2Page = () => {
+export const BatteriesPage = () => {
+    usePodDataUpdate();
+    
+    const connections = useConnections();
     const boardOrders = useOrders();
 
     return (
+        <LostConnectionContext.Provider
+             value={any(
+                [...connections.boards, connections.backend],
+                 isDisconnected
+             )}
+        >
         <div className={styles.data2_page}>
             <div className={`${styles.column} ${styles.lcu}`}>
                 <LCU />
@@ -38,5 +49,29 @@ export const Data2Page = () => {
                 </Window>
             </div>
         </div>
+        
+        </LostConnectionContext.Provider>
     );
 };
+
+function isDisconnected(connection: Connection): boolean {
+    return !connection.isConnected;
+}
+
+function all<T>(data: T[], condition: (value: T) => boolean): boolean {
+    for (const value of data) {
+        if (!condition(value)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function any<T>(data: T[], condition: (value: T) => boolean): boolean {
+    for (const value of data) {
+        if (condition(value)) {
+            return true;
+        }
+    }
+    return false;
+}

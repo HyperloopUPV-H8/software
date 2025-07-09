@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import styles from "./GuiModule.module.scss";
+import styles from "./BoosterModule.module.scss";
 
 import { useMeasurementsStore } from "common";
 
@@ -9,7 +9,7 @@ interface CellProps {
   max: number;
 }
 
-const GuiModule: React.FC<{ id: string | number }> = ({ id }) => {
+const BoosterModule: React.FC<{ id: string | number }> = ({ id }) => {
   const moduleMinCell = useMeasurementsStore(
     (state) => (state.getNumericMeasurementInfo(`HVSCU-Cabinet/HVSCU-Cabinet_module_${id}_min_cell`)?.getUpdate() ?? 0)
   );
@@ -85,5 +85,5 @@ const GuiModule: React.FC<{ id: string | number }> = ({ id }) => {
   );
 };
 
-export default GuiModule;
+export default BoosterModule;
 

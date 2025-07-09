@@ -1,7 +1,7 @@
 import { HvscuMeasurements, useGlobalTicker, useMeasurementsStore } from "common";
 import { useContext, useState } from "react";
 import { LostConnectionContext } from "services/connections";
-import styles from '../Data1Page.module.scss';
+import styles from '../MainPage.module.scss';
 import { useEffect } from 'react';
 
 export const LEDS = () => {

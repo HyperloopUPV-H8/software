@@ -1,5 +1,5 @@
 import { Window2 } from 'components/Window/Window2';
-import styles from '../Data1Page.module.scss';
+import styles from '../MainPage.module.scss';
 import { BatteryIndicator } from 'components/BatteryIndicator/BatteryIndicator';
 import { BmslMeasurements, useMeasurementsStore, HvscuMeasurements, HvscuCabinetMeasurements } from "common";
 import { GaugeTag } from 'components/GaugeTag/GaugeTag';
