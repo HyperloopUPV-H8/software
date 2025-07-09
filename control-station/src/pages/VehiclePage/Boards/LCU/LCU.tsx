@@ -26,7 +26,7 @@ export const LCU = () => {
             <div className={styles.LCUWrapper}>
                 <div className={styles.levitationUnitsWrapper}>
                     <div className={styles.levitationUnitsColumn}>
-                        <h5 className={styles.subtitle}>Left side</h5>
+                        <span className={styles.subtitle}>Left side</span>
                         <LevitationUnit unitIndex={1} kind="hems" imageSide={'none'} />
                         <LevitationUnit unitIndex={5} kind="ems" imageSide={'none'} />
                         <LevitationUnit unitIndex={7} kind="ems" imageSide={'none'} />
@@ -35,7 +35,7 @@ export const LCU = () => {
                     </div>
 
                     <div className={styles.levitationUnitsColumn}>
-                        <h5 className={styles.subtitle}>Right side</h5>
+                        <span className={styles.subtitle}>Right side</span>
                         <LevitationUnit unitIndex={0} kind="hems" imageSide={'none'}  />
                         <LevitationUnit unitIndex={4} kind="ems" imageSide={'none'}  />
                         <LevitationUnit unitIndex={6} kind="ems" imageSide={'none'} />
@@ -44,7 +44,7 @@ export const LCU = () => {
                     </div>
                 </div>
 
-                <h5 className={styles.subtitle}>Orientation</h5>
+                <span className={styles.subtitle}>Orientation</span>
                 <div className={styles.rotationIndicatorsWrapper}>
                     <div className={styles.rotationRow}>
                         <IndicatorStack>

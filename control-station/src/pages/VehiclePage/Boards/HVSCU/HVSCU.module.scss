@@ -9,10 +9,11 @@
 
 .subtitle {
   font-size: 1.1rem;
-  font-weight: 300;
   text-align: center;
   color: #5894A7;
   font-style: italic;
+  font-weight: bold;
+  white-space: nowrap;
 }
 
 .levitationUnitsWrapper {
@@ -21,7 +22,6 @@
   justify-content: stretch;
   align-items: stretch;
   width: 100%;
-  margin: 0;
   gap: 0.5rem;
 }
 
@@ -30,7 +30,7 @@
   flex-direction: column;
   align-items: stretch;
   flex: 1 1 0;
-  margin: 0;
+  width: 100%;
 }
 
 .currentBar {
@@ -56,7 +56,8 @@
 
 .text {
   display: flex;
-  flex-direction: column;
+  flex-direction: column; 
+  justify-content: center; 
   align-items: center;
   margin: 0.5rem;
   gap: 0.4rem;
