@@ -22,7 +22,7 @@ export const LCU = () => {
     const positionZ = getNumericMeasurementInfo(LcuMeasurements.positionZ);
 
     return (
-        <Window title="LCU - Current">
+        <Window title="LEVITATION">
             <div className={styles.LCUWrapper}>
                 <div className={styles.levitationUnitsWrapper}>
                     <div className={styles.levitationUnitsColumn}>

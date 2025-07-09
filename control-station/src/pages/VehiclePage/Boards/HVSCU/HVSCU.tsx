@@ -5,7 +5,7 @@ import { HvscuStateIndicator, ImdIndicator } from 'components/HvscuStateIndicato
 export const HVSCU = () => {
 // TODO: Get correct measurements from ADJ and correct icons
     return (
-        <Window title="HVSCU - Status">
+        <Window title="BMS">
             <div className={styles.HVSCU}>
                 <div className={styles.levitationUnitsWrapper}>
                     <div className={styles.levitationUnitsColumn}>  
