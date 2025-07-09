@@ -1,7 +1,7 @@
 import { BcuMeasurements, ColorfulChart, PcuMeasurements, useMeasurementsStore } from "common";
 import { useContext } from "react";
 import { LostConnectionContext } from "services/connections";
-import styles from '../Data1Page.module.scss';
+import styles from '../MainPage.module.scss';
 import { Window } from 'components/Window/Window';
 
 

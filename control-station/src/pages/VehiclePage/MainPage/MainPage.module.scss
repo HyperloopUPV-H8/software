@@ -44,6 +44,9 @@
   box-sizing: border-box;
   padding: 0;
   gap: 0.4rem;
+  margin-top: 1%;
+  margin-left: 1%;
+  margin-right: 1%;
 }
 
 .leds {
@@ -157,7 +160,6 @@
 .emergency_wrapper {
   display: flex;
   justify-content: center;
-  margin-bottom: 1rem;
 }
 .compact {
   height: 200px;

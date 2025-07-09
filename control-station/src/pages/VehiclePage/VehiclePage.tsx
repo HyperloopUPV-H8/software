@@ -1,4 +1,4 @@
-import styles from './VehiclePage.module.scss';
+/* import styles from './VehiclePage.module.scss';
 import { Pagination } from 'components/Pagination/Pagination';
 import { PageWrapper } from 'pages/PageWrapper/PageWrapper';
 import { Outlet } from 'react-router-dom';
@@ -52,3 +52,4 @@ function any<T>(data: T[], condition: (value: T) => boolean): boolean {
     }
     return false;
 }
+ */

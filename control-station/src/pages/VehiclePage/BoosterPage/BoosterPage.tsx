@@ -1,17 +1,13 @@
 import { useState } from "react";
-import styles from "./GuiPage.module.scss";
-import GuiModule from "../../../components/GuiModules/GuiModule";
+import styles from "./BoosterPage.module.scss";
+import GuiModule from "../../../components/BoosterModules/BoosterModule";
 import { useMeasurementsStore, HvscuCabinetMeasurements, getBooleanMeasurement, GlobalTicker, useGlobalTicker, useOrders, BoardOrders, MessagesContainer } from "common";
 import { OrdersContainer } from "components/OrdersContainer/OrdersContainer";
 import { Window } from "components/Window/Window";
-import { getHardcodedOrders } from "../Data2Page/FixedOrders";
-
-// Función para filtrar solo las placas deseadas
-function getFilteredBoardOrders(boardOrders: BoardOrders[]): BoardOrders[] {
-  return boardOrders.filter(board => 
-    board.name === "HVSCU-Cabinet" || board.name === "BCU"
-  );
-}
+import { getHardcodedOrders } from "../BatteriesPage/FixedOrders";
+import { usePodDataUpdate } from 'hooks/usePodDataUpdate';
+import { Connection, useConnections } from 'common';
+import { LostConnectionContext } from 'services/connections';
 
 interface ModuleData {
   id: number | string;
@@ -24,7 +20,10 @@ const modules: ModuleData[] = [
   { id: 3, name: "Module 3" },
 ];
 
-export function GuiPage() {
+export function BoosterPage() {
+  usePodDataUpdate();
+  
+  const connections = useConnections();
   const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
   
   const boardOrders = useOrders();
@@ -58,7 +57,12 @@ export function GuiPage() {
   });
 
   return (
-    <div>
+    <LostConnectionContext.Provider
+         value={any(
+            [...connections.boards, connections.backend],
+             isDisconnected
+         )}
+    >
       <main className={styles.boosterMainContainer}>
         <div className={styles.boosterContainer}>
           <div className={styles.statusContainer}>
@@ -121,6 +125,28 @@ export function GuiPage() {
           </Window>
         </div>
       </main>
-    </div>
+    </LostConnectionContext.Provider>
   );
+}
+
+function isDisconnected(connection: Connection): boolean {
+    return !connection.isConnected;
+}
+
+function all<T>(data: T[], condition: (value: T) => boolean): boolean {
+    for (const value of data) {
+        if (!condition(value)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function any<T>(data: T[], condition: (value: T) => boolean): boolean {
+    for (const value of data) {
+        if (condition(value)) {
+            return true;
+        }
+    }
+    return false;
 }

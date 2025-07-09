@@ -2,7 +2,7 @@ import { PcuMeasurements, useGlobalTicker, useMeasurementsStore } from "common";
 import { useContext, useState } from "react";
 import { LostConnectionContext } from "services/connections";
 import levion from 'assets/svg/levion.svg'
-import styles from '../Data1Page.module.scss';
+import styles from '../MainPage.module.scss';
 import { getPercentageFromRange } from "state";
 
 export const PodPosition = () => {

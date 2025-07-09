@@ -1,22 +1,32 @@
-import styles from './Data1Page.module.scss';
+import styles from './MainPage.module.scss';
 import { LCU } from '../Boards/LCU/LCU';
 import { HVSCU } from '../Boards/HVSCU/HVSCU';
-import { Orders, useOrders } from 'common';
 import { MessagesContainer } from 'common';
 import { Window } from 'components/Window/Window';
-import { emergencyStopOrders, getHardcodedOrders } from '../Data2Page/FixedOrders';
+import { emergencyStopOrders, getHardcodedOrders } from '../BatteriesPage/FixedOrders';
 import { BigOrderButton } from 'components/BigOrderButton';
-import { ChartDLIM, ChartLSM } from './Data1Modules/Data1Charts';
-import { Batteries } from './Data1Modules/Data1Batteries';
-import { LEDS } from './Data1Modules/Leds';
-import { BrakeState } from './Data1Modules/BrakeState';
-import { PodPosition } from './Data1Modules/PodPosition';
+import { ChartDLIM, ChartLSM } from './MainPageModules/MainCharts';
+import { Batteries } from './MainPageModules/MainBatteries';
+import { LEDS } from './MainPageModules/Leds';
+import { BrakeState } from './MainPageModules/BrakeState';
+import { PodPosition } from './MainPageModules/PodPosition';
 import { OrdersContainer } from 'components/OrdersContainer/OrdersContainer';
+import { usePodDataUpdate } from 'hooks/usePodDataUpdate';
+import { Connection, useConnections } from 'common';
+import { LostConnectionContext } from 'services/connections';
 
-export const Data1Page = () => {
-    const boardOrders = useOrders();
+export const MainPage = () => {
+    usePodDataUpdate();
+    
+    const connections = useConnections();
 
     return (
+        <LostConnectionContext.Provider
+             value={any(
+                [...connections.boards, connections.backend],
+                 isDisconnected
+             )}
+        >
         <div className={styles.data1_page}>
             <LEDS/>
             <PodPosition/>
@@ -58,5 +68,29 @@ export const Data1Page = () => {
                 </div>
             </div>
         </div>
+        
+        </LostConnectionContext.Provider>
     );
 };
+
+function isDisconnected(connection: Connection): boolean {
+    return !connection.isConnected;
+}
+
+function all<T>(data: T[], condition: (value: T) => boolean): boolean {
+    for (const value of data) {
+        if (!condition(value)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function any<T>(data: T[], condition: (value: T) => boolean): boolean {
+    for (const value of data) {
+        if (condition(value)) {
+            return true;
+        }
+    }
+    return false;
+}

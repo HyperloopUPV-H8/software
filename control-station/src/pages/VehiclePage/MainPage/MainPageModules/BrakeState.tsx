@@ -1,8 +1,7 @@
 import { VcuMeasurements, useGlobalTicker, useMeasurementsStore } from "common";
 import { useContext, useState } from "react";
 import { LostConnectionContext } from "services/connections";
-import styles from '../Data1Page.module.scss';
-import hand from 'assets/svg/hand.svg'
+import styles from '../MainPage.module.scss';
 
 export const BrakeState = () => {
     const getBooleanMeasurementInfo = useMeasurementsStore((state) => state.getBooleanMeasurementInfo);
