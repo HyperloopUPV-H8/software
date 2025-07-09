@@ -56,9 +56,26 @@ cargo build --release
 
 ## Usage
 
+### Dev Mode vs Production Mode
+
+The packet-sender now supports two modes:
+
+- **Production Mode (default)**: Sends packets that can be captured by the backend's packet sniffer. Requires board IPs to be configured on network interfaces.
+- **Dev Mode**: Sends packets directly to the backend's UDP server. Use this for local development.
+
+```bash
+# Production mode (for use with packet sniffer)
+./target/release/packet-sender random
+
+# Dev mode (for use with UDP server)
+./target/release/packet-sender --dev random
+```
+
 ### Interactive Mode
 ```bash
 ./target/release/packet-sender
+# Or in dev mode
+./target/release/packet-sender --dev
 ```
 
 ### Random Generation
@@ -68,6 +85,9 @@ cargo build --release
 
 # Generate packets from specific board at 200 pps
 ./target/release/packet-sender random -b BCU -r 200
+
+# Dev mode with specific board
+./target/release/packet-sender --dev random -b BCU -r 200
 ```
 
 ### Board Simulation
@@ -77,6 +97,9 @@ cargo build --release
 
 # Simulate with sine wave pattern
 ./target/release/packet-sender board BCU --mode sine
+
+# Dev mode simulation
+./target/release/packet-sender --dev board BCU --mode sine
 ```
 
 ### List Available Boards
@@ -117,8 +140,15 @@ Packets follow the backend's binary format:
 
 ### Testing with Backend
 
-1. Start the backend with sniffer enabled
-2. Run the packet sender
+#### Production Mode (with Sniffer)
+1. Start the backend with `dev_mode = false` in config.toml
+2. Ensure network interfaces are configured with board IPs
+3. Run the packet sender without the `--dev` flag
+4. Monitor backend logs for received packets
+
+#### Dev Mode (with UDP Server)
+1. Start the backend with `dev_mode = true` in config.toml or dev-config.toml
+2. Run the packet sender with the `--dev` flag
 3. Monitor backend logs for received packets
 
 ## Troubleshooting

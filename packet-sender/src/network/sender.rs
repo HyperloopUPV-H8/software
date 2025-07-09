@@ -16,8 +16,8 @@ pub struct PacketSender {
 }
 
 impl PacketSender {
-    pub async fn new(backend_host: &str, backend_port: u16, adj: ADJ) -> Result<Self> {
-        let mut network = NetworkManager::new(backend_host, backend_port, adj.clone()).await?;
+    pub async fn new(backend_host: &str, backend_port: u16, adj: ADJ, dev_mode: bool) -> Result<Self> {
+        let mut network = NetworkManager::new(backend_host, backend_port, adj.clone(), dev_mode).await?;
         network.initialize_boards().await?;
         
         let generators = Arc::new(RwLock::new(Vec::new()));

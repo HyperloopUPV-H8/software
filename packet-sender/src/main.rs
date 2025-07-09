@@ -33,6 +33,10 @@ struct Cli {
     #[arg(short = 'p', long)]
     backend_port: Option<u16>,
 
+    /// Use dev mode (UDP server) instead of packet sniffer
+    #[arg(short = 'd', long, default_value_t = false)]
+    dev: bool,
+
     #[command(subcommand)]
     command: Option<Commands>,
 }
@@ -104,12 +108,14 @@ async fn main() -> Result<()> {
     });
     
     info!("Backend address: {}:{}", backend_address, backend_port);
+    info!("Dev mode: {}", cli.dev);
     
     // Create packet sender
     let mut sender = PacketSender::new(
         &backend_address,
         backend_port,
         adj.clone(),
+        cli.dev,
     ).await?;
     
     match cli.command {
