@@ -1,5 +1,4 @@
 import styles from './MainPage.module.scss';
-import { LCU } from '../Boards/LCU/LCU';
 import { HVSCU } from '../Boards/HVSCU/HVSCU';
 import { MessagesContainer } from 'common';
 import { Window } from 'components/Window/Window';
@@ -14,6 +13,7 @@ import { OrdersContainer } from 'components/OrdersContainer/OrdersContainer';
 import { usePodDataUpdate } from 'hooks/usePodDataUpdate';
 import { Connection, useConnections } from 'common';
 import { LostConnectionContext } from 'services/connections';
+import { LCUandMaster } from './MainPageModules/LCUandMaster';
 
 export const MainPage = () => {
     usePodDataUpdate();
@@ -44,7 +44,7 @@ export const MainPage = () => {
                 <BrakeState/>
                     <div className={styles.row}>
                         <HVSCU />
-                        <LCU />
+                        <LCUandMaster />
                     </div>
 
                     <Batteries/>
