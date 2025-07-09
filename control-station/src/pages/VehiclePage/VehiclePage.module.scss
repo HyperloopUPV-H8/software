@@ -1,9 +1,6 @@
 .pagination_position {
-    margin-top: 0.5rem;
-    display: flex;
-    justify-content: center;
-    // position: fixed;
-    // right: 50%;
-    // bottom: 1rem;
-    width: 100%;
+    position: fixed;
+    right: 50%;
+    bottom: 1rem;
+    width: fit-content;
 }

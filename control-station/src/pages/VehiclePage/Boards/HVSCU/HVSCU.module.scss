@@ -9,11 +9,10 @@
 
 .subtitle {
   font-size: 1.1rem;
+  font-weight: 300;
   text-align: center;
   color: #5894A7;
   font-style: italic;
-  font-weight: bold;
-  white-space: nowrap;
 }
 
 .levitationUnitsWrapper {
@@ -56,7 +55,6 @@
 
 .text {
   display: flex;
-  flex-direction: column; 
   justify-content: center; 
   align-items: center;
   margin: 0.5rem;

@@ -13,7 +13,7 @@ export const HVSCU = () => {
                         <div className={styles.text}><span className={styles.subtitle}>HV Charger</span><HvscuStateIndicator measurementId={'HVSCU-Cabinet/operational_state_machine_status'} icon={'battery-filled.svg'} /></div>
                         <div className={styles.text}><span className={styles.subtitle}>Vehicle Contactors</span><HvscuStateIndicator measurementId={'HVSCU-Cabinet/contactors_status'} icon={'battery-filled.svg'} /></div>
                         <div className={styles.text}><span className={styles.subtitle}>Cabinet Contactors</span><HvscuStateIndicator measurementId={''} icon={'battery-filled.svg'} /></div>
-                        <div className={styles.text}><span className={styles.subtitle}>Supercaps Charging</span><HvscuStateIndicator measurementId={''} icon={'battery-filled.svg'} /></div>
+                        <div className={styles.text}><span className={styles.subtitle}>Supercaps</span><HvscuStateIndicator measurementId={''} icon={'battery-filled.svg'} /></div>
                         <div className={styles.text}><span className={styles.subtitle}>LV Charger</span><HvscuStateIndicator measurementId={'HVSCU-Cabinet/lv_status'} icon={'battery-filled.svg'} /></div>
                         <div className={styles.text}><span className={styles.subtitle}>SDC</span><HvscuStateIndicator measurementId={'HVSCU-Cabinet/sdc_status'} icon={'battery-filled.svg'} /></div>
                     </div>
