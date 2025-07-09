@@ -63,7 +63,7 @@ export const ImdIndicator = () => {
             <img className={styles.icon} src={thunderIcon} />
 
             <p className={styles.title}>
-                {lostConnection ? 'DISCONNECTED' : IsImdOk ? 'OK' : 'INSULATION FAULT'}
+                {lostConnection ? 'DISCONNECTED' : IsImdOk ? 'ISOLATED' : 'ISOLATION FAULT'}
             </p>
 
             <img className={styles.icon} src={thunderIcon} />
