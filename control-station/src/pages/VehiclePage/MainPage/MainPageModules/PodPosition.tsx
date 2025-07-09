@@ -17,7 +17,7 @@ export const PodPosition = () => {
         setValueState(position.getUpdate);
     });
 
-    const percent = getPercentageFromRange(positionValue, 0, 52.6);
+    const percent = getPercentageFromRange(positionValue, 0, 53.4);
 
     return (
         <div
@@ -35,10 +35,11 @@ export const PodPosition = () => {
                     top: '50%',
                     left: `${percent}%`,
                     transform: 'translate(-1%, -50%)',
-                    width: '4.9rem',
-                    height: '4.9rem',
+                    height: '100%',
+                    width: 'auto',
                     borderRadius: '1rem',
                     transition: 'left 0.2s',
+                    objectFit: 'contain',
                     
                     filter: lostConnection ? 'grayscale(100%)' : 'none',
                 }}
