@@ -26,7 +26,7 @@ export default function Connections(_: Props) {
                         />
                         <StateIndicator
                             icon={plugIcon}
-                            measurementId={VcuMeasurements.specificState}
+                            measurementId={VcuMeasurements.operationalState}
                         />
                     </IndicatorStack>
                 </div>
