@@ -173,16 +173,7 @@ impl PacketSender {
         }
     }
     
-    pub async fn send_specific_packet(&self, board_name: &str, packet_id: u16) -> Result<()> {
-        let generators = self.generators.read().await;
-        let (_, generator) = generators
-            .iter()
-            .find(|(name, _)| name == board_name)
-            .ok_or_else(|| anyhow::anyhow!("Board {} not found", board_name))?;
-        
-        let packet_data = generator.generate_packet_with_id(packet_id)?;
-        self.network.send_packet(board_name, packet_data).await?;
-        
-        Ok(())
+    pub async fn send_raw_packet(&self, board_name: &str, packet_data: Vec<u8>) -> Result<()> {
+        self.network.send_packet(board_name, packet_data).await
     }
 }

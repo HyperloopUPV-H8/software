@@ -24,6 +24,20 @@ impl Board {
             .collect()
     }
     
+    pub fn get_order_packets(&self) -> Vec<&Packet> {
+        self.packets
+            .iter()
+            .filter(|p| p.packet_type == super::packet::PacketType::Order)
+            .collect()
+    }
+    
+    pub fn get_info_packets(&self) -> Vec<&Packet> {
+        self.packets
+            .iter()
+            .filter(|p| p.packet_type == super::packet::PacketType::Info)
+            .collect()
+    }
+    
     pub fn find_packet_by_id(&self, id: u16) -> Option<&Packet> {
         self.packets.iter().find(|p| p.id == id)
     }

@@ -4,6 +4,9 @@ use tokio::task;
 
 use crate::network::PacketSender;
 
+mod manual;
+use manual::ManualPacketBuilder;
+
 pub struct InteractiveMode {
     sender: PacketSender,
 }
@@ -39,15 +42,11 @@ impl InteractiveMode {
                         println!("Usage: board <board_name>");
                     }
                 }
-                "send" | "s" => {
-                    if parts.len() >= 3 {
-                        if let Ok(packet_id) = parts[2].parse::<u16>() {
-                            self.send_packet(parts[1], packet_id).await?;
-                        } else {
-                            println!("Invalid packet ID");
-                        }
+                "manual" | "m" => {
+                    if parts.len() >= 2 {
+                        self.send_manual_packet(parts[1]).await?;
                     } else {
-                        println!("Usage: send <board_name> <packet_id>");
+                        println!("Usage: manual <board_name>");
                     }
                 }
                 "random" | "r" => {
@@ -68,7 +67,7 @@ impl InteractiveMode {
                         println!("Usage: random <board_name> [rate]");
                     }
                 }
-                "simulate" | "sim" => {
+                "simulate" | "sim" | "s" => {
                     if parts.len() >= 3 {
                         let mut sender = self.sender.clone();
                         let board = parts[1].to_string();
@@ -100,13 +99,13 @@ impl InteractiveMode {
     
     fn show_help(&self) {
         println!("Available commands:");
-        println!("  help, h                    - Show this help message");
-        println!("  list, l                    - List all boards");
-        println!("  board, b <name>            - Show board information");
-        println!("  send, s <board> <id>       - Send a specific packet");
-        println!("  random, r <board> [rate]   - Start random packet generation");
-        println!("  simulate <board> <mode>    - Start simulation (modes: random, sine, sequence)");
-        println!("  quit, q, exit              - Exit the program");
+        println!("  help, h                       - Show this help message");
+        println!("  list, l                       - List all boards");
+        println!("  board, b <name>               - Show board information");
+        println!("  manual, m <board>             - Manually build and send a packet");
+        println!("  random, r <board> [rate]      - Start random packet generation");
+        println!("  simulate, sim, s <board> <mode> - Start simulation (modes: random, sine, sequence)");
+        println!("  quit, q, exit                 - Exit the program");
     }
     
     fn list_boards(&self) {
@@ -135,11 +134,24 @@ impl InteractiveMode {
         }
     }
     
-    async fn send_packet(&self, board_name: &str, packet_id: u16) -> Result<()> {
-        match self.sender.send_specific_packet(board_name, packet_id).await {
-            Ok(_) => println!("Sent packet {} from board {}", packet_id, board_name),
-            Err(e) => println!("Error sending packet: {}", e),
+    async fn send_manual_packet(&self, board_name: &str) -> Result<()> {
+        // Find the board
+        let board = self.sender.adj.boards.iter()
+            .find(|b| b.name == board_name)
+            .ok_or_else(|| anyhow::anyhow!("Board '{}' not found", board_name))?;
+        
+        // Build packet interactively
+        match ManualPacketBuilder::build_packet_interactive(board) {
+            Ok(packet_data) => {
+                // Send the packet
+                match self.sender.send_raw_packet(board_name, packet_data).await {
+                    Ok(_) => println!("\nPacket sent successfully!"),
+                    Err(e) => println!("\nError sending packet: {}", e),
+                }
+            }
+            Err(e) => println!("\nError building packet: {}", e),
         }
+        
         Ok(())
     }
 }

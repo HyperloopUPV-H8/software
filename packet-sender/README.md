@@ -73,9 +73,57 @@ The packet-sender now supports two modes:
 
 ### Interactive Mode
 ```bash
-./target/release/packet-sender
+./target/release/packet-sender interactive
 # Or in dev mode
-./target/release/packet-sender --dev
+./target/release/packet-sender --dev interactive
+```
+
+Interactive mode commands:
+- `help` / `h` - Show available commands
+- `list` / `l` - List all boards
+- `board` / `b <name>` - Show board information
+- `manual` / `m <board>` - Manually build and send a packet with custom values
+- `random` / `r <board> [rate]` - Start random packet generation
+- `simulate` / `sim` / `s <board> <mode>` - Start simulation (modes: random, sine, sequence)
+- `quit` / `q` / `exit` - Exit the program
+
+#### Manual Packet Sending
+
+The new `manual` command provides an interactive way to send packets with custom values:
+
+1. Select the board: `manual VCU`
+2. Choose a packet from the displayed list
+3. Select random or custom values
+4. If custom, enter values for each variable with:
+   - Type information (uint8, float32, bool, enum, etc.)
+   - Valid ranges based on the data type
+   - Units (if available in ADJ)
+   - Safe/warning ranges (if configured in ADJ)
+
+Example session:
+```
+> manual VCU
+Available packets for board VCU:
+
+Data packets:
+  [1] temperature_data (ID: 100) - 3 variables
+  [2] pressure_data (ID: 101) - 2 variables
+
+Select packet number (1-2): 1
+
+Selected packet: temperature_data (ID: 100)
+This packet has 3 variables
+
+Generate (r)andom or (c)ustom values? c
+
+Variable: temp_sensor_1 (ID: 1001)
+Type: Float32
+Units: °C
+Safe range: 20.0 to 80.0
+32-bit floating point
+Enter value: 25.5
+
+Packet sent successfully!
 ```
 
 ### Random Generation
