@@ -16,6 +16,7 @@ import { LostConnectionContext } from 'services/connections';
 import { LCU } from '../Boards/LCU/LCU';
 import { EnumIndicator } from 'components/EnumIndicator/EnumIndicator';
 import teamLogo from 'assets/svg/team_logo.svg'
+import { Logger } from 'components/Logger/Logger';
 
 export const MainPage = () => {
     usePodDataUpdate();
@@ -40,6 +41,7 @@ export const MainPage = () => {
                             <OrdersContainer boardOrdersFilter={getHardcodedOrders}/>
                         </div>
                     </Window>
+                    <Logger/>
                 </div>
 
                 <div className={styles.column_center}>
