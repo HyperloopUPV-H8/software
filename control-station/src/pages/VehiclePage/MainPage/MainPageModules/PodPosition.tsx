@@ -34,7 +34,7 @@ export const PodPosition = () => {
                     position: 'absolute',
                     top: '50%',
                     left: `${percent}%`,
-                    transform: 'translate(-1%, -50%)',
+                    transform: 'translate(-1%, -51%)',
                     height: '100%',
                     width: 'auto',
                     borderRadius: '1rem',
