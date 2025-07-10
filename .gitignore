@@ -15,7 +15,7 @@ backend/cmd/cmd
 CLAUDE*
 .claude
 
-packet-sender/packet_sender
-packet-sender/adj/
-
 *.exe
+
+# Rust build artifacts
+packet-sender/target/
