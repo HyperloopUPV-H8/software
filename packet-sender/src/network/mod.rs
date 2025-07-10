@@ -5,6 +5,7 @@ use tokio::net::UdpSocket;
 use tokio::sync::Mutex;
 use tokio::time::{interval, Duration};
 use tracing::{debug, error, info, trace};
+use rand::Rng;
 
 mod macos;
 mod sender;
@@ -95,7 +96,10 @@ impl NetworkManager {
             }
             
             // Select random board
-            let idx = rand::random::<usize>() % sockets.len();
+            let idx = {
+                let mut rng = rand::thread_rng();
+                rng.gen_range(0..sockets.len())
+            };
             let board_socket = &sockets[idx];
             
             // Generate random packet
