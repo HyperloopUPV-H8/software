@@ -1,6 +1,7 @@
 export const PcuMeasurements = {
     motorAPeakCurrent: 'PCU/peak_current',
     podPosition: 'PCU/encoder_position',
+    podSpeed: 'PCU/encoder_speed_km_h',
     motorACurrentU: 'PCU/current_sensor_u_a',
     motorACurrentV: 'PCU/current_sensor_v_a',
     motorACurrentW: 'PCU/current_sensor_w_a',

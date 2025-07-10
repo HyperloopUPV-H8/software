@@ -2,7 +2,13 @@ export const HvscuMeasurements = {
     CurrentReading: "HVSCU/current_reading",
     BatteriesVoltage: "HVSCU/batteries_voltage_reading",
     VoltageReading: "HVSCU/voltage_reading",
-    BatterySOC: "HVSCU/battery1SOC",
+    BatterySOC: "HVSCU/batterySOCtotal",
     IsImdOk: 'HVSCU/imd_is_ok',
-    BusVoltage: 'HVSCU/?'
+    SdcStatus: 'HVSCU/sdc_status',
+    BusVoltage: 'HVSCU/dc_bus_voltage',
+    TempMin: 'HVSCU/temp_min',
+    TempMax: 'HVSCU/temp_max',
+    VoltageMin: 'HVSCU/voltage_min',
+    VoltageMax: 'HVSCU/voltage_max',
+    Contactors: 'HVSCU/contactors_state'
 };
