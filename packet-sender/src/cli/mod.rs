@@ -51,21 +51,42 @@ impl InteractiveMode {
                     }
                 }
                 "random" | "r" => {
-                    if parts.len() >= 2 {
-                        let rate = parts.get(2)
-                            .and_then(|s| s.parse().ok())
-                            .unwrap_or(100);
-                        
+                    if parts.len() == 1 {
+                        // No board specified - random from all boards
+                        let rate = 100;
                         let mut sender = self.sender.clone();
-                        let board = parts[1].to_string();
                         
-                        println!("Starting random generation for {} at {} pps (Ctrl+C to stop)", board, rate);
+                        println!("Starting random generation from all boards at {} pps (Ctrl+C to stop)", rate);
                         
                         task::spawn(async move {
-                            let _ = sender.start_random_single(&board, rate).await;
+                            let _ = sender.start_random_all(rate).await;
                         });
                     } else {
-                        println!("Usage: random <board_name> [rate]");
+                        // Check if first argument is a number (rate) or board name
+                        if let Ok(rate) = parts[1].parse::<u32>() {
+                            // First argument is rate - random from all boards
+                            let mut sender = self.sender.clone();
+                            
+                            println!("Starting random generation from all boards at {} pps (Ctrl+C to stop)", rate);
+                            
+                            task::spawn(async move {
+                                let _ = sender.start_random_all(rate).await;
+                            });
+                        } else {
+                            // First argument is board name
+                            let rate = parts.get(2)
+                                .and_then(|s| s.parse().ok())
+                                .unwrap_or(100);
+                            
+                            let mut sender = self.sender.clone();
+                            let board = parts[1].to_string();
+                            
+                            println!("Starting random generation for {} at {} pps (Ctrl+C to stop)", board, rate);
+                            
+                            task::spawn(async move {
+                                let _ = sender.start_random_single(&board, rate).await;
+                            });
+                        }
                     }
                 }
                 "simulate" | "sim" => {
@@ -104,7 +125,7 @@ impl InteractiveMode {
         println!("  list, l                    - List all boards");
         println!("  board, b <name>            - Show board information");
         println!("  send, s <board> <id>       - Send a specific packet");
-        println!("  random, r <board> [rate]   - Start random packet generation");
+        println!("  random, r [board] [rate]   - Start random packet generation (all boards if none specified)");
         println!("  simulate <board> <mode>    - Start simulation (modes: random, sine, sequence)");
         println!("  quit, q, exit              - Exit the program");
     }
