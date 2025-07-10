@@ -3,31 +3,32 @@ import { AiOutlineCloseCircle } from 'react-icons/ai'
 import { MeasurementId, NumericMeasurementInfo, useMeasurementsStore } from 'common';
 import { ChartCanvas } from './ChartCanvas/ChartCanvas';
 import { ChartLegend } from './ChartLegend/ChartLegend';
-import { memo } from "react";
+import { memo, useCallback, useState } from "react";
 import { ChartId } from "../ChartMenu";
 
-interface Props {
+type Props = {
     chartId: ChartId;
     initialMeasurementId: MeasurementId;
     removeChart: (chartId: ChartId) => void;
-    measurementsInChart: MeasurementId[];
-    setMeasurementsInChart: (ids: MeasurementId[]) => void;
-}
+};
 
 // React component that keeps the chart render and measurements represented on it.
-export const ChartElement = memo(({ chartId, removeChart, measurementsInChart, setMeasurementsInChart }: Props) => {
+export const ChartElement = memo(({ chartId, initialMeasurementId, removeChart }: Props) => {
+
     const getNumericMeasurementInfo = useMeasurementsStore(state => state.getNumericMeasurementInfo);
-    const measurementInfos: NumericMeasurementInfo[] = measurementsInChart.map(getNumericMeasurementInfo);
+    const initialMeasurement = getNumericMeasurementInfo(initialMeasurementId);
+    
+    const [measurementsInChart, setMeasurementsInChart] = useState([initialMeasurement]);
 
     const addMeasurementToChart = (measurement: NumericMeasurementInfo) => {
-        if(!measurementsInChart.includes(measurement.id)) {
-            setMeasurementsInChart([...measurementsInChart, measurement.id]);
+        if(!measurementsInChart.some(measurementInChart => measurementInChart.id === measurement.id)) {
+            setMeasurementsInChart([...measurementsInChart, measurement]);
         }
     }
 
-    const removeMeasurementFromChart = (measurementId: MeasurementId) => {
-        setMeasurementsInChart(measurementsInChart.filter(id => id !== measurementId));
-    };
+    const removeMeasurementFromChart = useCallback((measurementId: MeasurementId) => {
+        setMeasurementsInChart(prevMeasurements => prevMeasurements.filter(measurement => measurement.id !== measurementId));
+    }, []);
 
     const handleDrop = (ev: React.DragEvent<HTMLDivElement>) => {
         ev.stopPropagation();
@@ -50,11 +51,11 @@ export const ChartElement = memo(({ chartId, removeChart, measurementsInChart, s
                     onClick={() => removeChart(chartId)}
                 />
                 <ChartCanvas
-                    measurementsInChart={measurementInfos}
+                    measurementsInChart={measurementsInChart}
                 />
                 <ChartLegend
                     chartId={chartId}
-                    measurementsInChart={measurementInfos}
+                    measurementsInChart={measurementsInChart}
                     removeMeasurementFromChart={removeMeasurementFromChart}
                     removeChart={removeChart}
                 />
