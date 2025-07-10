@@ -38,7 +38,7 @@ export const MainPage = () => {
                     <ChartDLIM/>
                     <Window title="Orders" className={styles.orders}>
                         <div className={styles.order_column}>
-                            <OrdersContainer boardOrdersFilter={getHardcodedOrders}/>
+                            <OrdersContainer boardOrdersFilter={getHardcodedOrders} boardFilter={['VCU']}/>
                         </div>
                     </Window>
                     <Logger/>
