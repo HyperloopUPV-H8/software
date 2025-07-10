@@ -15,11 +15,9 @@ export const HVSCU = () => {
                 <div className={styles.levitationUnitsWrapper}>
                     <div className={styles.levitationUnitsColumn}>  
                         <div className={styles.text}><span className={styles.subtitle}>IMD</span><ImdIndicator /></div>
-                        <div className={styles.text}><span className={styles.subtitle}>HV Charger</span><EnumIndicator measurementId={'a'} icon={BatteryCharging} /></div>
                         <div className={styles.text}><span className={styles.subtitle}>Vehicle Contactors</span><EnumIndicator measurementId={''} icon={Battery} /></div>
                         <div className={styles.text}><span className={styles.subtitle}>Cabinet Contactors</span><EnumIndicator measurementId={''} icon={Contactors} /></div>
                         <div className={styles.text}><span className={styles.subtitle}>Supercaps</span><EnumIndicator measurementId={''} icon={Contactors} /></div>
-                        <div className={styles.text}><span className={styles.subtitle}>LV Charger</span><EnumIndicator measurementId={'HVSCU-Cabinet/lv_status'} icon={BatteryCharging} /></div>
                         <div className={styles.text}><span className={styles.subtitle}>SDC</span><EnumIndicator measurementId={'a'} icon={Battery} /></div>
                     </div>
                 </div>

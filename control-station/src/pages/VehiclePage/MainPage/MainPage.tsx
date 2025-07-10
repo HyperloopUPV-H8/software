@@ -1,6 +1,6 @@
 import styles from './MainPage.module.scss';
 import { HVSCU } from '../Boards/HVSCU/HVSCU';
-import { MessagesContainer } from 'common';
+import { MessagesContainer, VcuMeasurements } from 'common';
 import { Window } from 'components/Window/Window';
 import { emergencyStopOrders, getHardcodedOrders } from '../BatteriesPage/FixedOrders';
 import { BigOrderButton } from 'components/BigOrderButton';
@@ -13,7 +13,9 @@ import { OrdersContainer } from 'components/OrdersContainer/OrdersContainer';
 import { usePodDataUpdate } from 'hooks/usePodDataUpdate';
 import { Connection, useConnections } from 'common';
 import { LostConnectionContext } from 'services/connections';
-import { LCUandMaster } from './MainPageModules/LCUandMaster';
+import { LCU } from '../Boards/LCU/LCU';
+import { EnumIndicator } from 'components/EnumIndicator/EnumIndicator';
+import teamLogo from 'assets/svg/team_logo.svg'
 
 export const MainPage = () => {
     usePodDataUpdate();
@@ -44,7 +46,7 @@ export const MainPage = () => {
                 <BrakeState/>
                     <div className={styles.row}>
                         <HVSCU />
-                        <LCUandMaster />
+                        <LCU />
                     </div>
 
                     <Batteries/>
@@ -62,6 +64,9 @@ export const MainPage = () => {
 
                 <div className={styles.column}>
                     <ChartLSM/>
+                    <Window title="Vehicle State">
+                        <EnumIndicator measurementId={VcuMeasurements.operationalState} icon={teamLogo} />
+                    </Window>
                     <Window title="Messages" className={styles.messages}>
                         <MessagesContainer />
                     </Window>
