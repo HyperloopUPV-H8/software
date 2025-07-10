@@ -138,4 +138,22 @@ impl ValueType {
             ValueType::String => 0.0,
         }
     }
+    
+    pub fn min_value(&self) -> f64 {
+        match self {
+            ValueType::UInt8 => 0.0,
+            ValueType::UInt16 => 0.0,
+            ValueType::UInt32 => 0.0,
+            ValueType::UInt64 => 0.0,
+            ValueType::Int8 => i8::MIN as f64,
+            ValueType::Int16 => i16::MIN as f64,
+            ValueType::Int32 => i32::MIN as f64,
+            ValueType::Int64 => i64::MIN as f64,
+            ValueType::Float32 => f32::MIN as f64,
+            ValueType::Float64 => f64::MIN,
+            ValueType::Bool => 0.0,
+            ValueType::Enum(_) => 0.0,
+            ValueType::String => 0.0,
+        }
+    }
 }
