@@ -3,5 +3,6 @@ export const HvscuMeasurements = {
     BatteriesVoltage: "HVSCU/batteries_voltage_reading",
     VoltageReading: "HVSCU/voltage_reading",
     BatterySOC: "HVSCU/battery1SOC",
-    IsImdOk: 'HVSCU/imd_is_ok'
+    IsImdOk: 'HVSCU/imd_is_ok',
+    BusVoltage: 'HVSCU/?'
 };

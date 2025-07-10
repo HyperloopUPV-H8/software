@@ -4,34 +4,22 @@ import { LostConnectionContext } from "services/connections";
 import styles from '../MainPage.module.scss';
 
 export const BrakeState = () => {
-    const getBooleanMeasurementInfo = useMeasurementsStore((state) => state.getBooleanMeasurementInfo);
-    const lostConnection = useContext(LostConnectionContext);
-    const Reeds = getBooleanMeasurementInfo(
-        VcuMeasurements.allReeds
-    );
-
-    const [ReedsState, setValueState] = useState(false);
-    useGlobalTicker(() => {
-        setValueState(Reeds.getUpdate());
-    });
-
-
-
-    const bgColor = lostConnection
-        ? '#cccccc'
-        : ReedsState
-            ? '#99ccff'
-            : '#F3785C';
-    const textColor = lostConnection
-        ? '#888888'
-        : ReedsState
-            ? '#0059b3'
-            : '#571500';
+    const getValue = useMeasurementsStore(
+            (state) => state.getBooleanMeasurementInfo(VcuMeasurements.allReeds).getUpdate
+        );
+    
+        const lostConnection = useContext(LostConnectionContext);
+    
+        const [ReedsState, setVariant] = useState(getValue());
+    
+        useGlobalTicker(() => {
+            setVariant(getValue());
+        });
 
     return (
-        <div className={styles.break_state} style={{backgroundColor: bgColor}}>
-            <div style={{color: textColor}}>
-                {lostConnection ? 'Connection Lost' : ReedsState ? 'UNBRAKED' : 'BRAKED'}
+        <div className={styles.break_state} style={{ backgroundColor: lostConnection ? '#cccccc' : ReedsState ? '#99ccff' : '#f3785c' }}>
+            <div style={{ color: lostConnection ? '#888888' : ReedsState ? '#0059b3' : '#571500' }}>
+                {lostConnection ? 'DISCONNECTED' : ReedsState ? 'BRAKED' : 'UNBRAKED'}
             </div>
         </div>
     );
