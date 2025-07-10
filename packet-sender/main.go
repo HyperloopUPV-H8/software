@@ -36,13 +36,7 @@ func main() {
 
 	if *devMode {
 		fmt.Println("Running in DEV mode - packets will be sent to UDP server")
-		// Dev mode: Create a listener and use backend address for communication
-		listener, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.ParseIP(backend_address), Port: int(backend_port)})
-		if err != nil {
-			log.Fatalf("Error creating UDP listener: %v", err)
-		}
-		defer listener.Close()
-
+		// Dev mode: Connect to backend UDP server (don't create a listener)
 		conns = getConnsDevMode(adj, backend_address, backend_port)
 	} else {
 		fmt.Println("Running in PRODUCTION mode - packets will be sent for sniffer capture")
