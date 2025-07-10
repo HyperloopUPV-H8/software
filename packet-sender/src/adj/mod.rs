@@ -172,13 +172,21 @@ fn parse_packet_with_measurements(
                         parse_value_type(type_str)?
                     };
                     
+                    // Parse out_of_range field if it exists
+                    let mut warning_range = None;
+                    if let Some(out_of_range) = measurement["out_of_range"].as_object() {
+                        if let Some(warning) = out_of_range.get("warning") {
+                            warning_range = parse_range(warning);
+                        }
+                    }
+                    
                     let variable = Variable {
                         id: idx as u16,
                         name: measurement["name"].as_str().unwrap_or(var_id).to_string(),
                         value_type,
                         units: measurement["displayUnits"].as_str().map(|s| s.to_string()),
                         safe_range: parse_range(&measurement["safeRange"]),
-                        warning_range: parse_range(&measurement["warningRange"]),
+                        warning_range,
                     };
                     variables.push(variable);
                     variables_ids.push(idx as u16);

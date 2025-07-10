@@ -1,5 +1,5 @@
 use anyhow::Result;
-use crate::adj::{Board, Packet, Variable};
+use crate::adj::{Board, Packet, Variable, ValueType};
 use super::{encode_packet_header, encode_value, RandomValueGenerator};
 
 #[derive(Clone)]
@@ -58,13 +58,52 @@ impl DataPacketGenerator {
         // Map sine wave (-1 to 1) to variable range
         let normalized = (sine + 1.0) / 2.0; // 0 to 1
         
-        if let Some(safe_range) = &variable.safe_range {
-            if let (Some(min), Some(max)) = (safe_range[0], safe_range[1]) {
-                return Ok(min + normalized * (max - min));
+        // Try warning range first
+        if let Some(warning_range) = &variable.warning_range {
+            if let (Some(min), Some(max)) = (warning_range[0], warning_range[1]) {
+                if min < max {
+                    let type_min = variable.value_type.min_value();
+                    let type_max = variable.value_type.max_value();
+                    let clamped_min = min.max(type_min);
+                    let clamped_max = max.min(type_max);
+                    return Ok(clamped_min + normalized * (clamped_max - clamped_min));
+                }
             }
         }
         
-        // Fallback to type range
-        Ok(normalized * variable.value_type.max_value())
+        // Try safe range
+        if let Some(safe_range) = &variable.safe_range {
+            if let (Some(min), Some(max)) = (safe_range[0], safe_range[1]) {
+                if min < max {
+                    let type_min = variable.value_type.min_value();
+                    let type_max = variable.value_type.max_value();
+                    let clamped_min = min.max(type_min);
+                    let clamped_max = max.min(type_max);
+                    return Ok(clamped_min + normalized * (clamped_max - clamped_min));
+                }
+            }
+        }
+        
+        // Fallback to reasonable type-based range
+        match &variable.value_type {
+            ValueType::Bool => Ok(if normalized > 0.5 { 1.0 } else { 0.0 }),
+            ValueType::Enum(variants) => {
+                let max_idx = if variants.is_empty() { 0.0 } else { (variants.len() - 1) as f64 };
+                Ok((normalized * max_idx).round())
+            }
+            ValueType::UInt8 | ValueType::UInt16 | ValueType::UInt32 => {
+                let max = variable.value_type.max_value().min(1000.0);
+                Ok(normalized * max)
+            }
+            ValueType::Int8 | ValueType::Int16 | ValueType::Int32 => {
+                // Map to -500 to 500 range
+                Ok(-500.0 + normalized * 1000.0)
+            }
+            ValueType::Float32 | ValueType::Float64 => {
+                // Map to -100 to 100 range for floats
+                Ok(-100.0 + normalized * 200.0)
+            }
+            _ => Ok(normalized * 10000.0)
+        }
     }
 }
