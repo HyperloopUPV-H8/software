@@ -17,8 +17,8 @@ export const BrakeState = () => {
         });
 
     return (
-        <div className={styles.break_state} style={{ backgroundColor: lostConnection ? '#cccccc' : ReedsState ? '#99ccff' : '#f3785c' }}>
-            <div style={{ color: lostConnection ? '#888888' : ReedsState ? '#0059b3' : '#571500' }}>
+        <div className={styles.break_state} style={{ backgroundColor: lostConnection ? '#cccccc' : ReedsState ? '#f3785c' : '#99ccff' }}>
+            <div style={{ color: lostConnection ? '#888888' : ReedsState ? '#571500' : '#0059b3' }}>
                 {lostConnection ? 'DISCONNECTED' : ReedsState ? 'BRAKED' : 'UNBRAKED'}
             </div>
         </div>
