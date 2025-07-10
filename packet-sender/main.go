@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
-	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -23,32 +22,20 @@ type boardConn struct {
 }
 
 func main() {
-	// Parse command-line flags
-	devMode := flag.Bool("dev", false, "Use UDP server mode instead of sniffer mode")
-	flag.Parse()
 
 	adj := getADJ()
 
 	backend_address := adj.Info.Addresses["BACKEND"]
 	backend_port := adj.Info.Ports["UDP"]
 
-	var conns []boardConn
-
-	if *devMode {
-		fmt.Println("Running in DEV mode - packets will be sent to UDP server")
-		// Dev mode: Create a listener and use backend address for communication
-		listener, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.ParseIP(backend_address), Port: int(backend_port)})
-		if err != nil {
-			log.Fatalf("Error creating UDP listener: %v", err)
-		}
-		defer listener.Close()
-
-		conns = getConnsDevMode(adj, backend_address, backend_port)
-	} else {
-		fmt.Println("Running in PRODUCTION mode - packets will be sent for sniffer capture")
-		// Production mode: Send packets directly from board IPs (for sniffer)
-		conns = getConnsProdMode(adj, backend_port)
+	// Create a listener so the packets don't get lost (the backend will sniff them)
+	listener, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.ParseIP(backend_address), Port: int(backend_port)})
+	if err != nil {
+		log.Fatalf("Error creando listener UDP: %v", err)
 	}
+	defer listener.Close()
+
+	conns := getConns(adj)
 
 	defer func() {
 		for _, c := range conns {
@@ -63,7 +50,7 @@ func main() {
 
 	var input string
 	fmt.Print("Quieres lanzar paquetes aleatorios (1) o manualmente (2): ")
-	_, err := fmt.Scan(&input)
+	_, err = fmt.Scan(&input)
 	if err != nil {
 		log.Fatal("Invalid input", err)
 	}
@@ -76,29 +63,11 @@ func main() {
 	}
 }
 
-func getConnsDevMode(adj adj_module.ADJ, backend_address string, backend_port uint16) []boardConn {
+func getConns(adj adj_module.ADJ) []boardConn {
 	conns := make([]boardConn, 0)
 
 	for _, board := range adj.Boards {
-		// In dev mode, connect to backend UDP server
-		conn := getConn(board.IP, 0, backend_address, backend_port)
-		conns = append(conns, boardConn{
-			conn:    conn,
-			packets: []adj_module.Packet{},
-			board:   board,
-		})
-	}
-
-	return conns
-}
-
-func getConnsProdMode(adj adj_module.ADJ, backend_port uint16) []boardConn {
-	conns := make([]boardConn, 0)
-
-	for _, board := range adj.Boards {
-		// In production mode, send from board IP to board IP (sniffer will capture)
-		// Using the board's own IP as both source and destination
-		conn := getConn(board.IP, 0, board.IP, backend_port)
+		conn := getConn(board.IP, 0, "127.0.0.9", 8000)
 		conns = append(conns, boardConn{
 			conn:    conn,
 			packets: []adj_module.Packet{},
