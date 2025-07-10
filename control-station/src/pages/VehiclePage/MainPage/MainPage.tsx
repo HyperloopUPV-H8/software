@@ -14,9 +14,8 @@ import { usePodDataUpdate } from 'hooks/usePodDataUpdate';
 import { Connection, useConnections } from 'common';
 import { LostConnectionContext } from 'services/connections';
 import { LCU } from '../Boards/LCU/LCU';
-import { EnumIndicator } from 'components/EnumIndicator/EnumIndicator';
-import teamLogo from 'assets/svg/team_logo.svg'
 import { Logger } from 'components/Logger/Logger';
+import { VehicleState } from 'components/EnumIndicator/VehicleState';
 
 export const MainPage = () => {
     usePodDataUpdate();
@@ -67,7 +66,7 @@ export const MainPage = () => {
                 <div className={styles.column}>
                     <ChartLSM/>
                     <Window title="Vehicle State">
-                        <EnumIndicator measurementId={VcuMeasurements.operationalState} icon={teamLogo} />
+                        <VehicleState/>
                     </Window>
                     <Window title="Messages" className={styles.messages}>
                         <MessagesContainer />
