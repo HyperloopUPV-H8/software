@@ -5,22 +5,22 @@
     justify-items: center;
     align-items: center;
     background-color: map-get($map: colors.$key-colors, $key: lightskyblue);
-    padding: .3rem;
+    padding: .2rem;
     border-radius: 50%;
     
-    /* Usar tamaños relativos para mantener círculo perfecto */
-    width: 7rem;
-    height: 7rem;
+    width: 4.5rem;
+    height: 4.5rem;
     
-    /* Asegurar que no se deforme */
     flex-shrink: 0;
-    min-width: 7rem;
-    min-height: 7rem;
+    min-width: 4.5rem;
+    min-height: 4.5rem;
+    transform: translateY(-0.9rem);
 }
 
 .gauge {
     grid-row-start: 1;
     grid-column-start: 1;
-    font-size: 7rem; /* Tamaño relativo al contenedor */
+    font-size: 4.5rem; 
     z-index: 1;
+    transform: translateY(-0.8rem);
 }

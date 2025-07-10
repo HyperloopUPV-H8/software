@@ -26,7 +26,7 @@
     .value {
         font-family: map-get($map: fonts.$font-families, $key: roboto);
         font-weight: map-get($map: fonts.$font-weights, $key: bold);
-        font-size: 1.2rem;
+        font-size: 0.9rem;
     }
 
     .units {

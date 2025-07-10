@@ -19,14 +19,17 @@ export const Batteries = () => {
     const TotalVoltageLow = getNumericMeasurementInfo(BmslMeasurements.totalVoltage);
     const TotalVoltageCabinet = getNumericMeasurementInfo(HvscuCabinetMeasurements.TotalVoltage);
 
+    const BusHV = getNumericMeasurementInfo(HvscuMeasurements.BusVoltage);
+    const BusCabinet = getNumericMeasurementInfo(HvscuCabinetMeasurements.BusVoltage);
 
     return (
-        <div className={styles.row}>
+        <div className={styles.batteriesRow}>
         <Window2 title="High Voltage">
             <GaugeTag name={'Current'} id={'hv'} units={CurrentHV.units} getUpdate={CurrentHV.getUpdate} strokeWidth={110} min={CurrentHV.range[0] ?? 0} max={CurrentHV.range[1] ?? 100} />
             <BatteryIndicator getValue={TotalVoltageHigh.getUpdate} getValueSOC={SocHigh.getUpdate} color='#ACF293' units={TotalVoltageHigh.units}
                 safeRangeMin={TotalVoltageHigh.range[0] ?? 0} warningRangeMin={TotalVoltageHigh.warningRange[0] ?? 100}
                 safeRangeMax={TotalVoltageHigh.range[1] ?? 100} warningRangeMax={TotalVoltageHigh.warningRange[1] ?? 70} />
+            <GaugeTag name={'DC Bus'} id={'hv-bus'} units={BusHV.units} getUpdate={BusHV.getUpdate} strokeWidth={110} min={BusHV.range[0] ?? 0} max={BusHV.range[1] ?? 100} />
         </Window2>
 
         <Window2 title="Low Voltage">
@@ -41,6 +44,7 @@ export const Batteries = () => {
             <BatteryIndicator getValue={TotalVoltageCabinet.getUpdate} getValueSOC={SocCabinet.getUpdate} color='#ACF293' units={TotalVoltageCabinet.units}
                 safeRangeMin={TotalVoltageCabinet.range[0] ?? 0} warningRangeMin={TotalVoltageCabinet.warningRange[0] ?? 0}
                 safeRangeMax={TotalVoltageCabinet.range[1] ?? 100} warningRangeMax={TotalVoltageCabinet.warningRange[1] ?? 70} />
+            <GaugeTag name={'DC Bus'} id={'cabinet-bus'} units={BusCabinet.units} getUpdate={BusCabinet.getUpdate} strokeWidth={110} min={BusCabinet.range[0] ?? 0} max={BusCabinet.range[1] ?? 100} />
         </Window2>
     </div>
     );
