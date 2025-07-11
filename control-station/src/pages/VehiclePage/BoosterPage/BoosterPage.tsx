@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import styles from "./BoosterPage.module.scss";
 import GuiModule from "../../../components/BoosterModules/BoosterModule";
-import { useMeasurementsStore, HvscuCabinetMeasurements, getBooleanMeasurement, GlobalTicker, useGlobalTicker, useOrders, BoardOrders, MessagesContainer } from "common";
+import { useMeasurementsStore, HvscuCabinetMeasurements, getBooleanMeasurement, GlobalTicker, useGlobalTicker, useOrders, BoardOrders, MessagesContainer, BcuMeasurements } from "common";
 import { OrdersContainer } from "components/OrdersContainer/OrdersContainer";
 import { Window } from "components/Window/Window";
 import { getHardcodedOrders } from "../BatteriesPage/FixedOrders";
@@ -36,25 +36,34 @@ export function BoosterPage() {
   const temperatureMeasurementInfo = getNumericMeasurementInfo(HvscuCabinetMeasurements.Temperature)
 
   // Enums
-  const contactorsStateInfo = useMeasurementsStore((state) =>
-    state.getMeasurement("HVSCU-Cabinet/contactors_state")
+  const contactorsStateMeasurement = useMeasurementsStore(
+    (state) => state.getEnumMeasurementInfo(HvscuCabinetMeasurements.ContactorsState).getUpdate
   );
-  const bcuGeneralStateInfo = useMeasurementsStore((state) =>
-    state.getMeasurement("HVSCU-Cabinet/BCU_state_master_nested")
+  const bcuGeneralStateMeasurement = useMeasurementsStore(
+    (state) => state.getEnumMeasurementInfo(BcuMeasurements.generalState).getUpdate
+  );
+  const bcuOperationalStateMeasurement = useMeasurementsStore(
+    (state) => state.getEnumMeasurementInfo(BcuMeasurements.operationalState).getUpdate
   );
 
   // Estados
   const [voltageTotal, setVoltageTotal] = useState<number | null>(null);
   const [current, setCurrent] = useState<number | null>(null);
   const [temperature, setTemperature] = useState<number | null>(null);
-  const [contactorsState, setContactorsState] = useState<string | null>(null);
-  const [bcuState, setBcuState] = useState<string | null>(null);
+  const [contactorsState, setContactorsState] = useState(contactorsStateMeasurement);
+  const [generalState, setGeneralState] = useState(bcuGeneralStateMeasurement);
+  const [operationalState, setOperationalState] = useState(bcuOperationalStateMeasurement);
 
   useGlobalTicker(() => {
       setVoltageTotal(totalSupercapsVoltageInfo.getUpdate);
       setCurrent(currentMeasurementInfo.getUpdate);
       setTemperature(temperatureMeasurementInfo.getUpdate);
+      setContactorsState(contactorsStateMeasurement);
+      setGeneralState(bcuGeneralStateMeasurement);
+      setOperationalState(bcuOperationalStateMeasurement);
   });
+
+  const bcuState = (generalState == 'Operational') ? operationalState : generalState;
 
   return (
     <LostConnectionContext.Provider
