@@ -27,7 +27,7 @@ export const EnumIndicator = memo(({ measurementId, icon }: Props) => {
     return (
         <div
             className={styles.enum_indicator}
-            style={{ backgroundColor: enumToColor[state] || enumToColor.default }}
+            style={{ backgroundColor: enumToColor[state.toUpperCase()] || enumToColor.default }}
         >
             <img className={styles.icon} src={icon} />
 
@@ -49,6 +49,7 @@ const enumToColor: { [key: string]: string } = {
     'OPEN' : '#ACF293',
     'PRECHARGE' : '#F4F788',
     'CLOSED' : '#F28E31',
+    'CLOSE' : '#F28E31',
 
     'DISENGAGED' : '#EF9A87',
     'ENGAGED' : '#ACF293',
