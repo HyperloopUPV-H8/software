@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import styles from "./BoosterPage.module.scss";
-import GuiModule from "../../../components/BoosterModules/BoosterModule";
+import BoosterModule from "components/BoosterModules/BoosterModule";
 import { useMeasurementsStore, HvscuCabinetMeasurements, getBooleanMeasurement, GlobalTicker, useGlobalTicker, useOrders, BoardOrders, MessagesContainer, BcuMeasurements } from "common";
 import { OrdersContainer } from "components/OrdersContainer/OrdersContainer";
 import { Window } from "components/Window/Window";
@@ -119,7 +119,7 @@ export function BoosterPage() {
 
           <div className={styles.modulesContainer}>
             {modules.map((module) => (
-              <GuiModule key={module.id} id={module.id} />
+              <BoosterModule key={module.id} id={module.id} />
             ))}
           </div>
         </div>

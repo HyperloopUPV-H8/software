@@ -61,7 +61,7 @@ const BoosterModule: React.FC<{ id: string | number }> = ({ id }) => {
           <h2 className={styles.h2Module}>Module {id}</h2>
         </article>
 
-        <div className={styles.voltajeContainer}>
+        <div className={styles.voltageContainer}>
           <div className={styles.dataStyle}>
             <p className={styles.moduleInfoLabel}>max:</p>
             <p className={styles.p}>{`${moduleMaxCell.toFixed(2)} V`}</p>
