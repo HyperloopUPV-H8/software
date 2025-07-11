@@ -77,7 +77,7 @@ export function BoosterPage() {
           <div className={styles.statusContainer}>
             <div className={styles.statusRow1}>
               <div className={styles.statusItem}>
-                <h3>V total:</h3>
+                <h3>Total Voltage:</h3>
                 <div className={styles.value}>
                   <span>{voltageTotal?.toFixed(2) ?? "-"} V</span>
                 </div>
