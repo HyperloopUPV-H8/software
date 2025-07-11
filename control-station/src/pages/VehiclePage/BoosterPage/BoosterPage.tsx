@@ -94,20 +94,6 @@ export function BoosterPage() {
                   <span>{contactorsState ?? "-"}</span>
                 </div>
               </div>
-            </div>
-            <div className={styles.statusRow2}>
-              <div className={styles.statusItem}>
-                <h3>BCU status:</h3>
-                <div className={styles.value}>
-                  <span>{bcuState ?? "-"}</span>
-                </div>
-              </div>
-              <div className={styles.statusItem}>
-                <h3>Temperature total:</h3>
-                <div className={styles.value}>
-                  <span>{temperature?.toFixed(2) ?? "-"} ºC</span>
-                </div>
-              </div>
               <div className={styles.statusItem}>
                 <h3>Charge:</h3>
                 <div className={styles.value}>
