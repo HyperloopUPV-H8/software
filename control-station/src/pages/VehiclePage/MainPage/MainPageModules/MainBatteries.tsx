@@ -9,7 +9,7 @@ export const Batteries = () => {
 
     const CurrentHV = getNumericMeasurementInfo(HvscuMeasurements.CurrentReading);
     const CurrentLV = getNumericMeasurementInfo(BmslMeasurements.current);
-    const CurrentCabinet = getNumericMeasurementInfo(HvscuCabinetMeasurements.CurrentReading);
+    const CurrentCabinet = getNumericMeasurementInfo(HvscuCabinetMeasurements.CurrentOutput);
 
     const SocHigh = getNumericMeasurementInfo(HvscuMeasurements.BatterySOC);
     const SocLow = getNumericMeasurementInfo(BmslMeasurements.stateOfCharge);

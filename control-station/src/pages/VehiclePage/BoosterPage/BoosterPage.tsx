@@ -31,7 +31,7 @@ export function BoosterPage() {
   // Medidas
   const totalSupercapsVoltageInfo = getNumericMeasurementInfo(HvscuCabinetMeasurements.TotalVoltage)
   
-  const currentMeasurementInfo = getNumericMeasurementInfo(HvscuCabinetMeasurements.CurrentReading)
+  const currentMeasurementInfo = getNumericMeasurementInfo(HvscuCabinetMeasurements.CurrentOutput)
 
   const temperatureMeasurementInfo = getNumericMeasurementInfo(HvscuCabinetMeasurements.Temperature)
 
