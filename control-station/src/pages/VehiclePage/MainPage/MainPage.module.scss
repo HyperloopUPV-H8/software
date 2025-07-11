@@ -205,3 +205,19 @@
     margin: 0;
   }
 }
+
+.pneumatic{
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  
+  & > *:first-child {
+    border-top-left-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem;
+  }
+  
+  & > *:last-child {
+    border-top-right-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+  }
+}

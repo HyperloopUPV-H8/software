@@ -16,6 +16,7 @@ import { LostConnectionContext } from 'services/connections';
 import { LCU } from '../Boards/LCU/LCU';
 import { Logger } from 'components/Logger/Logger';
 import { VehicleState } from 'components/EnumIndicator/VehicleState';
+import { Pneumatic } from './MainPageModules/Pneunmatic';
 
 export const MainPage = () => {
     usePodDataUpdate();
@@ -49,6 +50,7 @@ export const MainPage = () => {
                         <HVSCU />
                         <LCU />
                     </div>
+                    <Pneumatic/>
 
                     <Batteries/>
 
