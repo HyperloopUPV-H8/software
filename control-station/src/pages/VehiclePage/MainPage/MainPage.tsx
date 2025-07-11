@@ -102,3 +102,6 @@ function any<T>(data: T[], condition: (value: T) => boolean): boolean {
     }
     return false;
 }
+
+// H10: Joan Física @JFisica, Marc Sanchís @msanlli
+// @JFisica: My frist time doing frontend was 4 days ago so sorry for probably breaking everything for next year
