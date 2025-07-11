@@ -1,6 +1,7 @@
 import { BarIndicator } from "components/BarIndicator/BarIndicator"
 import { Window } from "components/Window/Window";
 import pressure from 'assets/svg/pressure-filled.svg'
+import thermometer from 'assets/svg/thermometer-field.svg'
 import { useMeasurementsStore } from "common";
 import styles from '../MainPage.module.scss'
 
@@ -48,7 +49,7 @@ export const Pneumatic = () => {
         />
         <BarIndicator
             name="Cooling EM"
-            icon={pressure}
+            icon={thermometer}
             getValue={CoolingEM.getUpdate}
             safeRangeMin={CoolingEM.range[0]!!}
             safeRangeMax={CoolingEM.range[1]!!}
@@ -58,7 +59,7 @@ export const Pneumatic = () => {
         />
         <BarIndicator
             name="Cooling PCB"
-            icon={pressure}
+            icon={thermometer}
             getValue={CoolingPCB.getUpdate}
             safeRangeMin={CoolingPCB.range[0]!!}
             safeRangeMax={CoolingPCB.range[1]!!}
