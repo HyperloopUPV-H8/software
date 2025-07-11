@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "./BoosterModule.module.scss";
 
-import { useMeasurementsStore } from "common";
+import { useMeasurementsStore, useGlobalTicker } from "common";
 
 interface CellProps {
   value: number;
@@ -10,39 +10,32 @@ interface CellProps {
 }
 
 const BoosterModule: React.FC<{ id: string | number }> = ({ id }) => {
-  const moduleMinCell = useMeasurementsStore(
-    (state) => (state.getNumericMeasurementInfo(`HVSCU-Cabinet/HVSCU-Cabinet_module_${id}_min_cell`)?.getUpdate() ?? 0)
-  );
-  const moduleMaxCell = useMeasurementsStore(
-    (state) => (state.getNumericMeasurementInfo(`HVSCU-Cabinet/HVSCU-Cabinet_module_${id}_max_cell`)?.getUpdate() ?? 0)
-  );
+  const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
+  
+  // Estados para todos los valores
+  const [moduleMinCell, setModuleMinCell] = useState<number>(0);
+  const [moduleMaxCell, setModuleMaxCell] = useState<number>(0);
+  const [moduleTotalVoltage, setModuleTotalVoltage] = useState<number>(0);
+  const [moduleMaxTemp, setModuleMaxTemp] = useState<number>(0);
+  const [moduleMinTemp, setModuleMinTemp] = useState<number>(0);
+  const [cellValues, setCellValues] = useState<number[]>(Array(48).fill(0));
 
-  const moduleTotalVoltage = useMeasurementsStore(
-    (state) => (state.getNumericMeasurementInfo(`HVSCU-Cabinet/HVSCU-Cabinet_module_${id}_voltage`)?.getUpdate() ?? 0)
-  );
-
-  const moduleMaxTemp = useMeasurementsStore(
-    (state) => (state.getNumericMeasurementInfo(`HVSCU-Cabinet/HVSCU-Cabinet_module_${id}_max_temp`)?.getUpdate() ?? 0)
-  );
-  const moduleMinTemp = useMeasurementsStore(
-    (state) => (state.getNumericMeasurementInfo(`HVSCU-Cabinet/HVSCU-Cabinet_module_${id}_min_temp`)?.getUpdate() ?? 0)
-  );
-
-  // Estado para las celdas
-  const [cellValues, setCellValues] = useState<number[]>(Array(48).fill(0)); // Define el tipo correctamente
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setCellValues(() =>
-        Array.from({ length: 48 }, (_, i) => {
-          const variableName = `HVSCU-Cabinet/HVSCU-Cabinet_module_${id}_cell_${i + 1}_voltage`;
-          return useMeasurementsStore.getState().getNumericMeasurementInfo(variableName)?.getUpdate() ?? 0;
-        })
-      );
-    }, 100);
-
-    return () => clearInterval(intervalId);
-  }, [id]);
+  useGlobalTicker(() => {
+    // Actualizar valores del módulo
+    setModuleMinCell(getNumericMeasurementInfo(`HVSCU-Cabinet/HVSCU-Cabinet_module_${id}_min_cell`)?.getUpdate() ?? 0);
+    setModuleMaxCell(getNumericMeasurementInfo(`HVSCU-Cabinet/HVSCU-Cabinet_module_${id}_max_cell`)?.getUpdate() ?? 0);
+    setModuleTotalVoltage(getNumericMeasurementInfo(`HVSCU-Cabinet/HVSCU-Cabinet_module_${id}_voltage`)?.getUpdate() ?? 0);
+    setModuleMaxTemp(getNumericMeasurementInfo(`HVSCU-Cabinet/HVSCU-Cabinet_module_${id}_max_temp`)?.getUpdate() ?? 0);
+    setModuleMinTemp(getNumericMeasurementInfo(`HVSCU-Cabinet/HVSCU-Cabinet_module_${id}_min_temp`)?.getUpdate() ?? 0);
+    
+    // Actualizar valores de las celdas
+    setCellValues(
+      Array.from({ length: 48 }, (_, i) => {
+        const variableName = `HVSCU-Cabinet/HVSCU-Cabinet_module_${id}_cell_${i + 1}_voltage`;
+        return getNumericMeasurementInfo(variableName)?.getUpdate() ?? 0;
+      })
+    );
+  });
 
   const getColorFromValue = (value: number, min: number, max: number) => {
     if (value < min) return styles.red;
