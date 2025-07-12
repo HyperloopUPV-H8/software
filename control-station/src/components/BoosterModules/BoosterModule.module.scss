@@ -1,42 +1,50 @@
+@use 'src/styles/colors';
+
 .boxContainer1 {
-    width: 40%;
+    width: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     border-radius: 20px;
+    height: 100%;
   }
   
   .boxContainer2 {
-    border: 2.5px solid #FFE7CF;
-    width: 65%;
-    height: 10.5rem;
+    border: 2.5px solid colors.getThemeColor('border');
+    width: 100%;
+    min-height: 10.5rem;
     border-radius: 20px;
     display: flex;
     flex-direction: column;
     align-items: stretch;
     position: relative;
-    background-color: white;
+    background-color: colors.getThemeColor('surface-variant');
     box-sizing: border-box;
-    padding-top: 20px;
-
+    padding-top: 28px;
+    flex: 0 0 auto;
   }
   
   .h2Module {
-    color: #EF7E30;
+    color: colors.getThemeColor('header-text');
     font-family: 'IBM Plex Mono', monospace;
     width: 100%;
-    height: 30px;
-    background-color: #FFE7CF;
+    height: 28px;
+    background-color: colors.getThemeColor('header-bg');
     text-align: center;
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
+    border-radius: 20px 20px 0 0;
     font-weight: bold;
-    position: absolute;
-    transform: translateY(-165%);
-    padding-top: 1px;
-    padding-bottom: 10px;
+    font-size: 0.85rem;
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
   }
 
   .voltageContainer {
@@ -46,7 +54,7 @@
     flex-direction: column;
     justify-content: center;
     margin-top: 5%;
-    height: 8rem;
+    min-height: 8rem;
     box-sizing: border-box;
   }
   
@@ -57,13 +65,13 @@
   }
   
   .h3 {
-    color: #EF7E30;
+    color: colors.getThemeColor('text-secondary');
     font-family: 'IBM Plex Mono', monospace;
     margin: 2px 0; /* Reducido el margen vertical */
   }
   
   .dataStyle {
-    color: #EF7E30;
+    color: colors.getThemeColor('text-secondary');
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.9rem;
     display: flex;
@@ -71,7 +79,7 @@
     align-items: center;
   }
   .p{
-    color: #EF7E30;
+    color: colors.getThemeColor('text-secondary');
     font-family: 'IBM Plex Mono', monospace;
     font-size: 1rem;
     margin-top: 1px;
@@ -79,7 +87,7 @@
     overflow: hidden;
     margin-bottom: 1px;
     padding: 5px 10px;
-    background-color: #FFE7CF;
+    background-color: colors.getThemeColor('surface');
     border-radius: 20px;
     width: fit-content;
     align-items: center;
@@ -89,29 +97,31 @@
   
   .flexCells {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 9px;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 4px;
     justify-content: center;
     align-items: center;
-    width: fit-content;
-    margin: 5 auto;
+    width: 100%;
+    margin: 10px auto 0;
     border-radius: 20px;
-    border: 2.5px solid #FFE7CF;
+    border: 2.5px solid colors.getThemeColor('border');
     padding: 10px;
-    margin-top: 10px;
-    background-color: white;
+    background-color: colors.getThemeColor('surface-variant');
+    box-sizing: border-box;
+    flex: 1;
   }
   
   
   .cell {
-    width: 65px;
-    height: 30px;
-    border: 1px solid orange;
-    border-radius: 5px;
+    width: 100%;
+    aspect-ratio: 2 / 1;
+    border: 1px solid colors.getThemeColor('border');
+    border-radius: 4px;
     text-align: center;
     display: flex;
     align-items: center;
     justify-content: center;
+    box-sizing: border-box;
   }
   
   .red {
@@ -138,9 +148,9 @@
     align-items: center;
     text-align: center;
     border-radius: 15px;
-    background-color: #FFE7CF;
+    background-color: colors.getColor('tertiary', 90);
     font-size: 0.8rem;
-    color: #EF7E30;
+    color: colors.getColor('tertiary', 40);
     font-family: 'IBM Plex Mono', monospace;
     box-sizing: border-box;
   }
@@ -155,7 +165,7 @@
   }
   
   .moduleInfoLabel {
-    color: #EF7E30;
+    color: colors.getThemeColor('text-secondary');
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.9rem;
     width: 50%;

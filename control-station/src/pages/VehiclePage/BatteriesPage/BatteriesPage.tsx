@@ -2,10 +2,18 @@ import { useState } from "react";
 import styles from "./BatteriesPage.module.scss";
 import BatteriesModule from "components/BatteriesModules/BatteriesModule";
 import LowVoltageModule from "components/BatteriesModules/LowVoltageModule";
-import { useMeasurementsStore, HvscuCabinetMeasurements, useGlobalTicker, BcuMeasurements, HvscuMeasurements, BmslMeasurements } from "common";
-import { usePodDataUpdate } from 'hooks/usePodDataUpdate';
-import { Connection, useConnections } from 'common';
-import { LostConnectionContext } from 'services/connections';
+import {
+  useMeasurementsStore,
+  HvscuCabinetMeasurements,
+  useGlobalTicker,
+  BcuMeasurements,
+  HvscuMeasurements,
+  BmslMeasurements,
+} from "common";
+import { usePodDataUpdate } from "hooks/usePodDataUpdate";
+import { Connection, useConnections } from "common";
+import { LostConnectionContext } from "services/connections";
+import { Window } from "components/Window/Window";
 
 interface ModuleData {
   id: number | string;
@@ -41,21 +49,43 @@ const highVoltageGroup3: ModuleData[] = [
 
 export function BatteriesPage() {
   usePodDataUpdate();
-  
-  const connections = useConnections();
-  const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
-  
-  const totalVoltageHighMeasurement = getNumericMeasurementInfo(HvscuMeasurements.BatteriesVoltage)
-  const maxVoltageHighMeasurement = getNumericMeasurementInfo(HvscuMeasurements.VoltageMax)
-  const minVoltageHighMeasurement = getNumericMeasurementInfo(HvscuMeasurements.VoltageMin)
-  const maxTempHighMeasurement = getNumericMeasurementInfo(HvscuMeasurements.TempMax)
-  const minTempHighMeasurement = getNumericMeasurementInfo(HvscuMeasurements.TempMin)
 
-  const totalVoltageLowMeasurement = getNumericMeasurementInfo(BmslMeasurements.totalVoltage)
-  const maxVoltageLowMeasurement = getNumericMeasurementInfo(BmslMeasurements.voltageMax)
-  const minVoltageLowMeasurement = getNumericMeasurementInfo(BmslMeasurements.voltageMin)
-  const maxTempLowMeasurement = getNumericMeasurementInfo(BmslMeasurements.tempMax)
-  const minTempLowMeasurement = getNumericMeasurementInfo(BmslMeasurements.tempMin)
+  const connections = useConnections();
+  const getNumericMeasurementInfo = useMeasurementsStore(
+    (state) => state.getNumericMeasurementInfo,
+  );
+
+  const totalVoltageHighMeasurement = getNumericMeasurementInfo(
+    HvscuMeasurements.BatteriesVoltage,
+  );
+  const maxVoltageHighMeasurement = getNumericMeasurementInfo(
+    HvscuMeasurements.VoltageMax,
+  );
+  const minVoltageHighMeasurement = getNumericMeasurementInfo(
+    HvscuMeasurements.VoltageMin,
+  );
+  const maxTempHighMeasurement = getNumericMeasurementInfo(
+    HvscuMeasurements.TempMax,
+  );
+  const minTempHighMeasurement = getNumericMeasurementInfo(
+    HvscuMeasurements.TempMin,
+  );
+
+  const totalVoltageLowMeasurement = getNumericMeasurementInfo(
+    BmslMeasurements.totalVoltage,
+  );
+  const maxVoltageLowMeasurement = getNumericMeasurementInfo(
+    BmslMeasurements.voltageMax,
+  );
+  const minVoltageLowMeasurement = getNumericMeasurementInfo(
+    BmslMeasurements.voltageMin,
+  );
+  const maxTempLowMeasurement = getNumericMeasurementInfo(
+    BmslMeasurements.tempMax,
+  );
+  const minTempLowMeasurement = getNumericMeasurementInfo(
+    BmslMeasurements.tempMin,
+  );
 
   const [voltageTotal, setVoltageTotal] = useState<number | null>(null);
   const [maxVoltageHigh, setMaxVoltageHigh] = useState<number | null>(null);
@@ -70,64 +100,61 @@ export function BatteriesPage() {
   const [minTempLow, setMinTempLow] = useState<number | null>(null);
 
   useGlobalTicker(() => {
-      setVoltageTotal(totalVoltageHighMeasurement.getUpdate);
-      setMaxVoltageHigh(maxVoltageHighMeasurement.getUpdate);
-      setMinVoltageHigh(minVoltageHighMeasurement.getUpdate);
-      setMaxTempHigh(maxTempHighMeasurement.getUpdate);
-      setMinTempHigh(minTempHighMeasurement.getUpdate);
-      
-      setVoltageTotalLow(totalVoltageLowMeasurement.getUpdate);
-      setMaxVoltageLow(maxVoltageLowMeasurement.getUpdate);
-      setMinVoltageLow(minVoltageLowMeasurement.getUpdate);
-      setMaxTempLow(maxTempLowMeasurement.getUpdate);
-      setMinTempLow(minTempLowMeasurement.getUpdate);
+    setVoltageTotal(totalVoltageHighMeasurement.getUpdate);
+    setMaxVoltageHigh(maxVoltageHighMeasurement.getUpdate);
+    setMinVoltageHigh(minVoltageHighMeasurement.getUpdate);
+    setMaxTempHigh(maxTempHighMeasurement.getUpdate);
+    setMinTempHigh(minTempHighMeasurement.getUpdate);
+
+    setVoltageTotalLow(totalVoltageLowMeasurement.getUpdate);
+    setMaxVoltageLow(maxVoltageLowMeasurement.getUpdate);
+    setMinVoltageLow(minVoltageLowMeasurement.getUpdate);
+    setMaxTempLow(maxTempLowMeasurement.getUpdate);
+    setMinTempLow(minTempLowMeasurement.getUpdate);
   });
 
   return (
     <LostConnectionContext.Provider
-         value={any(
-            [...connections.boards, connections.backend],
-             isDisconnected
-         )}
+      value={any([...connections.boards, connections.backend], isDisconnected)}
     >
       <main className={styles.batteriesMainContainer}>
         <div className={styles.batteriesContainer}>
-          
-          <h2 className={styles.sectionTitle}>High Voltage Batteries</h2>
-          <div className={styles.statusContainer}>
-            <div className={styles.statusRow1}>
-              <div className={styles.statusItem}>
-                <h3>Total Voltage:</h3>
-                <div className={styles.value}>
-                  <span>{voltageTotal?.toFixed(1)}V</span>
+          <Window title="High Voltage Batteries">
+            <div className={styles.statusContainer}>
+              <div className={styles.statusRow1}>
+                <div className={styles.statusItem}>
+                  <h3>Total Voltage:</h3>
+                  <div className={styles.value}>
+                    <span>{voltageTotal?.toFixed(1)}V</span>
+                  </div>
                 </div>
-              </div>
-              <div className={styles.statusItem}>
-                <h3>Max V:</h3>
-                <div className={styles.value}>
-                  <span>{maxVoltageHigh?.toFixed(2)}V</span>
+                <div className={styles.statusItem}>
+                  <h3>Max V:</h3>
+                  <div className={styles.value}>
+                    <span>{maxVoltageHigh?.toFixed(2)}V</span>
+                  </div>
                 </div>
-              </div>
-              <div className={styles.statusItem}>
-                <h3>Min V:</h3>
-                <div className={styles.value}>
-                  <span>{minVoltageHigh?.toFixed(2)}V</span>
+                <div className={styles.statusItem}>
+                  <h3>Min V:</h3>
+                  <div className={styles.value}>
+                    <span>{minVoltageHigh?.toFixed(2)}V</span>
+                  </div>
                 </div>
-              </div>
-              <div className={styles.statusItem}>
-                <h3>Max Temp:</h3>
-                <div className={styles.value}>
-                  <span>{maxTempHigh?.toFixed(1)}°C</span>
+                <div className={styles.statusItem}>
+                  <h3>Max Temp:</h3>
+                  <div className={styles.value}>
+                    <span>{maxTempHigh?.toFixed(1)}°C</span>
+                  </div>
                 </div>
-              </div>
-              <div className={styles.statusItem}>
-                <h3>Min Temp:</h3>
-                <div className={styles.value}>
-                  <span>{minTempHigh?.toFixed(1)}°C</span>
+                <div className={styles.statusItem}>
+                  <h3>Min Temp:</h3>
+                  <div className={styles.value}>
+                    <span>{minTempHigh?.toFixed(1)}°C</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </Window>
 
           <div className={styles.sectionContainer}>
             <div className={styles.modulesContainer}>
@@ -136,7 +163,7 @@ export function BatteriesPage() {
               ))}
             </div>
           </div>
-          
+
           <div className={styles.sectionContainer}>
             <div className={styles.modulesContainer}>
               {highVoltageGroup2.map((module) => (
@@ -144,7 +171,7 @@ export function BatteriesPage() {
               ))}
             </div>
           </div>
-          
+
           <div className={styles.sectionContainer}>
             <div className={styles.modulesContainer}>
               {highVoltageGroup3.map((module) => (
@@ -152,46 +179,46 @@ export function BatteriesPage() {
               ))}
             </div>
           </div>
-          
+
           <div className={styles.sectionContainer}>
-            <h2 className={styles.sectionTitle}>Low Voltage Battery</h2>
-            
             {/* Low Voltage Bar */}
             <div className={styles.statusContainer}>
-              <div className={styles.statusRow1}>
-                <div className={styles.statusItem}>
-                  <h3>Total Voltage:</h3>
-                  <div className={styles.value}>
-                    <span>{voltageTotalLow?.toFixed(1) ?? "-"}V</span>
+              <Window title="Low Voltage Battery">
+                <div className={styles.statusRow1}>
+                  <div className={styles.statusItem}>
+                    <h3>Total Voltage:</h3>
+                    <div className={styles.value}>
+                      <span>{voltageTotalLow?.toFixed(1) ?? "-"}V</span>
+                    </div>
+                  </div>
+                  <div className={styles.statusItem}>
+                    <h3>Max V:</h3>
+                    <div className={styles.value}>
+                      <span>{maxVoltageLow?.toFixed(2) ?? "-"}V</span>
+                    </div>
+                  </div>
+                  <div className={styles.statusItem}>
+                    <h3>Min V:</h3>
+                    <div className={styles.value}>
+                      <span>{minVoltageLow?.toFixed(2) ?? "-"}V</span>
+                    </div>
+                  </div>
+                  <div className={styles.statusItem}>
+                    <h3>Max Temp:</h3>
+                    <div className={styles.value}>
+                      <span>{maxTempLow?.toFixed(1) ?? "-"}°C</span>
+                    </div>
+                  </div>
+                  <div className={styles.statusItem}>
+                    <h3>Min Temp:</h3>
+                    <div className={styles.value}>
+                      <span>{minTempLow?.toFixed(1) ?? "-"}°C</span>
+                    </div>
                   </div>
                 </div>
-                <div className={styles.statusItem}>
-                  <h3>Max V:</h3>
-                  <div className={styles.value}>
-                    <span>{maxVoltageLow?.toFixed(2) ?? "-"}V</span>
-                  </div>
-                </div>
-                <div className={styles.statusItem}>
-                  <h3>Min V:</h3>
-                  <div className={styles.value}>
-                    <span>{minVoltageLow?.toFixed(2) ?? "-"}V</span>
-                  </div>
-                </div>
-                <div className={styles.statusItem}>
-                  <h3>Max Temp:</h3>
-                  <div className={styles.value}>
-                    <span>{maxTempLow?.toFixed(1) ?? "-"}°C</span>
-                  </div>
-                </div>
-                <div className={styles.statusItem}>
-                  <h3>Min Temp:</h3>
-                  <div className={styles.value}>
-                    <span>{minTempLow?.toFixed(1) ?? "-"}°C</span>
-                  </div>
-                </div>
-              </div>
+              </Window>
             </div>
-            
+
             <div className={styles.lowVoltageContainer}>
               <LowVoltageModule />
             </div>
@@ -203,23 +230,23 @@ export function BatteriesPage() {
 }
 
 function isDisconnected(connection: Connection): boolean {
-    return !connection.isConnected;
+  return !connection.isConnected;
 }
 
 function all<T>(data: T[], condition: (value: T) => boolean): boolean {
-    for (const value of data) {
-        if (!condition(value)) {
-            return false;
-        }
+  for (const value of data) {
+    if (!condition(value)) {
+      return false;
     }
-    return true;
+  }
+  return true;
 }
 
 function any<T>(data: T[], condition: (value: T) => boolean): boolean {
-    for (const value of data) {
-        if (condition(value)) {
-            return true;
-        }
+  for (const value of data) {
+    if (condition(value)) {
+      return true;
     }
-    return false;
+  }
+  return false;
 }

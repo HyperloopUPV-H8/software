@@ -16,7 +16,8 @@
     flex-direction: row;
     gap: 0.2rem;
     z-index: 1;
-    background-color: white;
+    background-color: var(--theme-surface, white);
+    color: var(--theme-text-primary, black);
     font-size: 0.7rem;
     align-items: center;
 }
@@ -36,6 +37,6 @@
 
 .boardOrderList > :not(:last-child)::after {
     content: '';
-    border-bottom: 1px solid rgba(165, 131, 101, 0.368);
+    border-bottom: 1px solid var(--theme-border, rgba(165, 131, 101, 0.368));
     margin-bottom: 0.2rem;
 }

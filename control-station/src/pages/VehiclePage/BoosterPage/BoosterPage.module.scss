@@ -1,3 +1,5 @@
+@use 'src/styles/colors';
+
 .header{
   display: flex;
   flex-direction: row;
@@ -7,67 +9,52 @@
 
 .boosterMainContainer{
   display: flex;
-  justify-content: start;
-  align-items: start;
   width: 100%;
+  height: 100vh;
+  padding: 1rem;
+  gap: 1rem;
+  box-sizing: border-box;
 }
 
 .boosterContainer {
-  width: 150vh;
-  background-color: white;
-  border-radius: 20px;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  overflow: hidden;
-  box-sizing: border-box;
-  margin: 20px;
-  padding-bottom: 2vh;
+  gap: 1rem;
+  overflow-y: auto;
+  height: 100%;
 }
 
-.statusContainer {
-  margin: 20px;
-  display: flex;
-  flex-direction: column; /* Cambiado a columna */
-  justify-content: center;
-  align-items: center;
-  width: 90%;
-}
-
-.statusRow1, .statusRow2 {
-  background-color: #FFE7CF;
-  border-radius: 20px;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  align-items: center;
+.statusIndicators {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
   width: 100%;
-  margin-bottom: 5px; /* Espacio entre filas */
+  padding: 1rem;
 }
 
-.statusItem{
-  color: #EF7E30;
-  font-family: 'IBM Plex Mono', monospace;
+.stateIndicators {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem;
+}
+
+.text {
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.subtitle {
+  font-size: 0.8rem;
   text-align: center;
-  width: 100%;
-}
-
-.value{
-  color: #EF7E30;
-  font-family: 'IBM Plex Mono', monospace;
-  border: 1.5px solid #EF7E30;
-  border-radius: 1.2rem;
-  font-size: 25px;
-  height: 100px;
-  width: 100%;
-  min-width: 150px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  color: colors.getThemeColor('battery-header-text');
+  font-style: italic;
+  margin: 0;
+  padding: 0;
 }
 
 
@@ -77,11 +64,11 @@
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
-  border: 2.5px solid #FFE7CF;
+  border: 2.5px solid colors.getThemeColor('border');
   border-radius: 20px;
   text-align: center;
-  background-color: #FFF7EC;
-  color: #EF7E30;
+  background-color: colors.getThemeColor('surface');
+  color: colors.getThemeColor('text-secondary');
   font-family: 'IBM Plex Mono', monospace;
   margin-bottom: 10px;
 }
@@ -91,16 +78,16 @@
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
-  border: 2.5px solid #FFE7CF;
+  border: 2.5px solid colors.getThemeColor('border');
   border-radius: 20px;
   width: 95%;
   text-align: center;
-  background-color: #FFF7EC;
-  color: #EF7E30;
+  background-color: colors.getThemeColor('surface');
+  color: colors.getThemeColor('text-secondary');
   font-family: 'IBM Plex Mono', monospace;
 }
 .value {
-  border: 1.5px solid #EF7E30;
+  border: 1.5px solid colors.getThemeColor('border');
   border-radius: 1.2rem;
   width: 60%;
   min-width: 150px;
@@ -114,16 +101,18 @@
 }
 
 .modulesContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
   width: 100%;
+  padding: 0 1rem;
+  flex: 1;
 }
 
 h1 {
   padding-left: 20px;
   padding-top: 20px;
+  color: colors.getThemeColor('text-secondary');
 }
 
 .boosterDecorationLine {
@@ -135,14 +124,17 @@ h1 {
 
 h2 {
   font-size: 25px;
+  color: colors.getThemeColor('text-secondary');
 }
 
 h3 {
   font-size: 20px;
+  color: colors.getThemeColor('text-secondary');
 }
 
 p {
   font-size: 15px;
+  color: colors.getThemeColor('text-primary');
 }
 
 .main {
@@ -151,27 +143,24 @@ p {
 }
 
 .messagesAndOrders {
-  margin-top: 20px;
-  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
   width: 100%;
-  max-width: 25vw;
+  max-width: 400px;
+  min-width: 300px;
 }
 
 .orders {
-  margin-top: 20px;
-  width: 100%;
-  height: 100%;
   flex: 1;
   overflow: auto;
-  height: 46.1vh;
-  max-height: 46.1vh;
-  min-height: 46.1vh;
+  min-height: 300px;
 }
 
 .messages {
   flex: 1;
   overflow: auto;
-  height: 20rem;
+  min-height: 200px;
 }
 
 .order_column {
@@ -184,11 +173,48 @@ p {
 .voltageValueContainer {
   display: inline-block;
   padding: 5px 10px;
-  border: 1px solid #EF7E30;
+  border: 1px solid colors.getThemeColor('border');
   border-radius: 15px;
 }
 
 .voltageValue {
   font-size: 1.2rem;
   font-weight: bold;
+}
+
+// Media queries for responsive design
+@media (max-width: 1200px) {
+  .boosterMainContainer {
+    flex-direction: column;
+  }
+  
+  .messagesAndOrders {
+    max-width: 100%;
+    flex-direction: row;
+    height: 300px;
+  }
+  
+  .messages, .orders {
+    flex: 1;
+    min-height: unset;
+  }
+}
+
+@media (max-width: 768px) {
+  .statusIndicators {
+    grid-template-columns: 1fr;
+  }
+  
+  .stateIndicators {
+    grid-template-columns: 1fr;
+  }
+  
+  .modulesContainer {
+    grid-template-columns: 1fr;
+  }
+  
+  .messagesAndOrders {
+    flex-direction: column;
+    height: auto;
+  }
 }

@@ -3,7 +3,7 @@
     flex-direction: column;
     gap: 0.8rem;
 
-    --bg-color: var(--primary-99);
+    --bg-color: var(--theme-surface, var(--primary-99));
 }
 
 .body {

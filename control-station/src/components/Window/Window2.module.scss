@@ -12,8 +12,8 @@
 }
 
 .header {
-    background-color: #D1E3F1;
-    color: #5894A7;
+    background-color: colors.getThemeColor('battery-header-bg');
+    color: colors.getThemeColor('battery-header-text');
     font-weight: bold;
     padding: 0.3rem 0.6rem;
     font-size: map-get($map: fonts.$font-sizes, $key: x-small);
@@ -26,7 +26,7 @@
     align-items: center;
     gap: 1.5rem;
     padding: 0.6rem;
-    background-color: colors.getColor('primary', 99);
+    background-color: colors.getThemeColor('battery-bg');
     overflow: scroll;
     height: 100%;
     width: 100%;

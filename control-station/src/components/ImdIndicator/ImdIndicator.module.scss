@@ -1,12 +1,14 @@
+@use 'src/styles/colors';
+
 .state_indicator {
     display: flex;
     align-items: center;
     width: 100%;
-    min-height: 2.5rem;
+    min-height: clamp(2rem, 3vw, 2.5rem);
     margin-left: auto;
     padding: 0;
     box-sizing: border-box;
-    margin-bottom: 0.6rem; 
+    margin-bottom: clamp(0.3rem, 1vw, 0.6rem); 
     border-radius: 0.5rem;
 }
 
@@ -16,23 +18,28 @@
 
 .title {
     font-family: Roboto;
-    font-size: 20px;
+    font-size: 1.1rem;
     font-style: normal;
     text-align: center;
     font-weight: 400;
     opacity: 0.8;
     margin: 0;
     flex: 1 1 auto;
+    color: colors.getColor('primary', 15);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .icon {
     opacity: 0.6;
-    width: 1.1rem;
-    height: 1.1rem;
+    width: clamp(0.9rem, 2vw, 1.1rem);
+    height: clamp(0.9rem, 2vw, 1.1rem);
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0;
+    flex-shrink: 0;
 }
 .state_indicator > .icon:first-child {
     justify-self: start;

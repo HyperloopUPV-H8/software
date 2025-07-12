@@ -1,15 +1,15 @@
 @use "sass:color";
 
 // COLORS
-$background-color: #dce3eb;
-$title-color: #45677d;
-$normal-text-color: #373c43;
-$alternate-text-color: #505868;
+$background-color: var(--theme-background);
+$title-color: var(--theme-text-secondary);
+$normal-text-color: var(--theme-text-primary);
+$alternate-text-color: var(--theme-text-tertiary);
 $orange: #ee7623;
 $blue: #317ae7;
 $base-color: hsl(212, 27%, 55%);
 
-$dark-normal-text-color: #bec6d2;
+$dark-normal-text-color: var(--theme-text-primary);
 
 @function getColor($name, $lightness) {
     @return var(--color-#{$name}-#{$lightness});
@@ -76,7 +76,7 @@ $background-color-transition: background-color $normal-transition-time linear;
     font-family: $code-font;
     font-size: $normal-font-size;
     font-style: italic;
-    color: #a9adb6;
+    color: var(--theme-text-tertiary);
 }
 
 @mixin tab-text {

@@ -1,5 +1,5 @@
 @use "src/styles/styles";
-$header-color: #ffe4cc;
+@use "src/styles/colors";
 
 .headerWrapper {
     flex: 0 0 0;
@@ -10,7 +10,7 @@ $header-color: #ffe4cc;
         / auto 1fr auto 4rem;
     align-items: center;
     gap: 0.3rem;
-    background-color: $header-color;
+    background-color: colors.getThemeColor('header-bg');
     cursor: pointer;
 }
 
@@ -24,7 +24,7 @@ $header-color: #ffe4cc;
 }
 
 .caret > * {
-    color: styles.$orange;
+    color: colors.getThemeColor('header-text');
 }
 
 .visible {
@@ -37,7 +37,7 @@ $header-color: #ffe4cc;
 
 .name {
     grid-area: name;
-    color: styles.$orange;
+    color: colors.getThemeColor('header-text');
     font-weight: 500;
     font-size: 0.8rem;
     overflow: hidden;

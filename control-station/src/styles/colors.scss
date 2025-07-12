@@ -24,6 +24,54 @@ $lightnesses: 0, 10, 15, 20, 30, 40, 50, 60, 70, 80, 85, 90, 95, 99, 100;
     }
 }
 
+@mixin themeColors {
+    // Light theme (default)
+    --theme-background: #{getColor("primary", 95)};
+    --theme-surface: #{getColor("primary", 99)};
+    --theme-surface-variant: #{getColor("primary", 90)};
+    --theme-text-primary: #{getColor("primary", 20)};
+    --theme-text-secondary: #{getColor("primary", 30)};
+    --theme-text-tertiary: #{getColor("primary", 40)};
+    --theme-border: #{getColor("primary", 80)};
+    --theme-border-variant: #{getColor("primary", 85)};
+    --theme-shadow-color: rgba(189, 189, 189, 0.04);
+    --theme-header-bg: #{getColor("tertiary", 90)};
+    --theme-header-text: #{getColor("tertiary", 60)};
+    --theme-battery-header-bg: #D1E3F1;
+    --theme-battery-header-text: #5894A7;
+    --theme-battery-bg: #{getColor("primary", 99)};
+    --theme-battery-border: #9CBDD7;
+    --theme-battery-text: #{getColor("primary", 15)};
+    --theme-orientation-bg: #C2E9D0;
+    --theme-orientation-text: #{getColor("primary", 15)};
+    
+    // Dark theme
+    &[data-theme="dark"] {
+        --theme-background: #{getColor("primary", 10)};
+        --theme-surface: #{getColor("primary", 15)};
+        --theme-surface-variant: #{getColor("primary", 20)};
+        --theme-text-primary: #{getColor("primary", 95)};
+        --theme-text-secondary: #{getColor("primary", 90)};
+        --theme-text-tertiary: #{getColor("primary", 85)};
+        --theme-border: #{getColor("primary", 25)};
+        --theme-border-variant: #{getColor("primary", 20)};
+        --theme-shadow-color: rgba(0, 0, 0, 0.3);
+        --theme-header-bg: #{getColor("tertiary", 15)};
+        --theme-header-text: #{getColor("tertiary", 85)};
+        --theme-battery-header-bg: #{getColor("primary", 20)};
+        --theme-battery-header-text: #{getColor("primary", 85)};
+        --theme-battery-bg: #{getColor("primary", 15)};
+        --theme-battery-border: #{getColor("primary", 30)};
+        --theme-battery-text: #{getColor("primary", 90)};
+        --theme-orientation-bg: #{getColor("primary", 40)};
+        --theme-orientation-text: #{getColor("primary", 95)};
+    }
+}
+
 @function getColor($name, $lightness) {
     @return var(--color-#{$name}-#{$lightness});
+}
+
+@function getThemeColor($property) {
+    @return var(--theme-#{$property});
 }

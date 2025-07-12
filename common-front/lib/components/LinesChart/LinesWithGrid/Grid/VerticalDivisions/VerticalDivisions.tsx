@@ -6,6 +6,7 @@ type Props = {
     width: number;
     strokeOpacity: number;
     strokeWidth: number;
+    strokeColor?: string;
 };
 
 export const VerticalDivisions = ({
@@ -13,6 +14,7 @@ export const VerticalDivisions = ({
     width,
     strokeOpacity,
     strokeWidth,
+    strokeColor = "black",
 }: Props) => {
     if (divisions == 0) {
         return <></>;
@@ -34,7 +36,7 @@ export const VerticalDivisions = ({
                         y1={0}
                         x2={width}
                         y2={"100%"}
-                        stroke="black"
+                        stroke={strokeColor}
                         strokeOpacity={strokeOpacity}
                         strokeWidth={strokeWidth}
                     ></line>

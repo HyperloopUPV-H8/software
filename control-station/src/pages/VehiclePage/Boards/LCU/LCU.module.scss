@@ -1,3 +1,5 @@
+@use 'src/styles/colors';
+
 .LCUWrapper {
   display: flex;
   flex-direction: column;
@@ -11,7 +13,7 @@
 .subtitle {
   font-size: 1rem;
   text-align: center;
-  color: #5894A7;
+  color: colors.getThemeColor('battery-header-text');
   font-style: italic;
   margin-top: 2px;
   margin-bottom: 2px;
@@ -40,7 +42,7 @@
   border-radius: 0.5rem;
   padding: 0.3rem 0.8rem;
   font-size: 0.9rem;
-  color: #2e7d32;
+  color: colors.getThemeColor('text-secondary');
   font-weight: 500;
 
   &::before {
