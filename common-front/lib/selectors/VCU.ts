@@ -18,4 +18,8 @@ export enum VcuMeasurements {
     bmslConnection = 'VCU/BMSL_connection',
     generalState = 'VCU/general_state',
     operationalState = 'VCU/operational_state',
+    regulatorPressure = 'VCU/regulator_pressure',
+    pressureHigh = 'VCU/pressure_high',
+    pressureBrakes = 'VCU/pressure_brakes',
+    pressureCapsule = 'VCU/pressure_capsule'
 }

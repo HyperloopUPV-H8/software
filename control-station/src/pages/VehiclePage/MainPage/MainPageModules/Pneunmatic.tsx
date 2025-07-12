@@ -2,15 +2,15 @@ import { BarIndicator } from "components/BarIndicator/BarIndicator"
 import { Window } from "components/Window/Window";
 import pressure from 'assets/svg/pressure-filled.svg'
 import thermometer from 'assets/svg/thermometer-field.svg'
-import { useMeasurementsStore } from "common";
+import { useMeasurementsStore, VcuMeasurements } from "common";
 import styles from '../MainPage.module.scss'
 
 export const Pneumatic = () => {
     const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
 
-    const HighPressure = getNumericMeasurementInfo('');
-    const BrakesPressure = getNumericMeasurementInfo('');
-    const CapsulePressure = getNumericMeasurementInfo('');
+    const HighPressure = getNumericMeasurementInfo(VcuMeasurements.pressureHigh);
+    const BrakesPressure = getNumericMeasurementInfo(VcuMeasurements.pressureBrakes);
+    const CapsulePressure = getNumericMeasurementInfo(VcuMeasurements.pressureCapsule);
     const CoolingEM = getNumericMeasurementInfo('');
     const CoolingPCB = getNumericMeasurementInfo('');
 
