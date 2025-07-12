@@ -5,10 +5,12 @@ import { useGlobalTicker, useMeasurementsStore } from "common";
 interface CellProps {
   value: number;
   min: number;
+  max: number;
 }
 
 const LowVoltageModule: React.FC = () => {
   const minThresholdCellVoltage = 3.67;
+  const maxThresholdCellVoltage = 4.2;
   const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
   const [cellValues, setCellValues] = useState<number[]>(Array(6).fill(0));
 
@@ -21,13 +23,14 @@ const LowVoltageModule: React.FC = () => {
     );
   });
 
-  const getColorFromValue = (value: number, min: number) => {
+  const getColorFromValue = (value: number, min: number, max: number) => {
     if (value < min) return styles.yellow;
+    if (value > max) return styles.red;
     return styles.green;
   };
 
-  const Cell: React.FC<CellProps> = ({ value, min }) => {
-    const colorClass = getColorFromValue(value, min);
+  const Cell: React.FC<CellProps> = ({ value, min, max }) => {
+    const colorClass = getColorFromValue(value, min, max);
     return (
       <div
         className={`${styles.cell} ${colorClass}`}
@@ -44,7 +47,7 @@ const LowVoltageModule: React.FC = () => {
         
         <div className={styles.flexCells}>
           {cellValues.map((value, index) => (
-            <Cell key={index} value={value} min={minThresholdCellVoltage} />
+            <Cell key={index} value={value} min={minThresholdCellVoltage} max={maxThresholdCellVoltage}/>
           ))}
         </div>
       </div>
