@@ -53,7 +53,7 @@ export const BatteryIndicator = memo(
 
         useGlobalTicker(() => {
             setValueState(getValue());
-            setValueStateSOC(getValueSOC)
+            setValueStateSOC(getValueSOC())
         });
 
         return (
@@ -89,7 +89,7 @@ export const BatteryIndicator = memo(
                     
                     <div className={styles.percentage_container}>
                         <span className={styles.percentage}>
-                            {lostConnection ? '-.--' : valueStateSOC ? Math.round(valueStateSOC) : '-.--'}%
+                            {lostConnection ? '-.--' : valueStateSOC ? valueStateSOC.toFixed(2) : '-.--'}%
                         </span>
                     </div>
                 </div>

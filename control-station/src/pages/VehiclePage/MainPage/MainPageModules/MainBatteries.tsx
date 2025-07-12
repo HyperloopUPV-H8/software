@@ -19,7 +19,7 @@ export const Batteries = () => {
     const TotalVoltageLow = getNumericMeasurementInfo(BmslMeasurements.totalVoltage);
     const TotalVoltageCabinet = getNumericMeasurementInfo(HvscuCabinetMeasurements.TotalVoltage);
 
-    const BusHV = getNumericMeasurementInfo(HvscuMeasurements.BusVoltage);
+    const BusHV = getNumericMeasurementInfo(HvscuMeasurements.VoltageReading);
     const BusCabinet = getNumericMeasurementInfo(HvscuCabinetMeasurements.BusVoltage);
 
     return (
