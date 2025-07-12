@@ -38,7 +38,7 @@
 }
 
 .sectionTitle {
-  color: colors.getColor('tertiary', 40);
+  color: colors.getThemeColor('text-secondary');
   font-family: 'IBM Plex Mono', monospace;
   font-size: 1.4rem;
   text-align: center;
@@ -57,7 +57,7 @@
 }
 
 .statusRow1, .statusRow2 {
-  background-color: colors.getColor('tertiary', 90);
+  background-color: colors.getThemeColor('surface');
   border-radius: 20px;
   display: flex;
   flex-direction: row;
@@ -68,7 +68,7 @@
 }
 
 .statusItem{
-  color: colors.getColor('tertiary', 40);
+  color: colors.getThemeColor('text-secondary');
   font-family: 'IBM Plex Mono', monospace;
   display: flex;
   flex-direction: row;
@@ -79,9 +79,9 @@
 }
 
 .value{
-  color: colors.getColor('tertiary', 40);
+  color: colors.getThemeColor('text-secondary');
   font-family: 'IBM Plex Mono', monospace;
-  border: 1.5px solid colors.getColor('tertiary', 40);
+  border: 1.5px solid colors.getThemeColor('border');
   border-radius: 1.2rem;
   font-size: 16px;
   height: 40px;
@@ -99,11 +99,11 @@
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
-  border: 2.5px solid colors.getColor('tertiary', 85);
+  border: 2.5px solid colors.getThemeColor('border');
   border-radius: 20px;
   text-align: center;
-  background-color: colors.getColor('tertiary', 95);
-  color: colors.getColor('tertiary', 40);
+  background-color: colors.getThemeColor('surface');
+  color: colors.getThemeColor('text-secondary');
   font-family: 'IBM Plex Mono', monospace;
   margin-bottom: 10px;
 }
@@ -113,25 +113,13 @@
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
-  border: 2.5px solid colors.getColor('tertiary', 85);
+  border: 2.5px solid colors.getThemeColor('border');
   border-radius: 20px;
   width: 95%;
   text-align: center;
-  background-color: colors.getColor('tertiary', 95);
-  color: colors.getColor('tertiary', 40);
+  background-color: colors.getThemeColor('surface');
+  color: colors.getThemeColor('text-secondary');
   font-family: 'IBM Plex Mono', monospace;
-}
-.value {
-  border: 1.5px solid colors.getColor('tertiary', 40);
-  border-radius: 1.2rem;
-  width: 40%;
-  height: 40px;
-  font-size: 25px;
-  margin-left: 5px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
 }
 
 .modulesContainer {
@@ -218,7 +206,7 @@ p {
 .voltageValueContainer {
   display: inline-block;
   padding: 5px 10px;
-  border: 1px solid colors.getColor('tertiary', 40);
+  border: 1px solid colors.getThemeColor('border');
   border-radius: 15px;
 }
 
@@ -230,7 +218,7 @@ p {
 /* Voltage Bar Styles */
 .voltageBar {
   width: 100%;
-  background-color: colors.getColor('tertiary', 90);
+  background-color: colors.getThemeColor('surface');
   border-radius: 10px;
   padding: 10px 15px;
   margin-bottom: 15px;
@@ -238,7 +226,7 @@ p {
 }
 
 .voltageBarTitle {
-  color: colors.getColor('tertiary', 40);
+  color: colors.getThemeColor('text-secondary');
   font-family: 'IBM Plex Mono', monospace;
   font-size: 1rem;
   font-weight: bold;
@@ -262,7 +250,7 @@ p {
 }
 
 .voltageBarLabel {
-  color: colors.getColor('tertiary', 40);
+  color: colors.getThemeColor('text-secondary');
   font-family: 'IBM Plex Mono', monospace;
   font-size: 0.7rem;
   font-weight: bold;
@@ -270,14 +258,14 @@ p {
 }
 
 .voltageBarValue {
-  color: colors.getColor('tertiary', 40);
+  color: colors.getThemeColor('text-secondary');
   font-family: 'IBM Plex Mono', monospace;
   font-size: 0.85rem;
   font-weight: bold;
   background-color: colors.getThemeColor('surface');
   padding: 3px 8px;
   border-radius: 8px;
-  border: 1px solid colors.getColor('tertiary', 40);
+  border: 1px solid colors.getThemeColor('border');
   text-align: center;
   min-width: 50px;
 }

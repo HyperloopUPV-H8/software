@@ -1,13 +1,20 @@
 import { useContext, useState } from "react";
 import styles from "./BoosterPage.module.scss";
 import BoosterModule from "components/BoosterModules/BoosterModule";
-import { useMeasurementsStore, HvscuCabinetMeasurements, getBooleanMeasurement, GlobalTicker, useGlobalTicker, useOrders, BoardOrders, MessagesContainer, BcuMeasurements } from "common";
+import { useMeasurementsStore, HvscuCabinetMeasurements, getBooleanMeasurement, GlobalTicker, useGlobalTicker, useOrders, BoardOrders, MessagesContainer, BcuMeasurements, VcuMeasurements } from "common";
 import { OrdersContainer } from "components/OrdersContainer/OrdersContainer";
 import { Window } from "components/Window/Window";
 import { getHardcodedOrders } from "../BatteriesPage/FixedOrders";
 import { usePodDataUpdate } from 'hooks/usePodDataUpdate';
 import { Connection, useConnections } from 'common';
 import { LostConnectionContext } from 'services/connections';
+import { BarIndicator } from "components/BarIndicator/BarIndicator";
+import { EnumIndicator } from "components/EnumIndicator/EnumIndicator";
+import battery from 'assets/svg/battery-filled.svg';
+import thunder from 'assets/svg/thunder-filled.svg';
+import thermometer from 'assets/svg/thermometer-field.svg';
+import Contactors from 'assets/svg/open-contactors-icon.svg';
+import teamLogo from 'assets/svg/team_logo.svg';
 
 interface ModuleData {
   id: number | string;
@@ -74,34 +81,48 @@ export function BoosterPage() {
     >
       <main className={styles.boosterMainContainer}>
         <div className={styles.boosterContainer}>
-          <div className={styles.statusContainer}>
-            <div className={styles.statusRow1}>
-              <div className={styles.statusItem}>
-                <h3>Total Voltage:</h3>
-                <div className={styles.value}>
-                  <span>{voltageTotal?.toFixed(2) ?? "-"} V</span>
-                </div>
-              </div>
-              <div className={styles.statusItem}>
-                <h3>Current:</h3>
-                <div className={styles.value}>
-                  <span>{current?.toFixed(2) ?? "-"} A</span>
-                </div>
-              </div>
-              <div className={styles.statusItem}>
-                <h3>Contactors status:</h3>
-                <div className={styles.value}>
-                  <span>{contactorsState ?? "-"}</span>
-                </div>
-              </div>
-              <div className={styles.statusItem}>
-                <h3>Charge:</h3>
-                <div className={styles.value}>
-                  <span>- %</span> 
-                </div>
-              </div>
+          <Window title='Booster Status'>
+            <div className={styles.statusIndicators}>
+              <BarIndicator
+                name="Total Voltage"
+                icon={battery}
+                getValue={totalSupercapsVoltageInfo.getUpdate}
+                safeRangeMin={totalSupercapsVoltageInfo.range[0]!!}
+                safeRangeMax={totalSupercapsVoltageInfo.range[1]!!}
+                warningRangeMin={totalSupercapsVoltageInfo.warningRange[0]!!}
+                warningRangeMax={totalSupercapsVoltageInfo.warningRange[1]!!}
+                units={totalSupercapsVoltageInfo.units}
+              />
+              <BarIndicator
+                name="Current Output"
+                icon={thunder}
+                getValue={currentMeasurementInfo.getUpdate}
+                safeRangeMin={currentMeasurementInfo.range[0]!!}
+                safeRangeMax={currentMeasurementInfo.range[1]!!}
+                warningRangeMin={currentMeasurementInfo.warningRange[0]!!}
+                warningRangeMax={currentMeasurementInfo.warningRange[1]!!}
+                units={currentMeasurementInfo.units}
+              />
+              <BarIndicator
+                name="Temperature"
+                icon={thermometer}
+                getValue={temperatureMeasurementInfo.getUpdate}
+                safeRangeMin={temperatureMeasurementInfo.range[0]!!}
+                safeRangeMax={temperatureMeasurementInfo.range[1]!!}
+                warningRangeMin={temperatureMeasurementInfo.warningRange[0]!!}
+                warningRangeMax={temperatureMeasurementInfo.warningRange[1]!!}
+                units={temperatureMeasurementInfo.units}
+              />
             </div>
-          </div>
+          </Window>
+          
+          <Window title='Booster State'>
+            <div className={styles.stateIndicators}>
+              <div className={styles.text}><span className={styles.subtitle}>Contactors</span><EnumIndicator measurementId={HvscuCabinetMeasurements.ContactorsState} icon={Contactors} /></div>
+              <div className={styles.text}><span className={styles.subtitle}>BCU General State</span><EnumIndicator measurementId={BcuMeasurements.generalState} icon={teamLogo} /></div>
+              <div className={styles.text}><span className={styles.subtitle}>BCU Operational State</span><EnumIndicator measurementId={BcuMeasurements.operationalState} icon={teamLogo} /></div>
+            </div>
+          </Window>
 
           <div className={styles.modulesContainer}>
             {modules.map((module) => (

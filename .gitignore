@@ -19,3 +19,5 @@ CLAUDE*
 
 # Rust build artifacts
 packet-sender/target/
+
+*.md
