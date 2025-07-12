@@ -14,7 +14,7 @@ export const SplashScreen = ({ children }: Props) => {
             mass: 5,
         },
         delay: 150,
-        loop: true,
+        loop: false,
     });
 
     return (
