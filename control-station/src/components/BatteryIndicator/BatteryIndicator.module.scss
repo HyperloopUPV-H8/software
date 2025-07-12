@@ -1,4 +1,5 @@
 @use 'src/styles/fonts';
+@use 'src/styles/colors';
 
 .battery_indicator {
     display: flex;
@@ -14,8 +15,8 @@
     position: relative;
     width: 2rem;
     height: 4rem;
-    background-color: #DFFFD4; 
-    border: 0.0625rem solid #9CBDD7; 
+    background-color: colors.getThemeColor('battery-bg'); 
+    border: 0.0625rem solid colors.getThemeColor('battery-border'); 
     border-radius: 0.35rem;
     overflow: hidden;
     
@@ -27,7 +28,7 @@
         transform: translateX(-50%);
         width: 1rem;
         height: 0.35rem;
-        background-color: #9CBDD7;
+        background-color: colors.getThemeColor('battery-border');
         border-radius: 0.175rem 0.175rem 0 0;
     }
 }
@@ -49,7 +50,7 @@
     transform: translate(-50%, -50%);
     font-size: 0.5rem;
     font-weight: bold;
-    color: #333;
+    color: colors.getThemeColor('battery-text');
     text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
     z-index: 10;
     display: flex;
@@ -92,7 +93,7 @@
     margin: 0;
     font-size: 0.7rem;
     font-weight: 500;
-    color: #333;
+    color: colors.getThemeColor('battery-text');
     text-align: center;
 }
 
@@ -106,6 +107,6 @@
     margin: 0;
     font-size: 0.8rem;
     font-weight: 600;
-    color: #333;
+    color: colors.getThemeColor('battery-text');
 }
 

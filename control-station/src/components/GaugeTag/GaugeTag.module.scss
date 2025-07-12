@@ -5,7 +5,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: map-get($map: colors.$key-colors, $key: lightskyblue);
+    background-color: colors.getThemeColor('surface');
     padding: .2rem;
     border-radius: 50%;
     

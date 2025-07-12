@@ -9,10 +9,16 @@ import { ReactComponent as Cameras } from 'assets/svg/cameras.svg';
 import { ReactComponent as TeamLogo } from 'assets/svg/team_logo.svg';
 import { ReactComponent as Batteries } from 'assets/svg/battery-filled.svg'
 import { SplashScreen, WsHandlerProvider, useLoadBackend } from 'common';
+import { useEffect } from 'react';
 
 export const App = () => {
     const isProduction = import.meta.env.PROD;
     const loadBackend = useLoadBackend(isProduction);
+    
+    useEffect(() => {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    }, []);
 
     return (
         <div className={styles.appWrapper}>
