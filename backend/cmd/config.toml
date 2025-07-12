@@ -4,26 +4,25 @@
 # <-- CHECKLIST -->
 # 1. Check that all the boards you want to use are declared in the [vehicle] section
 # 2. Set the branch you want to use for the ADJ configuration
-# 3. Toggle the Fault Propagation to your needs (treu/false)
+# 3. Toggle the Fault Propagation to your needs (true/false)
 # 4. Check the TCP configuration and make sure to use the needed Keep Alive settings
 
 # Control Station general configuration
 [app]
-automatic_window_opening = "" # Leave blank to open no windows (<blank>, ethernet-view, control-station, both)
+automatic_window_opening = "control-station" # Leave blank to open no windows (<blank>, ethernet-view, control-station, both)
 
 # Vehicle Configuration
 [vehicle]
-boards = ["HVSCU"]
+boards = ["BCU", "BMSL", "HVSCU", "HVSCU-Cabinet", "LCU", "PCU", "VCU", "BLCU"]
 
 # ADJ (Architecture Description JSON) Configuration
 [adj]
-branch = "software" # Leave blank when using ADJ as a submodule (like this: "")
-test = true         # Enable test mode
+branch = "main" # Leave blank when using ADJ as a submodule (like this: "")
+test = true     # Enable test mode
 
 # Network Configuration
 [network]
-manual = false # Manual network device selection
-dev_mode = false # Enable dev mode (UDP server instead of packet sniffer)
+manual = true # Manual network device selection
 
 # Transport Configuration
 [transport]

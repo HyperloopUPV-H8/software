@@ -23,7 +23,7 @@ test = true         # Enable test mode
 
 # Network Configuration
 [network]
-manual = true   # Manual network device selection
+manual = false  # Manual network device selection
 dev_mode = true # IMPORTANT: Dev mode enabled - uses UDP server instead of packet sniffer
 
 # Transport Configuration
@@ -33,12 +33,12 @@ propagate_fault = false
 # TCP Configuration
 # These settings control how the backend reconnects to boards when connections are lost
 [tcp]
-backoff_min_ms = 100         # Minimum backoff duration in milliseconds
-backoff_max_ms = 5000        # Maximum backoff duration in milliseconds
-backoff_multiplier = 1.5     # Exponential backoff multiplier (e.g., 1.5 means each retry waits 1.5x longer)
-max_retries = 0              # Maximum retries before cycling (0 = infinite retries, recommended for persistent reconnection)
-connection_timeout_ms = 2000 # Timeout for the initial connection attempt
-keep_alive_ms = 30000        # Keep-alive interval in milliseconds (0 to disable)
+backoff_min_ms = 999999        # Minimum backoff duration in milliseconds
+backoff_max_ms = 999999        # Maximum backoff duration in milliseconds
+backoff_multiplier = 1         # Exponential backoff multiplier (e.g., 1.5 means each retry waits 1.5x longer)
+max_retries = 0                # Maximum retries before cycling (0 = infinite retries, recommended for persistent reconnection)
+connection_timeout_ms = 999999 # Timeout for the initial connection attempt
+keep_alive_ms = 0              # Keep-alive interval in milliseconds (0 to disable)
 
 # Server Configuration
 [server.ethernet-view]
