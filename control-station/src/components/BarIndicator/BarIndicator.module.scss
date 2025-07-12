@@ -29,6 +29,7 @@
     background-color: currentColor;
 
     transition: width 0.1s ease-in-out;
+    z-index: 1;
 }
 
 .name_display,
@@ -37,6 +38,8 @@
     flex-flow: row;
     align-items: center;
     gap: 4px;
+    position: relative;
+    z-index: 2;
 }
 
 .name_display {
@@ -47,6 +50,8 @@
     max-width: 10px;
 
     opacity: 0.8;
+    position: relative;
+    z-index: 2;
 }
 
 .name {
