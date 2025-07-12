@@ -40,19 +40,22 @@ export const EnumIndicator = memo(({ measurementId, icon }: Props) => {
 });
 
 const enumToColor: { [key: string]: string } = {
-  DISCONNECTED: "#cccccc",
+    'DISCONNECTED': "#cccccc",
+    'NOT_CHARGING' : '#EBF6FF',
+    'CHARGING' : '#F583F8',
+    'CHARGED' : '#FBD15B',
 
-  NOT_CHARGING: "#EBF6FF",
-  CHARGING: "#F28E31",
+    'HV OPEN' : '#83C0F8',
+    'HV CLOSED' : '#ACF293',
 
-  OPEN: "#ACF293",
-  PRECHARGE: "#F4F788",
-  CLOSED: "#F28E31",
-  CLOSE: "#F28E31",
+    'OPEN' : '#83C0F8',
+    'PRECHARGE' : '#BB83F8',
+    'CLOSED' : '#ACF293',
+    'CLOSE' : '#ACF293',
 
-  DISENGAGED: "#EF9A87",
-  ENGAGED: "#ACF293",
-  FAULT: "#EF9A87",
+    'DISENGAGED' : '#FBD15B',
+    'ENGAGED' : '#ACF293',
+    'FAULT': "#EF9A87",
 
   default: "#EBF6FF",
 };
