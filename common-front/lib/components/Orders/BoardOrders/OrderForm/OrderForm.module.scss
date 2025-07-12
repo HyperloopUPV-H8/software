@@ -8,10 +8,12 @@
     width: 100%;
     @include styles.code-text;
     font-size: 0.7rem;
-    border: 1px solid styles.$orange;
+    border: 1px solid var(--theme-header-text, styles.$orange);
     border-radius: 0.3rem;
     overflow: hidden;
     box-sizing: border-box;
+    background-color: var(--theme-surface, white);
+    color: var(--theme-text-primary, black);
 
     @include styles.shadow;
 }

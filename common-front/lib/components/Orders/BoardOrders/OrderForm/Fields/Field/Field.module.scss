@@ -17,8 +17,9 @@
     text-overflow: ellipsis;
     overflow: hidden;
     font-size: 0.8rem;
+    color: var(--theme-text-primary, black);
 }
 
 .disabled {
-    color: rgb(176, 176, 176);
+    color: var(--theme-text-tertiary, rgb(176, 176, 176));
 }
