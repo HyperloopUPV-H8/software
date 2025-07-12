@@ -50,8 +50,7 @@
     transform: translate(-50%, -50%);
     font-size: 0.5rem;
     font-weight: bold;
-    color: colors.getThemeColor('battery-text');
-    text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
+    color: colors.getColor('primary', 30);
     z-index: 10;
     display: flex;
     align-items: baseline;
@@ -93,7 +92,7 @@
     margin: 0;
     font-size: 0.7rem;
     font-weight: 500;
-    color: colors.getThemeColor('battery-text');
+    color: colors.getColor('primary', 15);
     text-align: center;
 }
 
@@ -107,6 +106,6 @@
     margin: 0;
     font-size: 0.8rem;
     font-weight: 600;
-    color: colors.getThemeColor('battery-text');
+    color: colors.getColor('primary', 95);
 }
 

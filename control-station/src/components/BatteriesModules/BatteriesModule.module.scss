@@ -1,3 +1,5 @@
+@use 'src/styles/colors';
+
 .boxContainer1 {
     width: 100%;
     max-width: 220px;
@@ -12,7 +14,7 @@
   }
   
   .boxContainer2 {
-    border: 2.5px solid #FFE7CF;
+    border: 2.5px solid colors.getColor('tertiary', 85);
     width: 98%;
     height: 115px;
     border-radius: 20px;
@@ -21,18 +23,18 @@
     align-items: center;
     justify-content: flex-end;
     position: relative;
-    background-color: white;
+    background-color: colors.getThemeColor('surface-variant');
     box-sizing: border-box;
     padding: 8px 8px 8px 8px;
     padding-top: 38px;
   }
   
   .h2Module {
-    color: #EF7E30;
+    color: colors.getColor('tertiary', 40);
     font-family: 'IBM Plex Mono', monospace;
     width: 100%;
     height: 28px;
-    background-color: #FFE7CF;
+    background-color: colors.getColor('tertiary', 90);
     text-align: center;
     border-radius: 20px 20px 0 0;
     font-weight: bold;
@@ -68,7 +70,7 @@
   }
 
   .totalStyle {
-    color: #EF7E30;
+    color: colors.getColor('tertiary', 40);
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.7rem;
     display: flex;
@@ -78,7 +80,7 @@
   }
 
   .totalLabel {
-    color: #EF7E30;
+    color: colors.getColor('tertiary', 40);
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.7rem;
     margin: 0px;
@@ -87,12 +89,12 @@
   }
 
   .totalValue {
-    color: #EF7E30;
+    color: colors.getColor('tertiary', 40);
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.7rem;
     margin: 0px;
     padding: 3px 16px;
-    background-color: #FFE7CF;
+    background-color: colors.getColor('tertiary', 90);
     border-radius: 12px;
     font-weight: bold;
     min-width: 85px;
@@ -114,7 +116,7 @@
   }
   
   .dataStyle {
-    color: #EF7E30;
+    color: colors.getColor('tertiary', 40);
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.65rem;
     display: flex;
@@ -125,7 +127,7 @@
   }
 
   .p {
-    color: #EF7E30;
+    color: colors.getColor('tertiary', 40);
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.65rem;
     margin-top: 1px;
@@ -133,7 +135,7 @@
     overflow: hidden;
     margin-bottom: 1px;
     padding: 3px 14px;
-    background-color: #FFE7CF;
+    background-color: colors.getColor('tertiary', 90);
     border-radius: 12px;
     width: fit-content;
     align-items: center;
@@ -193,7 +195,7 @@
   }
   
   .moduleInfoLabel {
-    color: #EF7E30;
+    color: colors.getColor('tertiary', 40);
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.65rem;
     width: 45%;

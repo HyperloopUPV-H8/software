@@ -1,5 +1,6 @@
 @use "src/styles/styles";
-$header-color: #ffe4cc;
+@use "src/styles/colors";
+$header-color: colors.getColor('tertiary', 90);
 
 .headerWrapper {
     flex: 0 0 0;
@@ -24,7 +25,7 @@ $header-color: #ffe4cc;
 }
 
 .caret > * {
-    color: styles.$orange;
+    color: colors.getColor('tertiary', 40);
 }
 
 .visible {
@@ -37,7 +38,7 @@ $header-color: #ffe4cc;
 
 .name {
     grid-area: name;
-    color: styles.$orange;
+    color: colors.getColor('tertiary', 40);
     font-weight: 500;
     font-size: 0.8rem;
     overflow: hidden;

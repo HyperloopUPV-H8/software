@@ -1,3 +1,5 @@
+@use 'src/styles/colors';
+
 .boxContainer1 {
     width: 40%;
     display: flex;
@@ -8,7 +10,7 @@
   }
   
   .boxContainer2 {
-    border: 2.5px solid #FFE7CF;
+    border: 2.5px solid colors.getColor('tertiary', 85);
     width: 65%;
     height: 10.5rem;
     border-radius: 20px;
@@ -16,18 +18,18 @@
     flex-direction: column;
     align-items: stretch;
     position: relative;
-    background-color: white;
+    background-color: colors.getThemeColor('surface-variant');
     box-sizing: border-box;
     padding-top: 20px;
 
   }
   
   .h2Module {
-    color: #EF7E30;
+    color: colors.getColor('tertiary', 40);
     font-family: 'IBM Plex Mono', monospace;
     width: 100%;
     height: 30px;
-    background-color: #FFE7CF;
+    background-color: colors.getColor('tertiary', 90);
     text-align: center;
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
@@ -57,13 +59,13 @@
   }
   
   .h3 {
-    color: #EF7E30;
+    color: colors.getColor('tertiary', 40);
     font-family: 'IBM Plex Mono', monospace;
     margin: 2px 0; /* Reducido el margen vertical */
   }
   
   .dataStyle {
-    color: #EF7E30;
+    color: colors.getColor('tertiary', 40);
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.9rem;
     display: flex;
@@ -71,7 +73,7 @@
     align-items: center;
   }
   .p{
-    color: #EF7E30;
+    color: colors.getColor('tertiary', 40);
     font-family: 'IBM Plex Mono', monospace;
     font-size: 1rem;
     margin-top: 1px;
@@ -79,7 +81,7 @@
     overflow: hidden;
     margin-bottom: 1px;
     padding: 5px 10px;
-    background-color: #FFE7CF;
+    background-color: colors.getColor('tertiary', 90);
     border-radius: 20px;
     width: fit-content;
     align-items: center;
@@ -96,10 +98,10 @@
     width: fit-content;
     margin: 5 auto;
     border-radius: 20px;
-    border: 2.5px solid #FFE7CF;
+    border: 2.5px solid colors.getColor('tertiary', 85);
     padding: 10px;
     margin-top: 10px;
-    background-color: white;
+    background-color: colors.getThemeColor('surface-variant');
   }
   
   
@@ -138,9 +140,9 @@
     align-items: center;
     text-align: center;
     border-radius: 15px;
-    background-color: #FFE7CF;
+    background-color: colors.getColor('tertiary', 90);
     font-size: 0.8rem;
-    color: #EF7E30;
+    color: colors.getColor('tertiary', 40);
     font-family: 'IBM Plex Mono', monospace;
     box-sizing: border-box;
   }
@@ -155,7 +157,7 @@
   }
   
   .moduleInfoLabel {
-    color: #EF7E30;
+    color: colors.getColor('tertiary', 40);
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.9rem;
     width: 50%;

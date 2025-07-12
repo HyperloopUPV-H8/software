@@ -1,4 +1,5 @@
 @use 'src/styles/fonts';
+@use 'src/styles/colors';
 
 .bar_indicator {
     position: relative;
@@ -7,7 +8,7 @@
     width: 141px;
     max-width: 141px;
     min-width: 141px;
-    background-color: #C2E9D0;
+    background-color: colors.getColor('primary', 40);
 
     padding: 8px;
 
@@ -40,6 +41,7 @@
     width: 100%;
     margin: 2px 2px;
     opacity: 0.8;
+    color: colors.getColor('primary', 95);
     font-size: 14px;
     font-style: italic;
     font-weight: 300;
@@ -49,6 +51,7 @@
 .value,
 .units {
     opacity: 0.8;
+    color: colors.getColor('primary', 99);
     margin: 0;
     font-size: 12px;
     font-weight: 400;
