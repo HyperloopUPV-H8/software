@@ -1,9 +1,11 @@
 @use "src/styles/styles";
+@use "src/styles/colors";
 
 .fieldsWrapper {
     width: 100%;
     padding: 0.4rem;
-    border-top: 1px solid styles.$orange;
+    border-top: 1px solid colors.getThemeColor('border');
+    background-color: colors.getThemeColor('surface');
 
     display: flex;
     flex-direction: column;
