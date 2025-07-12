@@ -44,13 +44,16 @@ const enumToColor: { [key: string]: string } = {
     'DISCONNECTED' : '#cccccc',
 
     'NOT_CHARGING' : '#EBF6FF',
-    'CHARGING' : '#BB83F8',
-    'CHARGED' : '#ACF293',
+    'CHARGING' : '#F583F8',
+    'CHARGED' : '#FBD15B',
+
+    'HV OPEN' : '#83C0F8',
+    'HV CLOSED' : '#ACF293',
 
     'OPEN' : '#83C0F8',
-    'PRECHARGE' : '#F583F8',
-    'CLOSED' : '#FBD15B',
-    'CLOSE' : '#FBD15B',
+    'PRECHARGE' : '#BB83F8',
+    'CLOSED' : '#ACF293',
+    'CLOSE' : '#ACF293',
 
     'DISENGAGED' : '#FBD15B',
     'ENGAGED' : '#ACF293',

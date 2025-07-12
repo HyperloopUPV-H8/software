@@ -44,10 +44,10 @@ export const VehicleState = () => {
 const enumToColor: { [key: string]: string } = {
     'DISCONNECTED' : '#cccccc',
     "FAULT" : '#EF9A87',
-    "END_OF_RUN" : '#9BF37C',
-    "ENERGIZED" : '#9BF37C',
-    "READY" : '#9BF37C',
-    "DEMONSTRATION" : '#9BF37C',
+    "END_OF_RUN" : '#BB83F8',
+    "ENERGIZED" : '#FBD15B',
+    "READY" : '#B2CFD6',
+    "DEMONSTRATION" : '#ACF293',
     default : '#EBF6FF'
 
 }
