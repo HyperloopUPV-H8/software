@@ -10,5 +10,6 @@ export const HvscuMeasurements = {
     TempMax: 'HVSCU/temp_max',
     VoltageMin: 'HVSCU/voltage_min',
     VoltageMax: 'HVSCU/voltage_max',
-    Contactors: 'HVSCU/contactors_state'
+    Contactors: 'HVSCU/contactors_state',
+    OperationalState: 'HVSCU/operational_state_machine_status'
 };
