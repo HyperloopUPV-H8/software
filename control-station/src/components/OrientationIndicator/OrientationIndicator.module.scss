@@ -8,7 +8,7 @@
     width: 141px;
     max-width: 141px;
     min-width: 141px;
-    background-color: colors.getColor('primary', 40);
+    background-color: colors.getThemeColor('orientation-bg');
 
     padding: 8px;
 
@@ -41,7 +41,7 @@
     width: 100%;
     margin: 2px 2px;
     opacity: 0.8;
-    color: colors.getColor('primary', 95);
+    color: colors.getThemeColor('orientation-text');
     font-size: 14px;
     font-style: italic;
     font-weight: 300;
@@ -51,7 +51,7 @@
 .value,
 .units {
     opacity: 0.8;
-    color: colors.getColor('primary', 99);
+    color: colors.getThemeColor('orientation-text');
     margin: 0;
     font-size: 12px;
     font-weight: 400;

@@ -22,6 +22,7 @@
   flex-direction: column;
   gap: 1rem;
   overflow-y: auto;
+  height: 100%;
 }
 
 .statusIndicators {
@@ -101,11 +102,11 @@
 
 .modulesContainer {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   width: 100%;
   padding: 0 1rem;
-  justify-items: center;
+  flex: 1;
 }
 
 h1 {
