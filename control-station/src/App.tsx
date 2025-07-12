@@ -4,9 +4,10 @@ import 'styles/scrollbars.scss';
 import styles from './App.module.scss';
 import { Sidebar } from 'components/Sidebar/Sidebar';
 import { ReactComponent as Wheel } from 'assets/svg/wheel.svg';
-import { ReactComponent as Gui } from  'assets/svg/gui.svg';
+import { ReactComponent as Arrow } from  'assets/svg/arrow.svg';
 import { ReactComponent as Cameras } from 'assets/svg/cameras.svg';
 import { ReactComponent as TeamLogo } from 'assets/svg/team_logo.svg';
+import { ReactComponent as Batteries } from 'assets/svg/battery-filled.svg'
 import { SplashScreen, WsHandlerProvider, useLoadBackend } from 'common';
 
 export const App = () => {
@@ -20,8 +21,9 @@ export const App = () => {
                     <Sidebar
                         items={[
                             { path: '/vehicle', icon: <Wheel /> },
-                            { path: '/cameras', icon: <Cameras /> },
-                            { path: '/guiBooster', icon: <Gui /> }
+                            { path: '/booster', icon: <Arrow /> },
+                            { path: '/batteries', icon: <Batteries /> },
+                            { path: '/cameras', icon: <Cameras /> }
                         ]}
                     />
                     <Outlet />

@@ -1,0 +1,13 @@
+@use "src/styles/styles";
+
+.fieldsWrapper {
+    width: 100%;
+    padding: 0.4rem;
+    border-top: 1px solid styles.$orange;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+
+    overflow-x: auto;
+}

@@ -1,0 +1,61 @@
+@use 'src/styles/fonts';
+
+.bar_indicator {
+    position: relative;
+
+    min-height: fit-content;
+    width: 141px;
+    max-width: 141px;
+    min-width: 141px;
+    background-color: #C2E9D0;
+
+    padding: 8px;
+
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1px;
+}
+
+
+.name_display,
+.value_display {
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+    gap: 4px;
+}
+
+.name_display {
+    width: 100%;
+}
+
+.icon {
+    max-height: 23px;
+    opacity: 0.8;
+}
+
+.name {
+    width: 100%;
+    margin: 2px 2px;
+    opacity: 0.8;
+    font-size: 14px;
+    font-style: italic;
+    font-weight: 300;
+    text-overflow: ellipsis;
+}
+
+.value,
+.units {
+    opacity: 0.8;
+    margin: 0;
+    font-size: 12px;
+    font-weight: 400;
+    max-width: 70px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: right;
+}
+

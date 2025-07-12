@@ -1,15 +1,16 @@
 @use '../../../styles/fonts.scss';
 
 .textData {
+    position: relative;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding-top: 1rem;
+    padding-top: 2rem;
 
-    grid-row-start: 1;
-    grid-column-start: 1;
-    font-size: inherit;
+    z-index: 2;
+    max-width: 80%;
+    text-align: center;
 
     .name {
         font-weight: inherit;
@@ -23,7 +24,7 @@
     .value {
         font-family: map-get($map: fonts.$font-families, $key: roboto);
         font-weight: map-get($map: fonts.$font-weights, $key: bold);
-        font-size: 1.2rem;
+        font-size: 0.9rem;
     }
 
     .units {

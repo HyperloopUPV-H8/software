@@ -1,0 +1,33 @@
+@use 'src/styles/colors';
+@use 'src/styles/fonts';
+
+.window {
+    display: flex;
+    flex-flow: column;
+    border-radius: 0.8rem;
+    filter: var(--shadow);
+    overflow: hidden;
+    width: auto;
+    flex: 1 0 auto;
+}
+
+.header {
+    background-color: #D1E3F1;
+    color: #5894A7;
+    font-weight: bold;
+    padding: 0.3rem 0.6rem;
+    font-size: map-get($map: fonts.$font-sizes, $key: x-small);
+}
+
+.content {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0.6rem;
+    background-color: colors.getColor('primary', 99);
+    overflow: scroll;
+    height: 100%;
+    width: 100%;
+}

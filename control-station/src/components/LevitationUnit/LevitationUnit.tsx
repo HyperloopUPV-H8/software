@@ -1,16 +1,14 @@
 import { LcuMeasurements } from 'common';
 import styles from './LevitationUnit.module.scss';
 import { IndicatorStack } from 'components/IndicatorStack/IndicatorStack';
-import { BarIndicator } from 'components/BarIndicator/BarIndicator';
-import batteryFilled from 'assets/svg/battery-filled.svg';
-import thermometerFilled from 'assets/svg/thermometer-filled.svg';
-import airgapIcon from 'assets/svg/z-index.svg';
+import thunder from 'assets/svg/thunder-filled.svg';
 import { useMeasurementsStore } from 'common';
 import EMSRepresentation from './EMSRepresentation/EMSRepresentation';
 import HEMSRepresentation from './HEMSRepresentation/HEMSRepresentation';
+import { CurrentIndicator } from './CurrentIndicator/CurrentIndicator';
 export interface Props {
     unitIndex: number;
-    imageSide: 'left' | 'right';
+    imageSide: 'left' | 'right' | 'none';
     kind: 'ems' | 'hems';
 }
 
@@ -59,9 +57,7 @@ export const LevitationUnit = ({ unitIndex, kind, imageSide }: Props) => {
     );
 
     const current = getNumericMeasurementInfo(currentMeasurements[unitIndex]);
-    const temperature = getNumericMeasurementInfo(
-        temperatureMeasurements[unitIndex]
-    );
+
     const airgap = getNumericMeasurementInfo(airgapMeasurements[unitIndex]);
     const airgap2 =
         unitIndex == 6 || unitIndex == 7
@@ -100,9 +96,8 @@ export const LevitationUnit = ({ unitIndex, kind, imageSide }: Props) => {
                     />
                 ))}
             <IndicatorStack className={styles.levitationUnitMeasurements}>
-                <BarIndicator
-                    icon={batteryFilled}
-                    name="Current"
+                <CurrentIndicator
+                    icon={thunder}
                     getValue={current.getUpdate}
                     units={current.units}
                     safeRangeMin={current.range[0]!!}
@@ -110,7 +105,7 @@ export const LevitationUnit = ({ unitIndex, kind, imageSide }: Props) => {
                     warningRangeMin={current.warningRange[0]!!}
                     warningRangeMax={current.warningRange[1]!!}
                 />
-                <BarIndicator
+                {/* <BarIndicator
                     icon={thermometerFilled}
                     name="Temperature"
                     getValue={temperature.getUpdate}
@@ -161,7 +156,7 @@ export const LevitationUnit = ({ unitIndex, kind, imageSide }: Props) => {
                             ? null!!
                             : airgap.warningRange[1]!!
                     }
-                />
+                /> */}
             </IndicatorStack>
             {imageSide === 'right' &&
                 (kind == 'ems' ? (

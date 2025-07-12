@@ -1,4 +1,4 @@
-import { Window } from 'components/Window/Window';
+/* import { Window } from 'components/Window/Window';
 import { GaugeTag } from 'components/GaugeTag/GaugeTag';
 import { BmslMeasurements, useMeasurementsStore } from 'common';
 import { IndicatorStack } from 'components/IndicatorStack/IndicatorStack';
@@ -175,3 +175,6 @@ export const BMSL = () => {
         </Window>
     );
 };
+ */
+
+export {}
