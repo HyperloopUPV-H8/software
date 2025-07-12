@@ -32,7 +32,7 @@ export const EnumIndicator = memo(({ measurementId, icon }: Props) => {
             <img className={styles.icon} src={icon} />
 
             <p className={styles.title}>
-                {lostConnection ? 'DISCONNECTED' : state}
+                {lostConnection ? 'DISCONNECTED' : state.toUpperCase()}
             </p>
 
             <img className={styles.icon} src={icon} />
@@ -44,14 +44,15 @@ const enumToColor: { [key: string]: string } = {
     'DISCONNECTED' : '#cccccc',
 
     'NOT_CHARGING' : '#EBF6FF',
-    'CHARGING' : '#F28E31',
+    'CHARGING' : '#BB83F8',
+    'CHARGED' : '#ACF293',
 
-    'OPEN' : '#ACF293',
-    'PRECHARGE' : '#F4F788',
-    'CLOSED' : '#F28E31',
-    'CLOSE' : '#F28E31',
+    'OPEN' : '#83C0F8',
+    'PRECHARGE' : '#F583F8',
+    'CLOSED' : '#FBD15B',
+    'CLOSE' : '#FBD15B',
 
-    'DISENGAGED' : '#EF9A87',
+    'DISENGAGED' : '#FBD15B',
     'ENGAGED' : '#ACF293',
 
     default : '#EBF6FF'
