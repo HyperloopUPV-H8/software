@@ -115,7 +115,7 @@ export function BoosterPage() {
           </Window>
           <Window title="Orders" className={styles.orders}>
               <div className={styles.order_column}>
-                  <OrdersContainer boardFilter={['HVSCU-Cabinet']} boardOrdersFilter={getHardcodedOrders}/>
+                  <OrdersContainer boardFilter={['BCU']} boardOrdersFilter={getHardcodedOrders}/>
               </div>
           </Window>
         </div>
