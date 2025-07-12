@@ -45,8 +45,18 @@ export const openContactorsOrders: Order[] = [
 ];
 
 export const emergencyStopOrders: Order[] = [
-    ...brakeOrders,
-    ...openContactorsOrders,
+    {
+        id: 55,
+        fields: {},
+    },
+    {
+        id: 1799,
+        fields: {},
+    },
+    {
+        id: 1698,
+        fields: {},
+    },
     {
         id: 0,
         fields: {},
@@ -54,7 +64,8 @@ export const emergencyStopOrders: Order[] = [
 ];
 
 export const desiredOrders = [
-    53, 44, 52, 43, 37, 46, 38, 47, 62, 55
+    53, 44, 52, 43, 37, 46, 38, 47, 62, 55, 1799, 1795, 1792, 1791,
+    1694, 1695, 1697, 1698, 1693, 1699
 ];
 
 export function getHardcodedOrders(boardOrders: BoardOrders[]): BoardOrders[] {
