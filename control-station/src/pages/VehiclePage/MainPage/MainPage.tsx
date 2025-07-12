@@ -54,14 +54,17 @@ export const MainPage = () => {
 
                     <Batteries/>
 
-                    <div className={styles.emergency_wrapper}>
-                        <BigOrderButton
-                            orders={emergencyStopOrders}
-                            label="⚠️ EMERGENCY STOP"
-                            shortcut=" "
-                            className={`${styles.emergency_button} ${styles.emergency_stop}`}
-                            brightness={3}
-                        />
+                    <div className={styles.emergency_container}>
+                        <div className={styles.emergency_spacer}></div>
+                        <div className={styles.emergency_wrapper}>
+                            <BigOrderButton
+                                orders={emergencyStopOrders}
+                                label="⚠️ EMERGENCY STOP"
+                                shortcut=" "
+                                className={`${styles.emergency_button} ${styles.emergency_stop}`}
+                                brightness={3}
+                            />
+                        </div>
                     </div>
                 </div>
 

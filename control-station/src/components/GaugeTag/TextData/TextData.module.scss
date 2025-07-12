@@ -1,5 +1,5 @@
-@use '../../../styles/fonts.scss';
-@use '../../../styles/colors.scss';
+@use "../../../styles/fonts.scss";
+@use "../../../styles/colors.scss";
 
 .textData {
     position: relative;
@@ -20,14 +20,15 @@
         font-weight: map-get($map: fonts.$font-weights, $key: light);
         font-style: italic;
         font-size: 0.6rem;
-        color: colors.getColor('primary', 95);
+        color: colors.getColor("primary", 95);
+        padding-top: 1rem;
     }
 
     .value {
         font-family: map-get($map: fonts.$font-families, $key: roboto);
         font-weight: map-get($map: fonts.$font-weights, $key: bold);
         font-size: 0.9rem;
-        color: colors.getColor('primary', 99);
+        color: colors.getColor("primary", 99);
     }
 
     .units {
@@ -35,13 +36,18 @@
         font-family: map-get($map: fonts.$font-families, $key: roboto);
         font-size: map-get($map: fonts.$font-sizes, $key: small);
         font-weight: map-get($map: fonts.$font-weights, $key: normal);
-        color: colors.getColor('primary', 95);
+        color: colors.getColor("primary", 95);
     }
 
-    .min,
+    .min {
+        font-weight: 300;
+        font-size: 11px;
+        color: colors.getThemeColor("battery-text");
+        padding-top: 0.5rem;
+    }
     .max {
         font-weight: 300;
-        font-size: 12px;
-        color: colors.getColor('primary', 90);
+        font-size: 11px;
+        color: colors.getThemeColor("battery-text");
     }
 }

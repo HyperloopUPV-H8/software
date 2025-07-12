@@ -5,5 +5,5 @@
     height: 100vh;
     display: flex;
     background-color: colors.getThemeColor("background");
-    overflow-x: scroll;
+    overflow: hidden;
 }

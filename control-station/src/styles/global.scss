@@ -44,6 +44,11 @@ body {
     margin: 0;
 }
 
+html, body, #root {
+    height: 100%;
+    overflow: hidden;
+}
+
 h1 {
     font-size: fonts.getFontSize("large");
     color: colors.getThemeColor("text-secondary");
