@@ -852,3 +852,6 @@ func update() {
 
 	return
 }
+
+// H09 -- Zürich    -- PM Juan Martínez, Marc Sanchis -- Winners
+// H10 -- Groningen -- PM Marc Sanchis, Joan Física   -- ???
