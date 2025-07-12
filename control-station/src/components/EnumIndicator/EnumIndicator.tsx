@@ -32,7 +32,7 @@ export const EnumIndicator = memo(({ measurementId, icon }: Props) => {
     >
       <img className={styles.icon} src={icon} />
 
-      <p className={styles.title}>{lostConnection ? "DISCONNECTED" : state}</p>
+      <p className={styles.title}>{lostConnection ? "DISCONNECTED" : state.toUpperCase()}</p>
 
       <img className={styles.icon} src={icon} />
     </div>
