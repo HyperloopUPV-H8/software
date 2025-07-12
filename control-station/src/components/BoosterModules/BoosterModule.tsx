@@ -5,11 +5,10 @@ import { useMeasurementsStore, useGlobalTicker } from "common";
 
 interface CellProps {
   value: number;
-  min: number;
-  max: number;
 }
 
 const BoosterModule: React.FC<{ id: string | number }> = ({ id }) => {
+  const minThresholdCellVoltage = 3.73;
   const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
   
   // Estados para todos los valores
@@ -37,18 +36,10 @@ const BoosterModule: React.FC<{ id: string | number }> = ({ id }) => {
     );
   });
 
-  const getColorFromValue = (value: number, min: number, max: number) => {
-    if (value < min) return styles.red;
-    if (value > max) return styles.red;
-    if (value >= min && value <= max) return styles.green;
-    return styles.yellow;
-  };
-
-  const Cell: React.FC<CellProps> = ({ value, min, max }) => {
-    const colorClass = getColorFromValue(value, min, max);
+  const Cell: React.FC<CellProps> = ({ value }) => {
     return (
       <div
-        className={`${styles.cell} ${colorClass}`}
+        className={`${styles.cell} ${styles.green}`}
         title={`${value.toFixed(3)} V`}
       ></div>
     );
@@ -86,7 +77,7 @@ const BoosterModule: React.FC<{ id: string | number }> = ({ id }) => {
       </div>
       <div className={styles.flexCells}>
         {cellValues.map((value, index) => (
-          <Cell key={index} value={value} min={moduleMinCell} max={moduleMaxCell} />
+          <Cell key={index} value={value} />
         ))}
       </div>
     </div>

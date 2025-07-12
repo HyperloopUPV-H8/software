@@ -14,7 +14,7 @@ export const HVSCU = () => {
                 <div className={styles.levitationUnitsWrapper}>
                     <div className={styles.levitationUnitsColumn}>  
                         <div className={styles.text}><span className={styles.subtitle}>IMD</span><ImdIndicator /></div>
-                        <div className={styles.text}><span className={styles.subtitle}>Vehicle Contactors</span><EnumIndicator measurementId={HvscuMeasurements.Contactors} icon={Contactors} /></div>
+                        <div className={styles.text}><span className={styles.subtitle}>Vehicle Contactors</span><EnumIndicator measurementId={HvscuMeasurements.OperationalState} icon={Contactors} /></div>
                         <div className={styles.text}><span className={styles.subtitle}>Cabinet Contactors</span><EnumIndicator measurementId={HvscuCabinetMeasurements.ContactorsState} icon={Contactors} /></div>
                         <div className={styles.text}><span className={styles.subtitle}>SDC</span><EnumIndicator measurementId={HvscuMeasurements.SdcStatus} icon={Battery} /></div>
                     </div>
