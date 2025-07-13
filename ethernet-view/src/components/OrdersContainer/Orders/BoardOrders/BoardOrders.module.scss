@@ -1,4 +1,6 @@
 @use "src/styles/styles";
+@use "src/styles/colors" as colors;
+
 .boardOrders {
     display: flex;
     flex-direction: column;
@@ -10,8 +12,12 @@
     gap: .6rem;
     font-family: Inter;
     font-weight: 600;
-    color: hsl(29, 88%, 70%);
+    color: colors.getThemeColor("secondary");
     cursor: pointer;
+    
+    &:hover {
+        color: colors.getThemeColor("secondary-hover");
+    }
 }
 
 .orders,
@@ -21,7 +27,7 @@
     gap: 0.6rem;
 
     .title {
-        color: rgb(145, 145, 145);
+        color: colors.getThemeColor("text-secondary");
         font-weight: 600;
     }
 }
