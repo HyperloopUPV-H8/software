@@ -1,5 +1,4 @@
 import { Outlet } from 'react-router-dom';
-import { useState, useEffect } from 'react';
 import 'styles/global.scss';
 import 'styles/scrollbars.scss';
 import styles from './App.module.scss';

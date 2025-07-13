@@ -10,7 +10,6 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
         <ConfigProvider
             devIp="127.0.0.1"
-            devPort={5174}
             prodIp="127.0.0.1"
         >
             <GlobalTicker fps={100}>
