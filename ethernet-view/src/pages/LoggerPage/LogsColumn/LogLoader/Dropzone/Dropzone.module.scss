@@ -1,4 +1,5 @@
 @use "src/styles/styles.scss";
+@use "src/styles/colors" as colors;
 
 .dropZone {
     display: flex;
@@ -6,35 +7,37 @@
     align-items: center;
     width: 100%;
     padding: 3rem 2rem;
-    border: dashed styles.$alternate-text-color;
+    border: dashed colors.getThemeColor("border");
     border-radius: styles.$large-border-radius;
 
     &Text {
         font-weight: styles.$normal-font-weight;
         font-size: styles.$normal-font-size;
-        color: styles.$alternate-text-color;
+        color: colors.getThemeColor("text-secondary");
         font-family: styles.$code-font;
     }
 
     &.Active {
-        background-color: #80b3ff24;
+        background-color: colors.getThemeColor("primary-surface");
     }
 
     &.Uploading {
-        background-color: #80b3ff24;
+        background-color: colors.getThemeColor("primary-surface");
     }
 
     &.Success {
-        background-color: #80ff8024;
+        background-color: colors.getThemeColor("success");
+        opacity: 0.15;
     }
 
     &.Error {
-        background-color: #ff808024;
+        background-color: colors.getThemeColor("error");
+        opacity: 0.15;
     }
 }
 
 .selectLabel {
     cursor: pointer;
     font-weight: bold;
-    color: #66a9f6;
+    color: colors.getThemeColor("primary");
 }

@@ -1,4 +1,5 @@
 @use "src/styles/styles";
+@use "src/styles/colors" as colors;
 
 .buttonWrapper {
     flex: 1 1 0;
@@ -9,19 +10,24 @@
     padding: 0.5rem;
     text-align: center;
     border-radius: styles.$normal-border-radius;
-    background-color: styles.$orange;
-    color: white;
+    background-color: colors.getThemeColor("secondary");
+    color: colors.getThemeColor("surface");
     user-select: none;
 
     @include styles.shadow;
 
     &.enabled {
         cursor: pointer;
+        
+        &:hover {
+            background-color: colors.getThemeColor("secondary-hover");
+        }
     }
 
     &.disabled {
         cursor: auto;
-        background-color: #b6b6b6;
+        background-color: colors.getThemeColor("border");
+        color: colors.getThemeColor("text-disabled");
     }
 }
 

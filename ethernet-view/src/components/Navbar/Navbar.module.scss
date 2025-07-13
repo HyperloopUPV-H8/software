@@ -1,4 +1,5 @@
 @use "../../styles/styles.scss";
+@use "../../styles/colors.scss" as colors;
 
 .navbarWrapper {
     width: fit-content;
@@ -8,21 +9,22 @@
     align-items: center;
     gap: 1.4rem;
     padding: 2rem 0.8rem;
-    background-color: white;
-    border-right: 1px solid styles.getColor(styles.$base-color, 80);
+    background-color: colors.getThemeColor("navbar-bg");
+    border-right: 1px solid colors.getThemeColor("border");
     border-radius: styles.$large-border-radius;
+    min-height: 100%;
 }
 
 .logo {
     font-size: 3rem;
-    color: styles.$base-color;
+    color: colors.getThemeColor("primary");
 }
 
 .separator {
     width: 46%;
     height: 0.25rem;
     border-radius: 10rem;
-    background-color: styles.getColor(styles.$base-color, 80);
+    background-color: colors.getThemeColor("border");
 }
 
 .items {
@@ -31,4 +33,8 @@
     align-items: center;
     font-size: 1.5rem;
     gap: 1.5rem;
+}
+
+.spacer {
+    flex: 1;
 }

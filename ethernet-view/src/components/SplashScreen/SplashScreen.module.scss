@@ -1,3 +1,5 @@
+@use "src/styles/colors" as colors;
+
 .loadingView {
     flex: 1 1 0;
     display: flex;
@@ -8,7 +10,7 @@
     gap: 2rem;
     font-size: 6rem;
     font-weight: 900;
-    color: rgb(241, 105, 52);
+    color: colors.getThemeColor("secondary");
 }
 
 .monkey {

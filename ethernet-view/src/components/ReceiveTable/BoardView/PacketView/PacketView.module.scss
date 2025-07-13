@@ -1,10 +1,11 @@
 @use "src/styles/styles";
+@use "src/styles/colors" as colors;
 
 .packetView {
     display: flex;
     flex-direction: column;
-    color: rgb(91, 91, 91);
-    --border-color: rgb(219, 219, 219);
+    color: colors.getThemeColor("text-primary");
+    --border-color: #{colors.getThemeColor("border")};
     --border-width: 1px;
 }
 
@@ -13,7 +14,7 @@
     align-items: stretch;
     border-top: var(--border-width) solid var(--border-color);
     border-bottom: var(--border-width) solid var(--border-color);
-    // background-color: #edf3ff;
+    background-color: colors.getThemeColor("surface");
     @include styles.shadow;
 }
 

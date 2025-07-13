@@ -1,4 +1,5 @@
 @use "src/styles/styles";
+@use "src/styles/colors" as colors;
 
 .orderFormWrapper {
     flex-shrink: 0;
@@ -6,9 +7,10 @@
     flex-direction: column;
     align-items: stretch;
     @include styles.code-text;
-    border: 1px solid styles.$orange;
+    border: 1px solid colors.getThemeColor("secondary");
     border-radius: 0.5rem;
     overflow: hidden;
+    background-color: colors.getThemeColor("surface");
 
     @include styles.shadow;
 }

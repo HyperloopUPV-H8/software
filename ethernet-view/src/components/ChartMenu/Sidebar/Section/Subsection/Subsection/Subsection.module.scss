@@ -1,4 +1,6 @@
 @use "src/styles/styles";
+@use "src/styles/colors" as colors;
+
 .subsection {
     display: flex;
     flex-direction: column;
@@ -7,5 +9,5 @@
 .name {
     margin-bottom: 0.5rem;
     font-style: italic;
-    color: #a9adb6;
+    color: colors.getThemeColor("text-tertiary");
 }
