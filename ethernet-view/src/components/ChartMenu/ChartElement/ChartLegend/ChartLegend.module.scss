@@ -1,3 +1,5 @@
+@use "src/styles/colors" as colors;
+
 .chartLegend {
     display: flex;
     gap: 1rem;
@@ -5,6 +7,8 @@
     align-items: flex-start;
     justify-content: flex-start;
     padding: 0.8rem;
+    background-color: colors.getThemeColor("surface-variant");
+    border-radius: 0.5rem;
 }
 
 .chartLegendItem {
@@ -12,9 +16,25 @@
     align-items: center;
     gap: 0.5rem;
     cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease;
+    background-color: colors.getThemeColor("surface");
+    color: colors.getThemeColor("text-primary");
+    
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: colors.getThemeColor("shadow-sm");
+    }
+}
+
+:global([data-theme="dark"]) .chartLegendItem {
+    background-color: colors.getThemeColor("text-primary");
+    color: colors.getThemeColor("surface");
 }
 
 .chartLegendItemColor {
     width: 1rem;
     height: 1rem;
+    border-radius: 0.125rem;
 }
