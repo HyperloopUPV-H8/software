@@ -55,7 +55,7 @@ export const ChartCanvas = ({ measurementsInChart }: Props) => {
                         timeVisible: true,
                         secondsVisible: true,
                         rightOffset: 12,
-                        barSpacing: 1,
+                        barSpacing: 0.1,
                         tickMarkFormatter: (time: UTCTimestamp) => {
                             const date = new Date(time * 1000);
                             return date.toLocaleTimeString() + '.' + date.getMilliseconds();
