@@ -34,8 +34,9 @@
     top: 0.5rem;
     left: 0.5rem;
     z-index: 1000;
-    background-color: styles.lightness(styles.$base-color, 90%);
-    border: 1px solid styles.lightness(styles.$base-color, 70%);
+    background-color: colors.getThemeColor("surface");
+    border: 1px solid colors.getThemeColor("border");
+    color: colors.getThemeColor("text-primary");
     border-radius: 4px;
     padding: 0.25rem 0.5rem;
     cursor: pointer;
@@ -44,7 +45,7 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     
     &:hover {
-        background-color: styles.lightness(styles.$base-color, 85%);
+        background-color: colors.getThemeColor("primary-surface");
     }
 }
 
