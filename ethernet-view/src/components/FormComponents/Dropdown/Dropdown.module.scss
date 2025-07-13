@@ -1,9 +1,21 @@
 @use "src/styles/styles";
+@use "src/styles/colors" as colors;
 
 .select {
     width: 100%;
     padding: 0.5rem;
+    background-color: colors.getThemeColor("input-bg");
+    color: colors.getThemeColor("text-primary");
+    border: 1px solid colors.getThemeColor("border");
+    border-radius: styles.$normal-border-radius;
+    
+    &:focus {
+        outline: none;
+        border-color: colors.getThemeColor("primary");
+    }
 }
 
 option {
+    background-color: colors.getThemeColor("surface");
+    color: colors.getThemeColor("text-primary");
 }

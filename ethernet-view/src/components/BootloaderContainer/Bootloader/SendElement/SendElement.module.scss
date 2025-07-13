@@ -1,3 +1,5 @@
+@use "src/styles/colors" as colors;
+
 .sendElementWrapper {
     flex: 1 1 0;
     align-self: center;
@@ -8,12 +10,12 @@
     gap: 1rem;
     padding: 1rem 0.5rem;
     border-radius: 1rem;
-    background-color: #f3f3f3;
+    background-color: colors.getThemeColor("surface-variant");
 }
 
 .fileIcon {
     font-size: 0.9rem;
-    color: orange;
+    color: colors.getThemeColor("secondary");
 }
 
 .fileData {
@@ -23,6 +25,7 @@
     gap: 0.5rem;
     text-overflow: ellipsis;
     font-size: 1rem;
+    color: colors.getThemeColor("text-primary");
 }
 
 .name {
@@ -35,4 +38,9 @@
     cursor: pointer;
     width: 25px;
     height: 25px;
+    color: colors.getThemeColor("text-secondary");
+    
+    &:hover {
+        color: colors.getThemeColor("error");
+    }
 }

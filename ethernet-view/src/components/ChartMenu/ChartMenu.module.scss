@@ -1,4 +1,6 @@
 @use "src/styles/styles";
+@use "src/styles/colors" as colors;
+
 .chartMenuWrapper {
     width: 100%;
     height: 100%;
@@ -8,12 +10,13 @@
     border-radius: styles.$normal-border-radius;
     overflow: hidden;
 
-    border: 1px solid styles.lightness(styles.$base-color, 35%);
+    border: 1px solid colors.getThemeColor("primary");
     border-left: 0;
 }
 
 .noValues {
     text-align: center;
+    color: colors.getThemeColor("text-tertiary");
 }
 
 .chartListWrapper {
@@ -23,7 +26,7 @@
 
     width: 100%;
     height: 100%;
-    background-color: #fcfcfc;
+    background-color: colors.getThemeColor("surface");
     padding: 1rem;
     overflow: auto;
 }

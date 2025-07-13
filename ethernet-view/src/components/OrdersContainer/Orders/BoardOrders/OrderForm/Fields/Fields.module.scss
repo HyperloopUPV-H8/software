@@ -1,9 +1,10 @@
 @use "src/styles/styles";
+@use "src/styles/colors" as colors;
 
 .fieldsWrapper {
     width: 100%;
     padding: 1rem;
-    border-top: 1px solid styles.$orange;
+    border-top: 1px solid colors.getThemeColor("secondary");
 
     display: flex;
     flex-direction: column;
