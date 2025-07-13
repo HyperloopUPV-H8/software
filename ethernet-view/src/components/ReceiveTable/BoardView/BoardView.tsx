@@ -9,7 +9,7 @@ type Props = {
 };
 
 export const BoardView = ({ board }: Props) => {
-    const [open, setOpen] = useState(true);
+    const [open, setOpen] = useState(false);
 
     return (
         <div className={styles.boardView}>
