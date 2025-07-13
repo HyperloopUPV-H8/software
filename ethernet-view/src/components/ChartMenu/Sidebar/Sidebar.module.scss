@@ -11,3 +11,7 @@
 
     background-color: colors.getThemeColor("primary-surface");
 }
+
+:global([data-theme="dark"]) .sidebar {
+    background-color: colors.getColor("neutral", 20);
+}
