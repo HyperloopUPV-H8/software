@@ -73,7 +73,6 @@ export const ChartMenu = memo(({ sidebarSections }: Props) => {
                         {sidebarVisible ? "◀" : "▶"}
                     </button>
                     <div
-                        key={`chart-container-${sidebarVisible}`}
                         className={styles.chartListWrapper}
                         onDrop={handleDrop}
                         onDragEnter={(ev) => ev.preventDefault()}
