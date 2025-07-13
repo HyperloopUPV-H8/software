@@ -1,22 +1,23 @@
 @use "src/styles/styles";
+@use "src/styles/colors" as colors;
 
 //TODO: increase contrast info
 .message.info {
-    --main-color: #65d04d;
-    --light-color: #b8e3ae;
-    --background-color: #d3efcd;
+    --main-color: #{colors.getThemeColor("success")};
+    --light-color: #{colors.getColor("success", 75)};
+    --background-color: #{colors.getColor("success", 95)};
 }
 
 .message.fault {
-    --main-color: #fc3535;
-    --light-color: #ffb3b3;
-    --background-color: #ffdcdc;
+    --main-color: #{colors.getThemeColor("error")};
+    --light-color: #{colors.getColor("error", 75)};
+    --background-color: #{colors.getColor("error", 95)};
 }
 
 .message.warning {
-    --main-color: #ffba0a;
-    --light-color: #ffdd86;
-    --background-color: #fff0ba;
+    --main-color: #{colors.getThemeColor("warning")};
+    --light-color: #{colors.getColor("warning", 75)};
+    --background-color: #{colors.getColor("warning", 95)};
 }
 
 .message {
@@ -32,6 +33,7 @@
     background-color: var(--background-color);
     border-radius: 1rem;
     @include styles.shadow;
+    color: colors.getThemeColor("text-primary");
 }
 
 .icon {
