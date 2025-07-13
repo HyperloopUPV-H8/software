@@ -173,6 +173,14 @@
     font-size: 0.75rem;
     font-weight: bold;
   }
+
+  .cellText {
+    font-size: 0.55rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: bold;
+    line-height: 1;
+    white-space: nowrap;
+  }
   
   .red {
     background-color: red;
