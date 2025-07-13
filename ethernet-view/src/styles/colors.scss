@@ -26,10 +26,10 @@ $colors: (
 :root,
 :root[data-theme="light"] {
   // Backgrounds
-  --theme-background: var(--color-surface-95);
-  --theme-surface: var(--color-surface-99);
-  --theme-surface-variant: var(--color-surface-97);
-  --theme-surface-hover: var(--color-surface-93);
+  --theme-background: #dce3eb;
+  --theme-surface: #ffffff;
+  --theme-surface-variant: #f5f5f5;
+  --theme-surface-hover: #f0f0f0;
   
   // Text
   --theme-text-primary: var(--color-neutral-15);
@@ -66,7 +66,7 @@ $colors: (
   --theme-shadow-lg: 0 10px 15px var(--theme-shadow-color);
   
   // Components
-  --theme-navbar-bg: var(--color-primary-95);
+  --theme-navbar-bg: #f8f9fa;
   --theme-island-bg: var(--theme-surface);
   --theme-input-bg: var(--theme-surface);
   --theme-button-bg: var(--theme-primary);
@@ -120,7 +120,7 @@ $colors: (
   --theme-shadow-lg: 0 10px 15px var(--theme-shadow-color);
   
   // Components
-  --theme-navbar-bg: var(--color-primary-8);
+  --theme-navbar-bg: rgba(10, 25, 47, 0.85);
   --theme-island-bg: var(--theme-surface);
   --theme-input-bg: var(--color-neutral-20);
   --theme-button-bg: var(--theme-primary);
