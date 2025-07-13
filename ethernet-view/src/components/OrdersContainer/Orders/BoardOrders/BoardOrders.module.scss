@@ -5,6 +5,9 @@
     display: flex;
     flex-direction: column;
     gap: 0.8rem;
+    background-color: colors.getThemeColor("surface");
+    padding: 0.8rem;
+    border-radius: 0.5rem;
 }
 
 .name {
