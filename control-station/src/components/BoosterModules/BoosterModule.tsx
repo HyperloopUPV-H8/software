@@ -37,11 +37,14 @@ const BoosterModule: React.FC<{ id: string | number }> = ({ id }) => {
   });
 
   const Cell: React.FC<CellProps> = ({ value }) => {
+    const formattedValue = Math.max(0, Math.min(99.999, value)).toFixed(3);
     return (
       <div
         className={`${styles.cell} ${styles.green}`}
         title={`${value.toFixed(3)} V`}
-      ></div>
+      >
+        <span className={styles.cellText}>{formattedValue}V</span>
+      </div>
     );
   };
 

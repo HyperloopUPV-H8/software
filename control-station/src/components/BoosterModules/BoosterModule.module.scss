@@ -123,6 +123,14 @@
     justify-content: center;
     box-sizing: border-box;
   }
+
+  .cellText {
+    font-size: 0.6rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: bold;
+    line-height: 1;
+    white-space: nowrap;
+  }
   
   .red {
     background-color: red;

@@ -31,11 +31,13 @@ const BatteriesModule: React.FC<{ id: string | number }> = ({ id }) => {
 
   const Cell: React.FC<CellProps> = ({ value, min, max }) => {
     const colorClass = getColorFromValue(value, min, max);
+    const formattedValue = Math.max(0, Math.min(9.999, value)).toFixed(3);
     return (
       <div
         className={`${styles.cell} ${colorClass}`}
-        title={`${value.toFixed(3)} V`}
-      ></div>
+      >
+        <span className={styles.cellText}>{formattedValue}V</span>
+      </div>
     );
   };
 
