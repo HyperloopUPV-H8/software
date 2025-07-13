@@ -12,10 +12,18 @@
     top: 0px;
     position: sticky;
     display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
+    flex-direction: row;
+    gap: 0.2rem;
     z-index: 1;
     background-color: white;
+    align-items: center;
+}
+
+.stateOrdersToggleButton {
+    font-size: 0.6rem;
+    padding: 0.15rem 0.3rem;
+    height: auto;
+    min-height: auto;
 }
 
 .boardOrderList {

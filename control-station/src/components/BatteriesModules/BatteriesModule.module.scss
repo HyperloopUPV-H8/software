@@ -1,0 +1,209 @@
+@use 'src/styles/colors';
+
+.boxContainer1 {
+    width: 100%;
+    max-width: 220px;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 20px;
+    margin: 5px;
+    position: relative;
+  }
+  
+  .boxContainer2 {
+    border: 2.5px solid colors.getThemeColor('border');
+    width: 98%;
+    height: 115px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    position: relative;
+    background-color: colors.getThemeColor('surface-variant');
+    box-sizing: border-box;
+    padding: 8px 8px 8px 8px;
+    padding-top: 38px;
+  }
+  
+  .h2Module {
+    color: colors.getThemeColor('header-text');
+    font-family: 'IBM Plex Mono', monospace;
+    width: 100%;
+    height: 28px;
+    background-color: colors.getThemeColor('header-bg');
+    text-align: center;
+    border-radius: 20px 20px 0 0;
+    font-weight: bold;
+    font-size: 0.85rem;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .voltageContainer {
+    width: 100%;
+    padding: 0 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  .totalRow {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 0px;
+  }
+
+  .totalStyle {
+    color: colors.getThemeColor('text-secondary');
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-weight: bold;
+  }
+
+  .totalLabel {
+    color: colors.getThemeColor('text-secondary');
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    margin: 0px;
+    margin-right: 8px;
+    font-weight: bold;
+  }
+
+  .totalValue {
+    color: colors.getThemeColor('text-secondary');
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    margin: 0px;
+    padding: 3px 16px;
+    background-color: colors.getThemeColor('surface');
+    border-radius: 12px;
+    font-weight: bold;
+    min-width: 85px;
+    text-align: center;
+  }
+
+  .dataRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: -2px;
+  }
+  
+  .titleDecorationModule {
+    text-align: center;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+  }
+  
+  .dataStyle {
+    color: colors.getThemeColor('text-secondary');
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex: 1;
+    margin-right: 8px;
+  }
+
+  .p {
+    color: colors.getThemeColor('text-secondary');
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    margin-top: 1px;
+    max-height: 1.4rem;
+    overflow: hidden;
+    margin-bottom: 1px;
+    padding: 3px 14px;
+    background-color: colors.getThemeColor('surface');
+    border-radius: 12px;
+    width: fit-content;
+    align-items: center;
+    box-sizing: border-box;
+    margin-left: auto;
+    min-width: 70px;
+    text-align: center;
+  }
+  
+  .flexCells {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin: 15px auto -5px auto;
+    border-radius: 0;
+    border: none;
+    padding: 6px;
+    background-color: transparent;
+    transform: none;
+  }
+  
+  .cell {
+    width: 52px;
+    height: 28px;
+    border: 1px solid colors.getThemeColor('border');
+    border-radius: 6px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: bold;
+  }
+  
+  .red {
+    background-color: red;
+  }
+  
+  .green {
+    background-color: rgb(33, 240, 33);
+  }
+  
+  .yellow {
+    background-color: yellow;
+  }
+
+  .red {
+    background-color: red;
+  }
+  
+  .lightOrange1 {
+    background-color: #FFA500;
+  }
+  
+  .lightOrange2 {
+    background-color: #FFCC80;
+  }
+  
+  .moduleInfoLabel {
+    color: colors.getThemeColor('text-secondary');
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    width: 45%;
+    text-align: left;
+    margin: 0px;
+    white-space: nowrap;
+  }

@@ -48,7 +48,7 @@ export const MessageView = React.memo(({ message }: Props) => {
 
     return (
         <article className={`${styles.message} ${appearance}`}>
-            <Icon className={styles.icon} />
+            <Icon className={styles.icon}/>
             {Message}
             <Counter
                 className={styles.counter}

@@ -1,5 +1,5 @@
 import { Order, useListenKey, useSendOrder } from 'common';
-import { emergencyStopOrders } from 'pages/VehiclePage/Data2Page/FixedOrders';
+import { emergencyStopOrders } from 'pages/VehiclePage/BatteriesPage/FixedOrders';
 
 export function useEmergencyOrders(
     shortcut: string = ' ',

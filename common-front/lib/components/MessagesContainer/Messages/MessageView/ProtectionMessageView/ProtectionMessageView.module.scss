@@ -1,7 +1,7 @@
 .protectionMessage {
     display: grid;
     grid-template-rows: auto 1fr;
-    gap: 0.5rem;
+    gap: 0.2rem;
 }
 
 .kindAndOrigin {
@@ -10,8 +10,8 @@
     flex-wrap: wrap;
     overflow: hidden;
 
-    column-gap: 0.8rem;
-    row-gap: 0.5rem;
+    column-gap: 0.4rem;
+    row-gap: 0.2rem;
 }
 
 .protectionKind {
@@ -19,11 +19,12 @@
     height: fit-content;
     text-overflow: ellipsis;
     overflow: hidden;
-    padding: 0.15rem 0.4rem;
-    border-radius: 0.5rem;
+    padding: 0.1rem 0.3rem;
+    border-radius: 0.3rem;
     background-color: var(--main-color);
     color: white;
     font-weight: bold;
+    font-size: 0.7rem;
 }
 
 .origin {

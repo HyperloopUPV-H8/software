@@ -1,16 +1,29 @@
 @use "../../styles/colors";
 
 .gaugeTagWrapper {
-    display: grid;
-    justify-items: center;
+    position: relative;
+    display: flex;
+    justify-content: center;
     align-items: center;
-    background-color: map-get($map: colors.$key-colors, $key: lightskyblue);
-    padding: .3rem;
-    border-radius: 100%;
+    background-color: colors.getColor('primary', 40);
+    padding: .2rem;
+    border-radius: 50%;
+    
+    width: 4.5rem;
+    height: 4.5rem;
+    
+    flex-shrink: 0;
+    min-width: 4.5rem;
+    min-height: 4.5rem;
+    transform: translateY(-0.9rem);
 }
 
 .gauge {
-    grid-row-start: 1;
-    grid-column-start: 1;
-    font-size: 6rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 4.5rem;
+    height: 4.5rem;
+    z-index: 1;
 }

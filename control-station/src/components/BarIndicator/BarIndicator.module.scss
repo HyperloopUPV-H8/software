@@ -1,4 +1,5 @@
 @use 'src/styles/fonts';
+@use 'src/styles/colors';
 
 .bar_indicator {
     position: relative;
@@ -28,6 +29,7 @@
     background-color: currentColor;
 
     transition: width 0.1s ease-in-out;
+    z-index: 1;
 }
 
 .name_display,
@@ -36,6 +38,8 @@
     flex-flow: row;
     align-items: center;
     gap: 4px;
+    position: relative;
+    z-index: 2;
 }
 
 .name_display {
@@ -46,6 +50,8 @@
     max-width: 10px;
 
     opacity: 0.8;
+    position: relative;
+    z-index: 2;
 }
 
 .name {
@@ -53,7 +59,8 @@
 
     margin: 0;
 
-    opacity: 0.8;
+    opacity: 1;
+    color: colors.getColor('primary', 20);
 
     font-size: 14px;
     font-style: italic;
@@ -63,7 +70,8 @@
 
 .value,
 .units {
-    opacity: 0.8;
+    opacity: 1;
+    color: colors.getColor('primary', 15);
 
     margin: 0;
 
@@ -80,7 +88,8 @@
 
 .min,
 .max {
-    opacity: 0.8;
+    opacity: 1;
+    color: colors.getColor('primary', 25);
     margin: 0;
     font-size: 12px;
     font-weight: 300;

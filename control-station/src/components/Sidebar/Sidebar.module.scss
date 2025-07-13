@@ -16,13 +16,13 @@
 
     padding: 1rem 0.4rem;
 
-    background-color: colors.getColor('primary', 90);
-    border-right: 1px solid colors.getColor('primary', 80);
+    background-color: colors.getThemeColor('surface-variant');
+    border-right: 1px solid colors.getThemeColor('border');
 }
 
 .logo {
     font-size: 1.6rem;
-    color: colors.getColor('primary', 30);
+    color: colors.getThemeColor('text-secondary');
 }
 
 .separator {
@@ -32,7 +32,7 @@
 
     margin: 0;
 
-    background-color: colors.getColor('primary', 80);
+    background-color: colors.getThemeColor('border');
 
     border: none;
     appearance: none;

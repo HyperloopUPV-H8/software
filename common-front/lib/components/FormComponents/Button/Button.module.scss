@@ -9,19 +9,24 @@
     padding: 0.5rem;
     text-align: center;
     border-radius: styles.$normal-border-radius;
-    background-color: styles.$orange;
+    background-color: var(--theme-header-bg, styles.$orange);
     color: white;
     user-select: none;
+    border: 1px solid var(--theme-border, transparent);
 
     @include styles.shadow;
 
     &.enabled {
         cursor: pointer;
+        &:hover {
+            opacity: 0.9;
+        }
     }
 
     &.disabled {
         cursor: auto;
-        background-color: #b6b6b6;
+        background-color: var(--theme-border, #b6b6b6);
+        color: var(--theme-text-tertiary, white);
     }
 }
 

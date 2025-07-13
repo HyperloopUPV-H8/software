@@ -3,6 +3,7 @@ export enum VcuMeasurements {
     reed2 = 'VCU/reed2',
     reed3 = 'VCU/reed3',
     reed4 = 'VCU/reed4',
+    allReeds = 'VCU/all_reeds',
     highPressure = 'VCU/high_pressure',
     lowPressure1 = 'VCU/low_pressure_1',
     lowPressure2 = 'VCU/low_pressure_2',
@@ -16,5 +17,9 @@ export enum VcuMeasurements {
     lcuConnection = 'VCU/LCU_connection',
     bmslConnection = 'VCU/BMSL_connection',
     generalState = 'VCU/general_state',
-    specificState = 'VCU/specific_state',
+    operationalState = 'VCU/operational_state',
+    regulatorPressure = 'VCU/regulator_pressure',
+    pressureHigh = 'VCU/pressure_high',
+    pressureBrakes = 'VCU/pressure_brakes',
+    pressureCapsule = 'VCU/pressure_capsule'
 }

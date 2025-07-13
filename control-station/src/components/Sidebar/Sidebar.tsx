@@ -2,6 +2,7 @@ import styles from './Sidebar.module.scss';
 import { SidebarItem, SidebarItemData } from './SidebarItem/SidebarItem';
 import { ReactComponent as TeamLogo } from 'assets/svg/team_logo.svg';
 import { Link, useLocation } from 'react-router-dom';
+import { ThemeToggle } from '../ThemeToggle/ThemeToggle';
 
 type Props = {
     items: SidebarItemData[];
@@ -27,6 +28,9 @@ export const Sidebar = ({ items }: Props) => {
                         />
                     );
                 })}
+            </div>
+            <div style={{ marginTop: 'auto', paddingBottom: '1rem' }}>
+                <ThemeToggle />
             </div>
         </nav>
     );

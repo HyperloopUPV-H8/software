@@ -22,3 +22,39 @@
         #F3785C
     );
 }
+
+.gaugeContainer {
+    width: 100%;
+    max-width: 4em;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: visible;
+}
+
+svg {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+}
+
+.gaugeLabel {
+    fill: #3a5a6a;
+    font-size: 1.2rem;
+    font-style: italic;
+    opacity: 0.7;
+}
+
+.gaugeValue {
+    fill: #18404b;
+    font-size: 1rem;
+    font-weight: 300;
+}
+
+.gaugeUnits {
+    fill: #18404b;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}

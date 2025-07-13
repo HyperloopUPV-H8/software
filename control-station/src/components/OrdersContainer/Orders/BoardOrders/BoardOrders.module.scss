@@ -1,0 +1,30 @@
+@use "src/styles/styles";
+@use "src/styles/colors";
+
+.boardOrders {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.name {
+    display: flex;
+    gap: 0.3rem;
+    font-family: Inter;
+    font-weight: 500;
+    font-size: 0.8rem;
+    color: colors.getThemeColor('header-text');
+    cursor: pointer;
+}
+.orders,
+.stateOrders {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+
+    .title {
+        color: colors.getThemeColor('text-tertiary');
+        font-weight: 500;
+        font-size: 0.7rem;
+    }
+}

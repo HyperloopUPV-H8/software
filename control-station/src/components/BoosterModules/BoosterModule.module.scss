@@ -1,0 +1,178 @@
+@use 'src/styles/colors';
+
+.boxContainer1 {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    border-radius: 20px;
+    height: 100%;
+  }
+  
+  .boxContainer2 {
+    border: 2.5px solid colors.getThemeColor('border');
+    width: 100%;
+    min-height: 10.5rem;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    position: relative;
+    background-color: colors.getThemeColor('surface-variant');
+    box-sizing: border-box;
+    padding-top: 28px;
+    flex: 0 0 auto;
+  }
+  
+  .h2Module {
+    color: colors.getThemeColor('header-text');
+    font-family: 'IBM Plex Mono', monospace;
+    width: 100%;
+    height: 28px;
+    background-color: colors.getThemeColor('header-bg');
+    text-align: center;
+    border-radius: 20px 20px 0 0;
+    font-weight: bold;
+    font-size: 0.85rem;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .voltageContainer {
+    width: 100%;
+    padding: 0 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-top: 5%;
+    min-height: 8rem;
+    box-sizing: border-box;
+  }
+  
+  .titleDecorationModule {
+    text-align: center;
+    border-top-left-radius: 20px;
+    border-top-right-radius:20px ;
+  }
+  
+  .h3 {
+    color: colors.getThemeColor('text-secondary');
+    font-family: 'IBM Plex Mono', monospace;
+    margin: 2px 0; /* Reducido el margen vertical */
+  }
+  
+  .dataStyle {
+    color: colors.getThemeColor('text-secondary');
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.9rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+  .p{
+    color: colors.getThemeColor('text-secondary');
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1rem;
+    margin-top: 1px;
+    max-height: 1.6rem;
+    overflow: hidden;
+    margin-bottom: 1px;
+    padding: 5px 10px;
+    background-color: colors.getThemeColor('surface');
+    border-radius: 20px;
+    width: fit-content;
+    align-items: center;
+    box-sizing: border-box;
+    margin-left: auto;
+  }
+  
+  .flexCells {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 4px;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin: 10px auto 0;
+    border-radius: 20px;
+    border: 2.5px solid colors.getThemeColor('border');
+    padding: 10px;
+    background-color: colors.getThemeColor('surface-variant');
+    box-sizing: border-box;
+    flex: 1;
+  }
+  
+  
+  .cell {
+    width: 100%;
+    aspect-ratio: 2 / 1;
+    border: 1px solid colors.getThemeColor('border');
+    border-radius: 4px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+  
+  .red {
+    background-color: red;
+  }
+  
+  .green {
+    background-color: rgb(33, 240, 33);
+  }
+  
+  .lightOrange1 {
+    background-color: #FFA500;
+  }
+  
+  .lightOrange2 {
+    background-color: #FFCC80;
+  }
+  
+  .voltageTotal {
+    display: inline-block;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-align: center;
+    border-radius: 15px;
+    background-color: colors.getColor('tertiary', 90);
+    font-size: 0.8rem;
+    color: colors.getColor('tertiary', 40);
+    font-family: 'IBM Plex Mono', monospace;
+    box-sizing: border-box;
+  }
+  
+  .value {
+    height: 50px;
+    font-size: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .moduleInfoLabel {
+    color: colors.getThemeColor('text-secondary');
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.9rem;
+    width: 50%;
+    text-align: left;
+    margin: 0px;
+  }
+
+  .yellow {
+    background-color: yellow;
+  }
