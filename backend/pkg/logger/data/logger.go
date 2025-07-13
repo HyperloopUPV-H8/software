@@ -27,6 +27,8 @@ type Logger struct {
 	fileLock *sync.RWMutex
 	// saveFiles is a map that contains the file of each value
 	saveFiles map[data.ValueName]*file.CSV
+	// allowedVars contains the full names (board/valueName) to be logged
+	allowedVars map[string]struct{}
 }
 
 // Record is a struct that implements the abstraction.LoggerRecord interface
@@ -41,13 +43,23 @@ func (*Record) Name() abstraction.LoggerName { return Name }
 
 func NewLogger() *Logger {
 	logger := &Logger{
-		saveFiles: make(map[data.ValueName]*file.CSV),
-		running:   &atomic.Bool{},
-		fileLock:  &sync.RWMutex{},
+		saveFiles:   make(map[data.ValueName]*file.CSV),
+		running:     &atomic.Bool{},
+		fileLock:    &sync.RWMutex{},
+		allowedVars: nil, // no filter by default
 	}
 
 	logger.running.Store(false)
 	return logger
+}
+
+// SetAllowedVars allows updating the list of allowed variables at runtime
+func (sublogger *Logger) SetAllowedVars(allowed []string) {
+	allowedMap := make(map[string]struct{}, len(allowed))
+	for _, v := range allowed {
+		allowedMap[v] = struct{}{}
+	}
+	sublogger.allowedVars = allowedMap
 }
 
 func (sublogger *Logger) Start() error {
@@ -85,7 +97,13 @@ func (sublogger *Logger) PushRecord(record abstraction.LoggerRecord) error {
 
 	writeErr := error(nil)
 	for valueName, value := range dataRecord.Packet.GetValues() {
-
+		// Filter: only log allowed variables
+		if sublogger.allowedVars != nil {
+			key := dataRecord.From + "/" + string(valueName)
+			if _, ok := sublogger.allowedVars[key]; !ok {
+				continue
+			}
+		}
 		var valueRepresentation string
 		switch value := value.(type) {
 		case numeric:

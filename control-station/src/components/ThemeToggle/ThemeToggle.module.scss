@@ -1,0 +1,20 @@
+@use 'src/styles/colors';
+
+.themeToggle {
+    background: none;
+    border: 2px solid colors.getThemeColor('border');
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    
+    &:hover {
+        background-color: colors.getThemeColor('surface-variant');
+        transform: scale(1.1);
+    }
+}

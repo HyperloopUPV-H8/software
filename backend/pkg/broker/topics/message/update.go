@@ -7,11 +7,14 @@ import (
 
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/abstraction"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/data"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/transport/packet/protection"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/websocket"
 	"github.com/google/uuid"
 	ws "github.com/gorilla/websocket"
 )
+
+var _ = data.Packet{}
 
 const UpdateName abstraction.BrokerTopic = "message/update"
 const SubscribeName abstraction.BrokerTopic = "message/update"
@@ -19,16 +22,14 @@ const SubscribeName abstraction.BrokerTopic = "message/update"
 type Update struct {
 	subscribersMx *sync.Mutex
 	subscribers   map[websocket.ClientId]struct{}
-	idToBoard     map[abstraction.BoardId]string
 	pool          *websocket.Pool
 	api           abstraction.BrokerAPI
 }
 
-func NewUpdateTopic(idToBoard map[abstraction.BoardId]string) *Update {
+func NewUpdateTopic() *Update {
 	return &Update{
 		subscribersMx: &sync.Mutex{},
 		subscribers:   make(map[websocket.ClientId]struct{}),
-		idToBoard:     idToBoard,
 	}
 }
 
@@ -42,7 +43,7 @@ func (update *Update) Push(p abstraction.BrokerPush) error {
 		return topics.ErrUnexpectedPush{Push: p}
 	}
 
-	raw, err := json.Marshal(push.Data(push.boardId, update.idToBoard))
+	raw, err := json.Marshal(push.Data(push.boardName))
 	if err != nil {
 		return err
 	}
@@ -100,19 +101,19 @@ func (update *Update) SetAPI(api abstraction.BrokerAPI) {
 }
 
 type pushStruct struct {
-	data    any
-	boardId abstraction.BoardId
+	data      any
+	boardName string
 }
 
-func Push(data any, boardId abstraction.BoardId) *pushStruct {
-	return &pushStruct{data: data, boardId: boardId}
+func Push(data any, boardName string) *pushStruct {
+	return &pushStruct{data: data, boardName: boardName}
 }
 
 func (push *pushStruct) Topic() abstraction.BrokerTopic {
 	return UpdateName
 }
 
-func (push *pushStruct) Data(boardID abstraction.BoardId, idToBoard map[abstraction.BoardId]string) wrapper {
+func (push *pushStruct) Data(boardName string) wrapper {
 	switch data := push.data.(type) {
 	case *protection.Packet:
 		return wrapper{
@@ -124,12 +125,21 @@ func (push *pushStruct) Data(boardID abstraction.BoardId, idToBoard map[abstract
 				Kind: string(data.Data.Name()),
 				Data: data.Data,
 			},
-			Board:     string(idToBoard[boardID]),
+			Board:     boardName,
 			Name:      string(data.Name),
 			Timestamp: data.Timestamp,
 		}
+	case *data.Packet:
+		return wrapper{
+			Kind:      "info",
+			Payload:   "Order Sent",
+			Board:     boardName,
+			Name:      string(data.Id()),
+			Timestamp: protection.NowTimestamp(),
+		}
 	}
 	return wrapper{}
+
 }
 
 type wrapper struct {

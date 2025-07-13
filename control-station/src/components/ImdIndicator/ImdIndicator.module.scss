@@ -1,0 +1,53 @@
+@use 'src/styles/colors';
+
+.state_indicator {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: clamp(2rem, 3vw, 2.5rem);
+    margin-left: auto;
+    padding: 0;
+    box-sizing: border-box;
+    margin-bottom: clamp(0.3rem, 1vw, 0.6rem); 
+    border-radius: 0.5rem;
+}
+
+.state_indicator:last-child {
+    margin-bottom: 0; 
+}
+
+.title {
+    font-family: Roboto;
+    font-size: 1.1rem;
+    font-style: normal;
+    text-align: center;
+    font-weight: 400;
+    opacity: 0.8;
+    margin: 0;
+    flex: 1 1 auto;
+    color: colors.getColor('primary', 15);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.icon {
+    opacity: 0.6;
+    width: clamp(0.9rem, 2vw, 1.1rem);
+    height: clamp(0.9rem, 2vw, 1.1rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    flex-shrink: 0;
+}
+.state_indicator > .icon:first-child {
+    justify-self: start;
+    margin-left: 0.2rem;
+    margin-right: 0.5rem;
+}
+.state_indicator > .icon:last-child {
+    justify-self: end;
+    margin-left: 0.5rem;
+    margin-right: 0.2rem;
+}

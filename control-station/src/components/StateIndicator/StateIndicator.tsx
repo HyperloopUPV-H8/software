@@ -33,7 +33,7 @@ export const StateIndicator = memo(({ measurementId, icon }: Props) => {
             <img className={styles.icon} src={icon} />
 
             <p className={styles.title}>
-                {lostConnection ? 'DISCONNECTED' : variant}
+                {lostConnection ? 'DISCONNECTED' : state}
             </p>
 
             <img className={styles.icon} src={icon} />

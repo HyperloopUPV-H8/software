@@ -1,0 +1,110 @@
+@use "src/styles/fonts";
+@use "src/styles/colors";
+
+.battery_indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.7rem;
+    width: 4.2rem;
+    background-color: transparent;
+}
+
+.battery_container {
+    position: relative;
+    width: 2rem;
+    height: 4rem;
+    background-color: #dfffd4;
+    border: 0.0625rem solid colors.getThemeColor("battery-border");
+    border-radius: 0.35rem;
+    overflow: hidden;
+
+    &::before {
+        content: "";
+        position: absolute;
+        top: -0.35rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 1rem;
+        height: 0.35rem;
+        background-color: colors.getThemeColor("battery-border");
+        border-radius: 0.175rem 0.175rem 0 0;
+    }
+}
+
+.battery_fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: currentColor;
+    transition: height 0.3s ease-in-out;
+    border-radius: 0 0 0.1875rem 0.1875rem;
+}
+
+.battery_level_text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.5rem;
+    font-weight: bold;
+    color: colors.getColor("primary", 30);
+    z-index: 10;
+    display: flex;
+    align-items: baseline;
+    gap: 0.0625rem;
+
+    .value {
+        margin: 0;
+        font-size: 0.5rem;
+        font-weight: 600;
+    }
+
+    .units {
+        margin: 0;
+        font-size: 0.45rem;
+        font-weight: 400;
+    }
+}
+
+.info_container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1875rem;
+}
+
+.name_container {
+    display: flex;
+    align-items: center;
+    gap: 0.1875rem;
+}
+
+.icon {
+    width: 0.875rem;
+    height: 0.875rem;
+    opacity: 0.8;
+}
+
+.name {
+    margin: 0;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: colors.getColor("primary", 15);
+    text-align: center;
+}
+
+.percentage_container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.percentage {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: colors.getThemeColor("battery-text");
+}

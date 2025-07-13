@@ -1,0 +1,15 @@
+@use 'src/styles/colors';
+
+.orderTableWrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.emptyAlert {
+    margin-top: 2rem;
+    text-align: center;
+    color: colors.getThemeColor('text-tertiary');
+}

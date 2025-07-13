@@ -17,10 +17,11 @@ export const Orders = ({ boards }: Props) => {
             <div className={styles.ordersWrapper}>
                 <div className={styles.stateOrdersToggle}>
                     Always show state orders:{' '}
-                    {alwaysShowStateOrders ? 'true' : 'false'}
                     <Button
+                        key={alwaysShowStateOrders ? 'true' : 'false'}
                         className={styles.stateOrdersToggleButton}
-                        label="Toggle"
+                        color={alwaysShowStateOrders ? '#008000' : '#f3785c'}
+                        label={alwaysShowStateOrders ? 'True' : 'False'}
                         onClick={() =>
                             setAlwaysShowStateOrders((prev) => !prev)
                         }

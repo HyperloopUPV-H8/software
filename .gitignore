@@ -14,3 +14,10 @@ backend/cmd/cmd
 # Claude
 CLAUDE*
 .claude
+
+*.exe
+
+# Rust build artifacts
+packet-sender/target/
+
+*.md

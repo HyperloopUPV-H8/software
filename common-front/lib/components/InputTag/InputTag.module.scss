@@ -17,7 +17,7 @@
 
         font-size: 0.75rem;
 
-        color: var(--neutral-30);
+        color: var(--theme-text-primary, var(--neutral-30));
 
         &:focus {
             outline: none;
@@ -38,7 +38,7 @@
 
         padding: 0 0.5rem;
 
-        background-color: transparent;
+        background-color: var(--theme-surface, white);
     }
 }
 

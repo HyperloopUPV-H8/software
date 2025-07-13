@@ -69,3 +69,4 @@ export const ChartMenu = memo(({ sidebarSections }: Props) => {
         );
     }
 });
+

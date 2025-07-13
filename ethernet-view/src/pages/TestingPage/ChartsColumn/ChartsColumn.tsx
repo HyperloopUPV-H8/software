@@ -20,13 +20,13 @@ export const ChartsColumn = () => {
     }, []);
 
     const chartsColumnTabItems = [
-            {
-                id: "charts",
-                name: "Charts",
-                icon: <Chart />,
-                component: <ChartMenu sidebarSections={sections} />,
-            },
-        ]
+        {
+            id: "charts",
+            name: "Charts",
+            icon: <Chart />,
+            component: <ChartMenu sidebarSections={sections} />,
+        },
+    ];
 
     return <TabLayout tabs={chartsColumnTabItems}></TabLayout>;
 };

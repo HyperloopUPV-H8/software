@@ -4,7 +4,7 @@ import { SplashScreen } from "components/SplashScreen/SplashScreen";
 import { WsHandlerProvider } from "common";
 import { useLoadBackend } from "common";
 import { AppLayout } from "layouts/AppLayout/AppLayout";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LoggerPage } from "pages/LoggerPage/LoggerPage";
 import { CamerasPage } from "pages/CamerasPage/CamerasPage";
 
@@ -13,6 +13,11 @@ function App() {
     const isProduction = import.meta.env.PROD;
     const loadBackend = useLoadBackend(isProduction);
     const [pageShown, setPageShown] = useState<string>("testing");
+
+    useEffect(() => {
+        const savedTheme = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", savedTheme);
+    }, []);
 
     return (
         <AppLayout

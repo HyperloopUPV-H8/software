@@ -15,7 +15,8 @@ type Adj struct {
 }
 
 type Network struct {
-	Manual bool `toml:"manual"`
+	Manual  bool `toml:"manual"`
+	DevMode bool `toml:"dev_mode"`
 }
 
 type Transport struct {
