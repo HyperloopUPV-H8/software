@@ -19,14 +19,26 @@ export const MeasurementView = ({ measurement }: Props) => {
     );
     const isNumeric = isNumericMeasurement(measurement);
 
-    const { valueRef } = useUpdater(
-        measurement.id,
-        isNumeric
-            ? measurement.value.showLatest
-                ? measurement.value.last.toFixed(3)
-                : measurement.value.average.toFixed(3)
-            : measurement.value.toString()
-    );
+    const formatNumericValue = (value: number): string => {
+
+        if (!isFinite(value) || isNaN(value)) {
+            return "0.000";
+        }
+        
+        if (Math.abs(value) > Number.MAX_SAFE_INTEGER) {
+            return "ERR";
+        }
+        
+        return value.toFixed(3);
+    };
+
+    const displayValue = isNumeric
+        ? measurement.value.showLatest
+            ? formatNumericValue(measurement.value.last)
+            : formatNumericValue(measurement.value.average)
+        : measurement.value.toString();
+
+    const { valueRef } = useUpdater(measurement.id, displayValue);
 
     const onLatestValueChange = (event: FormEvent<HTMLInputElement>) => {
         setShowMeasurementLatest(event.currentTarget.checked);

@@ -103,12 +103,22 @@ export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
 
                 const measurementId = `${boardName}/${id}`;
                 if (typeof mUpdate != 'string' && typeof mUpdate != 'boolean') {
+                    const lastValue = isFinite(mUpdate.last) && !isNaN(mUpdate.last) 
+                        ? mUpdate.last 
+                        : 0;
+                    const averageValue = isFinite(mUpdate.average) && !isNaN(mUpdate.average) 
+                        ? mUpdate.average 
+                        : 0;
+                    
+                    const safeLast = Math.abs(lastValue) > Number.MAX_SAFE_INTEGER ? 0 : lastValue;
+                    const safeAverage = Math.abs(averageValue) > Number.MAX_SAFE_INTEGER ? 0 : averageValue;
+                    
                     (
                         measurementsDraft[measurementId].value as NumericValue
-                    ).last = mUpdate.last;
+                    ).last = safeLast;
                     (
                         measurementsDraft[measurementId].value as NumericValue
-                    ).average = mUpdate.average;
+                    ).average = safeAverage;
                 } else {
                     measurementsDraft[measurementId].value = mUpdate;
                 }

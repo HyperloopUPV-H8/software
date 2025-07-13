@@ -66,10 +66,21 @@ export const TableUpdater = ({ children }: Props) => {
                 console.warn(`element of measurement ${item.id} not found`);
                 return;
             }
+
+            const formatValue = (value: number): string => {
+                if (!isFinite(value) || isNaN(value)) {
+                    return "0.000";
+                }
+                if (Math.abs(value) > Number.MAX_SAFE_INTEGER) {
+                    return "ERR";
+                }
+                return value.toFixed(3);
+            };
+
             element.value.nodeValue = isNumericMeasurement(measurement)
                 ? measurement.value.showLatest
-                    ? measurement.value.last.toFixed(3)
-                    : measurement.value.average.toFixed(3)
+                    ? formatValue(measurement.value.last)
+                    : formatValue(measurement.value.average)
                 : measurement.value.toString();
         }
     });
