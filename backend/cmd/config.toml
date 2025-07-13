@@ -7,7 +7,7 @@
 # 3. Toggle the Fault Propagation to your needs (true/false)
 # 4. Check the TCP configuration and make sure to use the needed Keep Alive settings
 
-# Control Station general configuration
+# Application Configuration
 [app]
 automatic_window_opening = "control-station" # Leave blank to open no windows (<blank>, ethernet-view, control-station, both)
 
@@ -22,7 +22,7 @@ test = true     # Enable test mode
 
 # Network Configuration
 [network]
-manual = false # Manual network device selection
+manual = true # Manual network device selection
 
 # Transport Configuration
 [transport]
@@ -53,6 +53,15 @@ backoff_factor = 2     # Backoff multiplier for retry delays
 enable_progress = true # Enable progress callbacks during transfers
 
 # <-- DO NOT TOUCH BELOW THIS LINE -->
+
+# Development mode configuration
+[dev]
+# Set to true to use development mode (dev servers, dev ports, hot reload)
+dev_mode = true
+
+# Development server ports (used when dev_mode = true)
+control_station_port = 5173
+ethernet_view_port = 5174
 
 # Server Configuration
 [server.ethernet-view]

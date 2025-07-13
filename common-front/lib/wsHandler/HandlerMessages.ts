@@ -29,4 +29,15 @@ export type HandlerMessages = {
         BootloaderDownloadResponse | BootloaderUploadResponse
     >;
     "vcu/state": Subscription<VcuStateAndOrders>;
+    "lifecycle/shutdown": PostRequest<ShutdownRequest, never>;
+    "lifecycle/shutdownResponse": Subscription<ShutdownResponse>;
 };
+
+export interface ShutdownRequest {
+    reason: string;
+}
+
+export interface ShutdownResponse {
+    acknowledged: boolean;
+    message: string;
+}

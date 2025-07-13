@@ -40,7 +40,9 @@ import (
 	logger_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/logger"
 	message_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/message"
 	order_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/order"
+	lifecycle_topic "github.com/HyperloopUPV-H8/h9-backend/pkg/broker/topics/lifecycle"
 	h "github.com/HyperloopUPV-H8/h9-backend/pkg/http"
+	"github.com/HyperloopUPV-H8/h9-backend/pkg/lifecycle"
 	"github.com/HyperloopUPV-H8/h9-backend/pkg/logger"
 	data_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/data"
 	order_logger "github.com/HyperloopUPV-H8/h9-backend/pkg/logger/order"
@@ -221,6 +223,12 @@ func main() {
 	pool := websocket.NewPool(connections, trace.Logger)
 	broker.SetPool(pool)
 	blcu_topics.RegisterTopics(broker, pool)
+
+	// Create lifecycle manager
+	lifecycleManager := lifecycle.NewManager(trace.Logger)
+
+	// Set lifecycle in pool
+	pool.SetLifecycle(lifecycleManager)
 
 	// <--- transport --->
 	transp := transport.NewTransport(trace.Logger)
@@ -427,20 +435,65 @@ func main() {
 		fmt.Fprintf(os.Stderr, "error creating programableBoards handler: %v\n", err)
 	}
 
-	for _, server := range config.Server {
+	// DEBUG: Log config values
+	trace.Info().
+		Bool("dev_mode", config.Dev.DevMode).
+		Int("dev_control_station_port", config.Dev.ControlStationPort).
+		Int("dev_ethernet_view_port", config.Dev.EthernetViewPort).
+		Str("server_control_station", config.Server["control-station"].Addr).
+		Str("server_ethernet_view", config.Server["ethernet-view"].Addr).
+		Msg("DEBUG: config values loaded")
+
+	// Determine server addresses based on dev mode
+	var serverAddresses map[string]string
+	if config.Dev.DevMode {
+		// Use development ports for everything
+		serverAddresses = map[string]string{
+			"control-station": fmt.Sprintf("127.0.0.1:%d", config.Dev.ControlStationPort),
+			"ethernet-view":   fmt.Sprintf("127.0.0.1:%d", config.Dev.EthernetViewPort),
+		}
+		trace.Info().
+			Int("control_station_port", config.Dev.ControlStationPort).
+			Int("ethernet_view_port", config.Dev.EthernetViewPort).
+			Msg("development mode: using dev ports for backend servers")
+	} else {
+		// Use production ports
+		serverAddresses = map[string]string{
+			"control-station": config.Server["control-station"].Addr,
+			"ethernet-view":   config.Server["ethernet-view"].Addr,
+		}
+		trace.Info().Msg("production mode: using configured server ports")
+	}
+
+	// Start backend HTTP servers
+	trace.Info().Msg("starting backend HTTP servers")
+	for name, addr := range serverAddresses {
+		serverConfig := config.Server[name]
 		mux := h.NewMux(
-			h.Endpoint("/backend"+server.Endpoints.PodData, podDataHandle),
-			h.Endpoint("/backend"+server.Endpoints.OrderData, orderDataHandle),
-			h.Endpoint("/backend"+server.Endpoints.ProgramableBoards, programableBoardsHandle),
-			h.Endpoint(server.Endpoints.Connections, upgrader),
-			h.Endpoint(server.Endpoints.Files, h.HandleStatic(server.StaticPath)),
+			h.Endpoint("/backend"+serverConfig.Endpoints.PodData, podDataHandle),
+			h.Endpoint("/backend"+serverConfig.Endpoints.OrderData, orderDataHandle),
+			h.Endpoint("/backend"+serverConfig.Endpoints.ProgramableBoards, programableBoardsHandle),
+			h.Endpoint(serverConfig.Endpoints.Connections, upgrader),
 		)
 
-		httpServer := h.NewServer(server.Addr, mux)
+		// In dev mode, start Vite dev servers; in prod mode, serve static files
+		if config.Dev.DevMode {
+			trace.Info().Str("address", addr).Msg("backend HTTP server started (API only - dev servers will handle frontend)")
+		} else {
+			mux.Handle(serverConfig.Endpoints.Files, h.HandleStatic(serverConfig.StaticPath))
+			trace.Info().Str("address", addr).Str("static", serverConfig.StaticPath).Msg("backend HTTP server started (with static files)")
+		}
+
+		httpServer := h.NewServer(addr, mux)
 		go httpServer.ListenAndServe()
 	}
 
-	go http.ListenAndServe("127.0.0.1:4040", nil)
+	// Start pprof server for debugging (only if not conflicting with ethernet-view)
+	if config.Server["ethernet-view"].Addr != "127.0.0.1:4040" {
+		go http.ListenAndServe("127.0.0.1:4040", nil)
+	} else {
+		trace.Info().Msg("skipping pprof server (port conflict with ethernet-view)")
+	}
 
 	// <--- SNTP --->
 	if *enableSNTP {
@@ -463,7 +516,12 @@ func main() {
 			}
 		}()
 	}
-
+  
+	// Handle coordinated shutdown
+	if config.App.ShutdownMode == "coordinated" {
+		shutdownTopic := lifecycle_topic.NewShutdownTopic(lifecycleManager)
+		broker.AddTopic(lifecycle_topic.ShutdownRequestName, shutdownTopic)
+    
 	// Open browser tabs
 	switch config.App.AutomaticWindowOpening {
 	case "ethernet-view":
@@ -475,11 +533,154 @@ func main() {
 		browser.OpenURL("http://" + config.Server["control-station"].Addr)
 	}
 
+	// Start dev servers in dev mode
+	var devProcesses []*exec.Cmd
+	if config.Dev.DevMode {
+		trace.Info().Msg("starting frontend dev servers automatically")
+		
+		// Get project root (go up from backend/cmd to root)
+		execPath, err := os.Executable()
+		if err != nil {
+			// Fallback to current working directory approach
+			cwd, _ := os.Getwd()
+			execPath = cwd
+		}
+		projectRoot := filepath.Join(filepath.Dir(execPath), "..", "..")
+		if _, err := os.Stat(filepath.Join(projectRoot, "package.json")); os.IsNotExist(err) {
+			// Alternative: if we're running with 'go run .', use relative path
+			projectRoot = "../.."
+		}
+		
+		// Start control-station dev server on port 3000
+		controlStationPath := filepath.Join(projectRoot, "control-station")
+		if _, err := os.Stat(controlStationPath); err == nil {
+			trace.Info().Str("path", controlStationPath).Msg("starting control-station dev server on port 3000")
+			cmd := exec.Command("npm", "run", "dev", "--", "--port", "3000")
+			cmd.Dir = controlStationPath
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			err := cmd.Start()
+			if err != nil {
+				trace.Error().Err(err).Msg("failed to start control-station dev server")
+			} else {
+				devProcesses = append(devProcesses, cmd)
+				trace.Info().Int("pid", cmd.Process.Pid).Msg("control-station dev server started")
+			}
+		} else {
+			trace.Warn().Str("path", controlStationPath).Msg("control-station directory not found")
+		}
+		
+		// Start ethernet-view dev server on port 3001
+		ethernetViewPath := filepath.Join(projectRoot, "ethernet-view")
+		if _, err := os.Stat(ethernetViewPath); err == nil {
+			trace.Info().Str("path", ethernetViewPath).Msg("starting ethernet-view dev server on port 3001")
+			cmd := exec.Command("npm", "run", "dev", "--", "--port", "3001")
+			cmd.Dir = ethernetViewPath
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			err := cmd.Start()
+			if err != nil {
+				trace.Error().Err(err).Msg("failed to start ethernet-view dev server")
+			} else {
+				devProcesses = append(devProcesses, cmd)
+				trace.Info().Int("pid", cmd.Process.Pid).Msg("ethernet-view dev server started")
+			}
+		} else {
+			trace.Warn().Str("path", ethernetViewPath).Msg("ethernet-view directory not found")
+		}
+		
+		// Register shutdown handler for dev processes
+		lifecycleManager.RegisterShutdownHandler("dev-servers", func() {
+			trace.Info().Msg("stopping dev server processes")
+			for _, cmd := range devProcesses {
+				if cmd.Process != nil {
+					trace.Info().Int("pid", cmd.Process.Pid).Msg("killing dev server process")
+					cmd.Process.Kill()
+				}
+			}
+		})
+		
+		// Give dev servers time to start (wait for Vite to be ready)
+		trace.Info().Msg("waiting for dev servers to start...")
+		time.Sleep(5 * time.Second)
+	}
+
+	// Determine frontend URLs to open in browser
+	var frontendURLs map[string]string
+	if config.Dev.DevMode {
+		// In dev mode, open Vite dev server URLs (3000/3001) which proxy to backend APIs (5173/5174)
+		frontendURLs = map[string]string{
+			"control-station": "http://localhost:3000",
+			"ethernet-view":   "http://localhost:3001",
+		}
+		trace.Info().
+			Str("control_station_url", frontendURLs["control-station"]).
+			Str("ethernet_view_url", frontendURLs["ethernet-view"]).
+			Int("backend_control_port", config.Dev.ControlStationPort).
+			Int("backend_ethernet_port", config.Dev.EthernetViewPort).
+			Msg("DEBUG: development mode - opening Vite dev servers (proxy to backend APIs)")
+	} else {
+		// Use backend server URLs for static serving
+		frontendURLs = map[string]string{
+			"control-station": "http://" + serverAddresses["control-station"],
+			"ethernet-view":   "http://" + serverAddresses["ethernet-view"],
+		}
+		trace.Info().
+			Str("control_station_url", frontendURLs["control-station"]).
+			Str("ethernet_view_url", frontendURLs["ethernet-view"]).
+			Msg("DEBUG: production mode - frontend URLs set")
+	}
+
+	// DEBUG: Log all frontend URLs before opening
+	trace.Info().
+		Interface("frontend_urls", frontendURLs).
+		Str("opening_mode", config.App.AutomaticWindowOpening).
+		Msg("DEBUG: about to open browser URLs")
+
+	// Open configured app(s)
+	switch config.App.AutomaticWindowOpening {
+	case "control-station":
+		trace.Info().Str("url", frontendURLs["control-station"]).Msg("DEBUG: opening control-station")
+		browser.OpenURL(frontendURLs["control-station"])
+	case "ethernet-view":
+		trace.Info().Str("url", frontendURLs["ethernet-view"]).Msg("DEBUG: opening ethernet-view")
+		browser.OpenURL(frontendURLs["ethernet-view"])
+	case "both":
+		trace.Info().Str("ethernet_url", frontendURLs["ethernet-view"]).Str("control_url", frontendURLs["control-station"]).Msg("DEBUG: opening both frontends")
+		browser.OpenURL(frontendURLs["ethernet-view"])
+		browser.OpenURL(frontendURLs["control-station"])
+	case "none":
+		trace.Info().Msg("not opening any browser")
+	default:
+		trace.Warn().Str("value", config.App.AutomaticWindowOpening).
+			Msg("unknown automatic_window_opening value, defaulting to control-station")
+		trace.Info().Str("url", frontendURLs["control-station"]).Msg("DEBUG: opening default control-station")
+		browser.OpenURL(frontendURLs["control-station"])
+	}
+
+	// Register shutdown handlers
+	lifecycleManager.RegisterShutdownHandler("transport", func() {
+		trace.Info().Msg("closing transport connections")
+		// Transport cleanup will be handled by its own cleanup methods
+	})
+
+	lifecycleManager.RegisterShutdownHandler("broker", func() {
+		trace.Info().Msg("stopping broker")
+		// Broker cleanup - data topic already has Stop() method
+	})
+
+	lifecycleManager.RegisterShutdownHandler("websocket", func() {
+		trace.Info().Msg("closing websocket connections")
+		pool.Close()
+	})
+
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
 	for range interrupt {
-		trace.Info().Msg("Shutting down")
+		trace.Info().Msg("interrupt received")
+		gracePeriod := time.Duration(config.App.ShutdownGracePeriod) * time.Millisecond
+		lifecycleManager.Shutdown(gracePeriod)
 		return
 	}
 }

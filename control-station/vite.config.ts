@@ -15,6 +15,15 @@ export default defineConfig({
         alias: {
             common: path.resolve(__dirname, '../common-front'),
         },
-    }, 
+    },
+    server: {
+        proxy: {
+            // Proxy API calls to backend (control-station backend runs on 5173)
+            '/backend': {
+                target: 'http://localhost:5173',
+                changeOrigin: true,
+            },
+        },
+    },
 });
 
