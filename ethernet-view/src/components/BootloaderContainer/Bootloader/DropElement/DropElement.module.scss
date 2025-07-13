@@ -1,4 +1,5 @@
 @use "src/styles/styles";
+@use "src/styles/colors" as colors;
 
 .dropElementWrapper {
     flex: 1 1 0;
@@ -6,7 +7,7 @@
     justify-content: center;
     align-items: center;
     padding: 1rem;
-    outline: 1px dashed black;
+    outline: 1px dashed colors.getThemeColor("border");
     border-radius: styles.$large-border-radius;
 
     text-align: center;
@@ -15,11 +16,15 @@
 }
 
 .dragOver {
-    outline: 2px solid #589bff;
-    background-color: #80b3ff24;
+    outline: 2px solid colors.getThemeColor("primary");
+    background-color: colors.getThemeColor("primary-surface");
 }
 
 .link {
     font-weight: bold;
-    color: #66a9f6;
+    color: colors.getThemeColor("primary");
+    
+    &:hover {
+        color: colors.getThemeColor("primary-hover");
+    }
 }
