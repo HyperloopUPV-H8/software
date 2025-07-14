@@ -48,9 +48,9 @@ export const ChartCanvas = ({ measurementsInChart }: Props) => {
           layout: {
             background: { 
               type: ColorType.Solid, 
-              color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#0a0a0a' : 'white' 
+              color: document.documentElement.getAttribute('data-theme') === 'dark' ? 'black' : 'white' 
             },
-            textColor: document.documentElement.getAttribute('data-theme') === 'dark' ? '#e0e5eb' : 'black',
+            textColor: document.documentElement.getAttribute('data-theme') === 'dark' ? 'white' : 'black',
           },
           width: chartContainerRef.current.clientWidth,
           height: CHART_HEIGHT,
