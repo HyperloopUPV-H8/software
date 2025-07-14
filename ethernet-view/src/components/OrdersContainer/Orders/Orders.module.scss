@@ -36,10 +36,11 @@
 
 .boardOrderList > :not(:last-child)::after {
     content: "";
-    border-bottom: 1px solid rgba(colors.getColor("secondary", 50), 0.368);
+    border-bottom: 1px solid rgba(235, 137, 33, 0.368); // Orange with transparency
     margin-bottom: 0.8rem;
 }
 
 :global([data-theme="dark"]) .boardOrderList > :not(:last-child)::after {
-    border-bottom-color: rgba(colors.getColor("secondary", 40), 0.3);
+    border-bottom-color: rgba(235, 137, 33, 0.25);
+    background-color: rgba(235, 137, 33, 0.368);
 }

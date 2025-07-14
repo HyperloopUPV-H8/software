@@ -7,7 +7,7 @@
     flex-direction: column;
     align-items: stretch;
     @include styles.code-text;
-    border: 1px solid colors.getColor("secondary", 50);
+    border: 1px solid styles.$orange;
     border-radius: 0.5rem;
     overflow: hidden;
 
@@ -15,5 +15,5 @@
 }
 
 :global([data-theme="dark"]) .orderFormWrapper {
-    border-color: colors.getColor("secondary", 40);
+    border-color: rgba(235, 137, 33, 0.8);
 }

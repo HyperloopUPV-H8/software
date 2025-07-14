@@ -1,10 +1,9 @@
 @use "src/styles/styles";
-@use "src/styles/colors" as colors;
 
 .fieldsWrapper {
     width: 100%;
     padding: 1rem;
-    border-top: 1px solid colors.getColor("secondary", 50);
+    border-top: 1px solid styles.$orange;
 
     display: flex;
     flex-direction: column;
@@ -14,5 +13,5 @@
 }
 
 :global([data-theme="dark"]) .fieldsWrapper {
-    border-top-color: colors.getColor("secondary", 40);
+    border-top-color: rgba(235, 137, 33, 0.8);
 }

@@ -3,7 +3,6 @@ import { nanoid } from "nanoid";
 import { OrdersContainer } from "components/OrdersContainer/OrdersContainer";
 import { useRef } from "react";
 import { ReactComponent as OutgoingMessage } from "assets/svg/outgoing-message.svg";
-import styles from "./OrderColumn.module.scss";
 
 export const OrderColumn = () => {
     const orderTabItems = useRef([
@@ -15,7 +14,5 @@ export const OrderColumn = () => {
         },
     ]);
 
-    return <div className={styles.orderColumn}>
-        <TabLayout tabs={orderTabItems.current}></TabLayout>
-    </div>;
+    return <TabLayout tabs={orderTabItems.current}></TabLayout>;
 };
