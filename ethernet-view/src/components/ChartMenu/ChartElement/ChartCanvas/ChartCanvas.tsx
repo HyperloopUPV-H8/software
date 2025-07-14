@@ -53,84 +53,56 @@ export const ChartCanvas = ({ measurementsInChart }: Props) => {
 
   useEffect(() => {
     const handleResize = () => {
-      if (chartContainerRef.current)
-        if (chart)
-          chart.current?.applyOptions({
-            width: chartContainerRef.current.clientWidth,
-          });
+      if (chartContainerRef.current && chart.current) {
+        chart.current.applyOptions({
+          width: chartContainerRef.current.clientWidth,
+        });
+      }
     };
-        if (chartContainerRef.current) {
-            if (chart) {
-                chart.current = createChart(chartContainerRef.current, {
-                    layout: {
-                        background: { type: ColorType.Solid, color: 'white' },
-                        textColor: 'black',
-                    },
-                    width: chartContainerRef.current.clientWidth,
-                    height: CHART_HEIGHT,
-                    timeScale: {
-                        timeVisible: true,
-                        secondsVisible: true,
-                        rightOffset: 12,
-                        barSpacing: 0.1,
-                        tickMarkFormatter: (time: UTCTimestamp) => {
-                            const date = new Date(time * 1000);
-                            return date.toLocaleTimeString() + '.' + date.getMilliseconds();
-                        }
-                    },
-                    localization: {
-                        timeFormatter: (time: UTCTimestamp) => {
-                            const date = new Date(time * 1000);
-                            return date.toLocaleTimeString() + '.' + date.getMilliseconds();
-                        }
-                    }
-                });
-                
-            }
-        }
 
+    const resizeObserver = new ResizeObserver(handleResize);
     let themeObserver: MutationObserver | null = null;
 
     if (chartContainerRef.current) {
-      if (chart) {
-        chart.current = createChart(chartContainerRef.current, {
-          ...getThemeOptions(),
-          width: chartContainerRef.current.clientWidth,
-          height: CHART_HEIGHT,
-          timeScale: {
-            timeVisible: true,
-            secondsVisible: true,
-            fixLeftEdge: true,
-            fixRightEdge: true,
-            lockVisibleTimeRangeOnResize: true,
-            rightBarStaysOnScroll: true,
-            tickMarkFormatter: (time: UTCTimestamp) => {
-              const date = new Date(time * 1000);
-              return date.toLocaleTimeString() + "." + date.getMilliseconds();
-            },
-          },
-          localization: {
-            timeFormatter: (time: UTCTimestamp) => {
-              const date = new Date(time * 1000);
-              return date.toLocaleTimeString() + "." + date.getMilliseconds();
-            },
-          },
-        });
+      resizeObserver.observe(chartContainerRef.current);
 
-        // Set up MutationObserver to watch for theme changes
-        themeObserver = new MutationObserver((mutations) => {
-          mutations.forEach((mutation) => {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
-              chart.current?.applyOptions(getThemeOptions());
-            }
-          });
-        });
+      chart.current = createChart(chartContainerRef.current, {
+        ...getThemeOptions(),
+        width: chartContainerRef.current.clientWidth,
+        height: CHART_HEIGHT,
+        timeScale: {
+          timeVisible: true,
+          secondsVisible: true,
+          fixLeftEdge: true,
+          fixRightEdge: true,
+          lockVisibleTimeRangeOnResize: true,
+          rightBarStaysOnScroll: true,
+          tickMarkFormatter: (time: UTCTimestamp) => {
+            const date = new Date(time * 1000);
+            return date.toLocaleTimeString() + "." + date.getMilliseconds();
+          },
+        },
+        localization: {
+          timeFormatter: (time: UTCTimestamp) => {
+            const date = new Date(time * 1000);
+            return date.toLocaleTimeString() + "." + date.getMilliseconds();
+          },
+        },
+      });
 
-        themeObserver.observe(document.documentElement, {
-          attributes: true,
-          attributeFilter: ['data-theme']
+      // Set up MutationObserver to watch for theme changes
+      themeObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+            chart.current?.applyOptions(getThemeOptions());
+          }
         });
-      }
+      });
+
+      themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme']
+      });
     }
 
     return () => {
