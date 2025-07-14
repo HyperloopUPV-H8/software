@@ -1,0 +1,19 @@
+@use "src/styles/colors" as colors;
+
+.orderColumn {
+    width: 100%;
+    height: 100%;
+    
+    // Apply orange background and border to the Island inside
+    :global(.island) {
+        background-color: rgba(colors.getColor("secondary", 50), 0.05);
+        border: 2px solid rgba(colors.getColor("secondary", 50), 0.2);
+    }
+}
+
+:global([data-theme="dark"]) .orderColumn {
+    :global(.island) {
+        background-color: rgba(colors.getColor("secondary", 50), 0.02);
+        border: 2px solid rgba(colors.getColor("secondary", 50), 0.15);
+    }
+}
