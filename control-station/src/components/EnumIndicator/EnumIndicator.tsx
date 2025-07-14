@@ -45,6 +45,8 @@ const enumToColor: { [key: string]: string } = {
     'CHARGING' : '#F583F8',
     'CHARGED' : '#FBD15B',
 
+    'OK' : '#ACF293',
+
     'HV OPEN' : '#83C0F8',
     'HV CLOSED' : '#ACF293',
 
