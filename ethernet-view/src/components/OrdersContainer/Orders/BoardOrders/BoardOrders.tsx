@@ -14,7 +14,7 @@ export const BoardOrdersView = ({
     alwaysShowStateOrders,
 }: Props) => {
 
-    const [isOpen, setIsOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(true);
 
     return (
         <div className={styles.boardOrders}>

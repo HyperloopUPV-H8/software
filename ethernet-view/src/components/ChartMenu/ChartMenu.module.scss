@@ -15,6 +15,10 @@
     border-left: 0;
 }
 
+:global([data-theme="dark"]) .chartMenuWrapper {
+    border-color: colors.getColor("neutral", 20);
+}
+  
 .chartMenuWrapper.sidebarHidden {
     grid-template-columns: 1fr;
 }

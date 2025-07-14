@@ -4,7 +4,7 @@
 .select {
     width: 100%;
     padding: 0.5rem;
-    background-color: colors.getThemeColor("input-bg");
+    background-color: rgba(235, 137, 33, 0.1);
     color: colors.getThemeColor("text-primary");
     border: 1px solid colors.getThemeColor("border");
     border-radius: styles.$normal-border-radius;
@@ -15,7 +15,15 @@
     }
 }
 
+:global([data-theme="dark"]) .select {
+    background-color: rgba(235, 137, 33, 0.05);
+}
+
 option {
-    background-color: colors.getThemeColor("surface");
+    background-color: rgba(235, 137, 33, 0.1);
     color: colors.getThemeColor("text-primary");
+}
+
+:global([data-theme="dark"]) option {
+    background-color: rgba(235, 137, 33, 0.05);
 }

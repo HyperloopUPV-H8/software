@@ -22,6 +22,28 @@ export const ChartCanvas = ({
     const chart = useRef<IChartApi | null>(null);
     const chartContainerRef = useRef<HTMLDivElement>(null);
 
+    // Helper function to get theme-aware chart options
+    const getThemeOptions = () => {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        return {
+            layout: {
+                background: { 
+                    type: ColorType.Solid, 
+                    color: isDark ? 'black' : 'white' 
+                },
+                textColor: isDark ? 'white' : 'black',
+            },
+            grid: {
+                vertLines: {
+                    color: isDark ? '#1f1f1f' : '#f0f0f0',
+                },
+                horzLines: {
+                    color: isDark ? '#1f1f1f' : '#f0f0f0',
+                },
+            },
+        };
+    };
+
     useEffect(() => {
         const handleResize = () => {
             if (chartContainerRef.current)
@@ -35,13 +57,12 @@ export const ChartCanvas = ({
         if (chartContainerRef.current)
             resizeObserver.observe(chartContainerRef.current);
 
+        let themeObserver: MutationObserver | null = null;
+
         if (chartContainerRef.current) {
             if (chart)
                 chart.current = createChart(chartContainerRef.current, {
-                    layout: {
-                        background: { type: ColorType.Solid, color: 'white' },
-                        textColor: 'black',
-                    },
+                    ...getThemeOptions(),
                     width: chartContainerRef.current.clientWidth,
                     height: CHART_HEIGHT,
                     timeScale: {
@@ -61,6 +82,20 @@ export const ChartCanvas = ({
                         }
                     }
                 });
+
+            // Set up MutationObserver to watch for theme changes
+            themeObserver = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+                        chart.current?.applyOptions(getThemeOptions());
+                    }
+                });
+            });
+
+            themeObserver.observe(document.documentElement, {
+                attributes: true,
+                attributeFilter: ['data-theme']
+            });
         }
 
         for (const measurement of measurementsInChart) {
@@ -83,6 +118,7 @@ export const ChartCanvas = ({
 
         return () => {
             resizeObserver.disconnect();
+            themeObserver?.disconnect();
             chart.current?.remove();
         };
     }, [measurementsInChart]);

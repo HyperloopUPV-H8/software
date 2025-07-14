@@ -1,4 +1,5 @@
 @use "src/styles/styles";
+@use "src/styles/colors" as colors;
 
 .boardView {
     display: flex;
@@ -9,5 +10,10 @@
     flex: 0 0 auto;
     border: 1px solid var(--main-color);
     color: var(--light-main-color);
+    background-color: colors.getThemeColor("surface-variant");
     @include styles.shadow;
+}
+
+:global([data-theme="dark"]) .boardView {
+    background-color: colors.getThemeColor("surface");
 }

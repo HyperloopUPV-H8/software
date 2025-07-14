@@ -7,10 +7,13 @@
     flex-direction: column;
     align-items: stretch;
     @include styles.code-text;
-    border: 1px solid colors.getThemeColor("secondary");
+    border: 1px solid styles.$orange;
     border-radius: 0.5rem;
     overflow: hidden;
-    background-color: colors.getThemeColor("surface");
 
     @include styles.shadow;
+}
+
+:global([data-theme="dark"]) .orderFormWrapper {
+    border-color: rgba(235, 137, 33, 0.8);
 }
