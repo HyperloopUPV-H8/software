@@ -1,42 +1,18 @@
 @use "src/styles/styles";
-@use "src/styles/colors" as colors;
 
 .boardOrders {
     display: flex;
     flex-direction: column;
     gap: 0.8rem;
-    background-color: transparent;
-    padding: 0.8rem;
-    border-radius: 0.5rem;
-}
-
-:global([data-theme="dark"]) .boardOrders {
-    background-color: rgba(colors.getColor("secondary", 50), 0.05);
 }
 
 .name {
     display: flex;
-    gap: 0.6rem;
+    gap: .6rem;
     font-family: Inter;
     font-weight: 600;
-    color: colors.getThemeColor("secondary");
+    color: hsl(29, 88%, 70%);
     cursor: pointer;
-    background-color: rgba(colors.getColor("secondary", 50), 0.1);
-    padding: 0.5rem;
-    border-radius: 0.25rem;
-
-    &:hover {
-        color: colors.getThemeColor("secondary-hover");
-        background-color: rgba(colors.getColor("secondary", 50), 0.15);
-    }
-}
-
-:global([data-theme="dark"]) .name {
-    background-color: rgba(colors.getColor("secondary", 50), 0.05);
-    
-    &:hover {
-        background-color: rgba(colors.getColor("secondary", 50), 0.08);
-    }
 }
 
 .orders,
@@ -46,7 +22,7 @@
     gap: 0.6rem;
 
     .title {
-        color: colors.getThemeColor("text-secondary");
+        color: rgb(145, 145, 145);
         font-weight: 600;
     }
 }
