@@ -10,7 +10,3 @@
     cursor: pointer;
 }
 
-:global([data-theme="dark"]) .header {
-    background-color: var(--dark-bg-color);
-    filter: brightness(0.7);
-}
