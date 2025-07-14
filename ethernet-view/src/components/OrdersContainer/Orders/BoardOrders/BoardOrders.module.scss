@@ -14,7 +14,6 @@
     font-weight: 600;
     color: hsl(29, 88%, 70%);
     cursor: pointer;
-    background-color: rgba(235, 137, 33, 0.368);
     padding: 0.5rem;
     border-radius: 0.25rem;
 
@@ -24,8 +23,6 @@
 }
 
 :global([data-theme="dark"]) .name {
-    background-color: rgba(235, 137, 33, 0.05);
-
     &:hover {
         background-color: rgba(235, 137, 33, 0.08);
     }

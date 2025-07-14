@@ -42,5 +42,4 @@
 
 :global([data-theme="dark"]) .boardOrderList > :not(:last-child)::after {
     border-bottom-color: rgba(235, 137, 33, 0.25);
-    background-color: rgba(235, 137, 33, 0.368);
 }
