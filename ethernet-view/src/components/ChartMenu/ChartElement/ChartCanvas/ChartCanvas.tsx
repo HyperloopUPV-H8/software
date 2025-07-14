@@ -59,10 +59,35 @@ export const ChartCanvas = ({ measurementsInChart }: Props) => {
             width: chartContainerRef.current.clientWidth,
           });
     };
-
-    const resizeObserver = new ResizeObserver(handleResize);
-    if (chartContainerRef.current)
-      resizeObserver.observe(chartContainerRef.current);
+        if (chartContainerRef.current) {
+            if (chart) {
+                chart.current = createChart(chartContainerRef.current, {
+                    layout: {
+                        background: { type: ColorType.Solid, color: 'white' },
+                        textColor: 'black',
+                    },
+                    width: chartContainerRef.current.clientWidth,
+                    height: CHART_HEIGHT,
+                    timeScale: {
+                        timeVisible: true,
+                        secondsVisible: true,
+                        rightOffset: 12,
+                        barSpacing: 0.1,
+                        tickMarkFormatter: (time: UTCTimestamp) => {
+                            const date = new Date(time * 1000);
+                            return date.toLocaleTimeString() + '.' + date.getMilliseconds();
+                        }
+                    },
+                    localization: {
+                        timeFormatter: (time: UTCTimestamp) => {
+                            const date = new Date(time * 1000);
+                            return date.toLocaleTimeString() + '.' + date.getMilliseconds();
+                        }
+                    }
+                });
+                
+            }
+        }
 
     let themeObserver: MutationObserver | null = null;
 
