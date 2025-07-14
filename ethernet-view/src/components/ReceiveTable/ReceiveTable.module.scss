@@ -14,7 +14,7 @@
 }
 
 :global([data-theme="dark"]) .newReceiveTable {
-    --main-color: #{colors.getThemeColor("border")};
+    --main-color: #{colors.getThemeColor("text-primary")};
     --bg-color: #{colors.getColor("neutral", 20)};
     --light-main-color: #{colors.getThemeColor("text-secondary")};
     --light-bg-color: #{colors.getThemeColor("surface-variant")};
