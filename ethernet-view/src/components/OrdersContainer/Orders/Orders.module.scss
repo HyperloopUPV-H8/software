@@ -36,6 +36,10 @@
 
 .boardOrderList > :not(:last-child)::after {
     content: "";
-    border-bottom: 1px solid colors.getThemeColor("border-variant");
+    border-bottom: 1px solid rgba(colors.getColor("secondary", 50), 0.368);
     margin-bottom: 0.8rem;
+}
+
+:global([data-theme="dark"]) .boardOrderList > :not(:last-child)::after {
+    border-bottom-color: rgba(colors.getColor("secondary", 40), 0.3);
 }

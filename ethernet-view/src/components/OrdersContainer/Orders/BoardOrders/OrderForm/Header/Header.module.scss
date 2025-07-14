@@ -1,5 +1,5 @@
 @use "src/styles/styles";
-@use "src/styles/colors" as colors;
+$header-color: #ffe4cc;
 
 .headerWrapper {
     flex: 0 0 0;
@@ -10,7 +10,7 @@
         / auto 1fr auto 5rem;
     align-items: center;
     gap: 0.5rem;
-    background-color: colors.getThemeColor("secondary-surface");
+    background-color: $header-color;
     cursor: pointer;
 }
 
@@ -24,7 +24,7 @@
 }
 
 .caret > * {
-    color: colors.getThemeColor("secondary");
+    color: styles.$orange;
 }
 
 .visible {
@@ -37,7 +37,7 @@
 
 .name {
     grid-area: name;
-    color: colors.getThemeColor("secondary");
+    color: styles.$orange;
     font-weight: 500;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -45,7 +45,7 @@
 
 .target {
     grid-area: target;
-    color: colors.getThemeColor("error");
+    color: red;
     font-size: 0.8rem;
     margin: 0 0.5rem;
     opacity: 0;

@@ -1,5 +1,3 @@
-@use "src/styles/colors" as colors;
-
 .orderTableWrapper {
     width: 100%;
     height: 100%;
@@ -11,5 +9,5 @@
 .emptyAlert {
     margin-top: 2rem;
     text-align: center;
-    color: colors.getThemeColor("text-tertiary");
+    color: rgb(156, 156, 156);
 }
