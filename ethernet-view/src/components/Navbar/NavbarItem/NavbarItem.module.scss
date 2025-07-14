@@ -1,14 +1,16 @@
 @use "src/styles/styles";
+@use "src/styles/colors" as colors;
 
 .iconWrapper {
+    cursor: pointer;
     > * {
         width: 2rem;
+        transition: filter 0.2s ease;
     }
-    cursor: pointer;
-}
-
-.link {
-    color: styles.getColor(styles.$base-color, 60);
+    
+    &:hover > * {
+        filter: brightness(1.2);
+    }
 }
 
 .active {

@@ -10,7 +10,7 @@ import {
 import { App } from './App';
 import './index.css';
 import { mainPageRoute } from 'pages/VehiclePage/MainPage/mainPageRoute';
-import { camerasRoute } from 'pages/CamerasPage/camerasRoute';
+import { camerasRoute } from 'pages/CamerasPage/camerasRoute'
 import { batteriesRoute } from 'pages/VehiclePage/BatteriesPage/batteriesRoute'
 import { boosterRoute } from 'pages/VehiclePage/BoosterPage/boosterRoute';
 import { ConfigProvider, GlobalTicker } from 'common';

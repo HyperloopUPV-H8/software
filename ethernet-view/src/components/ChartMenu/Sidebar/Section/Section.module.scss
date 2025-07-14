@@ -1,4 +1,5 @@
 @use "src/styles/styles";
+@use "src/styles/colors" as colors;
 
 .section {
     display: flex;
@@ -13,10 +14,23 @@
     align-items: center;
     gap: 0.4rem;
     padding: 0.5rem;
-    background-color: styles.lightness(styles.$base-color, 30%);
-
-    color: styles.$base-color;
+    background-color: colors.getColor("primary", 80);
+    color: colors.getColor("primary", 50);
     font-weight: bold;
+    border-bottom: 1px solid colors.getColor("primary", 70);
+    transition: all 0.2s ease;
+    
+    &:hover {
+        background-color: colors.getColor("primary", 75);
+    }
+}
 
-    border-bottom: 1px solid styles.lightness(styles.$base-color, 18%);
+:global([data-theme="dark"]) .header {
+    background-color: colors.getThemeColor("surface-variant");
+    color: colors.getThemeColor("text-primary");
+    border-bottom: 1px solid colors.getThemeColor("border");
+    
+    &:hover {
+        background-color: colors.getThemeColor("surface-hover");
+    }
 }

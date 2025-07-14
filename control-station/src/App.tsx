@@ -4,7 +4,7 @@ import 'styles/scrollbars.scss';
 import styles from './App.module.scss';
 import { Sidebar } from 'components/Sidebar/Sidebar';
 import { ReactComponent as Wheel } from 'assets/svg/wheel.svg';
-import { ReactComponent as Arrow } from  'assets/svg/arrow.svg';
+import { ReactComponent as Cabinet } from  'assets/svg/cabinet.svg';
 import { ReactComponent as Cameras } from 'assets/svg/cameras.svg';
 import { ReactComponent as TeamLogo } from 'assets/svg/team_logo.svg';
 import { ReactComponent as Batteries } from 'assets/svg/battery-filled.svg'
@@ -27,7 +27,7 @@ export const App = () => {
                     <Sidebar
                         items={[
                             { path: '/vehicle', icon: <Wheel /> },
-                            { path: '/booster', icon: <Arrow /> },
+                            { path: '/booster', icon: <Cabinet /> },
                             { path: '/batteries', icon: <Batteries /> },
                             { path: '/cameras', icon: <Cameras /> }
                         ]}

@@ -1,18 +1,19 @@
 @use "sass:color";
+@use "./colors.scss" as colors;
 
-// COLORS
-$background-color: #dce3eb;
-$title-color: #45677d;
-$normal-text-color: #373c43;
-$alternate-text-color: #505868;
-$orange: #ee7623;
-$blue: #317ae7;
-$base-color: hsl(212, 27%, 55%);
+// COLORS (now using theme system)
+$background-color: colors.getThemeColor("background");
+$title-color: colors.getThemeColor("text-primary");
+$normal-text-color: colors.getThemeColor("text-primary");
+$alternate-text-color: colors.getThemeColor("text-secondary");
+$orange: colors.getColor("secondary", 50);
+$blue: colors.getColor("primary", 50);
+$base-color: colors.getColor("primary", 50);
 
-$dark-normal-text-color: #bec6d2;
+$dark-normal-text-color: colors.getThemeColor("text-secondary");
 
 @function getColor($name, $lightness) {
-    @return var(--color-#{$name}-#{$lightness});
+    @return colors.getColor($name, $lightness);
 }
 
 // FONTS
@@ -76,7 +77,7 @@ $background-color-transition: background-color $normal-transition-time linear;
     font-family: $code-font;
     font-size: $normal-font-size;
     font-style: italic;
-    color: #a9adb6;
+    color: colors.getThemeColor("text-tertiary");
 }
 
 @mixin tab-text {
@@ -103,7 +104,7 @@ $background-color-transition: background-color $normal-transition-time linear;
 }
 
 @mixin shadow {
-    box-shadow: 0px 4px 5px -4px rgba(0, 0, 0, 0.1);
+    box-shadow: colors.getThemeColor("shadow-md");
 }
 
 // CLASSES

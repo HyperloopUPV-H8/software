@@ -1,4 +1,5 @@
 @use "src/styles/styles";
+@use "src/styles/colors" as colors;
 
 .island {
     display: flex;
@@ -6,6 +7,7 @@
     align-items: stretch;
     height: 100%;
     padding: 1rem;
-    background-color: white;
+    background-color: colors.getThemeColor("island-bg");
     border-radius: 0.8rem;
+    box-shadow: colors.getThemeColor("shadow-sm");
 }

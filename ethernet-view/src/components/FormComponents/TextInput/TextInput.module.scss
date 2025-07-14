@@ -1,4 +1,5 @@
 @use "src/styles/styles";
+@use "src/styles/colors" as colors;
 
 .textInput {
     flex: 1 1 0;
@@ -7,17 +8,26 @@
     border-radius: styles.$normal-border-radius;
     font: inherit;
     transition: border-color 0.1s linear;
+    background-color: colors.getThemeColor("input-bg");
+    color: colors.getThemeColor("text-primary");
+    border: 1px solid colors.getThemeColor("border");
+
+    &:focus {
+        outline: none;
+        border-color: colors.getThemeColor("primary");
+    }
 }
 
 .valid {
-    border-color: #84e067;
+    border-color: colors.getThemeColor("success");
 }
 
 .invalid {
-    border-color: rgb(244, 90, 90);
+    border-color: colors.getThemeColor("error");
 }
 
 .disabled {
-    color: rgb(147, 147, 147);
-    border-color: rgb(183, 183, 183);
+    color: colors.getThemeColor("text-disabled");
+    border-color: colors.getThemeColor("border");
+    background-color: colors.getThemeColor("surface-variant");
 }

@@ -1,3 +1,5 @@
+@use "src/styles/colors" as colors;
+
 .responseElementWrapper {
     flex: 1 1 0;
     display: flex;
@@ -12,9 +14,9 @@
 }
 
 .successIcon {
-    color: #75d65d;
+    color: colors.getThemeColor("success");
 }
 
 .failureIcon {
-    color: #dc5757;
+    color: colors.getThemeColor("error");
 }
