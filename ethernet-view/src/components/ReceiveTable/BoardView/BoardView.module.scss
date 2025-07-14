@@ -16,5 +16,4 @@
 
 :global([data-theme="dark"]) .boardView {
     background-color: colors.getThemeColor("surface");
-    filter: invert(1) hue-rotate(180deg);
 }
