@@ -15,7 +15,7 @@ import {
 } from "common";
 import { OrdersContainer } from "components/OrdersContainer/OrdersContainer";
 import { Window } from "components/Window/Window";
-import { getHardcodedOrders } from "../BatteriesPage/FixedOrders";
+import { emergencyStopOrders, getHardcodedOrders } from "../BatteriesPage/FixedOrders";
 import { usePodDataUpdate } from "hooks/usePodDataUpdate";
 import { Connection, useConnections } from "common";
 import { LostConnectionContext } from "services/connections";
@@ -26,6 +26,7 @@ import thunder from "assets/svg/thunder-filled.svg";
 import thermometer from "assets/svg/thermometer-field.svg";
 import Contactors from "assets/svg/open-contactors-icon.svg";
 import teamLogo from "assets/svg/team_logo.svg";
+import { BigOrderButton } from "components/BigOrderButton";
 
 interface ModuleData {
   id: number | string;
@@ -153,6 +154,15 @@ export function BoosterPage() {
           <Window title="Messages" className={styles.messages}>
             <MessagesContainer />
           </Window>
+          <div className={styles.emergency_wrapper}>
+              <BigOrderButton
+                  orders={emergencyStopOrders}
+                  label="⚠️ EMERGENCY STOP"
+                  shortcut=" "
+                  className={`${styles.emergency_button} ${styles.emergency_stop}`}
+                  brightness={3}
+              />
+          </div>
           <Window title="Orders" className={styles.orders}>
             <div className={styles.order_column}>
               <OrdersContainer

@@ -50,7 +50,7 @@ export const MainPage = () => {
                         <HVSCU />
                         <LCU />
                     </div>
-                    <Pneumatic/>
+                    {/* <Pneumatic/> */}
 
                     <Batteries/>
 

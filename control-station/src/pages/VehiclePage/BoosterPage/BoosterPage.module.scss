@@ -25,6 +25,11 @@
   height: 100%;
 }
 
+.emergency_wrapper {
+    justify-content: center;
+    min-height: 0;
+    height: 3rem;
+}
 .statusIndicators {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));

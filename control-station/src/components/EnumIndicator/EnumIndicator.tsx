@@ -1,4 +1,4 @@
-import { useGlobalTicker, useMeasurementsStore } from "common";
+import { useGlobalTicker, useMeasurementsStore, usePodDataStore } from "common";
 import styles from "./EnumIndicator.module.scss";
 import { memo, useContext, useState } from "react";
 import { LostConnectionContext } from "services/connections";
@@ -13,14 +13,28 @@ export const EnumIndicator = memo(({ measurementId, icon }: Props) => {
     (state) => state.getEnumMeasurementInfo(measurementId).getUpdate,
   );
 
+  const podData = usePodDataStore((state) => state.podData);
   const lostConnection = useContext(LostConnectionContext);
 
+  const [hasReceivedData, setHasReceivedData] = useState(false);
   const [variant, setVariant] = useState(getValue());
-  const state = lostConnection ? "DISCONNECTED" : variant;
 
   useGlobalTicker(() => {
-    setVariant(getValue());
+    const boardName = measurementId.split('/')[0];
+    
+    const board = podData.boards.find(b => b.name === boardName);
+    const hasReceivedPackets = board?.packets.some(packet => packet.count > 0) || false;
+    
+    const currentValue = getValue();
+    setVariant(currentValue);
+
+    if (hasReceivedPackets && !hasReceivedData) {
+      setHasReceivedData(true);
+    }
   });
+
+  const showDisconnected = lostConnection || !hasReceivedData;
+  const state = showDisconnected ? "DISCONNECTED" : variant;
 
   return (
     <div
@@ -32,7 +46,7 @@ export const EnumIndicator = memo(({ measurementId, icon }: Props) => {
     >
       <img className={styles.icon} src={icon} />
 
-      <p className={styles.title}>{lostConnection ? "DISCONNECTED" : state.toUpperCase()}</p>
+      <p className={styles.title}>{showDisconnected ? "DISCONNECTED" : state.toUpperCase()}</p>
 
       <img className={styles.icon} src={icon} />
     </div>

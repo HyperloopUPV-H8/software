@@ -1,36 +1,43 @@
-import { HvscuMeasurements, useGlobalTicker, useMeasurementsStore } from 'common';
+import { HvscuMeasurements, useGlobalTicker, useMeasurementsStore, usePodDataStore, getPacket } from 'common';
 import styles from './ImdIndicator.module.scss';
 import thunderIcon from 'assets/svg/thunder-filled.svg'
 import { memo, useContext, useState } from 'react';
 import { LostConnectionContext } from 'services/connections';
-
-interface Props {
-    measurementId: string;
-    icon: string;
-}
 
 export const ImdIndicator = () => {
     const getValue = useMeasurementsStore(
         (state) => state.getBooleanMeasurementInfo(HvscuMeasurements.IsImdOk).getUpdate
     );
 
+    const podData = usePodDataStore((state) => state.podData);
     const lostConnection = useContext(LostConnectionContext);
 
-    const [IsImdOk, setVariant] = useState(getValue());
+    const [hasReceivedData, setHasReceivedData] = useState(false);
+    const [IsImdOk, setVariant] = useState(true); 
 
     useGlobalTicker(() => {
-        setVariant(getValue());
+        const hvscuBoard = podData.boards.find(board => board.name === 'HVSCU');
+        const hasReceivedPackets = hvscuBoard?.packets.some(packet => packet.count > 0) || false;
+        
+        const currentValue = getValue();
+        setVariant(currentValue);
+        
+        if (hasReceivedPackets && !hasReceivedData) {
+            setHasReceivedData(true);
+        }
     });
+
+    const showDisconnected = lostConnection || !hasReceivedData;
 
     return (
         <div
             className={styles.state_indicator}
-            style={{ backgroundColor: lostConnection ? '#cccccc' : IsImdOk ? '#ACF293' : '#EF9A87' }}
+            style={{ backgroundColor: showDisconnected ? '#cccccc' : IsImdOk ? '#ACF293' : '#EF9A87' }}
         >
             <img className={styles.icon} src={thunderIcon} />
 
             <p className={styles.title}>
-                {lostConnection ? 'DISCONNECTED' : IsImdOk ? 'ISOLATED' : 'ISOLATION FAULT'}
+                {showDisconnected ? 'DISCONNECTED' : IsImdOk ? 'ISOLATED' : 'ISOLATION FAULT'}
             </p>
 
             <img className={styles.icon} src={thunderIcon} />
