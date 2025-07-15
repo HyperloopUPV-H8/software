@@ -19,7 +19,7 @@ interface TemperatureProps {
 const BatteriesModule: React.FC<{ id: string | number }> = ({ id }) => {
   const minThresholdCellVoltage = 3.73;
   const maxThresholdCellVoltage = 4.2;
-  const minThresholdTemperature = 15;
+  const minThresholdTemperature = 0;
   const maxThresholdTemperature = 60;
   const temp1VariableName = `HVSCU/battery${id}_temperature1`;
   const temp2VariableName = `HVSCU/battery${id}_temperature2`;

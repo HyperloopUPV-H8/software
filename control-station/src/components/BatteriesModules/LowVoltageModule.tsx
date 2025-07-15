@@ -19,7 +19,7 @@ interface TemperatureProps {
 const LowVoltageModule: React.FC = () => {
   const minThresholdCellVoltage = 3.67;
   const maxThresholdCellVoltage = 4.2;
-  const minThresholdTemperature = 15;
+  const minThresholdTemperature = 0;
   const maxThresholdTemperature = 60;
   const getNumericMeasurementInfo = useMeasurementsStore((state) => state.getNumericMeasurementInfo);
   const podData = usePodDataStore((state) => state.podData);
