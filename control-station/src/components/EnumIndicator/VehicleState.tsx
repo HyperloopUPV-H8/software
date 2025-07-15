@@ -16,11 +16,10 @@ export const VehicleState = () => {
     const lostConnection = useContext(LostConnectionContext);
 
     const [hasReceivedData, setHasReceivedData] = useState(false);
-    const [generalState, setGeneralState] = useState('FAULT'); // Estado por defecto conservador
+    const [generalState, setGeneralState] = useState('FAULT');
     const [operationalState, setOperationalState] = useState('FAULT');
 
     useGlobalTicker(() => {
-        // Verificar si se han recibido paquetes de VCU
         const vcuBoard = podData.boards.find(board => board.name === 'VCU');
         const hasReceivedPackets = vcuBoard?.packets.some(packet => packet.count > 0) || false;
         
@@ -29,13 +28,11 @@ export const VehicleState = () => {
         setGeneralState(currentGeneralState);
         setOperationalState(currentOperationalState);
         
-        // Solo marcar como recibido si realmente hemos recibido paquetes de VCU
         if (hasReceivedPackets && !hasReceivedData) {
             setHasReceivedData(true);
         }
     });
 
-    // Determinar si mostrar como desconectado
     const showDisconnected = lostConnection || !hasReceivedData;
     
     const state = showDisconnected
