@@ -1,4 +1,4 @@
-import { useGlobalTicker, useMeasurementsStore, VcuMeasurements } from 'common';
+import { useGlobalTicker, useMeasurementsStore, VcuMeasurements, usePodDataStore } from 'common';
 import styles from './EnumIndicator.module.scss';
 import { useContext, useState } from 'react';
 import { LostConnectionContext } from 'services/connections';
@@ -12,18 +12,35 @@ export const VehicleState = () => {
         (state) => state.getEnumMeasurementInfo(VcuMeasurements.operationalState).getUpdate
     );
 
+    const podData = usePodDataStore((state) => state.podData);
     const lostConnection = useContext(LostConnectionContext);
 
-    const [generalState, setGeneralState] = useState(generalStateMeasurement);
-    const [operationalState, setOperationalState] = useState(operationalStateMeasurement);
-    const state = lostConnection
-        ? 'DISCONNECTED'
-        : (generalState == 'OPERATIONAL') ? operationalState : generalState;
+    const [hasReceivedData, setHasReceivedData] = useState(false);
+    const [generalState, setGeneralState] = useState('FAULT'); // Estado por defecto conservador
+    const [operationalState, setOperationalState] = useState('FAULT');
 
     useGlobalTicker(() => {
-        setGeneralState(generalStateMeasurement);
-        setOperationalState(operationalStateMeasurement);
+        // Verificar si se han recibido paquetes de VCU
+        const vcuBoard = podData.boards.find(board => board.name === 'VCU');
+        const hasReceivedPackets = vcuBoard?.packets.some(packet => packet.count > 0) || false;
+        
+        const currentGeneralState = generalStateMeasurement();
+        const currentOperationalState = operationalStateMeasurement();
+        setGeneralState(currentGeneralState);
+        setOperationalState(currentOperationalState);
+        
+        // Solo marcar como recibido si realmente hemos recibido paquetes de VCU
+        if (hasReceivedPackets && !hasReceivedData) {
+            setHasReceivedData(true);
+        }
     });
+
+    // Determinar si mostrar como desconectado
+    const showDisconnected = lostConnection || !hasReceivedData;
+    
+    const state = showDisconnected
+        ? 'DISCONNECTED'
+        : (generalState == 'OPERATIONAL') ? operationalState : generalState;
 
     return (
         <div

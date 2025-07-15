@@ -15,7 +15,7 @@ export const Pneumatic = () => {
     const CoolingPCB = getNumericMeasurementInfo('');
 
     return (
-    <Window title='Pneumatic and Cooling'>
+    {/* <Window title='Pneumatic and Cooling'>
         <div className={styles.pneumatic}>
         <BarIndicator
             name="High Pressure"
@@ -68,6 +68,6 @@ export const Pneumatic = () => {
             units={CoolingPCB.units}
         />
         </div>
-    </Window>
+    </Window> */}
     )
 }
