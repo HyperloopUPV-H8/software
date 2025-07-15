@@ -42,6 +42,13 @@ export const MeasurementView = ({ measurement }: Props) => {
 
     const logChecked = useMeasurementsStore(state => state.measurements[measurement.id]?.log !== false);
 
+    const showLatest = useMeasurementsStore(state => {
+        const meas = state.measurements[measurement.id];
+        return isNumeric && meas && typeof meas.value === 'object' && 'showLatest' in meas.value 
+            ? meas.value.showLatest 
+            : false;
+    });
+
     React.useEffect(() => {
         const handler = (e: any) => {
             setLog(e.detail);
@@ -49,6 +56,16 @@ export const MeasurementView = ({ measurement }: Props) => {
         window.addEventListener('log-all', handler);
         return () => window.removeEventListener('log-all', handler);
     }, [setLog]);
+
+    React.useEffect(() => {
+        const handler = (e: any) => {
+            if (isNumeric) {
+                setShowMeasurementLatest(e.detail);
+            }
+        };
+        window.addEventListener('show-latest-all', handler);
+        return () => window.removeEventListener('show-latest-all', handler);
+    }, [setShowMeasurementLatest, isNumeric]);
 
     return (
         <>
@@ -70,7 +87,7 @@ export const MeasurementView = ({ measurement }: Props) => {
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                         <input
                             type="checkbox"
-                            defaultChecked={false}
+                            checked={showLatest}
                             className={styles.show_last}
                             title="Show latest value"
                             onInput={onLatestValueChange}
