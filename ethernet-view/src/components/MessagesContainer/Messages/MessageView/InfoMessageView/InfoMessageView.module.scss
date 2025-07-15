@@ -11,3 +11,8 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+.payload {
+    font-size: 0.9rem;
+    color: black; // Inherit from parent which has proper theme color
+}

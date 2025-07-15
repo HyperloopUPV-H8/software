@@ -8,6 +8,6 @@
     font-size: small;
     line-height: 90%;
 
-    color: white;
+    color: var(--main-color); // Use main color for better contrast
     background-color: var(--light-color);
 }
