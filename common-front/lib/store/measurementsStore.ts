@@ -267,9 +267,6 @@ export const useMeasurementsStore = create<MeasurementsStore>((set, get) => ({
             ...state,
             measurements: measurementsDraft,
         }));
-        
-        // Dispatch a custom event to notify checkboxes to update
-        window.dispatchEvent(new CustomEvent('show-latest-all', { detail: showLatest }));
     },
 
     getLogVariables: () => {

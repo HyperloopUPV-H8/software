@@ -1,4 +1,3 @@
-import React from 'react';
 import styles from './MeasurementView.module.scss';
 import {
     Measurement,
@@ -49,24 +48,6 @@ export const MeasurementView = ({ measurement }: Props) => {
             : false;
     });
 
-    React.useEffect(() => {
-        const handler = (e: any) => {
-            setLog(e.detail);
-        };
-        window.addEventListener('log-all', handler);
-        return () => window.removeEventListener('log-all', handler);
-    }, [setLog]);
-
-    React.useEffect(() => {
-        const handler = (e: any) => {
-            if (isNumeric) {
-                setShowMeasurementLatest(e.detail);
-            }
-        };
-        window.addEventListener('show-latest-all', handler);
-        return () => window.removeEventListener('show-latest-all', handler);
-    }, [setShowMeasurementLatest, isNumeric]);
-
     return (
         <>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
@@ -90,7 +71,7 @@ export const MeasurementView = ({ measurement }: Props) => {
                             checked={showLatest}
                             className={styles.show_last}
                             title="Show latest value"
-                            onInput={onLatestValueChange}
+                            onChange={onLatestValueChange}
                         />
                     </span>
                     <span ref={valueRef} className={styles.value}></span>
