@@ -27,6 +27,7 @@ import thermometer from "assets/svg/thermometer-field.svg";
 import Contactors from "assets/svg/open-contactors-icon.svg";
 import teamLogo from "assets/svg/team_logo.svg";
 import { BigOrderButton } from "components/BigOrderButton";
+import { LEDS } from "../MainPage/MainPageModules/Leds";
 
 interface ModuleData {
   id: number | string;
@@ -93,6 +94,7 @@ export function BoosterPage() {
     >
       <main className={styles.boosterMainContainer}>
         <div className={styles.boosterContainer}>
+          <LEDS measurement={HvscuCabinetMeasurements.BusVoltage}/>
           <Window title="Booster Status">
             <div className={styles.statusIndicators}>
               <BarIndicator
