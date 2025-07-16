@@ -28,6 +28,7 @@ import Contactors from "assets/svg/open-contactors-icon.svg";
 import teamLogo from "assets/svg/team_logo.svg";
 import { BigOrderButton } from "components/BigOrderButton";
 import { LEDS } from "../MainPage/MainPageModules/Leds";
+import { SdcIndicator } from "components/BoolIndicator/SdcIndicator";
 
 interface ModuleData {
   id: number | string;
@@ -128,6 +129,10 @@ export function BoosterPage() {
                   measurementId={HvscuCabinetMeasurements.ContactorsState}
                   icon={Contactors}
                 />
+              </div>
+              <div className={styles.text}>
+                <span className={styles.subtitle}>SDC</span>
+                <SdcIndicator/>
               </div>
               <div className={styles.text}>
                 <span className={styles.subtitle}>BCU General State</span>
