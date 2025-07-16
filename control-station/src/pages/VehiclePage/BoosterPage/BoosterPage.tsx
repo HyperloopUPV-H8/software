@@ -143,6 +143,13 @@ export function BoosterPage() {
                   icon={teamLogo}
                 />
               </div>
+              <div className={styles.text}>
+                <span className={styles.subtitle}>BCU Control State</span>
+                <EnumIndicator
+                  measurementId={BcuMeasurements.nestedState}
+                  icon={battery}
+                />
+              </div>
             </div>
           </Window>
 
