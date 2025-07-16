@@ -99,20 +99,20 @@ export function BoosterPage() {
                 name="Total Voltage"
                 icon={battery}
                 getValue={totalSupercapsVoltageInfo.getUpdate}
-                safeRangeMin={totalSupercapsVoltageInfo.range[0]!!}
-                safeRangeMax={totalSupercapsVoltageInfo.range[1]!!}
-                warningRangeMin={totalSupercapsVoltageInfo.warningRange[0]!!}
-                warningRangeMax={totalSupercapsVoltageInfo.warningRange[1]!!}
+                safeRangeMin={0}
+                safeRangeMax={432}
+                warningRangeMin={0}
+                warningRangeMax={432}
                 units={totalSupercapsVoltageInfo.units}
               />
               <BarIndicator
                 name="Current Output"
                 icon={thunder}
                 getValue={currentMeasurementInfo.getUpdate}
-                safeRangeMin={currentMeasurementInfo.range[0]!!}
-                safeRangeMax={currentMeasurementInfo.range[1]!!}
-                warningRangeMin={currentMeasurementInfo.warningRange[0]!!}
-                warningRangeMax={currentMeasurementInfo.warningRange[1]!!}
+                safeRangeMin={0}
+                safeRangeMax={125}
+                warningRangeMin={0}
+                warningRangeMax={125}
                 units={currentMeasurementInfo.units}
               />
             </div>
