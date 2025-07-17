@@ -152,7 +152,7 @@ export function BoosterPage() {
                 <span className={styles.subtitle}>BCU Control State</span>
                 <EnumIndicator
                   measurementId={BcuMeasurements.nestedState}
-                  icon={battery}
+                  icon={teamLogo}
                 />
               </div>
             </div>
