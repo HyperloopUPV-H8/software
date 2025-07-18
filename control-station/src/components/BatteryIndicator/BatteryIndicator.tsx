@@ -11,8 +11,8 @@ import { LostConnectionContext } from 'services/connections';
 
 interface Props {
     icon?: string;
-    getValue: () => number;
-    getValueSOC: () => number;
+    getValue: () => number | null;
+    getValueSOC: () => number | null;
     safeRangeMin: number;
     warningRangeMin: number;
     safeRangeMax: number;
@@ -37,14 +37,15 @@ export const BatteryIndicator = memo(
         backgroundColor,
         className,
     }: Props) => {
-        const [valueState, setValueState] = useState<number>(0);
-        const [valueStateSOC, setValueStateSOC] = useState<number>(0);
+        const [valueState, setValueState] = useState<number | null>(0);
+        const [valueStateSOC, setValueStateSOC] = useState<number | null>(0);
         const lostConnection = useContext(LostConnectionContext);
+        const isStale = valueState === null || valueStateSOC === null;
 
-        const state = lostConnection
+        const state = lostConnection || isStale
             ? 'fault'
             : getStateFromRange(
-                  valueState,
+                  valueState as number,
                   safeRangeMin,
                   safeRangeMax,
                   warningRangeMin,
@@ -70,13 +71,13 @@ export const BatteryIndicator = memo(
                     <div
                         className={styles.battery_fill}
                         style={{
-                            height: lostConnection ? 0 : valueStateSOC + '%',
-                            color: color != undefined ? color : color,
+                            height: lostConnection || isStale ? 0 : (valueStateSOC || 0) + '%',
+                            color: isStale ? '#cccccc' : (color != undefined ? color : color),
                         }}
                     />
                     <div className={styles.battery_level_text}>
                         <span className={styles.value}>
-                            {lostConnection ? '-.-' : valueState?.toFixed(1)}
+                            {lostConnection || isStale ? '-.-' : valueState?.toFixed(1)}
                         </span>
                         {units && <span className={styles.units}>{units}</span>}
                     </div>
@@ -89,7 +90,7 @@ export const BatteryIndicator = memo(
                     
                     <div className={styles.percentage_container}>
                         <span className={styles.percentage}>
-                            {lostConnection ? '-.--' : valueStateSOC ? valueStateSOC.toFixed(2) : '-.--'}%
+                            {lostConnection || isStale ? '-.--' : valueStateSOC ? valueStateSOC.toFixed(2) : '-.--'}%
                         </span>
                     </div>
                 </div>
