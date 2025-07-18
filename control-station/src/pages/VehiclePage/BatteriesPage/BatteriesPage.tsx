@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useMemo } from "react";
 import styles from "./BatteriesPage.module.scss";
 import BatteriesModule from "components/BatteriesModules/BatteriesModule";
 import LowVoltageModule from "components/BatteriesModules/LowVoltageModule";
@@ -9,6 +9,7 @@ import {
   BcuMeasurements,
   HvscuMeasurements,
   BmslMeasurements,
+  usePodDataStore,
 } from "common";
 import { usePodDataUpdate } from "hooks/usePodDataUpdate";
 import { Connection, useConnections } from "common";
@@ -98,19 +99,111 @@ export function BatteriesPage() {
   const [minVoltageLow, setMinVoltageLow] = useState<number | null>(null);
   const [maxTempLow, setMaxTempLow] = useState<number | null>(null);
   const [minTempLow, setMinTempLow] = useState<number | null>(null);
+  
+  const [hasReceivedDataHV, setHasReceivedDataHV] = useState(false);
+  const [hasReceivedDataLV, setHasReceivedDataLV] = useState(false);
+  
+  const podData = usePodDataStore((state) => state.podData);
+  
+  // Delta tracking state for all values
+  const deltaTrackingRef = useRef<{
+    [key: string]: {
+      value: number | null;
+      lastSampleTime: number;
+      lastChangeTime: number;
+      isStale: boolean;
+    };
+  }>({});
+
+  // Create delta-tracked getter for numeric values
+  const createDeltaTrackedGetter = useMemo(() => {
+    return (key: string, originalGetter: () => number) => {
+      return () => {
+        const now = Date.now();
+        const prevData = deltaTrackingRef.current[key];
+        
+        // Check if 400ms have passed since last sample
+        if (prevData && now - prevData.lastSampleTime < 400) {
+          // Not enough time passed, return current value if not stale, otherwise null
+          const currentValue = originalGetter();
+          return prevData.isStale ? null : currentValue;
+        }
+        
+        // 400ms have passed or no previous data, get fresh value
+        const currentValue = originalGetter();
+        
+        // Initialize if no previous data
+        if (!prevData) {
+          deltaTrackingRef.current[key] = {
+            value: currentValue,
+            lastSampleTime: now,
+            lastChangeTime: now,
+            isStale: false,
+          };
+          return currentValue;
+        }
+        
+        // Check for delta with tolerance
+        const prevValue = prevData.value;
+        const tolerance = 0.1; // Tolerance for battery values
+        const hasChanged = prevValue === null || currentValue === null 
+          ? prevValue !== currentValue 
+          : Math.abs(prevValue - currentValue) > tolerance;
+        
+        if (hasChanged) {
+          // Value changed significantly, update everything
+          deltaTrackingRef.current[key] = {
+            value: currentValue,
+            lastSampleTime: now,
+            lastChangeTime: now,
+            isStale: false,
+          };
+          return currentValue;
+        } else {
+          // Value hasn't changed significantly, check if it's been stale for too long
+          const staleDuration = now - prevData.lastChangeTime;
+          const isStale = staleDuration > 100; // 100ms grace period
+          
+          deltaTrackingRef.current[key] = {
+            value: currentValue,
+            lastSampleTime: now,
+            lastChangeTime: prevData.lastChangeTime,
+            isStale: isStale,
+          };
+          return isStale ? null : currentValue;
+        }
+      };
+    };
+  }, []);
 
   useGlobalTicker(() => {
-    setVoltageTotal(totalVoltageHighMeasurement.getUpdate);
-    setMaxVoltageHigh(maxVoltageHighMeasurement.getUpdate);
-    setMinVoltageHigh(minVoltageHighMeasurement.getUpdate);
-    setMaxTempHigh(maxTempHighMeasurement.getUpdate);
-    setMinTempHigh(minTempHighMeasurement.getUpdate);
+    // Check if we've received data from HVSCU board
+    const hvscuBoard = podData.boards.find((board) => board.name === "HVSCU");
+    const hasReceivedHVPackets = hvscuBoard?.packets.some((packet) => packet.count > 0) || false;
+    if (hasReceivedHVPackets && !hasReceivedDataHV) {
+      setHasReceivedDataHV(true);
+    }
+    
+    // Check if we've received data from BMSL board
+    const bmslBoard = podData.boards.find((board) => board.name === "BMSL");
+    const hasReceivedLVPackets = bmslBoard?.packets.some((packet) => packet.count > 0) || false;
+    if (hasReceivedLVPackets && !hasReceivedDataLV) {
+      setHasReceivedDataLV(true);
+    }
+    
+    // High voltage measurements with delta tracking
+    setVoltageTotal(createDeltaTrackedGetter('hv_total_voltage', totalVoltageHighMeasurement.getUpdate)());
+    setMaxVoltageHigh(createDeltaTrackedGetter('hv_max_voltage', maxVoltageHighMeasurement.getUpdate)());
+    setMinVoltageHigh(createDeltaTrackedGetter('hv_min_voltage', minVoltageHighMeasurement.getUpdate)());
+    setMaxTempHigh(createDeltaTrackedGetter('hv_max_temp', maxTempHighMeasurement.getUpdate)());
+    setMinTempHigh(createDeltaTrackedGetter('hv_min_temp', minTempHighMeasurement.getUpdate)());
 
-    setVoltageTotalLow(totalVoltageLowMeasurement.getUpdate);
-    setMaxVoltageLow(maxVoltageLowMeasurement.getUpdate);
-    setMinVoltageLow(minVoltageLowMeasurement.getUpdate);
-    setMaxTempLow(maxTempLowMeasurement.getUpdate);
-    setMinTempLow(minTempLowMeasurement.getUpdate);
+    // Low voltage measurements with delta tracking
+    setVoltageTotalLow(createDeltaTrackedGetter('lv_total_voltage', totalVoltageLowMeasurement.getUpdate)());
+    setMaxVoltageLow(createDeltaTrackedGetter('lv_max_voltage', maxVoltageLowMeasurement.getUpdate)());
+    setMinVoltageLow(createDeltaTrackedGetter('lv_min_voltage', minVoltageLowMeasurement.getUpdate)());
+    setMaxTempLow(createDeltaTrackedGetter('lv_max_temp', maxTempLowMeasurement.getUpdate)());
+    setMinTempLow(createDeltaTrackedGetter('lv_min_temp', minTempLowMeasurement.getUpdate)());
   });
 
   return (
@@ -126,31 +219,31 @@ export function BatteriesPage() {
                   <div className={styles.statusItem}>
                     <h3>Total Voltage:</h3>
                     <div className={styles.value}>
-                      <span>{voltageTotal?.toFixed(1)}V</span>
+                      <span>{voltageTotal === null || !hasReceivedDataHV ? "-.--" : `${voltageTotal.toFixed(1)}V`}</span>
                     </div>
                   </div>
                   <div className={styles.statusItem}>
                     <h3>Max V:</h3>
                     <div className={styles.value}>
-                      <span>{maxVoltageHigh?.toFixed(2)}V</span>
+                      <span>{maxVoltageHigh === null || !hasReceivedDataHV ? "-.--" : `${maxVoltageHigh.toFixed(2)}V`}</span>
                     </div>
                   </div>
                   <div className={styles.statusItem}>
                     <h3>Min V:</h3>
                     <div className={styles.value}>
-                      <span>{minVoltageHigh?.toFixed(2)}V</span>
+                      <span>{minVoltageHigh === null || !hasReceivedDataHV ? "-.--" : `${minVoltageHigh.toFixed(2)}V`}</span>
                     </div>
                   </div>
                   <div className={styles.statusItem}>
                     <h3>Max Temp:</h3>
                     <div className={styles.value}>
-                      <span>{maxTempHigh?.toFixed(1)}°C</span>
+                      <span>{maxTempHigh === null || !hasReceivedDataHV ? "-.--" : `${maxTempHigh.toFixed(1)}°C`}</span>
                     </div>
                   </div>
                   <div className={styles.statusItem}>
                     <h3>Min Temp:</h3>
                     <div className={styles.value}>
-                      <span>{minTempHigh?.toFixed(1)}°C</span>
+                      <span>{minTempHigh === null || !hasReceivedDataHV ? "-.--" : `${minTempHigh.toFixed(1)}°C`}</span>
                     </div>
                   </div>
                 </div>
@@ -189,31 +282,31 @@ export function BatteriesPage() {
                   <div className={styles.statusItem}>
                     <h3>Total Voltage:</h3>
                     <div className={styles.value}>
-                      <span>{voltageTotalLow?.toFixed(1) ?? "-"}V</span>
+                      <span>{voltageTotalLow === null || !hasReceivedDataLV ? "-.--" : `${voltageTotalLow.toFixed(1)}V`}</span>
                     </div>
                   </div>
                   <div className={styles.statusItem}>
                     <h3>Max V:</h3>
                     <div className={styles.value}>
-                      <span>{maxVoltageLow?.toFixed(2) ?? "-"}V</span>
+                      <span>{maxVoltageLow === null || !hasReceivedDataLV ? "-.--" : `${maxVoltageLow.toFixed(2)}V`}</span>
                     </div>
                   </div>
                   <div className={styles.statusItem}>
                     <h3>Min V:</h3>
                     <div className={styles.value}>
-                      <span>{minVoltageLow?.toFixed(2) ?? "-"}V</span>
+                      <span>{minVoltageLow === null || !hasReceivedDataLV ? "-.--" : `${minVoltageLow.toFixed(2)}V`}</span>
                     </div>
                   </div>
                   <div className={styles.statusItem}>
                     <h3>Max Temp:</h3>
                     <div className={styles.value}>
-                      <span>{maxTempLow?.toFixed(1) ?? "-"}°C</span>
+                      <span>{maxTempLow === null || !hasReceivedDataLV ? "-.--" : `${maxTempLow.toFixed(1)}°C`}</span>
                     </div>
                   </div>
                   <div className={styles.statusItem}>
                     <h3>Min Temp:</h3>
                     <div className={styles.value}>
-                      <span>{minTempLow?.toFixed(1) ?? "-"}°C</span>
+                      <span>{minTempLow === null || !hasReceivedDataLV ? "-.--" : `${minTempLow.toFixed(1)}°C`}</span>
                     </div>
                   </div>
                 </div>
