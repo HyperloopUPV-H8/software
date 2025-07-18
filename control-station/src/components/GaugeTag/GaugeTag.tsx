@@ -10,7 +10,7 @@ type Props = {
     name: string;
     id: string;
     units: string;
-    getUpdate: () => number;
+    getUpdate: () => number | null;
     strokeWidth: number;
     min: number;
     max: number;
@@ -18,11 +18,12 @@ type Props = {
 
 export const GaugeTag = memo(
     ({ name, units, id, getUpdate, strokeWidth, min, max }: Props) => {
-        const [value, setValue] = useState(getUpdate());
+        const [value, setValue] = useState<number | null>(getUpdate());
         const lostConnection = useContext(LostConnectionContext);
-        const percentage = lostConnection
+        const isStale = value === null;
+        const percentage = lostConnection || isStale
             ? 100
-            : getPercentageFromRange(Math.abs(value), min, max);
+            : getPercentageFromRange(Math.abs(value || 0), min, max);
 
         useGlobalTicker(() => {
             setValue(getUpdate());
@@ -36,13 +37,14 @@ export const GaugeTag = memo(
                     sweep={250}
                     strokeWidth={strokeWidth}
                     percentage={percentage}
+                    isStale={isStale}
                 />
                 <TextData
                     name={name}
                     units={units}
                     value={value}
                     max={max}
-                    lostConnection={lostConnection}
+                    lostConnection={lostConnection || isStale}
                 ></TextData>
             </article>
         );
