@@ -3,7 +3,7 @@ import { memo } from 'react';
 
 type Props = {
     name: string;
-    value: number;
+    value: number | null;
     units: string;
     lostConnection: boolean;
     min?: number;
