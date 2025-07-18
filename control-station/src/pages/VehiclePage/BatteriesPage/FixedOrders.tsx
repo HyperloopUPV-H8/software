@@ -64,7 +64,7 @@ export const emergencyStopOrders: Order[] = [
 ];
 
 export const desiredOrders = [
-    53, 44, 52, 43, 56, 58, 38, 47, 62, 55, 32
+    53, 44, 52, 43, 56, 58, 38, 47, 62, 55, 32,
     1799, 1792, 1697, 1698, 1693, 1699
 ];
 
