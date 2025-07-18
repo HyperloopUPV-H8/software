@@ -15,6 +15,7 @@ import { usePodDataUpdate } from "hooks/usePodDataUpdate";
 import { Connection, useConnections } from "common";
 import { LostConnectionContext } from "services/connections";
 import { Window } from "components/Window/Window";
+import { DELTA_SAMPLE_PERIOD, DELTA_GRACE_PERIOD } from "constants/deltaTracking";
 
 interface ModuleData {
   id: number | string;
@@ -122,14 +123,14 @@ export function BatteriesPage() {
         const now = Date.now();
         const prevData = deltaTrackingRef.current[key];
         
-        // Check if 400ms have passed since last sample
-        if (prevData && now - prevData.lastSampleTime < 400) {
+        // Check if sample period has passed since last sample
+        if (prevData && now - prevData.lastSampleTime < DELTA_SAMPLE_PERIOD) {
           // Not enough time passed, return current value if not stale, otherwise null
           const currentValue = originalGetter();
           return prevData.isStale ? null : currentValue;
         }
         
-        // 400ms have passed or no previous data, get fresh value
+        // Sample period has passed or no previous data, get fresh value
         const currentValue = originalGetter();
         
         // Initialize if no previous data
@@ -162,7 +163,7 @@ export function BatteriesPage() {
         } else {
           // Value hasn't changed significantly, check if it's been stale for too long
           const staleDuration = now - prevData.lastChangeTime;
-          const isStale = staleDuration > 100; // 100ms grace period
+          const isStale = staleDuration > DELTA_GRACE_PERIOD; // Grace period
           
           deltaTrackingRef.current[key] = {
             value: currentValue,

@@ -13,11 +13,15 @@ The delta time tracking system detects when telemetry values haven't changed for
 
 ## Configuration Parameters
 
+### Global Constants
+Delta tracking timing is configured globally in `/src/constants/deltaTracking.ts`:
+- **DELTA_SAMPLE_PERIOD**: 400ms (time between checks for value changes)
+- **DELTA_GRACE_PERIOD**: 100ms (standard grace period before marking as stale)
+- **DELTA_GRACE_PERIOD_LONG**: 5000ms (extended grace period for slow-changing values)
+
 ### Common Settings
-- **Sampling Period**: 400ms (time between checks for value changes)
-- **Grace Period**: Varies by component type
-  - Boolean/Enum indicators: 100ms
-  - Numeric displays: 100ms to 5 seconds
+- **Sampling Period**: Uses `DELTA_SAMPLE_PERIOD` constant (default: 400ms)
+- **Grace Period**: Uses `DELTA_GRACE_PERIOD` constant (default: 100ms)
 - **Tolerance**: 0.01 to 0.5 depending on measurement type
 
 ## Affected Components

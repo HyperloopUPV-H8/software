@@ -6,6 +6,7 @@ import {
 } from "common";
 import { useContext, useState, useRef, useMemo } from "react";
 import { LostConnectionContext } from "services/connections";
+import { DELTA_SAMPLE_PERIOD, DELTA_GRACE_PERIOD } from "constants/deltaTracking";
 import styles from "../MainPage.module.scss";
 
 export const BrakeState = () => {
@@ -35,14 +36,14 @@ export const BrakeState = () => {
       const now = Date.now();
       const prevData = deltaTrackingRef.current;
 
-      // Check if 400ms have passed since last sample
-      if (prevData && now - prevData.lastSampleTime < 400) {
+      // Check if sample period has passed since last sample
+      if (prevData && now - prevData.lastSampleTime < DELTA_SAMPLE_PERIOD) {
         // Not enough time passed, return current value if not stale, otherwise null
         const currentValue = getValue();
         return prevData.isStale ? null : currentValue;
       }
 
-      // 400ms have passed or no previous data, get fresh value
+      // Sample period has passed or no previous data, get fresh value
       const currentValue = getValue();
 
       // Initialize if no previous data
@@ -73,7 +74,7 @@ export const BrakeState = () => {
       } else {
         // Value hasn't changed, check if it's been stale for too long
         const staleDuration = now - prevData.lastChangeTime;
-        const isStale = staleDuration > 100; // 100 milliseconds for boolean values
+        const isStale = staleDuration > DELTA_GRACE_PERIOD; // Grace period for boolean values
 
         deltaTrackingRef.current = {
           value: currentValue,
