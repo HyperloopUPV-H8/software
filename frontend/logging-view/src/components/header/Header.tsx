@@ -18,7 +18,7 @@ const Header = () => {
   const activeMode: ViewMode = pathname.startsWith("/simple") ? "simple" : "normal";
 
   return (
-    <header className="h-(--header-height) flex shrink-0 items-center gap-2 border-b px-4">
+    <header className="h-(--header-height) flex shrink-0 items-center gap-2 overflow-x-hidden border-b px-4">
       <SidebarTrigger className="text-foreground -ml-1" />
       <Separator
         orientation="vertical"
