@@ -1,3 +1,5 @@
+// Global app preferences slice.
+// Only isDarkMode is persisted (see store.ts partialize).
 import type { StateCreator } from "zustand";
 import type { Store } from "../store";
 
