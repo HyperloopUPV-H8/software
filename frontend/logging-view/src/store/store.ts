@@ -11,6 +11,10 @@ import {
   type MessagesSlice,
 } from "./slices/messagesSlice";
 import {
+  createSessionSlice,
+  type SessionSlice,
+} from "./slices/sessionSlice";
+import {
   createTelemetrySlice,
   type TelemetrySlice,
 } from "./slices/telemetrySlice";
@@ -19,6 +23,7 @@ export type Store = AppSlice &
   CatalogSlice &
   ConnectionsSlice &
   MessagesSlice &
+  SessionSlice &
   TelemetrySlice;
 
 export const useStore = create<Store>()(
@@ -28,6 +33,7 @@ export const useStore = create<Store>()(
       ...createCatalogSlice(...a),
       ...createConnectionsSlice(...a),
       ...createMessagesSlice(...a),
+      ...createSessionSlice(...a),
       ...createTelemetrySlice(...a),
     }),
     {
