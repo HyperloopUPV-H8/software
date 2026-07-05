@@ -1,6 +1,6 @@
 import type { VariableValue } from "@workspace/core";
 import { ACRONYMS } from "../constants/acronyms";
-import { variablesBadgeClasses } from "../constants/variablesBadgeClasses";
+export { getTypeBadgeClass } from "@workspace/ui/lib";
 import type {
   FilterScope,
   TabFilter,
@@ -44,40 +44,6 @@ export const createFullFilter = (
     acc[category] = dataSource[category]?.map((item) => item.id) || [];
     return acc;
   }, {} as TabFilter);
-};
-
-export const getTypeBadgeClass = (type: string) => {
-  switch (type.toLowerCase()) {
-    case "float":
-    case "float32":
-    case "float64":
-      return variablesBadgeClasses.float;
-
-    case "integer":
-    case "int":
-    case "int8":
-    case "int16":
-    case "int32":
-    case "int64":
-      return variablesBadgeClasses.integer;
-
-    case "uint8":
-    case "uint16":
-    case "uint32":
-    case "uint64":
-      return variablesBadgeClasses.uint8;
-
-    case "string":
-    case "enum":
-      return variablesBadgeClasses.enum;
-
-    case "boolean":
-    case "bool":
-      return variablesBadgeClasses.boolean;
-
-    default:
-      return variablesBadgeClasses.unknown;
-  }
 };
 
 export const formatName = (name: string): string => {

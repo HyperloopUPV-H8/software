@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { variablesBadgeClasses } from "../constants/variablesBadgeClasses";
+import { typeBadgeClasses, getTypeBadgeClass } from "@workspace/ui/lib";
 import type { FilterScope } from "../features/filtering/types/filters";
 import type { MessageTimestamp } from "../types/data/message";
 import {
@@ -10,7 +10,6 @@ import {
   formatTimestamp,
   formatVariableValue,
   getCatalogKey,
-  getTypeBadgeClass,
 } from "./utils";
 
 describe("getCatalogKey", () => {
@@ -92,16 +91,16 @@ describe("formatName", () => {
 
 describe("getTypeBadgeClass", () => {
   it("should return the correct badge class", () => {
-    expect(getTypeBadgeClass("float")).toBe(variablesBadgeClasses.float);
-    expect(getTypeBadgeClass("integer")).toBe(variablesBadgeClasses.integer);
-    expect(getTypeBadgeClass("uint8")).toBe(variablesBadgeClasses.uint8);
-    expect(getTypeBadgeClass("enum")).toBe(variablesBadgeClasses.enum);
-    expect(getTypeBadgeClass("string")).toBe(variablesBadgeClasses.enum);
-    expect(getTypeBadgeClass("boolean")).toBe(variablesBadgeClasses.boolean);
+    expect(getTypeBadgeClass("float")).toBe(typeBadgeClasses.float);
+    expect(getTypeBadgeClass("integer")).toBe(typeBadgeClasses.integer);
+    expect(getTypeBadgeClass("uint8")).toBe(typeBadgeClasses.uint);
+    expect(getTypeBadgeClass("enum")).toBe(typeBadgeClasses.enum);
+    expect(getTypeBadgeClass("string")).toBe(typeBadgeClasses.enum);
+    expect(getTypeBadgeClass("boolean")).toBe(typeBadgeClasses.boolean);
   });
 
   it("should return the correct badge class for an unknown type", () => {
-    expect(getTypeBadgeClass("unknown")).toBe(variablesBadgeClasses.unknown);
+    expect(getTypeBadgeClass("unknown")).toBe(typeBadgeClasses.unknown);
   });
 });
 
