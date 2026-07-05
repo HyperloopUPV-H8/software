@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Plot Studio - Advanced Data Visualization</title>
+    <!-- Version: 1.1 Fixed Layout -->
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar collapsed" id="sidebar">
+            <div class="sidebar-header">
+                <div class="header-content">
+                    <h1>CSV Plot Studio</h1>
+                    <p class="subtitle">Advanced Data Visualization</p>
+                </div>
+            </div>
+
+            <!-- File Upload Section -->
+            <div class="section">
+                <h2>Data Files</h2>
+                <div class="upload-zone" id="uploadZone">
+                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <p>Drag & drop CSV files or folders</p>
+                    <p class="upload-hint">or click to browse</p>
+                    <input type="file" id="fileInput" accept=".csv" multiple hidden>
+                    <input type="file" id="fileInputFiles" accept=".csv" multiple hidden>
+                </div>
+
+                <div class="file-list" id="fileList">
+                    <!-- Files will be listed here -->
+                </div>
+            </div>
+
+            <!-- Operations Section -->
+            <div class="section">
+                <h2>Math Operations</h2>
+                <button class="btn btn-secondary" id="addOperationBtn">
+                    <span class="btn-icon">+</span>
+                    Create Calculated Signal
+                </button>
+                <div class="operations-list" id="operationsList">
+                    <!-- Operations will be listed here -->
+                </div>
+            </div>
+
+            <!-- Transforms Section -->
+            <div class="section">
+                <h2>Signal Transforms</h2>
+                <button class="btn btn-secondary" id="addTransformBtn">
+                    <span class="btn-icon">𝑓</span>
+                    Apply Transform (f(x))
+                </button>
+                <div class="transforms-list" id="transformsList">
+                    <!-- Transforms will be listed here -->
+                </div>
+
+                <!-- FFT Settings Section -->
+                <div class="section">
+                    <h2>FFT Settings</h2>
+                    <div class="fft-settings">
+                        <label for="fftSampleRate">Sample Rate (Hz)</label>
+                        <div class="input-group">
+                            <input type="number" id="fftSampleRate" placeholder="Auto" class="input" min="1" step="1">
+                            <button class="btn-small" onclick="applyFFTSampleRate()">Apply</button>
+                            <button class="btn-small" onclick="resetFFTSampleRate()">Auto</button>
+                        </div>
+                        <p class="form-hint">Set to 1000 for 1kHz sampling</p>
+                    </div>
+                </div>
+
+                <!-- Plot Management -->
+                <div class="section">
+                    <h2>Plots</h2>
+                    <button class="btn btn-primary" id="addPlotBtn">
+                        <span class="btn-icon">+</span>
+                        Add New Plot
+                    </button>
+                    <div class="plot-list" id="plotList">
+                        <!-- Plot controls will be listed here -->
+                    </div>
+                </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+            <div class="plots-container" id="plotsContainer">
+                <!-- Plots will be rendered here -->
+                <div class="empty-state">
+                    <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <polyline points="19 12 12 19 5 12"></polyline>
+                    </svg>
+                    <h2>No plots yet</h2>
+                    <p>Click "Add New Plot" to get started</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Operation Modal -->
+    <div class="modal" id="operationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create Calculated Signal</h3>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Operation Name</label>
+                    <input type="text" id="opName" placeholder="e.g., Position Error" class="input">
+                </div>
+                <div class="form-group">
+                    <label>Operation Type</label>
+                    <select id="opType" class="input">
+                        <option value="subtract">Subtraction (A - B)</option>
+                        <option value="add">Addition (A + B)</option>
+                        <option value="multiply">Multiplication (A × B)</option>
+                        <option value="divide">Division (A ÷ B)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Signal A</label>
+                    <select id="opSignalA" class="input">
+                        <option value="">Select signal...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Signal B</label>
+                    <select id="opSignalB" class="input">
+                        <option value="">Select signal...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelOperation">Cancel</button>
+                <button class="btn btn-primary" id="createOperation">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transform Modal -->
+    <div class="modal" id="transformModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Apply Signal Transform</h3>
+                <button class="modal-close" id="closeTransformModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Transform Name</label>
+                    <input type="text" id="trName" placeholder="e.g., Doubled Signal" class="input">
+                </div>
+                <div class="form-group">
+                    <label>Source Signal</label>
+                    <select id="trSignal" class="input">
+                        <option value="">Select signal...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Expression (use 'x' for signal value)</label>
+                    <input type="text" id="trExpression" placeholder="e.g., 2*x, sin(x), 1/x, x^2" class="input">
+                    <div class="form-hint">
+                        Examples: <code>2*x</code>, <code>abs(x)</code>, <code>sin(x)</code>, <code>1/x</code>,
+                        <code>sqrt(x)</code>, <code>log(x)</code>, <code>x^2</code>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelTransform">Cancel</button>
+                <button class="btn btn-primary" id="createTransform">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

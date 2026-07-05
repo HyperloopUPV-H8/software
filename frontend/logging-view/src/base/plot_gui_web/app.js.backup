@@ -1,0 +1,616 @@
+// ===== STATE MANAGEMENT =====
+const state = {
+    files: new Map(), // fileName -> { name, data: [{time, value}], pointCount }
+    operations: new Map(), // opId -> { id, name, type, signalA, signalB, data }
+    plots: new Map(), // plotId -> { id, name, signals: [signalId] }
+    plotCounter: 0,
+    operationCounter: 0,
+    sidebarCollapsed: false
+};
+
+// ===== UTILITY FUNCTIONS =====
+function parseCSV(text, fileName) {
+    const lines = text.trim().split('\n');
+    const data = [];
+
+    for (const line of lines) {
+        const parts = line.split(',');
+        if (parts.length >= 4) {
+            const timestamp = parseFloat(parts[0]);
+            const value = parseFloat(parts[3]);
+
+            if (!isNaN(timestamp) && !isNaN(value)) {
+                data.push({ time: timestamp, value });
+            }
+        }
+    }
+
+    // Normalize time to start at 0 (keep milliseconds, don't convert to seconds yet)
+    if (data.length > 0) {
+        const startTime = data[0].time;
+        data.forEach(point => {
+            point.time = point.time - startTime; // Keep in milliseconds
+        });
+    }
+
+    return data;
+}
+
+function formatNumber(num) {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    return num.toString();
+}
+
+function getAllSignals() {
+    const signals = [];
+
+    // Add raw files
+    state.files.forEach((file, fileName) => {
+        signals.push({ id: fileName, name: fileName, type: 'file' });
+    });
+
+    // Add calculated signals
+    state.operations.forEach(op => {
+        signals.push({ id: op.id, name: op.name, type: 'operation' });
+    });
+
+    return signals;
+}
+
+function getSignalData(signalId) {
+    // Check if it's a file
+    if (state.files.has(signalId)) {
+        return state.files.get(signalId).data;
+    }
+
+    // Check if it's an operation
+    if (state.operations.has(signalId)) {
+        return state.operations.get(signalId).data;
+    }
+
+    return null;
+}
+
+// ===== SIDEBAR TOGGLE =====
+const sidebar = document.getElementById('sidebar');
+const sidebarToggle = document.getElementById('sidebarToggle');
+
+sidebarToggle.addEventListener('click', () => {
+    state.sidebarCollapsed = !state.sidebarCollapsed;
+    sidebar.classList.toggle('collapsed');
+});
+
+// ===== FILE HANDLING =====
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput'); // Folder input
+const fileInputFiles = document.getElementById('fileInputFiles'); // Files input
+const fileList = document.getElementById('fileList');
+
+uploadZone.addEventListener('click', (e) => {
+    // Show context menu to choose folder or files
+    if (e.shiftKey) {
+        fileInputFiles.click(); // Shift+click for files
+    } else {
+        fileInput.click(); // Normal click for folder
+    }
+});
+
+uploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadZone.classList.add('drag-over');
+});
+
+uploadZone.addEventListener('dragleave', () => {
+    uploadZone.classList.remove('drag-over');
+});
+
+uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.classList.remove('drag-over');
+
+    const items = e.dataTransfer.items;
+    const files = [];
+
+    // Handle both files and folders
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i].webkitGetAsEntry();
+        if (item) {
+            if (item.isFile) {
+                items[i].getAsFile() && files.push(items[i].getAsFile());
+            } else if (item.isDirectory) {
+                readDirectory(item, files);
+            }
+        }
+    }
+
+    // Fallback for simple file drop
+    if (files.length === 0) {
+        handleFiles(e.dataTransfer.files);
+    } else {
+        setTimeout(() => handleFiles(files), 100);
+    }
+});
+
+function readDirectory(directoryEntry, files) {
+    const reader = directoryEntry.createReader();
+    reader.readEntries((entries) => {
+        entries.forEach(entry => {
+            if (entry.isFile && entry.name.endsWith('.csv')) {
+                entry.file(file => files.push(file));
+            } else if (entry.isDirectory) {
+                readDirectory(entry, files);
+            }
+        });
+    });
+}
+
+fileInput.addEventListener('change', (e) => {
+    handleFiles(e.target.files);
+});
+
+fileInputFiles.addEventListener('change', (e) => {
+    handleFiles(e.target.files);
+});
+
+function handleFiles(files) {
+    Array.from(files).forEach(file => {
+        if (!file.name.endsWith('.csv')) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const data = parseCSV(e.target.result, file.name);
+            state.files.set(file.name, {
+                name: file.name,
+                data: data,
+                pointCount: data.length
+            });
+            renderFileList();
+            updateOperationSelects();
+        };
+        reader.readAsText(file);
+    });
+}
+
+function renderFileList() {
+    if (state.files.size === 0) {
+        fileList.innerHTML = '';
+        return;
+    }
+
+    fileList.innerHTML = Array.from(state.files.values()).map(file => `
+        <div class="file-item">
+            <div class="file-info">
+                <div class="file-name">${file.name}</div>
+                <div class="file-meta">${formatNumber(file.pointCount)} points</div>
+            </div>
+            <div class="file-actions">
+                <button class="icon-btn danger" onclick="removeFile('${file.name}')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function removeFile(fileName) {
+    state.files.delete(fileName);
+
+    // Remove from all plots
+    state.plots.forEach(plot => {
+        plot.signals = plot.signals.filter(s => s !== fileName);
+    });
+
+    renderFileList();
+    renderAllPlots();
+    updateOperationSelects();
+}
+
+// ===== OPERATIONS =====
+const addOperationBtn = document.getElementById('addOperationBtn');
+const operationModal = document.getElementById('operationModal');
+const closeModal = document.getElementById('closeModal');
+const cancelOperation = document.getElementById('cancelOperation');
+const createOperation = document.getElementById('createOperation');
+const operationsList = document.getElementById('operationsList');
+
+addOperationBtn.addEventListener('click', () => {
+    operationModal.classList.add('active');
+    updateOperationSelects();
+});
+
+closeModal.addEventListener('click', () => operationModal.classList.remove('active'));
+cancelOperation.addEventListener('click', () => operationModal.classList.remove('active'));
+
+operationModal.addEventListener('click', (e) => {
+    if (e.target === operationModal) {
+        operationModal.classList.remove('active');
+    }
+});
+
+createOperation.addEventListener('click', () => {
+    const name = document.getElementById('opName').value.trim();
+    const type = document.getElementById('opType').value;
+    const signalA = document.getElementById('opSignalA').value;
+    const signalB = document.getElementById('opSignalB').value;
+
+    if (!name || !signalA || !signalB) {
+        alert('Please fill all fields');
+        return;
+    }
+
+    if (signalA === signalB) {
+        alert('Please select different signals');
+        return;
+    }
+
+    const dataA = getSignalData(signalA);
+    const dataB = getSignalData(signalB);
+
+    if (!dataA || !dataB) {
+        alert('Error loading signal data');
+        return;
+    }
+
+    // Perform operation
+    const result = performOperation(dataA, dataB, type);
+
+    const opId = `op_${state.operationCounter++}`;
+    state.operations.set(opId, {
+        id: opId,
+        name,
+        type,
+        signalA,
+        signalB,
+        data: result
+    });
+
+    renderOperationsList();
+    operationModal.classList.remove('active');
+
+    // Clear form
+    document.getElementById('opName').value = '';
+    document.getElementById('opSignalA').value = '';
+    document.getElementById('opSignalB').value = '';
+});
+
+function performOperation(dataA, dataB, type) {
+    // Find common time range
+    const minTime = Math.max(dataA[0].time, dataB[0].time);
+    const maxTime = Math.min(dataA[dataA.length - 1].time, dataB[dataB.length - 1].time);
+
+    // Interpolate both signals to a common time base
+    const result = [];
+    const dt = 0.001; // 1ms resolution
+
+    let idxA = 0;
+    let idxB = 0;
+
+    for (let t = minTime; t <= maxTime; t += dt) {
+        // Find surrounding points for A
+        while (idxA < dataA.length - 1 && dataA[idxA + 1].time < t) idxA++;
+        while (idxB < dataB.length - 1 && dataB[idxB + 1].time < t) idxB++;
+
+        // Linear interpolation
+        const valueA = interpolate(dataA, idxA, t);
+        const valueB = interpolate(dataB, idxB, t);
+
+        let resultValue;
+        switch (type) {
+            case 'subtract': resultValue = valueA - valueB; break;
+            case 'add': resultValue = valueA + valueB; break;
+            case 'multiply': resultValue = valueA * valueB; break;
+            case 'divide': resultValue = valueB !== 0 ? valueA / valueB : 0; break;
+            default: resultValue = 0;
+        }
+
+        result.push({ time: t, value: resultValue });
+    }
+
+    return result;
+}
+
+function interpolate(data, idx, t) {
+    if (idx >= data.length - 1) return data[data.length - 1].value;
+
+    const p1 = data[idx];
+    const p2 = data[idx + 1];
+    const ratio = (t - p1.time) / (p2.time - p1.time);
+
+    return p1.value + ratio * (p2.value - p1.value);
+}
+
+function renderOperationsList() {
+    if (state.operations.size === 0) {
+        operationsList.innerHTML = '';
+        return;
+    }
+
+    const opSymbols = {
+        subtract: '−',
+        add: '+',
+        multiply: '×',
+        divide: '÷'
+    };
+
+    operationsList.innerHTML = Array.from(state.operations.values()).map(op => {
+        const signalAName = state.files.has(op.signalA)
+            ? state.files.get(op.signalA).name
+            : state.operations.get(op.signalA)?.name || 'Unknown';
+        const signalBName = state.files.has(op.signalB)
+            ? state.files.get(op.signalB).name
+            : state.operations.get(op.signalB)?.name || 'Unknown';
+
+        return `
+            <div class="operation-item">
+                <div class="operation-info">
+                    <div class="operation-name">${op.name}</div>
+                    <div class="operation-formula">${signalAName} ${opSymbols[op.type]} ${signalBName}</div>
+                </div>
+                <div class="file-actions">
+                    <button class="icon-btn danger" onclick="removeOperation('${op.id}')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function removeOperation(opId) {
+    state.operations.delete(opId);
+
+    // Remove from all plots
+    state.plots.forEach(plot => {
+        plot.signals = plot.signals.filter(s => s !== opId);
+    });
+
+    renderOperationsList();
+    renderAllPlots();
+}
+
+function updateOperationSelects() {
+    const signals = getAllSignals();
+    const optionsHtml = '<option value="">Select signal...</option>' +
+        signals.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+
+    document.getElementById('opSignalA').innerHTML = optionsHtml;
+    document.getElementById('opSignalB').innerHTML = optionsHtml;
+}
+
+// ===== PLOT MANAGEMENT =====
+const addPlotBtn = document.getElementById('addPlotBtn');
+const plotsContainer = document.getElementById('plotsContainer');
+const plotList = document.getElementById('plotList');
+
+addPlotBtn.addEventListener('click', addPlot);
+
+function addPlot() {
+    const plotId = `plot_${state.plotCounter++}`;
+    state.plots.set(plotId, {
+        id: plotId,
+        name: `Plot ${state.plots.size + 1}`,
+        signals: []
+    });
+
+    renderPlotControls();
+    renderPlot(plotId);
+}
+
+function renderPlotControls() {
+    plotList.innerHTML = Array.from(state.plots.values()).map(plot => {
+        const signals = getAllSignals();
+        return `
+            <div class="plot-control">
+                <div class="plot-header">
+                    <div class="plot-title">${plot.name}</div>
+                    <button class="icon-btn danger" onclick="removePlot('${plot.id}')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="signal-assignment">
+                    ${plot.signals.map(signalId => {
+            const signal = state.files.get(signalId) || state.operations.get(signalId);
+            return `
+                            <div class="signal-item">
+                                <span>${signal?.name || signalId}</span>
+                                <button class="icon-btn danger" onclick="removeSignalFromPlot('${plot.id}', '${signalId}')">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                        `;
+        }).join('')}
+                    <select class="input" onchange="addSignalToPlot('${plot.id}', this.value); this.value='';">
+                        <option value="">+ Add signal...</option>
+                        ${signals.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
+                    </select>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function addSignalToPlot(plotId, signalId) {
+    if (!signalId) return;
+
+    const plot = state.plots.get(plotId);
+    if (!plot.signals.includes(signalId)) {
+        plot.signals.push(signalId);
+        renderPlotControls();
+        renderPlot(plotId);
+    }
+}
+
+function removeSignalFromPlot(plotId, signalId) {
+    const plot = state.plots.get(plotId);
+    plot.signals = plot.signals.filter(s => s !== signalId);
+    renderPlotControls();
+    renderPlot(plotId);
+}
+
+function removePlot(plotId) {
+    state.plots.delete(plotId);
+    renderPlotControls();
+    renderAllPlots();
+}
+
+function renderPlot(plotId) {
+    const plot = state.plots.get(plotId);
+    if (!plot) return;
+
+    // Check if container exists
+    let container = document.getElementById(plotId);
+    if (!container) {
+        // Remove empty state if it exists
+        const emptyState = plotsContainer.querySelector('.empty-state');
+        if (emptyState) emptyState.remove();
+
+        // Create plot wrapper
+        const wrapper = document.createElement('div');
+        wrapper.className = 'plot-wrapper';
+        wrapper.innerHTML = `
+            <div class="plot-wrapper-header">
+                <div class="plot-wrapper-title">${plot.name}</div>
+                <div class="plot-actions">
+                    <button class="icon-btn" onclick="exportPlot('${plotId}')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="plot-container" id="${plotId}"></div>
+        `;
+        plotsContainer.appendChild(wrapper);
+        container = document.getElementById(plotId);
+    }
+
+    // Prepare traces
+    const traces = plot.signals.map(signalId => {
+        const data = getSignalData(signalId);
+        if (!data) return null;
+
+        const signal = state.files.get(signalId) || state.operations.get(signalId);
+
+        return {
+            x: data.map(p => p.time),
+            y: data.map(p => p.value),
+            type: 'scatter',
+            mode: 'lines',
+            name: signal?.name || signalId,
+            line: { width: 2.5 }
+        };
+    }).filter(t => t !== null);
+
+    const layout = {
+        paper_bgcolor: 'white',
+        plot_bgcolor: 'white',
+        font: {
+            color: '#000000',
+            family: 'Computer Modern, Latin Modern Math, Times New Roman, serif',
+            size: 14
+        },
+        xaxis: {
+            title: {
+                text: 'Time (ms)',
+                font: { size: 16, color: '#000000' }
+            },
+            gridcolor: '#e0e0e0',
+            linecolor: '#000000',
+            linewidth: 1.5,
+            mirror: true,
+            ticks: 'outside',
+            tickwidth: 1.5,
+            tickcolor: '#000000',
+            color: '#000000',
+            showline: true,
+            zeroline: false
+        },
+        yaxis: {
+            title: {
+                text: 'Value',
+                font: { size: 16, color: '#000000' }
+            },
+            gridcolor: '#e0e0e0',
+            linecolor: '#000000',
+            linewidth: 1.5,
+            mirror: true,
+            ticks: 'outside',
+            tickwidth: 1.5,
+            tickcolor: '#000000',
+            color: '#000000',
+            showline: true,
+            zeroline: false
+        },
+        margin: { l: 80, r: 40, t: 40, b: 80 },
+        hovermode: 'closest',
+        showlegend: true,
+        legend: {
+            bgcolor: 'rgba(255, 255, 255, 0.95)',
+            bordercolor: '#000000',
+            borderwidth: 1,
+            font: { size: 13, color: '#000000' }
+        }
+    };
+
+    const config = {
+        responsive: true,
+        displayModeBar: true,
+        displaylogo: false,
+        modeBarButtonsToRemove: ['select2d', 'lasso2d']
+    };
+
+    Plotly.newPlot(container, traces, layout, config);
+}
+
+function renderAllPlots() {
+    // Clear container
+    plotsContainer.innerHTML = '';
+
+    if (state.plots.size === 0) {
+        plotsContainer.innerHTML = `
+            <div class="empty-state">
+                <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <polyline points="19 12 12 19 5 12"></polyline>
+                </svg>
+                <h2>No plots yet</h2>
+                <p>Click "Add New Plot" to get started</p>
+            </div>
+        `;
+        return;
+    }
+
+    state.plots.forEach(plot => renderPlot(plot.id));
+}
+
+function exportPlot(plotId) {
+    const plotElement = document.getElementById(plotId);
+    if (!plotElement) return;
+
+    Plotly.downloadImage(plotElement, {
+        format: 'png',
+        width: 1920,
+        height: 1080,
+        filename: `plot_${plotId}_${Date.now()}`
+    });
+}
+
+// ===== INITIALIZATION =====
+renderFileList();
+renderOperationsList();
+renderPlotControls();

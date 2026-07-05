@@ -1,0 +1,57 @@
+﻿// Add this to the END of app.js after line 611
+
+function exportPlotSVG(plotId) {
+    const plotElement = document.getElementById(plotId);
+    if (!plotElement) return;
+    
+    Plotly.downloadImage(plotElement, {
+        format: 'svg',
+        width: 1200,
+        height: 800,
+        filename: `plot_$${plot Id}_${Date.now()}`
+    });
+}
+
+function exportPlotPNG(plotId) {
+    const plotElement = document.getElementById(plotId);
+    if (!plotElement) return;
+    
+    Plotly.downloadImage(plotElement, {
+        format: 'png',
+        width: 2400,
+        height: 1600,
+        scale: 2,
+        filename: `plot_${plotId}_${Date.now()}`
+    });
+}
+
+function makeResizable(container) {
+    const wrapper = container.parentElement;
+    const handle = container.querySelector('.resize-handle');
+    if (!handle) return;
+    
+    let isResizing = false;
+    let startY = 0;
+    let startHeight = 0;
+    
+    handle.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        startY = e.clientY;
+        startHeight = container.offsetHeight;
+        e.preventDefault();
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        
+        const delta = e.clientY - startY;
+        const newHeight = Math.max(300, startHeight + delta);
+        container.style.height = newHeight + 'px';
+        
+        Plotly.Plots.resize(container);
+    });
+    
+    document.addEventListener('mouseup', () => {
+        isResizing = false;
+    });
+}
