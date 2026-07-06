@@ -3,11 +3,14 @@
 // or dragging a folder from the file manager and dropping it onto the zone.
 // The drop zone is always visible; it highlights when a drag is active over it.
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
 } from "@workspace/ui/components";
-import { ExternalLink, GitCommit, Timer } from "@workspace/ui/icons";
+import { ChevronDown, ExternalLink, GitCommit, Timer, X } from "@workspace/ui/icons";
 import { cn } from "@workspace/ui/lib";
 import { useCallback, useRef, useState } from "react";
 import { useStore } from "../../store/store";
@@ -63,6 +66,7 @@ async function readDirectoryEntry(
 
 const FolderPickerGroup = () => {
   const openSession = useStore((s) => s.openSession);
+  const clearSession = useStore((s) => s.clearSession);
   const folderName = useStore((s) => s.folderName);
   const settings = useStore((s) => s.settings);
   const isLoading = useStore((s) => s.isLoading);
@@ -114,6 +118,7 @@ const FolderPickerGroup = () => {
   );
 
   return (
+    <Collapsible defaultOpen className="group/session">
     <SidebarGroup>
       <input
         ref={inputRef}
@@ -123,7 +128,27 @@ const FolderPickerGroup = () => {
         webkitdirectory=""
       />
 
-      <SidebarGroupLabel>Session</SidebarGroupLabel>
+      <CollapsibleTrigger asChild>
+        <SidebarGroupLabel className="cursor-pointer select-none gap-1">
+          Session
+          {/* Collapsed summary — inline, only visible when collapsed */}
+          {folderName && (
+            <span className="group-data-[state=open]/session:hidden flex min-w-0 items-center gap-1 truncate text-[10px] opacity-60">
+              <span className="truncate font-medium">{folderName}</span>
+              {settings && (
+                <>
+                  <span>·</span>
+                  <GitCommit className="size-3 shrink-0" />
+                  <span className="font-mono">{settings.adj_commit_hash.slice(0, 7)}</span>
+                </>
+              )}
+            </span>
+          )}
+          <ChevronDown className="ml-auto size-3.5 shrink-0 transition-transform duration-200 group-data-[state=open]/session:rotate-180" />
+        </SidebarGroupLabel>
+      </CollapsibleTrigger>
+
+      <CollapsibleContent>
       <SidebarGroupContent className="px-2">
         <div
           onDragEnter={handleDragEnter}
@@ -140,40 +165,54 @@ const FolderPickerGroup = () => {
           {isLoading ? (
             <p className="text-muted-foreground text-xs">Loading…</p>
           ) : folderName ? (
-            // Session loaded — show metadata
-            <div className="text-muted-foreground w-full min-w-0 overflow-hidden text-xs">
-              <p className="text-foreground truncate font-medium">{folderName}</p>
-              {settings && (
-                <div className="mt-1 space-y-0.5">
-                  <p className="truncate">{formatSessionDate(settings.date)}</p>
-                  <p className="flex items-center gap-1">
-                    <Timer className="size-3 shrink-0" />
-                    <span>{settings.time_unit}</span>
-                  </p>
-                  <button
-                    type="button"
-                    className="flex items-center gap-1 opacity-60 hover:opacity-100 hover:underline"
-                    onClick={() =>
-                      window.open(
-                        `https://hyperloop-upv.github.io/ADJ-Archive/storage/commit-${settings.adj_commit_hash}.json`,
-                        "_blank",
-                      )
-                    }
-                  >
-                    <GitCommit className="size-3 shrink-0" />
-                    <span className="truncate font-mono">
-                      {settings.adj_commit_hash.slice(0, 7)}
-                    </span>
-                    <ExternalLink className="size-3 shrink-0" />
-                  </button>
-                </div>
-              )}
+            // Session loaded — show metadata.
+            // The × in the top-right corner is a root-level dismiss (clears the whole
+            // session), intentionally distinct from the board-level chevron toggles below.
+            <div className="relative w-full min-w-0 text-xs">
+              {/* Root-level close — higher hierarchy than board collapsibles */}
               <button
-                onClick={handleButtonClick}
-                className="text-muted-foreground hover:text-foreground mt-2 text-[10px] underline-offset-2 hover:underline"
+                type="button"
+                aria-label="Close session"
+                onClick={clearSession}
+                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 absolute -right-1 -top-1 rounded p-0.5 transition-colors"
               >
-                Change folder
+                <X className="size-3.5" />
               </button>
+
+              <div className="text-muted-foreground pr-4">
+                <p className="text-foreground truncate font-medium">{folderName}</p>
+                {settings && (
+                  <div className="mt-1 space-y-0.5">
+                    <p className="truncate">{formatSessionDate(settings.date)}</p>
+                    <p className="flex items-center gap-1">
+                      <Timer className="size-3 shrink-0" />
+                      <span>{settings.time_unit}</span>
+                    </p>
+                    <button
+                      type="button"
+                      className="flex items-center gap-1 opacity-60 hover:opacity-100 hover:underline"
+                      onClick={() =>
+                        window.open(
+                          `https://hyperloop-upv.github.io/ADJ-Archive/storage/commit-${settings.adj_commit_hash}.json`,
+                          "_blank",
+                        )
+                      }
+                    >
+                      <GitCommit className="size-3 shrink-0" />
+                      <span className="truncate font-mono">
+                        {settings.adj_commit_hash.slice(0, 7)}
+                      </span>
+                      <ExternalLink className="size-3 shrink-0" />
+                    </button>
+                  </div>
+                )}
+                <button
+                  onClick={handleButtonClick}
+                  className="text-muted-foreground hover:text-foreground mt-2 text-[10px] underline-offset-2 hover:underline"
+                >
+                  Change folder
+                </button>
+              </div>
             </div>
           ) : (
             // No session — prompt to open or drop
@@ -208,7 +247,9 @@ const FolderPickerGroup = () => {
           )}
         </div>
       </SidebarGroupContent>
+      </CollapsibleContent>
     </SidebarGroup>
+    </Collapsible>
   );
 };
 

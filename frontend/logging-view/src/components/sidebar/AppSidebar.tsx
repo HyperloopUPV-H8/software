@@ -5,6 +5,7 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarHeader,
   SidebarSeparator,
 } from "@workspace/ui/components";
 import FolderPickerGroup from "./FolderPickerGroup";
@@ -14,9 +15,14 @@ import ThemeToggleItem from "./ThemeToggleItem";
 
 const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => (
   <Sidebar collapsible="offcanvas" {...props}>
-    <SidebarContent className="overflow-x-hidden overflow-y-auto">
+    {/* Fixed — always visible regardless of scroll position */}
+    <SidebarHeader className="p-0">
       <FolderPickerGroup />
       <SidebarSeparator />
+    </SidebarHeader>
+
+    {/* Scrollable area for series selection */}
+    <SidebarContent className="overflow-x-hidden overflow-y-auto">
       <SeriesGroup />
     </SidebarContent>
 
