@@ -10,11 +10,12 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
 } from "@workspace/ui/components";
-import { ChevronDown, ExternalLink, GitCommit, Timer, X } from "@workspace/ui/icons";
+import { BookOpen, ChevronDown, ExternalLink, GitCommit, Timer, X } from "@workspace/ui/icons";
 import { cn } from "@workspace/ui/lib";
 import { useCallback, useRef, useState } from "react";
 import { useStore } from "../../store/store";
 import type { DroppedFile } from "../../types/session";
+import { AdjViewerDialog } from "./AdjViewerDialog";
 
 // Backend writes dates as "2025-06-15T13-45-22" (dashes in time part).
 function formatSessionDate(raw: string): string {
@@ -188,22 +189,33 @@ const FolderPickerGroup = () => {
                       <Timer className="size-3 shrink-0" />
                       <span>{settings.time_unit}</span>
                     </p>
-                    <button
-                      type="button"
-                      className="flex items-center gap-1 opacity-60 hover:opacity-100 hover:underline"
-                      onClick={() =>
-                        window.open(
-                          `https://hyperloop-upv.github.io/ADJ-Archive/storage/commit-${settings.adj_commit_hash}.json`,
-                          "_blank",
-                        )
-                      }
-                    >
-                      <GitCommit className="size-3 shrink-0" />
-                      <span className="truncate font-mono">
-                        {settings.adj_commit_hash.slice(0, 7)}
-                      </span>
-                      <ExternalLink className="size-3 shrink-0" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        className="flex items-center gap-1 opacity-60 hover:opacity-100 hover:underline"
+                        onClick={() =>
+                          window.open(
+                            `https://hyperloop-upv.github.io/ADJ-Archive/storage/commit-${settings.adj_commit_hash}.json`,
+                            "_blank",
+                          )
+                        }
+                      >
+                        <GitCommit className="size-3 shrink-0" />
+                        <span className="truncate font-mono">
+                          {settings.adj_commit_hash.slice(0, 7)}
+                        </span>
+                        <ExternalLink className="size-3 shrink-0" />
+                      </button>
+                      <AdjViewerDialog>
+                        <button
+                          type="button"
+                          className="text-muted-foreground hover:text-primary flex items-center gap-0.5 opacity-60 hover:opacity-100 transition-colors"
+                          title="View ADJ"
+                        >
+                          <BookOpen className="size-3 shrink-0" />
+                        </button>
+                      </AdjViewerDialog>
+                    </div>
                   </div>
                 )}
                 <button
