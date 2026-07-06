@@ -5,22 +5,16 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarHeader,
-  SidebarRail,
   SidebarSeparator,
 } from "@workspace/ui/components";
 import FolderPickerGroup from "./FolderPickerGroup";
-import Logo from "./Logo";
 import SeriesGroup from "./SeriesGroup";
+import SidebarToggleHandle from "./SidebarToggleHandle";
 import ThemeToggleItem from "./ThemeToggleItem";
 
 const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => (
-  <Sidebar collapsible="icon" {...props}>
-    <SidebarHeader>
-      <Logo />
-    </SidebarHeader>
-
-    <SidebarContent className="overflow-x-hidden">
+  <Sidebar collapsible="offcanvas" {...props}>
+    <SidebarContent className="overflow-x-hidden overflow-y-auto">
       <FolderPickerGroup />
       <SidebarSeparator />
       <SeriesGroup />
@@ -31,7 +25,7 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => (
       <ThemeToggleItem />
     </SidebarFooter>
 
-    <SidebarRail className="cursor-pointer!" />
+    <SidebarToggleHandle />
   </Sidebar>
 );
 

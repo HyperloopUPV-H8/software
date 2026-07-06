@@ -3,6 +3,7 @@ export {
   ChevronLeft,
   ChevronRight,
   ChevronUp,
+  ChevronsLeftRight,
   ChevronsUpDown,
   ExternalLink,
   Play,

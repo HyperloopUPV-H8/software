@@ -18,7 +18,11 @@ const AppLayout = ({ children }: AppLayoutProps) => {
 
   return (
     <div className="h-full w-full [--header-height:calc(--spacing(14))]">
-      <SidebarProvider className="h-full w-full" defaultOpen={false}>
+      <SidebarProvider
+          className="h-full w-full"
+          defaultOpen={true}
+          style={{ "--sidebar-width": "20vw" } as React.CSSProperties}
+        >
         <div className="bg-background flex h-full w-full overflow-x-hidden">
           <AppSidebar />
           <SidebarInset className="flex h-full flex-col">
