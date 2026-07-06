@@ -55,3 +55,11 @@ export interface LoggerSettings {
 
 // Key format used to uniquely identify a measurement across boards: "BOARD/measurementId"
 export type SeriesKey = string;
+
+// Minimal file interface used by openSession — satisfied by both native File objects
+// (from <input webkitdirectory>) and synthetic entries built from a directory drop.
+export interface DroppedFile {
+  name: string;
+  webkitRelativePath: string;
+  text: () => Promise<string>;
+}

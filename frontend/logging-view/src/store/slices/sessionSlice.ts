@@ -6,7 +6,7 @@
 // Files are keyed by webkitRelativePath ("folder/data/BOARD/meas.csv") and kept
 // in sessionFiles for later CSV reading during plotting. Not persisted.
 import type { StateCreator } from "zustand";
-import type { AdjArchive, LoggerSettings, SeriesKey } from "../../types/session";
+import type { AdjArchive, DroppedFile, LoggerSettings, SeriesKey } from "../../types/session";
 import type { Store } from "../store";
 
 const ADJ_ARCHIVE_URL = (hash: string) =>
@@ -25,8 +25,8 @@ export interface SessionSlice {
   isLoading: boolean;
   sessionError: string | null;
 
-  // Called with the FileList from a <input webkitdirectory> change event.
-  openSession: (files: FileList) => Promise<void>;
+  // Accepts files from <input webkitdirectory> or a directory drop traversal.
+  openSession: (files: DroppedFile[]) => Promise<void>;
   toggleSeries: (key: SeriesKey) => void;
   clearSession: () => void;
 }
@@ -45,7 +45,7 @@ export const createSessionSlice: StateCreator<Store, [], [], SessionSlice> = (se
     try {
       set({ isLoading: true, sessionError: null });
 
-      const fileArray = Array.from(files);
+      const fileArray = files;
 
       // Derive the session folder name from the first file's relative path.
       const folderName = fileArray[0]?.webkitRelativePath.split("/")[0] ?? "Session";

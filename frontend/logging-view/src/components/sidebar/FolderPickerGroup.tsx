@@ -1,17 +1,65 @@
 // Sidebar group for opening a log session folder.
-// Uses a hidden <input webkitdirectory> so the native OS folder picker opens —
-// window.showDirectoryPicker is not available in Electron's renderer.
+// Provides two ways to open: clicking the button (hidden <input webkitdirectory>)
+// or dragging a folder from the file manager and dropping it onto the zone.
+// The drop zone is always visible; it highlights when a drag is active over it.
 import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
 } from "@workspace/ui/components";
-import { Folder, FolderOpen } from "@workspace/ui/icons";
-import { useRef } from "react";
+import { ExternalLink, GitCommit, Timer } from "@workspace/ui/icons";
+import { cn } from "@workspace/ui/lib";
+import { useCallback, useRef, useState } from "react";
 import { useStore } from "../../store/store";
+import type { DroppedFile } from "../../types/session";
+
+// Backend writes dates as "2025-06-15T13-45-22" (dashes in time part).
+function formatSessionDate(raw: string): string {
+  const fixed = raw.replace(/T(\d{2})-(\d{2})-(\d{2})$/, "T$1:$2:$3");
+  const d = new Date(fixed);
+  if (isNaN(d.getTime())) return raw;
+  return d.toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
+async function readDirectoryEntry(
+  entry: FileSystemDirectoryEntry,
+  basePath: string,
+): Promise<DroppedFile[]> {
+  const results: DroppedFile[] = [];
+  const reader = entry.createReader();
+  const readBatch = (): Promise<FileSystemEntry[]> =>
+    new Promise((resolve, reject) => reader.readEntries(resolve, reject));
+  let batch: FileSystemEntry[];
+  do {
+    batch = await readBatch();
+    for (const child of batch) {
+      if (child.isFile) {
+        const file = await new Promise<File>((resolve, reject) =>
+          (child as FileSystemFileEntry).file(resolve, reject),
+        );
+        results.push({
+          name: file.name,
+          webkitRelativePath: `${basePath}/${file.name}`,
+          text: () => file.text(),
+        });
+      } else if (child.isDirectory) {
+        const sub = await readDirectoryEntry(
+          child as FileSystemDirectoryEntry,
+          `${basePath}/${child.name}`,
+        );
+        results.push(...sub);
+      }
+    }
+  } while (batch.length > 0);
+  return results;
+}
 
 const FolderPickerGroup = () => {
   const openSession = useStore((s) => s.openSession);
@@ -20,74 +68,145 @@ const FolderPickerGroup = () => {
   const isLoading = useStore((s) => s.isLoading);
 
   const inputRef = useRef<HTMLInputElement>(null);
+  // Counter tracks nested dragenter/dragleave pairs to avoid flicker.
+  const dragCounter = useRef(0);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const handleButtonClick = () => inputRef.current?.click();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      openSession(files);
-      // Reset so the same folder can be re-selected.
+      openSession(Array.from(files));
       e.target.value = "";
     }
   };
 
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    if (e.dataTransfer.items[0]?.kind === "file") {
+      dragCounter.current += 1;
+      setIsDragOver(true);
+    }
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    dragCounter.current -= 1;
+    if (dragCounter.current === 0) setIsDragOver(false);
+  }, []);
+
+  const handleDrop = useCallback(
+    async (e: React.DragEvent) => {
+      e.preventDefault();
+      dragCounter.current = 0;
+      setIsDragOver(false);
+      const item = e.dataTransfer.items[0];
+      if (!item) return;
+      const entry = item.webkitGetAsEntry();
+      if (!entry?.isDirectory) return;
+      const files = await readDirectoryEntry(
+        entry as FileSystemDirectoryEntry,
+        entry.name,
+      );
+      openSession(files);
+    },
+    [openSession],
+  );
+
   return (
     <SidebarGroup>
-      {/* Hidden directory input — triggered programmatically by the button below */}
       <input
         ref={inputRef}
         type="file"
         className="hidden"
         onChange={handleFileChange}
-        // webkitdirectory makes the picker select an entire folder.
         webkitdirectory=""
       />
 
       <SidebarGroupLabel>Session</SidebarGroupLabel>
-      <SidebarGroupContent>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={handleButtonClick}
-              disabled={isLoading}
-              tooltip={folderName ?? "Open Session"}
-            >
-              {folderName ? (
-                <Folder className="size-4 shrink-0" />
-              ) : (
-                <FolderOpen className="size-4 shrink-0" />
-              )}
-              <span className="truncate">
-                {isLoading ? "Loading…" : (folderName ?? "Open Session")}
-              </span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
-          {/* Session metadata shown once a folder is loaded */}
-          {settings && (
-            <SidebarMenuItem className="min-w-0">
-              <div className="text-muted-foreground w-full min-w-0 overflow-hidden px-2 py-1 text-xs">
-                <p className="truncate">{settings.date}</p>
-                <a
-                  href={`https://hyperloop-upv.github.io/ADJ-Archive/storage/commit-${settings.adj_commit_hash}.json`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="block truncate font-mono opacity-60 hover:opacity-100 hover:underline"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    window.open(
-                      `https://hyperloop-upv.github.io/ADJ-Archive/storage/commit-${settings.adj_commit_hash}.json`,
-                      "_blank",
-                    );
-                  }}
-                >
-                  {settings.adj_commit_hash.slice(0, 7)}
-                </a>
-              </div>
-            </SidebarMenuItem>
+      <SidebarGroupContent className="px-2">
+        <div
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={handleDrop}
+          className={cn(
+            "flex min-h-[6rem] flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-3 transition-colors",
+            isDragOver
+              ? "border-primary bg-primary/5"
+              : "border-muted-foreground/20 hover:border-muted-foreground/40",
           )}
-        </SidebarMenu>
+        >
+          {isLoading ? (
+            <p className="text-muted-foreground text-xs">Loading…</p>
+          ) : folderName ? (
+            // Session loaded — show metadata
+            <div className="text-muted-foreground w-full min-w-0 overflow-hidden text-xs">
+              <p className="text-foreground truncate font-medium">{folderName}</p>
+              {settings && (
+                <div className="mt-1 space-y-0.5">
+                  <p className="truncate">{formatSessionDate(settings.date)}</p>
+                  <p className="flex items-center gap-1">
+                    <Timer className="size-3 shrink-0" />
+                    <span>{settings.time_unit}</span>
+                  </p>
+                  <button
+                    type="button"
+                    className="flex items-center gap-1 opacity-60 hover:opacity-100 hover:underline"
+                    onClick={() =>
+                      window.open(
+                        `https://hyperloop-upv.github.io/ADJ-Archive/storage/commit-${settings.adj_commit_hash}.json`,
+                        "_blank",
+                      )
+                    }
+                  >
+                    <GitCommit className="size-3 shrink-0" />
+                    <span className="truncate font-mono">
+                      {settings.adj_commit_hash.slice(0, 7)}
+                    </span>
+                    <ExternalLink className="size-3 shrink-0" />
+                  </button>
+                </div>
+              )}
+              <button
+                onClick={handleButtonClick}
+                className="text-muted-foreground hover:text-foreground mt-2 text-[10px] underline-offset-2 hover:underline"
+              >
+                Change folder
+              </button>
+            </div>
+          ) : (
+            // No session — prompt to open or drop
+            <>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className={cn(
+                  "size-8 transition-colors",
+                  isDragOver ? "text-primary" : "text-muted-foreground/40",
+                )}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"
+                />
+              </svg>
+              <p className="text-muted-foreground text-center text-[11px] leading-snug">
+                {isDragOver ? "Release to open" : "Drop folder here"}
+              </p>
+              <button
+                onClick={handleButtonClick}
+                className="text-muted-foreground hover:text-foreground text-[10px] underline underline-offset-2"
+              >
+                or browse…
+              </button>
+            </>
+          )}
+        </div>
       </SidebarGroupContent>
     </SidebarGroup>
   );

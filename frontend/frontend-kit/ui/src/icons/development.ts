@@ -1,1 +1,1 @@
-export { Terminal } from "lucide-react";
+export { GitCommit, Terminal, Timer } from "lucide-react";
