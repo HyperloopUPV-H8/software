@@ -1,15 +1,15 @@
-// Reusable signal picker: session series grouped by board, composed signals
-// (operations / transforms) in their own group with ∑ / 𝑓 glyphs.
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@workspace/ui/components";
+// Two-step signal picker: opening it lists the boards first (plus a
+// "Composed" entry for operations/transforms); choosing a board drills into
+// its series with a filter box and a back button. Built on Popover because
+// Radix Select cannot nest levels.
+import { Input, Popover, PopoverContent, PopoverTrigger } from "@workspace/ui/components";
+import { Check, ChevronDown, ChevronLeft, ChevronRight, Search } from "@workspace/ui/icons";
+import { cn } from "@workspace/ui/lib";
+import { useState } from "react";
 import { useAvailableSignals, type AvailableSignal } from "./hooks/useStudioSignals";
+
+// Sentinel board key for the composed-signals group
+const COMPOSED = "__composed__";
 
 interface SignalSelectProps {
   value: string;
@@ -21,6 +21,9 @@ interface SignalSelectProps {
   size?: "sm" | "default";
 }
 
+const glyphFor = (kind: AvailableSignal["kind"]) =>
+  kind === "operation" ? "∑" : kind === "transform" ? "𝑓" : null;
+
 export default function SignalSelect({
   value,
   onValueChange,
@@ -30,6 +33,10 @@ export default function SignalSelect({
   size = "default",
 }: SignalSelectProps) {
   const signals = useAvailableSignals();
+  const [open, setOpen] = useState(false);
+  // null → board list; a board name (or COMPOSED) → its series list
+  const [activeBoard, setActiveBoard] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
 
   const excluded = new Set(exclude ?? []);
   const byBoard = new Map<string, AvailableSignal[]>();
@@ -37,51 +44,166 @@ export default function SignalSelect({
   for (const s of signals) {
     if (excluded.has(s.id)) continue;
     if (s.board) {
-      const arr = byBoard.get(s.board) ?? [];
-      arr.push(s);
-      byBoard.set(s.board, arr);
+      const arr = byBoard.get(s.board);
+      if (arr) { arr.push(s); } else { byBoard.set(s.board, [s]); }
     } else {
       composed.push(s);
     }
   }
-  const boards = [...byBoard.entries()].sort(([a], [b]) => a.localeCompare(b));
-  const empty = boards.length === 0 && composed.length === 0;
+  const boardNames = [...byBoard.keys()].sort((a, b) => a.localeCompare(b));
+  const empty = boardNames.length === 0 && composed.length === 0;
+
+  const selected = signals.find((s) => s.id === value);
+
+  const handleOpenChange = (o: boolean) => {
+    setOpen(o);
+    if (o) {
+      setQuery("");
+      // Skip the board step when there is only one group to choose from
+      if (boardNames.length === 1 && composed.length === 0) {
+        setActiveBoard(boardNames[0]);
+      } else if (boardNames.length === 0 && composed.length > 0) {
+        setActiveBoard(COMPOSED);
+      } else {
+        setActiveBoard(null);
+      }
+    }
+  };
+
+  const pick = (id: string) => {
+    onValueChange(id);
+    setOpen(false);
+  };
+
+  const activeItems = activeBoard === COMPOSED ? composed : (byBoard.get(activeBoard ?? "") ?? []);
+  const q = query.trim().toLowerCase();
+  const visibleItems = q
+    ? activeItems.filter((s) => s.label.toLowerCase().includes(q))
+    : activeItems;
 
   return (
-    <Select value={value} onValueChange={(v) => { if (v) onValueChange(v); }}>
-      <SelectTrigger size={size} className={triggerClassName}>
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent>
-        {empty && (
-          <div className="text-muted-foreground px-2 py-3 text-center text-[11px]">
-            No series available — open a session first
+    <Popover open={open} onOpenChange={handleOpenChange}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className={cn(
+            "border-input focus-visible:border-ring focus-visible:ring-ring/50 flex h-8 w-full items-center justify-between gap-2 whitespace-nowrap rounded-md border bg-transparent px-3 outline-none transition-[color,box-shadow] focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50",
+            size === "sm" ? "text-xs" : "text-sm",
+            triggerClassName,
+          )}
+        >
+          <span className="min-w-0 truncate text-left">
+            {selected ? (
+              selected.board ? (
+                <>
+                  <span className="text-muted-foreground">{selected.board}/</span>
+                  {selected.label}
+                </>
+              ) : (
+                <>
+                  <span className="text-muted-foreground mr-1">{glyphFor(selected.kind)}</span>
+                  {selected.label}
+                </>
+              )
+            ) : (
+              <span className="text-muted-foreground">{placeholder}</span>
+            )}
+          </span>
+          <ChevronDown className="size-4 shrink-0 opacity-50" />
+        </button>
+      </PopoverTrigger>
+
+      <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] min-w-52 p-0">
+        {activeBoard === null ? (
+          /* Step 1 — pick a board */
+          <div className="max-h-72 overflow-y-auto p-1">
+            {empty && (
+              <div className="text-muted-foreground px-2 py-3 text-center text-[11px]">
+                No series available — open a session first
+              </div>
+            )}
+            {boardNames.map((board) => (
+              <button
+                key={board}
+                type="button"
+                onClick={() => { setActiveBoard(board); setQuery(""); }}
+                className="hover:bg-accent hover:text-accent-foreground flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm transition-colors"
+              >
+                <span className="min-w-0 flex-1 truncate font-medium">{board}</span>
+                <span className="text-muted-foreground shrink-0 text-[10px] tabular-nums">
+                  {byBoard.get(board)!.length}
+                </span>
+                <ChevronRight className="text-muted-foreground size-3.5 shrink-0" />
+              </button>
+            ))}
+            {composed.length > 0 && (
+              <button
+                type="button"
+                onClick={() => { setActiveBoard(COMPOSED); setQuery(""); }}
+                className="hover:bg-accent hover:text-accent-foreground flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm transition-colors"
+              >
+                <span className="text-muted-foreground shrink-0">∑𝑓</span>
+                <span className="min-w-0 flex-1 truncate font-medium">Composed</span>
+                <span className="text-muted-foreground shrink-0 text-[10px] tabular-nums">{composed.length}</span>
+                <ChevronRight className="text-muted-foreground size-3.5 shrink-0" />
+              </button>
+            )}
+          </div>
+        ) : (
+          /* Step 2 — pick a series within the board */
+          <div>
+            <div className="flex items-center gap-1 border-b px-1 py-1">
+              <button
+                type="button"
+                onClick={() => setActiveBoard(null)}
+                aria-label="Back to boards"
+                className="hover:bg-accent rounded-sm p-1 transition-colors"
+              >
+                <ChevronLeft className="size-3.5" />
+              </button>
+              <span className="min-w-0 flex-1 truncate text-xs font-semibold">
+                {activeBoard === COMPOSED ? "Composed" : activeBoard}
+              </span>
+            </div>
+
+            <div className="relative border-b">
+              <Search className="text-muted-foreground pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2" />
+              <Input
+                autoFocus
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && visibleItems.length > 0) pick(visibleItems[0].id);
+                }}
+                placeholder="Filter…"
+                className="h-8 rounded-none border-0 pl-8 text-xs shadow-none focus-visible:ring-0"
+              />
+            </div>
+
+            <div className="max-h-60 overflow-y-auto p-1">
+              {visibleItems.length === 0 && (
+                <div className="text-muted-foreground px-2 py-3 text-center text-[11px]">
+                  No matches
+                </div>
+              )}
+              {visibleItems.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => pick(s.id)}
+                  className="hover:bg-accent hover:text-accent-foreground flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm transition-colors"
+                >
+                  {glyphFor(s.kind) && (
+                    <span className="text-muted-foreground shrink-0">{glyphFor(s.kind)}</span>
+                  )}
+                  <span className="min-w-0 flex-1 truncate">{s.label}</span>
+                  {s.id === value && <Check className="text-primary size-3.5 shrink-0" />}
+                </button>
+              ))}
+            </div>
           </div>
         )}
-        {boards.map(([board, items]) => (
-          <SelectGroup key={board}>
-            <SelectLabel>{board}</SelectLabel>
-            {items.map((s) => (
-              <SelectItem key={s.id} value={s.id}>
-                {s.label}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        ))}
-        {composed.length > 0 && (
-          <SelectGroup>
-            <SelectLabel>Composed</SelectLabel>
-            {composed.map((s) => (
-              <SelectItem key={s.id} value={s.id}>
-                <span className="text-muted-foreground mr-1">
-                  {s.kind === "operation" ? "∑" : "𝑓"}
-                </span>
-                {s.label}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        )}
-      </SelectContent>
-    </Select>
+      </PopoverContent>
+    </Popover>
   );
 }
