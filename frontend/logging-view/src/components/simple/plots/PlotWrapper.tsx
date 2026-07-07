@@ -25,10 +25,17 @@ const PLOTLY_CONFIG: Partial<Plotly.Config> = {
   responsive: true,
   displayModeBar: true,
   displaylogo: false,
+  scrollZoom: true,
+  showTips: false,
   modeBarButtonsToRemove: ["select2d", "lasso2d"],
+  modeBarButtonsToAdd: ["togglespikelines", "hoverclosest", "hovercompare"],
   editable: true,
   toImageButtonOptions: { format: "svg", width: 1200, height: 800, scale: 1 },
 };
+
+// Above this point count, render with WebGL (scattergl) instead of SVG —
+// logging sessions easily reach 100k+ samples per signal.
+const GL_POINT_THRESHOLD = 20_000;
 
 // Plotly divs expose a Node-style event emitter after newPlot()
 type PlotlyEventDiv = HTMLDivElement & {
@@ -124,14 +131,16 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
           return [{
             x: fftData.map((p) => p.frequency),
             y: fftData.map((p) => p.magnitude),
-            type: "scatter" as const, mode: "lines" as const,
+            type: fftData.length > GL_POINT_THRESHOLD ? ("scattergl" as const) : ("scatter" as const),
+            mode: "lines" as const,
             name: `${name} (FFT)`, line: { width: 2, color },
             yaxis: sig.yAxis === "right" ? ("y2" as const) : ("y" as const),
           }];
         }
         return [{
           x: data.map((p) => p.time), y: data.map((p) => p.value),
-          type: "scatter" as const, mode: "lines" as const,
+          type: data.length > GL_POINT_THRESHOLD ? ("scattergl" as const) : ("scatter" as const),
+          mode: "lines" as const,
           name, line: { width: 2.5, color },
           yaxis: sig.yAxis === "right" ? ("y2" as const) : ("y" as const),
         }];
@@ -145,6 +154,9 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
     () => {
       const base: Partial<Plotly.Layout> = {
         autosize: true,
+        // Preserve zoom/pan across data changes (adding signals, stats, etc.);
+        // reset only when the X-axis meaning flips between time and frequency.
+        uirevision: hasFFT ? `${plot.id}:fft` : plot.id,
         paper_bgcolor: "white", plot_bgcolor: "white",
         font: { color: "#000000", family: "Computer Modern, Latin Modern Math, Times New Roman, serif", size: 14 },
         xaxis: {
@@ -152,15 +164,25 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
           gridcolor: "#e0e0e0", linecolor: "#000000", linewidth: 1.5, mirror: true,
           ticks: "outside", tickwidth: 1.5, tickcolor: "#000000", color: "#000000",
           showline: true, zeroline: false, fixedrange: false,
+          exponentformat: "power", separatethousands: true,
         },
         yaxis: {
           title: { text: hasRightAxis ? "Value (Left)" : "Value", font: { size: 16, color: hasRightAxis ? "#1f77b4" : "#000000" } },
           gridcolor: "#e0e0e0", linecolor: hasRightAxis ? "#1f77b4" : "#000000", linewidth: 1.5, mirror: !hasRightAxis,
           ticks: "outside", tickwidth: 1.5, tickcolor: hasRightAxis ? "#1f77b4" : "#000000", color: hasRightAxis ? "#1f77b4" : "#000000",
           showline: true, zeroline: false, fixedrange: false,
+          exponentformat: "power", separatethousands: true,
         },
         margin: { l: 80, r: hasRightAxis ? 80 : 40, t: 40, b: 80 },
-        hovermode: "closest", showlegend: true,
+        // Unified hover: one label per signal at the same X — much easier to
+        // compare synchronized measurements than per-point "closest" mode.
+        hovermode: "x unified",
+        hoverlabel: {
+          bgcolor: "rgba(255,255,255,0.97)",
+          bordercolor: "#000000",
+          font: { family: "Computer Modern, Latin Modern Math, Times New Roman, serif", size: 12, color: "#000000" },
+        },
+        showlegend: true,
         legend: { bgcolor: "rgba(255,255,255,0.95)", bordercolor: "#000000", borderwidth: 1, font: { size: 13, color: "#000000" } },
       };
       if (hasRightAxis) {
@@ -169,11 +191,12 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
           overlaying: "y", side: "right", gridcolor: "transparent",
           linecolor: "#ff7f0e", linewidth: 1.5, ticks: "outside", tickwidth: 1.5,
           tickcolor: "#ff7f0e", color: "#ff7f0e", showline: true, zeroline: false, fixedrange: false,
+          exponentformat: "power", separatethousands: true,
         };
       }
       return base;
     },
-    [hasRightAxis, hasFFT],
+    [hasRightAxis, hasFFT, plot.id],
   );
 
   // Drag-to-resize
