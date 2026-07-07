@@ -1,29 +1,43 @@
-// Simple mode — Plot Studio. Signals are loaded from the left app sidebar
-// (Plot Studio Series group); plots and derived signals are managed in the
-// right studio panel. The toolbar shows live counts and quick actions.
+// Simple mode — Plot Studio. All session series are available by default;
+// plots and composed series are managed in the right studio panel, laid out
+// VS Code-style: a fixed activity bar with one open section at a time, and
+// only the plots area scrolls.
 import { Button, Separator } from "@workspace/ui/components";
 import { PanelRight, Plus } from "@workspace/ui/icons";
 import { cn } from "@workspace/ui/lib";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useStore } from "../../store/store";
 import PlotsArea from "./plots/PlotsArea";
 import StudioSidebar from "./sidebar/StudioSidebar";
+import { STUDIO_SECTIONS } from "./sidebar/studioSections";
 
 export default function PlotStudio() {
-  const [collapsed, setCollapsed] = useState(false);
+  // Open section id, null = panel closed. Plots is open by default.
+  const [activeSection, setActiveSection] = useState<string | null>(STUDIO_SECTIONS[0].id);
+  // Remembered so the toolbar toggle reopens the last-used section
+  const lastSection = useRef(STUDIO_SECTIONS[0].id);
+
   const seriesCount = useStore((s) =>
     Object.values(s.availableSeries).reduce((n, ids) => n + ids.length, 0),
   );
   const plotCount = useStore((s) => s.studioPlots.size);
   const addStudioPlot = useStore((s) => s.addStudioPlot);
 
+  // VS Code semantics: clicking the active icon closes the panel
+  const selectSection = (id: string) => {
+    lastSection.current = id;
+    setActiveSection((prev) => (prev === id ? null : id));
+  };
+
+  const togglePanel = () =>
+    setActiveSection((prev) => (prev ? null : lastSection.current));
+
   return (
-    // min-h-full fills the scrollable parent without a h-full/overflow conflict
-    <div className="bg-background text-foreground flex min-h-full">
+    <div className="bg-background text-foreground flex h-full overflow-hidden">
       {/* Main content column */}
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* Toolbar — sticky inside the app scroll container */}
-        <div className="bg-background/90 sticky top-0 z-10 flex h-12 shrink-0 items-center gap-3 border-b px-4 backdrop-blur">
+        {/* Toolbar — fixed above the scrolling plots area */}
+        <div className="bg-background flex h-12 shrink-0 items-center gap-3 border-b px-4">
           <span className="text-muted-foreground text-xs tabular-nums">
             {seriesCount} series available
             <span className="text-muted-foreground/50 mx-1.5">·</span>
@@ -39,19 +53,22 @@ export default function PlotStudio() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setCollapsed((v) => !v)}
+              onClick={togglePanel}
               aria-label="Toggle studio panel"
               title="Toggle studio panel"
             >
-              <PanelRight className={cn("size-4 transition-colors", !collapsed && "text-primary")} />
+              <PanelRight className={cn("size-4 transition-colors", activeSection && "text-primary")} />
             </Button>
           </div>
         </div>
 
-        <PlotsArea />
+        {/* Scrolling plots area */}
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <PlotsArea />
+        </div>
       </div>
 
-      <StudioSidebar collapsed={collapsed} />
+      <StudioSidebar activeSection={activeSection} onSelect={selectSection} />
     </div>
   );
 }

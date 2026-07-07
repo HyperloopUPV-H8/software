@@ -1,67 +1,79 @@
-// Right-hand studio panel. All session series are available by default
-// (parsed lazily on first use), so the panel focuses on: building plots,
-// composing derived series, and tuning the FFT.
-import { Separator } from "@workspace/ui/components";
-import { Activity, Layers, Timer } from "@workspace/ui/icons";
-import type { LucideIcon } from "@workspace/ui/icons";
+// VS Code-style studio panel: a persistent activity bar (icon strip) on the
+// right edge; clicking an icon opens that section in a panel next to it,
+// clicking the active icon again closes the panel.
+import { Button, Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components";
 import { cn } from "@workspace/ui/lib";
-import ComposedSection from "./ComposedSection";
-import FFTSection from "./FFTSection";
-import PlotsSection from "./PlotsSection";
+import { STUDIO_SECTIONS } from "./studioSections";
 
-function SectionHeader({ icon: Icon, title }: { icon: LucideIcon; title: string }) {
+interface StudioSidebarProps {
+  /** Id of the open section, or null when the panel is closed. */
+  activeSection: string | null;
+  /** Called with the clicked section id (parent handles toggle semantics). */
+  onSelect: (id: string) => void;
+}
+
+export default function StudioSidebar({ activeSection, onSelect }: StudioSidebarProps) {
+  const active = STUDIO_SECTIONS.find((s) => s.id === activeSection) ?? null;
+  const ActiveIcon = active?.icon;
+  const ActiveComponent = active?.Component;
+
   return (
-    <div className="from-primary/8 mb-4 flex items-center gap-2.5 rounded-md bg-gradient-to-r to-transparent px-1 py-1.5">
-      <div className="bg-primary/15 flex size-6 shrink-0 items-center justify-center rounded">
-        <Icon className="text-primary size-3.5" />
+    <div className="flex h-full shrink-0">
+      {/* Panel — shows the single active section */}
+      <div
+        className={cn(
+          "bg-sidebar overflow-hidden border-l transition-all duration-200",
+          active ? "w-64" : "w-0",
+        )}
+      >
+        {active && ActiveIcon && ActiveComponent && (
+          // Fixed inner width so content doesn't reflow during the transition
+          <div className="flex h-full w-64 flex-col">
+            {/* Panel header — aligns with the main toolbar height */}
+            <div className="flex h-12 shrink-0 items-center gap-2 border-b px-3">
+              <ActiveIcon className="text-primary size-3.5 shrink-0" />
+              <span className="text-foreground truncate text-[11px] font-semibold uppercase tracking-widest">
+                {active.title}
+              </span>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto px-3 py-4">
+              <ActiveComponent />
+            </div>
+          </div>
+        )}
       </div>
-      <span className="text-foreground text-[11px] font-semibold uppercase tracking-widest">
-        {title}
-      </span>
+
+      {/* Activity bar — always visible */}
+      <div className="bg-sidebar flex w-12 shrink-0 flex-col items-center gap-1 border-l py-2">
+        {STUDIO_SECTIONS.map(({ id, icon: Icon, title }) => {
+          const isActive = id === activeSection;
+          return (
+            <Tooltip key={id}>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onSelect(id)}
+                  aria-label={title}
+                  className={cn(
+                    "relative",
+                    isActive
+                      ? "bg-primary/10 text-primary hover:text-primary"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {/* Active indicator on the panel-facing edge */}
+                  {isActive && (
+                    <span className="bg-primary absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full" />
+                  )}
+                  <Icon className="size-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left">{title}</TooltipContent>
+            </Tooltip>
+          );
+        })}
+      </div>
     </div>
-  );
-}
-
-function Section({
-  icon,
-  title,
-  children,
-}: {
-  icon: LucideIcon;
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="px-3 py-4">
-      <SectionHeader icon={icon} title={title} />
-      {children}
-    </div>
-  );
-}
-
-export default function StudioSidebar({ collapsed }: { collapsed: boolean }) {
-  return (
-    <aside
-      className={cn(
-        "bg-sidebar flex flex-col overflow-y-auto overflow-x-hidden border-l transition-all duration-300",
-        collapsed ? "w-0 min-w-0" : "w-72 min-w-72",
-      )}
-    >
-      <Section icon={Activity} title="Plots">
-        <PlotsSection />
-      </Section>
-
-      <Separator />
-
-      <Section icon={Layers} title="Composed Series">
-        <ComposedSection />
-      </Section>
-
-      <Separator />
-
-      <Section icon={Timer} title="FFT Settings">
-        <FFTSection />
-      </Section>
-    </aside>
   );
 }
