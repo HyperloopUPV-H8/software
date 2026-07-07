@@ -11,6 +11,10 @@ import {
   type MessagesSlice,
 } from "./slices/messagesSlice";
 import {
+  createPlotStudioSlice,
+  type PlotStudioSlice,
+} from "./slices/plotStudioSlice";
+import {
   createSessionSlice,
   type SessionSlice,
 } from "./slices/sessionSlice";
@@ -23,6 +27,7 @@ export type Store = AppSlice &
   CatalogSlice &
   ConnectionsSlice &
   MessagesSlice &
+  PlotStudioSlice &
   SessionSlice &
   TelemetrySlice;
 
@@ -33,6 +38,7 @@ export const useStore = create<Store>()(
       ...createCatalogSlice(...a),
       ...createConnectionsSlice(...a),
       ...createMessagesSlice(...a),
+      ...createPlotStudioSlice(...a),
       ...createSessionSlice(...a),
       ...createTelemetrySlice(...a),
     }),

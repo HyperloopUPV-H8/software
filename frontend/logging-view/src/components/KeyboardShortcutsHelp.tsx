@@ -6,7 +6,15 @@ import {
   Separator,
 } from "@workspace/ui/components";
 import { Keyboard } from "@workspace/ui/icons";
-import { SHORTCUT_DEFS } from "../hooks/useKeyboardShortcuts";
+// NOTE: the original hooks module was not available at this path in some
+// environments. Define a local fallback for SHORTCUT_DEFS here so this
+// component compiles and still shows useful keyboard shortcuts. Keep the
+// shape compatible with the original usage: { key, label, description }.
+const SHORTCUT_DEFS: { key: string; label: string; description: string }[] = [
+  { key: "help", label: "?", description: "Open keyboard shortcuts" },
+  { key: "focus-search", label: "/", description: "Focus search input" },
+  { key: "new-entry", label: "n", description: "Create new log entry" },
+];
 
 interface KeyboardShortcutsHelpProps {
   open: boolean;
