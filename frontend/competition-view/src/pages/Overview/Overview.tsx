@@ -1,11 +1,10 @@
-import { Button, Separator } from "@workspace/ui/components";
+import { Button } from "@workspace/ui/components";
 import { ChevronUp } from "@workspace/ui/icons";
 import { useEffect, useRef, useState } from "react";
 import {
-  BCU,
   BLCU,
+  BOARDS,
   HVBMS,
-  HVBMS_CABINET,
   LCU,
   LVBMS,
   PCU,
@@ -23,39 +22,185 @@ import MessageItem from "../Messages/components/MessageItem";
 /* ─── Stable series configs ─────────────────────────────────────────────── */
 
 const DLIM_SERIES: SeriesConfig[] = [
-  { measurementKey: PCU.motorCurrentU, label: "U", colorIndex: 0 },
-  { measurementKey: PCU.motorCurrentV, label: "V", colorIndex: 1 },
-  { measurementKey: PCU.motorCurrentW, label: "W", colorIndex: 2 },
+  { board: BOARDS.PCU, measurementKey: PCU.motorCurrentU, label: "U", colorIndex: 0 },
+  { board: BOARDS.PCU, measurementKey: PCU.motorCurrentV, label: "V", colorIndex: 1 },
+  { board: BOARDS.PCU, measurementKey: PCU.motorCurrentW, label: "W", colorIndex: 2 },
 ];
 
-const LSM_SERIES: SeriesConfig[] = [
-  { measurementKey: BCU.averageCurrentU, label: "U", colorIndex: 0 },
-  { measurementKey: BCU.averageCurrentV, label: "V", colorIndex: 1 },
-  { measurementKey: BCU.averageCurrentW, label: "W", colorIndex: 2 },
+const VERT_AIRGAP_SERIES: SeriesConfig[] = [
+  { board: BOARDS.LCU, measurementKey: LCU.verticalAirgap1, label: "1", colorIndex: 0 },
+  { board: BOARDS.LCU, measurementKey: LCU.verticalAirgap2, label: "2", colorIndex: 1 },
+  { board: BOARDS.LCU, measurementKey: LCU.verticalAirgap3, label: "3", colorIndex: 2 },
+  { board: BOARDS.LCU, measurementKey: LCU.verticalAirgap4, label: "4", colorIndex: 3 },
 ];
 
-/* ─── Compact metric tile ───────────────────────────────────────────────── */
+const LAT_AIRGAP_SERIES: SeriesConfig[] = [
+  { board: BOARDS.LCU, measurementKey: LCU.horizontalAirgap1, label: "1", colorIndex: 0 },
+  { board: BOARDS.LCU, measurementKey: LCU.horizontalAirgap2, label: "2", colorIndex: 1 },
+  { board: BOARDS.LCU, measurementKey: LCU.horizontalAirgap3, label: "3", colorIndex: 2 },
+  { board: BOARDS.LCU, measurementKey: LCU.horizontalAirgap4, label: "4", colorIndex: 3 },
+];
 
-interface MetricTileProps {
+const HEMS_SERIES: SeriesConfig[] = [
+  { board: BOARDS.LCU, measurementKey: LCU.coilCurrentHEMS1, label: "H1", colorIndex: 0 },
+  { board: BOARDS.LCU, measurementKey: LCU.coilCurrentHEMS2, label: "H2", colorIndex: 1 },
+  { board: BOARDS.LCU, measurementKey: LCU.coilCurrentHEMS3, label: "H3", colorIndex: 2 },
+  { board: BOARDS.LCU, measurementKey: LCU.coilCurrentHEMS4, label: "H4", colorIndex: 3 },
+];
+
+const EMS_SERIES: SeriesConfig[] = [
+  { board: BOARDS.LCU, measurementKey: LCU.coilCurrentEMS1, label: "E1", colorIndex: 0 },
+  { board: BOARDS.LCU, measurementKey: LCU.coilCurrentEMS2, label: "E2", colorIndex: 1 },
+  { board: BOARDS.LCU, measurementKey: LCU.coilCurrentEMS3, label: "E3", colorIndex: 2 },
+  { board: BOARDS.LCU, measurementKey: LCU.coilCurrentEMS4, label: "E4", colorIndex: 3 },
+  { board: BOARDS.LCU, measurementKey: LCU.coilCurrentEMS5, label: "E5", colorIndex: 4 },
+  { board: BOARDS.LCU, measurementKey: LCU.coilCurrentEMS6, label: "E6", colorIndex: 5 },
+];
+
+/* ─── Helpers ───────────────────────────────────────────────────────────── */
+
+const fmtNum = (v: number | boolean | string | undefined, decimals = 1) =>
+  typeof v === "number" ? v.toFixed(decimals) : undefined;
+
+/* ─── Battery card ──────────────────────────────────────────────────────── */
+
+interface BatteryRow {
   label: string;
   value: string | undefined;
   unit?: string;
-  valueClassName?: string;
+  warn?: boolean;
 }
 
-const MetricTile = ({ label, value, unit, valueClassName = "" }: MetricTileProps) => (
-  <div className="bg-card flex flex-col justify-center rounded-lg border px-3 py-2">
-    <span className="text-muted-foreground text-[10px] font-medium leading-none tracking-widest uppercase">
-      {label}
-    </span>
-    <span className={`text-foreground text-xl font-bold leading-tight tabular-nums ${valueClassName}`}>
-      {value ?? "—"}
-      {value !== undefined && unit && (
-        <span className="text-muted-foreground ml-0.5 text-xs font-normal">{unit}</span>
-      )}
-    </span>
-  </div>
-);
+interface BatteryCardProps {
+  title: string;
+  soc: number | undefined;
+  rows: BatteryRow[];
+}
+
+const BatteryCard = ({ title, soc, rows }: BatteryCardProps) => {
+  const socPct   = typeof soc === "number" ? Math.min(100, Math.max(0, soc)) : 0;
+  const barColor = typeof soc !== "number"
+    ? "bg-muted-foreground/20"
+    : soc < 20 ? "bg-red-500" : soc < 50 ? "bg-yellow-500" : "bg-green-500";
+
+  return (
+    <div className="bg-card flex flex-col rounded-xl border p-3 gap-2">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-semibold">{title}</span>
+        <span className={`text-sm font-bold tabular-nums ${typeof soc === "number" && soc < 20 ? "text-red-500" : ""}`}>
+          {typeof soc === "number" ? soc.toFixed(0) : "—"}
+          <span className="text-muted-foreground ml-0.5 text-xs font-normal">%</span>
+        </span>
+      </div>
+
+      <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+        <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${socPct}%` }} />
+      </div>
+
+      <div className="flex flex-col gap-0.5">
+        {rows.map(({ label, value, unit, warn }) => (
+          <div key={label} className="flex items-baseline justify-between">
+            <span className="text-muted-foreground text-[10px] uppercase tracking-wider">{label}</span>
+            <span className={`text-xs font-medium tabular-nums ${warn ? "text-red-500" : "text-foreground"}`}>
+              {value ?? "—"}
+              {value !== undefined && unit && (
+                <span className="text-muted-foreground ml-0.5 text-[10px] font-normal">{unit}</span>
+              )}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/* ─── Kinematics card ───────────────────────────────────────────────────── */
+
+const KinematicsCard = () => {
+  const speed        = useMeasurement(BOARDS.PCU, PCU.speed);
+  const position     = useMeasurement(BOARDS.PCU, PCU.position);
+  const acceleration = useMeasurement(BOARDS.PCU, PCU.acceleration);
+  const highPsi      = useMeasurement(BOARDS.VCU, VCU.highPressure);
+  const lowPsi       = useMeasurement(BOARDS.VCU, VCU.lowPressure);
+
+  const rows = [
+    { label: "Position",     value: fmtNum(position),        unit: "m"    },
+    { label: "Acceleration", value: fmtNum(acceleration, 2), unit: "m/s²" },
+    { label: "High pres.",   value: fmtNum(highPsi),         unit: "bar"  },
+    { label: "Low pres.",    value: fmtNum(lowPsi),          unit: "bar"  },
+  ];
+
+  return (
+    <div className="bg-card flex flex-col rounded-xl border p-3 gap-2">
+      <span className="text-sm font-semibold">Kinematics</span>
+      <div className="flex items-baseline gap-1">
+        <span className="text-3xl font-bold tabular-nums">{fmtNum(speed, 0) ?? "—"}</span>
+        <span className="text-muted-foreground text-sm">km/h</span>
+      </div>
+      <div className="flex flex-col gap-0.5">
+        {rows.map(({ label, value, unit }) => (
+          <div key={label} className="flex items-baseline justify-between">
+            <span className="text-muted-foreground text-[10px] uppercase tracking-wider">{label}</span>
+            <span className="text-foreground text-xs font-medium tabular-nums">
+              {value ?? "—"}
+              {value !== undefined && unit && (
+                <span className="text-muted-foreground ml-0.5 text-[10px] font-normal">{unit}</span>
+              )}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/* ─── Safety card ───────────────────────────────────────────────────────── */
+
+interface SafeRow { label: string; text: string; color: string }
+
+const SafetyCard = () => {
+  const sdcStatus  = useMeasurement(BOARDS.HVBMS, HVBMS.sdcStatus);
+  const contactors = useMeasurement(BOARDS.VCU,   VCU.contactorsClosed);
+  const imd        = useMeasurement(BOARDS.HVBMS, HVBMS.imdOk);
+  const hvBmsState = useMeasurement(BOARDS.HVBMS, HVBMS.operationalState);
+
+  const rows: SafeRow[] = [
+    {
+      label: "SDC",
+      text:  sdcStatus === undefined ? "—" : String(sdcStatus),
+      color: sdcStatus === "ENGAGED" ? "text-green-500" : sdcStatus === "DISENGAGED" ? "text-red-500" : "text-muted-foreground",
+    },
+    {
+      label: "Contactors",
+      text:  contactors === true ? "CLOSED" : contactors === false ? "OPEN" : "—",
+      color: contactors === true ? "text-green-500" : contactors === false ? "text-amber-500" : "text-muted-foreground",
+    },
+    {
+      label: "IMD",
+      text:  imd === true ? "OK" : imd === false ? "FAULT" : "—",
+      color: imd === true ? "text-green-500" : imd === false ? "text-red-500" : "text-muted-foreground",
+    },
+    {
+      label: "HV BMS",
+      text:  hvBmsState === undefined ? "—" : String(hvBmsState),
+      color: hvBmsState === "OPERATIONAL" ? "text-green-500" : "text-foreground",
+    },
+  ];
+
+  return (
+    <div className="bg-card flex flex-col rounded-xl border p-3 gap-2">
+      <span className="text-sm font-semibold">Safety</span>
+      <div className="flex flex-col gap-1">
+        {rows.map(({ label, text, color }) => (
+          <div key={label} className="flex items-center justify-between">
+            <span className="text-muted-foreground text-[10px] uppercase tracking-wider">{label}</span>
+            <span className={`text-xs font-semibold ${color}`}>{text}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 /* ─── Messages panel ────────────────────────────────────────────────────── */
 
@@ -98,7 +243,6 @@ const MessagesPanel = () => {
         ))}
         <div className="ml-auto flex items-center gap-1.5">
           <span className="text-muted-foreground text-xs">{filtered.length}/{messages.length}</span>
-          <Separator orientation="vertical" className="data-[orientation=vertical]:h-3" />
           <Button variant="outline" size="sm" className="h-6 px-2 text-xs"
             onClick={clearMessages} disabled={messages.length === 0}>
             Clear
@@ -131,125 +275,115 @@ const MessagesPanel = () => {
 /* ─── Dashboard ─────────────────────────────────────────────────────────── */
 
 const Dashboard = () => {
-  const speed        = useMeasurement(PCU.speed);
-  const position     = useMeasurement(PCU.position);
-  const acceleration = useMeasurement(PCU.acceleration);
-  const soc          = useMeasurement(HVBMS.minimumSoc);
-  const hvVoltage    = useMeasurement(HVBMS.voltageReading);
-  const hvCurrent    = useMeasurement(HVBMS.currentReading);
-  const tempMax      = useMeasurement(HVBMS.tempMax);
-  const brakePsi     = useMeasurement(VCU.pressureBrakes);
-  const highPsi      = useMeasurement(VCU.highPressure);
+  const hvSoc     = useMeasurement(BOARDS.HVBMS, HVBMS.minimumSoc);
+  const hvVoltage = useMeasurement(BOARDS.HVBMS, HVBMS.batteriesVoltage);
+  const hvCurrent = useMeasurement(BOARDS.HVBMS, HVBMS.currentReading);
+  const hvVSensor = useMeasurement(BOARDS.HVBMS, HVBMS.voltageReading);
 
-  const fmt = (v: ReturnType<typeof useMeasurement>, d = 1) =>
-    v === undefined ? undefined : typeof v === "number" ? v.toFixed(d) : String(v);
+  const lvSoc     = useMeasurement(BOARDS.LVBMS, LVBMS.soc);
+  const lvVoltage = useMeasurement(BOARDS.LVBMS, LVBMS.totalVoltage);
+  const lvCurrent = useMeasurement(BOARDS.LVBMS, LVBMS.current);
+  const lvTemp    = useMeasurement(BOARDS.LVBMS, LVBMS.temperature);
 
   return (
     <div className="flex h-full w-full gap-3 overflow-hidden p-3">
 
-      {/* ── Left column: metrics (top) + charts (bottom) ─────────────── */}
+      {/* ── Left column ──────────────────────────────────────────────── */}
       <div className="flex min-h-0 flex-1 flex-col gap-3">
 
-        {/* Metric tiles — 3×3 grid, one row per group */}
-        <div className="grid shrink-0 grid-cols-3 gap-2">
-          {/* Kinematic */}
-          <MetricTile label="Speed"       value={fmt(speed)}           unit="km/h" />
-          <MetricTile label="Position"    value={fmt(position)}        unit="m"    />
-          <MetricTile label="Acceleration" value={fmt(acceleration, 2)} unit="m/s²" />
-          {/* Electrical */}
-          <MetricTile label="SOC"         value={fmt(soc)}             unit="%"
-            valueClassName={typeof soc === "number" && soc < 20 ? "text-red-500" : ""} />
-          <MetricTile label="HV Voltage"  value={fmt(hvVoltage)}       unit="V"    />
-          <MetricTile label="HV Current"  value={fmt(hvCurrent)}       unit="A"    />
-          {/* Pressure */}
-          <MetricTile label="Pack Temp"   value={fmt(tempMax)}         unit="°C"
-            valueClassName={typeof tempMax === "number" && tempMax > 55 ? "text-red-500" : ""} />
-          <MetricTile label="Brake Pres." value={fmt(brakePsi)}        unit="bar"  />
-          <MetricTile label="High Pres."  value={fmt(highPsi)}         unit="bar"  />
+        {/* Summary cards row */}
+        <div className="grid shrink-0 grid-cols-4 gap-2">
+          <BatteryCard
+            title="HV Battery"
+            soc={typeof hvSoc === "number" ? hvSoc : undefined}
+            rows={[
+              { label: "Pack V",    value: fmtNum(hvVoltage), unit: "V" },
+              { label: "Current",   value: fmtNum(hvCurrent), unit: "A" },
+              { label: "V sensor",  value: fmtNum(hvVSensor), unit: "V" },
+            ]}
+          />
+          <BatteryCard
+            title="LV Battery"
+            soc={typeof lvSoc === "number" ? lvSoc : undefined}
+            rows={[
+              { label: "Voltage", value: fmtNum(lvVoltage), unit: "V" },
+              { label: "Current", value: fmtNum(lvCurrent), unit: "A" },
+              { label: "Temp",    value: fmtNum(lvTemp),    unit: "°C",
+                warn: typeof lvTemp === "number" && lvTemp > 55 },
+            ]}
+          />
+          <KinematicsCard />
+          <SafetyCard />
         </div>
 
-        {/* Charts — 2 cols × 3 rows, each fills its grid cell */}
+        {/* Charts — 2 cols × 3 rows */}
         <div className="grid min-h-0 flex-1 grid-cols-2 grid-rows-3 gap-2">
-          <TelemetryChart title="Speed"           measurementKey={PCU.speed}          unit="km/h" colorIndex={0} />
-          <TelemetryChart title="Position"        measurementKey={PCU.position}       unit="m"    colorIndex={1} />
-          <TelemetryChart title="HV Battery SOC"  measurementKey={HVBMS.minimumSoc}   unit="%"    colorIndex={2} />
-          <TelemetryChart title="Brake Pressure"  measurementKey={VCU.pressureBrakes} unit="bar"  colorIndex={3} />
-          <MultiSeriesChart title="DLIM — Phase Currents" series={DLIM_SERIES} unit="A" />
-          <MultiSeriesChart title="LSM — Phase Currents"  series={LSM_SERIES}  unit="A" />
+          <MultiSeriesChart title="DLIM — Phase Currents"  series={DLIM_SERIES}       unit="A"  />
+          <TelemetryChart   title="Speed"                  board={BOARDS.PCU}          measurementKey={PCU.speed}    unit="km/h" colorIndex={0} />
+          <MultiSeriesChart title="Vertical Airgaps"       series={VERT_AIRGAP_SERIES} unit="mm" />
+          <MultiSeriesChart title="Lateral Airgaps"        series={LAT_AIRGAP_SERIES}  unit="mm" />
+          <MultiSeriesChart title="HEMS — Coil Currents"   series={HEMS_SERIES}        unit="A"  />
+          <MultiSeriesChart title="EMS — Coil Currents"    series={EMS_SERIES}         unit="A"  />
         </div>
 
       </div>
 
-      {/* ── Right column: boards (top) + messages (bottom) ───────────── */}
-      <div className="flex w-[42%] min-h-0 flex-col gap-3">
+      {/* ── Right column ─────────────────────────────────────────────── */}
+      <div className="flex w-[38%] min-h-0 flex-col gap-3">
 
-        {/* Board state cards — 2-col grid */}
         <div className="grid shrink-0 grid-cols-2 gap-2">
           <BoardCard
+            board={BOARDS.VCU}
             name="VCU"
             stateMeasurementKey={VCU.generalState}
             stats={[
               { label: "Op. state",   measurementKey: VCU.operationalState              },
-              { label: "Brake pres.", measurementKey: VCU.pressureBrakes, unit: "bar"   },
-              { label: "High pres.",  measurementKey: VCU.highPressure,   unit: "bar"   },
+              { label: "High pres.",  measurementKey: VCU.highPressure,  unit: "bar"    },
+              { label: "SDC",         measurementKey: VCU.sdcClosed                     },
+              { label: "Contactors",  measurementKey: VCU.contactorsClosed              },
             ]}
           />
           <BoardCard
+            board={BOARDS.HVBMS}
             name="HVBMS"
             stateMeasurementKey={HVBMS.operationalState}
             stats={[
-              { label: "Min SOC",  measurementKey: HVBMS.minimumSoc,     unit: "%"  },
-              { label: "Voltage",  measurementKey: HVBMS.voltageReading, unit: "V"  },
-              { label: "Current",  measurementKey: HVBMS.currentReading, unit: "A"  },
-              { label: "Temp max", measurementKey: HVBMS.tempMax,        unit: "°C" },
+              { label: "Min SOC",  measurementKey: HVBMS.minimumSoc,       unit: "%"  },
+              { label: "Pack V",   measurementKey: HVBMS.batteriesVoltage, unit: "V"  },
+              { label: "Current",  measurementKey: HVBMS.currentReading,   unit: "A"  },
+              { label: "Temp max", measurementKey: HVBMS.tempMax,          unit: "°C" },
             ]}
           />
           <BoardCard
-            name="HVBMS-Cabinet"
-            stateMeasurementKey={HVBMS_CABINET.contactorsState}
-            stats={[
-              { label: "Bus voltage", measurementKey: HVBMS_CABINET.busVoltage,            unit: "V" },
-              { label: "Supercaps",   measurementKey: HVBMS_CABINET.totalSupercapsVoltage, unit: "V" },
-              { label: "SDC",         measurementKey: HVBMS_CABINET.sdcGood                          },
-            ]}
-          />
-          <BoardCard
+            board={BOARDS.PCU}
             name="PCU"
             stateMeasurementKey={PCU_BOARD.generalState}
             stats={[
-              { label: "Op. state",    measurementKey: PCU_BOARD.operatingState           },
-              { label: "Peak current", measurementKey: PCU_BOARD.peakCurrent,  unit: "A"  },
+              { label: "Op. state",    measurementKey: PCU_BOARD.operatingState          },
+              { label: "Peak current", measurementKey: PCU_BOARD.peakCurrent, unit: "A" },
             ]}
           />
           <BoardCard
-            name="BCU"
-            stateMeasurementKey={BCU.generalState}
-            stats={[
-              { label: "Op. state", measurementKey: BCU.operationalState                          },
-              { label: "Phase U",   measurementKey: BCU.averageCurrentU, unit: "A", decimals: 2   },
-              { label: "Phase V",   measurementKey: BCU.averageCurrentV, unit: "A", decimals: 2   },
-            ]}
-          />
-          <BoardCard
+            board={BOARDS.LCU}
             name="LCU"
-            stateMeasurementKey={LCU.generalState}
+            stateMeasurementKey={LCU.masterState}
             stats={[
-              { label: "Position Y", measurementKey: LCU.positionY, unit: "mm", decimals: 2 },
-              { label: "Position Z", measurementKey: LCU.positionZ, unit: "mm", decimals: 2 },
+              { label: "Slave SM", measurementKey: LCU.slaveState },
             ]}
           />
           <BoardCard
+            board={BOARDS.LVBMS}
             name="LVBMS"
             stateMeasurementKey={LVBMS.generalState}
             stats={[
               { label: "SOC",     measurementKey: LVBMS.soc,          unit: "%", decimals: 0 },
               { label: "Voltage", measurementKey: LVBMS.totalVoltage, unit: "V"              },
+              { label: "Current", measurementKey: LVBMS.current,      unit: "A"              },
             ]}
           />
-          <BoardCard name="BLCU" stateMeasurementKey={BLCU.state} />
+          <BoardCard board={BOARDS.BLCU} name="BLCU" stateMeasurementKey={BLCU.state} />
         </div>
 
-        {/* Messages — fills the remaining height */}
         <MessagesPanel />
 
       </div>

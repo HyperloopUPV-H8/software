@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components";
-import { LVBMS } from "../../../constants/measurements";
+import { BOARDS, LVBMS } from "../../../constants/measurements";
 import useMeasurement from "../../../hooks/useMeasurement";
 
 const CELL_MIN = 3.0;
@@ -13,7 +13,7 @@ const fmt = (v: number | boolean | string | undefined, decimals = 2) =>
 /* ─── Cell tile (same style as HV) ──────────────────────────────────────── */
 
 const CellTile = ({ cellNum, measurementKey }: { cellNum: number; measurementKey: string }) => {
-  const raw = useMeasurement(measurementKey);
+  const raw = useMeasurement(BOARDS.LVBMS, measurementKey);
   const v = typeof raw === "number" ? raw : null;
   const isLow  = v !== null && v < CELL_WARN_LOW;
   const isHigh = v !== null && v > CELL_WARN_HIGH;
@@ -51,14 +51,13 @@ const CellTile = ({ cellNum, measurementKey }: { cellNum: number; measurementKey
 /* ─── LV section ─────────────────────────────────────────────────────────── */
 
 const LvBatterySection = () => {
-  const soc          = useMeasurement(LVBMS.soc);
-  const totalVoltage = useMeasurement(LVBMS.totalVoltage);
-  const voltageMax   = useMeasurement(LVBMS.voltageMax);
-  const voltageMin   = useMeasurement(LVBMS.voltageMin);
-  const tempMax      = useMeasurement(LVBMS.tempMax);
-  const tempMin      = useMeasurement(LVBMS.tempMin);
-  const current      = useMeasurement(LVBMS.current);
-  const state        = useMeasurement(LVBMS.generalState);
+  const soc          = useMeasurement(BOARDS.LVBMS, LVBMS.soc);
+  const totalVoltage = useMeasurement(BOARDS.LVBMS, LVBMS.totalVoltage);
+  const voltageMax   = useMeasurement(BOARDS.LVBMS, LVBMS.voltageMax);
+  const voltageMin   = useMeasurement(BOARDS.LVBMS, LVBMS.voltageMin);
+  const temperature  = useMeasurement(BOARDS.LVBMS, LVBMS.temperature);
+  const current      = useMeasurement(BOARDS.LVBMS, LVBMS.current);
+  const state        = useMeasurement(BOARDS.LVBMS, LVBMS.generalState);
 
   const socNum   = typeof soc === "number" ? soc : null;
   const socColor =
@@ -99,14 +98,13 @@ const LvBatterySection = () => {
 
         <CardContent className="flex flex-col gap-3 px-3">
           {/* Summary stats */}
-          <div className="grid grid-cols-3 gap-x-4 gap-y-1 text-xs sm:grid-cols-6">
+          <div className="grid grid-cols-3 gap-x-4 gap-y-1 text-xs sm:grid-cols-5">
             {[
               { label: "Total V",  value: fmt(totalVoltage), unit: "V"  },
               { label: "Current",  value: fmt(current),      unit: "A"  },
               { label: "V max",    value: fmt(voltageMax),   unit: "V"  },
               { label: "V min",    value: fmt(voltageMin),   unit: "V"  },
-              { label: "T max",    value: fmt(tempMax, 1),   unit: "°C" },
-              { label: "T min",    value: fmt(tempMin, 1),   unit: "°C" },
+              { label: "Temp",     value: fmt(temperature, 1), unit: "°C" },
             ].map(({ label, value, unit }) => (
               <div key={label} className="flex items-baseline justify-between">
                 <span className="text-muted-foreground">{label}</span>

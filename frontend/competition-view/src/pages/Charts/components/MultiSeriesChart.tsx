@@ -12,6 +12,9 @@ import {
 import { useStore } from "../../../store/store";
 
 export interface SeriesConfig {
+  /** Board name (must match backend, use BOARDS constants). */
+  board: string;
+  /** Measurement ID within that board. */
   measurementKey: string;
   /** Short label shown in the legend (e.g. "U", "V", "W"). */
   label: string;
@@ -48,7 +51,7 @@ const MultiSeriesChart = memo(({ title, series, unit = "" }: MultiSeriesChartPro
   const values = useStore(
     // The selector is stable because `series` is a module-level constant.
     useShallow((s) =>
-      series.map(({ measurementKey }) => s.telemetry[measurementKey] as number | undefined),
+      series.map(({ board, measurementKey }) => s.telemetry[board]?.[measurementKey] as number | undefined),
     ),
   );
 

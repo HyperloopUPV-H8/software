@@ -13,7 +13,9 @@ import useMeasurement from "../../../hooks/useMeasurement";
 interface TelemetryChartProps {
   /** Human-readable label shown in the card header. */
   title: string;
-  /** Backend telemetry key to track (e.g. "PCU/encoder_speed_km_h"). */
+  /** Board name (must match backend, use BOARDS constants). */
+  board: string;
+  /** Measurement ID within that board. */
   measurementKey: string;
   /** Unit appended to the y-axis label. */
   unit?: string;
@@ -30,6 +32,7 @@ interface TelemetryChartProps {
  */
 const TelemetryChart = memo(({
   title,
+  board,
   measurementKey,
   unit = "",
   colorIndex = 0,
@@ -41,7 +44,7 @@ const TelemetryChart = memo(({
   const yRef         = useRef<number[]>([]);
   const counterRef   = useRef(0);
 
-  const value = useMeasurement(measurementKey);
+  const value = useMeasurement(board, measurementKey);
   const color = CHART_COLORS[colorIndex % CHART_COLORS.length];
 
   // ── Initialise uplot ────────────────────────────────────────────────────

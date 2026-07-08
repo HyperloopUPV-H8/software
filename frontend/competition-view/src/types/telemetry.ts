@@ -7,8 +7,8 @@ export type { TelemetryPacket, VariableValue, Variables } from "@workspace/core"
 export type TelemetryData = Record<number, import("@workspace/core").TelemetryPacket>;
 
 /**
- * Flat map from measurement ID (string) to the latest value.
- * The store keeps only the most recent value per measurement to avoid
- * unbounded memory growth.
+ * Telemetry keyed first by board name then by measurement ID.
+ * Two-level lookup prevents collisions between boards that share
+ * measurement names (e.g. VCU and LCU both have "general_state").
  */
-export type TelemetryState = Record<string, number | boolean | string>;
+export type TelemetryState = Record<string, Record<string, number | boolean | string>>;

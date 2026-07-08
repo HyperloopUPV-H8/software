@@ -1,5 +1,5 @@
 import { Separator } from "@workspace/ui/components";
-import { HVBMS, HVBMS_CABINET } from "../../../constants/measurements";
+import { BOARDS, HVBMS, VCU } from "../../../constants/measurements";
 import useMeasurement from "../../../hooks/useMeasurement";
 import BatteryPackCard from "./BatteryPackCard";
 
@@ -10,13 +10,13 @@ const fmt = (v: number | boolean | string | undefined, decimals = 1) =>
   typeof v === "number" ? v.toFixed(decimals) : "—";
 
 const HvBatterySection = () => {
-  const totalVoltage = useMeasurement(HVBMS.batteriesVoltage);
-  const voltageMax   = useMeasurement(HVBMS.voltageMax);
-  const voltageMin   = useMeasurement(HVBMS.voltageMin);
-  const tempMax      = useMeasurement(HVBMS.tempMax);
-  const tempMin      = useMeasurement(HVBMS.tempMin);
-  const soc          = useMeasurement(HVBMS.minimumSoc);
-  const contactors   = useMeasurement(HVBMS_CABINET.contactorsState);
+  const totalVoltage = useMeasurement(BOARDS.HVBMS,         HVBMS.batteriesVoltage);
+  const voltageMax   = useMeasurement(BOARDS.HVBMS,         HVBMS.voltageMax);
+  const voltageMin   = useMeasurement(BOARDS.HVBMS,         HVBMS.voltageMin);
+  const tempMax      = useMeasurement(BOARDS.HVBMS,         HVBMS.tempMax);
+  const tempMin      = useMeasurement(BOARDS.HVBMS,         HVBMS.tempMin);
+  const soc          = useMeasurement(BOARDS.HVBMS,         HVBMS.minimumSoc);
+  const contactors   = useMeasurement(BOARDS.VCU, VCU.contactorsClosed);
 
   return (
     <section className="flex flex-col gap-4">
@@ -27,12 +27,12 @@ const HvBatterySection = () => {
         {contactors !== undefined && (
           <span
             className={`rounded-full border px-2 py-0.5 text-xs font-medium ${
-              contactors === "Close"
+              contactors === true
                 ? "border-green-500 text-green-600 dark:text-green-400"
                 : "border-red-500 text-red-600 dark:text-red-400"
             }`}
           >
-            Contactors {contactors}
+            Contactors {contactors === true ? "Closed" : "Open"}
           </span>
         )}
       </div>

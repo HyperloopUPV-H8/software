@@ -9,6 +9,7 @@ import {
   OPEN_CONTACTORS_ORDERS,
 } from "./constants/orders";
 import useKeyboardShortcuts from "./hooks/useKeyboardShortcuts";
+import usePodCatalog from "./hooks/usePodCatalog";
 import useSendOrder from "./hooks/useSendOrder";
 import AppLayout from "./layout/AppLayout";
 import Batteries from "./pages/Batteries";
@@ -27,6 +28,9 @@ const App = () => {
   const updateTelemetry   = useStore((s) => s.updateTelemetry);
 
   const sendOrder = useSendOrder();
+
+  // Fetch pod catalog to build packetId → boardName map for scoped telemetry
+  usePodCatalog();
 
   // Keyboard shortcuts help dialog
   const [helpOpen, setHelpOpen] = useState(false);

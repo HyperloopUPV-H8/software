@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components";
-import { hvbmsPack } from "../../../constants/measurements";
+import { BOARDS, hvbmsPack } from "../../../constants/measurements";
 import useMeasurement from "../../../hooks/useMeasurement";
 
 interface BatteryPackCardProps {
@@ -17,7 +17,7 @@ const fmt = (v: number | boolean | string | undefined, decimals = 1) =>
 /* ─── Individual cell tile ───────────────────────────────────────────────── */
 
 const CellTile = ({ cellNum, measurementKey }: { cellNum: number; measurementKey: string }) => {
-  const raw = useMeasurement(measurementKey);
+  const raw = useMeasurement(BOARDS.HVBMS, measurementKey);
   const v = typeof raw === "number" ? raw : null;
   const isLow  = v !== null && v < CELL_WARN_LOW;
   const isHigh = v !== null && v > CELL_WARN_HIGH;
@@ -57,34 +57,13 @@ const CellTile = ({ cellNum, measurementKey }: { cellNum: number; measurementKey
 const BatteryPackCard = ({ packNumber }: BatteryPackCardProps) => {
   const keys = hvbmsPack(packNumber);
 
-  const soc     = useMeasurement(keys.soc);
-  const voltage = useMeasurement(keys.voltage);
-  const temp    = useMeasurement(keys.temperature);
-
-  const socNum   = typeof soc === "number" ? soc : null;
-  const socColor =
-    socNum === null ? "bg-muted"     :
-    socNum < 15     ? "bg-red-500"   :
-    socNum < 30     ? "bg-amber-500" :
-                      "bg-green-500";
+  const voltage = useMeasurement(BOARDS.HVBMS, keys.voltage);
+  const temp    = useMeasurement(BOARDS.HVBMS, keys.tempMax);
 
   return (
     <Card className="gap-2 py-3">
       <CardHeader className="px-3 pb-0">
-        <div className="flex items-center justify-between gap-2">
-          <CardTitle className="text-sm font-semibold">Group {packNumber}</CardTitle>
-          <div className="flex items-center gap-1.5 flex-1 max-w-[60%]">
-            <div className="bg-muted h-1.5 flex-1 overflow-hidden rounded-full">
-              <div
-                className={`h-full rounded-full transition-all ${socColor}`}
-                style={{ width: `${socNum ?? 0}%` }}
-              />
-            </div>
-            <span className="text-xs font-medium tabular-nums w-8 text-right">
-              {fmt(soc, 0)}%
-            </span>
-          </div>
-        </div>
+        <CardTitle className="text-sm font-semibold">Group {packNumber}</CardTitle>
       </CardHeader>
 
       <CardContent className="flex flex-col gap-2 px-3">
@@ -94,7 +73,7 @@ const BatteryPackCard = ({ packNumber }: BatteryPackCardProps) => {
           <Stat label="Temp"    value={fmt(temp)}    unit="°C" />
         </div>
 
-        {/* 12-cell grid: 6 cols × 2 rows */}
+        {/* Cell grid */}
         <div className="grid grid-cols-6 gap-1">
           {keys.cells.map((key, i) => (
             <CellTile key={key} cellNum={i + 1} measurementKey={key} />

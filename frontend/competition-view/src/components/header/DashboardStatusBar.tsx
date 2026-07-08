@@ -1,6 +1,6 @@
 import { Button, Separator } from "@workspace/ui/components";
 import { useState } from "react";
-import { VCU } from "../../constants/measurements";
+import { BOARDS, VCU } from "../../constants/measurements";
 import {
   BRAKE_ORDERS,
   EMERGENCY_STOP_ORDERS,
@@ -70,9 +70,9 @@ const StatusLabel = ({
 const DashboardStatusBar = () => {
   const sendOrder = useSendOrder();
 
-  const generalState     = useMeasurement(VCU.generalState);
-  const operationalState = useMeasurement(VCU.operationalState);
-  const brakeRaw         = useMeasurement(VCU.allReeds);
+  const generalState     = useMeasurement(BOARDS.VCU, VCU.generalState);
+  const operationalState = useMeasurement(BOARDS.VCU, VCU.operationalState);
+  const brakeRaw         = useMeasurement(BOARDS.VCU, VCU.activeBrakes);
 
   const brakeLabel = brakeRaw === undefined ? "—" : brakeRaw ? "BRAKED" : "UNBRAKED";
   const brakeClass =

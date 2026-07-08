@@ -1,4 +1,4 @@
-import { VCU } from "../../../constants/measurements";
+import { BOARDS, VCU } from "../../../constants/measurements";
 import useMeasurement from "../../../hooks/useMeasurement";
 
 type BrakeStatus = "braked" | "unbraked" | "unknown";
@@ -16,10 +16,10 @@ interface BrakeIndicatorProps {
 
 /**
  * Visual indicator that mirrors the control-station BrakeState widget.
- * Reads VCU/all_reeds — truthy means brakes are engaged.
+ * Reads VCU/active_brakes — true means brakes are engaged.
  */
 const BrakeIndicator = ({ compact = false }: BrakeIndicatorProps) => {
-  const raw = useMeasurement(VCU.allReeds);
+  const raw = useMeasurement(BOARDS.VCU, VCU.activeBrakes);
 
   const status: BrakeStatus =
     raw === undefined ? "unknown" : raw ? "braked" : "unbraked";

@@ -1,10 +1,11 @@
+import React from "react";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components";
-import { LCU } from "../../../constants/measurements";
+import { BOARDS, LCU } from "../../../constants/measurements";
 import useMeasurement from "../../../hooks/useMeasurement";
 
 /** Airgap warning threshold in mm. */
@@ -13,7 +14,7 @@ const AIRGAP_WARN_MM = 5;
 const fmt = (v: number | boolean | string | undefined, decimals = 1) =>
   typeof v === "number" ? v.toFixed(decimals) : "—";
 
-/* ─── Shared row components ────────────────────────────────────────────── */
+/* ─── Shared row component ─────────────────────────────────────────────── */
 
 interface MeasurementRowProps {
   label: string;
@@ -30,7 +31,7 @@ const MeasurementRow = ({
   decimals = 1,
   warnBelow,
 }: MeasurementRowProps) => {
-  const value = useMeasurement(measurementKey);
+  const value = useMeasurement(BOARDS.LCU, measurementKey);
   const isWarning =
     warnBelow !== undefined &&
     typeof value === "number" &&
@@ -39,11 +40,7 @@ const MeasurementRow = ({
   return (
     <div className="flex items-baseline justify-between text-xs">
       <span className="text-muted-foreground">{label}</span>
-      <span
-        className={`font-medium tabular-nums ${
-          isWarning ? "text-amber-500" : "text-foreground"
-        }`}
-      >
+      <span className={`font-medium tabular-nums ${isWarning ? "text-amber-500" : "text-foreground"}`}>
         {fmt(value, decimals)}
         <span className="text-muted-foreground ml-0.5 font-normal">{unit}</span>
       </span>
@@ -51,34 +48,13 @@ const MeasurementRow = ({
   );
 };
 
-/* ─── Section components ───────────────────────────────────────────────── */
-
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
   <p className="text-muted-foreground mb-2 text-xs font-medium uppercase tracking-wider">
     {children}
   </p>
 );
 
-const PositionSection = () => (
-  <div>
-    <SectionLabel>Position</SectionLabel>
-    <div className="flex flex-col gap-1">
-      <MeasurementRow label="Y" measurementKey={LCU.positionY} unit="mm" decimals={2} />
-      <MeasurementRow label="Z" measurementKey={LCU.positionZ} unit="mm" decimals={2} />
-    </div>
-  </div>
-);
-
-const RotationSection = () => (
-  <div>
-    <SectionLabel>Rotation</SectionLabel>
-    <div className="flex flex-col gap-1">
-      <MeasurementRow label="Pitch" measurementKey={LCU.rotationPitch} unit="°" decimals={2} />
-      <MeasurementRow label="Roll"  measurementKey={LCU.rotationRoll}  unit="°" decimals={2} />
-      <MeasurementRow label="Yaw"   measurementKey={LCU.rotationYaw}   unit="°" decimals={2} />
-    </div>
-  </div>
-);
+/* ─── Airgap sections ──────────────────────────────────────────────────── */
 
 const VerticalAirgapsSection = () => (
   <div>
@@ -94,25 +70,44 @@ const VerticalAirgapsSection = () => (
 
 const HorizontalAirgapsSection = () => (
   <div>
-    <SectionLabel>Horizontal Airgaps</SectionLabel>
+    <SectionLabel>Lateral Airgaps</SectionLabel>
     <div className="flex flex-col gap-1">
-      <MeasurementRow label="H1" measurementKey={LCU.horizontalAirgap1} unit="mm" warnBelow={AIRGAP_WARN_MM} />
-      <MeasurementRow label="H2" measurementKey={LCU.horizontalAirgap2} unit="mm" warnBelow={AIRGAP_WARN_MM} />
-      <MeasurementRow label="H3" measurementKey={LCU.horizontalAirgap3} unit="mm" warnBelow={AIRGAP_WARN_MM} />
-      <MeasurementRow label="H4" measurementKey={LCU.horizontalAirgap4} unit="mm" warnBelow={AIRGAP_WARN_MM} />
+      <MeasurementRow label="L1" measurementKey={LCU.horizontalAirgap1} unit="mm" warnBelow={AIRGAP_WARN_MM} />
+      <MeasurementRow label="L2" measurementKey={LCU.horizontalAirgap2} unit="mm" warnBelow={AIRGAP_WARN_MM} />
+      <MeasurementRow label="L3" measurementKey={LCU.horizontalAirgap3} unit="mm" warnBelow={AIRGAP_WARN_MM} />
+      <MeasurementRow label="L4" measurementKey={LCU.horizontalAirgap4} unit="mm" warnBelow={AIRGAP_WARN_MM} />
+    </div>
+  </div>
+);
+
+const HemsCurrentsSection = () => (
+  <div>
+    <SectionLabel>HEMS Currents</SectionLabel>
+    <div className="flex flex-col gap-1">
+      <MeasurementRow label="H1" measurementKey={LCU.coilCurrentHEMS1} unit="A" decimals={2} />
+      <MeasurementRow label="H2" measurementKey={LCU.coilCurrentHEMS2} unit="A" decimals={2} />
+      <MeasurementRow label="H3" measurementKey={LCU.coilCurrentHEMS3} unit="A" decimals={2} />
+      <MeasurementRow label="H4" measurementKey={LCU.coilCurrentHEMS4} unit="A" decimals={2} />
+    </div>
+  </div>
+);
+
+const EmsCurrentsSection = () => (
+  <div>
+    <SectionLabel>EMS Currents</SectionLabel>
+    <div className="flex flex-col gap-1">
+      <MeasurementRow label="E1" measurementKey={LCU.coilCurrentEMS1} unit="A" decimals={2} />
+      <MeasurementRow label="E2" measurementKey={LCU.coilCurrentEMS2} unit="A" decimals={2} />
+      <MeasurementRow label="E3" measurementKey={LCU.coilCurrentEMS3} unit="A" decimals={2} />
+      <MeasurementRow label="E4" measurementKey={LCU.coilCurrentEMS4} unit="A" decimals={2} />
+      <MeasurementRow label="E5" measurementKey={LCU.coilCurrentEMS5} unit="A" decimals={2} />
+      <MeasurementRow label="E6" measurementKey={LCU.coilCurrentEMS6} unit="A" decimals={2} />
     </div>
   </div>
 );
 
 /* ─── Main card ─────────────────────────────────────────────────────────── */
 
-import React from "react";
-
-/**
- * Full levitation status card for the LCU.
- * Displays position, rotation, and all 8 airgap sensors in a 4-column grid.
- * Airgap values below 5 mm are highlighted in amber.
- */
 const LcuAirgapCard = () => (
   <Card className="gap-3 py-4">
     <CardHeader className="px-4 pb-0">
@@ -121,10 +116,10 @@ const LcuAirgapCard = () => (
 
     <CardContent className="px-4">
       <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
-        <PositionSection />
-        <RotationSection />
         <VerticalAirgapsSection />
         <HorizontalAirgapsSection />
+        <HemsCurrentsSection />
+        <EmsCurrentsSection />
       </div>
     </CardContent>
   </Card>

@@ -1,5 +1,5 @@
 import { Badge } from "@workspace/ui/components";
-import { VCU } from "../../../constants/measurements";
+import { BOARDS, VCU } from "../../../constants/measurements";
 import useMeasurement from "../../../hooks/useMeasurement";
 
 type StateCategory = "emergency" | "running" | "braking" | "idle" | "unknown";
@@ -55,8 +55,8 @@ interface VehicleStateBannerProps {
  * Background and text colour change based on the detected state category.
  */
 const VehicleStateBanner = ({ compact = false }: VehicleStateBannerProps) => {
-  const generalState     = useMeasurement(VCU.generalState);
-  const operationalState = useMeasurement(VCU.operationalState);
+  const generalState     = useMeasurement(BOARDS.VCU, VCU.generalState);
+  const operationalState = useMeasurement(BOARDS.VCU, VCU.operationalState);
 
   const category = categorise(generalState);
   const { banner, valueText, badgeClass } = STATE_STYLES[category];

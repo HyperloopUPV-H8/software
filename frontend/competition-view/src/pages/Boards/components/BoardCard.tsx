@@ -15,6 +15,8 @@ interface Stat {
 }
 
 interface BoardCardProps {
+  /** Board name used to scope the telemetry lookup (must match backend). */
+  board: string;
   /** Display name shown in the card header. */
   name: string;
   /** Measurement key for the board's general/operational state string. */
@@ -27,8 +29,8 @@ interface BoardCardProps {
  * Generic board status card.
  * Shows a state badge and an optional grid of secondary measurements.
  */
-const BoardCard = ({ name, stateMeasurementKey, stats = [] }: BoardCardProps) => {
-  const state = useMeasurement(stateMeasurementKey);
+const BoardCard = ({ board, name, stateMeasurementKey, stats = [] }: BoardCardProps) => {
+  const state = useMeasurement(board, stateMeasurementKey);
   const hasData = state !== undefined;
 
   return (
@@ -53,7 +55,7 @@ const BoardCard = ({ name, stateMeasurementKey, stats = [] }: BoardCardProps) =>
         <CardContent className="px-4">
           <div className="grid grid-cols-2 gap-x-4 gap-y-1">
             {stats.map((s) => (
-              <StatRow key={s.measurementKey} stat={s} />
+              <StatRow key={s.measurementKey} board={board} stat={s} />
             ))}
           </div>
         </CardContent>
@@ -62,8 +64,8 @@ const BoardCard = ({ name, stateMeasurementKey, stats = [] }: BoardCardProps) =>
   );
 };
 
-const StatRow = ({ stat }: { stat: Stat }) => {
-  const raw = useMeasurement(stat.measurementKey);
+const StatRow = ({ board, stat }: { board: string; stat: Stat }) => {
+  const raw = useMeasurement(board, stat.measurementKey);
   const display =
     typeof raw === "number"
       ? raw.toFixed(stat.decimals ?? 1)

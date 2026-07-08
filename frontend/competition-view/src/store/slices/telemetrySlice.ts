@@ -4,8 +4,11 @@ import type { Store } from "../store";
 
 export interface TelemetrySlice {
   telemetry: TelemetryState;
+  /** Maps numeric packet ID → board name. Populated from podDataStructure on connect. */
+  packetBoard: Record<number, string>;
+  setPacketBoard: (map: Record<number, string>) => void;
   updateTelemetry: (packets: TelemetryData) => void;
-  getMeasurement: (id: string) => number | boolean | string | undefined;
+  getMeasurement: (board: string, id: string) => number | boolean | string | undefined;
 }
 
 export const createTelemetrySlice: StateCreator<
@@ -15,22 +18,37 @@ export const createTelemetrySlice: StateCreator<
   TelemetrySlice
 > = (set, get) => ({
   telemetry: {},
+  packetBoard: {},
+
+  setPacketBoard: (map) => set({ packetBoard: map }),
 
   updateTelemetry: (packets) => {
-    const flat: TelemetryState = {};
+    const boardMap = get().packetBoard;
+    const updates: TelemetryState = {};
 
-    for (const packet of Object.values(packets)) {
+    for (const [packetIdStr, packet] of Object.entries(packets)) {
+      const boardName = boardMap[Number(packetIdStr)];
+      if (!boardName) continue;
+
+      if (!updates[boardName]) updates[boardName] = {};
+
       for (const [key, value] of Object.entries(packet.measurementUpdates)) {
         if (typeof value === "object" && value !== null && "last" in value) {
-          flat[key] = value.last;
+          updates[boardName][key] = value.last;
         } else {
-          flat[key] = value as number | boolean | string;
+          updates[boardName][key] = value as number | boolean | string;
         }
       }
     }
 
-    set((state) => ({ telemetry: { ...state.telemetry, ...flat } }));
+    set((state) => {
+      const newTelemetry = { ...state.telemetry };
+      for (const [board, measurements] of Object.entries(updates)) {
+        newTelemetry[board] = { ...newTelemetry[board], ...measurements };
+      }
+      return { telemetry: newTelemetry };
+    });
   },
 
-  getMeasurement: (id) => get().telemetry[id],
+  getMeasurement: (board, id) => get().telemetry[board]?.[id],
 });
