@@ -140,7 +140,16 @@ func configureUDPServerTransport(
 
 ) {
 	trace.Info().Msg("Starting UDP server")
-	udpServer := udp.NewServer(adj.Info.Addresses[BACKEND], adj.Info.Ports[UDP], &trace.Logger, config.UDP.RingBufferSize, config.UDP.PacketChanSize)
+	udpServer := udp.NewServer(
+		adj.Info.Addresses[BACKEND],
+		adj.Info.Ports[UDP],
+		&trace.Logger,
+		config.UDP.RingBufferSize,
+		config.UDP.PacketChanSize,
+		time.Duration(config.UDP.KeepAliveCheckIntervalMs)*time.Millisecond,
+		time.Duration(config.UDP.KeepAliveTimeoutMs)*time.Millisecond,
+		transp.SendFault,
+	)
 	err := udpServer.Start()
 	if err != nil {
 		trace.Fatal().Err(err).Msg("failed to start UDP server: " + err.Error())
