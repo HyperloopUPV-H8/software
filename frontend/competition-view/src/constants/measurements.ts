@@ -13,8 +13,6 @@ export const BOARDS = {
   PCU:   "PCU",
   LCU:   "LCU",
   HVBMS: "HVBMS",
-  LVBMS: "LVBMS",
-  BLCU:  "BLCU",
 } as const;
 
 export const VCU = {
@@ -79,24 +77,6 @@ export const hvbmsPack = (n: number) => ({
   tempMin: `battery${n}_min_temp`,
   cells:   Array.from({ length: 12 }, (_, i) => `battery${n}_cell${i + 1}`),
 });
-
-/** LVBMS — low-voltage battery management system. */
-export const LVBMS = {
-  cells:        ["cell_1", "cell_2", "cell_3", "cell_4", "cell_5", "cell_6"] as string[],
-  soc:          "SOC",
-  totalVoltage: "total_voltage",
-  voltageMin:   "voltage_min",
-  voltageMax:   "voltage_max",
-  temperature:  "temperature_1",
-  current:      "current",
-  generalState: "State",
-} as const;
-
-/** BLCU — bootloader control unit (firmware flashing). */
-export const BLCU = {
-  state:            "general_state_machine",
-  operationalState: "operational_state_machine",
-} as const;
 
 /** LCU — levitation control unit. */
 export const LCU = {

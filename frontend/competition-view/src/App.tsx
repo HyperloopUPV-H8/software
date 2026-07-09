@@ -13,7 +13,6 @@ import usePodCatalog from "./hooks/usePodCatalog";
 import useSendOrder from "./hooks/useSendOrder";
 import AppLayout from "./layout/AppLayout";
 import Batteries from "./pages/Batteries";
-import Orders from "./pages/Orders";
 import Overview from "./pages/Overview";
 import { useStore } from "./store/store";
 import type { Connection } from "./types/connection";
@@ -68,7 +67,6 @@ const App = () => {
       >
         <Routes>
           <Route path="/"          element={<ErrorBoundary title="Dashboard failed to render">  <Overview />   </ErrorBoundary>} />
-          <Route path="/orders"    element={<ErrorBoundary title="Orders failed to render">     <Orders />     </ErrorBoundary>} />
           <Route path="/batteries" element={<ErrorBoundary title="Batteries failed to render">  <Batteries />  </ErrorBoundary>} />
         </Routes>
       </AppLayout>

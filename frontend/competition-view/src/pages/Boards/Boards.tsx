@@ -1,4 +1,4 @@
-import { BLCU, BOARDS, HVBMS, LCU, LVBMS, PCU_BOARD, VCU } from "../../constants/measurements";
+import { BOARDS, HVBMS, LCU, PCU_BOARD, VCU } from "../../constants/measurements";
 import BoardCard from "./components/BoardCard";
 import LcuAirgapCard from "./components/LcuAirgapCard";
 
@@ -56,19 +56,6 @@ const Boards = () => (
           ]}
         />
 
-        <BoardCard
-          board={BOARDS.LVBMS}
-          name="LVBMS"
-          stateMeasurementKey={LVBMS.generalState}
-          stats={[
-            { label: "SOC",           measurementKey: LVBMS.soc,          unit: "%", decimals: 0 },
-            { label: "Total voltage", measurementKey: LVBMS.totalVoltage, unit: "V"              },
-            { label: "Current",       measurementKey: LVBMS.current,      unit: "A"              },
-            { label: "Temperature",   measurementKey: LVBMS.temperature,  unit: "°C"             },
-          ]}
-        />
-
-        <BoardCard board={BOARDS.BLCU} name="BLCU" stateMeasurementKey={BLCU.state} />
       </div>
     </section>
 

@@ -2,11 +2,9 @@ import { Button } from "@workspace/ui/components";
 import { ChevronUp } from "@workspace/ui/icons";
 import { useEffect, useRef, useState } from "react";
 import {
-  BLCU,
   BOARDS,
   HVBMS,
   LCU,
-  LVBMS,
   PCU,
   PCU_BOARD,
   VCU,
@@ -18,6 +16,7 @@ import BoardCard from "../Boards/components/BoardCard";
 import MultiSeriesChart, { type SeriesConfig } from "../Charts/components/MultiSeriesChart";
 import TelemetryChart from "../Charts/components/TelemetryChart";
 import MessageItem from "../Messages/components/MessageItem";
+import OrdersPanel from "./components/OrdersPanel";
 
 /* ─── Stable series configs ─────────────────────────────────────────────── */
 
@@ -280,11 +279,6 @@ const Dashboard = () => {
   const hvCurrent = useMeasurement(BOARDS.HVBMS, HVBMS.currentReading);
   const hvVSensor = useMeasurement(BOARDS.HVBMS, HVBMS.voltageReading);
 
-  const lvSoc     = useMeasurement(BOARDS.LVBMS, LVBMS.soc);
-  const lvVoltage = useMeasurement(BOARDS.LVBMS, LVBMS.totalVoltage);
-  const lvCurrent = useMeasurement(BOARDS.LVBMS, LVBMS.current);
-  const lvTemp    = useMeasurement(BOARDS.LVBMS, LVBMS.temperature);
-
   return (
     <div className="flex h-full w-full gap-3 overflow-hidden p-3">
 
@@ -292,7 +286,7 @@ const Dashboard = () => {
       <div className="flex min-h-0 flex-1 flex-col gap-3">
 
         {/* Summary cards row */}
-        <div className="grid shrink-0 grid-cols-4 gap-2">
+        <div className="grid shrink-0 grid-cols-3 gap-2">
           <BatteryCard
             title="HV Battery"
             soc={typeof hvSoc === "number" ? hvSoc : undefined}
@@ -300,16 +294,6 @@ const Dashboard = () => {
               { label: "Pack V",    value: fmtNum(hvVoltage), unit: "V" },
               { label: "Current",   value: fmtNum(hvCurrent), unit: "A" },
               { label: "V sensor",  value: fmtNum(hvVSensor), unit: "V" },
-            ]}
-          />
-          <BatteryCard
-            title="LV Battery"
-            soc={typeof lvSoc === "number" ? lvSoc : undefined}
-            rows={[
-              { label: "Voltage", value: fmtNum(lvVoltage), unit: "V" },
-              { label: "Current", value: fmtNum(lvCurrent), unit: "A" },
-              { label: "Temp",    value: fmtNum(lvTemp),    unit: "°C",
-                warn: typeof lvTemp === "number" && lvTemp > 55 },
             ]}
           />
           <KinematicsCard />
@@ -371,18 +355,9 @@ const Dashboard = () => {
               { label: "Slave SM", measurementKey: LCU.slaveState },
             ]}
           />
-          <BoardCard
-            board={BOARDS.LVBMS}
-            name="LVBMS"
-            stateMeasurementKey={LVBMS.generalState}
-            stats={[
-              { label: "SOC",     measurementKey: LVBMS.soc,          unit: "%", decimals: 0 },
-              { label: "Voltage", measurementKey: LVBMS.totalVoltage, unit: "V"              },
-              { label: "Current", measurementKey: LVBMS.current,      unit: "A"              },
-            ]}
-          />
-          <BoardCard board={BOARDS.BLCU} name="BLCU" stateMeasurementKey={BLCU.state} />
         </div>
+
+        <OrdersPanel />
 
         <MessagesPanel />
 
