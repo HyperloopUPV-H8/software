@@ -10,7 +10,7 @@
 
 # Vehicle Configuration
 [vehicle]
-boards = ["BCU", "BMSL", "HVSCU", "HVSCU-Cabinet", "LCU", "PCU", "VCU", "BLCU"]
+boards = ["HVBMS","LCU", "PCU", "VCU", "BLCU"]
 
 # ADJ (Architecture Description JSON) Configuration
 [adj]
@@ -28,7 +28,7 @@ backoff_min_ms = 100         # Minimum backoff duration in milliseconds
 backoff_max_ms = 5000        # Maximum backoff duration in milliseconds
 backoff_multiplier = 1.5     # Exponential backoff multiplier (e.g., 1.5 means each retry waits 1.5x longer)
 max_retries = 0              # Maximum retries before cycling (0 = infinite retries, recommended for persistent reconnection)
-connection_timeout_ms = 1000 # Connection timeout in milliseconds
+connection_timeout_ms = 3000 # Connection timeout in milliseconds
 keep_alive_ms = 1000         # Keep-alive interval in milliseconds
 
 # UDP Configuration
