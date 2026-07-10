@@ -463,6 +463,18 @@ func (transport *Transport) consumeErrors() {
 	}
 }
 
+// ReportError forwards an error to the API as an error notification so it
+// shows up in the GUI message log.
+func (transport *Transport) ReportError(err error) {
+	transport.errChan <- err
+}
+
+// TargetFromIp returns the board (transport target) registered for the given IP.
+func (transport *Transport) TargetFromIp(ip string) (abstraction.TransportTarget, bool) {
+	target, ok := transport.ipToTarget[ip]
+	return target, ok
+}
+
 func (transport *Transport) SendFault() {
 	err := transport.SendMessage(NewPacketMessage(data.NewPacket(0)))
 	if err != nil {

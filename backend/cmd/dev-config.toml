@@ -38,6 +38,8 @@ keep_alive_ms = 0              # Keep-alive interval in milliseconds (0 to disab
 [udp]
 ring_buffer_size = 64      # Size of the ring buffer for incoming packets (number of packets, not bytes)
 packet_chan_size = 16      # Size of the channel buffer
+keep_alive_check_interval_ms = 5   # How often the keep-alive checks last-received times (ms)
+keep_alive_timeout_ms = 100        # Max time without packets from an IP before it is considered disconnected (ms)
 
 # Server Configuration
 [server.ethernet-view]

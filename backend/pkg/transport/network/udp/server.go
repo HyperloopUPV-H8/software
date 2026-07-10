@@ -34,16 +34,38 @@ type Server struct {
 	count     int
 	ringMutex sync.Mutex
 	notEmpty  *sync.Cond
+
+	lastSeen               map[string]time.Time
+	lastSeenMu             sync.Mutex
+	keepAliveCheckInterval time.Duration
+	keepAliveTimeout       time.Duration
+	OnDisconnect           func(ip string)
 }
 
-func NewServer(address string, port uint16, logger *zerolog.Logger, ringBufferSize int, packetChanSize int) *Server {
+const (
+	defaultKeepAliveCheckInterval = 5 * time.Millisecond
+	defaultKeepAliveTimeout       = 100 * time.Millisecond
+)
+
+func NewServer(address string, port uint16, logger *zerolog.Logger, ringBufferSize int, packetChanSize int, keepAliveCheckInterval time.Duration, keepAliveTimeout time.Duration, onDisconnect func(ip string)) *Server {
+	if keepAliveCheckInterval <= 0 {
+		keepAliveCheckInterval = defaultKeepAliveCheckInterval
+	}
+	if keepAliveTimeout <= 0 {
+		keepAliveTimeout = defaultKeepAliveTimeout
+	}
+
 	s := &Server{
-		address:   address,
-		port:      port,
-		logger:    logger,
-		packetsCh: make(chan Packet, packetChanSize),
-		errorsCh:  make(chan error, 100),
-		stopCh:    make(chan struct{}),
+		address:                address,
+		port:                   port,
+		logger:                 logger,
+		packetsCh:              make(chan Packet, packetChanSize),
+		errorsCh:               make(chan error, 100),
+		stopCh:                 make(chan struct{}),
+		lastSeen:               make(map[string]time.Time),
+		keepAliveCheckInterval: keepAliveCheckInterval,
+		keepAliveTimeout:       keepAliveTimeout,
+		OnDisconnect:           onDisconnect,
 	}
 
 	s.ring = make([]Packet, ringBufferSize)
@@ -71,8 +93,9 @@ func (s *Server) Start() error {
 		Uint16("port", s.port).
 		Msg("UDP server started")
 
-	go s.readLoop()
-	go s.dispatchLoop()
+	go s.readLoop()      // Read incoming UDP packets
+	go s.dispatchLoop()  // Dispatch packets from ring buffer to channel
+	go s.keepAliveLoop() // Monitor keep-alive timeouts
 	return nil
 }
 
@@ -121,8 +144,47 @@ func (s *Server) readLoop() {
 				Int("size", len(payload)).
 				Msg("received UDP packet")
 
+			// Update keep-alive tracking for this source IP
+			s.lastSeenMu.Lock()
+			s.lastSeen[addr.IP.String()] = packet.Timestamp
+			s.lastSeenMu.Unlock()
+
 			// Push packet to ring buffer
 			s.push(packet)
+		}
+	}
+}
+
+// keepAliveLoop checks for clients that have not sent any packets within the keepAliveTimeout duration.
+func (s *Server) keepAliveLoop() {
+	ticker := time.NewTicker(s.keepAliveCheckInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-s.stopCh:
+			return
+		case now := <-ticker.C:
+			var timedOut []string
+
+			s.lastSeenMu.Lock()
+			for ip, last := range s.lastSeen {
+				if now.Sub(last) > s.keepAliveTimeout {
+					timedOut = append(timedOut, ip)
+					delete(s.lastSeen, ip)
+				}
+			}
+			s.lastSeenMu.Unlock()
+
+			for _, ip := range timedOut {
+				s.logger.Error().
+					Str("ip", ip).
+					Dur("timeout", s.keepAliveTimeout).
+					Msg("keep-alive timeout: no UDP packets received")
+				if s.OnDisconnect != nil {
+					s.OnDisconnect(ip)
+				}
+			}
 		}
 	}
 }
