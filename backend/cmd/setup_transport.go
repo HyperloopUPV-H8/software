@@ -140,6 +140,16 @@ func configureUDPServerTransport(
 
 ) {
 	trace.Info().Msg("Starting UDP server")
+
+	onKeepAliveTimeout := func(ip string) {
+		transp.SendFault()
+		board, ok := transp.TargetFromIp(ip)
+		if !ok {
+			board = "unknown"
+		}
+		transp.ReportError(fmt.Errorf("UDP keep-alive timeout: no packets received from board %s (%s) for %dms, fault sent", board, ip, config.UDP.KeepAliveTimeoutMs))
+	}
+
 	udpServer := udp.NewServer(
 		adj.Info.Addresses[BACKEND],
 		adj.Info.Ports[UDP],
@@ -148,7 +158,7 @@ func configureUDPServerTransport(
 		config.UDP.PacketChanSize,
 		time.Duration(config.UDP.KeepAliveCheckIntervalMs)*time.Millisecond,
 		time.Duration(config.UDP.KeepAliveTimeoutMs)*time.Millisecond,
-		transp.SendFault,
+		onKeepAliveTimeout,
 	)
 	err := udpServer.Start()
 	if err != nil {

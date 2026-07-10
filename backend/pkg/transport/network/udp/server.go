@@ -39,7 +39,7 @@ type Server struct {
 	lastSeenMu             sync.Mutex
 	keepAliveCheckInterval time.Duration
 	keepAliveTimeout       time.Duration
-	OnDisconnect           func()
+	OnDisconnect           func(ip string)
 }
 
 const (
@@ -47,7 +47,7 @@ const (
 	defaultKeepAliveTimeout       = 100 * time.Millisecond
 )
 
-func NewServer(address string, port uint16, logger *zerolog.Logger, ringBufferSize int, packetChanSize int, keepAliveCheckInterval time.Duration, keepAliveTimeout time.Duration, onDisconnect func()) *Server {
+func NewServer(address string, port uint16, logger *zerolog.Logger, ringBufferSize int, packetChanSize int, keepAliveCheckInterval time.Duration, keepAliveTimeout time.Duration, onDisconnect func(ip string)) *Server {
 	if keepAliveCheckInterval <= 0 {
 		keepAliveCheckInterval = defaultKeepAliveCheckInterval
 	}
@@ -182,7 +182,7 @@ func (s *Server) keepAliveLoop() {
 					Dur("timeout", s.keepAliveTimeout).
 					Msg("keep-alive timeout: no UDP packets received")
 				if s.OnDisconnect != nil {
-					s.OnDisconnect()
+					s.OnDisconnect(ip)
 				}
 			}
 		}
