@@ -147,7 +147,15 @@ func configureUDPServerTransport(
 		if !ok {
 			board = "unknown"
 		}
-		transp.ReportError(fmt.Errorf("UDP keep-alive timeout: no packets received from board %s (%s) for %dms, fault sent", board, ip, config.UDP.KeepAliveTimeoutMs))
+		err := fmt.Errorf("UDP keep-alive timeout: no packets received from board %s (%s) for %dms, fault sent", board, ip, config.UDP.KeepAliveTimeoutMs)
+		transp.ReportError(err)
+
+		// Close the board's TCP connection ourselves: the fault we just
+		// broadcast leaves unacked data on a dead peer, which suppresses the
+		// TCP keep-alive and would delay disconnect detection by minutes.
+		if ok {
+			transp.DisconnectTarget(board, err)
+		}
 	}
 
 	udpServer := udp.NewServer(

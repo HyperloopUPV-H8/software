@@ -224,6 +224,11 @@ func (transport *Transport) readLoopTCPConn(conn net.Conn, logger zerolog.Logger
 		for {
 			packet, err := transport.decoder.DecodeNext(conn)
 			if err != nil {
+				// net.ErrClosed means we closed the connection on purpose
+				// (e.g. UDP keep-alive timeout), and a fault was already sent
+				if errors.Is(err, net.ErrClosed) {
+					return
+				}
 				logger.Error().Stack().Err(err).Msg("decode")
 				transport.errChan <- err
 				transport.SendFault()
@@ -268,6 +273,10 @@ func (transport *Transport) SendMessage(message abstraction.TransportMessage) er
 	return err
 }
 
+// faultWriteTimeout bounds each TCP write of the fault broadcast; boards on
+// the vehicle LAN ack in milliseconds, so exceeding this means a dead peer
+const faultWriteTimeout = time.Second
+
 // handlePacketEvent is used to send an order to one of the connected boards
 func (transport *Transport) handlePacketEvent(message PacketMessage) error {
 	eventLogger := transport.logger.With().Str("type", fmt.Sprintf("%T", message.Packet)).Uint16("id", uint16(message.Id())).Logger()
@@ -287,16 +296,29 @@ func (transport *Transport) handlePacketEvent(message PacketMessage) error {
 		defer transport.connectionsMx.RUnlock()
 		for target, conn := range transport.connections {
 			targetName := string(target)
+
+			// Bound each write so a dead peer with a full send buffer cannot
+			// hold the connections lock (and the caller) for minutes
+			conn.SetWriteDeadline(time.Now().Add(faultWriteTimeout))
+			var writeErr error
 			totalWritten := 0
 			for totalWritten < len(data) {
 				n, err := conn.Write(data[totalWritten:])
 				eventLogger.Trace().Str("target", targetName).Int("amount", n).Msg("written chunk")
 				totalWritten += n
 				if err != nil {
-					eventLogger.Error().Str("target", targetName).Stack().Err(err).Msg("write")
-					transport.errChan <- err
-					return err
+					writeErr = err
+					break
 				}
+			}
+			conn.SetWriteDeadline(time.Time{})
+
+			// Keep broadcasting to the remaining boards even if one write
+			// fails: the fault must reach every live board
+			if writeErr != nil {
+				eventLogger.Error().Str("target", targetName).Stack().Err(writeErr).Msg("write")
+				transport.errChan <- writeErr
+				continue
 			}
 			eventLogger.Info().Str("target", targetName).Msg("sent")
 		}
@@ -473,6 +495,22 @@ func (transport *Transport) ReportError(err error) {
 func (transport *Transport) TargetFromIp(ip string) (abstraction.TransportTarget, bool) {
 	target, ok := transport.ipToTarget[ip]
 	return target, ok
+}
+
+// DisconnectTarget forcefully closes the TCP connection to target, if any.
+// The connection handler wakes up with reason, cleans up and notifies the
+// disconnection, and the client reconnection loop takes over.
+func (transport *Transport) DisconnectTarget(target abstraction.TransportTarget, reason error) bool {
+	transport.connectionsMx.RLock()
+	conn, ok := transport.connections[target]
+	transport.connectionsMx.RUnlock()
+	if !ok {
+		return false
+	}
+
+	transport.logger.Warn().Str("target", string(target)).Err(reason).Msg("forcefully disconnecting target")
+	tcp.CloseWithError(conn, reason)
+	return true
 }
 
 func (transport *Transport) SendFault() {

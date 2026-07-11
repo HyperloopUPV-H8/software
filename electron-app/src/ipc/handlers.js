@@ -8,9 +8,11 @@
  */
 
 import { app, dialog, ipcMain, shell } from "electron";
+import { execFile } from "child_process";
 import { readFile } from "fs/promises";
 import fs from "fs";
 import { isAbsolute, join } from "path";
+import { promisify } from "util";
 import {
   importConfig,
   readConfig,
@@ -61,6 +63,39 @@ function setupIpcHandlers() {
   });
 
   ipcMain.handle("get-app-version", () => app.getVersion());
+
+  /**
+   * @event setup-kernel
+   * @async
+   * @description Configures kernel parameters needed by the backend
+   * (disables the TCP invalid-packet rate limit). Linux only; on other
+   * platforms it shows a warning dialog.
+   * @returns {Promise<{success: boolean, message: string}>}
+   */
+  ipcMain.handle("setup-kernel", async () => {
+    if (process.platform !== "linux") {
+      const message = "Kernel setup is only available on Linux";
+      dialog.showMessageBox({
+        type: "warning",
+        title: "Not available",
+        message,
+      });
+      return { success: false, message };
+    }
+
+    try {
+      const { stdout } = await promisify(execFile)("pkexec", [
+        "sysctl",
+        "-w",
+        "net.ipv4.tcp_invalid_ratelimit=0",
+      ]);
+      logger.electron.info(`Kernel setup completed: ${stdout.trim()}`);
+      return { success: true, message: "Kernel set up successfully" };
+    } catch (error) {
+      logger.electron.error("Kernel setup failed:", error);
+      return { success: false, message: error.stderr?.trim() || error.message };
+    }
+  });
 
   ipcMain.handle("get-available-views", () => {
     const ALL_VIEWS = [
