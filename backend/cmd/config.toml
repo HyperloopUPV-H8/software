@@ -10,7 +10,7 @@
 
 # Vehicle Configuration
 [vehicle]
-boards = ["HVBMS","LCU", "PCU", "VCU", "BLCU"]
+boards = ["HVBMS","LCU", "PCU", "VCU"]
 
 # ADJ (Architecture Description JSON) Configuration
 [adj]
@@ -20,7 +20,6 @@ validate = true # Execute ADJ validator before starting backend
 # Transport Configuration
 [transport]
 propagate_fault = true
-
 # TCP Configuration
 # These settings control how the backend reconnects to boards when connections are lost
 [tcp]
