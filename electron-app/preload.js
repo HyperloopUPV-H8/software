@@ -48,6 +48,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   restartBackend: () => ipcRenderer.invoke("restart-backend"),
   // Get the list of views available in this build
   getAvailableViews: () => ipcRenderer.invoke("get-available-views"),
+  // Run the kernel setup script (used by mode selector renderer)
+  setupKernel: () => ipcRenderer.invoke("setup-kernel"),
   // Set initial mode (used by mode selector renderer)
   setInitialMode: (mode) => {
     ipcRenderer.send("mode-selected", mode);
