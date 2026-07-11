@@ -182,7 +182,10 @@ func (s *Server) keepAliveLoop() {
 					Dur("timeout", s.keepAliveTimeout).
 					Msg("keep-alive timeout: no UDP packets received")
 				if s.OnDisconnect != nil {
-					s.OnDisconnect(ip)
+					// Run the callback on its own goroutine so a slow
+					// handler (e.g. blocking TCP writes) cannot stall
+					// timeout detection for the remaining IPs
+					go s.OnDisconnect(ip)
 				}
 			}
 		}
