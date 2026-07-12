@@ -46,6 +46,17 @@ func (vehicle *Vehicle) UserPush(push abstraction.BrokerPush) error {
 			return nil
 		}
 
+		// Orders with id 0 are faults: broadcast them to every board instead
+		// of routing them like a regular order
+		if order.Id == 0 {
+			if transp, ok := vehicle.transport.(*transport.Transport); ok {
+				transp.SendFault()
+				vehicle.notifyError("PROPAGATING ORDER FAULT", errors.New("order with id 0 received, fault broadcasted to all boards"))
+				return nil
+			}
+			return fmt.Errorf("cannot propagate fault: transport does not support SendFault")
+		}
+
 		packet, err := order.ToPacket()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error converting order to packet: %v\n", err)
