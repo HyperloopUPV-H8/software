@@ -18,6 +18,7 @@ export const SHORTCUT_DEFS: ShortcutDef[] = [
   { key: "b",     label: "B",       description: "Brake"                              },
   { key: "o",     label: "O",       description: "Open Contactors"                    },
   { key: "e",     label: "E → E",   description: "Emergency Stop (press twice in 2 s)" },
+  { key: "space", label: "Space",   description: "Fault"                              },
   { key: "shift+/", label: "?",     description: "Toggle keyboard shortcuts reference" },
 ];
 
@@ -27,6 +28,7 @@ interface Options {
   onBrake: () => void;
   onOpenContactors: () => void;
   onEmergencyStop: () => void;
+  onFault: () => void;
   onToggleHelp: () => void;
 }
 
@@ -46,6 +48,7 @@ const useKeyboardShortcuts = ({
   onBrake,
   onOpenContactors,
   onEmergencyStop,
+  onFault,
   onToggleHelp,
 }: Options): Result => {
   const [estopArmed, setEstopArmed] = useState(false);
@@ -93,9 +96,14 @@ const useKeyboardShortcuts = ({
           e.preventDefault();
           onToggleHelp();
           break;
+
+        case " ":
+          e.preventDefault();
+          onFault();
+          break;
       }
     },
-    [enabled, estopArmed, onBrake, onOpenContactors, armEstop, confirmEstop, onToggleHelp],
+    [enabled, estopArmed, onBrake, onOpenContactors, armEstop, confirmEstop, onFault, onToggleHelp],
   );
 
   useEffect(() => {

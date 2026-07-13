@@ -1,9 +1,12 @@
 import { Button, Separator, SidebarTrigger, Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components";
 import { Keyboard } from "@workspace/ui/icons";
 import { useLocation } from "react-router";
+import { BOARDS } from "../../constants/measurements";
 import { PAGES } from "../../constants/pages";
+import useConnections from "../../hooks/useConnections";
 import ConnectionBadge from "./ConnectionBadge";
 import DashboardStatusBar from "./DashboardStatusBar";
+import HvalIndicator from "./HvalIndicator";
 
 interface HeaderProps {
   backendConnected: boolean;
@@ -14,31 +17,33 @@ const Header = ({ backendConnected, onShowShortcuts }: HeaderProps) => {
   const location = useLocation();
   const page = PAGES[location.pathname as keyof typeof PAGES];
   const pageTitle = page?.title ?? "Competition View";
-  const isDashboard = location.pathname === "/";
+
+  const connections = useConnections();
+  const vcuConnected = connections[BOARDS.VCU]?.isConnected ?? false;
 
   return (
-    <header className="h-(--header-height) relative flex shrink-0 items-center gap-2 border-b px-4">
-      <SidebarTrigger className="text-foreground -ml-1" />
-      <Separator orientation="vertical" className="text-foreground mx-1 data-[orientation=vertical]:h-4" />
-      <h1 className="text-foreground text-xl font-bold">{pageTitle}</h1>
+    <header className="h-(--header-height) grid shrink-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-b px-4">
+      <div className="flex min-w-0 items-center gap-2 justify-self-start">
+        <SidebarTrigger className="text-foreground -ml-1" />
+        <Separator orientation="vertical" className="text-foreground mx-1 data-[orientation=vertical]:h-5" />
+        <h1 className="text-foreground truncate text-2xl font-bold">{pageTitle}</h1>
+        <HvalIndicator />
+      </div>
 
-      {isDashboard && (
-        <div className="absolute left-1/2 -translate-x-1/2">
-          <DashboardStatusBar />
-        </div>
-      )}
+      <DashboardStatusBar />
 
-      <div className="ml-auto flex items-center gap-2">
+      <div className="flex items-center gap-2 justify-self-end">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" onClick={onShowShortcuts} aria-label="Keyboard shortcuts">
-              <Keyboard className="size-4" />
+              <Keyboard className="size-5" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Keyboard shortcuts (?)</TooltipContent>
         </Tooltip>
 
-        <ConnectionBadge connected={backendConnected} />
+        <ConnectionBadge label="Backend" connected={backendConnected} />
+        <ConnectionBadge label="VCU" connected={vcuConnected} />
       </div>
     </header>
   );

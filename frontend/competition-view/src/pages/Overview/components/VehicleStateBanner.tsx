@@ -51,14 +51,14 @@ interface VehicleStateBannerProps {
 }
 
 /**
- * Banner showing the vehicle's general and operational states.
+ * Banner showing the vehicle's state and active-brakes status.
  * Background and text colour change based on the detected state category.
  */
 const VehicleStateBanner = ({ compact = false }: VehicleStateBannerProps) => {
-  const generalState     = useMeasurement(BOARDS.VCU, VCU.generalState);
-  const operationalState = useMeasurement(BOARDS.VCU, VCU.operationalState);
+  const state        = useMeasurement(BOARDS.VCU, VCU.state);
+  const activeBrakes = useMeasurement(BOARDS.VCU, VCU.activeBrakes);
 
-  const category = categorise(generalState);
+  const category = categorise(state);
   const { banner, valueText, badgeClass } = STATE_STYLES[category];
 
   return (
@@ -68,19 +68,19 @@ const VehicleStateBanner = ({ compact = false }: VehicleStateBannerProps) => {
           Vehicle State
         </span>
         <span className={`font-black tracking-wide transition-colors duration-300 ${valueText} ${compact ? "text-xl leading-tight" : "text-2xl"}`}>
-          {generalState !== undefined ? String(generalState) : "—"}
+          {state !== undefined ? String(state) : "—"}
         </span>
       </div>
 
       <div className={`flex flex-col items-end ${compact ? "gap-0" : "gap-1"}`}>
         <span className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
-          Operational State
+          Brakes
         </span>
         <Badge
           variant="outline"
           className={`font-semibold transition-colors duration-300 ${badgeClass} ${compact ? "px-2 py-0.5 text-xs" : "px-3 py-1 text-sm"}`}
         >
-          {operationalState !== undefined ? String(operationalState) : "—"}
+          {activeBrakes === undefined ? "—" : activeBrakes ? "BRAKED" : "UNBRAKED"}
         </Badge>
       </div>
     </div>

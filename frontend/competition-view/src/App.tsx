@@ -6,6 +6,7 @@ import KeyboardShortcutsHelp from "./components/KeyboardShortcutsHelp";
 import {
   BRAKE_ORDERS,
   EMERGENCY_STOP_ORDERS,
+  FAULT_ORDERS,
   OPEN_CONTACTORS_ORDERS,
 } from "./constants/orders";
 import useKeyboardShortcuts from "./hooks/useKeyboardShortcuts";
@@ -41,6 +42,7 @@ const App = () => {
     onBrake:          () => sendOrder(BRAKE_ORDERS),
     onOpenContactors: () => sendOrder(OPEN_CONTACTORS_ORDERS),
     onEmergencyStop:  () => sendOrder(EMERGENCY_STOP_ORDERS),
+    onFault:          () => sendOrder(FAULT_ORDERS),
     onToggleHelp:     () => setHelpOpen((v) => !v),
   });
 

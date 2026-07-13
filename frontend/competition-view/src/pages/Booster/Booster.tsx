@@ -1,4 +1,4 @@
-import { BOARDS, HVBMS, VCU } from "../../constants/measurements";
+import { BOARDS, HVBMS, HVSCU_CABINET, VCU } from "../../constants/measurements";
 import useMeasurement from "../../hooks/useMeasurement";
 
 /* ─── Helpers ───────────────────────────────────────────────────────────── */
@@ -54,19 +54,44 @@ const EnumRow = ({ label, board, measurementKey, goodValues = [] }: {
   );
 };
 
+/* ─── Value row ──────────────────────────────────────────────────────────── */
+
+const ValueRow = ({ label, board, measurementKey, unit, digits = 1 }: {
+  label: string; board: string; measurementKey: string; unit: string; digits?: number
+}) => {
+  const v = useMeasurement(board, measurementKey);
+  const text = typeof v === "number" ? v.toFixed(digits) : "—";
+
+  return (
+    <div className="flex items-center justify-between rounded-lg border px-3 py-2">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <span className="text-foreground text-sm font-semibold tabular-nums">
+        {text} <span className="text-muted-foreground font-normal">{unit}</span>
+      </span>
+    </div>
+  );
+};
+
 /* ─── Booster page ───────────────────────────────────────────────────────── */
 
 const Booster = () => (
   <div className="flex h-full flex-col gap-6 overflow-auto p-4">
 
-    {/* ── VCU Subsystem States ──────────────────────────────────────────── */}
+    {/* ── VCU Subsystem Connectivity ────────────────────────────────────── */}
     <section className="flex flex-col gap-3">
-      <h2 className="text-foreground text-base font-semibold">VCU — Subsystem States</h2>
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-        <EnumRow label="HVBMS State"       board={BOARDS.VCU} measurementKey={VCU.hvbmsState}         goodValues={["Closed"]}    />
-        <EnumRow label="PCU State"         board={BOARDS.VCU} measurementKey={VCU.pcuState}           goodValues={["Propulsion"]}/>
-        <EnumRow label="LCU Vertical"      board={BOARDS.VCU} measurementKey={VCU.lcuVerticalState}   goodValues={["Levitation"]}/>
-        <EnumRow label="LCU Horizontal"    board={BOARDS.VCU} measurementKey={VCU.lcuHorizontalState} goodValues={["Enabled"]}   />
+      <h2 className="text-foreground text-base font-semibold">VCU — Subsystem Connectivity</h2>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <StatusRow label="HVBMS" board={BOARDS.VCU} measurementKey={VCU.hvbmsConnected} trueLabel="CONNECTED" falseLabel="DISCONNECTED" />
+        <StatusRow label="PCU"   board={BOARDS.VCU} measurementKey={VCU.pcuConnected}   trueLabel="CONNECTED" falseLabel="DISCONNECTED" />
+        <StatusRow label="LCU"   board={BOARDS.VCU} measurementKey={VCU.lcuConnected}   trueLabel="CONNECTED" falseLabel="DISCONNECTED" />
+      </div>
+    </section>
+
+    {/* ── HVSCU Cabinet ────────────────────────────────────────────────── */}
+    <section className="flex flex-col gap-3">
+      <h2 className="text-foreground text-base font-semibold">HVSCU Cabinet</h2>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <ValueRow label="DC Link Voltage" board={BOARDS.HVSCU_CABINET} measurementKey={HVSCU_CABINET.dcLinkVoltage} unit="V" />
       </div>
     </section>
 
@@ -76,7 +101,6 @@ const Booster = () => (
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
         <EnumRow  label="SDC Status"        board={BOARDS.HVBMS} measurementKey={HVBMS.sdcStatus}     goodValues={["ENGAGED"]}   />
         <StatusRow label="SDC Closed (VCU)" board={BOARDS.VCU}   measurementKey={VCU.sdcClosed}       trueLabel="CLOSED" falseLabel="OPEN" />
-        <StatusRow label="Contactors"       board={BOARDS.VCU}   measurementKey={VCU.contactorsClosed} trueLabel="CLOSED" falseLabel="OPEN" />
         <StatusRow label="Active Brakes"    board={BOARDS.VCU}   measurementKey={VCU.activeBrakes}    trueLabel="ENGAGED" falseLabel="DISENGAGED" trueIsGood={false} />
         <StatusRow label="Brake Fault"      board={BOARDS.VCU}   measurementKey={VCU.brakeFault}      trueLabel="FAULT"  falseLabel="OK"          trueIsGood={false} />
         <EnumRow  label="IMD Status"        board={BOARDS.HVBMS} measurementKey={HVBMS.imdStatus}     goodValues={["NORMAL"]}    />

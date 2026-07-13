@@ -6,17 +6,17 @@ import {
   HVBMS,
   LCU,
   PCU,
-  PCU_BOARD,
   VCU,
 } from "../../constants/measurements";
 import useMeasurement from "../../hooks/useMeasurement";
 import { useStore } from "../../store/store";
 import type { MessageKind } from "../../types/message";
-import BoardCard from "../Boards/components/BoardCard";
 import MultiSeriesChart, { type SeriesConfig } from "../Charts/components/MultiSeriesChart";
 import TelemetryChart from "../Charts/components/TelemetryChart";
 import MessageItem from "../Messages/components/MessageItem";
+import BoardsOverviewCard from "./components/BoardsOverviewCard";
 import OrdersPanel from "./components/OrdersPanel";
+import TrackProgress from "./components/TrackProgress";
 
 /* ─── Stable series configs ─────────────────────────────────────────────── */
 
@@ -78,15 +78,13 @@ interface BatteryCardProps {
 
 const BatteryCard = ({ title, soc, rows }: BatteryCardProps) => {
   const socPct   = typeof soc === "number" ? Math.min(100, Math.max(0, soc)) : 0;
-  const barColor = typeof soc !== "number"
-    ? "bg-muted-foreground/20"
-    : soc < 20 ? "bg-red-500" : soc < 50 ? "bg-yellow-500" : "bg-green-500";
+  const barColor = typeof soc !== "number" ? "bg-muted-foreground/20" : "bg-yellow-500";
 
   return (
     <div className="bg-card flex flex-col rounded-xl border p-3 gap-2">
       <div className="flex items-center justify-between">
         <span className="text-sm font-semibold">{title}</span>
-        <span className={`text-sm font-bold tabular-nums ${typeof soc === "number" && soc < 20 ? "text-red-500" : ""}`}>
+        <span className={`text-base font-bold tabular-nums ${typeof soc === "number" && soc < 20 ? "text-red-500" : ""}`}>
           {typeof soc === "number" ? soc.toFixed(0) : "—"}
           <span className="text-muted-foreground ml-0.5 text-xs font-normal">%</span>
         </span>
@@ -100,10 +98,10 @@ const BatteryCard = ({ title, soc, rows }: BatteryCardProps) => {
         {rows.map(({ label, value, unit, warn }) => (
           <div key={label} className="flex items-baseline justify-between">
             <span className="text-muted-foreground text-[10px] uppercase tracking-wider">{label}</span>
-            <span className={`text-xs font-medium tabular-nums ${warn ? "text-red-500" : "text-foreground"}`}>
+            <span className={`text-sm font-medium tabular-nums ${warn ? "text-red-500" : "text-foreground"}`}>
               {value ?? "—"}
               {value !== undefined && unit && (
-                <span className="text-muted-foreground ml-0.5 text-[10px] font-normal">{unit}</span>
+                <span className="text-muted-foreground ml-0.5 text-xs font-normal">{unit}</span>
               )}
             </span>
           </div>
@@ -116,15 +114,13 @@ const BatteryCard = ({ title, soc, rows }: BatteryCardProps) => {
 /* ─── Kinematics card ───────────────────────────────────────────────────── */
 
 const KinematicsCard = () => {
-  const speed        = useMeasurement(BOARDS.PCU, PCU.speed);
-  const position     = useMeasurement(BOARDS.PCU, PCU.position);
-  const acceleration = useMeasurement(BOARDS.PCU, PCU.acceleration);
-  const highPsi      = useMeasurement(BOARDS.VCU, VCU.highPressure);
-  const lowPsi       = useMeasurement(BOARDS.VCU, VCU.lowPressure);
+  const speed    = useMeasurement(BOARDS.PCU, PCU.speed);
+  const position = useMeasurement(BOARDS.PCU, PCU.position);
+  const highPsi  = useMeasurement(BOARDS.VCU, VCU.highPressure);
+  const lowPsi   = useMeasurement(BOARDS.VCU, VCU.lowPressure);
 
   const rows = [
     { label: "Position",     value: fmtNum(position),        unit: "m"    },
-    { label: "Acceleration", value: fmtNum(acceleration, 2), unit: "m/s²" },
     { label: "High pres.",   value: fmtNum(highPsi),         unit: "bar"  },
     { label: "Low pres.",    value: fmtNum(lowPsi),          unit: "bar"  },
   ];
@@ -133,17 +129,17 @@ const KinematicsCard = () => {
     <div className="bg-card flex flex-col rounded-xl border p-3 gap-2">
       <span className="text-sm font-semibold">Kinematics</span>
       <div className="flex items-baseline gap-1">
-        <span className="text-3xl font-bold tabular-nums">{fmtNum(speed, 0) ?? "—"}</span>
+        <span className="text-4xl font-bold tabular-nums">{fmtNum(speed, 0) ?? "—"}</span>
         <span className="text-muted-foreground text-sm">km/h</span>
       </div>
       <div className="flex flex-col gap-0.5">
         {rows.map(({ label, value, unit }) => (
           <div key={label} className="flex items-baseline justify-between">
             <span className="text-muted-foreground text-[10px] uppercase tracking-wider">{label}</span>
-            <span className="text-foreground text-xs font-medium tabular-nums">
+            <span className="text-foreground text-sm font-medium tabular-nums">
               {value ?? "—"}
               {value !== undefined && unit && (
-                <span className="text-muted-foreground ml-0.5 text-[10px] font-normal">{unit}</span>
+                <span className="text-muted-foreground ml-0.5 text-xs font-normal">{unit}</span>
               )}
             </span>
           </div>
@@ -158,8 +154,12 @@ const KinematicsCard = () => {
 interface SafeRow { label: string; text: string; color: string }
 
 const SafetyCard = () => {
-  const sdcStatus  = useMeasurement(BOARDS.HVBMS, HVBMS.sdcStatus);
-  const contactors = useMeasurement(BOARDS.VCU,   VCU.contactorsClosed);
+  const sdcStatus     = useMeasurement(BOARDS.HVBMS, HVBMS.sdcStatus);
+  const contactorHigh = useMeasurement(BOARDS.HVBMS, HVBMS.contactorHigh);
+  const contactorLow  = useMeasurement(BOARDS.HVBMS, HVBMS.contactorLow);
+  const contactors    = contactorHigh === undefined || contactorLow === undefined
+    ? undefined
+    : contactorHigh === true && contactorLow === true;
   const imd        = useMeasurement(BOARDS.HVBMS, HVBMS.imdOk);
   const hvBmsState = useMeasurement(BOARDS.HVBMS, HVBMS.operationalState);
 
@@ -193,7 +193,7 @@ const SafetyCard = () => {
         {rows.map(({ label, text, color }) => (
           <div key={label} className="flex items-center justify-between">
             <span className="text-muted-foreground text-[10px] uppercase tracking-wider">{label}</span>
-            <span className={`text-xs font-semibold ${color}`}>{text}</span>
+            <span className={`text-sm font-semibold ${color}`}>{text}</span>
           </div>
         ))}
       </div>
@@ -274,92 +274,58 @@ const MessagesPanel = () => {
 /* ─── Dashboard ─────────────────────────────────────────────────────────── */
 
 const Dashboard = () => {
-  const hvSoc     = useMeasurement(BOARDS.HVBMS, HVBMS.minimumSoc);
+  const hvSoc     = useMeasurement(BOARDS.HVBMS, HVBMS.soc);
   const hvVoltage = useMeasurement(BOARDS.HVBMS, HVBMS.batteriesVoltage);
   const hvCurrent = useMeasurement(BOARDS.HVBMS, HVBMS.currentReading);
   const hvVSensor = useMeasurement(BOARDS.HVBMS, HVBMS.voltageReading);
 
   return (
-    <div className="flex h-full w-full gap-3 overflow-hidden p-3">
+    <div className="flex h-full w-full flex-col gap-3 overflow-hidden p-3">
 
-      {/* ── Left column ──────────────────────────────────────────────── */}
-      <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <TrackProgress />
 
-        {/* Summary cards row */}
-        <div className="grid shrink-0 grid-cols-3 gap-2">
-          <BatteryCard
-            title="HV Battery"
-            soc={typeof hvSoc === "number" ? hvSoc : undefined}
-            rows={[
-              { label: "Pack V",    value: fmtNum(hvVoltage), unit: "V" },
-              { label: "Current",   value: fmtNum(hvCurrent), unit: "A" },
-              { label: "V sensor",  value: fmtNum(hvVSensor), unit: "V" },
-            ]}
-          />
-          <KinematicsCard />
-          <SafetyCard />
+      <div className="flex min-h-0 flex-1 gap-3">
+
+        {/* ── Left column ────────────────────────────────────────────── */}
+        <div className="flex min-h-0 flex-1 flex-col gap-3">
+
+          {/* Summary cards row */}
+          <div className="grid shrink-0 grid-cols-3 gap-2">
+            <BatteryCard
+              title="HV Battery"
+              soc={typeof hvSoc === "number" ? hvSoc : undefined}
+              rows={[
+                { label: "Pack V",    value: fmtNum(hvVoltage), unit: "V" },
+                { label: "Current",   value: fmtNum(hvCurrent), unit: "A" },
+                { label: "DC Link",   value: fmtNum(hvVSensor), unit: "V" },
+              ]}
+            />
+            <KinematicsCard />
+            <SafetyCard />
+          </div>
+
+          {/* Charts — 2 cols × 3 rows */}
+          <div className="grid min-h-0 flex-1 grid-cols-2 grid-rows-3 gap-2">
+            <MultiSeriesChart title="DLIM — Phase Currents"  series={DLIM_SERIES}       unit="A"  />
+            <TelemetryChart   title="Speed"                  board={BOARDS.PCU}          measurementKey={PCU.speed}    unit="km/h" colorIndex={0} />
+            <MultiSeriesChart title="Vertical Airgaps"       series={VERT_AIRGAP_SERIES} unit="mm" />
+            <MultiSeriesChart title="Lateral Airgaps"        series={LAT_AIRGAP_SERIES}  unit="mm" />
+            <MultiSeriesChart title="HEMS — Coil Currents"   series={HEMS_SERIES}        unit="A"  />
+            <MultiSeriesChart title="EMS — Coil Currents"    series={EMS_SERIES}         unit="A"  />
+          </div>
+
         </div>
 
-        {/* Charts — 2 cols × 3 rows */}
-        <div className="grid min-h-0 flex-1 grid-cols-2 grid-rows-3 gap-2">
-          <MultiSeriesChart title="DLIM — Phase Currents"  series={DLIM_SERIES}       unit="A"  />
-          <TelemetryChart   title="Speed"                  board={BOARDS.PCU}          measurementKey={PCU.speed}    unit="km/h" colorIndex={0} />
-          <MultiSeriesChart title="Vertical Airgaps"       series={VERT_AIRGAP_SERIES} unit="mm" />
-          <MultiSeriesChart title="Lateral Airgaps"        series={LAT_AIRGAP_SERIES}  unit="mm" />
-          <MultiSeriesChart title="HEMS — Coil Currents"   series={HEMS_SERIES}        unit="A"  />
-          <MultiSeriesChart title="EMS — Coil Currents"    series={EMS_SERIES}         unit="A"  />
+        {/* ── Right column ───────────────────────────────────────────── */}
+        <div className="flex w-[38%] min-h-0 flex-col gap-3">
+
+          <BoardsOverviewCard />
+
+          <OrdersPanel />
+
+          <MessagesPanel />
+
         </div>
-
-      </div>
-
-      {/* ── Right column ─────────────────────────────────────────────── */}
-      <div className="flex w-[38%] min-h-0 flex-col gap-3">
-
-        <div className="grid shrink-0 grid-cols-2 gap-2">
-          <BoardCard
-            board={BOARDS.VCU}
-            name="VCU"
-            stateMeasurementKey={VCU.generalState}
-            stats={[
-              { label: "Op. state",   measurementKey: VCU.operationalState              },
-              { label: "High pres.",  measurementKey: VCU.highPressure,  unit: "bar"    },
-              { label: "SDC",         measurementKey: VCU.sdcClosed                     },
-              { label: "Contactors",  measurementKey: VCU.contactorsClosed              },
-            ]}
-          />
-          <BoardCard
-            board={BOARDS.HVBMS}
-            name="HVBMS"
-            stateMeasurementKey={HVBMS.operationalState}
-            stats={[
-              { label: "Min SOC",  measurementKey: HVBMS.minimumSoc,       unit: "%"  },
-              { label: "Pack V",   measurementKey: HVBMS.batteriesVoltage, unit: "V"  },
-              { label: "Current",  measurementKey: HVBMS.currentReading,   unit: "A"  },
-              { label: "Temp max", measurementKey: HVBMS.tempMax,          unit: "°C" },
-            ]}
-          />
-          <BoardCard
-            board={BOARDS.PCU}
-            name="PCU"
-            stateMeasurementKey={PCU_BOARD.generalState}
-            stats={[
-              { label: "Op. state",    measurementKey: PCU_BOARD.operatingState          },
-              { label: "Peak current", measurementKey: PCU_BOARD.peakCurrent, unit: "A" },
-            ]}
-          />
-          <BoardCard
-            board={BOARDS.LCU}
-            name="LCU"
-            stateMeasurementKey={LCU.masterState}
-            stats={[
-              { label: "Slave SM", measurementKey: LCU.slaveState },
-            ]}
-          />
-        </div>
-
-        <OrdersPanel />
-
-        <MessagesPanel />
 
       </div>
 

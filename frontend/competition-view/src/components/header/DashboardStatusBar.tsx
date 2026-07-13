@@ -1,6 +1,7 @@
-import { Button, Separator } from "@workspace/ui/components";
-import { useState } from "react";
-import { BOARDS, VCU } from "../../constants/measurements";
+import { Button, Separator, Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components";
+import { AlertTriangle, Square, Unplug } from "@workspace/ui/icons";
+import { formatAxisValue } from "../../constants/chartConfig";
+import { BOARDS, HVAL_THRESHOLD_V, HVBMS, VCU } from "../../constants/measurements";
 import {
   BRAKE_ORDERS,
   EMERGENCY_STOP_ORDERS,
@@ -8,60 +9,57 @@ import {
 } from "../../constants/orders";
 import useMeasurement from "../../hooks/useMeasurement";
 import useSendOrder from "../../hooks/useSendOrder";
+import { stateBadgeClass } from "../../lib/stateColor";
 
-/* ─── State colour helper ────────────────────────────────────────────────── */
+/* ─── Icon-only order button (half the footprint of a labelled button) ──── */
 
-const stateColor = (state: string | number | boolean | undefined): string => {
-  if (state === undefined) return "text-muted-foreground";
-  const s = String(state).toUpperCase();
-  if (s.includes("EMERGENCY") || s.includes("FAULT") || s.includes("ERROR")) return "text-red-500";
-  if (s.includes("RUN") || s.includes("NOMINAL") || s.includes("ACCELERAT")) return "text-green-500";
-  if (s.includes("BRAKE") || s.includes("DECELER") || s.includes("WARN")) return "text-amber-500";
-  return "text-muted-foreground";
-};
-
-/* ─── Emergency stop button (requires two clicks within 2 s) ────────────── */
-
-const EStopButton = ({ onConfirm }: { onConfirm: () => void }) => {
-  const [armed, setArmed] = useState(false);
-
-  const handleClick = () => {
-    if (armed) { onConfirm(); setArmed(false); return; }
-    setArmed(true);
-    setTimeout(() => setArmed(false), 2000);
-  };
-
-  return (
-    <Button
-      size="sm"
-      variant="outline"
-      onClick={handleClick}
-      className={armed
-        ? "animate-pulse border-red-600 bg-red-600 text-white hover:bg-red-700"
-        : "border-red-500 text-red-600 hover:bg-red-500/10 dark:text-red-400"
-      }
-    >
-      {armed ? "⚠ Confirm E-Stop" : "⚠ E-Stop"}
-    </Button>
-  );
-};
-
-/* ─── Compact status label ───────────────────────────────────────────────── */
-
-const StatusLabel = ({
-  heading,
-  value,
-  valueClass = "text-foreground",
+const OrderIconButton = ({
+  label,
+  className,
+  onClick,
+  children,
 }: {
-  heading: string;
-  value: string;
-  valueClass?: string;
+  label: string;
+  className?: string;
+  onClick: () => void;
+  children: React.ReactNode;
 }) => (
-  <div className="flex flex-col gap-0">
-    <span className="text-muted-foreground text-[10px] leading-none font-medium uppercase tracking-widest">
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <Button size="icon" variant="outline" onClick={onClick} aria-label={label} className={className}>
+        {children}
+      </Button>
+    </TooltipTrigger>
+    <TooltipContent>{label}</TooltipContent>
+  </Tooltip>
+);
+
+/* ─── Shared vertical rhythm for the status blocks ───────────────────────── */
+
+const VDivider = () => <Separator orientation="vertical" className="data-[orientation=vertical]:h-6" />;
+
+const StatBlock = ({ heading, children }: { heading: string; children: React.ReactNode }) => (
+  <div className="flex flex-col gap-1.5">
+    <span className="text-muted-foreground text-xs leading-none font-medium uppercase tracking-widest">
       {heading}
     </span>
-    <span className={`text-sm font-bold leading-tight ${valueClass}`}>{value}</span>
+    {/* Fixed-height value row so a bare text value and a bordered badge line up identically. */}
+    <div className="flex h-8 items-center">{children}</div>
+  </div>
+);
+
+const StatValue = ({
+  value,
+  valueClass = "text-foreground",
+  width,
+}: {
+  value: string;
+  valueClass?: string;
+  /** Fixed width so a longer/shorter value doesn't shift the elements after it. */
+  width?: string;
+}) => (
+  <div className={`${width} overflow-hidden`}>
+    <span className={`block w-fit max-w-full truncate text-base font-bold leading-tight ${valueClass}`}>{value}</span>
   </div>
 );
 
@@ -70,9 +68,14 @@ const StatusLabel = ({
 const DashboardStatusBar = () => {
   const sendOrder = useSendOrder();
 
-  const generalState     = useMeasurement(BOARDS.VCU, VCU.generalState);
-  const operationalState = useMeasurement(BOARDS.VCU, VCU.operationalState);
-  const brakeRaw         = useMeasurement(BOARDS.VCU, VCU.activeBrakes);
+  const state    = useMeasurement(BOARDS.VCU, VCU.state);
+  const brakeRaw = useMeasurement(BOARDS.VCU, VCU.activeBrakes);
+  const dcLinkV  = useMeasurement(BOARDS.HVBMS, HVBMS.voltageReading) as number | undefined;
+
+  const dcLinkActive = dcLinkV !== undefined && dcLinkV > HVAL_THRESHOLD_V;
+  const dcLinkClass = dcLinkV === undefined
+    ? "text-muted-foreground"
+    : dcLinkActive ? "text-red-500" : "text-green-500";
 
   const brakeLabel = brakeRaw === undefined ? "—" : brakeRaw ? "BRAKED" : "UNBRAKED";
   const brakeClass =
@@ -82,43 +85,50 @@ const DashboardStatusBar = () => {
 
   return (
     <div className="flex items-center gap-3">
-      <StatusLabel
-        heading="State"
-        value={generalState !== undefined ? String(generalState) : "—"}
-        valueClass={stateColor(generalState)}
-      />
+      <StatBlock heading="DC Link">
+        <StatValue value={dcLinkV !== undefined ? `${formatAxisValue(dcLinkV)} V` : "—"} valueClass={dcLinkClass} width="w-28" />
+      </StatBlock>
 
-      <Separator orientation="vertical" className="data-[orientation=vertical]:h-5" />
+      <VDivider />
 
-      <StatusLabel
-        heading="Op. State"
-        value={operationalState !== undefined ? String(operationalState) : "—"}
-      />
+      <StatBlock heading="VCU State">
+        {/* Fixed-width slot so a longer/shorter state string doesn't shift the elements after it. */}
+        <div className="w-44 overflow-hidden">
+          <span className={`inline-block max-w-full truncate rounded-md border px-2.5 py-1 text-base font-bold leading-tight ${stateBadgeClass(state)}`}>
+            {state !== undefined ? String(state) : "—"}
+          </span>
+        </div>
+      </StatBlock>
 
-      <Separator orientation="vertical" className="data-[orientation=vertical]:h-5" />
+      <VDivider />
 
-      <StatusLabel heading="Brake" value={brakeLabel} valueClass={brakeClass} />
+      <StatBlock heading="Brake">
+        <StatValue value={brakeLabel} valueClass={brakeClass} width="w-24" />
+      </StatBlock>
 
-      <Separator orientation="vertical" className="data-[orientation=vertical]:h-5" />
+      <VDivider />
 
-      <Button
-        size="sm"
-        variant="outline"
-        onClick={() => sendOrder(BRAKE_ORDERS)}
-      >
-        Brake
-      </Button>
+      <div className="flex items-center gap-1">
+        <OrderIconButton label="Brake" onClick={() => sendOrder(BRAKE_ORDERS)}>
+          <Square className="size-5" />
+        </OrderIconButton>
 
-      <Button
-        size="sm"
-        variant="outline"
-        className="border-amber-500 text-amber-600 hover:bg-amber-500/10 dark:text-amber-400"
-        onClick={() => sendOrder(OPEN_CONTACTORS_ORDERS)}
-      >
-        Open Contactors
-      </Button>
+        <OrderIconButton
+          label="Open Contactors"
+          className="border-amber-500 text-amber-600 hover:bg-amber-500/10 dark:text-amber-400"
+          onClick={() => sendOrder(OPEN_CONTACTORS_ORDERS)}
+        >
+          <Unplug className="size-5" />
+        </OrderIconButton>
 
-      <EStopButton onConfirm={() => sendOrder(EMERGENCY_STOP_ORDERS)} />
+        <OrderIconButton
+          label="Emergency Stop"
+          className="border-red-500 text-red-600 hover:bg-red-500/10 dark:text-red-400"
+          onClick={() => sendOrder(EMERGENCY_STOP_ORDERS)}
+        >
+          <AlertTriangle className="size-5" />
+        </OrderIconButton>
+      </div>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 /**
  * Backend telemetry measurement IDs and board names sourced from the ADJ
- * repository (branch: astra-wip4).
+ * repository (branch: Astra).
  *
  * IDs are the raw values sent by the backend inside `measurementUpdates`.
  * The BOARDS map provides the board name needed for the two-level lookup
@@ -9,47 +9,50 @@
 
 /** Board names as reported by the backend (from the ADJ). */
 export const BOARDS = {
-  VCU:   "VCU",
-  PCU:   "PCU",
-  LCU:   "LCU",
-  HVBMS: "HVBMS",
+  VCU:           "VCU",
+  PCU:           "PCU",
+  LCU:           "LCU",
+  HVBMS:         "HVBMS",
+  HVSCU_CABINET: "HVSCU-Cabinet",
 } as const;
 
 export const VCU = {
-  generalState:       "general_state",
-  operationalState:   "operational_state",
-  highPressure:       "high_pressure",
-  lowPressure:        "low_pressure",
-  sdcClosed:          "sdc_closed",
-  contactorsClosed:   "contactors_closed",
-  activeBrakes:       "active_brakes",
-  brakeFault:         "brake_fault_detected",
-  // Sub-system states as orchestrated by the VCU
-  hvbmsState:         "hvbms_state",
-  pcuState:           "pcu_state",
-  lcuVerticalState:   "lcu_vertical_state",
-  lcuHorizontalState: "lcu_horizontal_state",
+  state:                   "state",
+  highPressure:            "high_pressure",
+  lowPressure:             "low_pressure",
+  pressureRegulatorFdbk:   "pressure_regulator_feedback",
+  sdcClosed:               "sdc_closed",
+  activeBrakes:            "active_brakes",
+  brakeFault:              "brake_fault_detected",
+  electrovalveEnabled:     "electrovalve_enabled",
+  // Sub-board connectivity as reported by the VCU
+  hvbmsConnected:          "hvbms_connected",
+  pcuConnected:            "pcu_connected",
+  lcuConnected:            "lcu_connected",
+  propulsionTargetSpeed:   "propulsion_target_speed",
+  propulsionMaxCurrent:    "propulsion_max_current",
+  levitationTargetHeight:  "levitation_target_height",
 } as const;
 
 export const PCU = {
-  speed:         "encoder_speed_km_h",
-  position:      "encoder_position",
-  acceleration:  "encoder_acceleration",
+  speed:         "imu_speed_km_h",
+  position:      "imu_position_m",
   motorCurrentU: "current_sensor_u_a",
   motorCurrentV: "current_sensor_v_a",
   motorCurrentW: "current_sensor_w_a",
 } as const;
 
 export const PCU_BOARD = {
-  generalState:   "general_state_machine",
-  operatingState: "operational_state_machine",
-  peakCurrent:    "current_Peak",
-  frequency:      "frequency",
+  state:        "state",
+  peakCurrent:  "current_Peak",
+  frequency:    "frequency",
 } as const;
+
+/** DC link voltage (HVBMS.voltageReading) threshold above which HVAL is considered active. */
+export const HVAL_THRESHOLD_V = 60;
 
 /** HVBMS — high-voltage battery management system. */
 export const HVBMS = {
-  minimumSoc:          "minimum_soc",
   soc:                 "soc",
   voltageReading:      "voltage_reading",
   batteriesVoltage:    "batteries_voltage_reading",
@@ -62,7 +65,7 @@ export const HVBMS = {
   imdStatus:           "imd_status",
   imdResistance:       "imd_resistance",
   sdcStatus:           "sdc_status",
-  operationalState:    "gsm_status",
+  operationalState:    "sm_status",
   contactorPrecharge:  "contactor_precharge",
   contactorDischarge:  "contactor_discharge",
   contactorHigh:       "contactor_high",
@@ -70,13 +73,18 @@ export const HVBMS = {
   contactorCommonHigh: "contactor_common_high",
 } as const;
 
-/** Per-group indices are 1-based (1–8). Each group has 12 cells. */
+/** Per-group indices are 1-based (1–8). Each group has 12 cells and 4 temp sensors. */
 export const hvbmsPack = (n: number) => ({
   voltage: `battery${n}_total_voltage`,
-  tempMax: `battery${n}_max_temp`,
-  tempMin: `battery${n}_min_temp`,
+  temps:   Array.from({ length: 4 }, (_, i) => `battery${n}_temp${i + 1}`),
   cells:   Array.from({ length: 12 }, (_, i) => `battery${n}_cell${i + 1}`),
 });
+
+/** HVSCU-Cabinet — booster supercapacitor cabinet. */
+export const HVSCU_CABINET = {
+  // DC bus voltage feeding the PCU inverter, i.e. the DC link voltage.
+  dcLinkVoltage: "HVSCU-Cabinet_bus_voltage",
+} as const;
 
 /** LCU — levitation control unit. */
 export const LCU = {

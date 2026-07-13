@@ -14,7 +14,7 @@ const OrdersPanel = () => {
   const { loading } = useOrdersCatalog(isConnected);
 
   return (
-    <div className="bg-card flex min-h-0 flex-[2] flex-col overflow-hidden rounded-xl border shadow-sm">
+    <div className="bg-card flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border shadow-sm">
       <div className="flex shrink-0 items-center gap-2 border-b px-3 py-2">
         <span className="text-muted-foreground flex-1 text-xs font-medium uppercase tracking-widest">
           Orders

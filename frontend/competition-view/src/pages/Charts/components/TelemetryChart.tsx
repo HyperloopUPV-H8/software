@@ -2,11 +2,14 @@ import { memo, useEffect, useRef } from "react";
 import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
 import {
+  CHART_AXIS_INCRS,
   CHART_COLORS,
   CHART_HEIGHT,
   CHART_LINE_WIDTH,
   CHART_MAX_POINTS,
   CHART_POINT_SIZE,
+  CHART_WINDOW_SECONDS,
+  formatAxisValue,
 } from "../../../constants/chartConfig";
 import useMeasurement from "../../../hooks/useMeasurement";
 
@@ -27,8 +30,10 @@ interface TelemetryChartProps {
  * Fixed single-series real-time chart for competition telemetry.
  *
  * History is accumulated in a local ref (no store involvement) so the
- * component stays lightweight. The x-axis is a monotonic counter driven
- * by incoming telemetry packets. Double-click resets the zoom.
+ * component stays lightweight. The x-axis is wall-clock time (seconds)
+ * and the visible range is pinned to a rolling window ending at the
+ * latest sample, so the chart keeps advancing even under bursty,
+ * high-frequency packet rates. Double-click resets a manual zoom.
  */
 const TelemetryChart = memo(({
   title,
@@ -42,7 +47,7 @@ const TelemetryChart = memo(({
   const uplotRef     = useRef<uPlot | null>(null);
   const xRef         = useRef<number[]>([]);
   const yRef         = useRef<number[]>([]);
-  const counterRef   = useRef(0);
+  const startRef     = useRef(performance.now());
 
   const value = useMeasurement(board, measurementKey);
   const color = CHART_COLORS[colorIndex % CHART_COLORS.length];
@@ -60,7 +65,13 @@ const TelemetryChart = memo(({
       legend: { show: false },
       padding: [16, 8, 4, 12],
       scales: {
-        x: { time: false },
+        x: {
+          time: false,
+          range: (_, __, dataMax) =>
+            dataMax == null
+              ? [0, CHART_WINDOW_SECONDS]
+              : [dataMax - CHART_WINDOW_SECONDS, dataMax],
+        },
         y: {
           range: (_, min, max) => {
             if (min === max) return [min - 1, max + 1];
@@ -84,15 +95,17 @@ const TelemetryChart = memo(({
           stroke: getVar("--muted-foreground"),
           grid:   { show: false },
           font:   "10px Archivo",
-          size:   20,
+          size:   24,
+          values: (_, ticks) => ticks.map(formatAxisValue),
         },
         {
           side:   1,
           stroke: getVar("--muted-foreground"),
           grid:   { stroke: getVar("--border") },
           font:   "10px Archivo",
-          size:   unit ? 48 : 36,
-          label:  unit,
+          size:   36,
+          incrs:  CHART_AXIS_INCRS,
+          values: (_, ticks) => ticks.map(formatAxisValue),
         },
       ],
       cursor: { drag: { setScale: true, x: true, y: true } },
@@ -116,7 +129,7 @@ const TelemetryChart = memo(({
   useEffect(() => {
     if (typeof value !== "number" || !uplotRef.current) return;
 
-    xRef.current.push(counterRef.current++);
+    xRef.current.push((performance.now() - startRef.current) / 1000);
     yRef.current.push(value);
 
     if (xRef.current.length > CHART_MAX_POINTS) {

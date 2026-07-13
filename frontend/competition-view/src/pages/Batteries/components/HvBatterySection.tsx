@@ -1,5 +1,5 @@
 import { Separator } from "@workspace/ui/components";
-import { BOARDS, HVBMS, VCU } from "../../../constants/measurements";
+import { BOARDS, HVBMS } from "../../../constants/measurements";
 import useMeasurement from "../../../hooks/useMeasurement";
 import BatteryPackCard from "./BatteryPackCard";
 
@@ -10,13 +10,17 @@ const fmt = (v: number | boolean | string | undefined, decimals = 1) =>
   typeof v === "number" ? v.toFixed(decimals) : "—";
 
 const HvBatterySection = () => {
-  const totalVoltage = useMeasurement(BOARDS.HVBMS,         HVBMS.batteriesVoltage);
-  const voltageMax   = useMeasurement(BOARDS.HVBMS,         HVBMS.voltageMax);
-  const voltageMin   = useMeasurement(BOARDS.HVBMS,         HVBMS.voltageMin);
-  const tempMax      = useMeasurement(BOARDS.HVBMS,         HVBMS.tempMax);
-  const tempMin      = useMeasurement(BOARDS.HVBMS,         HVBMS.tempMin);
-  const soc          = useMeasurement(BOARDS.HVBMS,         HVBMS.minimumSoc);
-  const contactors   = useMeasurement(BOARDS.VCU, VCU.contactorsClosed);
+  const totalVoltage  = useMeasurement(BOARDS.HVBMS, HVBMS.batteriesVoltage);
+  const voltageMax    = useMeasurement(BOARDS.HVBMS, HVBMS.voltageMax);
+  const voltageMin    = useMeasurement(BOARDS.HVBMS, HVBMS.voltageMin);
+  const tempMax       = useMeasurement(BOARDS.HVBMS, HVBMS.tempMax);
+  const tempMin       = useMeasurement(BOARDS.HVBMS, HVBMS.tempMin);
+  const soc           = useMeasurement(BOARDS.HVBMS, HVBMS.soc);
+  const contactorHigh = useMeasurement(BOARDS.HVBMS, HVBMS.contactorHigh);
+  const contactorLow  = useMeasurement(BOARDS.HVBMS, HVBMS.contactorLow);
+  const contactors    = contactorHigh === undefined || contactorLow === undefined
+    ? undefined
+    : contactorHigh === true && contactorLow === true;
 
   return (
     <section className="flex flex-col gap-4">
@@ -41,17 +45,17 @@ const HvBatterySection = () => {
       <div className="bg-card grid grid-cols-3 gap-px overflow-hidden rounded-xl border shadow-sm sm:grid-cols-6">
         {[
           { label: "Total V",  value: fmt(totalVoltage), unit: "V"  },
-          { label: "Min SOC",  value: fmt(soc, 0),        unit: "%"  },
+          { label: "SOC",      value: fmt(soc, 0),        unit: "%"  },
           { label: "V max",    value: fmt(voltageMax, 3), unit: "V"  },
           { label: "V min",    value: fmt(voltageMin, 3), unit: "V"  },
           { label: "T max",    value: fmt(tempMax),       unit: "°C" },
           { label: "T min",    value: fmt(tempMin),       unit: "°C" },
         ].map(({ label, value, unit }) => (
-          <div key={label} className="bg-card flex flex-col items-center py-3">
-            <span className="text-muted-foreground text-xs">{label}</span>
-            <span className="text-foreground text-sm font-semibold tabular-nums">
+          <div key={label} className="bg-card flex min-w-0 flex-col items-center gap-1 px-2 py-6">
+            <span className="text-muted-foreground text-sm">{label}</span>
+            <span className="text-foreground block w-full truncate text-center text-3xl font-bold tabular-nums">
               {value}
-              <span className="text-muted-foreground ml-0.5 text-xs font-normal">
+              <span className="text-muted-foreground ml-1 text-base font-normal">
                 {unit}
               </span>
             </span>
@@ -61,8 +65,8 @@ const HvBatterySection = () => {
 
       <Separator />
 
-      {/* Group grid: 2 rows of 4 */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      {/* Group grid */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {PACK_NUMBERS.map((n) => (
           <BatteryPackCard key={n} packNumber={n} />
         ))}

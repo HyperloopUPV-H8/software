@@ -56,7 +56,7 @@ const Charts = () => (
       <TelemetryChart title="Position" board={BOARDS.PCU}   measurementKey={PCU.position} unit="m"    colorIndex={1} />
 
       {/* Row 2 — Electrical */}
-      <TelemetryChart title="HV Battery SOC" board={BOARDS.HVBMS} measurementKey={HVBMS.minimumSoc}     unit="%" colorIndex={2} />
+      <TelemetryChart title="HV Battery SOC" board={BOARDS.HVBMS} measurementKey={HVBMS.soc}            unit="%" colorIndex={2} />
       <TelemetryChart title="HV Current"     board={BOARDS.HVBMS} measurementKey={HVBMS.currentReading} unit="A" colorIndex={3} />
 
       {/* Row 3 — DLIM motor currents */}

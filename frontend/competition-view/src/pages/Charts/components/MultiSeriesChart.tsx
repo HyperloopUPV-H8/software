@@ -3,11 +3,14 @@ import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
 import { useShallow } from "zustand/react/shallow";
 import {
+  CHART_AXIS_INCRS,
   CHART_COLORS,
   CHART_HEIGHT,
   CHART_LINE_WIDTH,
   CHART_MAX_POINTS,
   CHART_POINT_SIZE,
+  CHART_WINDOW_SECONDS,
+  formatAxisValue,
 } from "../../../constants/chartConfig";
 import { useStore } from "../../../store/store";
 
@@ -35,8 +38,12 @@ interface MultiSeriesChartProps {
  * Series configs must be a stable reference (defined at module level or
  * memoized) so the Zustand selector and uPlot init only run once.
  *
+ * The x-axis is wall-clock time (seconds) and the visible range is
+ * pinned to a rolling window ending at the latest sample, so the chart
+ * keeps advancing even under bursty, high-frequency packet rates.
+ *
  * A compact colour-dot legend is rendered in the card header.
- * Double-click resets the zoom.
+ * Double-click resets a manual zoom.
  */
 const MultiSeriesChart = memo(({ title, series, unit = "" }: MultiSeriesChartProps) => {
   const wrapperRef   = useRef<HTMLDivElement>(null); // flex-1 div sized by CSS layout
@@ -44,7 +51,7 @@ const MultiSeriesChart = memo(({ title, series, unit = "" }: MultiSeriesChartPro
   const uplotRef     = useRef<uPlot | null>(null);
   const xRef         = useRef<number[]>([]);
   const yRefs        = useRef<number[][]>(series.map(() => []));
-  const counterRef   = useRef(0);
+  const startRef     = useRef(performance.now());
 
   // Subscribe to all series values at once; useShallow prevents re-renders
   // when the values haven't actually changed.
@@ -81,7 +88,13 @@ const MultiSeriesChart = memo(({ title, series, unit = "" }: MultiSeriesChartPro
       legend:  { show: false },
       padding: [16, 8, 4, 12],
       scales: {
-        x: { time: false },
+        x: {
+          time: false,
+          range: (_, __, dataMax) =>
+            dataMax == null
+              ? [0, CHART_WINDOW_SECONDS]
+              : [dataMax - CHART_WINDOW_SECONDS, dataMax],
+        },
         y: {
           range: (_, min, max) => {
             if (min === max) return [min - 1, max + 1];
@@ -97,15 +110,17 @@ const MultiSeriesChart = memo(({ title, series, unit = "" }: MultiSeriesChartPro
           stroke: getVar("--muted-foreground"),
           grid:   { show: false },
           font:   "10px Archivo",
-          size:   20,
+          size:   24,
+          values: (_, ticks) => ticks.map(formatAxisValue),
         },
         {
           side:   1,
           stroke: getVar("--muted-foreground"),
           grid:   { stroke: getVar("--border") },
           font:   "10px Archivo",
-          size:   unit ? 48 : 36,
-          label:  unit,
+          size:   36,
+          incrs:  CHART_AXIS_INCRS,
+          values: (_, ticks) => ticks.map(formatAxisValue),
         },
       ],
       cursor: { drag: { setScale: true, x: true, y: true } },
@@ -137,7 +152,7 @@ const MultiSeriesChart = memo(({ title, series, unit = "" }: MultiSeriesChartPro
     // arrive in the same telemetry packet so this is normally always true).
     if (!values.every((v) => typeof v === "number")) return;
 
-    xRef.current.push(counterRef.current++);
+    xRef.current.push((performance.now() - startRef.current) / 1000);
     (values as number[]).forEach((v, i) => {
       yRefs.current[i].push(v);
     });
