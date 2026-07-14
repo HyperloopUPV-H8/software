@@ -6,6 +6,7 @@ import {
   SidebarRail,
 } from "@workspace/ui/components";
 import { PAGES_ARRAY } from "../../constants/pages";
+import AboutItem from "./AboutItem";
 import ConnectionStatusGroup from "./ConnectionStatusGroup";
 import Logo from "./Logo";
 import NavigationGroup from "./NavigationGroup";
@@ -29,6 +30,7 @@ const AppSidebar = ({ backendConnected, ...props }: AppSidebarProps) => (
       <ConnectionStatusGroup backendConnected={backendConnected} />
       <div className="my-2" />
       <ThemeToggleItem />
+      <AboutItem />
     </SidebarFooter>
 
     <SidebarRail className="cursor-pointer!" />

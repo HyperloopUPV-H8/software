@@ -5,7 +5,6 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import KeyboardShortcutsHelp from "./components/KeyboardShortcutsHelp";
 import {
   BRAKE_ORDERS,
-  EMERGENCY_STOP_ORDERS,
   FAULT_ORDERS,
   OPEN_CONTACTORS_ORDERS,
 } from "./constants/orders";
@@ -37,11 +36,10 @@ const App = () => {
 
   // Global keyboard shortcuts for competition quick-actions.
   // Disabled while the help dialog is open so its keys don't accidentally fire.
-  const { estopArmed } = useKeyboardShortcuts({
+  useKeyboardShortcuts({
     enabled:          !helpOpen,
     onBrake:          () => sendOrder(BRAKE_ORDERS),
     onOpenContactors: () => sendOrder(OPEN_CONTACTORS_ORDERS),
-    onEmergencyStop:  () => sendOrder(EMERGENCY_STOP_ORDERS),
     onFault:          () => sendOrder(FAULT_ORDERS),
     onToggleHelp:     () => setHelpOpen((v) => !v),
   });
@@ -75,13 +73,6 @@ const App = () => {
 
       {/* Keyboard shortcuts reference dialog */}
       <KeyboardShortcutsHelp open={helpOpen} onOpenChange={setHelpOpen} />
-
-      {/* ESTOP armed banner — pulses for 2 s after the first E press */}
-      {estopArmed && (
-        <div className="animate-pulse fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-xl bg-red-600 px-6 py-3 text-sm font-bold text-white shadow-xl">
-          ⚠ ESTOP ARMED — Press E again to confirm
-        </div>
-      )}
     </>
   );
 };

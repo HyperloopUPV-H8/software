@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect } from "react";
 
 /** Returns true when focus is inside a text-input element. */
 const isTypingInInput = () => {
@@ -17,7 +17,6 @@ export interface ShortcutDef {
 export const SHORTCUT_DEFS: ShortcutDef[] = [
   { key: "b",     label: "B",       description: "Brake"                              },
   { key: "o",     label: "O",       description: "Open Contactors"                    },
-  { key: "e",     label: "E → E",   description: "Emergency Stop (press twice in 2 s)" },
   { key: "space", label: "Space",   description: "Fault"                              },
   { key: "shift+/", label: "?",     description: "Toggle keyboard shortcuts reference" },
 ];
@@ -27,45 +26,22 @@ interface Options {
   enabled: boolean;
   onBrake: () => void;
   onOpenContactors: () => void;
-  onEmergencyStop: () => void;
   onFault: () => void;
   onToggleHelp: () => void;
-}
-
-interface Result {
-  /** True for up to 2 s after the first E press — use to show an armed indicator. */
-  estopArmed: boolean;
 }
 
 /**
  * Registers global keydown handlers for competition quick-actions.
  *
  * Shortcuts fire only when the user is NOT typing in a form field.
- * ESTOP requires two E presses within 2 seconds to prevent accidents.
  */
 const useKeyboardShortcuts = ({
   enabled,
   onBrake,
   onOpenContactors,
-  onEmergencyStop,
   onFault,
   onToggleHelp,
-}: Options): Result => {
-  const [estopArmed, setEstopArmed] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const armEstop = useCallback(() => {
-    setEstopArmed(true);
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => setEstopArmed(false), 2000);
-  }, []);
-
-  const confirmEstop = useCallback(() => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    setEstopArmed(false);
-    onEmergencyStop();
-  }, [onEmergencyStop]);
-
+}: Options): void => {
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (!enabled || isTypingInInput()) return;
@@ -83,15 +59,6 @@ const useKeyboardShortcuts = ({
           onOpenContactors();
           break;
 
-        case "e":
-          e.preventDefault();
-          if (estopArmed) {
-            confirmEstop();
-          } else {
-            armEstop();
-          }
-          break;
-
         case "?":
           e.preventDefault();
           onToggleHelp();
@@ -103,18 +70,13 @@ const useKeyboardShortcuts = ({
           break;
       }
     },
-    [enabled, estopArmed, onBrake, onOpenContactors, armEstop, confirmEstop, onFault, onToggleHelp],
+    [enabled, onBrake, onOpenContactors, onFault, onToggleHelp],
   );
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
-
-  // Clean up the arm timer on unmount
-  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
-
-  return { estopArmed };
 };
 
 export default useKeyboardShortcuts;

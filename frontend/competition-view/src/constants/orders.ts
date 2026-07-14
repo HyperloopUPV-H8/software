@@ -30,18 +30,6 @@ export const OPEN_CONTACTORS_ORDERS: Order[] = [
   { id: 42, fields: {} },
 ];
 
-/**
- * Full emergency stop sequence:
- * triggers emergency brake + brings the vehicle to a full stop
- * + opens contactors to cut power + forces FAULT (all VCU orders).
- */
-export const EMERGENCY_STOP_ORDERS: Order[] = [
-  { id: 51, fields: {} },
-  { id: 30, fields: {} },
-  { id: 42, fields: {} },
-  { id: 0,  fields: {} },
-];
-
 /** Forces a FAULT state (id 0 is shared by the FAULT order on every board). */
 export const FAULT_ORDERS: Order[] = [
   { id: 0, fields: {} },
