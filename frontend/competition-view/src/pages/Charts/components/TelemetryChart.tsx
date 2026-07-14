@@ -8,10 +8,11 @@ import {
   CHART_LINE_WIDTH,
   CHART_MAX_POINTS,
   CHART_POINT_SIZE,
+  CHART_TRIM_SLACK,
   CHART_WINDOW_SECONDS,
   formatAxisValue,
 } from "../../../constants/chartConfig";
-import useMeasurement from "../../../hooks/useMeasurement";
+import { useStore } from "../../../store/store";
 
 interface TelemetryChartProps {
   /** Human-readable label shown in the card header. */
@@ -34,6 +35,10 @@ interface TelemetryChartProps {
  * and the visible range is pinned to a rolling window ending at the
  * latest sample, so the chart keeps advancing even under bursty,
  * high-frequency packet rates. Double-click resets a manual zoom.
+ *
+ * Telemetry is consumed through a transient store subscription that feeds
+ * uPlot directly, so data updates never re-render the React component.
+ * Redraws are batched to animation frames.
  */
 const TelemetryChart = memo(({
   title,
@@ -49,7 +54,6 @@ const TelemetryChart = memo(({
   const yRef         = useRef<number[]>([]);
   const startRef     = useRef(performance.now());
 
-  const value = useMeasurement(board, measurementKey);
   const color = CHART_COLORS[colorIndex % CHART_COLORS.length];
 
   // ── Initialise uplot ────────────────────────────────────────────────────
@@ -90,9 +94,11 @@ const TelemetryChart = memo(({
           points: { show: true, size: CHART_POINT_SIZE, fill: color, width: 0 },
         },
       ],
+      // Stroke callbacks re-read the CSS variables on every draw so the
+      // axes/grid follow light/dark theme switches (see redraw observer below).
       axes: [
         {
-          stroke: getVar("--muted-foreground"),
+          stroke: () => getVar("--muted-foreground"),
           grid:   { show: false },
           font:   "10px Archivo",
           size:   24,
@@ -100,8 +106,8 @@ const TelemetryChart = memo(({
         },
         {
           side:   1,
-          stroke: getVar("--muted-foreground"),
-          grid:   { stroke: getVar("--border") },
+          stroke: () => getVar("--muted-foreground"),
+          grid:   { stroke: () => getVar("--border") },
           font:   "10px Archivo",
           size:   36,
           incrs:  CHART_AXIS_INCRS,
@@ -125,20 +131,48 @@ const TelemetryChart = memo(({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Feed new data points ────────────────────────────────────────────────
+  // ── Feed new data points (transient subscription, no React re-renders) ──
   useEffect(() => {
-    if (typeof value !== "number" || !uplotRef.current) return;
+    let rafId = 0;
+    let lastValue: number | boolean | string | undefined;
 
-    xRef.current.push((performance.now() - startRef.current) / 1000);
-    yRef.current.push(value);
+    // Coalesce redraws to one per animation frame (and none while hidden).
+    const flush = () => {
+      rafId = 0;
+      uplotRef.current?.setData([xRef.current, yRef.current]);
+    };
 
-    if (xRef.current.length > CHART_MAX_POINTS) {
-      xRef.current = xRef.current.slice(-CHART_MAX_POINTS);
-      yRef.current = yRef.current.slice(-CHART_MAX_POINTS);
-    }
+    const ingest = (telemetry: ReturnType<typeof useStore.getState>["telemetry"]) => {
+      const value = telemetry[board]?.[measurementKey];
+      if (value === lastValue) return;
+      lastValue = value;
+      if (typeof value !== "number") return;
 
-    uplotRef.current.setData([xRef.current, yRef.current]);
-  }, [value]);
+      xRef.current.push((performance.now() - startRef.current) / 1000);
+      yRef.current.push(value);
+
+      // Trim with slack so the slice allocation is amortised instead of
+      // happening on every single update once the cap is reached.
+      if (xRef.current.length > CHART_MAX_POINTS + CHART_TRIM_SLACK) {
+        xRef.current = xRef.current.slice(-CHART_MAX_POINTS);
+        yRef.current = yRef.current.slice(-CHART_MAX_POINTS);
+      }
+
+      if (!rafId) rafId = requestAnimationFrame(flush);
+    };
+
+    ingest(useStore.getState().telemetry);
+    const unsubscribe = useStore.subscribe((state, prevState) => {
+      if (state.telemetry !== prevState.telemetry) ingest(state.telemetry);
+    });
+
+    return () => {
+      unsubscribe();
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+    // Intentionally runs once on mount — board/measurement props are stable.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Resize to wrapper ───────────────────────────────────────────────────
   useEffect(() => {
@@ -154,6 +188,15 @@ const TelemetryChart = memo(({
     });
 
     observer.observe(wrapperRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // ── Repaint on theme switch ─────────────────────────────────────────────
+  // AppLayout toggles the `dark` class on <html>; redrawing re-runs the
+  // axis/grid stroke callbacks so the chart picks up the new theme colours.
+  useEffect(() => {
+    const observer = new MutationObserver(() => uplotRef.current?.redraw());
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
     return () => observer.disconnect();
   }, []);
 

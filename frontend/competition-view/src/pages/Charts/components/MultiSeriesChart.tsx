@@ -1,7 +1,6 @@
 import { memo, useEffect, useRef } from "react";
 import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
-import { useShallow } from "zustand/react/shallow";
 import {
   CHART_AXIS_INCRS,
   CHART_COLORS,
@@ -9,6 +8,7 @@ import {
   CHART_LINE_WIDTH,
   CHART_MAX_POINTS,
   CHART_POINT_SIZE,
+  CHART_TRIM_SLACK,
   CHART_WINDOW_SECONDS,
   formatAxisValue,
 } from "../../../constants/chartConfig";
@@ -42,6 +42,10 @@ interface MultiSeriesChartProps {
  * pinned to a rolling window ending at the latest sample, so the chart
  * keeps advancing even under bursty, high-frequency packet rates.
  *
+ * Telemetry is consumed through a transient store subscription that feeds
+ * uPlot directly, so data updates never re-render the React component.
+ * Redraws are batched to animation frames.
+ *
  * A compact colour-dot legend is rendered in the card header.
  * Double-click resets a manual zoom.
  */
@@ -52,15 +56,6 @@ const MultiSeriesChart = memo(({ title, series, unit = "" }: MultiSeriesChartPro
   const xRef         = useRef<number[]>([]);
   const yRefs        = useRef<number[][]>(series.map(() => []));
   const startRef     = useRef(performance.now());
-
-  // Subscribe to all series values at once; useShallow prevents re-renders
-  // when the values haven't actually changed.
-  const values = useStore(
-    // The selector is stable because `series` is a module-level constant.
-    useShallow((s) =>
-      series.map(({ board, measurementKey }) => s.telemetry[board]?.[measurementKey] as number | undefined),
-    ),
-  );
 
   // ── Initialise uPlot ────────────────────────────────────────────────────
   useEffect(() => {
@@ -105,9 +100,11 @@ const MultiSeriesChart = memo(({ title, series, unit = "" }: MultiSeriesChartPro
         },
       },
       series: uplotSeries,
+      // Stroke callbacks re-read the CSS variables on every draw so the
+      // axes/grid follow light/dark theme switches (see redraw observer below).
       axes: [
         {
-          stroke: getVar("--muted-foreground"),
+          stroke: () => getVar("--muted-foreground"),
           grid:   { show: false },
           font:   "10px Archivo",
           size:   24,
@@ -115,8 +112,8 @@ const MultiSeriesChart = memo(({ title, series, unit = "" }: MultiSeriesChartPro
         },
         {
           side:   1,
-          stroke: getVar("--muted-foreground"),
-          grid:   { stroke: getVar("--border") },
+          stroke: () => getVar("--muted-foreground"),
+          grid:   { stroke: () => getVar("--border") },
           font:   "10px Archivo",
           size:   36,
           incrs:  CHART_AXIS_INCRS,
@@ -145,25 +142,55 @@ const MultiSeriesChart = memo(({ title, series, unit = "" }: MultiSeriesChartPro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Feed new data points ─────────────────────────────────────────────────
+  // ── Feed new data points (transient subscription, no React re-renders) ──
   useEffect(() => {
-    if (!uplotRef.current) return;
-    // Only push a point when every series has a numeric value (all phases
-    // arrive in the same telemetry packet so this is normally always true).
-    if (!values.every((v) => typeof v === "number")) return;
+    let rafId = 0;
+    let lastValues: (number | boolean | string | undefined)[] | null = null;
 
-    xRef.current.push((performance.now() - startRef.current) / 1000);
-    (values as number[]).forEach((v, i) => {
-      yRefs.current[i].push(v);
+    // Coalesce redraws to one per animation frame (and none while hidden).
+    const flush = () => {
+      rafId = 0;
+      uplotRef.current?.setData([xRef.current, ...yRefs.current]);
+    };
+
+    const ingest = (telemetry: ReturnType<typeof useStore.getState>["telemetry"]) => {
+      const values = series.map(({ board, measurementKey }) => telemetry[board]?.[measurementKey]);
+
+      // Skip when nothing this chart plots has changed.
+      if (lastValues && values.every((v, i) => v === lastValues![i])) return;
+      lastValues = values;
+
+      // Only push a point when every series has a numeric value (all phases
+      // arrive in the same telemetry packet so this is normally always true).
+      if (!values.every((v) => typeof v === "number")) return;
+
+      xRef.current.push((performance.now() - startRef.current) / 1000);
+      (values as number[]).forEach((v, i) => {
+        yRefs.current[i].push(v);
+      });
+
+      // Trim with slack so the slice allocation is amortised instead of
+      // happening on every single update once the cap is reached.
+      if (xRef.current.length > CHART_MAX_POINTS + CHART_TRIM_SLACK) {
+        xRef.current  = xRef.current.slice(-CHART_MAX_POINTS);
+        yRefs.current = yRefs.current.map((y) => y.slice(-CHART_MAX_POINTS));
+      }
+
+      if (!rafId) rafId = requestAnimationFrame(flush);
+    };
+
+    ingest(useStore.getState().telemetry);
+    const unsubscribe = useStore.subscribe((state, prevState) => {
+      if (state.telemetry !== prevState.telemetry) ingest(state.telemetry);
     });
 
-    if (xRef.current.length > CHART_MAX_POINTS) {
-      xRef.current         = xRef.current.slice(-CHART_MAX_POINTS);
-      yRefs.current        = yRefs.current.map((y) => y.slice(-CHART_MAX_POINTS));
-    }
-
-    uplotRef.current.setData([xRef.current, ...yRefs.current]);
-  }, [values]);
+    return () => {
+      unsubscribe();
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+    // Intentionally runs once on mount — series config is stable.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Resize to wrapper ───────────────────────────────────────────────────
   useEffect(() => {
@@ -177,6 +204,15 @@ const MultiSeriesChart = memo(({ title, series, unit = "" }: MultiSeriesChartPro
       }
     });
     observer.observe(wrapperRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // ── Repaint on theme switch ─────────────────────────────────────────────
+  // AppLayout toggles the `dark` class on <html>; redrawing re-runs the
+  // axis/grid stroke callbacks so the chart picks up the new theme colours.
+  useEffect(() => {
+    const observer = new MutationObserver(() => uplotRef.current?.redraw());
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
     return () => observer.disconnect();
   }, []);
 

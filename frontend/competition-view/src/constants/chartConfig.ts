@@ -1,6 +1,13 @@
 /** Maximum number of data points kept per chart series (memory safety cap). */
 export const CHART_MAX_POINTS = 2000;
 
+/**
+ * Extra points allowed past CHART_MAX_POINTS before a series is trimmed.
+ * Trimming reallocates every series array, so doing it in batches keeps
+ * the per-update cost allocation-free once the cap is reached.
+ */
+export const CHART_TRIM_SLACK = 500;
+
 /** Width, in seconds, of the rolling time window shown by real-time charts. */
 export const CHART_WINDOW_SECONDS = 10;
 

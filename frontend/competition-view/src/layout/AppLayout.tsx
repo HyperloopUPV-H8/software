@@ -19,7 +19,7 @@ const AppLayout = ({ children, backendConnected, onShowShortcuts }: AppLayoutPro
   }, [isDarkMode]);
 
   return (
-    <div className="h-full w-full [--header-height:calc(--spacing(18))]">
+    <div className="h-full w-full [--header-height:calc(--spacing(14))]">
       <SidebarProvider className="h-full w-full" defaultOpen={false}>
         <div className="bg-background flex h-full w-full">
           <AppSidebar backendConnected={backendConnected} />

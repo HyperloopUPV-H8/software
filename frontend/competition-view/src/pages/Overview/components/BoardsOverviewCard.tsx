@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components";
 import { BOARDS, HVBMS, LCU, PCU_BOARD, VCU } from "../../../constants/measurements";
 import useMeasurement from "../../../hooks/useMeasurement";
 import { stateBadgeClass } from "../../../lib/stateColor";
@@ -71,35 +70,33 @@ const StatItem = ({ board, stat }: { board: string; stat: Stat }) => {
           : "—";
 
   return (
-    <div className="flex items-baseline gap-1 text-xs whitespace-nowrap">
-      <span className="text-muted-foreground">{stat.label}:</span>
-      <span className="text-foreground text-sm font-semibold tabular-nums">
+    <div className="flex items-baseline justify-between gap-2 text-xs whitespace-nowrap">
+      <span className="text-muted-foreground">{stat.label}</span>
+      <span className="text-foreground font-semibold tabular-nums">
         {display}
         {raw !== undefined && stat.unit && (
-          <span className="text-muted-foreground ml-0.5 text-xs">{stat.unit}</span>
+          <span className="text-muted-foreground ml-0.5">{stat.unit}</span>
         )}
       </span>
     </div>
   );
 };
 
-const BoardRowItem = ({ row }: { row: BoardRow }) => {
+const BoardTile = ({ row }: { row: BoardRow }) => {
   const state = useMeasurement(row.board, row.stateMeasurementKey);
 
   return (
-    <div className="flex items-center gap-3 py-2 first:pt-0 last:pb-0">
-      <span className="text-muted-foreground w-14 shrink-0 text-sm font-semibold uppercase tracking-wider">
-        {row.name}
-      </span>
-
-      {/* Fixed-width slot so a longer/shorter state string doesn't shift the stats after it. */}
-      <div className="w-48 shrink-0">
-        <span className={`w-fit inline-block whitespace-nowrap rounded border px-2 py-0.5 text-sm font-bold ${stateBadgeClass(state)}`}>
+    <div className="bg-card flex flex-col gap-1 rounded-xl border p-2 shadow-sm">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-muted-foreground shrink-0 text-xs font-semibold uppercase tracking-wider">
+          {row.name}
+        </span>
+        <span className={`min-w-0 truncate rounded border px-1.5 py-0.5 text-xs font-bold ${stateBadgeClass(state)}`}>
           {state !== undefined ? String(state) : "—"}
         </span>
       </div>
 
-      <div className="flex flex-1 flex-wrap justify-end gap-x-4 gap-y-1">
+      <div className="flex flex-col gap-0.5">
         {row.stats.map((stat) => (
           <StatItem key={stat.measurementKey} board={row.board} stat={stat} />
         ))}
@@ -108,18 +105,16 @@ const BoardRowItem = ({ row }: { row: BoardRow }) => {
   );
 };
 
-/** Single consolidated card showing every board's state and key measurements. */
+/**
+ * 2×2 grid of per-board state tiles. The tiles are the card surface
+ * themselves — no wrapper card or title, to keep the column compact.
+ */
 const BoardsOverviewCard = () => (
-  <Card className="gap-2 py-3">
-    <CardHeader className="px-3 pb-0">
-      <CardTitle className="text-sm font-semibold">Board States</CardTitle>
-    </CardHeader>
-    <CardContent className="divide-y px-3">
-      {ROWS.map((row) => (
-        <BoardRowItem key={row.board} row={row} />
-      ))}
-    </CardContent>
-  </Card>
+  <div className="grid shrink-0 grid-cols-2 gap-2">
+    {ROWS.map((row) => (
+      <BoardTile key={row.board} row={row} />
+    ))}
+  </div>
 );
 
 export default BoardsOverviewCard;

@@ -76,28 +76,35 @@ interface BatteryCardProps {
   rows: BatteryRow[];
 }
 
+/** SOC-level colouring: red below 20 %, amber below 40 %, green otherwise. */
+const socColors = (soc: number | undefined) =>
+  typeof soc !== "number" ? { bar: "bg-muted-foreground/20", text: "" }
+  : soc < 20              ? { bar: "bg-red-500",   text: "text-red-500" }
+  : soc < 40              ? { bar: "bg-amber-500", text: "text-amber-500" }
+  :                         { bar: "bg-green-500", text: "" };
+
 const BatteryCard = ({ title, soc, rows }: BatteryCardProps) => {
-  const socPct   = typeof soc === "number" ? Math.min(100, Math.max(0, soc)) : 0;
-  const barColor = typeof soc !== "number" ? "bg-muted-foreground/20" : "bg-yellow-500";
+  const socPct = typeof soc === "number" ? Math.min(100, Math.max(0, soc)) : 0;
+  const { bar, text } = socColors(soc);
 
   return (
-    <div className="bg-card flex flex-col rounded-xl border p-3 gap-2">
+    <div className="bg-card flex flex-col rounded-xl border p-2.5 gap-1.5 shadow-sm">
       <div className="flex items-center justify-between">
         <span className="text-sm font-semibold">{title}</span>
-        <span className={`text-base font-bold tabular-nums ${typeof soc === "number" && soc < 20 ? "text-red-500" : ""}`}>
+        <span className={`text-base font-bold tabular-nums ${text}`}>
           {typeof soc === "number" ? soc.toFixed(0) : "—"}
           <span className="text-muted-foreground ml-0.5 text-xs font-normal">%</span>
         </span>
       </div>
 
       <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-        <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${socPct}%` }} />
+        <div className={`h-full rounded-full transition-[width] ${bar}`} style={{ width: `${socPct}%` }} />
       </div>
 
       <div className="flex flex-col gap-0.5">
         {rows.map(({ label, value, unit, warn }) => (
           <div key={label} className="flex items-baseline justify-between">
-            <span className="text-muted-foreground text-[10px] uppercase tracking-wider">{label}</span>
+            <span className="text-muted-foreground text-xs uppercase tracking-wider">{label}</span>
             <span className={`text-sm font-medium tabular-nums ${warn ? "text-red-500" : "text-foreground"}`}>
               {value ?? "—"}
               {value !== undefined && unit && (
@@ -126,7 +133,7 @@ const KinematicsCard = () => {
   ];
 
   return (
-    <div className="bg-card flex flex-col rounded-xl border p-3 gap-2">
+    <div className="bg-card flex flex-col rounded-xl border p-2.5 gap-1.5 shadow-sm">
       <span className="text-sm font-semibold">Kinematics</span>
       <div className="flex items-baseline gap-1">
         <span className="text-4xl font-bold tabular-nums">{fmtNum(speed, 0) ?? "—"}</span>
@@ -135,7 +142,7 @@ const KinematicsCard = () => {
       <div className="flex flex-col gap-0.5">
         {rows.map(({ label, value, unit }) => (
           <div key={label} className="flex items-baseline justify-between">
-            <span className="text-muted-foreground text-[10px] uppercase tracking-wider">{label}</span>
+            <span className="text-muted-foreground text-xs uppercase tracking-wider">{label}</span>
             <span className="text-foreground text-sm font-medium tabular-nums">
               {value ?? "—"}
               {value !== undefined && unit && (
@@ -187,12 +194,12 @@ const SafetyCard = () => {
   ];
 
   return (
-    <div className="bg-card flex flex-col rounded-xl border p-3 gap-2">
+    <div className="bg-card flex flex-col rounded-xl border p-2.5 gap-1.5 shadow-sm">
       <span className="text-sm font-semibold">Safety</span>
       <div className="flex flex-col gap-1">
         {rows.map(({ label, text, color }) => (
           <div key={label} className="flex items-center justify-between">
-            <span className="text-muted-foreground text-[10px] uppercase tracking-wider">{label}</span>
+            <span className="text-muted-foreground text-xs uppercase tracking-wider">{label}</span>
             <span className={`text-sm font-semibold ${color}`}>{text}</span>
           </div>
         ))}
@@ -271,35 +278,48 @@ const MessagesPanel = () => {
   );
 };
 
-/* ─── Dashboard ─────────────────────────────────────────────────────────── */
+/* ─── HV battery card ───────────────────────────────────────────────────── */
 
-const Dashboard = () => {
+/**
+ * Leaf component so the HVBMS subscriptions re-render only this card —
+ * keeping them in Dashboard would re-render the whole page tree on every
+ * telemetry packet.
+ */
+const HvBatteryCard = () => {
   const hvSoc     = useMeasurement(BOARDS.HVBMS, HVBMS.soc);
   const hvVoltage = useMeasurement(BOARDS.HVBMS, HVBMS.batteriesVoltage);
   const hvCurrent = useMeasurement(BOARDS.HVBMS, HVBMS.currentReading);
   const hvVSensor = useMeasurement(BOARDS.HVBMS, HVBMS.voltageReading);
 
   return (
-    <div className="flex h-full w-full flex-col gap-3 overflow-hidden p-3">
+    <BatteryCard
+      title="HV Battery"
+      soc={typeof hvSoc === "number" ? hvSoc : undefined}
+      rows={[
+        { label: "Pack V",    value: fmtNum(hvVoltage), unit: "V" },
+        { label: "Current",   value: fmtNum(hvCurrent), unit: "A" },
+        { label: "DC Link",   value: fmtNum(hvVSensor), unit: "V" },
+      ]}
+    />
+  );
+};
+
+/* ─── Dashboard ─────────────────────────────────────────────────────────── */
+
+const Dashboard = () => {
+  return (
+    <div className="flex h-full w-full flex-col gap-2 overflow-hidden p-2">
 
       <TrackProgress />
 
-      <div className="flex min-h-0 flex-1 gap-3">
+      <div className="flex min-h-0 flex-1 gap-2">
 
         {/* ── Left column ────────────────────────────────────────────── */}
-        <div className="flex min-h-0 flex-1 flex-col gap-3">
+        <div className="flex min-h-0 flex-1 flex-col gap-2">
 
           {/* Summary cards row */}
           <div className="grid shrink-0 grid-cols-3 gap-2">
-            <BatteryCard
-              title="HV Battery"
-              soc={typeof hvSoc === "number" ? hvSoc : undefined}
-              rows={[
-                { label: "Pack V",    value: fmtNum(hvVoltage), unit: "V" },
-                { label: "Current",   value: fmtNum(hvCurrent), unit: "A" },
-                { label: "DC Link",   value: fmtNum(hvVSensor), unit: "V" },
-              ]}
-            />
+            <HvBatteryCard />
             <KinematicsCard />
             <SafetyCard />
           </div>
@@ -317,7 +337,7 @@ const Dashboard = () => {
         </div>
 
         {/* ── Right column ───────────────────────────────────────────── */}
-        <div className="flex w-[38%] min-h-0 flex-col gap-3">
+        <div className="flex w-[35%] min-h-0 flex-col gap-2">
 
           <BoardsOverviewCard />
 

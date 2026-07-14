@@ -41,10 +41,14 @@ export const createTelemetrySlice: StateCreator<
       }
     }
 
+    // Don't wake subscribers when no packet mapped to a known board.
+    const boards = Object.keys(updates);
+    if (boards.length === 0) return;
+
     set((state) => {
       const newTelemetry = { ...state.telemetry };
-      for (const [board, measurements] of Object.entries(updates)) {
-        newTelemetry[board] = { ...newTelemetry[board], ...measurements };
+      for (const board of boards) {
+        newTelemetry[board] = { ...newTelemetry[board], ...updates[board] };
       }
       return { telemetry: newTelemetry };
     });
