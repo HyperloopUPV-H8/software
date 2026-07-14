@@ -1,4 +1,5 @@
 import type { StateCreator } from "zustand";
+import { markFresh } from "../../lib/freshness";
 import type { TelemetryData, TelemetryState } from "../../types/telemetry";
 import type { Store } from "../store";
 
@@ -25,6 +26,7 @@ export const createTelemetrySlice: StateCreator<
   updateTelemetry: (packets) => {
     const boardMap = get().packetBoard;
     const updates: TelemetryState = {};
+    const now = Date.now();
 
     for (const [packetIdStr, packet] of Object.entries(packets)) {
       const boardName = boardMap[Number(packetIdStr)];
@@ -38,6 +40,7 @@ export const createTelemetrySlice: StateCreator<
         } else {
           updates[boardName][key] = value as number | boolean | string;
         }
+        markFresh(boardName, key, now);
       }
     }
 

@@ -5,8 +5,20 @@ import {
   CELL_V_WARN_LOW,
   HVBMS,
 } from "../../../constants/measurements";
+import { useStaleFlags } from "../../../hooks/useIsStale";
 import useMeasurement from "../../../hooks/useMeasurement";
+import { STALE_TEXT_CLASS } from "../../../lib/freshness";
 import BatteryPackCard from "./BatteryPackCard";
+
+/** Measurement ids backing the summary tiles, in display order (stable for useStaleFlags). */
+const SUMMARY_STALE_IDS = [
+  HVBMS.batteriesVoltage,
+  HVBMS.soc,
+  HVBMS.voltageMax,
+  HVBMS.voltageMin,
+  HVBMS.tempMax,
+  HVBMS.tempMin,
+] as const;
 
 const PACK_COUNT = 8;
 const PACK_NUMBERS = Array.from({ length: PACK_COUNT }, (_, i) => i + 1);
@@ -30,6 +42,8 @@ const HvBatterySection = () => {
   const contactors    = contactorHigh === undefined || contactorLow === undefined
     ? undefined
     : contactorHigh === true && contactorLow === true;
+
+  const staleFlags = useStaleFlags(BOARDS.HVBMS, SUMMARY_STALE_IDS);
 
   return (
     <section className="flex h-full min-h-0 flex-col gap-2">
@@ -68,10 +82,10 @@ const HvBatterySection = () => {
           },
           { label: "T max",    value: fmt(tempMax),       unit: "°C" },
           { label: "T min",    value: fmt(tempMin),       unit: "°C" },
-        ].map(({ label, value, unit, valueClass }) => (
+        ].map(({ label, value, unit, valueClass }, i) => (
           <div key={label} className="bg-card flex min-w-0 flex-col items-center gap-0.5 px-2 py-2">
             <span className="text-muted-foreground text-xs">{label}</span>
-            <span className={`block w-full truncate text-center text-xl font-bold tabular-nums ${valueClass || "text-foreground"}`}>
+            <span className={`block w-full truncate text-center text-xl font-bold tabular-nums ${staleFlags[i] ? STALE_TEXT_CLASS : valueClass || "text-foreground"}`}>
               {value}
               <span className="text-muted-foreground ml-1 text-sm font-normal">
                 {unit}

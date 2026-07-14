@@ -9,6 +9,8 @@ import {
   VCU,
 } from "../../constants/measurements";
 import useMeasurement from "../../hooks/useMeasurement";
+import { useIsStale, useStaleFlags } from "../../hooks/useIsStale";
+import { STALE_TEXT_CLASS } from "../../lib/freshness";
 import { useStore } from "../../store/store";
 import MultiSeriesChart, { type SeriesConfig } from "../Charts/components/MultiSeriesChart";
 import TelemetryChart from "../Charts/components/TelemetryChart";
@@ -67,11 +69,14 @@ interface BatteryRow {
   value: string | undefined;
   unit?: string;
   warn?: boolean;
+  /** Data stopped arriving — value is rendered in yellow. */
+  stale?: boolean;
 }
 
 interface BatteryCardProps {
   title: string;
   soc: number | undefined;
+  socStale?: boolean;
   rows: BatteryRow[];
 }
 
@@ -82,7 +87,7 @@ const socColors = (soc: number | undefined) =>
   : soc < 40              ? { bar: "bg-amber-500", text: "text-amber-500" }
   :                         { bar: "bg-green-500", text: "" };
 
-const BatteryCard = ({ title, soc, rows }: BatteryCardProps) => {
+const BatteryCard = ({ title, soc, socStale, rows }: BatteryCardProps) => {
   const socPct = typeof soc === "number" ? Math.min(100, Math.max(0, soc)) : 0;
   const { bar, text } = socColors(soc);
 
@@ -90,7 +95,7 @@ const BatteryCard = ({ title, soc, rows }: BatteryCardProps) => {
     <div className="bg-card flex flex-col rounded-xl border p-2.5 gap-1.5 shadow-sm">
       <div className="flex items-center justify-between">
         <span className="text-sm font-semibold">{title}</span>
-        <span className={`text-base font-bold tabular-nums ${text}`}>
+        <span className={`text-base font-bold tabular-nums ${socStale ? STALE_TEXT_CLASS : text}`}>
           {typeof soc === "number" ? soc.toFixed(0) : "—"}
           <span className="text-muted-foreground ml-0.5 text-xs font-normal">%</span>
         </span>
@@ -101,10 +106,10 @@ const BatteryCard = ({ title, soc, rows }: BatteryCardProps) => {
       </div>
 
       <div className="flex flex-col gap-0.5">
-        {rows.map(({ label, value, unit, warn }) => (
+        {rows.map(({ label, value, unit, warn, stale }) => (
           <div key={label} className="flex items-baseline justify-between">
             <span className="text-muted-foreground text-xs uppercase tracking-wider">{label}</span>
-            <span className={`text-sm font-medium tabular-nums ${warn ? "text-red-500" : "text-foreground"}`}>
+            <span className={`text-sm font-medium tabular-nums ${stale ? STALE_TEXT_CLASS : warn ? "text-red-500" : "text-foreground"}`}>
               {value ?? "—"}
               {value !== undefined && unit && (
                 <span className="text-muted-foreground ml-0.5 text-xs font-normal">{unit}</span>
@@ -125,10 +130,15 @@ const KinematicsCard = () => {
   const highPsi  = useMeasurement(BOARDS.VCU, VCU.highPressure);
   const lowPsi   = useMeasurement(BOARDS.VCU, VCU.lowPressure);
 
+  const speedStale = useIsStale(BOARDS.PCU, PCU.speed);
+  const posStale   = useIsStale(BOARDS.PCU, PCU.position);
+  const highStale  = useIsStale(BOARDS.VCU, VCU.highPressure);
+  const lowStale   = useIsStale(BOARDS.VCU, VCU.lowPressure);
+
   const rows = [
-    { label: "Position",     value: fmtNum(position),        unit: "m"    },
-    { label: "High pres.",   value: fmtNum(highPsi),         unit: "bar"  },
-    { label: "Low pres.",    value: fmtNum(lowPsi),          unit: "bar"  },
+    { label: "Position",     value: fmtNum(position),        unit: "m",   stale: posStale  },
+    { label: "High pres.",   value: fmtNum(highPsi),         unit: "bar", stale: highStale },
+    { label: "Low pres.",    value: fmtNum(lowPsi),          unit: "bar", stale: lowStale  },
   ];
 
   return (
@@ -136,16 +146,16 @@ const KinematicsCard = () => {
       {/* Speed sits beside the title (like the battery card's SOC) to keep the card short. */}
       <div className="flex items-center justify-between">
         <span className="text-sm font-semibold">Kinematics</span>
-        <span className="text-xl font-bold leading-none tabular-nums">
+        <span className={`text-xl font-bold leading-none tabular-nums ${speedStale ? STALE_TEXT_CLASS : ""}`}>
           {fmtNum(speed, 0) ?? "—"}
           <span className="text-muted-foreground ml-1 text-xs font-normal">km/h</span>
         </span>
       </div>
       <div className="flex flex-col gap-0.5">
-        {rows.map(({ label, value, unit }) => (
+        {rows.map(({ label, value, unit, stale }) => (
           <div key={label} className="flex items-baseline justify-between">
             <span className="text-muted-foreground text-xs uppercase tracking-wider">{label}</span>
-            <span className="text-foreground text-sm font-medium tabular-nums">
+            <span className={`text-sm font-medium tabular-nums ${stale ? STALE_TEXT_CLASS : "text-foreground"}`}>
               {value ?? "—"}
               {value !== undefined && unit && (
                 <span className="text-muted-foreground ml-0.5 text-xs font-normal">{unit}</span>
@@ -162,6 +172,15 @@ const KinematicsCard = () => {
 
 interface SafeRow { label: string; text: string; color: string }
 
+/** Measurement ids backing the Safety card rows (stable for useStaleFlags). */
+const SAFETY_STALE_IDS = [
+  HVBMS.sdcStatus,
+  HVBMS.contactorHigh,
+  HVBMS.contactorLow,
+  HVBMS.imdOk,
+  HVBMS.operationalState,
+] as const;
+
 const SafetyCard = () => {
   const sdcStatus     = useMeasurement(BOARDS.HVBMS, HVBMS.sdcStatus);
   const contactorHigh = useMeasurement(BOARDS.HVBMS, HVBMS.contactorHigh);
@@ -172,26 +191,29 @@ const SafetyCard = () => {
   const imd        = useMeasurement(BOARDS.HVBMS, HVBMS.imdOk);
   const hvBmsState = useMeasurement(BOARDS.HVBMS, HVBMS.operationalState);
 
+  const [sdcStale, ctHighStale, ctLowStale, imdStale, stateStale] =
+    useStaleFlags(BOARDS.HVBMS, SAFETY_STALE_IDS);
+
   const rows: SafeRow[] = [
     {
       label: "SDC",
       text:  sdcStatus === undefined ? "—" : String(sdcStatus),
-      color: sdcStatus === "ENGAGED" ? "text-green-500" : sdcStatus === "DISENGAGED" ? "text-red-500" : "text-muted-foreground",
+      color: sdcStale ? STALE_TEXT_CLASS : sdcStatus === "ENGAGED" ? "text-green-500" : sdcStatus === "DISENGAGED" ? "text-red-500" : "text-muted-foreground",
     },
     {
       label: "Contactors",
       text:  contactors === true ? "CLOSED" : contactors === false ? "OPEN" : "—",
-      color: contactors === true ? "text-green-500" : contactors === false ? "text-amber-500" : "text-muted-foreground",
+      color: ctHighStale || ctLowStale ? STALE_TEXT_CLASS : contactors === true ? "text-green-500" : contactors === false ? "text-amber-500" : "text-muted-foreground",
     },
     {
       label: "IMD",
       text:  imd === true ? "OK" : imd === false ? "FAULT" : "—",
-      color: imd === true ? "text-green-500" : imd === false ? "text-red-500" : "text-muted-foreground",
+      color: imdStale ? STALE_TEXT_CLASS : imd === true ? "text-green-500" : imd === false ? "text-red-500" : "text-muted-foreground",
     },
     {
       label: "HV BMS",
       text:  hvBmsState === undefined ? "—" : String(hvBmsState),
-      color: hvBmsState === "OPERATIONAL" ? "text-green-500" : "text-foreground",
+      color: stateStale ? STALE_TEXT_CLASS : hvBmsState === "OPERATIONAL" ? "text-green-500" : "text-foreground",
     },
   ];
 
@@ -269,20 +291,31 @@ const MessagesPanel = () => {
  * keeping them in Dashboard would re-render the whole page tree on every
  * telemetry packet.
  */
+/** Measurement ids backing the HV battery rows (stable for useStaleFlags). */
+const HV_BATTERY_STALE_IDS = [
+  HVBMS.soc,
+  HVBMS.batteriesVoltage,
+  HVBMS.currentReading,
+  HVBMS.voltageReading,
+] as const;
+
 const HvBatteryCard = () => {
   const hvSoc     = useMeasurement(BOARDS.HVBMS, HVBMS.soc);
   const hvVoltage = useMeasurement(BOARDS.HVBMS, HVBMS.batteriesVoltage);
   const hvCurrent = useMeasurement(BOARDS.HVBMS, HVBMS.currentReading);
   const hvVSensor = useMeasurement(BOARDS.HVBMS, HVBMS.voltageReading);
 
+  const [socStale, vStale, iStale, dcStale] = useStaleFlags(BOARDS.HVBMS, HV_BATTERY_STALE_IDS);
+
   return (
     <BatteryCard
       title="HV Battery"
       soc={typeof hvSoc === "number" ? hvSoc : undefined}
+      socStale={socStale}
       rows={[
-        { label: "Pack V",    value: fmtNum(hvVoltage), unit: "V" },
-        { label: "Current",   value: fmtNum(hvCurrent), unit: "A" },
-        { label: "DC Link",   value: fmtNum(hvVSensor), unit: "V" },
+        { label: "Pack V",    value: fmtNum(hvVoltage), unit: "V", stale: vStale  },
+        { label: "Current",   value: fmtNum(hvCurrent), unit: "A", stale: iStale  },
+        { label: "DC Link",   value: fmtNum(hvVSensor), unit: "V", stale: dcStale },
       ]}
     />
   );

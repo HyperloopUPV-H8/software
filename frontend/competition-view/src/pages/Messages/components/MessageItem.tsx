@@ -1,4 +1,5 @@
 import { Badge } from "@workspace/ui/components";
+import { memo } from "react";
 import type { Message, MessageKind } from "../../../types/message";
 
 const KIND_BADGE_CLASS: Record<MessageKind, string> = {
@@ -19,7 +20,9 @@ interface MessageItemProps {
   message: Message;
 }
 
-const MessageItem = ({ message }: MessageItemProps) => {
+// Memoised: message objects are immutable, so once rendered a row never
+// changes — this keeps a new message from re-rendering the whole list.
+const MessageItem = memo(({ message }: MessageItemProps) => {
   const time = new Date(message.timestamp).toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
@@ -42,6 +45,7 @@ const MessageItem = ({ message }: MessageItemProps) => {
       </span>
     </div>
   );
-};
+});
 
+MessageItem.displayName = "MessageItem";
 export default MessageItem;

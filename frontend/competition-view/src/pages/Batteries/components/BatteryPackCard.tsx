@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { formatAxisValue } from "../../../constants/chartConfig";
 import {
@@ -8,7 +9,8 @@ import {
   CELL_V_WARN_LOW,
   hvbmsPack,
 } from "../../../constants/measurements";
-import useMeasurement from "../../../hooks/useMeasurement";
+import { useStaleFlags } from "../../../hooks/useIsStale";
+import { STALE_TEXT_CLASS } from "../../../lib/freshness";
 import { useStore } from "../../../store/store";
 
 interface BatteryPackCardProps {
@@ -27,7 +29,8 @@ const cellStatus = (v: number | null): CellStatus =>
 
 /* ─── Individual cell tile ───────────────────────────────────────────────── */
 
-const CellTile = ({ cellNum, value }: { cellNum: number; value: number | undefined }) => {
+// Memoised so only the cells whose value actually changed re-render.
+const CellTile = memo(({ cellNum, value, stale }: { cellNum: number; value: number | undefined; stale: boolean }) => {
   const v = typeof value === "number" ? value : null;
   const status = cellStatus(v);
   const fill = v !== null
@@ -46,6 +49,7 @@ const CellTile = ({ cellNum, value }: { cellNum: number; value: number | undefin
         <span className="text-muted-foreground text-[10px] leading-none">C{cellNum}</span>
         <span
           className={`truncate text-sm font-semibold leading-none tabular-nums ${
+            stale ? STALE_TEXT_CLASS :
             status === "low" ? "text-red-500" : status === "high" ? "text-amber-500" : "text-foreground"
           }`}
         >
@@ -62,7 +66,9 @@ const CellTile = ({ cellNum, value }: { cellNum: number; value: number | undefin
       </div>
     </div>
   );
-};
+});
+
+CellTile.displayName = "CellTile";
 
 /* ─── Pack strip ─────────────────────────────────────────────────────────── */
 
@@ -71,22 +77,32 @@ const CellTile = ({ cellNum, value }: { cellNum: number; value: number | undefin
  * 12 cells laid out in a single row so every cell stays wide and legible.
  * Eight strips stacked fill the page without scrolling.
  */
-const BatteryPackCard = ({ packNumber }: BatteryPackCardProps) => {
-  const keys = hvbmsPack(packNumber);
+const BatteryPackCard = memo(({ packNumber }: BatteryPackCardProps) => {
+  const keys = useMemo(() => hvbmsPack(packNumber), [packNumber]);
+  // Same order as the values selector below: voltage, temps 1-4, cells 1-12.
+  const ids  = useMemo(() => [keys.voltage, ...keys.temps, ...keys.cells], [keys]);
 
-  const voltage = useMeasurement(BOARDS.HVBMS, keys.voltage);
-  const temp1   = useMeasurement(BOARDS.HVBMS, keys.temps[0]);
-  const temp2   = useMeasurement(BOARDS.HVBMS, keys.temps[1]);
-  const temp3   = useMeasurement(BOARDS.HVBMS, keys.temps[2]);
-  const temp4   = useMeasurement(BOARDS.HVBMS, keys.temps[3]);
-  const numericTemps = [temp1, temp2, temp3, temp4].filter((t): t is number => typeof t === "number");
+  // Single consolidated subscription for everything this strip displays
+  // (voltage + 4 temps + 12 cells) instead of one subscription per value.
+  const values = useStore(
+    useShallow((s) => {
+      const board = s.telemetry[BOARDS.HVBMS];
+      return ids.map((id) => board?.[id]) as (number | undefined)[];
+    }),
+  );
+  const staleFlags = useStaleFlags(BOARDS.HVBMS, ids);
+
+  const voltage    = values[0];
+  const temps      = values.slice(1, 5);
+  const cellValues = values.slice(5);
+
+  const voltageStale = staleFlags[0];
+  const tempStale    = staleFlags.slice(1, 5).some(Boolean);
+  const cellStale    = staleFlags.slice(5);
+
+  const numericTemps = temps.filter((t): t is number => typeof t === "number");
   const tempMax = numericTemps.length > 0 ? Math.max(...numericTemps) : undefined;
 
-  // Read every cell once here (not inside each tile) so the pack-level
-  // health accent and the tiles themselves share a single subscription.
-  const cellValues = useStore(
-    useShallow((s) => keys.cells.map((key) => s.telemetry[BOARDS.HVBMS]?.[key] as number | undefined)),
-  );
   const statuses = cellValues.map((v) => cellStatus(typeof v === "number" ? v : null));
   const packStatus: CellStatus = statuses.includes("low") ? "low" : statuses.includes("high") ? "high" : "ok";
 
@@ -102,20 +118,21 @@ const BatteryPackCard = ({ packNumber }: BatteryPackCardProps) => {
       <div className="flex w-40 min-w-0 shrink-0 flex-col justify-center gap-0.5 border-r pr-2">
         <span className="truncate text-sm font-semibold leading-tight">Group {packNumber}</span>
         <span className="text-muted-foreground truncate text-xs tabular-nums">
-          <span className="text-foreground font-semibold">{fmt(voltage)}</span> V
+          <span className={`font-semibold ${voltageStale ? STALE_TEXT_CLASS : "text-foreground"}`}>{fmt(voltage)}</span> V
           {" · "}
-          <span className="text-foreground font-semibold">{fmt(tempMax)}</span> °C
+          <span className={`font-semibold ${tempStale ? STALE_TEXT_CLASS : "text-foreground"}`}>{fmt(tempMax)}</span> °C
         </span>
       </div>
 
       {/* All 12 cells in a single row */}
       <div className="grid min-h-0 min-w-0 flex-1 grid-cols-12 gap-1.5">
         {keys.cells.map((key, i) => (
-          <CellTile key={key} cellNum={i + 1} value={cellValues[i]} />
+          <CellTile key={key} cellNum={i + 1} value={cellValues[i]} stale={cellStale[i]} />
         ))}
       </div>
     </div>
   );
-};
+});
 
+BatteryPackCard.displayName = "BatteryPackCard";
 export default BatteryPackCard;

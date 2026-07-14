@@ -3,7 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import podIcon from "../../../assets/pod.svg";
 import { BOARDS, PCU } from "../../../constants/measurements";
 import { TRACK_LENGTH_M } from "../../../constants/track";
+import { useIsStale } from "../../../hooks/useIsStale";
 import useMeasurement from "../../../hooks/useMeasurement";
+import { STALE_TEXT_CLASS } from "../../../lib/freshness";
 
 /** Number of gaps between distance labels below the track (5 labels total). */
 const TICK_COUNT = 4;
@@ -15,6 +17,7 @@ const ICON_WIDTH_PX = 85;
 /** Track-position visualizer: the pod icon slides along an empty bordered track. */
 const TrackProgress = () => {
   const position = useMeasurement(BOARDS.PCU, PCU.position) as number | undefined;
+  const stale    = useIsStale(BOARDS.PCU, PCU.position);
   const clamped  = typeof position === "number" ? Math.min(TRACK_LENGTH_M, Math.max(0, position)) : 0;
   const pct      = (clamped / TRACK_LENGTH_M) * 100;
 
@@ -67,7 +70,7 @@ const TrackProgress = () => {
           />
         </div>
 
-        <span className="text-foreground shrink-0 text-base font-bold tabular-nums">
+        <span className={`shrink-0 text-base font-bold tabular-nums ${stale ? STALE_TEXT_CLASS : "text-foreground"}`}>
           {typeof position === "number" ? position.toFixed(1) : "—"}
           <span className="text-muted-foreground ml-0.5 text-sm font-normal">/ {TRACK_LENGTH_M} m</span>
         </span>

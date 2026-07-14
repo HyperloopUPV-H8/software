@@ -12,6 +12,7 @@ import {
   CHART_WINDOW_SECONDS,
   formatAxisValue,
 } from "../../../constants/chartConfig";
+import { useIsStale } from "../../../hooks/useIsStale";
 import { useStore } from "../../../store/store";
 
 interface TelemetryChartProps {
@@ -55,6 +56,9 @@ const TelemetryChart = memo(({
   const startRef     = useRef(performance.now());
 
   const color = CHART_COLORS[colorIndex % CHART_COLORS.length];
+
+  // Subtle yellow tint when the data stream stopped arriving.
+  const stale = useIsStale(board, measurementKey);
 
   // ── Initialise uplot ────────────────────────────────────────────────────
   useEffect(() => {
@@ -201,7 +205,9 @@ const TelemetryChart = memo(({
   }, []);
 
   return (
-    <div className="bg-card flex h-full min-h-0 flex-col rounded-xl border shadow-sm">
+    <div className={`flex h-full min-h-0 flex-col rounded-xl border shadow-sm transition-colors duration-300 ${
+      stale ? "border-yellow-500/40 bg-yellow-500/10" : "bg-card"
+    }`}>
       <div className="flex shrink-0 items-center justify-between px-4 pb-1 pt-3">
         <span className="text-foreground text-sm font-semibold">{title}</span>
         {unit && (

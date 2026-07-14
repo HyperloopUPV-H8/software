@@ -1,5 +1,7 @@
 import { BOARDS, HVBMS, LCU, PCU_BOARD, VCU } from "../../../constants/measurements";
+import { useIsStale } from "../../../hooks/useIsStale";
 import useMeasurement from "../../../hooks/useMeasurement";
+import { STALE_BADGE_CLASS, STALE_TEXT_CLASS } from "../../../lib/freshness";
 import { stateBadgeClass } from "../../../lib/stateColor";
 
 interface Stat {
@@ -59,7 +61,8 @@ const ROWS: BoardRow[] = [
 ];
 
 const StatItem = ({ board, stat }: { board: string; stat: Stat }) => {
-  const raw = useMeasurement(board, stat.measurementKey);
+  const raw   = useMeasurement(board, stat.measurementKey);
+  const stale = useIsStale(board, stat.measurementKey);
   const display =
     typeof raw === "number"
       ? raw.toFixed(stat.decimals ?? 1)
@@ -72,7 +75,7 @@ const StatItem = ({ board, stat }: { board: string; stat: Stat }) => {
   return (
     <div className="flex items-baseline justify-between gap-2 text-xs whitespace-nowrap">
       <span className="text-muted-foreground">{stat.label}</span>
-      <span className="text-foreground font-semibold tabular-nums">
+      <span className={`font-semibold tabular-nums ${stale ? STALE_TEXT_CLASS : "text-foreground"}`}>
         {display}
         {raw !== undefined && stat.unit && (
           <span className="text-muted-foreground ml-0.5">{stat.unit}</span>
@@ -83,7 +86,8 @@ const StatItem = ({ board, stat }: { board: string; stat: Stat }) => {
 };
 
 const BoardTile = ({ row }: { row: BoardRow }) => {
-  const state = useMeasurement(row.board, row.stateMeasurementKey);
+  const state      = useMeasurement(row.board, row.stateMeasurementKey);
+  const stateStale = useIsStale(row.board, row.stateMeasurementKey);
 
   return (
     <div className="bg-card flex flex-col gap-1 rounded-xl border p-2 shadow-sm">
@@ -91,7 +95,7 @@ const BoardTile = ({ row }: { row: BoardRow }) => {
         <span className="text-muted-foreground shrink-0 text-xs font-semibold uppercase tracking-wider">
           {row.name}
         </span>
-        <span className={`min-w-0 truncate rounded border px-1.5 py-0.5 text-xs font-bold ${stateBadgeClass(state)}`}>
+        <span className={`min-w-0 truncate rounded border px-1.5 py-0.5 text-xs font-bold ${stateStale ? STALE_BADGE_CLASS : stateBadgeClass(state)}`}>
           {state !== undefined ? String(state) : "—"}
         </span>
       </div>

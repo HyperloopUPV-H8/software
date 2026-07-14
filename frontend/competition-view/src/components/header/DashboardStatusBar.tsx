@@ -7,8 +7,10 @@ import {
   EMERGENCY_STOP_ORDERS,
   OPEN_CONTACTORS_ORDERS,
 } from "../../constants/orders";
+import { useIsStale } from "../../hooks/useIsStale";
 import useMeasurement from "../../hooks/useMeasurement";
 import useSendOrder from "../../hooks/useSendOrder";
+import { STALE_BADGE_CLASS, STALE_TEXT_CLASS } from "../../lib/freshness";
 import { stateBadgeClass } from "../../lib/stateColor";
 
 /* ─── Icon-only order button (half the footprint of a labelled button) ──── */
@@ -72,13 +74,20 @@ const DashboardStatusBar = () => {
   const brakeRaw = useMeasurement(BOARDS.VCU, VCU.activeBrakes);
   const dcLinkV  = useMeasurement(BOARDS.HVBMS, HVBMS.voltageReading) as number | undefined;
 
+  const stateStale  = useIsStale(BOARDS.VCU, VCU.state);
+  const brakeStale  = useIsStale(BOARDS.VCU, VCU.activeBrakes);
+  const dcLinkStale = useIsStale(BOARDS.HVBMS, HVBMS.voltageReading);
+
   const dcLinkActive = dcLinkV !== undefined && dcLinkV > HVAL_THRESHOLD_V;
-  const dcLinkClass = dcLinkV === undefined
-    ? "text-muted-foreground"
-    : dcLinkActive ? "text-red-500" : "text-green-500";
+  const dcLinkClass = dcLinkStale
+    ? STALE_TEXT_CLASS
+    : dcLinkV === undefined
+      ? "text-muted-foreground"
+      : dcLinkActive ? "text-red-500" : "text-green-500";
 
   const brakeLabel = brakeRaw === undefined ? "—" : brakeRaw ? "BRAKED" : "UNBRAKED";
   const brakeClass =
+    brakeStale         ? STALE_TEXT_CLASS :
     brakeRaw === true  ? "text-red-500"  :
     brakeRaw === false ? "text-blue-500" :
     "text-muted-foreground";
@@ -94,7 +103,7 @@ const DashboardStatusBar = () => {
       <StatBlock heading="VCU State">
         {/* Fixed-width slot so a longer/shorter state string doesn't shift the elements after it. */}
         <div className="w-44 overflow-hidden">
-          <span className={`inline-block max-w-full truncate rounded-md border px-2.5 py-1 text-base font-bold leading-tight ${stateBadgeClass(state)}`}>
+          <span className={`inline-block max-w-full truncate rounded-md border px-2.5 py-1 text-base font-bold leading-tight ${stateStale ? STALE_BADGE_CLASS : stateBadgeClass(state)}`}>
             {state !== undefined ? String(state) : "—"}
           </span>
         </div>
