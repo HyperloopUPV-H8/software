@@ -10,7 +10,6 @@ import {
 } from "../../constants/measurements";
 import useMeasurement from "../../hooks/useMeasurement";
 import { useStore } from "../../store/store";
-import type { MessageKind } from "../../types/message";
 import MultiSeriesChart, { type SeriesConfig } from "../Charts/components/MultiSeriesChart";
 import TelemetryChart from "../Charts/components/TelemetryChart";
 import MessageItem from "../Messages/components/MessageItem";
@@ -134,10 +133,13 @@ const KinematicsCard = () => {
 
   return (
     <div className="bg-card flex flex-col rounded-xl border p-2.5 gap-1.5 shadow-sm">
-      <span className="text-sm font-semibold">Kinematics</span>
-      <div className="flex items-baseline gap-1">
-        <span className="text-4xl font-bold tabular-nums">{fmtNum(speed, 0) ?? "—"}</span>
-        <span className="text-muted-foreground text-sm">km/h</span>
+      {/* Speed sits beside the title (like the battery card's SOC) to keep the card short. */}
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-semibold">Kinematics</span>
+        <span className="text-xl font-bold leading-none tabular-nums">
+          {fmtNum(speed, 0) ?? "—"}
+          <span className="text-muted-foreground ml-1 text-xs font-normal">km/h</span>
+        </span>
       </div>
       <div className="flex flex-col gap-0.5">
         {rows.map(({ label, value, unit }) => (
@@ -210,50 +212,32 @@ const SafetyCard = () => {
 
 /* ─── Messages panel ────────────────────────────────────────────────────── */
 
-const ALL_KINDS: MessageKind[] = ["info", "warning", "error", "debug"];
-const KIND_LABEL: Record<MessageKind, string> = { info: "Info", warning: "Warn", error: "Err", debug: "Dbg" };
-
 const MessagesPanel = () => {
   const messages      = useStore((s) => s.messages);
   const clearMessages = useStore((s) => s.clearMessages);
 
-  const [activeKinds, setActiveKinds] = useState<Set<MessageKind>>(new Set(ALL_KINDS));
   const [scrolledAway, setScrolledAway] = useState(false);
   const scrollRef  = useRef<HTMLDivElement>(null);
   const prevLenRef = useRef(0);
 
-  const filtered = messages.filter((m) => activeKinds.has(m.kind));
-
-  const toggleKind = (kind: MessageKind) =>
-    setActiveKinds((prev) => {
-      const next = new Set(prev);
-      next.has(kind) ? next.delete(kind) : next.add(kind);
-      return next;
-    });
-
   useEffect(() => {
-    if (filtered.length > prevLenRef.current && !scrolledAway) {
+    if (messages.length > prevLenRef.current && !scrolledAway) {
       scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
     }
-    prevLenRef.current = filtered.length;
-  }, [filtered.length, scrolledAway]);
+    prevLenRef.current = messages.length;
+  }, [messages.length, scrolledAway]);
 
   return (
     <div className="bg-card flex min-h-0 flex-1 flex-col rounded-xl border shadow-sm">
-      <div className="flex shrink-0 flex-wrap items-center gap-1.5 border-b px-3 py-2">
-        {ALL_KINDS.map((kind) => (
-          <Button key={kind} size="sm" variant={activeKinds.has(kind) ? "default" : "outline"}
-            onClick={() => toggleKind(kind)} className="h-6 rounded-full px-2 text-xs">
-            {KIND_LABEL[kind]}
-          </Button>
-        ))}
-        <div className="ml-auto flex items-center gap-1.5">
-          <span className="text-muted-foreground text-xs">{filtered.length}/{messages.length}</span>
-          <Button variant="outline" size="sm" className="h-6 px-2 text-xs"
-            onClick={clearMessages} disabled={messages.length === 0}>
-            Clear
-          </Button>
-        </div>
+      <div className="flex shrink-0 items-center gap-1.5 border-b px-3 py-2">
+        <span className="text-muted-foreground flex-1 text-xs font-medium uppercase tracking-widest">
+          Messages
+        </span>
+        <span className="text-muted-foreground text-xs">{messages.length}</span>
+        <Button variant="outline" size="sm" className="h-6 px-2 text-xs"
+          onClick={clearMessages} disabled={messages.length === 0}>
+          Clear
+        </Button>
       </div>
 
       <div
@@ -261,10 +245,10 @@ const MessagesPanel = () => {
         onScroll={(e) => setScrolledAway(e.currentTarget.scrollTop > 60)}
         className="relative min-h-0 flex-1 overflow-y-auto"
       >
-        {filtered.length === 0 ? (
+        {messages.length === 0 ? (
           <p className="text-muted-foreground flex h-full items-center justify-center text-sm">No messages</p>
         ) : (
-          filtered.map((msg) => <MessageItem key={msg.id} message={msg} />)
+          messages.map((msg) => <MessageItem key={msg.id} message={msg} />)
         )}
         {scrolledAway && (
           <Button size="sm" variant="secondary"

@@ -51,6 +51,12 @@ export const PCU_BOARD = {
 /** DC link voltage (HVBMS.voltageReading) threshold above which HVAL is considered active. */
 export const HVAL_THRESHOLD_V = 60;
 
+/** Cell voltage display range and warning thresholds (V), shared by the battery views. */
+export const CELL_V_MIN       = 3.0;
+export const CELL_V_MAX       = 4.2;
+export const CELL_V_WARN_LOW  = 3.1;
+export const CELL_V_WARN_HIGH = 4.15;
+
 /** HVBMS — high-voltage battery management system. */
 export const HVBMS = {
   soc:                 "soc",

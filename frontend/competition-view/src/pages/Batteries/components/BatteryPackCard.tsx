@@ -1,18 +1,19 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components";
 import { useShallow } from "zustand/react/shallow";
 import { formatAxisValue } from "../../../constants/chartConfig";
-import { BOARDS, hvbmsPack } from "../../../constants/measurements";
+import {
+  BOARDS,
+  CELL_V_MAX,
+  CELL_V_MIN,
+  CELL_V_WARN_HIGH,
+  CELL_V_WARN_LOW,
+  hvbmsPack,
+} from "../../../constants/measurements";
 import useMeasurement from "../../../hooks/useMeasurement";
 import { useStore } from "../../../store/store";
 
 interface BatteryPackCardProps {
   packNumber: number;
 }
-
-const CELL_MIN = 3.0;
-const CELL_MAX = 4.2;
-const CELL_WARN_LOW  = 3.1;
-const CELL_WARN_HIGH = 4.15;
 
 // formatAxisValue keeps the label short (falls back to exponential notation)
 // so a garbage/out-of-range sample never blows out a tile's fixed width.
@@ -22,7 +23,7 @@ const fmt = (v: number | boolean | string | undefined) =>
 type CellStatus = "low" | "high" | "ok";
 
 const cellStatus = (v: number | null): CellStatus =>
-  v === null ? "ok" : v < CELL_WARN_LOW ? "low" : v > CELL_WARN_HIGH ? "high" : "ok";
+  v === null ? "ok" : v < CELL_V_WARN_LOW ? "low" : v > CELL_V_WARN_HIGH ? "high" : "ok";
 
 /* ─── Individual cell tile ───────────────────────────────────────────────── */
 
@@ -30,26 +31,27 @@ const CellTile = ({ cellNum, value }: { cellNum: number; value: number | undefin
   const v = typeof value === "number" ? value : null;
   const status = cellStatus(v);
   const fill = v !== null
-    ? Math.min(100, Math.max(0, ((v - CELL_MIN) / (CELL_MAX - CELL_MIN)) * 100))
+    ? Math.min(100, Math.max(0, ((v - CELL_V_MIN) / (CELL_V_MAX - CELL_V_MIN)) * 100))
     : 0;
 
   return (
     <div
-      className={`flex min-w-0 flex-col gap-1.5 overflow-hidden rounded-lg border px-2.5 py-2 ${
+      className={`flex min-w-0 flex-col justify-center gap-1 overflow-hidden rounded-md border px-1.5 py-1 ${
         status === "low"  ? "border-red-500 bg-red-500/5" :
         status === "high" ? "border-amber-500 bg-amber-500/5" :
                              "border-border"
       }`}
     >
-      <span className="text-muted-foreground truncate text-[10px] leading-none">Cell {cellNum}</span>
-      <span
-        className={`truncate text-sm font-semibold leading-none tabular-nums ${
-          status === "low" ? "text-red-500" : status === "high" ? "text-amber-500" : "text-foreground"
-        }`}
-      >
-        {v !== null ? formatAxisValue(v) : "—"}
-        <span className="text-muted-foreground ml-0.5 text-[10px] font-normal">V</span>
-      </span>
+      <div className="flex items-baseline justify-between gap-1">
+        <span className="text-muted-foreground text-[10px] leading-none">C{cellNum}</span>
+        <span
+          className={`truncate text-sm font-semibold leading-none tabular-nums ${
+            status === "low" ? "text-red-500" : status === "high" ? "text-amber-500" : "text-foreground"
+          }`}
+        >
+          {v !== null ? formatAxisValue(v) : "—"}
+        </span>
+      </div>
       <div className="bg-muted h-1 overflow-hidden rounded-full">
         <div
           className={`h-full rounded-full ${
@@ -62,8 +64,13 @@ const CellTile = ({ cellNum, value }: { cellNum: number; value: number | undefin
   );
 };
 
-/* ─── Pack card ──────────────────────────────────────────────────────────── */
+/* ─── Pack strip ─────────────────────────────────────────────────────────── */
 
+/**
+ * One horizontal strip per battery group: summary rail on the left, its
+ * 12 cells laid out in a single row so every cell stays wide and legible.
+ * Eight strips stacked fill the page without scrolling.
+ */
 const BatteryPackCard = ({ packNumber }: BatteryPackCardProps) => {
   const keys = hvbmsPack(packNumber);
 
@@ -84,45 +91,30 @@ const BatteryPackCard = ({ packNumber }: BatteryPackCardProps) => {
   const packStatus: CellStatus = statuses.includes("low") ? "low" : statuses.includes("high") ? "high" : "ok";
 
   return (
-    <Card
-      className={`gap-0 py-0 ${
+    <div
+      className={`bg-card flex min-h-0 flex-1 items-stretch gap-2 rounded-xl border p-2 shadow-sm ${
         packStatus === "low"  ? "border-red-500/60" :
         packStatus === "high" ? "border-amber-500/60" :
                                  ""
       }`}
     >
-      <CardContent className="flex gap-4 p-4">
-        {/* Summary rail */}
-        <div className="flex w-28 min-w-0 shrink-0 flex-col justify-center gap-3 border-r pr-4">
-          <CardHeader className="p-0">
-            <CardTitle className="truncate text-base font-semibold">Group {packNumber}</CardTitle>
-          </CardHeader>
+      {/* Summary rail */}
+      <div className="flex w-40 min-w-0 shrink-0 flex-col justify-center gap-0.5 border-r pr-2">
+        <span className="truncate text-sm font-semibold leading-tight">Group {packNumber}</span>
+        <span className="text-muted-foreground truncate text-xs tabular-nums">
+          <span className="text-foreground font-semibold">{fmt(voltage)}</span> V
+          {" · "}
+          <span className="text-foreground font-semibold">{fmt(tempMax)}</span> °C
+        </span>
+      </div>
 
-          <div className="flex min-w-0 flex-col">
-            <span className="text-muted-foreground text-[10px] uppercase tracking-widest">Voltage</span>
-            <span className="text-foreground truncate text-lg leading-tight font-bold tabular-nums">
-              {fmt(voltage)}
-              <span className="text-muted-foreground ml-1 text-xs font-normal">V</span>
-            </span>
-          </div>
-
-          <div className="flex min-w-0 flex-col">
-            <span className="text-muted-foreground text-[10px] uppercase tracking-widest">Temp max</span>
-            <span className="text-foreground truncate text-lg leading-tight font-semibold tabular-nums">
-              {fmt(tempMax)}
-              <span className="text-muted-foreground ml-1 text-xs font-normal">°C</span>
-            </span>
-          </div>
-        </div>
-
-        {/* Cell grid: 4 cols × 3 rows */}
-        <div className="grid min-w-0 flex-1 grid-cols-4 grid-rows-3 gap-2">
-          {keys.cells.map((key, i) => (
-            <CellTile key={key} cellNum={i + 1} value={cellValues[i]} />
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+      {/* All 12 cells in a single row */}
+      <div className="grid min-h-0 min-w-0 flex-1 grid-cols-12 gap-1.5">
+        {keys.cells.map((key, i) => (
+          <CellTile key={key} cellNum={i + 1} value={cellValues[i]} />
+        ))}
+      </div>
+    </div>
   );
 };
 
