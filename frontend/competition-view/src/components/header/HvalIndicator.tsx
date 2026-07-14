@@ -40,7 +40,7 @@ const HvalIndicator = () => {
             active ? (solid ? "bg-white" : "bg-red-500") : "bg-green-500"
           }`}
         />
-        HVAL: {active ? "Active" : "Inactive"}
+        HVAL
       </Badge>
     </div>
   );
