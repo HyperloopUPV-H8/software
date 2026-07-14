@@ -43,7 +43,7 @@ const Header = ({ backendConnected, onShowShortcuts }: HeaderProps) => {
         </Tooltip>
 
         <ConnectionBadge label="Backend" connected={backendConnected} />
-        <ConnectionBadge label="VCU" connected={vcuConnected} />
+        <ConnectionBadge label="Vehicle" connected={vcuConnected} />
       </div>
     </header>
   );

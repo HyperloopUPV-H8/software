@@ -1,4 +1,5 @@
 import { memo, useEffect, useRef } from "react";
+import type { LucideIcon } from "lucide-react";
 import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
 import {
@@ -18,6 +19,8 @@ import { useStore } from "../../../store/store";
 interface TelemetryChartProps {
   /** Human-readable label shown in the card header. */
   title: string;
+  /** Icon shown before the title, e.g. from lucide-react. */
+  icon?: LucideIcon;
   /** Board name (must match backend, use BOARDS constants). */
   board: string;
   /** Measurement ID within that board. */
@@ -44,6 +47,7 @@ interface TelemetryChartProps {
  */
 const TelemetryChart = memo(({
   title,
+  icon: Icon,
   board,
   measurementKey,
   unit = "",
@@ -206,7 +210,10 @@ const TelemetryChart = memo(({
       stale ? "border-yellow-500/40 bg-yellow-500/10" : "bg-card"
     }`}>
       <div className="flex shrink-0 items-center justify-between px-4 pb-1 pt-3">
-        <span className="text-foreground text-sm font-semibold">{title}</span>
+        <span className="flex items-center gap-1.5">
+          {Icon && <Icon className="text-muted-foreground size-4" />}
+          <span className="text-foreground text-sm font-semibold">{title}</span>
+        </span>
         {unit && (
           <span className="text-muted-foreground text-xs">{unit}</span>
         )}

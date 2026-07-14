@@ -1,4 +1,5 @@
 import { memo, useEffect, useRef } from "react";
+import type { LucideIcon } from "lucide-react";
 import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
 import {
@@ -28,6 +29,8 @@ export interface SeriesConfig {
 
 interface MultiSeriesChartProps {
   title: string;
+  /** Icon shown before the title, e.g. from lucide-react. */
+  icon?: LucideIcon;
   series: SeriesConfig[];
   unit?: string;
 }
@@ -50,7 +53,7 @@ interface MultiSeriesChartProps {
  * A compact colour-dot legend is rendered in the card header.
  * Zoom is disabled; only hover crosshair interaction is active.
  */
-const MultiSeriesChart = memo(({ title, series, unit = "" }: MultiSeriesChartProps) => {
+const MultiSeriesChart = memo(({ title, icon: Icon, series, unit = "" }: MultiSeriesChartProps) => {
   const wrapperRef   = useRef<HTMLDivElement>(null); // flex-1 div sized by CSS layout
   const containerRef = useRef<HTMLDivElement>(null); // uPlot mounting point
   const uplotRef     = useRef<uPlot | null>(null);
@@ -218,7 +221,10 @@ const MultiSeriesChart = memo(({ title, series, unit = "" }: MultiSeriesChartPro
     }`}>
       <div className="flex shrink-0 items-center justify-between px-4 pb-1 pt-3">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <span className="text-foreground text-sm font-semibold">{title}</span>
+          <span className="flex items-center gap-1.5">
+            {Icon && <Icon className="text-muted-foreground size-4" />}
+            <span className="text-foreground text-sm font-semibold">{title}</span>
+          </span>
           {series.map(({ label, colorIndex }, i) => {
             const color = CHART_COLORS[(colorIndex ?? i) % CHART_COLORS.length];
             return (

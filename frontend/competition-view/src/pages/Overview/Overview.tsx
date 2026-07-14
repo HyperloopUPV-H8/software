@@ -1,5 +1,14 @@
 import { Button } from "@workspace/ui/components";
-import { ChevronUp } from "@workspace/ui/icons";
+import { ChevronUp, MessageSquare } from "@workspace/ui/icons";
+import {
+  BatteryFull,
+  Gauge,
+  type LucideIcon,
+  MoveHorizontal,
+  MoveVertical,
+  Shield,
+  Zap,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
   BOARDS,
@@ -75,6 +84,7 @@ interface BatteryRow {
 
 interface BatteryCardProps {
   title: string;
+  icon: LucideIcon;
   soc: number | undefined;
   socStale?: boolean;
   rows: BatteryRow[];
@@ -87,14 +97,17 @@ const socColors = (soc: number | undefined) =>
   : soc < 40              ? { bar: "bg-amber-500", text: "text-amber-500" }
   :                         { bar: "bg-green-500", text: "" };
 
-const BatteryCard = ({ title, soc, socStale, rows }: BatteryCardProps) => {
+const BatteryCard = ({ title, icon: Icon, soc, socStale, rows }: BatteryCardProps) => {
   const socPct = typeof soc === "number" ? Math.min(100, Math.max(0, soc)) : 0;
   const { bar, text } = socColors(soc);
 
   return (
     <div className="bg-card flex flex-col rounded-xl border p-2.5 gap-1.5 shadow-sm">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold">{title}</span>
+        <span className="flex items-center gap-1.5 text-sm font-semibold">
+          <Icon className="text-muted-foreground size-4" />
+          {title}
+        </span>
         <span className={`text-base font-bold tabular-nums ${socStale ? STALE_TEXT_CLASS : text}`}>
           {typeof soc === "number" ? soc.toFixed(0) : "—"}
           <span className="text-muted-foreground ml-0.5 text-xs font-normal">%</span>
@@ -145,7 +158,10 @@ const KinematicsCard = () => {
     <div className="bg-card flex flex-col rounded-xl border p-2.5 gap-1.5 shadow-sm">
       {/* Speed sits beside the title (like the battery card's SOC) to keep the card short. */}
       <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold">Kinematics</span>
+        <span className="flex items-center gap-1.5 text-sm font-semibold">
+          <Gauge className="text-muted-foreground size-4" />
+          Kinematics
+        </span>
         <span className={`text-xl font-bold leading-none tabular-nums ${speedStale ? STALE_TEXT_CLASS : ""}`}>
           {fmtNum(speed, 0) ?? "—"}
           <span className="text-muted-foreground ml-1 text-xs font-normal">km/h</span>
@@ -219,7 +235,10 @@ const SafetyCard = () => {
 
   return (
     <div className="bg-card flex flex-col rounded-xl border p-2.5 gap-1.5 shadow-sm">
-      <span className="text-sm font-semibold">Safety</span>
+      <span className="flex items-center gap-1.5 text-sm font-semibold">
+        <Shield className="text-muted-foreground size-4" />
+        Safety
+      </span>
       <div className="flex flex-col gap-1">
         {rows.map(({ label, text, color }) => (
           <div key={label} className="flex items-center justify-between">
@@ -252,7 +271,8 @@ const MessagesPanel = () => {
   return (
     <div className="bg-card flex min-h-0 flex-1 flex-col rounded-xl border shadow-sm">
       <div className="flex shrink-0 items-center gap-1.5 border-b px-3 py-2">
-        <span className="text-muted-foreground flex-1 text-xs font-medium uppercase tracking-widest">
+        <span className="text-muted-foreground flex flex-1 items-center gap-1.5 text-xs font-medium uppercase tracking-widest">
+          <MessageSquare className="size-3.5" />
           Messages
         </span>
         <span className="text-muted-foreground text-xs">{messages.length}</span>
@@ -310,6 +330,7 @@ const HvBatteryCard = () => {
   return (
     <BatteryCard
       title="HV Battery"
+      icon={BatteryFull}
       soc={typeof hvSoc === "number" ? hvSoc : undefined}
       socStale={socStale}
       rows={[
@@ -343,12 +364,12 @@ const Dashboard = () => {
 
           {/* Charts — 2 cols × 3 rows */}
           <div className="grid min-h-0 flex-1 grid-cols-2 grid-rows-3 gap-2">
-            <MultiSeriesChart title="DLIM — Phase Currents"  series={DLIM_SERIES}       unit="A"  />
-            <TelemetryChart   title="Speed"                  board={BOARDS.PCU}          measurementKey={PCU.speed}    unit="km/h" colorIndex={0} />
-            <MultiSeriesChart title="Vertical Airgaps"       series={VERT_AIRGAP_SERIES} unit="mm" />
-            <MultiSeriesChart title="Lateral Airgaps"        series={LAT_AIRGAP_SERIES}  unit="mm" />
-            <MultiSeriesChart title="HEMS — Coil Currents"   series={HEMS_SERIES}        unit="A"  />
-            <MultiSeriesChart title="EMS — Coil Currents"    series={EMS_SERIES}         unit="A"  />
+            <MultiSeriesChart title="DLIM — Phase Currents"  icon={Zap}           series={DLIM_SERIES}       unit="A"  />
+            <TelemetryChart   title="Speed"                  icon={Gauge}         board={BOARDS.PCU}          measurementKey={PCU.speed}    unit="km/h" colorIndex={0} />
+            <MultiSeriesChart title="Vertical Airgaps"       icon={MoveVertical}  series={VERT_AIRGAP_SERIES} unit="mm" />
+            <MultiSeriesChart title="Lateral Airgaps"        icon={MoveHorizontal} series={LAT_AIRGAP_SERIES} unit="mm" />
+            <MultiSeriesChart title="HEMS — Coil Currents"   icon={Zap}           series={HEMS_SERIES}        unit="A"  />
+            <MultiSeriesChart title="EMS — Coil Currents"    icon={Zap}           series={EMS_SERIES}         unit="A"  />
           </div>
 
         </div>

@@ -1,11 +1,14 @@
 import { Card, CardContent } from "@workspace/ui/components";
+import { MapPin } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import podIcon from "../../../assets/pod.svg";
+import podIconDark from "../../../assets/pod-dark.svg";
+import podIconLight from "../../../assets/pod-light.svg";
 import { BOARDS, PCU } from "../../../constants/measurements";
 import { TRACK_LENGTH_M } from "../../../constants/track";
 import { useIsStale } from "../../../hooks/useIsStale";
 import useMeasurement from "../../../hooks/useMeasurement";
 import { STALE_TEXT_CLASS } from "../../../lib/freshness";
+import { useStore } from "../../../store/store";
 
 /** Number of gaps between distance labels below the track (5 labels total). */
 const TICK_COUNT = 4;
@@ -16,6 +19,9 @@ const ICON_WIDTH_PX = 85;
 
 /** Track-position visualizer: the pod icon slides along an empty bordered track. */
 const TrackProgress = () => {
+  const isDarkMode = useStore((s) => s.isDarkMode);
+  const podIcon    = isDarkMode ? podIconDark : podIconLight;
+
   const position = useMeasurement(BOARDS.PCU, PCU.position) as number | undefined;
   const stale    = useIsStale(BOARDS.PCU, PCU.position);
   const clamped  = typeof position === "number" ? Math.min(TRACK_LENGTH_M, Math.max(0, position)) : 0;
@@ -42,7 +48,8 @@ const TrackProgress = () => {
     <Card className="shrink-0 gap-1 py-2">
       {/* Single-row layout: label · track · value, to keep the banner short. */}
       <CardContent className="flex items-center gap-4 px-4">
-        <span className="text-muted-foreground shrink-0 text-xs font-medium uppercase tracking-widest">
+        <span className="text-muted-foreground flex shrink-0 items-center gap-1.5 text-xs font-medium uppercase tracking-widest">
+          <MapPin className="size-3.5" />
           Track Position
         </span>
 

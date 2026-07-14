@@ -1,40 +1,10 @@
-import { Button, Separator, Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components";
-import { AlertTriangle, Square, Unplug } from "@workspace/ui/icons";
+import { Separator } from "@workspace/ui/components";
 import { formatAxisValue } from "../../constants/chartConfig";
 import { BOARDS, HVAL_THRESHOLD_V, HVBMS, VCU } from "../../constants/measurements";
-import {
-  BRAKE_ORDERS,
-  EMERGENCY_STOP_ORDERS,
-  OPEN_CONTACTORS_ORDERS,
-} from "../../constants/orders";
 import { useIsStale } from "../../hooks/useIsStale";
 import useMeasurement from "../../hooks/useMeasurement";
-import useSendOrder from "../../hooks/useSendOrder";
 import { STALE_BADGE_CLASS, STALE_TEXT_CLASS } from "../../lib/freshness";
 import { stateBadgeClass } from "../../lib/stateColor";
-
-/* ─── Icon-only order button (half the footprint of a labelled button) ──── */
-
-const OrderIconButton = ({
-  label,
-  className,
-  onClick,
-  children,
-}: {
-  label: string;
-  className?: string;
-  onClick: () => void;
-  children: React.ReactNode;
-}) => (
-  <Tooltip>
-    <TooltipTrigger asChild>
-      <Button size="icon" variant="outline" onClick={onClick} aria-label={label} className={className}>
-        {children}
-      </Button>
-    </TooltipTrigger>
-    <TooltipContent>{label}</TooltipContent>
-  </Tooltip>
-);
 
 /* ─── Shared vertical rhythm for the status blocks ───────────────────────── */
 
@@ -68,8 +38,6 @@ const StatValue = ({
 /* ─── DashboardStatusBar ─────────────────────────────────────────────────── */
 
 const DashboardStatusBar = () => {
-  const sendOrder = useSendOrder();
-
   const state    = useMeasurement(BOARDS.VCU, VCU.state);
   const brakeRaw = useMeasurement(BOARDS.VCU, VCU.activeBrakes);
   const dcLinkV  = useMeasurement(BOARDS.HVBMS, HVBMS.voltageReading) as number | undefined;
@@ -114,30 +82,6 @@ const DashboardStatusBar = () => {
       <StatBlock heading="Brake">
         <StatValue value={brakeLabel} valueClass={brakeClass} width="w-24" />
       </StatBlock>
-
-      <VDivider />
-
-      <div className="flex items-center gap-1">
-        <OrderIconButton label="Brake" onClick={() => sendOrder(BRAKE_ORDERS)}>
-          <Square className="size-5" />
-        </OrderIconButton>
-
-        <OrderIconButton
-          label="Open Contactors"
-          className="border-amber-500 text-amber-600 hover:bg-amber-500/10 dark:text-amber-400"
-          onClick={() => sendOrder(OPEN_CONTACTORS_ORDERS)}
-        >
-          <Unplug className="size-5" />
-        </OrderIconButton>
-
-        <OrderIconButton
-          label="Emergency Stop"
-          className="border-red-500 text-red-600 hover:bg-red-500/10 dark:text-red-400"
-          onClick={() => sendOrder(EMERGENCY_STOP_ORDERS)}
-        >
-          <AlertTriangle className="size-5" />
-        </OrderIconButton>
-      </div>
     </div>
   );
 };

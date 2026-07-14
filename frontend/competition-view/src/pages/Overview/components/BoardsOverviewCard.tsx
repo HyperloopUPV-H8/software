@@ -1,3 +1,4 @@
+import { BatteryFull, Cpu, type LucideIcon, Waves, Zap } from "lucide-react";
 import { BOARDS, HVBMS, LCU, PCU_BOARD, VCU } from "../../../constants/measurements";
 import { useIsStale } from "../../../hooks/useIsStale";
 import useMeasurement from "../../../hooks/useMeasurement";
@@ -16,6 +17,7 @@ interface Stat {
 interface BoardRow {
   board: string;
   name: string;
+  icon: LucideIcon;
   stateMeasurementKey: string;
   stats: Stat[];
 }
@@ -24,6 +26,7 @@ const ROWS: BoardRow[] = [
   {
     board: BOARDS.VCU,
     name: "VCU",
+    icon: Cpu,
     stateMeasurementKey: VCU.state,
     stats: [
       { label: "High pres.", measurementKey: VCU.highPressure, unit: "bar" },
@@ -34,6 +37,7 @@ const ROWS: BoardRow[] = [
   {
     board: BOARDS.HVBMS,
     name: "HVBMS",
+    icon: BatteryFull,
     stateMeasurementKey: HVBMS.operationalState,
     stats: [
       { label: "SOC",     measurementKey: HVBMS.soc,              unit: "%" },
@@ -44,6 +48,7 @@ const ROWS: BoardRow[] = [
   {
     board: BOARDS.PCU,
     name: "PCU",
+    icon: Zap,
     stateMeasurementKey: PCU_BOARD.state,
     stats: [
       { label: "Peak I",  measurementKey: PCU_BOARD.peakCurrent, unit: "A" },
@@ -53,6 +58,7 @@ const ROWS: BoardRow[] = [
   {
     board: BOARDS.LCU,
     name: "LCU",
+    icon: Waves,
     stateMeasurementKey: LCU.masterState,
     stats: [
       { label: "Slave SM", measurementKey: LCU.slaveState },
@@ -92,7 +98,8 @@ const BoardTile = ({ row }: { row: BoardRow }) => {
   return (
     <div className="bg-card flex flex-col gap-1 rounded-xl border p-2 shadow-sm">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-muted-foreground shrink-0 text-xs font-semibold uppercase tracking-wider">
+        <span className="text-muted-foreground flex shrink-0 items-center gap-1 text-xs font-semibold uppercase tracking-wider">
+          <row.icon className="size-3.5" />
           {row.name}
         </span>
         <span className={`min-w-0 truncate rounded border px-1.5 py-0.5 text-xs font-bold ${stateStale ? STALE_BADGE_CLASS : stateBadgeClass(state)}`}>

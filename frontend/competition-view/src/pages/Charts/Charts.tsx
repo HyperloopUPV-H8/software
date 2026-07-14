@@ -1,3 +1,11 @@
+import {
+  BatteryFull,
+  Gauge,
+  MapPin,
+  MoveHorizontal,
+  MoveVertical,
+  Zap,
+} from "lucide-react";
 import { BOARDS, HVBMS, LCU, PCU, VCU } from "../../constants/measurements";
 import MultiSeriesChart, { type SeriesConfig } from "./components/MultiSeriesChart";
 import TelemetryChart from "./components/TelemetryChart";
@@ -52,24 +60,24 @@ const Charts = () => (
   <div className="flex h-full flex-col gap-4 overflow-y-auto p-4">
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       {/* Row 1 — Kinematic */}
-      <TelemetryChart title="Speed"    board={BOARDS.PCU}   measurementKey={PCU.speed}    unit="km/h" colorIndex={0} />
-      <TelemetryChart title="Position" board={BOARDS.PCU}   measurementKey={PCU.position} unit="m"    colorIndex={1} />
+      <TelemetryChart title="Speed"    icon={Gauge}  board={BOARDS.PCU}   measurementKey={PCU.speed}    unit="km/h" colorIndex={0} />
+      <TelemetryChart title="Position" icon={MapPin} board={BOARDS.PCU}   measurementKey={PCU.position} unit="m"    colorIndex={1} />
 
       {/* Row 2 — Electrical */}
-      <TelemetryChart title="HV Battery SOC" board={BOARDS.HVBMS} measurementKey={HVBMS.soc}            unit="%" colorIndex={2} />
-      <TelemetryChart title="HV Current"     board={BOARDS.HVBMS} measurementKey={HVBMS.currentReading} unit="A" colorIndex={3} />
+      <TelemetryChart title="HV Battery SOC" icon={BatteryFull} board={BOARDS.HVBMS} measurementKey={HVBMS.soc}            unit="%" colorIndex={2} />
+      <TelemetryChart title="HV Current"     icon={Zap}         board={BOARDS.HVBMS} measurementKey={HVBMS.currentReading} unit="A" colorIndex={3} />
 
       {/* Row 3 — DLIM motor currents */}
-      <MultiSeriesChart title="DLIM — Phase Currents" series={DLIM_SERIES} unit="A" />
-      <TelemetryChart title="High Pressure" board={BOARDS.VCU} measurementKey={VCU.highPressure} unit="bar" colorIndex={4} />
+      <MultiSeriesChart title="DLIM — Phase Currents" icon={Zap}   series={DLIM_SERIES} unit="A" />
+      <TelemetryChart title="High Pressure" icon={Gauge} board={BOARDS.VCU} measurementKey={VCU.highPressure} unit="bar" colorIndex={4} />
 
       {/* Row 4 — Airgaps */}
-      <MultiSeriesChart title="Vertical Airgaps" series={VERT_AIRGAP_SERIES} unit="mm" />
-      <MultiSeriesChart title="Lateral Airgaps"  series={LAT_AIRGAP_SERIES}  unit="mm" />
+      <MultiSeriesChart title="Vertical Airgaps" icon={MoveVertical}   series={VERT_AIRGAP_SERIES} unit="mm" />
+      <MultiSeriesChart title="Lateral Airgaps"  icon={MoveHorizontal} series={LAT_AIRGAP_SERIES}  unit="mm" />
 
       {/* Row 5 — Levitation currents */}
-      <MultiSeriesChart title="HEMS — Coil Currents" series={HEMS_SERIES} unit="A" />
-      <MultiSeriesChart title="EMS — Coil Currents"  series={EMS_SERIES}  unit="A" />
+      <MultiSeriesChart title="HEMS — Coil Currents" icon={Zap} series={HEMS_SERIES} unit="A" />
+      <MultiSeriesChart title="EMS — Coil Currents"  icon={Zap} series={EMS_SERIES}  unit="A" />
     </div>
   </div>
 );
