@@ -48,7 +48,7 @@ interface MultiSeriesChartProps {
  * Redraws are batched to animation frames.
  *
  * A compact colour-dot legend is rendered in the card header.
- * Double-click resets a manual zoom.
+ * Zoom is disabled; only hover crosshair interaction is active.
  */
 const MultiSeriesChart = memo(({ title, series, unit = "" }: MultiSeriesChartProps) => {
   const wrapperRef   = useRef<HTMLDivElement>(null); // flex-1 div sized by CSS layout
@@ -124,23 +124,15 @@ const MultiSeriesChart = memo(({ title, series, unit = "" }: MultiSeriesChartPro
           values: (_, ticks) => ticks.map(formatAxisValue),
         },
       ],
-      cursor: { drag: { setScale: true, x: true, y: true } },
+      cursor: { drag: { setScale: false, x: false, y: false } },
     };
 
     const initialData: uPlot.AlignedData = [[], ...series.map(() => [] as number[])];
     uplotRef.current = new uPlot(opts, initialData, containerRef.current);
 
-    const handleDblClick = () =>
-      uplotRef.current?.setScale("x", {
-        min: null as unknown as number,
-        max: null as unknown as number,
-      });
-    wrapperRef.current.addEventListener("dblclick", handleDblClick);
-
     return () => {
       uplotRef.current?.destroy();
       uplotRef.current = null;
-      wrapperRef.current?.removeEventListener("dblclick", handleDblClick);
     };
     // Intentionally runs once on mount — series config is stable.
     // eslint-disable-next-line react-hooks/exhaustive-deps

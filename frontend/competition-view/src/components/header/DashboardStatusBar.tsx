@@ -100,7 +100,7 @@ const DashboardStatusBar = () => {
 
       <VDivider />
 
-      <StatBlock heading="VCU State">
+      <StatBlock heading="Vehicle State">
         {/* Fixed-width slot so a longer/shorter state string doesn't shift the elements after it. */}
         <div className="w-44 overflow-hidden">
           <span className={`inline-block max-w-full truncate rounded-md border px-2.5 py-1 text-base font-bold leading-tight ${stateStale ? STALE_BADGE_CLASS : stateBadgeClass(state)}`}>

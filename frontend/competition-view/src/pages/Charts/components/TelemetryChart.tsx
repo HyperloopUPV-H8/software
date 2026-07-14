@@ -35,7 +35,8 @@ interface TelemetryChartProps {
  * component stays lightweight. The x-axis is wall-clock time (seconds)
  * and the visible range is pinned to a rolling window ending at the
  * latest sample, so the chart keeps advancing even under bursty,
- * high-frequency packet rates. Double-click resets a manual zoom.
+ * high-frequency packet rates. Zoom is disabled; only hover crosshair
+ * interaction is active.
  *
  * Telemetry is consumed through a transient store subscription that feeds
  * uPlot directly, so data updates never re-render the React component.
@@ -118,18 +119,14 @@ const TelemetryChart = memo(({
           values: (_, ticks) => ticks.map(formatAxisValue),
         },
       ],
-      cursor: { drag: { setScale: true, x: true, y: true } },
+      cursor: { drag: { setScale: false, x: false, y: false } },
     };
 
     uplotRef.current = new uPlot(opts, [[], []], containerRef.current);
 
-    const handleDblClick = () => uplotRef.current?.setScale("x", { min: null as unknown as number, max: null as unknown as number });
-    wrapperRef.current.addEventListener("dblclick", handleDblClick);
-
     return () => {
       uplotRef.current?.destroy();
       uplotRef.current = null;
-      wrapperRef.current?.removeEventListener("dblclick", handleDblClick);
     };
   // Intentionally runs once on mount — series config is stable.
   // eslint-disable-next-line react-hooks/exhaustive-deps
