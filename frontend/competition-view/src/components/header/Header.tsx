@@ -1,5 +1,4 @@
-import { Button, Separator, SidebarTrigger, Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components";
-import { Keyboard } from "@workspace/ui/icons";
+import { Separator, SidebarTrigger } from "@workspace/ui/components";
 import { useLocation } from "react-router";
 import { BOARDS } from "../../constants/measurements";
 import { PAGES } from "../../constants/pages";
@@ -10,10 +9,9 @@ import HvalIndicator from "./HvalIndicator";
 
 interface HeaderProps {
   backendConnected: boolean;
-  onShowShortcuts: () => void;
 }
 
-const Header = ({ backendConnected, onShowShortcuts }: HeaderProps) => {
+const Header = ({ backendConnected }: HeaderProps) => {
   const location = useLocation();
   const page = PAGES[location.pathname as keyof typeof PAGES];
   const pageTitle = page?.title ?? "Competition View";
@@ -33,15 +31,6 @@ const Header = ({ backendConnected, onShowShortcuts }: HeaderProps) => {
       <DashboardStatusBar />
 
       <div className="flex items-center gap-2 justify-self-end">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={onShowShortcuts} aria-label="Keyboard shortcuts">
-              <Keyboard className="size-5" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Keyboard shortcuts (?)</TooltipContent>
-        </Tooltip>
-
         <ConnectionBadge label="Backend" connected={backendConnected} />
         <ConnectionBadge label="Vehicle" connected={vcuConnected} />
       </div>
