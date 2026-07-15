@@ -2,6 +2,7 @@ package transport
 
 import (
 	"bytes"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
@@ -35,6 +36,8 @@ type Transport struct {
 	idToTarget map[abstraction.PacketId]abstraction.TransportTarget
 
 	propagateFault bool
+
+	onConnectOrderValue [8]byte
 
 	api abstraction.TransportAPI
 
@@ -132,6 +135,8 @@ func (transport *Transport) handleTCPConn(conn net.Conn) error {
 	transport.api.ConnectionUpdate(target, true)
 	defer transport.api.ConnectionUpdate(target, false)
 
+	transport.sendOnConnectOrder(conn, connectionLogger)
+
 	transport.readLoopTCPConn(conn, connectionLogger)
 
 	err = <-errChan
@@ -140,6 +145,43 @@ func (transport *Transport) handleTCPConn(conn net.Conn) error {
 		transport.errChan <- err
 	}
 	return err
+}
+
+// Hardcoded order sent to a board right after its TCP connection is
+// established, carrying the short ADJ hash. TODO: set the real id
+const onConnectOrderId uint16 = 65535
+
+// SetADJHash stores the ADJ commit hash to be sent on each new TCP connection.
+// The short hash is the first 8 characters of the commit, sent as ASCII text.
+// A hash shorter than 8 characters is sent as zeroes.
+func (transport *Transport) SetADJHash(hash string) {
+	if len(hash) < 8 {
+		transport.logger.Warn().Str("hash", hash).Msg("adj hash too short, on-connect order will send zeroes")
+		return
+	}
+	copy(transport.onConnectOrderValue[:], hash[:8])
+}
+
+// sendOnConnectOrder writes the on-connect order (carrying the short ADJ hash)
+// to the board using the same wire format as regular orders: packet id (little
+// endian) followed by the 8 ASCII characters of the hash.
+func (transport *Transport) sendOnConnectOrder(conn net.Conn, logger zerolog.Logger) {
+	buf := new(bytes.Buffer)
+	binary.Write(buf, binary.LittleEndian, onConnectOrderId)
+	binary.Write(buf, binary.LittleEndian, transport.onConnectOrderValue)
+
+	data := buf.Bytes()
+	totalWritten := 0
+	for totalWritten < len(data) {
+		n, err := conn.Write(data[totalWritten:])
+		totalWritten += n
+		if err != nil {
+			logger.Error().Stack().Err(err).Msg("write on-connect order")
+			transport.errChan <- err
+			return
+		}
+	}
+	logger.Info().Uint16("id", onConnectOrderId).Msg("sent on-connect order")
 }
 
 // configureTCPConn sets TCP-level options like linger and no-delay.
@@ -224,11 +266,11 @@ func (transport *Transport) readLoopTCPConn(conn net.Conn, logger zerolog.Logger
 		for {
 			packet, err := transport.decoder.DecodeNext(conn)
 			if err != nil {
-				// net.ErrClosed means we closed the connection on purpose
-				// (e.g. UDP keep-alive timeout), and a fault was already sent
-				if errors.Is(err, net.ErrClosed) {
-					return
-				}
+				// Disabled: skipped the fault when we closed the connection on
+				// purpose from the UDP keep-alive - Javier Ribal del Río (2026-07-15)
+				// if errors.Is(err, net.ErrClosed) {
+				// 	return
+				// }
 				logger.Error().Stack().Err(err).Msg("decode")
 				transport.errChan <- err
 				transport.SendFault()
@@ -485,33 +527,32 @@ func (transport *Transport) consumeErrors() {
 	}
 }
 
-// ReportError forwards an error to the API as an error notification so it
-// shows up in the GUI message log.
-func (transport *Transport) ReportError(err error) {
-	transport.errChan <- err
-}
-
-// TargetFromIp returns the board (transport target) registered for the given IP.
-func (transport *Transport) TargetFromIp(ip string) (abstraction.TransportTarget, bool) {
-	target, ok := transport.ipToTarget[ip]
-	return target, ok
-}
-
-// DisconnectTarget forcefully closes the TCP connection to target, if any.
-// The connection handler wakes up with reason, cleans up and notifies the
-// disconnection, and the client reconnection loop takes over.
-func (transport *Transport) DisconnectTarget(target abstraction.TransportTarget, reason error) bool {
-	transport.connectionsMx.RLock()
-	conn, ok := transport.connections[target]
-	transport.connectionsMx.RUnlock()
-	if !ok {
-		return false
-	}
-
-	transport.logger.Warn().Str("target", string(target)).Err(reason).Msg("forcefully disconnecting target")
-	tcp.CloseWithError(conn, reason)
-	return true
-}
+// Disabled: helpers for the UDP keep-alive callback — ReportError surfaced an
+// error in the GUI message log, TargetFromIp mapped a source IP to its board,
+// and DisconnectTarget force-closed a board's TCP connection so the handler
+// woke up, cleaned up and the reconnection loop took over
+// - Javier Ribal del Río (2026-07-15)
+// func (transport *Transport) ReportError(err error) {
+// 	transport.errChan <- err
+// }
+//
+// func (transport *Transport) TargetFromIp(ip string) (abstraction.TransportTarget, bool) {
+// 	target, ok := transport.ipToTarget[ip]
+// 	return target, ok
+// }
+//
+// func (transport *Transport) DisconnectTarget(target abstraction.TransportTarget, reason error) bool {
+// 	transport.connectionsMx.RLock()
+// 	conn, ok := transport.connections[target]
+// 	transport.connectionsMx.RUnlock()
+// 	if !ok {
+// 		return false
+// 	}
+//
+// 	transport.logger.Warn().Str("target", string(target)).Err(reason).Msg("forcefully disconnecting target")
+// 	tcp.CloseWithError(conn, reason)
+// 	return true
+// }
 
 func (transport *Transport) SendFault() {
 	err := transport.SendMessage(NewPacketMessage(data.NewPacket(0)))
