@@ -1,14 +1,39 @@
 package adj
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	trace "github.com/rs/zerolog/log"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 )
+
+// commitFile persists the commit hash of the last downloaded ADJ. It lives
+// next to the repo (not inside it) so wiping the repo before a clone does not
+// lose it, and local runs (no branch or no internet) can still report it.
+var commitFile = filepath.Join(filepath.Dir(filepath.Clean(RepoPath)), "adj_commit")
+
+// writeCommitFile stores the commit hash of the freshly cloned ADJ
+func writeCommitFile(hash string) error {
+	return os.WriteFile(commitFile, []byte(hash), 0644)
+}
+
+// readCommitFile recovers the commit hash persisted by the last download
+func readCommitFile() (string, error) {
+	raw, err := os.ReadFile(commitFile)
+	if err != nil {
+		return "", err
+	}
+	hash := strings.TrimSpace(string(raw))
+	if hash == "" {
+		return "", fmt.Errorf("commit file %s is empty", commitFile)
+	}
+	return hash, nil
+}
 
 // updateRepo ensures that the local ADJ repository matches the specified remote branch.
 // It first performs a test clone to verify remote accessibility (including internet
@@ -83,6 +108,10 @@ func updateRepo(AdjBranch string) (string, error) {
 			}
 			commitHash = ref.Hash().String()
 		}
+	}
+
+	if err = writeCommitFile(commitHash); err != nil {
+		return "", err
 	}
 
 	return commitHash, nil

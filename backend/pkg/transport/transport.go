@@ -2,6 +2,7 @@ package transport
 
 import (
 	"bytes"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
@@ -35,6 +36,8 @@ type Transport struct {
 	idToTarget map[abstraction.PacketId]abstraction.TransportTarget
 
 	propagateFault bool
+
+	onConnectOrderValue [8]byte
 
 	api abstraction.TransportAPI
 
@@ -132,6 +135,8 @@ func (transport *Transport) handleTCPConn(conn net.Conn) error {
 	transport.api.ConnectionUpdate(target, true)
 	defer transport.api.ConnectionUpdate(target, false)
 
+	transport.sendOnConnectOrder(conn, connectionLogger)
+
 	transport.readLoopTCPConn(conn, connectionLogger)
 
 	err = <-errChan
@@ -140,6 +145,43 @@ func (transport *Transport) handleTCPConn(conn net.Conn) error {
 		transport.errChan <- err
 	}
 	return err
+}
+
+// Hardcoded order sent to a board right after its TCP connection is
+// established, carrying the short ADJ hash. TODO: set the real id
+const onConnectOrderId uint16 = 65535
+
+// SetADJHash stores the ADJ commit hash to be sent on each new TCP connection.
+// The short hash is the first 8 characters of the commit, sent as ASCII text.
+// A hash shorter than 8 characters is sent as zeroes.
+func (transport *Transport) SetADJHash(hash string) {
+	if len(hash) < 8 {
+		transport.logger.Warn().Str("hash", hash).Msg("adj hash too short, on-connect order will send zeroes")
+		return
+	}
+	copy(transport.onConnectOrderValue[:], hash[:8])
+}
+
+// sendOnConnectOrder writes the on-connect order (carrying the short ADJ hash)
+// to the board using the same wire format as regular orders: packet id (little
+// endian) followed by the 8 ASCII characters of the hash.
+func (transport *Transport) sendOnConnectOrder(conn net.Conn, logger zerolog.Logger) {
+	buf := new(bytes.Buffer)
+	binary.Write(buf, binary.LittleEndian, onConnectOrderId)
+	binary.Write(buf, binary.LittleEndian, transport.onConnectOrderValue)
+
+	data := buf.Bytes()
+	totalWritten := 0
+	for totalWritten < len(data) {
+		n, err := conn.Write(data[totalWritten:])
+		totalWritten += n
+		if err != nil {
+			logger.Error().Stack().Err(err).Msg("write on-connect order")
+			transport.errChan <- err
+			return
+		}
+	}
+	logger.Info().Uint16("id", onConnectOrderId).Msg("sent on-connect order")
 }
 
 // configureTCPConn sets TCP-level options like linger and no-delay.
