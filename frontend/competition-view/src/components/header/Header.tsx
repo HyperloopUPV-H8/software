@@ -6,6 +6,7 @@ import useConnections from "../../hooks/useConnections";
 import ConnectionBadge from "./ConnectionBadge";
 import DashboardStatusBar from "./DashboardStatusBar";
 import HvalIndicator from "./HvalIndicator";
+import OrdersSheet from "./OrdersSheet";
 
 interface HeaderProps {
   backendConnected: boolean;
@@ -36,6 +37,7 @@ const Header = ({ backendConnected }: HeaderProps) => {
       <div className="flex items-center gap-2 justify-self-end">
         <ConnectionBadge label="Backend" connected={backendConnected} />
         <ConnectionBadge label="Vehicle" connected={vcuConnected} />
+        <OrdersSheet />
       </div>
     </header>
   );
