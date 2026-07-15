@@ -7,21 +7,27 @@
  * - Folder selection dialogs
  */
 
-import { dialog, ipcMain, shell } from "electron";
+import { app, dialog, ipcMain, shell } from "electron";
+import { execFile } from "child_process";
+import { readFile } from "fs/promises";
 import fs from "fs";
 import { isAbsolute, join } from "path";
+import { promisify } from "util";
 import {
   importConfig,
   readConfig,
   writeConfig,
 } from "../config/configInstance.js";
-import { getBackendWorkingDir, restartBackend } from "../processes/backend.js";
+import {
+  getBackendWorkingDir,
+  restartBackend,
+} from "../processes/backend.js";
 import { logger } from "../utils/logger.js";
+import { getAppPath } from "../utils/paths.js";
 import {
   getCurrentView,
   getMainWindow,
   loadView,
-  reloadWindow,
 } from "../windows/mainWindow.js";
 
 /**
@@ -41,6 +47,69 @@ function setupIpcHandlers() {
   ipcMain.handle("get-current-view", () => getCurrentView());
 
   /**
+   * @event restart-backend
+   * @async
+   * @description Stops the backend process, restarts it, and reloads the renderer once ready.
+   */
+  ipcMain.handle("restart-backend", async () => {
+    try {
+      await restartBackend();
+    } catch (error) {
+      logger.electron.error("Failed to restart backend:", error);
+      dialog.showErrorBox("Restart Failed", `Could not restart backend:\n\n${error.message}`);
+    } finally {
+      loadView("testing-view");
+    }
+  });
+
+  ipcMain.handle("get-app-version", () => app.getVersion());
+
+  /**
+   * @event setup-kernel
+   * @async
+   * @description Configures kernel parameters needed by the backend
+   * (disables the TCP invalid-packet rate limit). Linux only; on other
+   * platforms it shows a warning dialog.
+   * @returns {Promise<{success: boolean, message: string}>}
+   */
+  ipcMain.handle("setup-kernel", async () => {
+    if (process.platform !== "linux") {
+      const message = "Kernel setup is only available on Linux";
+      dialog.showMessageBox({
+        type: "warning",
+        title: "Not available",
+        message,
+      });
+      return { success: false, message };
+    }
+
+    try {
+      const { stdout } = await promisify(execFile)("pkexec", [
+        "sysctl",
+        "-w",
+        "net.ipv4.tcp_invalid_ratelimit=0",
+      ]);
+      logger.electron.info(`Kernel setup completed: ${stdout.trim()}`);
+      return { success: true, message: "Kernel set up successfully" };
+    } catch (error) {
+      logger.electron.error("Kernel setup failed:", error);
+      return { success: false, message: error.stderr?.trim() || error.message };
+    }
+  });
+
+  ipcMain.handle("get-available-views", () => {
+    const ALL_VIEWS = [
+      { mode: "testing", label: "Testing View" },
+      { mode: "competition", label: "Competition View" },
+      { mode: "flashing", label: "Flashing View" },
+    ];
+    const rendererDir = join(getAppPath(), "renderer");
+    return ALL_VIEWS.filter(({ mode }) =>
+      fs.existsSync(join(rendererDir, `${mode}-view`))
+    );
+  });
+
+  /**
    * @event switch-view
    * @description Switches the main window to the specified view.
    * @param {import("electron").IpcMainInvokeEvent} event - The IPC event object.
@@ -51,6 +120,8 @@ function setupIpcHandlers() {
     loadView(view);
     return view;
   });
+
+  
 
   /**
    * @event save-config
@@ -64,10 +135,7 @@ function setupIpcHandlers() {
   ipcMain.handle("save-config", async (event, config) => {
     try {
       await writeConfig(config);
-      await restartBackend();
-
-      reloadWindow();
-
+      app.emit("return-to-selector");
       return true;
     } catch (error) {
       logger.electron.error("Error saving config:", error);
@@ -102,10 +170,7 @@ function setupIpcHandlers() {
   ipcMain.handle("import-config", async () => {
     try {
       await importConfig();
-      await restartBackend();
-
-      reloadWindow();
-
+      app.emit("return-to-selector");
       return true;
     } catch (error) {
       logger.electron.error("Error importing config:", error);
@@ -154,11 +219,35 @@ function setupIpcHandlers() {
         ? folderPath
         : join(getBackendWorkingDir(), folderPath);
       const loggerPath = join(resolvedPath, "logger");
-      await shell.openPath(fs.existsSync(loggerPath) ? loggerPath : resolvedPath);
+      await shell.openPath(
+        fs.existsSync(loggerPath) ? loggerPath : resolvedPath,
+      );
     } catch (error) {
       logger.electron.error("Error opening folder:", error);
       throw error;
     }
+  });
+
+  // BLCU — only the file picker runs through IPC; all API calls go directly
+  // from the renderer to http://localhost:8000.
+
+  ipcMain.handle("blcu-select-file", async () => {
+    try {
+      const mainWindow = getMainWindow();
+      const result = await dialog.showOpenDialog(mainWindow, {
+        title: "Select Firmware File",
+        properties: ["openFile"],
+        filters: [{ name: "Firmware", extensions: ["bin", "hex", "elf"] }],
+      });
+      return result.canceled ? null : (result.filePaths[0] ?? null);
+    } catch (error) {
+      logger.electron.error("Error opening firmware file dialog:", error);
+      return null;
+    }
+  });
+
+  ipcMain.handle("blcu-read-file", async (_event, filePath) => {
+    return await readFile(filePath);
   });
 }
 

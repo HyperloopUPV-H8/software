@@ -140,7 +140,34 @@ func configureUDPServerTransport(
 
 ) {
 	trace.Info().Msg("Starting UDP server")
-	udpServer := udp.NewServer(adj.Info.Addresses[BACKEND], adj.Info.Ports[UDP], &trace.Logger, config.UDP.RingBufferSize, config.UDP.PacketChanSize)
+
+	onKeepAliveTimeout := func(ip string) {
+		transp.SendFault()
+		board, ok := transp.TargetFromIp(ip)
+		if !ok {
+			board = "unknown"
+		}
+		err := fmt.Errorf("UDP keep-alive timeout: no packets received from board %s (%s) for %dms, fault sent", board, ip, config.UDP.KeepAliveTimeoutMs)
+		transp.ReportError(err)
+
+		// Close the board's TCP connection ourselves: the fault we just
+		// broadcast leaves unacked data on a dead peer, which suppresses the
+		// TCP keep-alive and would delay disconnect detection by minutes.
+		if ok {
+			transp.DisconnectTarget(board, err)
+		}
+	}
+
+	udpServer := udp.NewServer(
+		adj.Info.Addresses[BACKEND],
+		adj.Info.Ports[UDP],
+		&trace.Logger,
+		config.UDP.RingBufferSize,
+		config.UDP.PacketChanSize,
+		time.Duration(config.UDP.KeepAliveCheckIntervalMs)*time.Millisecond,
+		time.Duration(config.UDP.KeepAliveTimeoutMs)*time.Millisecond,
+		onKeepAliveTimeout,
+	)
 	err := udpServer.Start()
 	if err != nil {
 		trace.Fatal().Err(err).Msg("failed to start UDP server: " + err.Error())
