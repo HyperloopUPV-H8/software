@@ -224,11 +224,11 @@ func (transport *Transport) readLoopTCPConn(conn net.Conn, logger zerolog.Logger
 		for {
 			packet, err := transport.decoder.DecodeNext(conn)
 			if err != nil {
-				// net.ErrClosed means we closed the connection on purpose
-				// (e.g. UDP keep-alive timeout), and a fault was already sent
-				if errors.Is(err, net.ErrClosed) {
-					return
-				}
+				// Disabled: skipped the fault when we closed the connection on
+				// purpose from the UDP keep-alive - Javier Ribal del Río (2026-07-15)
+				// if errors.Is(err, net.ErrClosed) {
+				// 	return
+				// }
 				logger.Error().Stack().Err(err).Msg("decode")
 				transport.errChan <- err
 				transport.SendFault()
@@ -485,33 +485,32 @@ func (transport *Transport) consumeErrors() {
 	}
 }
 
-// ReportError forwards an error to the API as an error notification so it
-// shows up in the GUI message log.
-func (transport *Transport) ReportError(err error) {
-	transport.errChan <- err
-}
-
-// TargetFromIp returns the board (transport target) registered for the given IP.
-func (transport *Transport) TargetFromIp(ip string) (abstraction.TransportTarget, bool) {
-	target, ok := transport.ipToTarget[ip]
-	return target, ok
-}
-
-// DisconnectTarget forcefully closes the TCP connection to target, if any.
-// The connection handler wakes up with reason, cleans up and notifies the
-// disconnection, and the client reconnection loop takes over.
-func (transport *Transport) DisconnectTarget(target abstraction.TransportTarget, reason error) bool {
-	transport.connectionsMx.RLock()
-	conn, ok := transport.connections[target]
-	transport.connectionsMx.RUnlock()
-	if !ok {
-		return false
-	}
-
-	transport.logger.Warn().Str("target", string(target)).Err(reason).Msg("forcefully disconnecting target")
-	tcp.CloseWithError(conn, reason)
-	return true
-}
+// Disabled: helpers for the UDP keep-alive callback — ReportError surfaced an
+// error in the GUI message log, TargetFromIp mapped a source IP to its board,
+// and DisconnectTarget force-closed a board's TCP connection so the handler
+// woke up, cleaned up and the reconnection loop took over
+// - Javier Ribal del Río (2026-07-15)
+// func (transport *Transport) ReportError(err error) {
+// 	transport.errChan <- err
+// }
+//
+// func (transport *Transport) TargetFromIp(ip string) (abstraction.TransportTarget, bool) {
+// 	target, ok := transport.ipToTarget[ip]
+// 	return target, ok
+// }
+//
+// func (transport *Transport) DisconnectTarget(target abstraction.TransportTarget, reason error) bool {
+// 	transport.connectionsMx.RLock()
+// 	conn, ok := transport.connections[target]
+// 	transport.connectionsMx.RUnlock()
+// 	if !ok {
+// 		return false
+// 	}
+//
+// 	transport.logger.Warn().Str("target", string(target)).Err(reason).Msg("forcefully disconnecting target")
+// 	tcp.CloseWithError(conn, reason)
+// 	return true
+// }
 
 func (transport *Transport) SendFault() {
 	err := transport.SendMessage(NewPacketMessage(data.NewPacket(0)))
