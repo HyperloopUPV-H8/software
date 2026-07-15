@@ -8,6 +8,7 @@ import {
 import { PAGES_ARRAY } from "../../constants/pages";
 import AboutItem from "./AboutItem";
 import ConnectionStatusGroup from "./ConnectionStatusGroup";
+import LoggerItem from "./LoggerItem";
 import Logo from "./Logo";
 import NavigationGroup from "./NavigationGroup";
 import ShortcutsItem from "./ShortcutsItem";
@@ -31,6 +32,7 @@ const AppSidebar = ({ backendConnected, onShowShortcuts, ...props }: AppSidebarP
     <SidebarFooter>
       <ConnectionStatusGroup backendConnected={backendConnected} />
       <div className="my-2" />
+      <LoggerItem disabled={!backendConnected} />
       <ThemeToggleItem />
       <ShortcutsItem onShowShortcuts={onShowShortcuts} />
       <AboutItem />
