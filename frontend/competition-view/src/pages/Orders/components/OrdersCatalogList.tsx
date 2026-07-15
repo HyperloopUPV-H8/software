@@ -1,7 +1,10 @@
 import type { BoardOrdersData, CommandCatalogItem } from "../../../types/catalog";
 import { BOARDS } from "../../../constants/measurements";
-import { VCU_GATED_ORDER_IDS } from "../../../constants/vcuStateMachine";
+import { VCU_GATED_ORDER_IDS, VCU_PARAMETERIZED_ORDER_IDS } from "../../../constants/vcuStateMachine";
 import OrderRow from "./OrderRow";
+
+/** State-machine orders plus their parameterized variants (Propulsion/Static/Dynamic Levitation Parameterized). */
+const CATALOG_ORDER_IDS: readonly number[] = [...VCU_GATED_ORDER_IDS, ...VCU_PARAMETERIZED_ORDER_IDS];
 
 interface OrdersCatalogListProps {
   /** Full catalog, keyed by board name (as received from the backend). */
@@ -18,17 +21,17 @@ const matchesFilter = (item: CommandCatalogItem, filter: string) => {
 
 /**
  * Classic flat catalog list (name + id badge + outline Send button per row,
- * search filtering) — used in the Orders side sheet. Restricted to the
- * orders defined by the vehicle state machine (constants/vcuStateMachine.ts):
- * no per-board grouping, and orders outside that set (other boards, or VCU
- * orders not part of the diagram) aren't rendered at all. Every order in the
- * set is always shown; OrderRow disables + tooltips the ones the current
- * vehicle state doesn't allow.
+ * search filtering, expandable parameter forms) — used in the Orders side
+ * sheet. Restricted to the orders defined by the vehicle state machine
+ * (constants/vcuStateMachine.ts) plus their parameterized variants: no
+ * per-board grouping, and orders outside that set (other boards) aren't
+ * rendered at all. Every order in the set is always shown; OrderRow
+ * disables + tooltips the ones the current vehicle state doesn't allow.
  */
 const OrdersCatalogList = ({ commandsCatalog, filter, isConnected }: OrdersCatalogListProps) => {
   const vcuOrders = commandsCatalog[BOARDS.VCU]?.orders ?? [];
 
-  const items = VCU_GATED_ORDER_IDS
+  const items = CATALOG_ORDER_IDS
     .map((id) => vcuOrders.find((o) => o.id === id))
     .filter((o): o is CommandCatalogItem => o !== undefined)
     .filter((o) => matchesFilter(o, filter));

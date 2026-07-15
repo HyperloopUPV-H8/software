@@ -15,6 +15,15 @@ export type VcuState = (typeof VCU_STATES)[number];
 
 export const VCU_GATED_ORDER_IDS = [0, 30, 40, 41, 50, 51, 60, 61, 62] as const;
 
+/**
+ * Parameterized variants of the propulsion/levitation orders (they take
+ * fields — target speed/current/height — so aren't shown as plain buttons
+ * in the state-machine diagram/grid). Not part of VCU_ORDER_STATE_MATRIX,
+ * so isVcuOrderAllowedInState treats them as always allowed regardless of
+ * vehicle state. Shown only in the Orders side sheet's classic catalog list.
+ */
+export const VCU_PARAMETERIZED_ORDER_IDS = [100, 101, 102] as const;
+
 const VCU_ORDER_STATE_MATRIX: readonly (0 | 1)[][] = [
   /* Idle               */ [1, 0, 0, 0, 0, 0, 0, 0, 0],
   /* Connected          */ [1, 0, 1, 1, 0, 0, 0, 0, 0],
