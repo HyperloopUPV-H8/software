@@ -1,9 +1,11 @@
 import { formatAxisValue } from "../../../constants/chartConfig";
 import {
   BOARDS,
+  CELL_V_RANGE,
   CELL_V_WARN_HIGH,
   CELL_V_WARN_LOW,
   HVBMS,
+  PACK_V_RANGE,
 } from "../../../constants/measurements";
 import { useStaleFlags } from "../../../hooks/useIsStale";
 import useMeasurement from "../../../hooks/useMeasurement";
@@ -67,22 +69,27 @@ const HvBatterySection = () => {
       {/* Summary stats — SOC / cell extremes reuse the cell warning thresholds */}
       <div className="bg-card grid shrink-0 grid-cols-6 gap-px overflow-hidden rounded-xl border shadow-sm">
         {[
-          { label: "Total V",  value: fmt(totalVoltage), unit: "V"  },
+          {
+            label: "Total V", value: fmt(totalVoltage), unit: "V",
+            range: PACK_V_RANGE,
+          },
           {
             label: "SOC", value: fmt(soc, 0), unit: "%",
             valueClass: typeof soc !== "number" ? "" : soc < 20 ? "text-red-500" : soc < 40 ? "text-amber-500" : "",
           },
           {
             label: "V max", value: fmt(voltageMax, 3), unit: "V",
+            range: CELL_V_RANGE,
             valueClass: typeof voltageMax === "number" && voltageMax > CELL_V_WARN_HIGH ? "text-amber-500" : "",
           },
           {
             label: "V min", value: fmt(voltageMin, 3), unit: "V",
+            range: CELL_V_RANGE,
             valueClass: typeof voltageMin === "number" && voltageMin < CELL_V_WARN_LOW ? "text-red-500" : "",
           },
           { label: "T max",    value: fmt(tempMax),       unit: "°C" },
           { label: "T min",    value: fmt(tempMin),       unit: "°C" },
-        ].map(({ label, value, unit, valueClass }, i) => (
+        ].map(({ label, value, unit, valueClass, range }, i) => (
           <div key={label} className="bg-card flex min-w-0 flex-col items-center gap-0.5 px-2 py-2">
             <span className="text-muted-foreground text-xs">{label}</span>
             <span className={`block w-full truncate text-center text-xl font-bold tabular-nums ${staleFlags[i] ? STALE_TEXT_CLASS : valueClass || "text-foreground"}`}>
@@ -90,6 +97,11 @@ const HvBatterySection = () => {
               <span className="text-muted-foreground ml-1 text-sm font-normal">
                 {unit}
               </span>
+              {range && (
+                <span className="text-muted-foreground ml-1 text-sm font-normal tabular-nums">
+                  [{range[0]}–{range[1]}]
+                </span>
+              )}
             </span>
           </div>
         ))}

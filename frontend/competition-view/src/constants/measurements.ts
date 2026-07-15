@@ -51,6 +51,19 @@ export const PCU_BOARD = {
 /** DC link voltage (HVBMS.voltageReading) threshold above which HVAL is considered active. */
 export const HVAL_THRESHOLD_V = 60;
 
+/* ─── Expected operating intervals, displayed next to the live values ────── */
+
+/** Cell voltage interval (V). */
+export const CELL_V_RANGE: readonly [number, number] = [2.7, 4.2];
+/** Total battery (pack) voltage interval (V). */
+export const PACK_V_RANGE: readonly [number, number] = [260, 400];
+/** DC bus / DC link voltage interval (V). */
+export const DC_BUS_V_RANGE: readonly [number, number] = [0, 400];
+/** Levitation coil current interval (A). */
+export const LEV_CURRENT_RANGE: readonly [number, number] = [-55, 55];
+/** Propulsion phase current interval (A). */
+export const PROP_CURRENT_RANGE: readonly [number, number] = [0, 120];
+
 /** Cell voltage display range and warning thresholds (V), shared by the battery views. */
 export const CELL_V_MIN       = 3.0;
 export const CELL_V_MAX       = 4.2;

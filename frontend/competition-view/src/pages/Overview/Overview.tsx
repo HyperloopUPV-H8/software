@@ -12,9 +12,13 @@ import {
 import { useEffect, useRef, useState } from "react";
 import {
   BOARDS,
+  DC_BUS_V_RANGE,
   HVBMS,
   LCU,
+  LEV_CURRENT_RANGE,
+  PACK_V_RANGE,
   PCU,
+  PROP_CURRENT_RANGE,
   VCU,
 } from "../../constants/measurements";
 import useMeasurement from "../../hooks/useMeasurement";
@@ -80,6 +84,8 @@ interface BatteryRow {
   warn?: boolean;
   /** Data stopped arriving — value is rendered in yellow. */
   stale?: boolean;
+  /** Expected operating interval [min, max], shown muted next to the value. */
+  range?: readonly [number, number];
 }
 
 interface BatteryCardProps {
@@ -119,13 +125,18 @@ const BatteryCard = ({ title, icon: Icon, soc, socStale, rows }: BatteryCardProp
       </div>
 
       <div className="flex flex-col gap-0.5">
-        {rows.map(({ label, value, unit, warn, stale }) => (
+        {rows.map(({ label, value, unit, warn, stale, range }) => (
           <div key={label} className="flex items-baseline justify-between">
             <span className="text-muted-foreground text-xs uppercase tracking-wider">{label}</span>
             <span className={`text-sm font-medium tabular-nums ${stale ? STALE_TEXT_CLASS : warn ? "text-red-500" : "text-foreground"}`}>
               {value ?? "—"}
               {value !== undefined && unit && (
                 <span className="text-muted-foreground ml-0.5 text-xs font-normal">{unit}</span>
+              )}
+              {range && (
+                <span className="text-muted-foreground ml-1 text-xs font-normal">
+                  [{range[0]}–{range[1]}]
+                </span>
               )}
             </span>
           </div>
@@ -334,9 +345,9 @@ const HvBatteryCard = () => {
       soc={typeof hvSoc === "number" ? hvSoc : undefined}
       socStale={socStale}
       rows={[
-        { label: "Pack V",    value: fmtNum(hvVoltage), unit: "V", stale: vStale  },
+        { label: "Pack V",    value: fmtNum(hvVoltage), unit: "V", stale: vStale,  range: PACK_V_RANGE   },
         { label: "Current",   value: fmtNum(hvCurrent), unit: "A", stale: iStale  },
-        { label: "DC Link",   value: fmtNum(hvVSensor), unit: "V", stale: dcStale },
+        { label: "DC Link",   value: fmtNum(hvVSensor), unit: "V", stale: dcStale, range: DC_BUS_V_RANGE },
       ]}
     />
   );
@@ -364,12 +375,12 @@ const Dashboard = () => {
 
           {/* Charts — 2 cols × 3 rows */}
           <div className="grid min-h-0 flex-1 grid-cols-2 grid-rows-3 gap-2">
-            <MultiSeriesChart title="DLIM — Phase Currents"  icon={Zap}           series={DLIM_SERIES}       unit="A"  />
+            <MultiSeriesChart title="DLIM — Phase Currents"  icon={Zap}           series={DLIM_SERIES}       unit={`A [${PROP_CURRENT_RANGE[0]}–${PROP_CURRENT_RANGE[1]}]`} />
             <TelemetryChart   title="Speed"                  icon={Gauge}         board={BOARDS.PCU}          measurementKey={PCU.speed}    unit="km/h" colorIndex={0} />
             <MultiSeriesChart title="Vertical Airgaps"       icon={MoveVertical}  series={VERT_AIRGAP_SERIES} unit="mm" />
             <MultiSeriesChart title="Lateral Airgaps"        icon={MoveHorizontal} series={LAT_AIRGAP_SERIES} unit="mm" />
-            <MultiSeriesChart title="HEMS — Coil Currents"   icon={Zap}           series={HEMS_SERIES}        unit="A"  />
-            <MultiSeriesChart title="EMS — Coil Currents"    icon={Zap}           series={EMS_SERIES}         unit="A"  />
+            <MultiSeriesChart title="HEMS — Coil Currents"   icon={Zap}           series={HEMS_SERIES}        unit={`A [${LEV_CURRENT_RANGE[0]}–${LEV_CURRENT_RANGE[1]}]`} />
+            <MultiSeriesChart title="EMS — Coil Currents"    icon={Zap}           series={EMS_SERIES}         unit={`A [${LEV_CURRENT_RANGE[0]}–${LEV_CURRENT_RANGE[1]}]`} />
           </div>
 
         </div>
