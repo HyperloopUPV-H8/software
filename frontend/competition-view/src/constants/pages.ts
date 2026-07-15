@@ -1,7 +1,7 @@
 import { Battery, Layout } from "@workspace/ui/icons";
 
 export const PAGES = {
-  "/":          { title: "Dashboard",  icon: Layout },
+  "/":          { title: "Competition View",  icon: Layout },
   "/batteries": { title: "Batteries",  icon: Battery },
 } as const;
 

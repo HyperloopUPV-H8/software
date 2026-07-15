@@ -20,11 +20,14 @@ const Header = ({ backendConnected }: HeaderProps) => {
   const vcuConnected = connections[BOARDS.VCU]?.isConnected ?? false;
 
   return (
-    <header className="h-(--header-height) grid shrink-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-b px-4">
-      <div className="flex min-w-0 items-center gap-2 justify-self-start">
+    <header className="grid h-16 shrink-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-b px-4">
+      <div className="flex min-w-0 items-center gap-2">
         <SidebarTrigger className="text-foreground -ml-1" />
         <Separator orientation="vertical" className="text-foreground mx-1 data-[orientation=vertical]:h-5" />
-        <h1 className="text-foreground truncate text-2xl font-bold">{pageTitle}</h1>
+        <div className="min-w-0">
+          <h1 className="text-foreground truncate text-xl font-bold leading-tight">{pageTitle}</h1>
+          <p className="text-muted-foreground truncate text-xs font-medium leading-tight">Hyperloop UPV</p>
+        </div>
         <HvalIndicator />
       </div>
 
