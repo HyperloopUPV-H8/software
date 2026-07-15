@@ -44,10 +44,6 @@ func (conn *connWithErr) Close() error {
 	return conn.Conn.Close()
 }
 
-// CloseWithError closes conn, delivering reason to its error channel first so
-// the connection handler blocked on that channel wakes up. Closing a
-// connection directly would not do this, since Read/Write filter out
-// net.ErrClosed.
 func CloseWithError(conn net.Conn, reason error) error {
 	if cwe, ok := conn.(*connWithErr); ok {
 		select {
