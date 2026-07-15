@@ -7,6 +7,9 @@ export const formatMessageTimestamp = (ts: MessageTimestamp | undefined): string
   return `${pad(ts.hour)}:${pad(ts.minute)}:${pad(ts.second)}`;
 };
 
+/** Caps a raw telemetry float to 2 decimal places for display. */
+const fmt = (n: number): string => (Number.isFinite(n) ? n.toFixed(2) : String(n));
+
 /** Human-readable text for a message's payload, whether it's a plain string or a detailed protection object. */
 export const messageContent = (payload: MessagePacket["payload"]): string => {
   if (typeof payload === "string") return payload;
@@ -17,16 +20,16 @@ export const messageContent = (payload: MessagePacket["payload"]): string => {
 
   switch (kind) {
     case "OUT_OF_BOUNDS":
-      return `Value: ${data.value} (Bounds: [${data.bounds[0]}, ${data.bounds[1]}])`;
+      return `Value: ${fmt(data.value)} (Bounds: [${fmt(data.bounds[0])}, ${fmt(data.bounds[1])}])`;
     case "UPPER_BOUND":
     case "LOWER_BOUND":
-      return `Value: ${data.value} (Limit: ${data.bound})`;
+      return `Value: ${fmt(data.value)} (Limit: ${fmt(data.bound)})`;
     case "EQUALS":
-      return `Value: ${data.value}`;
+      return `Value: ${fmt(data.value)}`;
     case "NOT_EQUALS":
-      return `Value: ${data.value} (Expected: ${data.want})`;
+      return `Value: ${fmt(data.value)} (Expected: ${fmt(data.want)})`;
     case "TIME_ACCUMULATION":
-      return `Value: ${data.value} for ${data.timelimit}s (Limit: ${data.bound})`;
+      return `Value: ${fmt(data.value)} for ${fmt(data.timelimit)}s (Limit: ${fmt(data.bound)})`;
     default:
       return JSON.stringify(data);
   }

@@ -3,6 +3,7 @@ import { MapPin } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import podIconDark from "../../../assets/pod-dark.svg";
 import podIconLight from "../../../assets/pod-light.svg";
+import { formatAxisValue } from "../../../constants/chartConfig";
 import { BOARDS, PCU } from "../../../constants/measurements";
 import { TRACK_LENGTH_M } from "../../../constants/track";
 import { useIsStale } from "../../../hooks/useIsStale";
@@ -78,7 +79,11 @@ const TrackProgress = () => {
         </div>
 
         <span className={`shrink-0 text-base font-bold tabular-nums ${stale ? STALE_TEXT_CLASS : "text-foreground"}`}>
-          {typeof position === "number" ? position.toFixed(1) : "—"}
+          {typeof position === "number" && Number.isFinite(position)
+            ? Math.abs(position) >= 1e6
+              ? formatAxisValue(position)
+              : position.toFixed(1)
+            : "—"}
           <span className="text-muted-foreground ml-0.5 text-sm font-normal">/ {TRACK_LENGTH_M} m</span>
         </span>
       </CardContent>

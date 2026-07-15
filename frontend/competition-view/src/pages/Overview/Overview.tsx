@@ -10,6 +10,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { formatAxisValue } from "../../constants/chartConfig";
 import {
   BOARDS,
   DC_BUS_V_RANGE,
@@ -72,8 +73,19 @@ const EMS_SERIES: SeriesConfig[] = [
 
 /* ─── Helpers ───────────────────────────────────────────────────────────── */
 
-const fmtNum = (v: number | boolean | string | undefined, decimals = 1) =>
-  typeof v === "number" ? v.toFixed(decimals) : undefined;
+/**
+ * Formats a telemetry number for display, capped to `decimals` places.
+ * Garbage/misdecoded samples can come through as huge magnitudes (a
+ * float64 reinterpreted from bad bytes can reach ~1e308) — those fall
+ * back to the same compact/exponential formatting used on chart axes
+ * instead of printing dozens of digits.
+ */
+const fmtNum = (v: number | boolean | string | undefined, decimals = 1) => {
+  if (typeof v !== "number" || !Number.isFinite(v)) return undefined;
+  const abs = Math.abs(v);
+  if (abs !== 0 && (abs >= 1e6 || abs < 1e-3)) return formatAxisValue(v);
+  return v.toFixed(decimals);
+};
 
 /* ─── Battery card ──────────────────────────────────────────────────────── */
 
@@ -115,7 +127,7 @@ const BatteryCard = ({ title, icon: Icon, soc, socStale, rows }: BatteryCardProp
           {title}
         </span>
         <span className={`text-base font-bold tabular-nums ${socStale ? STALE_TEXT_CLASS : text}`}>
-          {typeof soc === "number" ? soc.toFixed(0) : "—"}
+          {fmtNum(soc, 0) ?? "—"}
           <span className="text-muted-foreground ml-0.5 text-xs font-normal">%</span>
         </span>
       </div>

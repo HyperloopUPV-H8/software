@@ -1,4 +1,5 @@
 import { BatteryFull, Cpu, type LucideIcon, Waves, Zap } from "lucide-react";
+import { formatAxisValue } from "../../../constants/chartConfig";
 import { BOARDS, HVBMS, LCU, PCU_BOARD, VCU } from "../../../constants/measurements";
 import { useIsStale } from "../../../hooks/useIsStale";
 import useMeasurement from "../../../hooks/useMeasurement";
@@ -69,9 +70,13 @@ const ROWS: BoardRow[] = [
 const StatItem = ({ board, stat }: { board: string; stat: Stat }) => {
   const raw   = useMeasurement(board, stat.measurementKey);
   const stale = useIsStale(board, stat.measurementKey);
+  // Garbage/misdecoded samples can come through as huge magnitudes; fall
+  // back to compact/exponential formatting instead of a long digit string.
   const display =
     typeof raw === "number"
-      ? raw.toFixed(stat.decimals ?? 1)
+      ? Number.isFinite(raw) && Math.abs(raw) !== 0 && (Math.abs(raw) >= 1e6 || Math.abs(raw) < 1e-3)
+        ? formatAxisValue(raw)
+        : raw.toFixed(stat.decimals ?? 1)
       : typeof raw === "boolean" && stat.boolLabels
         ? stat.boolLabels[raw ? 0 : 1]
         : raw !== undefined
