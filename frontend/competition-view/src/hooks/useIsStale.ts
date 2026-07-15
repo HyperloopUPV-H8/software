@@ -1,13 +1,26 @@
-import { useRef, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import { isStale, subscribeTick } from "../lib/freshness";
 
 /**
- * True when the measurement stopped arriving (see STALE_THRESHOLD_MS).
- * Driven by the shared freshness ticker; the component only re-renders
- * when the flag actually flips.
+ * These hooks poll the freshness map on the shared ticker and mirror the
+ * result into component state. A plain setState is used (rather than
+ * useSyncExternalStore) so a flip can never be missed: memoised chart
+ * components never re-render on data updates, so a single dropped
+ * notification would leave them tinted yellow forever.
  */
-export const useIsStale = (board: string, id: string): boolean =>
-  useSyncExternalStore(subscribeTick, () => isStale(board, id));
+
+/** True when the measurement stopped arriving (see STALE_THRESHOLD_MS). */
+export const useIsStale = (board: string, id: string): boolean => {
+  const [stale, setStale] = useState(() => isStale(board, id));
+
+  useEffect(() => {
+    const update = () => setStale(isStale(board, id));
+    update();
+    return subscribeTick(update);
+  }, [board, id]);
+
+  return stale;
+};
 
 /**
  * True when EVERY listed measurement is stale — used by charts to tint the
@@ -16,10 +29,20 @@ export const useIsStale = (board: string, id: string): boolean =>
  */
 export const useAllStale = (
   pairs: readonly { board: string; measurementKey: string }[],
-): boolean =>
-  useSyncExternalStore(subscribeTick, () =>
+): boolean => {
+  const [stale, setStale] = useState(() =>
     pairs.every(({ board, measurementKey }) => isStale(board, measurementKey)),
   );
+
+  useEffect(() => {
+    const update = () =>
+      setStale(pairs.every(({ board, measurementKey }) => isStale(board, measurementKey)));
+    update();
+    return subscribeTick(update);
+  }, [pairs]);
+
+  return stale;
+};
 
 /**
  * Stale flags for several measurements of one board in a single
@@ -27,12 +50,19 @@ export const useAllStale = (
  * `ids` should be a stable reference (module constant or memoised).
  */
 export const useStaleFlags = (board: string, ids: readonly string[]): boolean[] => {
-  const cacheRef = useRef<boolean[]>([]);
-  return useSyncExternalStore(subscribeTick, () => {
-    const next = ids.map((id) => isStale(board, id));
-    const prev = cacheRef.current;
-    if (next.length === prev.length && next.every((v, i) => v === prev[i])) return prev;
-    cacheRef.current = next;
-    return next;
-  });
+  const [flags, setFlags] = useState<boolean[]>(() => ids.map((id) => isStale(board, id)));
+
+  useEffect(() => {
+    const update = () =>
+      setFlags((prev) => {
+        const next = ids.map((id) => isStale(board, id));
+        return next.length === prev.length && next.every((v, i) => v === prev[i])
+          ? prev
+          : next;
+      });
+    update();
+    return subscribeTick(update);
+  }, [board, ids]);
+
+  return flags;
 };
