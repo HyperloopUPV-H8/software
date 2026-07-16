@@ -97,6 +97,7 @@ func main() {
 	// <--- transport --->
 	transp := transport.NewTransport(trace.Logger)
 	transp.SetpropagateFault(config.Transport.PropagateFault)
+	transp.SetADJHash(adj.Commit)
 
 	// <--- vehicle --->
 	err = configureVehicle(

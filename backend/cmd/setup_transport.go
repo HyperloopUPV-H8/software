@@ -131,22 +131,25 @@ func configureUDPServerTransport(
 ) {
 	trace.Info().Msg("Starting UDP server")
 
-	onKeepAliveTimeout := func(ip string) {
-		transp.SendFault()
-		board, ok := transp.TargetFromIp(ip)
-		if !ok {
-			board = "unknown"
-		}
-		err := fmt.Errorf("UDP keep-alive timeout: no packets received from board %s (%s) for %dms, fault sent", board, ip, config.UDP.KeepAliveTimeoutMs)
-		transp.ReportError(err)
-
-		// Close the board's TCP connection ourselves: the fault we just
-		// broadcast leaves unacked data on a dead peer, which suppresses the
-		// TCP keep-alive and would delay disconnect detection by minutes.
-		if ok {
-			transp.DisconnectTarget(board, err)
-		}
-	}
+	// Disabled: UDP keep-alive callback — on timeout it broadcast a fault,
+	// reported the board to the GUI and force-closed its TCP connection
+	// - Javier Ribal del Río (2026-07-15)
+	// onKeepAliveTimeout := func(ip string) {
+	// 	transp.SendFault()
+	// 	board, ok := transp.TargetFromIp(ip)
+	// 	if !ok {
+	// 		board = "unknown"
+	// 	}
+	// 	err := fmt.Errorf("UDP keep-alive timeout: no packets received from board %s (%s) for %dms, fault sent", board, ip, config.UDP.KeepAliveTimeoutMs)
+	// 	transp.ReportError(err)
+	//
+	// 	// Close the board's TCP connection ourselves: the fault we just
+	// 	// broadcast leaves unacked data on a dead peer, which suppresses the
+	// 	// TCP keep-alive and would delay disconnect detection by minutes.
+	// 	if ok {
+	// 		transp.DisconnectTarget(board, err)
+	// 	}
+	// }
 
 	udpServer := udp.NewServer(
 		adj.Info.Addresses[BACKEND],
@@ -154,9 +157,10 @@ func configureUDPServerTransport(
 		&trace.Logger,
 		config.UDP.RingBufferSize,
 		config.UDP.PacketChanSize,
-		time.Duration(config.UDP.KeepAliveCheckIntervalMs)*time.Millisecond,
-		time.Duration(config.UDP.KeepAliveTimeoutMs)*time.Millisecond,
-		onKeepAliveTimeout,
+		// Disabled: UDP keep-alive arguments - Javier Ribal del Río (2026-07-15)
+		// time.Duration(config.UDP.KeepAliveCheckIntervalMs)*time.Millisecond,
+		// time.Duration(config.UDP.KeepAliveTimeoutMs)*time.Millisecond,
+		// onKeepAliveTimeout,
 	)
 	err := udpServer.Start()
 	if err != nil {

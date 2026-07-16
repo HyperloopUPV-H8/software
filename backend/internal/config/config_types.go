@@ -25,10 +25,11 @@ type TCP struct {
 }
 
 type UDP struct {
-	RingBufferSize           int `toml:"ring_buffer_size"`
-	PacketChanSize           int `toml:"packet_chan_size"`
-	KeepAliveCheckIntervalMs int `toml:"keep_alive_check_interval_ms"`
-	KeepAliveTimeoutMs       int `toml:"keep_alive_timeout_ms"`
+	RingBufferSize int `toml:"ring_buffer_size"`
+	PacketChanSize int `toml:"packet_chan_size"`
+	// Disabled: UDP keep-alive settings - Javier Ribal del Río (2026-07-15)
+	// KeepAliveCheckIntervalMs int `toml:"keep_alive_check_interval_ms"`
+	// KeepAliveTimeoutMs       int `toml:"keep_alive_timeout_ms"`
 }
 
 type Logging struct {
