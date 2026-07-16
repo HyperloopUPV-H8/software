@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/binary"
 	"fmt"
 	"net"
@@ -52,6 +51,8 @@ func configureTransport(
 	// Start handling network packets using UDP server
 	configureUDPServerTransport(adj, transp, config)
 
+	// Start the application-level TCP keep-alive (empty order with id 1)
+	go transp.HandleKeepAlive(time.Duration(config.TCP.KeepAliveIntervalMs) * time.Millisecond)
 }
 
 func configureTCPClientTransport(
@@ -86,11 +87,6 @@ func configureTCPClientTransport(
 			clientConfig.Timeout = time.Duration(config.TCP.ConnectionTimeout) * time.Millisecond
 		}
 
-		// Apply custom keep-alive if specified
-		if config.TCP.KeepAlive > 0 {
-			clientConfig.KeepAlive = time.Duration(config.TCP.KeepAlive) * time.Millisecond
-		}
-
 		// Apply custom backoff parameters
 		if config.TCP.BackoffMinMs > 0 || config.TCP.BackoffMaxMs > 0 || config.TCP.BackoffMultiplier > 0 {
 			minBackoff := 100 * time.Millisecond // default
@@ -118,18 +114,12 @@ func configureTCPClientTransport(
 	}
 }
 
-// configureTCPServerTransport starts the TCP server handler using a ListenConfig with KeepAlive.
+// configureTCPServerTransport starts the TCP server handler.
 func configureTCPServerTransport(
 	adj adj_module.ADJ,
 	transp *transport.Transport,
 ) {
-	go transp.HandleServer(tcp.ServerConfig{
-		ListenConfig: net.ListenConfig{
-			KeepAlive: time.Second,
-		},
-		Context: context.TODO(),
-	}, fmt.Sprintf("%s:%d", adj.Info.Addresses[BACKEND], adj.Info.Ports[TcpServer]))
-
+	go transp.HandleServer(tcp.NewServerConfig(), fmt.Sprintf("%s:%d", adj.Info.Addresses[BACKEND], adj.Info.Ports[TcpServer]))
 }
 
 // configureUDPServerTransport creates and starts the UDP server then delegates handling to transport.
@@ -240,6 +230,15 @@ func getTransportDecEnc(info adj_module.Info, podData pod_data.PodData) (*presen
 	for _, id := range ids {
 		decoder.SetPacketDecoder(id, dataDecoder)
 		encoder.SetPacketEncoder(id, dataEncoder)
+	}
+
+	// The TCP keep-alive order is an empty packet, so give it an empty
+	// descriptor unless the ADJ already defines packet id 1
+	if !common.Contains(ids, transport.KeepAliveId) {
+		dataDecoder.SetDescriptor(transport.KeepAliveId, data.Descriptor{})
+		dataEncoder.SetDescriptor(transport.KeepAliveId, data.Descriptor{})
+		decoder.SetPacketDecoder(transport.KeepAliveId, dataDecoder)
+		encoder.SetPacketEncoder(transport.KeepAliveId, dataEncoder)
 	}
 
 	// TODO Solve this foking mess, I have tried...
