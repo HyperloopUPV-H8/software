@@ -14,12 +14,14 @@ import { formatAxisValue } from "../../constants/chartConfig";
 import {
   BOARDS,
   DC_BUS_V_RANGE,
+  HV_CURRENT_RANGE,
   HVBMS,
   LCU,
   LEV_CURRENT_RANGE,
   PACK_V_RANGE,
   PCU,
   PROP_CURRENT_RANGE,
+  SPEED_RANGE,
   VCU,
 } from "../../constants/measurements";
 import useMeasurement from "../../hooks/useMeasurement";
@@ -142,13 +144,13 @@ const BatteryCard = ({ title, icon: Icon, soc, socStale, rows }: BatteryCardProp
             <span className="text-muted-foreground text-xs uppercase tracking-wider">{label}</span>
             <span className={`text-sm font-medium tabular-nums ${stale ? STALE_TEXT_CLASS : warn ? "text-red-500" : "text-foreground"}`}>
               {value ?? "—"}
-              {value !== undefined && unit && (
-                <span className="text-muted-foreground ml-0.5 text-xs font-normal">{unit}</span>
-              )}
               {range && (
                 <span className="text-muted-foreground ml-1 text-xs font-normal">
-                  [{range[0]}–{range[1]}]
+                  [{range[0]}, {range[1]}]
                 </span>
+              )}
+              {(value !== undefined || range) && unit && (
+                <span className="text-muted-foreground ml-0.5 text-xs font-normal">{unit}</span>
               )}
             </span>
           </div>
@@ -358,7 +360,7 @@ const HvBatteryCard = () => {
       socStale={socStale}
       rows={[
         { label: "Pack V",    value: fmtNum(hvVoltage), unit: "V", stale: vStale,  range: PACK_V_RANGE   },
-        { label: "Current",   value: fmtNum(hvCurrent), unit: "A", stale: iStale  },
+        { label: "Current",   value: fmtNum(hvCurrent), unit: "A", stale: iStale,  range: HV_CURRENT_RANGE },
         { label: "DC Link",   value: fmtNum(hvVSensor), unit: "V", stale: dcStale, range: DC_BUS_V_RANGE },
       ]}
     />
@@ -387,12 +389,12 @@ const Dashboard = () => {
 
           {/* Charts — 2 cols × 3 rows */}
           <div className="grid min-h-0 flex-1 grid-cols-2 grid-rows-3 gap-2">
-            <MultiSeriesChart title="DLIM — Phase Currents"  icon={Zap}           series={DLIM_SERIES}       unit={`A [${PROP_CURRENT_RANGE[0]}–${PROP_CURRENT_RANGE[1]}]`} />
-            <TelemetryChart   title="Speed"                  icon={Gauge}         board={BOARDS.PCU}          measurementKey={PCU.speed}    unit="km/h" colorIndex={0} />
+            <MultiSeriesChart title="DLIM — Phase Currents"  icon={Zap}           series={DLIM_SERIES}       unit={`[${PROP_CURRENT_RANGE[0]}, ${PROP_CURRENT_RANGE[1]}] A`} />
+            <TelemetryChart   title="Speed"                  icon={Gauge}         board={BOARDS.PCU}          measurementKey={PCU.speed}    unit={`[${SPEED_RANGE[0]}, ${SPEED_RANGE[1]}] km/h`} colorIndex={0} />
             <MultiSeriesChart title="Vertical Airgaps"       icon={MoveVertical}  series={VERT_AIRGAP_SERIES} unit="mm" />
             <MultiSeriesChart title="Lateral Airgaps"        icon={MoveHorizontal} series={LAT_AIRGAP_SERIES} unit="mm" />
-            <MultiSeriesChart title="HEMS — Coil Currents"   icon={Zap}           series={HEMS_SERIES}        unit={`A [${LEV_CURRENT_RANGE[0]}–${LEV_CURRENT_RANGE[1]}]`} />
-            <MultiSeriesChart title="EMS — Coil Currents"    icon={Zap}           series={EMS_SERIES}         unit={`A [${LEV_CURRENT_RANGE[0]}–${LEV_CURRENT_RANGE[1]}]`} />
+            <MultiSeriesChart title="HEMS — Coil Currents"   icon={Zap}           series={HEMS_SERIES}        unit={`[${LEV_CURRENT_RANGE[0]}, ${LEV_CURRENT_RANGE[1]}] A`} />
+            <MultiSeriesChart title="EMS — Coil Currents"    icon={Zap}           series={EMS_SERIES}         unit={`[${LEV_CURRENT_RANGE[0]}, ${LEV_CURRENT_RANGE[1]}] A`} />
           </div>
 
         </div>

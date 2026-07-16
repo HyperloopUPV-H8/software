@@ -94,14 +94,14 @@ const HvBatterySection = () => {
             <span className="text-muted-foreground text-xs">{label}</span>
             <span className={`block w-full truncate text-center text-xl font-bold tabular-nums ${staleFlags[i] ? STALE_TEXT_CLASS : valueClass || "text-foreground"}`}>
               {value}
+              {range && (
+                <span className="text-muted-foreground ml-1 text-sm font-normal tabular-nums">
+                  [{range[0]}, {range[1]}]
+                </span>
+              )}
               <span className="text-muted-foreground ml-1 text-sm font-normal">
                 {unit}
               </span>
-              {range && (
-                <span className="text-muted-foreground ml-1 text-sm font-normal tabular-nums">
-                  [{range[0]}–{range[1]}]
-                </span>
-              )}
             </span>
           </div>
         ))}
