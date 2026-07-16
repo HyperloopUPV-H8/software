@@ -9,6 +9,15 @@ import (
 	ws "github.com/gorilla/websocket"
 )
 
+// HeartbeatTopic is the liveness message every frontend sends once per
+// second. It is consumed by the websocket layer and never reaches the broker.
+const HeartbeatTopic = "connection/heartbeat"
+
+// heartbeatTimeout bounds how long a dead or frozen frontend goes undetected:
+// if no message (the heartbeat guarantees one per second) arrives within this
+// window, Read fails and the client is treated as disconnected.
+const heartbeatTimeout = 3 * time.Second
+
 type Client struct {
 	readMx    *sync.Mutex
 	writeMx   *sync.Mutex
@@ -25,6 +34,8 @@ func NewClient(conn *ws.Conn) *Client {
 		onCloseMx: &sync.Mutex{},
 		onClose:   func() {},
 	}
+
+	conn.SetReadDeadline(time.Now().Add(heartbeatTimeout))
 
 	return client
 }
@@ -46,6 +57,9 @@ func (client *Client) Read() (Message, error) {
 
 	var message Message
 	err := client.conn.ReadJSON(&message)
+	if err == nil {
+		client.conn.SetReadDeadline(time.Now().Add(heartbeatTimeout))
+	}
 	return message, err
 }
 
