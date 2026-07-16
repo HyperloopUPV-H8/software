@@ -64,7 +64,7 @@ export const HV_CURRENT_RANGE: readonly [number, number] = [0, 120];
 /** Levitation coil current interval (A). */
 export const LEV_CURRENT_RANGE: readonly [number, number] = [-55, 55];
 /** Propulsion phase current interval (A). */
-export const PROP_CURRENT_RANGE: readonly [number, number] = [-20, 100];
+export const PROP_CURRENT_RANGE: readonly [number, number] = [0, 120];
 
 /** Cell voltage display range and warning thresholds (V), shared by the battery views. */
 export const CELL_V_MIN       = 3.0;
