@@ -16,12 +16,12 @@ type Transport struct {
 }
 
 type TCP struct {
-	BackoffMinMs      int     `toml:"backoff_min_ms"`
-	BackoffMaxMs      int     `toml:"backoff_max_ms"`
-	BackoffMultiplier float64 `toml:"backoff_multiplier"`
-	MaxRetries        int     `toml:"max_retries"`
-	ConnectionTimeout int     `toml:"connection_timeout_ms"`
-	KeepAlive         int     `toml:"keep_alive_ms"`
+	BackoffMinMs        int     `toml:"backoff_min_ms"`
+	BackoffMaxMs        int     `toml:"backoff_max_ms"`
+	BackoffMultiplier   float64 `toml:"backoff_multiplier"`
+	MaxRetries          int     `toml:"max_retries"`
+	ConnectionTimeout   int     `toml:"connection_timeout_ms"`
+	KeepAliveIntervalMs int     `toml:"keep_alive_interval_ms"`
 }
 
 type UDP struct {

@@ -1,83 +1,37 @@
-import { Button, Separator } from "@workspace/ui/components";
-import { useState } from "react";
-import {
-  BRAKE_ORDERS,
-  EMERGENCY_STOP_ORDERS,
-  OPEN_CONTACTORS_ORDERS,
-} from "../../../constants/orders";
-import useSendOrder from "../../../hooks/useSendOrder";
+import { Skeleton } from "@workspace/ui/components";
+import { Send } from "@workspace/ui/icons";
+import { useWebSocket } from "@workspace/ui/hooks";
+import useOrdersCatalog from "../../../hooks/useOrdersCatalog";
+import { useStore } from "../../../store/store";
+import OrdersList from "../../Orders/components/OrdersList";
 
-/**
- * Panel of hardcoded competition orders.
- *
- * The Emergency Stop button requires two consecutive clicks within 2 seconds
- * to prevent accidental activation. All other buttons fire on single click.
- */
 const OrdersPanel = () => {
-  const sendOrder = useSendOrder();
+  const { isConnected } = useWebSocket();
+  const commandsCatalog = useStore((s) => s.commandsCatalog);
+
+  const { loading } = useOrdersCatalog(isConnected);
 
   return (
-    <div className="bg-card flex flex-col rounded-xl border shadow-sm">
-      <div className="px-4 py-3">
-        <span className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
-          Quick Orders
+    <div className="bg-card flex shrink-0 flex-col overflow-hidden rounded-xl border shadow-sm">
+      <div className="flex shrink-0 items-center gap-2 border-b px-3 py-2">
+        <span className="text-muted-foreground flex flex-1 items-center gap-1.5 text-xs font-medium uppercase tracking-widest">
+          <Send className="size-3.5" />
+          Orders
         </span>
       </div>
-      <Separator />
 
-      <div className="flex flex-wrap gap-3 p-4">
-        <Button
-          variant="outline"
-          onClick={() => sendOrder(BRAKE_ORDERS)}
-          title="Engage brakes (ID 215)"
-        >
-          Brake
-        </Button>
-
-        <Button
-          variant="outline"
-          className="border-amber-500 text-amber-600 hover:bg-amber-500/10 dark:text-amber-400"
-          onClick={() => sendOrder(OPEN_CONTACTORS_ORDERS)}
-          title="Cut HV power (ID 902)"
-        >
-          Open Contactors
-        </Button>
-
-        <EmergencyStopButton onConfirm={() => sendOrder(EMERGENCY_STOP_ORDERS)} />
-      </div>
+      {loading ? (
+        <div className="flex flex-col gap-2 p-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-10 w-full rounded-lg" />
+          ))}
+        </div>
+      ) : (
+        <div className="p-2">
+          <OrdersList commandsCatalog={commandsCatalog} isConnected={isConnected} />
+        </div>
+      )}
     </div>
-  );
-};
-
-/**
- * Emergency Stop requires two clicks within 2 s to prevent accidents.
- * After the first click the button enters an "armed" state.
- */
-const EmergencyStopButton = ({ onConfirm }: { onConfirm: () => void }) => {
-  const [armed, setArmed] = useState(false);
-
-  const handleClick = () => {
-    if (armed) {
-      onConfirm();
-      setArmed(false);
-      return;
-    }
-    setArmed(true);
-    setTimeout(() => setArmed(false), 2000);
-  };
-
-  return (
-    <Button
-      variant="outline"
-      onClick={handleClick}
-      className={
-        armed
-          ? "animate-pulse border-red-600 bg-red-600 text-white hover:bg-red-700"
-          : "border-red-500 text-red-600 hover:bg-red-500/10 dark:text-red-400"
-      }
-    >
-      {armed ? "⚠ Click again to confirm" : "⚠ Emergency Stop"}
-    </Button>
   );
 };
 

@@ -27,8 +27,8 @@ backoff_min_ms = 100         # Minimum backoff duration in milliseconds
 backoff_max_ms = 5000        # Maximum backoff duration in milliseconds
 backoff_multiplier = 1.5     # Exponential backoff multiplier (e.g., 1.5 means each retry waits 1.5x longer)
 max_retries = 0              # Maximum retries before cycling (0 = infinite retries, recommended for persistent reconnection)
-connection_timeout_ms = 3000 # Connection timeout in milliseconds
-keep_alive_ms = 1000         # Keep-alive interval in milliseconds
+keep_alive_interval_ms = 50
+
 
 # UDP Configuration
 # These settings control the UDP server's buffer sizes and performance characteristics

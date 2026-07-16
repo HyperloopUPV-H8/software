@@ -5,13 +5,13 @@ import { useStore } from "../../store/store";
 import type { MessageKind } from "../../types/message";
 import MessageItem from "./components/MessageItem";
 
-const ALL_KINDS: MessageKind[] = ["info", "warning", "error", "debug"];
+const ALL_KINDS: MessageKind[] = ["info", "warning", "fault", "ok"];
 
 const KIND_LABEL: Record<MessageKind, string> = {
   info:    "Info",
   warning: "Warning",
-  error:   "Error",
-  debug:   "Debug",
+  fault:   "Fault",
+  ok:      "Ok",
 };
 
 /**

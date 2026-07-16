@@ -64,6 +64,15 @@ func configureBroker(subloggers abstraction.SubloggersMap, loggerHandler *logger
 	pool := websocket.NewPool(connections, trace.Logger)
 	pool.SetOnDisconnect(func(count int) {
 		if count == 0 {
+			// Losing the last control-station GUI (closed, crashed or hung:
+			// heartbeats stop and the read deadline expires) must put the
+			// vehicle in a safe state, as required by competition rules.
+			trace.Warn().Msg("no clients connected, sending FAULT order")
+			faultOrder := &order_topic.Order{Id: 0, Fields: map[string]order_topic.Field{}}
+			if err := broker.UserPush(faultOrder); err != nil {
+				trace.Error().Err(err).Msg("failed to send fault order on client disconnect")
+			}
+
 			trace.Info().Msg("no clients connected, stopping logger")
 			loggerHandler.Stop()
 			if err := loggerTopic.NotifyStopped(); err != nil {

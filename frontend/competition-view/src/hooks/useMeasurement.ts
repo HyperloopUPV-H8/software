@@ -1,10 +1,11 @@
 import { useStore } from "../store/store";
 
 /**
- * Reads a single telemetry measurement from the store by its backend key
- * (e.g. "VCU/general_state"). Returns `undefined` if no data has arrived yet.
+ * Reads a single telemetry measurement from the store.
+ * Both board and id must match what the backend sends in `measurementUpdates`.
+ * Use the BOARDS and per-board constants from `constants/measurements.ts`.
  */
-const useMeasurement = (key: string) =>
-  useStore((s) => s.getMeasurement(key));
+const useMeasurement = (board: string, id: string) =>
+  useStore((s) => s.getMeasurement(board, id));
 
 export default useMeasurement;

@@ -1,75 +1,83 @@
-import { BCU, HVBMS, PCU, VCU } from "../../constants/measurements";
+import {
+  BatteryFull,
+  Gauge,
+  MapPin,
+  MoveHorizontal,
+  MoveVertical,
+  Zap,
+} from "lucide-react";
+import { BOARDS, HVBMS, LCU, PCU, VCU } from "../../constants/measurements";
 import MultiSeriesChart, { type SeriesConfig } from "./components/MultiSeriesChart";
 import TelemetryChart from "./components/TelemetryChart";
 
 /**
  * Real-time telemetry charts page.
  *
- * Row 1 — Kinematic:    Speed · Position
- * Row 2 — Electrical:   HV Battery SOC · Brake Pressure
- * Row 3 — Motor phase:  DLIM (PCU motorA U/V/W) · LSM (BCU average U/V/W)
- *
- * Each chart accumulates a rolling 500-point history and supports
- * click-drag zoom with double-click to reset.
- *
- * DLIM/LSM series configs are defined at module level so the
- * MultiSeriesChart's Zustand selector and uPlot init are stable.
+ * Row 1 — Kinematic:     Speed · Position
+ * Row 2 — Electrical:    HV Battery SOC · HV Current
+ * Row 3 — Motor phase:   DLIM (PCU U/V/W)
+ * Row 4 — Levitation:    Vertical Airgaps · Lateral Airgaps
+ * Row 5 — Lev. currents: HEMS coil currents · EMS coil currents
  */
 
 const DLIM_SERIES: SeriesConfig[] = [
-  { measurementKey: PCU.motorCurrentU, label: "U", colorIndex: 0 },
-  { measurementKey: PCU.motorCurrentV, label: "V", colorIndex: 1 },
-  { measurementKey: PCU.motorCurrentW, label: "W", colorIndex: 2 },
+  { board: BOARDS.PCU, measurementKey: PCU.motorCurrentU, label: "U", colorIndex: 0 },
+  { board: BOARDS.PCU, measurementKey: PCU.motorCurrentV, label: "V", colorIndex: 1 },
+  { board: BOARDS.PCU, measurementKey: PCU.motorCurrentW, label: "W", colorIndex: 2 },
 ];
 
-const LSM_SERIES: SeriesConfig[] = [
-  { measurementKey: BCU.averageCurrentU, label: "U", colorIndex: 0 },
-  { measurementKey: BCU.averageCurrentV, label: "V", colorIndex: 1 },
-  { measurementKey: BCU.averageCurrentW, label: "W", colorIndex: 2 },
+const VERT_AIRGAP_SERIES: SeriesConfig[] = [
+  { board: BOARDS.LCU, measurementKey: LCU.verticalAirgap1, label: "V1", colorIndex: 0 },
+  { board: BOARDS.LCU, measurementKey: LCU.verticalAirgap2, label: "V2", colorIndex: 1 },
+  { board: BOARDS.LCU, measurementKey: LCU.verticalAirgap3, label: "V3", colorIndex: 2 },
+  { board: BOARDS.LCU, measurementKey: LCU.verticalAirgap4, label: "V4", colorIndex: 3 },
+];
+
+const LAT_AIRGAP_SERIES: SeriesConfig[] = [
+  { board: BOARDS.LCU, measurementKey: LCU.horizontalAirgap1, label: "L1", colorIndex: 0 },
+  { board: BOARDS.LCU, measurementKey: LCU.horizontalAirgap2, label: "L2", colorIndex: 1 },
+  { board: BOARDS.LCU, measurementKey: LCU.horizontalAirgap3, label: "L3", colorIndex: 2 },
+  { board: BOARDS.LCU, measurementKey: LCU.horizontalAirgap4, label: "L4", colorIndex: 3 },
+];
+
+const HEMS_SERIES: SeriesConfig[] = [
+  { board: BOARDS.LCU, measurementKey: LCU.coilCurrentHEMS1, label: "H1", colorIndex: 0 },
+  { board: BOARDS.LCU, measurementKey: LCU.coilCurrentHEMS2, label: "H2", colorIndex: 1 },
+  { board: BOARDS.LCU, measurementKey: LCU.coilCurrentHEMS3, label: "H3", colorIndex: 2 },
+  { board: BOARDS.LCU, measurementKey: LCU.coilCurrentHEMS4, label: "H4", colorIndex: 3 },
+];
+
+const EMS_SERIES: SeriesConfig[] = [
+  { board: BOARDS.LCU, measurementKey: LCU.coilCurrentEMS1, label: "E1", colorIndex: 0 },
+  { board: BOARDS.LCU, measurementKey: LCU.coilCurrentEMS2, label: "E2", colorIndex: 1 },
+  { board: BOARDS.LCU, measurementKey: LCU.coilCurrentEMS3, label: "E3", colorIndex: 2 },
+  { board: BOARDS.LCU, measurementKey: LCU.coilCurrentEMS4, label: "E4", colorIndex: 3 },
+  { board: BOARDS.LCU, measurementKey: LCU.coilCurrentEMS5, label: "E5", colorIndex: 4 },
+  { board: BOARDS.LCU, measurementKey: LCU.coilCurrentEMS6, label: "E6", colorIndex: 5 },
 ];
 
 const Charts = () => (
   <div className="flex h-full flex-col gap-4 overflow-y-auto p-4">
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       {/* Row 1 — Kinematic */}
-      <TelemetryChart
-        title="Speed"
-        measurementKey={PCU.speed}
-        unit="km/h"
-        colorIndex={0}
-      />
-      <TelemetryChart
-        title="Position"
-        measurementKey={PCU.position}
-        unit="m"
-        colorIndex={1}
-      />
+      <TelemetryChart title="Speed"    icon={Gauge}  board={BOARDS.PCU}   measurementKey={PCU.speed}    unit="km/h" colorIndex={0} />
+      <TelemetryChart title="Position" icon={MapPin} board={BOARDS.PCU}   measurementKey={PCU.position} unit="m"    colorIndex={1} />
 
       {/* Row 2 — Electrical */}
-      <TelemetryChart
-        title="HV Battery SOC"
-        measurementKey={HVBMS.minimumSoc}
-        unit="%"
-        colorIndex={2}
-      />
-      <TelemetryChart
-        title="Brake Pressure"
-        measurementKey={VCU.pressureBrakes}
-        unit="bar"
-        colorIndex={3}
-      />
+      <TelemetryChart title="HV Battery SOC" icon={BatteryFull} board={BOARDS.HVBMS} measurementKey={HVBMS.soc}            unit="%" colorIndex={2} />
+      <TelemetryChart title="HV Current"     icon={Zap}         board={BOARDS.HVBMS} measurementKey={HVBMS.currentReading} unit="A" colorIndex={3} />
 
-      {/* Row 3 — Motor phase currents */}
-      <MultiSeriesChart
-        title="DLIM — Phase Currents"
-        series={DLIM_SERIES}
-        unit="A"
-      />
-      <MultiSeriesChart
-        title="LSM — Phase Currents"
-        series={LSM_SERIES}
-        unit="A"
-      />
+      {/* Row 3 — DLIM motor currents */}
+      <MultiSeriesChart title="DLIM — Phase Currents" icon={Zap}   series={DLIM_SERIES} unit="A" />
+      <TelemetryChart title="High Pressure" icon={Gauge} board={BOARDS.VCU} measurementKey={VCU.highPressure} unit="bar" colorIndex={4} />
+
+      {/* Row 4 — Airgaps */}
+      <MultiSeriesChart title="Vertical Airgaps" icon={MoveVertical}   series={VERT_AIRGAP_SERIES} unit="mm" />
+      <MultiSeriesChart title="Lateral Airgaps"  icon={MoveHorizontal} series={LAT_AIRGAP_SERIES}  unit="mm" />
+
+      {/* Row 5 — Levitation currents */}
+      <MultiSeriesChart title="HEMS — Coil Currents" icon={Zap} series={HEMS_SERIES} unit="A" />
+      <MultiSeriesChart title="EMS — Coil Currents"  icon={Zap} series={EMS_SERIES}  unit="A" />
     </div>
   </div>
 );

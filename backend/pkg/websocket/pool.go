@@ -84,6 +84,13 @@ func (pool *Pool) handle(id ClientId, client *Client) {
 		}
 
 		clientLogger.Trace().Msg("read")
+
+		// Heartbeats only refresh the read deadline; they carry no payload
+		// for the broker.
+		if string(message.Topic) == HeartbeatTopic {
+			continue
+		}
+
 		pool.onMessage(id, &message)
 	}
 }
