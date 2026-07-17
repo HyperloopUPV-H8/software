@@ -6,6 +6,7 @@ import {
   CELL_V_WARN_LOW,
   HVBMS,
   PACK_V_RANGE,
+  TEMP_RANGE,
 } from "../../../constants/measurements";
 import { useStaleFlags } from "../../../hooks/useIsStale";
 import useMeasurement from "../../../hooks/useMeasurement";
@@ -87,8 +88,8 @@ const HvBatterySection = () => {
             range: CELL_V_RANGE,
             valueClass: typeof voltageMin === "number" && voltageMin < CELL_V_WARN_LOW ? "text-red-500" : "",
           },
-          { label: "T max",    value: fmt(tempMax),       unit: "°C" },
-          { label: "T min",    value: fmt(tempMin),       unit: "°C" },
+          { label: "T max",    value: fmt(tempMax),       unit: "°C", range: TEMP_RANGE },
+          { label: "T min",    value: fmt(tempMin),       unit: "°C", range: TEMP_RANGE },
         ].map(({ label, value, unit, valueClass, range }, i) => (
           <div key={label} className="bg-card flex min-w-0 flex-col items-center gap-0.5 px-2 py-2">
             <span className="text-muted-foreground text-xs">{label}</span>

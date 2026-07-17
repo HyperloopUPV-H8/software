@@ -66,6 +66,10 @@ export const HV_CURRENT_RANGE: readonly [number, number] = [0, 120];
 export const LEV_CURRENT_RANGE: readonly [number, number] = [-55, 55];
 /** Propulsion phase current interval (A). */
 export const PROP_CURRENT_RANGE: readonly [number, number] = [0, 120];
+/** Battery temperature safety interval (°C). */
+export const TEMP_RANGE: readonly [number, number] = [0, 60];
+/** Propulsion velocity safety interval (km/h). */
+export const SPEED_RANGE: readonly [number, number] = [0, 50];
 
 /** Cell voltage display range and warning thresholds (V), shared by the battery views. */
 export const CELL_V_MIN       = 3.0;
