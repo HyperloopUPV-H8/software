@@ -4,18 +4,19 @@
  * Defines menu structure with File, Tools, and Help sections with keyboard shortcuts and actions.
  */
 
-import { Menu, app, dialog } from "electron";
+import { BrowserWindow, Menu, app, dialog } from "electron";
 
 /**
- * Creates and sets the application menu with File, Tools, and Help sections.
- * Includes menu items for reloading, exiting, toggling DevTools, and app information.
+ * Creates the application menu with File, Tools, and Help sections.
+ * Includes menu items for reloading, exiting, toggling fullscreen/DevTools, and app information.
+ * Menu actions operate on the currently focused window, so the menu can be
+ * shared by all windows via Menu.setApplicationMenu.
  * View switching is no longer available since the mode is selected at startup.
- * @param {import("electron").BrowserWindow} mainWindow - The main browser window instance to attach menu actions to.
- * @returns {void}
+ * @returns {Menu} The built application menu.
  * @example
- * createMenu(mainWindow);
+ * Menu.setApplicationMenu(createMenu());
  */
-function createMenu(mainWindow) {
+function createMenu() {
   const template = [
     {
       label: "File",
@@ -46,6 +47,15 @@ function createMenu(mainWindow) {
       label: "Tools",
       submenu: [
         {
+          label: "Toggle Full Screen",
+          accelerator: "F11",
+          click: (_, browserWindow) => {
+            if (browserWindow) {
+              browserWindow.setFullScreen(!browserWindow.isFullScreen());
+            }
+          },
+        },
+        {
           label: "Toggle DevTools",
           accelerator: "F12",
           click: (_, browserWindow) => {
@@ -62,7 +72,7 @@ function createMenu(mainWindow) {
         {
           label: "About",
           click: () => {
-            dialog.showMessageBox(mainWindow, {
+            dialog.showMessageBox(BrowserWindow.getFocusedWindow() ?? undefined, {
               type: "info",
               title: "About",
               message: "Hyperloop UPV Control Station",
