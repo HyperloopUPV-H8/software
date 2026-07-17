@@ -68,8 +68,9 @@ function setupIpcHandlers() {
    * @event setup-kernel
    * @async
    * @description Configures kernel parameters needed by the backend
-   * (disables the TCP invalid-packet rate limit). Linux only; on other
-   * platforms it shows a warning dialog.
+   * (disables the TCP invalid-packet rate limit and lowers the TCP
+   * retransmission limit). Linux only; on other platforms it shows a
+   * warning dialog.
    * @returns {Promise<{success: boolean, message: string}>}
    */
   ipcMain.handle("setup-kernel", async () => {
@@ -88,6 +89,7 @@ function setupIpcHandlers() {
         "sysctl",
         "-w",
         "net.ipv4.tcp_invalid_ratelimit=0",
+        "net.ipv4.tcp_retries2=3",
       ]);
       logger.electron.info(`Kernel setup completed: ${stdout.trim()}`);
       return { success: true, message: "Kernel set up successfully" };
