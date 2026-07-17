@@ -56,7 +56,7 @@ interface VehicleStateBannerProps {
  */
 const VehicleStateBanner = ({ compact = false }: VehicleStateBannerProps) => {
   const state        = useMeasurement(BOARDS.VCU, VCU.state);
-  const activeBrakes = useMeasurement(BOARDS.VCU, VCU.activeBrakes);
+  const brakesStatus = useMeasurement(BOARDS.VCU, VCU.brakesStatus);
 
   const category = categorise(state);
   const { banner, valueText, badgeClass } = STATE_STYLES[category];
@@ -80,7 +80,7 @@ const VehicleStateBanner = ({ compact = false }: VehicleStateBannerProps) => {
           variant="outline"
           className={`font-semibold transition-colors duration-300 ${badgeClass} ${compact ? "px-2 py-0.5 text-xs" : "px-3 py-1 text-sm"}`}
         >
-          {activeBrakes === undefined ? "—" : activeBrakes ? "BRAKED" : "UNBRAKED"}
+          {brakesStatus === undefined ? "—" : String(brakesStatus)}
         </Badge>
       </div>
     </div>

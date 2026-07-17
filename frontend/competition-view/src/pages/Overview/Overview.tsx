@@ -21,7 +21,8 @@ import {
   PACK_V_RANGE,
   PCU,
   PROP_CURRENT_RANGE,
-  VCU,
+  SPEED_RANGE,
+  VERT_AIRGAP_RANGE,
 } from "../../constants/measurements";
 import useMeasurement from "../../hooks/useMeasurement";
 import { useIsStale, useStaleFlags } from "../../hooks/useIsStale";
@@ -164,18 +165,12 @@ const BatteryCard = ({ title, icon: Icon, soc, socStale, rows }: BatteryCardProp
 const KinematicsCard = () => {
   const speed    = useMeasurement(BOARDS.PCU, PCU.speed);
   const position = useMeasurement(BOARDS.PCU, PCU.position);
-  const highPsi  = useMeasurement(BOARDS.VCU, VCU.highPressure);
-  const lowPsi   = useMeasurement(BOARDS.VCU, VCU.lowPressure);
 
   const speedStale = useIsStale(BOARDS.PCU, PCU.speed);
   const posStale   = useIsStale(BOARDS.PCU, PCU.position);
-  const highStale  = useIsStale(BOARDS.VCU, VCU.highPressure);
-  const lowStale   = useIsStale(BOARDS.VCU, VCU.lowPressure);
 
   const rows = [
     { label: "Position",     value: fmtNum(position),        unit: "m",   stale: posStale  },
-    { label: "High pres.",   value: fmtNum(highPsi),         unit: "bar", stale: highStale },
-    { label: "Low pres.",    value: fmtNum(lowPsi),          unit: "bar", stale: lowStale  },
   ];
 
   return (
@@ -389,8 +384,8 @@ const Dashboard = () => {
           {/* Charts — 2 cols × 3 rows */}
           <div className="grid min-h-0 flex-1 grid-cols-2 grid-rows-3 gap-2">
             <MultiSeriesChart title="DLIM — Phase Currents"  icon={Zap}           series={DLIM_SERIES}       unit={`[${PROP_CURRENT_RANGE[0]}, ${PROP_CURRENT_RANGE[1]}] A`} />
-            <TelemetryChart   title="Speed"                  icon={Gauge}         board={BOARDS.PCU}          measurementKey={PCU.speed}    unit="km/h" colorIndex={0} />
-            <MultiSeriesChart title="Vertical Airgaps"       icon={MoveVertical}  series={VERT_AIRGAP_SERIES} unit="mm" />
+            <TelemetryChart   title="Speed"                  icon={Gauge}         board={BOARDS.PCU}          measurementKey={PCU.speed}    unit={`[${SPEED_RANGE[0]}, ${SPEED_RANGE[1]}] km/h`} colorIndex={0} />
+            <MultiSeriesChart title="Vertical Airgaps"       icon={MoveVertical}  series={VERT_AIRGAP_SERIES} unit={`[${VERT_AIRGAP_RANGE[0]}, ${VERT_AIRGAP_RANGE[1]}] mm`} />
             <MultiSeriesChart title="Lateral Airgaps"        icon={MoveHorizontal} series={LAT_AIRGAP_SERIES} unit="mm" />
             <MultiSeriesChart title="HEMS — Coil Currents"   icon={Zap}           series={HEMS_SERIES}        unit={`[${LEV_CURRENT_RANGE[0]}, ${LEV_CURRENT_RANGE[1]}] A`} />
             <MultiSeriesChart title="EMS — Coil Currents"    icon={Zap}           series={EMS_SERIES}         unit={`[${LEV_CURRENT_RANGE[0]}, ${LEV_CURRENT_RANGE[1]}] A`} />

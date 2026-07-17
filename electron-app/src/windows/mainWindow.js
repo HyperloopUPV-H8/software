@@ -7,7 +7,6 @@
 import { BrowserWindow, app, dialog } from "electron";
 import fs from "fs";
 import path from "path";
-import { createMenu } from "../menu/menu.js";
 import { getAppPath } from "../utils/paths.js";
 
 // Get the application root path
@@ -56,10 +55,6 @@ function createWindow(screenWidth, screenHeight, initialView) {
   } else {
     loadView(currentView);
   }
-
-  // Create application menu
-  const menu = createMenu(mainWindow);
-  mainWindow.setMenu(menu);
 
   // Open DevTools in development mode (skip in test env to keep window order predictable)
   if (!app.isPackaged && process.env.NODE_ENV !== "test") {

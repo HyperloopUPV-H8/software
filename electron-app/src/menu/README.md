@@ -4,7 +4,7 @@ Application menu system for the Electron application. Provides the native menu b
 
 ## Overview
 
-Creates and manages the native application menu bar with view switching, window controls, developer tools, and utility applications.
+Creates the native application menu bar shared by all windows. Menu actions operate on the currently focused window, so shortcuts like fullscreen and DevTools work in the main window, the mode selector, and the log window alike.
 
 ## Files
 
@@ -14,19 +14,17 @@ Creates and manages the native application menu bar with view switching, window 
 
 ### File Menu
 
-- **Reload** (`CmdOrCtrl+R`) - Reloads the current window
+- **Reload** (`CmdOrCtrl+R`) - Reloads the focused window
+- **Return to Selector** (`CmdOrCtrl+Shift+S`) - Stops services and returns to the mode selector
 - **Exit** (`CmdOrCtrl+Q`) - Quits the application
 
-### View Menu
+### Tools Menu
 
-- **Control Station** (`CmdOrCtrl+1`) - Switches to Competition View
-- **Ethernet View** (`CmdOrCtrl+2`) - Switches to Testing View
-- **Toggle DevTools** (`F12`) - Opens/closes Chrome DevTools
-
-### Tools Menu (Developing)
-
-- **Start Packet Sender** - Launches packet sender utility (validates binary exists)
-- **Stop Packet Sender** - Stops the running packet sender process
+- **Zoom In** (`CmdOrCtrl+Plus`) - Increases zoom of the focused window
+- **Zoom Out** (`CmdOrCtrl+-`) - Decreases zoom of the focused window
+- **Reset Zoom** (`CmdOrCtrl+0`) - Restores the focused window to 100% zoom
+- **Toggle Full Screen** (`F11`) - Toggles fullscreen on the focused window
+- **Toggle DevTools** (`F12`) - Opens/closes Chrome DevTools for the focused window
 
 ### Help Menu
 
@@ -34,28 +32,24 @@ Creates and manages the native application menu bar with view switching, window 
 
 ## Functions
 
-### `createMenu(mainWindow)`
+### `createMenu()`
 
-Creates and sets the application menu bar. Takes the main window instance as parameter.
+Builds and returns the application menu. Set it globally with `Menu.setApplicationMenu(createMenu())` so it applies to every window.
 
 ## Dependencies
 
-- `../utils/paths.js` - For resolving binary paths
-- `electron` - For Menu, dialog, and app APIs
+- `electron` - For Menu, BrowserWindow, dialog, and app APIs
 
 ## Used By
 
-- **`windows/mainWindow.js`** - Creates the menu when initializing the main window
+- **`app/initialization.js`** - Sets the application-wide menu during app initialization
 
 ## Notes
 
 - Keyboard shortcuts automatically use `Cmd` on macOS and `Ctrl` on Windows/Linux
 - Menu appears in system menu bar on macOS, in window on Windows/Linux
-- Packet sender binary existence is validated before starting
-- View switching requires `loadView` to be imported from windows module
+- Menu items resolve their target window at click time (focused window), so no window reference is needed when building the menu
 
 ## See Also
 
-- [../windows/README.md](../windows/README.md) - Window management (used for view switching)
-- [../processes/README.md](../processes/README.md) - Process management (packet sender)
-- [../utils/README.md](../utils/README.md) - Utility functions (path resolution)
+- [../windows/README.md](../windows/README.md) - Window management

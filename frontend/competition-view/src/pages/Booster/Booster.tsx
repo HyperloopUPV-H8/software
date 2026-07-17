@@ -101,7 +101,7 @@ const Booster = () => (
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
         <EnumRow  label="SDC Status"        board={BOARDS.HVBMS} measurementKey={HVBMS.sdcStatus}     goodValues={["ENGAGED"]}   />
         <StatusRow label="SDC Closed (VCU)" board={BOARDS.VCU}   measurementKey={VCU.sdcClosed}       trueLabel="CLOSED" falseLabel="OPEN" />
-        <StatusRow label="Active Brakes"    board={BOARDS.VCU}   measurementKey={VCU.activeBrakes}    trueLabel="ENGAGED" falseLabel="DISENGAGED" trueIsGood={false} />
+        <EnumRow  label="Brakes Status"     board={BOARDS.VCU}   measurementKey={VCU.brakesStatus}    goodValues={["UNBRAKED"]} />
         <StatusRow label="Brake Fault"      board={BOARDS.VCU}   measurementKey={VCU.brakeFault}      trueLabel="FAULT"  falseLabel="OK"          trueIsGood={false} />
         <EnumRow  label="IMD Status"        board={BOARDS.HVBMS} measurementKey={HVBMS.imdStatus}     goodValues={["NORMAL"]}    />
         <StatusRow label="IMD OK"           board={BOARDS.HVBMS} measurementKey={HVBMS.imdOk}         trueLabel="OK"     falseLabel="FAULT"        />
