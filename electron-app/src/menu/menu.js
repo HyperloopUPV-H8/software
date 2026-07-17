@@ -46,6 +46,10 @@ function createMenu() {
     {
       label: "Tools",
       submenu: [
+        { role: "zoomIn", label: "Zoom In" },
+        { role: "zoomOut", label: "Zoom Out" },
+        { role: "resetZoom", label: "Reset Zoom" },
+        { type: "separator" },
         {
           label: "Toggle Full Screen",
           accelerator: "F11",

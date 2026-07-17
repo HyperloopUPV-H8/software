@@ -20,6 +20,9 @@ Creates the native application menu bar shared by all windows. Menu actions oper
 
 ### Tools Menu
 
+- **Zoom In** (`CmdOrCtrl+Plus`) - Increases zoom of the focused window
+- **Zoom Out** (`CmdOrCtrl+-`) - Decreases zoom of the focused window
+- **Reset Zoom** (`CmdOrCtrl+0`) - Restores the focused window to 100% zoom
 - **Toggle Full Screen** (`F11`) - Toggles fullscreen on the focused window
 - **Toggle DevTools** (`F12`) - Opens/closes Chrome DevTools for the focused window
 
