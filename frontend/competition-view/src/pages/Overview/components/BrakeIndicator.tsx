@@ -16,13 +16,15 @@ interface BrakeIndicatorProps {
 
 /**
  * Visual indicator that mirrors the control-station BrakeState widget.
- * Reads VCU/active_brakes — true means brakes are engaged.
+ * Reads the VCU `brakes_status` enum ("BRAKED" | "UNBRAKED").
  */
 const BrakeIndicator = ({ compact = false }: BrakeIndicatorProps) => {
-  const raw = useMeasurement(BOARDS.VCU, VCU.activeBrakes);
+  const raw = useMeasurement(BOARDS.VCU, VCU.brakesStatus);
 
   const status: BrakeStatus =
-    raw === undefined ? "unknown" : raw ? "braked" : "unbraked";
+    raw === "BRAKED"   ? "braked"   :
+    raw === "UNBRAKED" ? "unbraked" :
+    "unknown";
 
   const { bg, text, label } = STATUS_STYLES[status];
 

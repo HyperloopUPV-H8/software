@@ -9,14 +9,15 @@ import {
   TooltipTrigger,
 } from "@workspace/ui/components";
 import { Check, ChevronDown, Send } from "@workspace/ui/icons";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import useSendOrder from "../../../hooks/useSendOrder";
 import useMeasurement from "../../../hooks/useMeasurement";
 import type { CommandCatalogItem, ParameterValues } from "../../../types/catalog";
 import type { OrderFieldValue } from "../../../constants/orders";
 import { BOARDS, VCU } from "../../../constants/measurements";
 import { isVcuOrderAllowedInState } from "../../../constants/vcuStateMachine";
-import OrderParameters from "./OrderParameters";
+import { applyOrderLimitOverrides } from "../../../constants/orderLimits";
+import OrderParameters, { isNumericValueOutOfRange } from "./OrderParameters";
 
 interface OrderRowProps {
   item: CommandCatalogItem;
@@ -48,9 +49,11 @@ const getDefaultValues = (item: CommandCatalogItem): ParameterValues => {
  *   doesn't allow it — either way a tooltip explains why.
  * - After a successful dispatch the button briefly shows a checkmark.
  */
-const OrderRow = ({ item, board, isConnected }: OrderRowProps) => {
+const OrderRow = ({ item: catalogItem, board, isConnected }: OrderRowProps) => {
   const sendOrder = useSendOrder();
   const vcuState  = useMeasurement(BOARDS.VCU, VCU.state);
+
+  const item = useMemo(() => applyOrderLimitOverrides(catalogItem), [catalogItem]);
 
   const [values, setValues] = useState<ParameterValues>(() => getDefaultValues(item));
   const [open, setOpen]   = useState(false);
@@ -64,11 +67,15 @@ const OrderRow = ({ item, board, isConnected }: OrderRowProps) => {
       !Number.isFinite(parseFloat(String(values[key]))),
   );
 
+  const hasOutOfRangeNumeric = Object.entries(item.fields).some(
+    ([key, param]) => param.kind === "numeric" && isNumericValueOutOfRange(param, values[key]),
+  );
+
   // Only VCU orders are gated by the vehicle state machine.
   const stateAllowsOrder =
     board !== BOARDS.VCU || isVcuOrderAllowedInState(item.id, vcuState as string | undefined);
 
-  const canSend = isConnected && !hasInvalidNumeric && !sent && stateAllowsOrder;
+  const canSend = isConnected && !hasInvalidNumeric && !hasOutOfRangeNumeric && !sent && stateAllowsOrder;
 
   const handleSend = () => {
     if (!canSend) return;
@@ -136,6 +143,13 @@ const OrderRow = ({ item, board, isConnected }: OrderRowProps) => {
         <span>{sendButton}</span>
       </TooltipTrigger>
       <TooltipContent>Fill in all required fields first</TooltipContent>
+    </Tooltip>
+  ) : hasOutOfRangeNumeric ? (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span>{sendButton}</span>
+      </TooltipTrigger>
+      <TooltipContent>One or more values are outside their allowed range</TooltipContent>
     </Tooltip>
   ) : (
     sendButton

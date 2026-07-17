@@ -6,7 +6,7 @@ import {
   MoveVertical,
   Zap,
 } from "lucide-react";
-import { BOARDS, HVBMS, LCU, PCU, VCU } from "../../constants/measurements";
+import { BOARDS, HVBMS, LCU, PCU, SPEED_RANGE, VERT_AIRGAP_RANGE } from "../../constants/measurements";
 import MultiSeriesChart, { type SeriesConfig } from "./components/MultiSeriesChart";
 import TelemetryChart from "./components/TelemetryChart";
 
@@ -60,7 +60,7 @@ const Charts = () => (
   <div className="flex h-full flex-col gap-4 overflow-y-auto p-4">
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       {/* Row 1 — Kinematic */}
-      <TelemetryChart title="Speed"    icon={Gauge}  board={BOARDS.PCU}   measurementKey={PCU.speed}    unit="km/h" colorIndex={0} />
+      <TelemetryChart title="Speed"    icon={Gauge}  board={BOARDS.PCU}   measurementKey={PCU.speed}    unit={`[${SPEED_RANGE[0]}, ${SPEED_RANGE[1]}] km/h`} colorIndex={0} />
       <TelemetryChart title="Position" icon={MapPin} board={BOARDS.PCU}   measurementKey={PCU.position} unit="m"    colorIndex={1} />
 
       {/* Row 2 — Electrical */}
@@ -69,10 +69,9 @@ const Charts = () => (
 
       {/* Row 3 — DLIM motor currents */}
       <MultiSeriesChart title="DLIM — Phase Currents" icon={Zap}   series={DLIM_SERIES} unit="A" />
-      <TelemetryChart title="High Pressure" icon={Gauge} board={BOARDS.VCU} measurementKey={VCU.highPressure} unit="bar" colorIndex={4} />
 
       {/* Row 4 — Airgaps */}
-      <MultiSeriesChart title="Vertical Airgaps" icon={MoveVertical}   series={VERT_AIRGAP_SERIES} unit="mm" />
+      <MultiSeriesChart title="Vertical Airgaps" icon={MoveVertical}   series={VERT_AIRGAP_SERIES} unit={`[${VERT_AIRGAP_RANGE[0]}, ${VERT_AIRGAP_RANGE[1]}] mm`} />
       <MultiSeriesChart title="Lateral Airgaps"  icon={MoveHorizontal} series={LAT_AIRGAP_SERIES}  unit="mm" />
 
       {/* Row 5 — Levitation currents */}
