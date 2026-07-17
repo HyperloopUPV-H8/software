@@ -31,7 +31,7 @@ const ROWS: BoardRow[] = [
     stateMeasurementKey: VCU.state,
     stats: [
       { label: "SDC",        measurementKey: VCU.sdcClosed,    boolLabels: ["Closed", "Open"] },
-      { label: "Brakes",     measurementKey: VCU.activeBrakes, boolLabels: ["Braked", "Unbraked"] },
+      { label: "Brakes",     measurementKey: VCU.brakesStatus },
     ],
   },
   {

@@ -22,7 +22,8 @@ export const VCU = {
   lowPressure:             "low_pressure",
   pressureRegulatorFdbk:   "pressure_regulator_feedback",
   sdcClosed:               "sdc_closed",
-  activeBrakes:            "active_brakes",
+  // Enum: "BRAKED" | "UNBRAKED"
+  brakesStatus:            "brakes_status",
   brakeFault:              "brake_fault_detected",
   electrovalveEnabled:     "electrovalve_enabled",
   // Sub-board connectivity as reported by the VCU

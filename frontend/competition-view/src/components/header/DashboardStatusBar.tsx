@@ -39,11 +39,11 @@ const StatValue = ({
 
 const DashboardStatusBar = () => {
   const state    = useMeasurement(BOARDS.VCU, VCU.state);
-  const brakeRaw = useMeasurement(BOARDS.VCU, VCU.activeBrakes);
+  const brakeRaw = useMeasurement(BOARDS.VCU, VCU.brakesStatus);
   const dcLinkV  = useMeasurement(BOARDS.HVBMS, HVBMS.voltageReading) as number | undefined;
 
   const stateStale  = useIsStale(BOARDS.VCU, VCU.state);
-  const brakeStale  = useIsStale(BOARDS.VCU, VCU.activeBrakes);
+  const brakeStale  = useIsStale(BOARDS.VCU, VCU.brakesStatus);
   const dcLinkStale = useIsStale(BOARDS.HVBMS, HVBMS.voltageReading);
 
   const dcLinkActive = dcLinkV !== undefined && dcLinkV > HVAL_THRESHOLD_V;
@@ -53,11 +53,11 @@ const DashboardStatusBar = () => {
       ? "text-muted-foreground"
       : dcLinkActive ? "text-red-500" : "text-green-500";
 
-  const brakeLabel = brakeRaw === undefined ? "—" : brakeRaw ? "BRAKED" : "UNBRAKED";
+  const brakeLabel = brakeRaw === undefined ? "—" : String(brakeRaw);
   const brakeClass =
-    brakeStale         ? STALE_TEXT_CLASS :
-    brakeRaw === true  ? "text-red-500"  :
-    brakeRaw === false ? "text-blue-500" :
+    brakeStale              ? STALE_TEXT_CLASS :
+    brakeRaw === "BRAKED"   ? "text-red-500"  :
+    brakeRaw === "UNBRAKED" ? "text-blue-500" :
     "text-muted-foreground";
 
   return (
