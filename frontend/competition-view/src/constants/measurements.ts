@@ -70,8 +70,6 @@ export const PROP_CURRENT_RANGE: readonly [number, number] = [0, 120];
 export const TEMP_RANGE: readonly [number, number] = [0, 60];
 /** Propulsion velocity safety interval (km/h). */
 export const SPEED_RANGE: readonly [number, number] = [0, 50];
-/** Vertical airgap safety interval (mm). */
-export const VERT_AIRGAP_RANGE: readonly [number, number] = [10, 25];
 
 /** Cell voltage display range and warning thresholds (V), shared by the battery views. */
 export const CELL_V_MIN       = 3.0;

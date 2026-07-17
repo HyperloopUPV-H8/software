@@ -6,7 +6,7 @@ import {
   MoveVertical,
   Zap,
 } from "lucide-react";
-import { BOARDS, HVBMS, LCU, PCU, SPEED_RANGE, VERT_AIRGAP_RANGE } from "../../constants/measurements";
+import { BOARDS, HVBMS, LCU, PCU, SPEED_RANGE } from "../../constants/measurements";
 import MultiSeriesChart, { type SeriesConfig } from "./components/MultiSeriesChart";
 import TelemetryChart from "./components/TelemetryChart";
 
@@ -71,7 +71,7 @@ const Charts = () => (
       <MultiSeriesChart title="DLIM — Phase Currents" icon={Zap}   series={DLIM_SERIES} unit="A" />
 
       {/* Row 4 — Airgaps */}
-      <MultiSeriesChart title="Vertical Airgaps" icon={MoveVertical}   series={VERT_AIRGAP_SERIES} unit={`[${VERT_AIRGAP_RANGE[0]}, ${VERT_AIRGAP_RANGE[1]}] mm`} />
+      <MultiSeriesChart title="Vertical Airgaps" icon={MoveVertical}   series={VERT_AIRGAP_SERIES} unit="mm" />
       <MultiSeriesChart title="Lateral Airgaps"  icon={MoveHorizontal} series={LAT_AIRGAP_SERIES}  unit="mm" />
 
       {/* Row 5 — Levitation currents */}
