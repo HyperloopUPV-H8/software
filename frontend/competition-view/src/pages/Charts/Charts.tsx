@@ -6,7 +6,7 @@ import {
   MoveVertical,
   Zap,
 } from "lucide-react";
-import { BOARDS, HVBMS, LCU, PCU, VCU } from "../../constants/measurements";
+import { BOARDS, HVBMS, LCU, PCU } from "../../constants/measurements";
 import MultiSeriesChart, { type SeriesConfig } from "./components/MultiSeriesChart";
 import TelemetryChart from "./components/TelemetryChart";
 
@@ -69,7 +69,6 @@ const Charts = () => (
 
       {/* Row 3 — DLIM motor currents */}
       <MultiSeriesChart title="DLIM — Phase Currents" icon={Zap}   series={DLIM_SERIES} unit="A" />
-      <TelemetryChart title="High Pressure" icon={Gauge} board={BOARDS.VCU} measurementKey={VCU.highPressure} unit="bar" colorIndex={4} />
 
       {/* Row 4 — Airgaps */}
       <MultiSeriesChart title="Vertical Airgaps" icon={MoveVertical}   series={VERT_AIRGAP_SERIES} unit="mm" />

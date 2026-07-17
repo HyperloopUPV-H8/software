@@ -21,7 +21,6 @@ import {
   PACK_V_RANGE,
   PCU,
   PROP_CURRENT_RANGE,
-  VCU,
 } from "../../constants/measurements";
 import useMeasurement from "../../hooks/useMeasurement";
 import { useIsStale, useStaleFlags } from "../../hooks/useIsStale";
@@ -164,18 +163,12 @@ const BatteryCard = ({ title, icon: Icon, soc, socStale, rows }: BatteryCardProp
 const KinematicsCard = () => {
   const speed    = useMeasurement(BOARDS.PCU, PCU.speed);
   const position = useMeasurement(BOARDS.PCU, PCU.position);
-  const highPsi  = useMeasurement(BOARDS.VCU, VCU.highPressure);
-  const lowPsi   = useMeasurement(BOARDS.VCU, VCU.lowPressure);
 
   const speedStale = useIsStale(BOARDS.PCU, PCU.speed);
   const posStale   = useIsStale(BOARDS.PCU, PCU.position);
-  const highStale  = useIsStale(BOARDS.VCU, VCU.highPressure);
-  const lowStale   = useIsStale(BOARDS.VCU, VCU.lowPressure);
 
   const rows = [
     { label: "Position",     value: fmtNum(position),        unit: "m",   stale: posStale  },
-    { label: "High pres.",   value: fmtNum(highPsi),         unit: "bar", stale: highStale },
-    { label: "Low pres.",    value: fmtNum(lowPsi),          unit: "bar", stale: lowStale  },
   ];
 
   return (

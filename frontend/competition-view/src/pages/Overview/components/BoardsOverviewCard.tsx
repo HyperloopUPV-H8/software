@@ -30,7 +30,6 @@ const ROWS: BoardRow[] = [
     icon: Cpu,
     stateMeasurementKey: VCU.state,
     stats: [
-      { label: "High pres.", measurementKey: VCU.highPressure, unit: "bar" },
       { label: "SDC",        measurementKey: VCU.sdcClosed,    boolLabels: ["Closed", "Open"] },
       { label: "Brakes",     measurementKey: VCU.activeBrakes, boolLabels: ["Braked", "Unbraked"] },
     ],
