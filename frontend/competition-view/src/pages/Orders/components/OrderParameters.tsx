@@ -9,7 +9,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components";
-import type { CommandParameter, ParameterValues } from "../../../types/catalog";
+import type { CommandParameter, NumericParameter, ParameterValues } from "../../../types/catalog";
+
+/** True when the field holds a number outside the parameter's safeRange (empty/NaN doesn't count). */
+export const isNumericValueOutOfRange = (param: NumericParameter, raw: unknown): boolean => {
+  const value = parseFloat(String(raw));
+  if (!Number.isFinite(value)) return false;
+  const [min, max] = param.safeRange;
+  return (min != null && value < min) || (max != null && value > max);
+};
+
+const rangeLabel = (min: number | null, max: number | null): string => {
+  if (min != null && max != null) return `between ${min} and ${max}`;
+  if (min != null) return `at least ${min}`;
+  return `at most ${max}`;
+};
 
 interface OrderParametersProps {
   fields: Record<string, CommandParameter>;
@@ -24,17 +38,27 @@ const OrderParameters = ({ fields, values, onChange }: OrderParametersProps) => 
       <Field key={key}>
         <FieldLabel htmlFor={`param-${key}`}>{param.name}</FieldLabel>
         {param.kind === "numeric" && (
-          <Input
-            id={`param-${key}`}
-            type="number"
-            value={String(values[key] ?? "")}
-            onChange={(e) => onChange(key, e.target.value)}
-            placeholder={
-              param.safeRange[0] != null && param.safeRange[1] != null
-                ? `${param.safeRange[0]}–${param.safeRange[1]}`
-                : undefined
-            }
-          />
+          <>
+            <Input
+              id={`param-${key}`}
+              type="number"
+              min={param.safeRange[0] ?? undefined}
+              max={param.safeRange[1] ?? undefined}
+              value={String(values[key] ?? "")}
+              onChange={(e) => onChange(key, e.target.value)}
+              aria-invalid={isNumericValueOutOfRange(param, values[key]) || undefined}
+              placeholder={
+                param.safeRange[0] != null && param.safeRange[1] != null
+                  ? `${param.safeRange[0]}–${param.safeRange[1]}`
+                  : undefined
+              }
+            />
+            {isNumericValueOutOfRange(param, values[key]) && (
+              <p className="text-destructive text-xs">
+                Must be {rangeLabel(param.safeRange[0], param.safeRange[1])}.
+              </p>
+            )}
+          </>
         )}
         {param.kind === "enum" && (
           <Select value={String(values[key] ?? "")} onValueChange={(v) => onChange(key, v)}>
