@@ -21,6 +21,7 @@ import {
   PACK_V_RANGE,
   PCU,
   PROP_CURRENT_RANGE,
+  SPEED_RANGE,
 } from "../../constants/measurements";
 import useMeasurement from "../../hooks/useMeasurement";
 import { useIsStale, useStaleFlags } from "../../hooks/useIsStale";
@@ -382,7 +383,7 @@ const Dashboard = () => {
           {/* Charts — 2 cols × 3 rows */}
           <div className="grid min-h-0 flex-1 grid-cols-2 grid-rows-3 gap-2">
             <MultiSeriesChart title="DLIM — Phase Currents"  icon={Zap}           series={DLIM_SERIES}       unit={`[${PROP_CURRENT_RANGE[0]}, ${PROP_CURRENT_RANGE[1]}] A`} />
-            <TelemetryChart   title="Speed"                  icon={Gauge}         board={BOARDS.PCU}          measurementKey={PCU.speed}    unit="km/h" colorIndex={0} />
+            <TelemetryChart   title="Speed"                  icon={Gauge}         board={BOARDS.PCU}          measurementKey={PCU.speed}    unit={`[${SPEED_RANGE[0]}, ${SPEED_RANGE[1]}] km/h`} colorIndex={0} />
             <MultiSeriesChart title="Vertical Airgaps"       icon={MoveVertical}  series={VERT_AIRGAP_SERIES} unit="mm" />
             <MultiSeriesChart title="Lateral Airgaps"        icon={MoveHorizontal} series={LAT_AIRGAP_SERIES} unit="mm" />
             <MultiSeriesChart title="HEMS — Coil Currents"   icon={Zap}           series={HEMS_SERIES}        unit={`[${LEV_CURRENT_RANGE[0]}, ${LEV_CURRENT_RANGE[1]}] A`} />

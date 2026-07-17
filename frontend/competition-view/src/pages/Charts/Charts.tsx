@@ -6,7 +6,7 @@ import {
   MoveVertical,
   Zap,
 } from "lucide-react";
-import { BOARDS, HVBMS, LCU, PCU } from "../../constants/measurements";
+import { BOARDS, HVBMS, LCU, PCU, SPEED_RANGE } from "../../constants/measurements";
 import MultiSeriesChart, { type SeriesConfig } from "./components/MultiSeriesChart";
 import TelemetryChart from "./components/TelemetryChart";
 
@@ -60,7 +60,7 @@ const Charts = () => (
   <div className="flex h-full flex-col gap-4 overflow-y-auto p-4">
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       {/* Row 1 — Kinematic */}
-      <TelemetryChart title="Speed"    icon={Gauge}  board={BOARDS.PCU}   measurementKey={PCU.speed}    unit="km/h" colorIndex={0} />
+      <TelemetryChart title="Speed"    icon={Gauge}  board={BOARDS.PCU}   measurementKey={PCU.speed}    unit={`[${SPEED_RANGE[0]}, ${SPEED_RANGE[1]}] km/h`} colorIndex={0} />
       <TelemetryChart title="Position" icon={MapPin} board={BOARDS.PCU}   measurementKey={PCU.position} unit="m"    colorIndex={1} />
 
       {/* Row 2 — Electrical */}
