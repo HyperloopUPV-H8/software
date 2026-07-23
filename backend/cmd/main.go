@@ -157,4 +157,4 @@ func main() {
 // <-- Hall of Fame -->
 // H09 -- Zürich    -- PM Juan Martínez, Marc Sanchis                      -- Winners
 // H10 -- Groningen -- PM Marc Sanchis, Joan Física   					   -- 3rd Place
-// H11 -- Groningen -- PM Alejandro González, Javier Ribal, Vasyl Klymenko -- ???
+// H11 -- Groningen -- PM Alejandro González, Javier Ribal, Vasyl Klymenko -- 2nd Place
