@@ -1,1 +1,0 @@
-"common": "npm:@hyperloop-upv/common-front@2.0.12",
