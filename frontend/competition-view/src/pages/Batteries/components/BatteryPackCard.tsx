@@ -1,94 +1,138 @@
+import { memo, useMemo } from "react";
+import { useShallow } from "zustand/react/shallow";
+import { formatAxisValue } from "../../../constants/chartConfig";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@workspace/ui/components";
-import { hvbmsPack } from "../../../constants/measurements";
-import useMeasurement from "../../../hooks/useMeasurement";
+  BOARDS,
+  CELL_V_MAX,
+  CELL_V_MIN,
+  CELL_V_WARN_HIGH,
+  CELL_V_WARN_LOW,
+  hvbmsPack,
+} from "../../../constants/measurements";
+import { useStaleFlags } from "../../../hooks/useIsStale";
+import { STALE_TEXT_CLASS } from "../../../lib/freshness";
+import { useStore } from "../../../store/store";
 
 interface BatteryPackCardProps {
-  /** Pack number, 1-based (1–18). */
   packNumber: number;
 }
 
-const fmt = (v: number | boolean | string | undefined, decimals = 1) =>
-  typeof v === "number" ? v.toFixed(decimals) : "—";
+// formatAxisValue keeps the label short (falls back to exponential notation)
+// so a garbage/out-of-range sample never blows out a tile's fixed width.
+const fmt = (v: number | boolean | string | undefined) =>
+  typeof v === "number" ? formatAxisValue(v) : "—";
 
-const BatteryPackCard = ({ packNumber }: BatteryPackCardProps) => {
-  const keys = hvbmsPack(packNumber);
+type CellStatus = "low" | "high" | "ok";
 
-  const soc     = useMeasurement(keys.soc);
-  const voltage = useMeasurement(keys.voltage);
-  const temp    = useMeasurement(keys.temperature);
-  const cell1   = useMeasurement(keys.cell1);
-  const cell2   = useMeasurement(keys.cell2);
-  const cell3   = useMeasurement(keys.cell3);
-  const cell4   = useMeasurement(keys.cell4);
-  const cell5   = useMeasurement(keys.cell5);
-  const cell6   = useMeasurement(keys.cell6);
+const cellStatus = (v: number | null): CellStatus =>
+  v === null ? "ok" : v < CELL_V_WARN_LOW ? "low" : v > CELL_V_WARN_HIGH ? "high" : "ok";
 
-  const cells = [cell1, cell2, cell3, cell4, cell5, cell6];
-  const cellNums = cells.filter((c): c is number => typeof c === "number");
-  const cellMax = cellNums.length ? Math.max(...cellNums) : undefined;
-  const cellMin = cellNums.length ? Math.min(...cellNums) : undefined;
+/* ─── Individual cell tile ───────────────────────────────────────────────── */
 
-  const socNum = typeof soc === "number" ? soc : null;
-  const socColor =
-    socNum === null ? "bg-muted"     :
-    socNum < 15     ? "bg-red-500"   :
-    socNum < 30     ? "bg-amber-500" :
-                      "bg-green-500";
+// Memoised so only the cells whose value actually changed re-render.
+const CellTile = memo(({ cellNum, value, stale }: { cellNum: number; value: number | undefined; stale: boolean }) => {
+  const v = typeof value === "number" ? value : null;
+  const status = cellStatus(v);
+  const fill = v !== null
+    ? Math.min(100, Math.max(0, ((v - CELL_V_MIN) / (CELL_V_MAX - CELL_V_MIN)) * 100))
+    : 0;
 
   return (
-    <Card className="gap-2 py-3">
-      <CardHeader className="px-3 pb-0">
-        <CardTitle className="text-xs font-semibold">
-          Pack {packNumber}
-        </CardTitle>
-      </CardHeader>
-
-      <CardContent className="flex flex-col gap-2 px-3">
-        {/* SOC bar */}
-        <div className="flex items-center gap-2">
-          <div className="bg-muted h-2 flex-1 overflow-hidden rounded-full">
-            <div
-              className={`h-full rounded-full transition-all ${socColor}`}
-              style={{ width: `${socNum ?? 0}%` }}
-            />
-          </div>
-          <span className="text-foreground w-10 text-right text-xs font-medium tabular-nums">
-            {fmt(soc, 0)}%
-          </span>
-        </div>
-
-        {/* Key values */}
-        <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs">
-          <Stat label="Voltage"  value={fmt(voltage)}      unit="V"  />
-          <Stat label="Temp"     value={fmt(temp)}          unit="°C" />
-          <Stat label="Cell max" value={fmt(cellMax, 3)}   unit="V"  />
-          <Stat label="Cell min" value={fmt(cellMin, 3)}   unit="V"  />
-        </div>
-      </CardContent>
-    </Card>
+    <div
+      className={`flex min-w-0 flex-col justify-center gap-1 overflow-hidden rounded-md border px-1.5 py-1 ${
+        status === "low"  ? "border-red-500 bg-red-500/5" :
+        status === "high" ? "border-amber-500 bg-amber-500/5" :
+                             "border-border"
+      }`}
+    >
+      <div className="flex items-baseline justify-between gap-1">
+        <span className="text-muted-foreground text-[10px] leading-none">C{cellNum}</span>
+        <span
+          className={`truncate text-sm font-semibold leading-none tabular-nums ${
+            stale ? STALE_TEXT_CLASS :
+            status === "low" ? "text-red-500" : status === "high" ? "text-amber-500" : "text-foreground"
+          }`}
+        >
+          {v !== null ? formatAxisValue(v) : "—"}
+        </span>
+      </div>
+      <div className="bg-muted h-1 overflow-hidden rounded-full">
+        <div
+          className={`h-full rounded-full ${
+            status === "low" ? "bg-red-500" : status === "high" ? "bg-amber-500" : "bg-green-500"
+          }`}
+          style={{ width: `${fill}%` }}
+        />
+      </div>
+    </div>
   );
-};
+});
 
-const Stat = ({
-  label,
-  value,
-  unit,
-}: {
-  label: string;
-  value: string;
-  unit: string;
-}) => (
-  <div className="flex items-baseline justify-between">
-    <span className="text-muted-foreground">{label}</span>
-    <span className="text-foreground font-medium tabular-nums">
-      {value} <span className="text-muted-foreground font-normal">{unit}</span>
-    </span>
-  </div>
-);
+CellTile.displayName = "CellTile";
 
+/* ─── Pack strip ─────────────────────────────────────────────────────────── */
+
+/**
+ * One horizontal strip per battery group: summary rail on the left, its
+ * 12 cells laid out in a single row so every cell stays wide and legible.
+ * Eight strips stacked fill the page without scrolling.
+ */
+const BatteryPackCard = memo(({ packNumber }: BatteryPackCardProps) => {
+  const keys = useMemo(() => hvbmsPack(packNumber), [packNumber]);
+  // Same order as the values selector below: voltage, temps 1-4, cells 1-12.
+  const ids  = useMemo(() => [keys.voltage, ...keys.temps, ...keys.cells], [keys]);
+
+  // Single consolidated subscription for everything this strip displays
+  // (voltage + 4 temps + 12 cells) instead of one subscription per value.
+  const values = useStore(
+    useShallow((s) => {
+      const board = s.telemetry[BOARDS.HVBMS];
+      return ids.map((id) => board?.[id]) as (number | undefined)[];
+    }),
+  );
+  const staleFlags = useStaleFlags(BOARDS.HVBMS, ids);
+
+  const voltage    = values[0];
+  const temps      = values.slice(1, 5);
+  const cellValues = values.slice(5);
+
+  const voltageStale = staleFlags[0];
+  const tempStale    = staleFlags.slice(1, 5).some(Boolean);
+  const cellStale    = staleFlags.slice(5);
+
+  const numericTemps = temps.filter((t): t is number => typeof t === "number");
+  const tempMax = numericTemps.length > 0 ? Math.max(...numericTemps) : undefined;
+
+  const statuses = cellValues.map((v) => cellStatus(typeof v === "number" ? v : null));
+  const packStatus: CellStatus = statuses.includes("low") ? "low" : statuses.includes("high") ? "high" : "ok";
+
+  return (
+    <div
+      className={`bg-card flex min-h-0 flex-1 items-stretch gap-2 rounded-xl border p-2 shadow-sm ${
+        packStatus === "low"  ? "border-red-500/60" :
+        packStatus === "high" ? "border-amber-500/60" :
+                                 ""
+      }`}
+    >
+      {/* Summary rail */}
+      <div className="flex w-40 min-w-0 shrink-0 flex-col justify-center gap-0.5 border-r pr-2">
+        <span className="truncate text-sm font-semibold leading-tight">Group {packNumber}</span>
+        <span className="text-muted-foreground truncate text-xs tabular-nums">
+          <span className={`font-semibold ${voltageStale ? STALE_TEXT_CLASS : "text-foreground"}`}>{fmt(voltage)}</span> V
+          {" · "}
+          <span className={`font-semibold ${tempStale ? STALE_TEXT_CLASS : "text-foreground"}`}>{fmt(tempMax)}</span> °C
+        </span>
+      </div>
+
+      {/* All 12 cells in a single row */}
+      <div className="grid min-h-0 min-w-0 flex-1 grid-cols-12 gap-1.5">
+        {keys.cells.map((key, i) => (
+          <CellTile key={key} cellNum={i + 1} value={cellValues[i]} stale={cellStale[i]} />
+        ))}
+      </div>
+    </div>
+  );
+});
+
+BatteryPackCard.displayName = "BatteryPackCard";
 export default BatteryPackCard;

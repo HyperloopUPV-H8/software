@@ -22,10 +22,10 @@ const AppLayout = ({ children, backendConnected, onShowShortcuts }: AppLayoutPro
     <div className="h-full w-full [--header-height:calc(--spacing(14))]">
       <SidebarProvider className="h-full w-full" defaultOpen={false}>
         <div className="bg-background flex h-full w-full">
-          <AppSidebar backendConnected={backendConnected} />
+          <AppSidebar backendConnected={backendConnected} onShowShortcuts={onShowShortcuts} />
           <SidebarInset className="flex h-full flex-col">
-            <Header backendConnected={backendConnected} onShowShortcuts={onShowShortcuts} />
-            <div className="flex-1 overflow-auto">{children}</div>
+            <Header backendConnected={backendConnected} />
+            <div className="min-h-0 flex-1 overflow-hidden">{children}</div>
           </SidebarInset>
         </div>
       </SidebarProvider>

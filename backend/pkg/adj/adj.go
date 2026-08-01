@@ -96,9 +96,14 @@ func downloadADJ(AdjSettings config.Adj) (string, json.RawMessage, json.RawMessa
 		return "local", nil, nil, err
 	}
 
-	// If not downloading use local ADJ
+	// If not downloading, recover the commit hash persisted by the last
+	// successful download. Without it the backend must not start: boards
+	// receive this hash on connection and could not validate their ADJ.
 	if commitHash == "" {
-		commitHash = "local"
+		commitHash, err = readCommitFile()
+		if err != nil {
+			return "", nil, nil, fmt.Errorf("using local ADJ but no stored commit hash was found (run once with an adj branch and internet access): %w", err)
+		}
 	}
 
 	// After downloading adj apply adj validator

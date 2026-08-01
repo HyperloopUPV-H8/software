@@ -1,19 +1,29 @@
 import { memo, useEffect, useRef } from "react";
+import type { LucideIcon } from "lucide-react";
 import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
 import {
+  CHART_AXIS_INCRS,
   CHART_COLORS,
   CHART_HEIGHT,
   CHART_LINE_WIDTH,
   CHART_MAX_POINTS,
   CHART_POINT_SIZE,
+  CHART_TRIM_SLACK,
+  CHART_WINDOW_SECONDS,
+  formatAxisValue,
 } from "../../../constants/chartConfig";
-import useMeasurement from "../../../hooks/useMeasurement";
+import { useIsStale } from "../../../hooks/useIsStale";
+import { useStore } from "../../../store/store";
 
 interface TelemetryChartProps {
   /** Human-readable label shown in the card header. */
   title: string;
-  /** Backend telemetry key to track (e.g. "PCU/encoder_speed_km_h"). */
+  /** Icon shown before the title, e.g. from lucide-react. */
+  icon?: LucideIcon;
+  /** Board name (must match backend, use BOARDS constants). */
+  board: string;
+  /** Measurement ID within that board. */
   measurementKey: string;
   /** Unit appended to the y-axis label. */
   unit?: string;
@@ -25,38 +35,56 @@ interface TelemetryChartProps {
  * Fixed single-series real-time chart for competition telemetry.
  *
  * History is accumulated in a local ref (no store involvement) so the
- * component stays lightweight. The x-axis is a monotonic counter driven
- * by incoming telemetry packets. Double-click resets the zoom.
+ * component stays lightweight. The x-axis is wall-clock time (seconds)
+ * and the visible range is pinned to a rolling window ending at the
+ * latest sample, so the chart keeps advancing even under bursty,
+ * high-frequency packet rates. Zoom is disabled; only hover crosshair
+ * interaction is active.
+ *
+ * Telemetry is consumed through a transient store subscription that feeds
+ * uPlot directly, so data updates never re-render the React component.
+ * Redraws are batched to animation frames.
  */
 const TelemetryChart = memo(({
   title,
+  icon: Icon,
+  board,
   measurementKey,
   unit = "",
   colorIndex = 0,
 }: TelemetryChartProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef   = useRef<HTMLDivElement>(null); // flex-1 div sized by CSS layout
+  const containerRef = useRef<HTMLDivElement>(null); // uPlot mounting point
   const uplotRef     = useRef<uPlot | null>(null);
   const xRef         = useRef<number[]>([]);
   const yRef         = useRef<number[]>([]);
-  const counterRef   = useRef(0);
+  const startRef     = useRef(performance.now());
 
-  const value = useMeasurement(measurementKey);
   const color = CHART_COLORS[colorIndex % CHART_COLORS.length];
+
+  // Subtle yellow tint when the data stream stopped arriving.
+  const stale = useIsStale(board, measurementKey);
 
   // ── Initialise uplot ────────────────────────────────────────────────────
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!wrapperRef.current || !containerRef.current) return;
 
     const getVar = (name: string) =>
       getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
     const opts: uPlot.Options = {
-      width:  containerRef.current.clientWidth,
-      height: CHART_HEIGHT,
+      width:  wrapperRef.current.clientWidth  || 300,
+      height: wrapperRef.current.clientHeight || CHART_HEIGHT,
       legend: { show: false },
       padding: [16, 8, 4, 12],
       scales: {
-        x: { time: false },
+        x: {
+          time: false,
+          range: (_, __, dataMax) =>
+            dataMax == null
+              ? [0, CHART_WINDOW_SECONDS]
+              : [dataMax - CHART_WINDOW_SECONDS, dataMax],
+        },
         y: {
           range: (_, min, max) => {
             if (min === max) return [min - 1, max + 1];
@@ -75,81 +103,124 @@ const TelemetryChart = memo(({
           points: { show: true, size: CHART_POINT_SIZE, fill: color, width: 0 },
         },
       ],
+      // Stroke callbacks re-read the CSS variables on every draw so the
+      // axes/grid follow light/dark theme switches (see redraw observer below).
       axes: [
         {
-          stroke: getVar("--muted-foreground"),
+          stroke: () => getVar("--muted-foreground"),
           grid:   { show: false },
           font:   "10px Archivo",
-          size:   20,
+          size:   24,
+          values: (_, ticks) => ticks.map(formatAxisValue),
         },
         {
           side:   1,
-          stroke: getVar("--muted-foreground"),
-          grid:   { stroke: getVar("--border") },
+          stroke: () => getVar("--muted-foreground"),
+          grid:   { stroke: () => getVar("--border") },
           font:   "10px Archivo",
-          size:   unit ? 48 : 36,
-          label:  unit,
+          size:   36,
+          incrs:  CHART_AXIS_INCRS,
+          values: (_, ticks) => ticks.map(formatAxisValue),
         },
       ],
-      cursor: { drag: { setScale: true, x: true, y: true } },
+      cursor: { drag: { setScale: false, x: false, y: false } },
     };
 
     uplotRef.current = new uPlot(opts, [[], []], containerRef.current);
 
-    // Pass null to reset zoom; cast needed since uplot's TS types omit null here.
-    const handleDblClick = () => uplotRef.current?.setScale("x", { min: null as unknown as number, max: null as unknown as number });
-    containerRef.current.addEventListener("dblclick", handleDblClick);
-
     return () => {
       uplotRef.current?.destroy();
       uplotRef.current = null;
-      containerRef.current?.removeEventListener("dblclick", handleDblClick);
     };
   // Intentionally runs once on mount — series config is stable.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Feed new data points ────────────────────────────────────────────────
+  // ── Feed new data points (transient subscription, no React re-renders) ──
   useEffect(() => {
-    if (typeof value !== "number" || !uplotRef.current) return;
+    let rafId = 0;
+    let lastValue: number | boolean | string | undefined;
 
-    xRef.current.push(counterRef.current++);
-    yRef.current.push(value);
+    // Coalesce redraws to one per animation frame (and none while hidden).
+    const flush = () => {
+      rafId = 0;
+      uplotRef.current?.setData([xRef.current, yRef.current]);
+    };
 
-    if (xRef.current.length > CHART_MAX_POINTS) {
-      xRef.current = xRef.current.slice(-CHART_MAX_POINTS);
-      yRef.current = yRef.current.slice(-CHART_MAX_POINTS);
-    }
+    const ingest = (telemetry: ReturnType<typeof useStore.getState>["telemetry"]) => {
+      const value = telemetry[board]?.[measurementKey];
+      if (value === lastValue) return;
+      lastValue = value;
+      if (typeof value !== "number") return;
 
-    uplotRef.current.setData([xRef.current, yRef.current]);
-  }, [value]);
+      xRef.current.push((performance.now() - startRef.current) / 1000);
+      yRef.current.push(value);
 
-  // ── Resize to container ─────────────────────────────────────────────────
+      // Trim with slack so the slice allocation is amortised instead of
+      // happening on every single update once the cap is reached.
+      if (xRef.current.length > CHART_MAX_POINTS + CHART_TRIM_SLACK) {
+        xRef.current = xRef.current.slice(-CHART_MAX_POINTS);
+        yRef.current = yRef.current.slice(-CHART_MAX_POINTS);
+      }
+
+      if (!rafId) rafId = requestAnimationFrame(flush);
+    };
+
+    ingest(useStore.getState().telemetry);
+    const unsubscribe = useStore.subscribe((state, prevState) => {
+      if (state.telemetry !== prevState.telemetry) ingest(state.telemetry);
+    });
+
+    return () => {
+      unsubscribe();
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+    // Intentionally runs once on mount — board/measurement props are stable.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Resize to wrapper ───────────────────────────────────────────────────
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!wrapperRef.current) return;
 
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        uplotRef.current?.setSize({
-          width:  entry.contentRect.width,
-          height: CHART_HEIGHT,
-        });
+        const { width, height } = entry.contentRect;
+        if (width > 0 && height > 0) {
+          uplotRef.current?.setSize({ width, height });
+        }
       }
     });
 
-    observer.observe(containerRef.current);
+    observer.observe(wrapperRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // ── Repaint on theme switch ─────────────────────────────────────────────
+  // AppLayout toggles the `dark` class on <html>; redrawing re-runs the
+  // axis/grid stroke callbacks so the chart picks up the new theme colours.
+  useEffect(() => {
+    const observer = new MutationObserver(() => uplotRef.current?.redraw());
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
     return () => observer.disconnect();
   }, []);
 
   return (
-    <div className="bg-card flex flex-col rounded-xl border shadow-sm">
-      <div className="flex items-center justify-between px-4 pt-3">
-        <span className="text-foreground text-sm font-semibold">{title}</span>
+    <div className={`flex h-full min-h-0 flex-col rounded-xl border shadow-sm transition-colors duration-300 ${
+      stale ? "border-yellow-500/40 bg-yellow-500/10" : "bg-card"
+    }`}>
+      <div className="flex shrink-0 items-center justify-between px-4 pb-1 pt-3">
+        <span className="flex items-center gap-1.5">
+          {Icon && <Icon className="text-muted-foreground size-4" />}
+          <span className="text-foreground text-sm font-semibold">{title}</span>
+        </span>
         {unit && (
           <span className="text-muted-foreground text-xs">{unit}</span>
         )}
       </div>
-      <div ref={containerRef} className="w-full px-1 pb-2" />
+      <div ref={wrapperRef} className="min-h-0 flex-1 px-1 pb-2">
+        <div ref={containerRef} />
+      </div>
     </div>
   );
 });

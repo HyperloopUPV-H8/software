@@ -1,14 +1,8 @@
-import { Activity, Layout, ScrollText, Send, Terminal, Wrench } from "@workspace/ui/icons";
-import { Zap } from "lucide-react";
+import { Battery, Layout } from "@workspace/ui/icons";
 
 export const PAGES = {
-  "/":           { title: "Overview",  icon: Layout    },
-  "/charts":     { title: "Charts",    icon: Activity  },
-  "/batteries":  { title: "Batteries", icon: Wrench    },
-  "/boards":     { title: "Boards",    icon: Terminal  },
-  "/booster":    { title: "Booster",   icon: Zap       },
-  "/orders":     { title: "Orders",    icon: Send      },
-  "/messages":   { title: "Messages",  icon: ScrollText },
+  "/":          { title: "Competition View",  icon: Layout },
+  "/batteries": { title: "Batteries",  icon: Battery },
 } as const;
 
 export const PAGES_ARRAY = Object.entries(PAGES).map(

@@ -13,7 +13,6 @@ type ClientConfig struct {
 
 	Context context.Context
 
-	TryReconnect              bool
 	ConnectionBackoffFunction backoffFunction
 	MaxConnectionRetries      int
 }
@@ -24,17 +23,12 @@ func NewClientConfig(laddr net.Addr) ClientConfig {
 		Dialer: net.Dialer{
 			Timeout:   time.Second,
 			LocalAddr: laddr,
-			KeepAlive: -1, // managed via KeepAliveConfig
-			KeepAliveConfig: net.KeepAliveConfig{
-				Enable:   true,
-				Idle:     time.Second,
-				Interval: time.Second,
-				Count:    3,
-			},
+			// Kernel keep-alive disabled: liveness is handled by the
+			// application-level keep-alive order (transport.HandleKeepAlive)
+			KeepAlive: -1,
 		},
 
 		Context:                   context.TODO(),
-		TryReconnect:              true,
 		ConnectionBackoffFunction: NewExponentialBackoff(defaultBackoffMin, defaultBackoffExp, defaultBackoffMax),
 		MaxConnectionRetries:      -1,
 	}
@@ -75,13 +69,9 @@ type ServerConfig struct {
 func NewServerConfig() ServerConfig {
 	return ServerConfig{
 		ListenConfig: net.ListenConfig{
-			KeepAlive: -1, // managed via KeepAliveConfig
-			KeepAliveConfig: net.KeepAliveConfig{
-				Enable:   true,
-				Idle:     time.Second,
-				Interval: time.Second,
-				Count:    3,
-			},
+			// Kernel keep-alive disabled: liveness is handled by the
+			// application-level keep-alive order (transport.HandleKeepAlive)
+			KeepAlive: -1,
 		},
 		Context: context.TODO(),
 	}

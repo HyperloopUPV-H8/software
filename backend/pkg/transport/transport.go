@@ -2,6 +2,7 @@ package transport
 
 import (
 	"bytes"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
@@ -36,6 +37,8 @@ type Transport struct {
 
 	propagateFault bool
 
+	onConnectOrderValue [8]byte
+
 	api abstraction.TransportAPI
 
 	logger zerolog.Logger
@@ -55,20 +58,11 @@ func (transport *Transport) HandleClient(config tcp.ClientConfig, remote string)
 	client := tcp.NewClient(remote, config, transport.logger)
 	clientLogger := transport.logger.With().Str("remoteAddress", remote).Logger()
 	defer clientLogger.Warn().Msg("abort connection")
-	hasConnected := false
 
 	for {
 		conn, err := client.Dial()
 		if err != nil {
 			clientLogger.Debug().Stack().Err(err).Msg("dial failed")
-			// Only return if reconnection is disabled
-			if !config.TryReconnect {
-				if hasConnected {
-					transport.SendFault()
-				}
-				transport.errChan <- err
-				return err
-			}
 
 			// For ErrTooManyRetries, we still want to continue retrying
 			// The client will reset its retry counter on the next Dial() call
@@ -81,8 +75,6 @@ func (transport *Transport) HandleClient(config tcp.ClientConfig, remote string)
 			continue
 		}
 
-		hasConnected = true
-
 		err = transport.handleTCPConn(conn)
 		if errors.Is(err, error(ErrTargetAlreadyConnected{})) {
 			clientLogger.Warn().Stack().Err(err).Msg("multiple connections for same target")
@@ -91,11 +83,6 @@ func (transport *Transport) HandleClient(config tcp.ClientConfig, remote string)
 		}
 		if err != nil {
 			clientLogger.Debug().Stack().Err(err).Msg("connection lost")
-			if !config.TryReconnect {
-				transport.SendFault()
-				transport.errChan <- err
-				return err
-			}
 
 			// Connection was lost, continue trying to reconnect
 			continue
@@ -148,6 +135,8 @@ func (transport *Transport) handleTCPConn(conn net.Conn) error {
 	transport.api.ConnectionUpdate(target, true)
 	defer transport.api.ConnectionUpdate(target, false)
 
+	transport.sendOnConnectOrder(conn, connectionLogger)
+
 	transport.readLoopTCPConn(conn, connectionLogger)
 
 	err = <-errChan
@@ -156,6 +145,43 @@ func (transport *Transport) handleTCPConn(conn net.Conn) error {
 		transport.errChan <- err
 	}
 	return err
+}
+
+// Hardcoded order sent to a board right after its TCP connection is
+// established, carrying the short ADJ hash. TODO: set the real id
+const onConnectOrderId uint16 = 65535
+
+// SetADJHash stores the ADJ commit hash to be sent on each new TCP connection.
+// The short hash is the first 8 characters of the commit, sent as ASCII text.
+// A hash shorter than 8 characters is sent as zeroes.
+func (transport *Transport) SetADJHash(hash string) {
+	if len(hash) < 8 {
+		transport.logger.Warn().Str("hash", hash).Msg("adj hash too short, on-connect order will send zeroes")
+		return
+	}
+	copy(transport.onConnectOrderValue[:], hash[:8])
+}
+
+// sendOnConnectOrder writes the on-connect order (carrying the short ADJ hash)
+// to the board using the same wire format as regular orders: packet id (little
+// endian) followed by the 8 ASCII characters of the hash.
+func (transport *Transport) sendOnConnectOrder(conn net.Conn, logger zerolog.Logger) {
+	buf := new(bytes.Buffer)
+	binary.Write(buf, binary.LittleEndian, onConnectOrderId)
+	binary.Write(buf, binary.LittleEndian, transport.onConnectOrderValue)
+
+	data := buf.Bytes()
+	totalWritten := 0
+	for totalWritten < len(data) {
+		n, err := conn.Write(data[totalWritten:])
+		totalWritten += n
+		if err != nil {
+			logger.Error().Stack().Err(err).Msg("write on-connect order")
+			transport.errChan <- err
+			return
+		}
+	}
+	logger.Info().Uint16("id", onConnectOrderId).Msg("sent on-connect order")
 }
 
 // configureTCPConn sets TCP-level options like linger and no-delay.
@@ -240,6 +266,11 @@ func (transport *Transport) readLoopTCPConn(conn net.Conn, logger zerolog.Logger
 		for {
 			packet, err := transport.decoder.DecodeNext(conn)
 			if err != nil {
+				// Disabled: skipped the fault when we closed the connection on
+				// purpose from the UDP keep-alive - Javier Ribal del Río (2026-07-15)
+				// if errors.Is(err, net.ErrClosed) {
+				// 	return
+				// }
 				logger.Error().Stack().Err(err).Msg("decode")
 				transport.errChan <- err
 				transport.SendFault()
@@ -284,6 +315,10 @@ func (transport *Transport) SendMessage(message abstraction.TransportMessage) er
 	return err
 }
 
+// faultWriteTimeout bounds each TCP write of the fault broadcast; boards on
+// the vehicle LAN ack in milliseconds, so exceeding this means a dead peer
+const faultWriteTimeout = time.Second
+
 // handlePacketEvent is used to send an order to one of the connected boards
 func (transport *Transport) handlePacketEvent(message PacketMessage) error {
 	eventLogger := transport.logger.With().Str("type", fmt.Sprintf("%T", message.Packet)).Uint16("id", uint16(message.Id())).Logger()
@@ -303,16 +338,29 @@ func (transport *Transport) handlePacketEvent(message PacketMessage) error {
 		defer transport.connectionsMx.RUnlock()
 		for target, conn := range transport.connections {
 			targetName := string(target)
+
+			// Bound each write so a dead peer with a full send buffer cannot
+			// hold the connections lock (and the caller) for minutes
+			conn.SetWriteDeadline(time.Now().Add(faultWriteTimeout))
+			var writeErr error
 			totalWritten := 0
 			for totalWritten < len(data) {
 				n, err := conn.Write(data[totalWritten:])
 				eventLogger.Trace().Str("target", targetName).Int("amount", n).Msg("written chunk")
 				totalWritten += n
 				if err != nil {
-					eventLogger.Error().Str("target", targetName).Stack().Err(err).Msg("write")
-					transport.errChan <- err
-					return err
+					writeErr = err
+					break
 				}
+			}
+			conn.SetWriteDeadline(time.Time{})
+
+			// Keep broadcasting to the remaining boards even if one write
+			// fails: the fault must reach every live board
+			if writeErr != nil {
+				eventLogger.Error().Str("target", targetName).Stack().Err(writeErr).Msg("write")
+				transport.errChan <- writeErr
+				continue
 			}
 			eventLogger.Info().Str("target", targetName).Msg("sent")
 		}
@@ -478,6 +526,33 @@ func (transport *Transport) consumeErrors() {
 		transport.api.Notification(NewErrorNotification(err))
 	}
 }
+
+// Disabled: helpers for the UDP keep-alive callback — ReportError surfaced an
+// error in the GUI message log, TargetFromIp mapped a source IP to its board,
+// and DisconnectTarget force-closed a board's TCP connection so the handler
+// woke up, cleaned up and the reconnection loop took over
+// - Javier Ribal del Río (2026-07-15)
+// func (transport *Transport) ReportError(err error) {
+// 	transport.errChan <- err
+// }
+//
+// func (transport *Transport) TargetFromIp(ip string) (abstraction.TransportTarget, bool) {
+// 	target, ok := transport.ipToTarget[ip]
+// 	return target, ok
+// }
+//
+// func (transport *Transport) DisconnectTarget(target abstraction.TransportTarget, reason error) bool {
+// 	transport.connectionsMx.RLock()
+// 	conn, ok := transport.connections[target]
+// 	transport.connectionsMx.RUnlock()
+// 	if !ok {
+// 		return false
+// 	}
+//
+// 	transport.logger.Warn().Str("target", string(target)).Err(reason).Msg("forcefully disconnecting target")
+// 	tcp.CloseWithError(conn, reason)
+// 	return true
+// }
 
 func (transport *Transport) SendFault() {
 	err := transport.SendMessage(NewPacketMessage(data.NewPacket(0)))

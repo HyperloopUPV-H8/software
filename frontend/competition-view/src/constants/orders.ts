@@ -1,6 +1,12 @@
 /**
- * Hardcoded order IDs used during competition.
+ * Hardcoded order IDs used during competition, sourced from the ADJ
+ * repository (branch: Astra).
  * Each ID maps to a backend command understood by the VCU/HV system.
+ *
+ * The running backend currently only has the VCU board enabled
+ * (see backend/cmd/config.toml `[vehicle].boards`), so these quick
+ * actions are scoped to VCU-native orders — PCU/HVBMS order IDs won't
+ * route anywhere until those boards are added back to the config.
  */
 
 export interface OrderFieldValue {
@@ -14,23 +20,17 @@ export interface Order {
   fields: Record<string, OrderFieldValue>;
 }
 
-/** Engages the brakes. */
+/** Engages the brakes (VCU "Brake"). */
 export const BRAKE_ORDERS: Order[] = [
-  { id: 215, fields: {} },
+  { id: 51, fields: {} },
 ];
 
-/** Opens the HV contactors to cut power. */
+/** Opens the contactors to cut power (VCU "Open Contactors"). */
 export const OPEN_CONTACTORS_ORDERS: Order[] = [
-  { id: 902, fields: {} },
+  { id: 42, fields: {} },
 ];
 
-/**
- * Full emergency stop sequence:
- * triggers emergency brake + disables propulsion + cuts HV power.
- */
-export const EMERGENCY_STOP_ORDERS: Order[] = [
-  { id: 55,   fields: {} },
-  { id: 1799, fields: {} },
-  { id: 1698, fields: {} },
-  { id: 0,    fields: {} },
+/** Forces a FAULT state (id 0 is shared by the FAULT order on every board). */
+export const FAULT_ORDERS: Order[] = [
+  { id: 0, fields: {} },
 ];

@@ -1,25 +1,14 @@
-/** Single variable value as received from the backend. */
-export type VariableValue =
-  | { last: number; average: number }
-  | boolean
-  | string
-  | number;
-
-/** Map of variable names to their current values inside a packet. */
-export type Variables = Record<string, VariableValue>;
-
-/** High-frequency telemetry packet from the backend. */
-export interface TelemetryData {
-  id: number;
-  count: number;
-  cycleTime: number;
-  hexValue: string;
-  measurementUpdates: Variables;
-}
+export type { TelemetryPacket, VariableValue, Variables } from "@workspace/core";
 
 /**
- * Flat map from measurement ID (string) to the latest numeric value.
- * The store keeps only the most recent value per measurement to avoid
- * unbounded memory growth.
+ * The backend sends a batch of packets keyed by numeric packet ID.
+ * Each packet carries its own `measurementUpdates` map.
  */
-export type TelemetryState = Record<string, number | boolean | string>;
+export type TelemetryData = Record<number, import("@workspace/core").TelemetryPacket>;
+
+/**
+ * Telemetry keyed first by board name then by measurement ID.
+ * Two-level lookup prevents collisions between boards that share
+ * measurement names (e.g. VCU and LCU both have "general_state").
+ */
+export type TelemetryState = Record<string, Record<string, number | boolean | string>>;

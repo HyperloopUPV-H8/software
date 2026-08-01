@@ -43,3 +43,13 @@ func (conn *connWithErr) Write(b []byte) (n int, err error) {
 func (conn *connWithErr) Close() error {
 	return conn.Conn.Close()
 }
+
+func CloseWithError(conn net.Conn, reason error) error {
+	if cwe, ok := conn.(*connWithErr); ok {
+		select {
+		case cwe.errors <- reason:
+		default:
+		}
+	}
+	return conn.Close()
+}

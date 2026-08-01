@@ -178,6 +178,38 @@
       box-shadow: inset 0 0 0 1px rgba(237, 238, 240, 0.04);
     }
 
+    .kernel-setup {
+      margin-top: 16px;
+      display: grid;
+      gap: 8px;
+      justify-items: center;
+    }
+
+    .kernel-setup button {
+      min-height: 44px;
+      padding: 10px 24px;
+    }
+
+    .kernel-setup button:disabled {
+      opacity: 0.5;
+      cursor: wait;
+      transform: none;
+    }
+
+    .kernel-status {
+      font-size: 0.85rem;
+      min-height: 1.2em;
+      opacity: 0.85;
+    }
+
+    .kernel-status.ok {
+      color: #7ee787;
+    }
+
+    .kernel-status.error {
+      color: #ff8080;
+    }
+
     @media (max-width: 420px) {
       .card {
         padding: 20px;
@@ -208,10 +240,10 @@
     <div class="header">
       <h1>Control Station</h1>
     </div>
-    <div class="button-grid">
-      <button id="testing" class="primary">Testing View</button>
-      <button id="competition" class="secondary">Competition View</button>
-      <button id="flashing" class="secondary">Flashing View</button>
+    <div class="button-grid" id="button-grid"></div>
+    <div class="kernel-setup">
+      <button id="setup-kernel" class="secondary">Set up kernel</button>
+      <div id="kernel-status" class="kernel-status"></div>
     </div>
     <div class="aux-logo-wrap">
       <img src="src/sign.png" alt="Logo auxiliar" class="logo-aux" />
@@ -229,9 +261,61 @@
         try { window.ipcRenderer && window.ipcRenderer.send('set-initial-mode', mode); window.close(); } catch (e) { }
       }
     };
-    document.getElementById('testing').addEventListener('click', () => sendMode('testing'));
-    document.getElementById('competition').addEventListener('click', () => sendMode('competition'));
-    document.getElementById('flashing').addEventListener('click', () => sendMode('flashing'));
+
+    const FALLBACK_VIEWS = [
+      { mode: 'testing', label: 'Testing View' },
+      { mode: 'competition', label: 'Competition View' },
+      { mode: 'flashing', label: 'Flashing View' },
+    ];
+
+    async function renderButtons() {
+      let views = FALLBACK_VIEWS;
+      try {
+        if (window.electronAPI?.getAvailableViews) {
+          const available = await window.electronAPI.getAvailableViews();
+          if (available && available.length > 0) views = available;
+        }
+      } catch (e) { }
+
+      const grid = document.getElementById('button-grid');
+      views.forEach(({ mode, label }, i) => {
+        const btn = document.createElement('button');
+        btn.id = mode;
+        btn.className = i === 0 ? 'primary' : 'secondary';
+        btn.textContent = label;
+        btn.addEventListener('click', () => sendMode(mode));
+        grid.appendChild(btn);
+      });
+
+      if (views.length === 1) {
+        sendMode(views[0].mode);
+      }
+    }
+
+    renderButtons();
+
+    const kernelButton = document.getElementById('setup-kernel');
+    const kernelStatus = document.getElementById('kernel-status');
+    kernelButton.addEventListener('click', async () => {
+      if (!window.electronAPI?.setupKernel) {
+        kernelStatus.textContent = 'Not available';
+        kernelStatus.className = 'kernel-status error';
+        return;
+      }
+      kernelButton.disabled = true;
+      kernelStatus.textContent = 'Setting up kernel…';
+      kernelStatus.className = 'kernel-status';
+      try {
+        const result = await window.electronAPI.setupKernel();
+        kernelStatus.textContent = result.message;
+        kernelStatus.className = `kernel-status ${result.success ? 'ok' : 'error'}`;
+      } catch (e) {
+        kernelStatus.textContent = 'Kernel setup failed';
+        kernelStatus.className = 'kernel-status error';
+      } finally {
+        kernelButton.disabled = false;
+      }
+    });
 
     const appVersionNode = document.getElementById('app-version');
     if (appVersionNode && window.electronAPI?.getAppVersion) {

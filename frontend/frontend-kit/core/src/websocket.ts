@@ -65,6 +65,11 @@ class SocketService {
   private ws: WebSocketSubject<any> | null = null;
 
   /**
+   * Handle of the interval that emits the liveness heartbeat while connected.
+   */
+  private heartbeatInterval: ReturnType<typeof setInterval> | null = null;
+
+  /**
    * Connects to the WebSocket server by creating a new connection object and pushing it to `socketSource$`.
    * @param port - the port to connect to. Defaults to 4000.
    */
@@ -81,6 +86,7 @@ class SocketService {
         next: () => {
           this.status$.next("connected");
           logger.core.log("WebSocket connected");
+          this.startHeartbeat();
         },
       },
     });
@@ -103,9 +109,29 @@ class SocketService {
   }
 
   /**
+   * Starts the periodic heartbeat that lets the backend detect a dead or
+   * frozen GUI. The backend expects one at least every 3 seconds and treats
+   * a missing heartbeat as a disconnection.
+   */
+  private startHeartbeat() {
+    this.stopHeartbeat();
+    this.heartbeatInterval = setInterval(() => {
+      this.ws?.next({ topic: "connection/heartbeat", payload: {} });
+    }, 1000);
+  }
+
+  private stopHeartbeat() {
+    if (this.heartbeatInterval !== null) {
+      clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
+    }
+  }
+
+  /**
    * Cleans up the WebSocket connection by setting the connection object to null and updating the status to "disconnected".
    */
   private cleanup() {
+    this.stopHeartbeat();
     this.ws = null;
     this.status$.next("disconnected");
   }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/binary"
 	"fmt"
 	"net"
@@ -52,6 +51,8 @@ func configureTransport(
 	// Start handling network packets using UDP server
 	configureUDPServerTransport(adj, transp, config)
 
+	// Start the application-level TCP keep-alive (empty order with id 1)
+	go transp.HandleKeepAlive(time.Duration(config.TCP.KeepAliveIntervalMs) * time.Millisecond)
 }
 
 func configureTCPClientTransport(
@@ -86,11 +87,6 @@ func configureTCPClientTransport(
 			clientConfig.Timeout = time.Duration(config.TCP.ConnectionTimeout) * time.Millisecond
 		}
 
-		// Apply custom keep-alive if specified
-		if config.TCP.KeepAlive > 0 {
-			clientConfig.KeepAlive = time.Duration(config.TCP.KeepAlive) * time.Millisecond
-		}
-
 		// Apply custom backoff parameters
 		if config.TCP.BackoffMinMs > 0 || config.TCP.BackoffMaxMs > 0 || config.TCP.BackoffMultiplier > 0 {
 			minBackoff := 100 * time.Millisecond // default
@@ -118,18 +114,12 @@ func configureTCPClientTransport(
 	}
 }
 
-// configureTCPServerTransport starts the TCP server handler using a ListenConfig with KeepAlive.
+// configureTCPServerTransport starts the TCP server handler.
 func configureTCPServerTransport(
 	adj adj_module.ADJ,
 	transp *transport.Transport,
 ) {
-	go transp.HandleServer(tcp.ServerConfig{
-		ListenConfig: net.ListenConfig{
-			KeepAlive: time.Second,
-		},
-		Context: context.TODO(),
-	}, fmt.Sprintf("%s:%d", adj.Info.Addresses[BACKEND], adj.Info.Ports[TcpServer]))
-
+	go transp.HandleServer(tcp.NewServerConfig(), fmt.Sprintf("%s:%d", adj.Info.Addresses[BACKEND], adj.Info.Ports[TcpServer]))
 }
 
 // configureUDPServerTransport creates and starts the UDP server then delegates handling to transport.
@@ -140,7 +130,38 @@ func configureUDPServerTransport(
 
 ) {
 	trace.Info().Msg("Starting UDP server")
-	udpServer := udp.NewServer(adj.Info.Addresses[BACKEND], adj.Info.Ports[UDP], &trace.Logger, config.UDP.RingBufferSize, config.UDP.PacketChanSize)
+
+	// Disabled: UDP keep-alive callback — on timeout it broadcast a fault,
+	// reported the board to the GUI and force-closed its TCP connection
+	// - Javier Ribal del Río (2026-07-15)
+	// onKeepAliveTimeout := func(ip string) {
+	// 	transp.SendFault()
+	// 	board, ok := transp.TargetFromIp(ip)
+	// 	if !ok {
+	// 		board = "unknown"
+	// 	}
+	// 	err := fmt.Errorf("UDP keep-alive timeout: no packets received from board %s (%s) for %dms, fault sent", board, ip, config.UDP.KeepAliveTimeoutMs)
+	// 	transp.ReportError(err)
+	//
+	// 	// Close the board's TCP connection ourselves: the fault we just
+	// 	// broadcast leaves unacked data on a dead peer, which suppresses the
+	// 	// TCP keep-alive and would delay disconnect detection by minutes.
+	// 	if ok {
+	// 		transp.DisconnectTarget(board, err)
+	// 	}
+	// }
+
+	udpServer := udp.NewServer(
+		adj.Info.Addresses[BACKEND],
+		adj.Info.Ports[UDP],
+		&trace.Logger,
+		config.UDP.RingBufferSize,
+		config.UDP.PacketChanSize,
+		// Disabled: UDP keep-alive arguments - Javier Ribal del Río (2026-07-15)
+		// time.Duration(config.UDP.KeepAliveCheckIntervalMs)*time.Millisecond,
+		// time.Duration(config.UDP.KeepAliveTimeoutMs)*time.Millisecond,
+		// onKeepAliveTimeout,
+	)
 	err := udpServer.Start()
 	if err != nil {
 		trace.Fatal().Err(err).Msg("failed to start UDP server: " + err.Error())
@@ -213,6 +234,15 @@ func getTransportDecEnc(info adj_module.Info, podData pod_data.PodData) (*presen
 	for _, id := range ids {
 		decoder.SetPacketDecoder(id, dataDecoder)
 		encoder.SetPacketEncoder(id, dataEncoder)
+	}
+
+	// The TCP keep-alive order is an empty packet, so give it an empty
+	// descriptor unless the ADJ already defines packet id 1
+	if !common.Contains(ids, transport.KeepAliveId) {
+		dataDecoder.SetDescriptor(transport.KeepAliveId, data.Descriptor{})
+		dataEncoder.SetDescriptor(transport.KeepAliveId, data.Descriptor{})
+		decoder.SetPacketDecoder(transport.KeepAliveId, dataDecoder)
+		encoder.SetPacketEncoder(transport.KeepAliveId, dataEncoder)
 	}
 
 	// TODO Solve this foking mess, I have tried...
