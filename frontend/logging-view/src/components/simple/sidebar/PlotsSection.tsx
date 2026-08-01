@@ -5,6 +5,14 @@
 // chip matches the trace color in the chart (lib/plotStudio/palette).
 import {
   Button,
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuLabel,
+  ContextMenuRadioGroup,
+  ContextMenuRadioItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
   Select,
   SelectContent,
   SelectItem,
@@ -150,13 +158,19 @@ export default function PlotsSection() {
             <div className="flex flex-col gap-1 px-2 py-2">
               {plot.signals.map((sig, idx) => {
                 const signal = studioFiles.get(sig.signalId) ?? studioOperations.get(sig.signalId) ?? studioTransforms.get(sig.signalId);
+                // Ref to the hidden-ish color input, so the context menu's
+                // "Change Color" item can open the same native picker.
+                let colorInputEl: HTMLInputElement | null = null;
                 return (
-                  <div key={sig.signalId}
+                  <ContextMenu key={sig.signalId}>
+                    <ContextMenuTrigger asChild>
+                  <div
                     className="bg-muted/30 hover:bg-muted/60 group flex items-center gap-2 rounded-md border px-2 py-1.5 transition-colors">
                     {/* Trace color — click to override; matches the curve in the chart */}
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <input
+                          ref={(el) => { colorInputEl = el; }}
                           type="color"
                           value={resolveSignalColor(sig.color, idx)}
                           onChange={(e) => updateStudioSignalColor(plot.id, sig.signalId, e.target.value)}
@@ -190,6 +204,30 @@ export default function PlotsSection() {
                       </Button>
                     </div>
                   </div>
+                    </ContextMenuTrigger>
+                    <ContextMenuContent>
+                      <ContextMenuLabel>Axis</ContextMenuLabel>
+                      <ContextMenuRadioGroup
+                        value={sig.yAxis}
+                        onValueChange={(v) => updateStudioSignalAxis(plot.id, sig.signalId, v as "left" | "right")}
+                      >
+                        <ContextMenuRadioItem value="left">Left</ContextMenuRadioItem>
+                        <ContextMenuRadioItem value="right">Right</ContextMenuRadioItem>
+                      </ContextMenuRadioGroup>
+                      <ContextMenuSeparator />
+                      <ContextMenuItem onClick={() => colorInputEl?.click()}>
+                        Change Color
+                      </ContextMenuItem>
+                      <ContextMenuSeparator />
+                      <ContextMenuItem
+                        variant="destructive"
+                        onClick={() => removeSignalFromStudioPlot(plot.id, sig.signalId)}
+                      >
+                        <Trash2 className="size-3.5" />
+                        Remove from Plot
+                      </ContextMenuItem>
+                    </ContextMenuContent>
+                  </ContextMenu>
                 );
               })}
             </div>

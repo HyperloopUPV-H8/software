@@ -5,13 +5,26 @@
 import { useDroppable } from "@dnd-kit/core";
 import {
   Button,
+  ContextMenu,
+  ContextMenuCheckboxItem,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
   Input,
   Separator,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components";
-import { Activity, AlertTriangle, ChevronDown, Pencil, RefreshCw, Trash2 } from "@workspace/ui/icons";
+import {
+  Activity,
+  AlertTriangle,
+  ChevronDown,
+  Pencil,
+  RefreshCw,
+  Trash2,
+} from "@workspace/ui/icons";
 import { cn } from "@workspace/ui/lib";
 import Plotly from "plotly.js-dist";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -108,6 +121,7 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
   const removeStudioPlot = useStore((s) => s.removeStudioPlot);
   const renameStudioPlot = useStore((s) => s.renameStudioPlot);
   const isDarkMode = useStore((s) => s.isDarkMode);
+  const toggleStudioPlotFFT = useStore((s) => s.toggleStudioPlotFFT);
 
   const chartRef     = useRef<PlotlyChartHandle>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -367,6 +381,8 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
   );
 
   return (
+    <ContextMenu>
+    <ContextMenuTrigger asChild>
     <div
       ref={setDropRef}
       className={cn(
@@ -533,5 +549,41 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
         )}
       </div>
     </div>
+    </ContextMenuTrigger>
+    <ContextMenuContent>
+      <ContextMenuItem onClick={startRename}>
+        <Pencil className="size-3.5" />
+        Rename
+      </ContextMenuItem>
+      <ContextMenuCheckboxItem checked={plot.showFFT} onCheckedChange={() => toggleStudioPlotFFT(plot.id)}>
+        Frequency spectrum (FFT)
+      </ContextMenuCheckboxItem>
+      <ContextMenuItem onClick={() => setCollapsed((v) => !v)}>
+        <ChevronDown className={`size-3.5 transition-transform ${collapsed ? "-rotate-90" : ""}`} />
+        {collapsed ? "Expand" : "Collapse"}
+      </ContextMenuItem>
+      <ContextMenuItem onClick={resetZoom} disabled={!hasTraces}>
+        <RefreshCw className="size-3.5" />
+        Reset Zoom
+      </ContextMenuItem>
+      <ContextMenuSeparator />
+      <ContextMenuCheckboxItem checked={showStats} onCheckedChange={() => setShowStats((v) => !v)} disabled={!hasTraces}>
+        Show Stats
+      </ContextMenuCheckboxItem>
+      <ContextMenuItem onClick={exportSVG} disabled={!hasTraces}>
+        <IconExportSVG />
+        Export SVG
+      </ContextMenuItem>
+      <ContextMenuItem onClick={exportPNG} disabled={!hasTraces}>
+        <IconDownload />
+        Export PNG
+      </ContextMenuItem>
+      <ContextMenuSeparator />
+      <ContextMenuItem variant="destructive" onClick={() => removeStudioPlot(plot.id)}>
+        <Trash2 className="size-3.5" />
+        Close
+      </ContextMenuItem>
+    </ContextMenuContent>
+    </ContextMenu>
   );
 }
