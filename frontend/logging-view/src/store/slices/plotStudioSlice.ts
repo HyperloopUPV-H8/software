@@ -31,7 +31,7 @@ export interface PlotStudioSlice {
   addSignalToStudioPlot: (plotId: string, signalId: string) => void;
   removeSignalFromStudioPlot: (plotId: string, signalId: string) => void;
   updateStudioSignalAxis: (plotId: string, signalId: string, axis: "left" | "right") => void;
-  toggleStudioSignalFFT: (plotId: string, signalId: string, show: boolean) => void;
+  toggleStudioPlotFFT: (plotId: string) => void;
   updateStudioSignalColor: (plotId: string, signalId: string, color: string) => void;
   setStudioFFTSampleRate: (rate: number | null) => void;
 }
@@ -115,7 +115,7 @@ export const createPlotStudioSlice: StateCreator<PlotStudioSlice> = (set) => ({
     set((s) => {
       const id = `plot_${s.studioPlotCounter}`;
       const next = new Map(s.studioPlots);
-      next.set(id, { id, name: `Plot ${next.size + 1}`, signals: [] });
+      next.set(id, { id, name: `Plot ${next.size + 1}`, signals: [], showFFT: false });
       return { studioPlots: next, studioPlotCounter: s.studioPlotCounter + 1 };
     }),
 
@@ -165,7 +165,7 @@ export const createPlotStudioSlice: StateCreator<PlotStudioSlice> = (set) => ({
       const plot = s.studioPlots.get(plotId);
       if (!plot) return {};
       if (plot.signals.some((sig) => sig.signalId === signalId)) return {};
-      const newSignal: PlotSignal = { signalId, yAxis: "left", showFFT: false };
+      const newSignal: PlotSignal = { signalId, yAxis: "left" };
       const next = new Map(s.studioPlots);
       next.set(plotId, { ...plot, signals: [...plot.signals, newSignal] });
       return { studioPlots: next };
@@ -197,17 +197,12 @@ export const createPlotStudioSlice: StateCreator<PlotStudioSlice> = (set) => ({
       return { studioPlots: next };
     }),
 
-  toggleStudioSignalFFT: (plotId, signalId, show) =>
+  toggleStudioPlotFFT: (plotId) =>
     set((s) => {
       const plot = s.studioPlots.get(plotId);
       if (!plot) return {};
       const next = new Map(s.studioPlots);
-      next.set(plotId, {
-        ...plot,
-        signals: plot.signals.map((sig) =>
-          sig.signalId === signalId ? { ...sig, showFFT: show } : sig,
-        ),
-      });
+      next.set(plotId, { ...plot, showFFT: !plot.showFFT });
       return { studioPlots: next };
     }),
 

@@ -53,7 +53,6 @@ export interface Transform {
 export interface PlotSignal {
   signalId: string;
   yAxis: "left" | "right"; // which Y axis to plot against
-  showFFT: boolean;         // if true, plots frequency spectrum instead of time-domain
   color?: string;           // user-picked trace color override; falls back to the palette by index
 }
 
@@ -63,6 +62,9 @@ export interface PlotState {
   name: string;
   signals: PlotSignal[];
   hidden?: boolean; // if true, skipped in PlotsArea but still managed in the sidebar list
+  // Per-plot, not per-signal — FFT and time-domain traces can't coexist on
+  // one plot (they'd need incompatible X-axis semantics on the same axis).
+  showFFT: boolean;
 }
 
 /** Summary statistics for a signal over a time range. */

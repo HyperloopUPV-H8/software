@@ -119,21 +119,22 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
   };
 
   const hasRightAxis = plot.signals.some((s) => s.yAxis === "right");
-  const hasFFT       = plot.signals.some((s) => s.showFFT);
+  const hasFFT       = plot.showFFT;
   const signalCount  = plot.signals.length;
 
-  // Units are only meaningful for raw (non-FFT) traces — an FFT'd signal
-  // plots magnitude, not its source unit.
+  // Units are only meaningful in time-domain mode — an FFT'd plot shows
+  // magnitude, not any signal's source unit.
   const axisUnits = useMemo(() => {
-    const leftList  = plot.signals.filter((s) => s.yAxis === "left"  && !s.showFFT).map((s) => getSignalUnits(adjData, s.signalId));
-    const rightList = plot.signals.filter((s) => s.yAxis === "right" && !s.showFFT).map((s) => getSignalUnits(adjData, s.signalId));
+    if (hasFFT) return { left: undefined, right: undefined, leftMismatch: false, rightMismatch: false };
+    const leftList  = plot.signals.filter((s) => s.yAxis === "left").map((s) => getSignalUnits(adjData, s.signalId));
+    const rightList = plot.signals.filter((s) => s.yAxis === "right").map((s) => getSignalUnits(adjData, s.signalId));
     return {
       left: commonUnits(leftList),
       right: commonUnits(rightList),
       leftMismatch: unitsMismatch(leftList),
       rightMismatch: unitsMismatch(rightList),
     };
-  }, [plot.signals, adjData]);
+  }, [plot.signals, adjData, hasFFT]);
   const hasUnitsMismatch = axisUnits.leftMismatch || axisUnits.rightMismatch;
 
   const traces = useMemo<Plotly.Data[]>(
@@ -147,11 +148,11 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
         // Axis title can't show a unit when signals on it disagree — put each
         // signal's own unit in the legend instead so it's still visible.
         const axisMismatch = sig.yAxis === "right" ? axisUnits.rightMismatch : axisUnits.leftMismatch;
-        if (axisMismatch && !sig.showFFT) {
+        if (axisMismatch && !hasFFT) {
           const unit = getSignalUnits(adjData, sig.signalId);
           if (unit) name = `${name} (${unit})`;
         }
-        if (sig.showFFT) {
+        if (hasFFT) {
           const fftResult = computeFFT(data, fftSampleRateOverride);
           return [{
             x: fftResult.frequency,
@@ -170,7 +171,7 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
           yaxis: sig.yAxis === "right" ? ("y2" as const) : ("y" as const),
         }];
       }),
-    [plot.signals, studioFiles, studioOperations, studioTransforms, fftSampleRateOverride, webglAvailable, adjData, axisUnits],
+    [plot.signals, studioFiles, studioOperations, studioTransforms, fftSampleRateOverride, webglAvailable, adjData, axisUnits, hasFFT],
   );
 
   const hasTraces = traces.length > 0;

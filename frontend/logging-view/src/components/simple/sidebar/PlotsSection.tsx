@@ -1,6 +1,8 @@
 // Plot management: create plots, assign any session series (parsed lazily on
-// first use) and configure each signal's Y axis and FFT view. The color dot
-// on each chip matches the trace color in the chart (lib/plotStudio/palette).
+// first use) and configure each signal's Y axis. FFT is a whole-plot toggle
+// (not per-signal) — mixing FFT and time-domain traces on one plot would mean
+// two incompatible X-axis semantics sharing one axis. The color dot on each
+// chip matches the trace color in the chart (lib/plotStudio/palette).
 import {
   Button,
   Select,
@@ -34,7 +36,7 @@ export default function PlotsSection() {
   const addSignalToStudioPlot      = useStore((s) => s.addSignalToStudioPlot);
   const removeSignalFromStudioPlot = useStore((s) => s.removeSignalFromStudioPlot);
   const updateStudioSignalAxis     = useStore((s) => s.updateStudioSignalAxis);
-  const toggleStudioSignalFFT      = useStore((s) => s.toggleStudioSignalFFT);
+  const toggleStudioPlotFFT        = useStore((s) => s.toggleStudioPlotFFT);
   const updateStudioSignalColor    = useStore((s) => s.updateStudioSignalColor);
 
   const ensureLoaded = useSignalLoader();
@@ -105,6 +107,22 @@ export default function PlotsSection() {
             <span className="text-foreground flex-1 truncate text-xs font-semibold">{plot.name}</span>
             <Tooltip>
               <TooltipTrigger asChild>
+                <label className="text-muted-foreground hover:text-foreground flex shrink-0 cursor-pointer items-center gap-1 text-[10px] transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={plot.showFFT}
+                    onChange={() => toggleStudioPlotFFT(plot.id)}
+                    className="accent-primary size-3"
+                  />
+                  FFT
+                </label>
+              </TooltipTrigger>
+              <TooltipContent side="left">
+                {plot.showFFT ? "Showing frequency spectrum" : "Showing time-domain"} — applies to every signal in this plot
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
                 <Button variant="ghost" size="icon-xs"
                   onClick={() => toggleStudioPlotHidden(plot.id)}
                   aria-label={plot.hidden ? `Show ${plot.name}` : `Hide ${plot.name}`}
@@ -152,15 +170,6 @@ export default function PlotsSection() {
                       {getSignalName(adjData, sig.signalId) ?? shortName(signal?.name ?? sig.signalId)}
                     </span>
                     <div className="flex shrink-0 items-center gap-1">
-                      <label className="text-muted-foreground hover:text-foreground flex cursor-pointer items-center gap-0.5 text-[10px] transition-colors">
-                        <input
-                          type="checkbox"
-                          checked={sig.showFFT}
-                          onChange={(e) => toggleStudioSignalFFT(plot.id, sig.signalId, e.target.checked)}
-                          className="accent-primary size-2.5"
-                        />
-                        FFT
-                      </label>
                       <Select
                         value={sig.yAxis}
                         onValueChange={(v) => updateStudioSignalAxis(plot.id, sig.signalId, v as "left" | "right")}
