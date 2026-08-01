@@ -315,9 +315,10 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
     () => plot.signals.map((sig, idx) => {
       const data   = getSignalData(sig.signalId, { studioFiles, studioOperations, studioTransforms });
       const signal = studioFiles.get(sig.signalId) ?? studioOperations.get(sig.signalId) ?? studioTransforms.get(sig.signalId);
-      return { signalId: sig.signalId, name: displayName(signal?.name ?? sig.signalId), data, color: resolveSignalColor(sig.color, idx) };
+      const name = getSignalName(adjData, sig.signalId) ?? displayName(signal?.name ?? sig.signalId);
+      return { signalId: sig.signalId, name, data, color: resolveSignalColor(sig.color, idx) };
     }),
-    [plot.signals, studioFiles, studioOperations, studioTransforms],
+    [plot.signals, studioFiles, studioOperations, studioTransforms, adjData],
   );
 
   const getVisibleRange = useCallback((): [number, number] | null => {
