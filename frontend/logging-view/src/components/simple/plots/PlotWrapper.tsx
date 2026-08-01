@@ -10,12 +10,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components";
-import { Activity, Pencil, RefreshCw, Trash2 } from "@workspace/ui/icons";
+import { Activity, AlertTriangle, Pencil, RefreshCw, Trash2 } from "@workspace/ui/icons";
 import Plotly from "plotly.js-dist";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { computeFFT } from "../../../lib/plotStudio/fft";
 import { resolveSignalColor } from "../../../lib/plotStudio/palette";
-import { commonUnits, getSignalName, getSignalUnits } from "../../../lib/plotStudio/units";
+import { commonUnits, getSignalName, getSignalUnits, unitsMismatch } from "../../../lib/plotStudio/units";
 import { displayName, getSignalData } from "../../../store/slices/plotStudioSlice";
 import { useStore } from "../../../store/store";
 import type { PlotState } from "../../../types/plotStudio";
@@ -121,14 +121,35 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
   const hasFFT       = plot.signals.some((s) => s.showFFT);
   const signalCount  = plot.signals.length;
 
+  // Units are only meaningful for raw (non-FFT) traces — an FFT'd signal
+  // plots magnitude, not its source unit.
+  const axisUnits = useMemo(() => {
+    const leftList  = plot.signals.filter((s) => s.yAxis === "left"  && !s.showFFT).map((s) => getSignalUnits(adjData, s.signalId));
+    const rightList = plot.signals.filter((s) => s.yAxis === "right" && !s.showFFT).map((s) => getSignalUnits(adjData, s.signalId));
+    return {
+      left: commonUnits(leftList),
+      right: commonUnits(rightList),
+      leftMismatch: unitsMismatch(leftList),
+      rightMismatch: unitsMismatch(rightList),
+    };
+  }, [plot.signals, adjData]);
+  const hasUnitsMismatch = axisUnits.leftMismatch || axisUnits.rightMismatch;
+
   const traces = useMemo<Plotly.Data[]>(
     () =>
       plot.signals.flatMap((sig, idx) => {
         const data = getSignalData(sig.signalId, { studioFiles, studioOperations, studioTransforms });
         if (!data || data.length < 2) return [];
         const signal = studioFiles.get(sig.signalId) ?? studioOperations.get(sig.signalId) ?? studioTransforms.get(sig.signalId);
-        const name  = getSignalName(adjData, sig.signalId) ?? displayName(signal?.name ?? sig.signalId);
+        let name = getSignalName(adjData, sig.signalId) ?? displayName(signal?.name ?? sig.signalId);
         const color = resolveSignalColor(sig.color, idx);
+        // Axis title can't show a unit when signals on it disagree — put each
+        // signal's own unit in the legend instead so it's still visible.
+        const axisMismatch = sig.yAxis === "right" ? axisUnits.rightMismatch : axisUnits.leftMismatch;
+        if (axisMismatch && !sig.showFFT) {
+          const unit = getSignalUnits(adjData, sig.signalId);
+          if (unit) name = `${name} (${unit})`;
+        }
         if (sig.showFFT) {
           const fftData = computeFFT(data, fftSampleRateOverride);
           return [{
@@ -148,21 +169,15 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
           yaxis: sig.yAxis === "right" ? ("y2" as const) : ("y" as const),
         }];
       }),
-    [plot.signals, studioFiles, studioOperations, studioTransforms, fftSampleRateOverride, webglAvailable, adjData],
+    [plot.signals, studioFiles, studioOperations, studioTransforms, fftSampleRateOverride, webglAvailable, adjData, axisUnits],
   );
 
   const hasTraces = traces.length > 0;
 
   const layout = useMemo<Partial<Plotly.Layout>>(
     () => {
-      // Units are only meaningful for raw (non-FFT) traces — an FFT'd signal
-      // plots magnitude, not its source unit.
-      const leftUnits = commonUnits(
-        plot.signals.filter((s) => s.yAxis === "left" && !s.showFFT).map((s) => getSignalUnits(adjData, s.signalId)),
-      );
-      const rightUnits = commonUnits(
-        plot.signals.filter((s) => s.yAxis === "right" && !s.showFFT).map((s) => getSignalUnits(adjData, s.signalId)),
-      );
+      const leftUnits  = axisUnits.left;
+      const rightUnits = axisUnits.right;
 
       const base: Partial<Plotly.Layout> = {
         autosize: true,
@@ -171,6 +186,9 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
         uirevision: hasFFT ? `${plot.id}:fft` : plot.id,
         paper_bgcolor: "white", plot_bgcolor: "white",
         font: { color: "#000000", family: "Computer Modern, Latin Modern Math, Times New Roman, serif", size: 14 },
+        // Plot title stays editable (click-to-enter placeholder); the subtitle
+        // line is explicitly blanked so it doesn't show its own placeholder.
+        title: { subtitle: { text: "" } },
         xaxis: {
           title: { text: hasFFT ? "Frequency (Hz)" : "Time (ms)", font: { size: 16, color: "#000000" } },
           gridcolor: "#e0e0e0", linecolor: "#000000", linewidth: 1.5, mirror: true,
@@ -190,7 +208,7 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
           showline: true, zeroline: false, fixedrange: false,
           exponentformat: "power", separatethousands: true,
         },
-        margin: { l: 80, r: hasRightAxis ? 80 : 40, t: 40, b: 90 },
+        margin: { l: 80, r: hasRightAxis ? 80 : 40, t: 40, b: 130 },
         // Unified hover: one label per signal at the same X — much easier to
         // compare synchronized measurements than per-point "closest" mode.
         hovermode: "x unified",
@@ -202,9 +220,7 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
         showlegend: true,
         legend: {
           bgcolor: "rgba(255,255,255,0.95)", bordercolor: "#000000", borderwidth: 1, font: { size: 13, color: "#000000" },
-          // Same row as the (centered) x-axis title — anchored to the right so
-          // they sit side by side instead of overlapping.
-          orientation: "h", x: 1, xanchor: "right", y: -0.18, yanchor: "top",
+          orientation: "h", x: 1, xanchor: "right", y: -0.35, yanchor: "top",
         },
       };
       if (hasRightAxis) {
@@ -218,7 +234,7 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
       }
       return base;
     },
-    [hasRightAxis, hasFFT, plot.id, plot.signals, adjData],
+    [hasRightAxis, hasFFT, plot.id, axisUnits],
   );
 
   // Drag-to-resize
@@ -354,6 +370,18 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
             <span className="bg-primary/15 text-primary shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium">
               {signalCount} signal{signalCount !== 1 ? "s" : ""}
             </span>
+          )}
+
+          {hasUnitsMismatch && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="flex shrink-0 items-center gap-1 rounded-full bg-yellow-500/15 px-2 py-0.5 text-[10px] font-medium text-yellow-600 dark:text-yellow-400">
+                  <AlertTriangle className="size-3" />
+                  Units mismatch
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>Signals sharing an axis have different units — the axis title omits units</TooltipContent>
+            </Tooltip>
           )}
         </div>
 

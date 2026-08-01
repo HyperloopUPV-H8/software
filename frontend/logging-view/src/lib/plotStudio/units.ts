@@ -26,6 +26,13 @@ export function getSignalName(adjData: AdjArchive | null, signalId: string): str
   return findMeasurement(adjData, signalId)?.name;
 }
 
+// True when two or more signals on the same axis have known but different
+// units (e.g. mixing "mm" and "V") — distinct from simply not knowing a unit.
+export function unitsMismatch(units: (string | undefined)[]): boolean {
+  const known = new Set(units.filter((u): u is string => !!u));
+  return known.size > 1;
+}
+
 // Reduces per-signal units to a single axis-level unit: only shown when every
 // signal on that axis agrees, otherwise omitted silently (no "mixed" label).
 export function commonUnits(units: (string | undefined)[]): string | undefined {
