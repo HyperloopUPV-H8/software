@@ -243,7 +243,7 @@ body,
     @apply bg-background text-foreground font-archivo;
   }
 
-  /* Custom scrollbar */
+  /* Custom scrollbar (Chrome/Safari/Edge) */
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
@@ -259,5 +259,12 @@ body,
 
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-muted-foreground/40;
+  }
+
+  /* Firefox has no ::-webkit-scrollbar support — without this it falls back
+     to the OS's raw native scrollbar (wide, flat, no rounding). */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--color-muted-foreground) 30%, transparent) transparent;
   }
 }

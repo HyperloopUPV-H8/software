@@ -242,8 +242,17 @@ function BoardSection({
           <ContextMenu onOpenChange={(open) => { if (!open) setContextTarget(null); }}>
             <ContextMenuTrigger asChild>
               {/* Fixed-height scroll viewport — only the rows scrolled into
-                  view are ever mounted (see file header comment). */}
-              <div ref={scrollRef} className="max-h-72 overflow-y-auto">
+                  view are ever mounted (see file header comment). pr-2 keeps
+                  the scrollbar off the row content; the mask fades rows at
+                  the top/bottom edge instead of clipping them hard. */}
+              <div
+                ref={scrollRef}
+                className={cn(
+                  "max-h-72 overflow-y-auto pr-2",
+                  "[-webkit-mask-image:linear-gradient(to_bottom,transparent,black_8px,black_calc(100%-8px),transparent)]",
+                  "[mask-image:linear-gradient(to_bottom,transparent,black_8px,black_calc(100%-8px),transparent)]",
+                )}
+              >
                 <SidebarMenuSub
                   className="relative block"
                   style={{ height: virtualizer.getTotalSize() }}
