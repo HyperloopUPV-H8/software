@@ -2,6 +2,7 @@
 // drag-to-resize handle and an optional statistics panel.
 // Trace colors are pinned via lib/plotStudio/palette so sidebar chips and
 // stats headers can mirror the exact color of each curve.
+import { useDroppable } from "@dnd-kit/core";
 import {
   Button,
   Input,
@@ -15,7 +16,6 @@ import { cn } from "@workspace/ui/lib";
 import Plotly from "plotly.js-dist";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { decimateLTTB } from "../../../lib/plotStudio/decimate";
-import { decodeSignalIds, SIGNAL_IDS_MIME } from "../../../lib/plotStudio/dnd";
 import { computeFFT } from "../../../lib/plotStudio/fft";
 import { resolveSignalColor } from "../../../lib/plotStudio/palette";
 import { buildPlotLayout, getPlotlyTheme } from "../../../lib/plotStudio/plotlyTheme";
@@ -24,7 +24,6 @@ import { commonUnits, getSignalName, getSignalUnits, unitsMismatch } from "../..
 import { displayName, getSignalData } from "../../../store/slices/plotStudioSlice";
 import { useStore } from "../../../store/store";
 import type { PlotState } from "../../../types/plotStudio";
-import { useAssignSignalsToPlot } from "../hooks/useStudioSignals";
 import StatsPanel from "../StatsPanel";
 import PlotlyChart, { type PlotlyChartHandle } from "./PlotlyChart";
 
@@ -109,7 +108,6 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
   const removeStudioPlot = useStore((s) => s.removeStudioPlot);
   const renameStudioPlot = useStore((s) => s.renameStudioPlot);
   const isDarkMode = useStore((s) => s.isDarkMode);
-  const assignSignalsToPlot = useAssignSignalsToPlot();
 
   const chartRef     = useRef<PlotlyChartHandle>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -120,42 +118,9 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
   // Drives both zoom-adaptive decimation (traces useMemo) and the Stats panel.
   const [visibleRange, setVisibleRange] = useState<[number, number] | null>(null);
 
-  // Drop target for signals dragged from the left Series sidebar. Nested
-  // dragenter/dragleave counter (same technique as FolderPickerGroup's drop
-  // zone) avoids flicker as the cursor crosses child elements.
-  const dragCounter = useRef(0);
-  const [isDropTarget, setIsDropTarget] = useState(false);
-  const [isDroppingBusy, setIsDroppingBusy] = useState(false);
-
-  const handleDragEnter = (e: React.DragEvent) => {
-    if (!e.dataTransfer.types.includes(SIGNAL_IDS_MIME)) return;
-    e.preventDefault();
-    dragCounter.current += 1;
-    setIsDropTarget(true);
-  };
-  const handleDragOver = (e: React.DragEvent) => {
-    if (!e.dataTransfer.types.includes(SIGNAL_IDS_MIME)) return;
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "copy";
-  };
-  const handleDragLeave = () => {
-    dragCounter.current = Math.max(0, dragCounter.current - 1);
-    if (dragCounter.current === 0) setIsDropTarget(false);
-  };
-  const handleDrop = async (e: React.DragEvent) => {
-    if (!e.dataTransfer.types.includes(SIGNAL_IDS_MIME) || isDroppingBusy) return;
-    e.preventDefault();
-    dragCounter.current = 0;
-    setIsDropTarget(false);
-    const ids = decodeSignalIds(e.dataTransfer.getData(SIGNAL_IDS_MIME));
-    if (ids.length === 0) return;
-    setIsDroppingBusy(true);
-    try {
-      await assignSignalsToPlot(plot.id, ids);
-    } finally {
-      setIsDroppingBusy(false);
-    }
-  };
+  // Drop target for signals dragged from the left Series sidebar — assignment
+  // itself happens centrally in useSignalDnd's handleDragEnd (AppLayout.tsx).
+  const { setNodeRef: setDropRef, isOver } = useDroppable({ id: plot.id });
 
   // Inline rename
   const [editingName, setEditingName] = useState(false);
@@ -403,13 +368,10 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
 
   return (
     <div
-      onDragEnter={handleDragEnter}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
+      ref={setDropRef}
       className={cn(
         "bg-card overflow-hidden rounded-xl border shadow-md transition-shadow hover:shadow-lg",
-        isDropTarget && "ring-primary ring-2 ring-offset-2",
+        isOver && "ring-primary ring-2 ring-offset-2",
       )}
     >
       {/* Gradient accent strip */}
@@ -458,10 +420,6 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
             <span className="bg-primary/15 text-primary shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium">
               {signalCount} signal{signalCount !== 1 ? "s" : ""}
             </span>
-          )}
-
-          {isDroppingBusy && (
-            <span className="text-muted-foreground shrink-0 text-[10px]">Adding…</span>
           )}
 
           {hasUnitsMismatch && (

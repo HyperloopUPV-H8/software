@@ -1,7 +1,10 @@
+import { DndContext } from "@dnd-kit/core";
 import { SidebarInset, SidebarProvider } from "@workspace/ui/components";
 import { useEffect, type ReactNode } from "react";
 import Header from "../components/header/Header";
 import AppSidebar from "../components/sidebar/AppSidebar";
+import SignalDragOverlay from "../components/simple/SignalDragOverlay";
+import { useSignalDnd } from "../components/simple/hooks/useSignalDnd";
 import { useStore } from "../store/store";
 
 interface AppLayoutProps {
@@ -10,6 +13,7 @@ interface AppLayoutProps {
 
 const AppLayout = ({ children }: AppLayoutProps) => {
   const isDarkMode = useStore((s) => s.isDarkMode);
+  const { sensors, activeIds, handleDragStart, handleDragEnd } = useSignalDnd();
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -23,13 +27,19 @@ const AppLayout = ({ children }: AppLayoutProps) => {
           defaultOpen={true}
           style={{ "--sidebar-width": "20vw" } as React.CSSProperties}
         >
-        <div className="bg-background flex h-full w-full overflow-x-hidden">
-          <AppSidebar />
-          <SidebarInset className="flex h-full flex-col">
-            <Header />
-            <div className="flex-1 overflow-auto">{children}</div>
-          </SidebarInset>
-        </div>
+        {/* AppSidebar (drag source) and the routed page content (drop
+            targets, e.g. Plot Studio) are siblings here — the natural
+            common ancestor for the sidebar→plot signal drag-and-drop. */}
+        <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+          <div className="bg-background flex h-full w-full overflow-x-hidden">
+            <AppSidebar />
+            <SidebarInset className="flex h-full flex-col">
+              <Header />
+              <div className="flex-1 overflow-auto">{children}</div>
+            </SidebarInset>
+          </div>
+          <SignalDragOverlay activeIds={activeIds} />
+        </DndContext>
       </SidebarProvider>
     </div>
   );
