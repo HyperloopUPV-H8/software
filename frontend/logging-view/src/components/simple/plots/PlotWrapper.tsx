@@ -18,6 +18,7 @@ import { decimateLTTB } from "../../../lib/plotStudio/decimate";
 import { decodeSignalIds, SIGNAL_IDS_MIME } from "../../../lib/plotStudio/dnd";
 import { computeFFT } from "../../../lib/plotStudio/fft";
 import { resolveSignalColor } from "../../../lib/plotStudio/palette";
+import { buildPlotLayout, getPlotlyTheme } from "../../../lib/plotStudio/plotlyTheme";
 import { lowerBound, upperBound } from "../../../lib/plotStudio/range";
 import { commonUnits, getSignalName, getSignalUnits, unitsMismatch } from "../../../lib/plotStudio/units";
 import { displayName, getSignalData } from "../../../store/slices/plotStudioSlice";
@@ -107,6 +108,7 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
   const adjData = useStore((s) => s.adjData);
   const removeStudioPlot = useStore((s) => s.removeStudioPlot);
   const renameStudioPlot = useStore((s) => s.renameStudioPlot);
+  const isDarkMode = useStore((s) => s.isDarkMode);
   const assignSignalsToPlot = useAssignSignalsToPlot();
 
   const chartRef     = useRef<PlotlyChartHandle>(null);
@@ -266,66 +268,12 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
   const hasTraces = traces.length > 0;
 
   const layout = useMemo<Partial<Plotly.Layout>>(
-    () => {
-      const leftUnits  = axisUnits.left;
-      const rightUnits = axisUnits.right;
-
-      const base: Partial<Plotly.Layout> = {
-        autosize: true,
-        // Preserve zoom/pan across data changes (adding signals, stats, etc.);
-        // reset only when the X-axis meaning flips between time and frequency.
-        uirevision: hasFFT ? `${plot.id}:fft` : plot.id,
-        paper_bgcolor: "white", plot_bgcolor: "white",
-        font: { color: "#000000", family: "Computer Modern, Latin Modern Math, Times New Roman, serif", size: 14 },
-        // Plot title stays editable (click-to-enter placeholder); the subtitle
-        // line is explicitly blanked so it doesn't show its own placeholder.
-        title: { subtitle: { text: "" } },
-        xaxis: {
-          title: { text: hasFFT ? "Frequency (Hz)" : "Time (ms)", font: { size: 16, color: "#000000" } },
-          gridcolor: "#e0e0e0", linecolor: "#000000", linewidth: 1.5, mirror: true,
-          ticks: "outside", tickwidth: 1.5, tickcolor: "#000000", color: "#000000",
-          showline: true, zeroline: false, fixedrange: false,
-          exponentformat: "power", separatethousands: true,
-        },
-        yaxis: {
-          title: {
-            text: hasRightAxis
-              ? `Value (Left${leftUnits ? `, ${leftUnits}` : ""})`
-              : `Value${leftUnits ? ` (${leftUnits})` : ""}`,
-            font: { size: 16, color: hasRightAxis ? "#1f77b4" : "#000000" },
-          },
-          gridcolor: "#e0e0e0", linecolor: hasRightAxis ? "#1f77b4" : "#000000", linewidth: 1.5, mirror: !hasRightAxis,
-          ticks: "outside", tickwidth: 1.5, tickcolor: hasRightAxis ? "#1f77b4" : "#000000", color: hasRightAxis ? "#1f77b4" : "#000000",
-          showline: true, zeroline: false, fixedrange: false,
-          exponentformat: "power", separatethousands: true,
-        },
-        margin: { l: 80, r: hasRightAxis ? 80 : 40, t: 40, b: 130 },
-        // Unified hover: one label per signal at the same X — much easier to
-        // compare synchronized measurements than per-point "closest" mode.
-        hovermode: "x unified",
-        hoverlabel: {
-          bgcolor: "rgba(255,255,255,0.97)",
-          bordercolor: "#000000",
-          font: { family: "Computer Modern, Latin Modern Math, Times New Roman, serif", size: 12, color: "#000000" },
-        },
-        showlegend: true,
-        legend: {
-          bgcolor: "rgba(255,255,255,0.95)", bordercolor: "#000000", borderwidth: 1, font: { size: 13, color: "#000000" },
-          orientation: "h", x: 1, xanchor: "right", y: -0.35, yanchor: "top",
-        },
-      };
-      if (hasRightAxis) {
-        base.yaxis2 = {
-          title: { text: `Value (Right${rightUnits ? `, ${rightUnits}` : ""})`, font: { size: 16, color: "#ff7f0e" } },
-          overlaying: "y", side: "right", gridcolor: "transparent",
-          linecolor: "#ff7f0e", linewidth: 1.5, ticks: "outside", tickwidth: 1.5,
-          tickcolor: "#ff7f0e", color: "#ff7f0e", showline: true, zeroline: false, fixedrange: false,
-          exponentformat: "power", separatethousands: true,
-        };
-      }
-      return base;
-    },
-    [hasRightAxis, hasFFT, plot.id, axisUnits],
+    () => buildPlotLayout({
+      theme: getPlotlyTheme(isDarkMode),
+      hasFFT, hasRightAxis, plotId: plot.id,
+      leftUnits: axisUnits.left, rightUnits: axisUnits.right,
+    }),
+    [hasRightAxis, hasFFT, plot.id, axisUnits, isDarkMode],
   );
 
   // Drag-to-resize
@@ -407,19 +355,40 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
     Plotly.relayout(div, { "xaxis.autorange": true, "yaxis.autorange": true, "yaxis2.autorange": true });
   }, []);
 
-  const exportSVG = () => {
+  // Exports always render in the light/academic theme regardless of the
+  // on-screen app theme (publication-figure look), but keep whatever
+  // zoom/pan range is currently visible rather than autoranging to all data.
+  const buildExportFigure = () => {
     const div = chartRef.current?.getDiv();
-    if (!div) return;
-    Plotly.toImage(div, { format: "svg", width: 1200, height: 800 }).then((url) => {
+    if (!div) return null;
+    const gd = div as unknown as Plotly.PlotlyHTMLElement & { _fullLayout: Record<string, { range?: number[] }> };
+    const exportLayout = buildPlotLayout({
+      theme: getPlotlyTheme(false),
+      hasFFT, hasRightAxis, plotId: plot.id,
+      leftUnits: axisUnits.left, rightUnits: axisUnits.right,
+    });
+    const xRange  = gd._fullLayout["xaxis"]?.range;
+    const yRange  = gd._fullLayout["yaxis"]?.range;
+    const y2Range = gd._fullLayout["yaxis2"]?.range;
+    if (xRange) exportLayout.xaxis = { ...exportLayout.xaxis, range: xRange, autorange: false };
+    if (yRange) exportLayout.yaxis = { ...exportLayout.yaxis, range: yRange, autorange: false };
+    if (y2Range && exportLayout.yaxis2) exportLayout.yaxis2 = { ...exportLayout.yaxis2, range: y2Range, autorange: false };
+    return { data: gd.data, layout: exportLayout };
+  };
+
+  const exportSVG = () => {
+    const figure = buildExportFigure();
+    if (!figure) return;
+    Plotly.toImage(figure, { format: "svg", width: 1200, height: 800 }).then((url) => {
       const a = document.createElement("a");
       a.href = url; a.download = `${plot.name}_${Date.now()}.svg`; a.click();
     });
   };
 
   const exportPNG = () => {
-    const div = chartRef.current?.getDiv();
-    if (!div) return;
-    Plotly.downloadImage(div, { format: "png", width: 2400, height: 1600, scale: 2, filename: `${plot.name}_${Date.now()}` });
+    const figure = buildExportFigure();
+    if (!figure) return;
+    Plotly.downloadImage(figure, { format: "png", width: 2400, height: 1600, scale: 2, filename: `${plot.name}_${Date.now()}` });
   };
 
   const statsData = useMemo(
@@ -581,8 +550,9 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
           zoom/pan state and WebGL context survive expand/collapse. */}
       <div className={collapsed ? "hidden" : undefined}>
         {hasTraces ? (
-          // Chart — white canvas kept intentionally for the academic/LaTeX export style
-          <div ref={containerRef} className="relative bg-white" style={{ height: plotHeight }}>
+          // Chart canvas follows app dark mode; exports stay pinned to the
+          // light/academic theme regardless (see buildExportFigure above).
+          <div ref={containerRef} className="relative" style={{ height: plotHeight, backgroundColor: isDarkMode ? "#181818" : "white" }}>
             <PlotlyChart ref={chartRef} traces={traces} layout={layout} config={PLOTLY_CONFIG} style={{ height: "100%" }} />
             <div
               onMouseDown={onResizeMouseDown}
