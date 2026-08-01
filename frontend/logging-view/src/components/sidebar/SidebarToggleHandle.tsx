@@ -19,10 +19,10 @@ const SidebarToggleHandle = () => {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className={cn(
-        "absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 sm:flex",
-        "group-data-[side=left]:-right-4 group-data-[side=right]:left-0",
+        "absolute inset-y-0 z-20 hidden w-6 -translate-x-1/2 sm:flex",
+        "group-data-[side=left]:-right-6 group-data-[side=right]:left-0",
         "group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full",
-        "[[data-side=left][data-collapsible=offcanvas]_&]:-right-2",
+        "[[data-side=left][data-collapsible=offcanvas]_&]:-right-3",
         "flex-col items-center justify-center",
         "cursor-pointer border-0 bg-transparent p-0 outline-none",
       )}
@@ -50,14 +50,14 @@ const SidebarToggleHandle = () => {
       >
         <ChevronLeft
           className={cn(
-            "size-4 transition-colors duration-150",
+            "size-6 transition-colors duration-150",
             hovered ? "text-primary/70" : "text-muted-foreground/40",
           )}
         />
         {!isOpen && (
           <ChevronRight
             className={cn(
-              "-ml-2 size-4 transition-colors duration-150",
+              "-ml-3 size-6 transition-colors duration-150",
               hovered ? "text-primary/70" : "text-muted-foreground/40",
             )}
           />
