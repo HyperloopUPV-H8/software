@@ -83,3 +83,25 @@ export function useSignalLoader() {
     [sessionFiles, folderName, settings, studioFiles, studioOperations, studioTransforms, addStudioFiles],
   );
 }
+
+/**
+ * Loads each signal id (sequentially — avoids firing many concurrent CSV
+ * parses for a large multi-select) and assigns it to plotId. Ids that fail
+ * to load are silently skipped (no toast system in this app — matches
+ * useSignalLoader's null-on-failure convention); already-assigned ids are a
+ * no-op via addSignalToStudioPlot's own dedup guard.
+ */
+export function useAssignSignalsToPlot() {
+  const ensureLoaded = useSignalLoader();
+  const addSignalToStudioPlot = useStore((s) => s.addSignalToStudioPlot);
+
+  return useCallback(
+    async (plotId: string, signalIds: string[]) => {
+      for (const id of signalIds) {
+        const data = await ensureLoaded(id);
+        if (data) addSignalToStudioPlot(plotId, id);
+      }
+    },
+    [ensureLoaded, addSignalToStudioPlot],
+  );
+}

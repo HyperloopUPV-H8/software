@@ -20,6 +20,7 @@ import {
 } from "@workspace/ui/components";
 import { ChevronRight } from "@workspace/ui/icons";
 import { cn, getTypeBadgeClass } from "@workspace/ui/lib";
+import { encodeSignalIds, SIGNAL_IDS_MIME } from "../../lib/plotStudio/dnd";
 import type { AdjMeasurement, AdjPacket } from "../../types/session";
 import { useStore } from "../../store/store";
 
@@ -40,6 +41,18 @@ const SeriesGroup = () => {
 
   const boards = Object.keys(availableSeries);
   if (boards.length === 0) return null;
+
+  const totalSelectedCount = Object.values(selectedSeries).filter(Boolean).length;
+
+  // Dragging a checked row while others are also checked drags the whole
+  // selection (Explorer/Finder-style multi-drag); otherwise just this row.
+  const handleDragStart = (e: React.DragEvent, key: string) => {
+    const ids = selectedSeries[key] && totalSelectedCount > 1
+      ? Object.keys(selectedSeries).filter((k) => selectedSeries[k])
+      : [key];
+    e.dataTransfer.setData(SIGNAL_IDS_MIME, encodeSignalIds(ids));
+    e.dataTransfer.effectAllowed = "copy";
+  };
 
   // Build measurement metadata and packet-frequency lookups from the ADJ archive.
   // Archive structure: boards[boardName][`${boardName}_measurements`] = AdjMeasurement[]
@@ -118,7 +131,9 @@ const SeriesGroup = () => {
                           <SidebarMenuSubItem key={measId}>
                             <SidebarMenuSubButton
                               onClick={() => toggleSeries(key)}
-                              className="h-auto min-w-0 gap-2 py-1.5"
+                              draggable
+                              onDragStart={(e) => handleDragStart(e, key)}
+                              className="h-auto min-w-0 cursor-grab gap-2 py-1.5 active:cursor-grabbing"
                             >
                               <Checkbox
                                 checked={checked}

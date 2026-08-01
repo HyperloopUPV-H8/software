@@ -11,9 +11,11 @@ import {
   TooltipTrigger,
 } from "@workspace/ui/components";
 import { Activity, AlertTriangle, ChevronDown, Pencil, RefreshCw, Trash2 } from "@workspace/ui/icons";
+import { cn } from "@workspace/ui/lib";
 import Plotly from "plotly.js-dist";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { decimateLTTB } from "../../../lib/plotStudio/decimate";
+import { decodeSignalIds, SIGNAL_IDS_MIME } from "../../../lib/plotStudio/dnd";
 import { computeFFT } from "../../../lib/plotStudio/fft";
 import { resolveSignalColor } from "../../../lib/plotStudio/palette";
 import { lowerBound, upperBound } from "../../../lib/plotStudio/range";
@@ -21,6 +23,7 @@ import { commonUnits, getSignalName, getSignalUnits, unitsMismatch } from "../..
 import { displayName, getSignalData } from "../../../store/slices/plotStudioSlice";
 import { useStore } from "../../../store/store";
 import type { PlotState } from "../../../types/plotStudio";
+import { useAssignSignalsToPlot } from "../hooks/useStudioSignals";
 import StatsPanel from "../StatsPanel";
 import PlotlyChart, { type PlotlyChartHandle } from "./PlotlyChart";
 
@@ -104,6 +107,7 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
   const adjData = useStore((s) => s.adjData);
   const removeStudioPlot = useStore((s) => s.removeStudioPlot);
   const renameStudioPlot = useStore((s) => s.renameStudioPlot);
+  const assignSignalsToPlot = useAssignSignalsToPlot();
 
   const chartRef     = useRef<PlotlyChartHandle>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -113,6 +117,43 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
   // Current X-axis viewport, tracked (debounced) from Plotly relayout events.
   // Drives both zoom-adaptive decimation (traces useMemo) and the Stats panel.
   const [visibleRange, setVisibleRange] = useState<[number, number] | null>(null);
+
+  // Drop target for signals dragged from the left Series sidebar. Nested
+  // dragenter/dragleave counter (same technique as FolderPickerGroup's drop
+  // zone) avoids flicker as the cursor crosses child elements.
+  const dragCounter = useRef(0);
+  const [isDropTarget, setIsDropTarget] = useState(false);
+  const [isDroppingBusy, setIsDroppingBusy] = useState(false);
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    if (!e.dataTransfer.types.includes(SIGNAL_IDS_MIME)) return;
+    e.preventDefault();
+    dragCounter.current += 1;
+    setIsDropTarget(true);
+  };
+  const handleDragOver = (e: React.DragEvent) => {
+    if (!e.dataTransfer.types.includes(SIGNAL_IDS_MIME)) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+  };
+  const handleDragLeave = () => {
+    dragCounter.current = Math.max(0, dragCounter.current - 1);
+    if (dragCounter.current === 0) setIsDropTarget(false);
+  };
+  const handleDrop = async (e: React.DragEvent) => {
+    if (!e.dataTransfer.types.includes(SIGNAL_IDS_MIME) || isDroppingBusy) return;
+    e.preventDefault();
+    dragCounter.current = 0;
+    setIsDropTarget(false);
+    const ids = decodeSignalIds(e.dataTransfer.getData(SIGNAL_IDS_MIME));
+    if (ids.length === 0) return;
+    setIsDroppingBusy(true);
+    try {
+      await assignSignalsToPlot(plot.id, ids);
+    } finally {
+      setIsDroppingBusy(false);
+    }
+  };
 
   // Inline rename
   const [editingName, setEditingName] = useState(false);
@@ -392,7 +433,16 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
   );
 
   return (
-    <div className="bg-card overflow-hidden rounded-xl border shadow-md transition-shadow hover:shadow-lg">
+    <div
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      className={cn(
+        "bg-card overflow-hidden rounded-xl border shadow-md transition-shadow hover:shadow-lg",
+        isDropTarget && "ring-primary ring-2 ring-offset-2",
+      )}
+    >
       {/* Gradient accent strip */}
       <div className="from-primary/80 to-primary/20 h-[3px] bg-gradient-to-r" />
 
@@ -439,6 +489,10 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
             <span className="bg-primary/15 text-primary shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium">
               {signalCount} signal{signalCount !== 1 ? "s" : ""}
             </span>
+          )}
+
+          {isDroppingBusy && (
+            <span className="text-muted-foreground shrink-0 text-[10px]">Adding…</span>
           )}
 
           {hasUnitsMismatch && (

@@ -23,7 +23,7 @@ export interface PlotStudioSlice {
   removeStudioOperation: (id: string) => void;
   addStudioTransform: (tr: Omit<Transform, "id">) => void;
   removeStudioTransform: (id: string) => void;
-  addStudioPlot: () => void;
+  addStudioPlot: () => string;
   removeStudioPlot: (id: string) => void;
   renameStudioPlot: (id: string, name: string) => void;
   toggleStudioPlotHidden: (id: string) => void;
@@ -111,13 +111,17 @@ export const createPlotStudioSlice: StateCreator<PlotStudioSlice> = (set) => ({
       return { studioTransforms: nextTrs, studioPlots: nextPlots };
     }),
 
-  addStudioPlot: () =>
+  addStudioPlot: () => {
+    let newId = "";
     set((s) => {
       const id = `plot_${s.studioPlotCounter}`;
+      newId = id;
       const next = new Map(s.studioPlots);
       next.set(id, { id, name: `Plot ${next.size + 1}`, signals: [], showFFT: false });
       return { studioPlots: next, studioPlotCounter: s.studioPlotCounter + 1 };
-    }),
+    });
+    return newId;
+  },
 
   removeStudioPlot: (id) =>
     set((s) => {

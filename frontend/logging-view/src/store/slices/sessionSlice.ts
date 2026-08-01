@@ -28,6 +28,7 @@ export interface SessionSlice {
   // Accepts files from <input webkitdirectory> or a directory drop traversal.
   openSession: (files: DroppedFile[]) => Promise<void>;
   toggleSeries: (key: SeriesKey) => void;
+  clearSelectedSeries: () => void;
   clearSession: () => void;
 }
 
@@ -104,6 +105,8 @@ export const createSessionSlice: StateCreator<Store, [], [], SessionSlice> = (se
         [key]: !s.selectedSeries[key],
       },
     })),
+
+  clearSelectedSeries: () => set({ selectedSeries: {} }),
 
   clearSession: () =>
     set({
