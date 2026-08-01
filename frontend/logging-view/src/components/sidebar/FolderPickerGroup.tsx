@@ -71,6 +71,8 @@ const FolderPickerGroup = () => {
   const folderName = useStore((s) => s.folderName);
   const settings = useStore((s) => s.settings);
   const isLoading = useStore((s) => s.isLoading);
+  const isSessionPanelOpen = useStore((s) => s.isSessionPanelOpen);
+  const setSessionPanelOpen = useStore((s) => s.setSessionPanelOpen);
 
   const inputRef = useRef<HTMLInputElement>(null);
   // Counter tracks nested dragenter/dragleave pairs to avoid flicker.
@@ -119,7 +121,7 @@ const FolderPickerGroup = () => {
   );
 
   return (
-    <Collapsible defaultOpen className="group/session">
+    <Collapsible open={isSessionPanelOpen} onOpenChange={setSessionPanelOpen} className="group/session">
     <SidebarGroup>
       <input
         ref={inputRef}

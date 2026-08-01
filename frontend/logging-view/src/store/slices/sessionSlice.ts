@@ -24,12 +24,18 @@ export interface SessionSlice {
   sessionFiles: Map<string, File>;
   isLoading: boolean;
   sessionError: string | null;
+  // Open/closed state of the "Session" collapsible in the sidebar. Auto-closes
+  // the first time a measurement gets checked (0 → 1 selected), to free up
+  // space for the series list — but not on every subsequent selection, so a
+  // user who reopens it isn't fought every time they check another box.
+  isSessionPanelOpen: boolean;
 
   // Accepts files from <input webkitdirectory> or a directory drop traversal.
   openSession: (files: DroppedFile[]) => Promise<void>;
   toggleSeries: (key: SeriesKey) => void;
   clearSelectedSeries: () => void;
   clearSession: () => void;
+  setSessionPanelOpen: (open: boolean) => void;
 }
 
 export const createSessionSlice: StateCreator<Store, [], [], SessionSlice> = (set) => ({
@@ -41,6 +47,7 @@ export const createSessionSlice: StateCreator<Store, [], [], SessionSlice> = (se
   sessionFiles: new Map(),
   isLoading: false,
   sessionError: null,
+  isSessionPanelOpen: true,
 
   openSession: async (files) => {
     try {
@@ -92,6 +99,7 @@ export const createSessionSlice: StateCreator<Store, [], [], SessionSlice> = (se
         selectedSeries: {},
         sessionFiles: new Map(fileArray.map((f) => [f.webkitRelativePath, f])),
         isLoading: false,
+        isSessionPanelOpen: true,
       });
     } catch (err) {
       set({ sessionError: String(err), isLoading: false });
@@ -99,14 +107,25 @@ export const createSessionSlice: StateCreator<Store, [], [], SessionSlice> = (se
   },
 
   toggleSeries: (key) =>
-    set((s) => ({
-      selectedSeries: {
+    set((s) => {
+      const wasSelected = Object.values(s.selectedSeries).filter(Boolean).length > 0;
+      const nextSelectedSeries = {
         ...s.selectedSeries,
         [key]: !s.selectedSeries[key],
-      },
-    })),
+      };
+      const isSelectedNow = Object.values(nextSelectedSeries).filter(Boolean).length > 0;
+      // Auto-close only on the 0 → 1 transition — not on every later toggle,
+      // so reopening it manually and checking more boxes doesn't re-close it.
+      const justSelectedFirst = !wasSelected && isSelectedNow;
+      return {
+        selectedSeries: nextSelectedSeries,
+        ...(justSelectedFirst ? { isSessionPanelOpen: false } : {}),
+      };
+    }),
 
   clearSelectedSeries: () => set({ selectedSeries: {} }),
+
+  setSessionPanelOpen: (open) => set({ isSessionPanelOpen: open }),
 
   clearSession: () =>
     set({
@@ -117,5 +136,6 @@ export const createSessionSlice: StateCreator<Store, [], [], SessionSlice> = (se
       selectedSeries: {},
       sessionFiles: new Map(),
       sessionError: null,
+      isSessionPanelOpen: true,
     }),
 });
