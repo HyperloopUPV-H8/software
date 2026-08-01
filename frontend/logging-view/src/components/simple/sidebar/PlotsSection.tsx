@@ -15,7 +15,8 @@ import {
 import { Activity, Plus, Trash2, X } from "@workspace/ui/icons";
 import { cn } from "@workspace/ui/lib";
 import { useState } from "react";
-import { traceColor } from "../../../lib/plotStudio/palette";
+import { resolveSignalColor } from "../../../lib/plotStudio/palette";
+import { getSignalName } from "../../../lib/plotStudio/units";
 import { useStore } from "../../../store/store";
 import { useSignalLoader } from "../hooks/useStudioSignals";
 import SignalSelect from "../SignalSelect";
@@ -25,12 +26,14 @@ export default function PlotsSection() {
   const studioFiles      = useStore((s) => s.studioFiles);
   const studioOperations = useStore((s) => s.studioOperations);
   const studioTransforms = useStore((s) => s.studioTransforms);
+  const adjData = useStore((s) => s.adjData);
   const addStudioPlot              = useStore((s) => s.addStudioPlot);
   const removeStudioPlot           = useStore((s) => s.removeStudioPlot);
   const addSignalToStudioPlot      = useStore((s) => s.addSignalToStudioPlot);
   const removeSignalFromStudioPlot = useStore((s) => s.removeSignalFromStudioPlot);
   const updateStudioSignalAxis     = useStore((s) => s.updateStudioSignalAxis);
   const toggleStudioSignalFFT      = useStore((s) => s.toggleStudioSignalFFT);
+  const updateStudioSignalColor    = useStore((s) => s.updateStudioSignalColor);
 
   const ensureLoaded = useSignalLoader();
   // Plot ids with a CSV parse in flight (shows "Loading…" in the trigger)
@@ -93,13 +96,21 @@ export default function PlotsSection() {
                 return (
                   <div key={sig.signalId}
                     className="bg-muted/30 hover:bg-muted/60 group flex items-center gap-2 rounded-md border px-2 py-1.5 transition-colors">
-                    {/* Trace color dot — matches the curve in the chart */}
-                    <span
-                      className="size-2.5 shrink-0 rounded-full"
-                      style={{ backgroundColor: traceColor(idx) }}
-                    />
+                    {/* Trace color — click to override; matches the curve in the chart */}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <input
+                          type="color"
+                          value={resolveSignalColor(sig.color, idx)}
+                          onChange={(e) => updateStudioSignalColor(plot.id, sig.signalId, e.target.value)}
+                          aria-label="Signal color"
+                          className="size-2.5 shrink-0 cursor-pointer appearance-none rounded-full border-0 bg-transparent p-0 [&::-webkit-color-swatch]:rounded-full [&::-webkit-color-swatch]:border-0 [&::-webkit-color-swatch-wrapper]:p-0"
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent side="left">Signal color</TooltipContent>
+                    </Tooltip>
                     <span className="text-foreground min-w-0 flex-1 truncate text-[11px] font-medium">
-                      {shortName(signal?.name ?? sig.signalId)}
+                      {getSignalName(adjData, sig.signalId) ?? shortName(signal?.name ?? sig.signalId)}
                     </span>
                     <div className="flex shrink-0 items-center gap-1">
                       <label className="text-muted-foreground hover:text-foreground flex cursor-pointer items-center gap-0.5 text-[10px] transition-colors">

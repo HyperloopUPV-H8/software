@@ -15,3 +15,8 @@ export const TRACE_COLORS = [
 
 export const traceColor = (index: number): string =>
   TRACE_COLORS[index % TRACE_COLORS.length];
+
+// Resolves the color actually shown for a signal: its user-picked override
+// (PlotSignal.color) if set, otherwise the palette color by index.
+export const resolveSignalColor = (color: string | undefined, index: number): string =>
+  color ?? traceColor(index);

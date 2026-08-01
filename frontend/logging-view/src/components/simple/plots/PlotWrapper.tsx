@@ -14,7 +14,8 @@ import { Activity, Pencil, RefreshCw, Trash2 } from "@workspace/ui/icons";
 import Plotly from "plotly.js-dist";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { computeFFT } from "../../../lib/plotStudio/fft";
-import { traceColor } from "../../../lib/plotStudio/palette";
+import { resolveSignalColor } from "../../../lib/plotStudio/palette";
+import { commonUnits, getSignalName, getSignalUnits } from "../../../lib/plotStudio/units";
 import { displayName, getSignalData } from "../../../store/slices/plotStudioSlice";
 import { useStore } from "../../../store/store";
 import type { PlotState } from "../../../types/plotStudio";
@@ -95,6 +96,8 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
   const studioOperations = useStore((s) => s.studioOperations);
   const studioTransforms = useStore((s) => s.studioTransforms);
   const fftSampleRateOverride = useStore((s) => s.fftSampleRateOverride);
+  const adjData = useStore((s) => s.adjData);
+  const webglAvailable = useStore((s) => s.webglAvailable);
   const removeStudioPlot = useStore((s) => s.removeStudioPlot);
   const renameStudioPlot = useStore((s) => s.renameStudioPlot);
 
@@ -124,14 +127,14 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
         const data = getSignalData(sig.signalId, { studioFiles, studioOperations, studioTransforms });
         if (!data || data.length < 2) return [];
         const signal = studioFiles.get(sig.signalId) ?? studioOperations.get(sig.signalId) ?? studioTransforms.get(sig.signalId);
-        const name  = displayName(signal?.name ?? sig.signalId);
-        const color = traceColor(idx);
+        const name  = getSignalName(adjData, sig.signalId) ?? displayName(signal?.name ?? sig.signalId);
+        const color = resolveSignalColor(sig.color, idx);
         if (sig.showFFT) {
           const fftData = computeFFT(data, fftSampleRateOverride);
           return [{
             x: fftData.map((p) => p.frequency),
             y: fftData.map((p) => p.magnitude),
-            type: fftData.length > GL_POINT_THRESHOLD ? ("scattergl" as const) : ("scatter" as const),
+            type: webglAvailable && fftData.length > GL_POINT_THRESHOLD ? ("scattergl" as const) : ("scatter" as const),
             mode: "lines" as const,
             name: `${name} (FFT)`, line: { width: 2, color },
             yaxis: sig.yAxis === "right" ? ("y2" as const) : ("y" as const),
@@ -139,19 +142,28 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
         }
         return [{
           x: data.map((p) => p.time), y: data.map((p) => p.value),
-          type: data.length > GL_POINT_THRESHOLD ? ("scattergl" as const) : ("scatter" as const),
+          type: webglAvailable && data.length > GL_POINT_THRESHOLD ? ("scattergl" as const) : ("scatter" as const),
           mode: "lines" as const,
           name, line: { width: 2.5, color },
           yaxis: sig.yAxis === "right" ? ("y2" as const) : ("y" as const),
         }];
       }),
-    [plot.signals, studioFiles, studioOperations, studioTransforms, fftSampleRateOverride],
+    [plot.signals, studioFiles, studioOperations, studioTransforms, fftSampleRateOverride, webglAvailable, adjData],
   );
 
   const hasTraces = traces.length > 0;
 
   const layout = useMemo<Partial<Plotly.Layout>>(
     () => {
+      // Units are only meaningful for raw (non-FFT) traces — an FFT'd signal
+      // plots magnitude, not its source unit.
+      const leftUnits = commonUnits(
+        plot.signals.filter((s) => s.yAxis === "left" && !s.showFFT).map((s) => getSignalUnits(adjData, s.signalId)),
+      );
+      const rightUnits = commonUnits(
+        plot.signals.filter((s) => s.yAxis === "right" && !s.showFFT).map((s) => getSignalUnits(adjData, s.signalId)),
+      );
+
       const base: Partial<Plotly.Layout> = {
         autosize: true,
         // Preserve zoom/pan across data changes (adding signals, stats, etc.);
@@ -167,13 +179,18 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
           exponentformat: "power", separatethousands: true,
         },
         yaxis: {
-          title: { text: hasRightAxis ? "Value (Left)" : "Value", font: { size: 16, color: hasRightAxis ? "#1f77b4" : "#000000" } },
+          title: {
+            text: hasRightAxis
+              ? `Value (Left${leftUnits ? `, ${leftUnits}` : ""})`
+              : `Value${leftUnits ? ` (${leftUnits})` : ""}`,
+            font: { size: 16, color: hasRightAxis ? "#1f77b4" : "#000000" },
+          },
           gridcolor: "#e0e0e0", linecolor: hasRightAxis ? "#1f77b4" : "#000000", linewidth: 1.5, mirror: !hasRightAxis,
           ticks: "outside", tickwidth: 1.5, tickcolor: hasRightAxis ? "#1f77b4" : "#000000", color: hasRightAxis ? "#1f77b4" : "#000000",
           showline: true, zeroline: false, fixedrange: false,
           exponentformat: "power", separatethousands: true,
         },
-        margin: { l: 80, r: hasRightAxis ? 80 : 40, t: 40, b: 80 },
+        margin: { l: 80, r: hasRightAxis ? 80 : 40, t: 40, b: 90 },
         // Unified hover: one label per signal at the same X — much easier to
         // compare synchronized measurements than per-point "closest" mode.
         hovermode: "x unified",
@@ -183,11 +200,16 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
           font: { family: "Computer Modern, Latin Modern Math, Times New Roman, serif", size: 12, color: "#000000" },
         },
         showlegend: true,
-        legend: { bgcolor: "rgba(255,255,255,0.95)", bordercolor: "#000000", borderwidth: 1, font: { size: 13, color: "#000000" } },
+        legend: {
+          bgcolor: "rgba(255,255,255,0.95)", bordercolor: "#000000", borderwidth: 1, font: { size: 13, color: "#000000" },
+          // Same row as the (centered) x-axis title — anchored to the right so
+          // they sit side by side instead of overlapping.
+          orientation: "h", x: 1, xanchor: "right", y: -0.18, yanchor: "top",
+        },
       };
       if (hasRightAxis) {
         base.yaxis2 = {
-          title: { text: "Value (Right)", font: { size: 16, color: "#ff7f0e" } },
+          title: { text: `Value (Right${rightUnits ? `, ${rightUnits}` : ""})`, font: { size: 16, color: "#ff7f0e" } },
           overlaying: "y", side: "right", gridcolor: "transparent",
           linecolor: "#ff7f0e", linewidth: 1.5, ticks: "outside", tickwidth: 1.5,
           tickcolor: "#ff7f0e", color: "#ff7f0e", showline: true, zeroline: false, fixedrange: false,
@@ -196,7 +218,7 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
       }
       return base;
     },
-    [hasRightAxis, hasFFT, plot.id],
+    [hasRightAxis, hasFFT, plot.id, plot.signals, adjData],
   );
 
   // Drag-to-resize
@@ -276,7 +298,7 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
     () => plot.signals.map((sig, idx) => {
       const data   = getSignalData(sig.signalId, { studioFiles, studioOperations, studioTransforms });
       const signal = studioFiles.get(sig.signalId) ?? studioOperations.get(sig.signalId) ?? studioTransforms.get(sig.signalId);
-      return { signalId: sig.signalId, name: displayName(signal?.name ?? sig.signalId), data, color: traceColor(idx) };
+      return { signalId: sig.signalId, name: displayName(signal?.name ?? sig.signalId), data, color: resolveSignalColor(sig.color, idx) };
     }),
     [plot.signals, studioFiles, studioOperations, studioTransforms],
   );

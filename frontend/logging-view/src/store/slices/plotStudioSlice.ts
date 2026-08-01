@@ -30,6 +30,7 @@ export interface PlotStudioSlice {
   removeSignalFromStudioPlot: (plotId: string, signalId: string) => void;
   updateStudioSignalAxis: (plotId: string, signalId: string, axis: "left" | "right") => void;
   toggleStudioSignalFFT: (plotId: string, signalId: string, show: boolean) => void;
+  updateStudioSignalColor: (plotId: string, signalId: string, color: string) => void;
   setStudioFFTSampleRate: (rate: number | null) => void;
 }
 
@@ -179,6 +180,20 @@ export const createPlotStudioSlice: StateCreator<PlotStudioSlice> = (set) => ({
         ...plot,
         signals: plot.signals.map((sig) =>
           sig.signalId === signalId ? { ...sig, showFFT: show } : sig,
+        ),
+      });
+      return { studioPlots: next };
+    }),
+
+  updateStudioSignalColor: (plotId, signalId, color) =>
+    set((s) => {
+      const plot = s.studioPlots.get(plotId);
+      if (!plot) return {};
+      const next = new Map(s.studioPlots);
+      next.set(plotId, {
+        ...plot,
+        signals: plot.signals.map((sig) =>
+          sig.signalId === signalId ? { ...sig, color } : sig,
         ),
       });
       return { studioPlots: next };

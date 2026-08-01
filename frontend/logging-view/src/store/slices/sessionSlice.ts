@@ -66,14 +66,21 @@ export const createSessionSlice: StateCreator<Store, [], [], SessionSlice> = (se
 
       // Build board → measurementIds map from data/<BOARD>/<id>.csv files.
       // webkitRelativePath format: folder/data/BOARD/measurement.csv (4 segments).
-      const availableSeries: Record<string, string[]> = {};
+      // Deduped via Set: directory drops can yield the same relative path twice
+      // (e.g. rotated/overlapping log files), which would otherwise show up as
+      // duplicate rows in the series sidebar.
+      const availableSeriesSets: Record<string, Set<string>> = {};
       for (const f of fileArray) {
         const parts = f.webkitRelativePath.split("/");
         if (parts.length === 4 && parts[1] === "data" && f.name.endsWith(".csv")) {
           const boardName = parts[2];
           const measId = f.name.slice(0, -4);
-          (availableSeries[boardName] ??= []).push(measId);
+          (availableSeriesSets[boardName] ??= new Set()).add(measId);
         }
+      }
+      const availableSeries: Record<string, string[]> = {};
+      for (const [boardName, ids] of Object.entries(availableSeriesSets)) {
+        availableSeries[boardName] = [...ids];
       }
 
       set({

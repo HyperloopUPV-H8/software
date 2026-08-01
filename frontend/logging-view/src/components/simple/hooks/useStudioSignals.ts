@@ -6,6 +6,7 @@
 // studioFiles afterwards.
 import { useCallback, useMemo } from "react";
 import { parseCSV } from "../../../lib/plotStudio/csv";
+import { getSignalName } from "../../../lib/plotStudio/units";
 import { useStore } from "../../../store/store";
 import type { SignalPoint } from "../../../types/plotStudio";
 
@@ -24,12 +25,14 @@ export function useAvailableSignals(): AvailableSignal[] {
   const availableSeries = useStore((s) => s.availableSeries);
   const studioOperations = useStore((s) => s.studioOperations);
   const studioTransforms = useStore((s) => s.studioTransforms);
+  const adjData = useStore((s) => s.adjData);
 
   return useMemo(() => {
     const list: AvailableSignal[] = [];
     for (const [board, measIds] of Object.entries(availableSeries)) {
       for (const measId of [...measIds].sort()) {
-        list.push({ id: `${board}/${measId}`, label: measId, board, kind: "series" });
+        const id = `${board}/${measId}`;
+        list.push({ id, label: getSignalName(adjData, id) ?? measId, board, kind: "series" });
       }
     }
     studioOperations.forEach((op) =>
@@ -39,7 +42,7 @@ export function useAvailableSignals(): AvailableSignal[] {
       list.push({ id: tr.id, label: tr.name, board: null, kind: "transform" }),
     );
     return list;
-  }, [availableSeries, studioOperations, studioTransforms]);
+  }, [availableSeries, studioOperations, studioTransforms, adjData]);
 }
 
 /**

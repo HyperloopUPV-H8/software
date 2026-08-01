@@ -49,6 +49,7 @@ export interface PlotSignal {
   signalId: string;
   yAxis: "left" | "right"; // which Y axis to plot against
   showFFT: boolean;         // if true, plots frequency spectrum instead of time-domain
+  color?: string;           // user-picked trace color override; falls back to the palette by index
 }
 
 /** A named plot containing an ordered list of signal assignments. */
