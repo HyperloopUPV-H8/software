@@ -82,7 +82,12 @@ export default function SignalSelect({
     : activeItems;
 
   return (
-    <Popover open={open} onOpenChange={handleOpenChange}>
+    // modal=true — this picker is used inside Dialogs (OperationModal,
+    // TransformModal); Radix's Popover otherwise fights the Dialog's own
+    // scroll-lock, leaving the board's measurement list unscrollable
+    // (documented Radix issue: nested Popover-in-Dialog wheel scroll is
+    // blocked unless the Popover itself is also modal).
+    <Popover open={open} onOpenChange={handleOpenChange} modal>
       <PopoverTrigger asChild>
         <button
           type="button"
