@@ -1,11 +1,11 @@
-import type { SignalPoint } from "../../types/plotStudio";
+import type { SeriesData } from "../../types/plotStudio";
 
-export interface FFTPoint {
-  frequency: number;
-  magnitude: number;
+export interface FFTResult {
+  frequency: Float64Array;
+  magnitude: Float64Array;
 }
 
-function fftInPlace(real: number[], imag: number[], n: number): void {
+function fftInPlace(real: Float64Array, imag: Float64Array, n: number): void {
   let j = 0;
   for (let i = 0; i < n - 1; i++) {
     if (i < j) {
@@ -46,14 +46,13 @@ function fftInPlace(real: number[], imag: number[], n: number): void {
   }
 }
 
-export function computeFFT(data: SignalPoint[], sampleRateOverride: number | null): FFTPoint[] {
-  const n = data.length;
+export function computeFFT(data: SeriesData, sampleRateOverride: number | null): FFTResult {
+  const n = data.value.length;
   const nextPow2 = Math.pow(2, Math.ceil(Math.log2(n)));
 
-  const real = new Array<number>(nextPow2).fill(0);
-  const imag = new Array<number>(nextPow2).fill(0);
-
-  for (let i = 0; i < n; i++) real[i] = data[i].value;
+  const real = new Float64Array(nextPow2);
+  const imag = new Float64Array(nextPow2);
+  real.set(data.value);
 
   fftInPlace(real, imag, nextPow2);
 
@@ -61,17 +60,17 @@ export function computeFFT(data: SignalPoint[], sampleRateOverride: number | nul
   if (sampleRateOverride && sampleRateOverride > 0) {
     sampleRate = sampleRateOverride;
   } else {
-    const dt = (data[data.length - 1].time - data[0].time) / (data.length - 1);
+    const dt = (data.time[n - 1] - data.time[0]) / (n - 1);
     sampleRate = 1000 / dt;
   }
 
-  const result: FFTPoint[] = [];
   const halfN = nextPow2 / 2;
+  const frequency = new Float64Array(halfN);
+  const magnitude = new Float64Array(halfN);
   for (let i = 0; i < halfN; i++) {
-    const freq = (i * sampleRate) / nextPow2;
-    const magnitude = Math.sqrt(real[i] * real[i] + imag[i] * imag[i]) / n;
-    result.push({ frequency: freq, magnitude });
+    frequency[i] = (i * sampleRate) / nextPow2;
+    magnitude[i] = Math.sqrt(real[i] * real[i] + imag[i] * imag[i]) / n;
   }
 
-  return result;
+  return { frequency, magnitude };
 }

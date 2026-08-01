@@ -38,7 +38,7 @@ export default function TransformModal({ open, onClose }: { open: boolean; onClo
       const sourceData = await ensureLoaded(sourceSignal);
       if (!sourceData) { setError("Failed to load source signal."); return; }
       const data = applyTransform(sourceData, expression.trim());
-      if (data.length === 0) { setError("Expression produced no valid values. Check your syntax."); return; }
+      if (data.value.length === 0) { setError("Expression produced no valid values. Check your syntax."); return; }
       addStudioTransform({ name: name.trim(), sourceSignal, expression: expression.trim(), data });
       setName(""); setSource(""); setExpr("");
       onClose();

@@ -140,7 +140,7 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
     () =>
       plot.signals.flatMap((sig, idx) => {
         const data = getSignalData(sig.signalId, { studioFiles, studioOperations, studioTransforms });
-        if (!data || data.length < 2) return [];
+        if (!data || data.value.length < 2) return [];
         const signal = studioFiles.get(sig.signalId) ?? studioOperations.get(sig.signalId) ?? studioTransforms.get(sig.signalId);
         let name = getSignalName(adjData, sig.signalId) ?? displayName(signal?.name ?? sig.signalId);
         const color = resolveSignalColor(sig.color, idx);
@@ -152,19 +152,19 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
           if (unit) name = `${name} (${unit})`;
         }
         if (sig.showFFT) {
-          const fftData = computeFFT(data, fftSampleRateOverride);
+          const fftResult = computeFFT(data, fftSampleRateOverride);
           return [{
-            x: fftData.map((p) => p.frequency),
-            y: fftData.map((p) => p.magnitude),
-            type: webglAvailable && fftData.length > GL_POINT_THRESHOLD ? ("scattergl" as const) : ("scatter" as const),
+            x: fftResult.frequency,
+            y: fftResult.magnitude,
+            type: webglAvailable && fftResult.frequency.length > GL_POINT_THRESHOLD ? ("scattergl" as const) : ("scatter" as const),
             mode: "lines" as const,
             name: `${name} (FFT)`, line: { width: 2, color },
             yaxis: sig.yAxis === "right" ? ("y2" as const) : ("y" as const),
           }];
         }
         return [{
-          x: data.map((p) => p.time), y: data.map((p) => p.value),
-          type: webglAvailable && data.length > GL_POINT_THRESHOLD ? ("scattergl" as const) : ("scatter" as const),
+          x: data.time, y: data.value,
+          type: webglAvailable && data.value.length > GL_POINT_THRESHOLD ? ("scattergl" as const) : ("scatter" as const),
           mode: "lines" as const,
           name, line: { width: 2.5, color },
           yaxis: sig.yAxis === "right" ? ("y2" as const) : ("y" as const),
@@ -265,15 +265,24 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
   }, []);
 
   // Re-render the stats panel whenever the user zooms/pans the chart, so the
-  // "visible range" statistics track the current viewport live.
+  // "visible range" statistics track the current viewport live. Debounced —
+  // relayout fires many times/sec during a drag, and recomputing stats over
+  // a large signal on every tick is what made interaction janky/unresponsive.
   const [, setStatsTick] = useState(0);
   useEffect(() => {
     if (!showStats || !hasTraces) return;
     const div = chartRef.current?.getDiv() as PlotlyEventDiv | null | undefined;
     if (!div?.on) return;
-    const handler = () => setStatsTick((t) => t + 1);
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const handler = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => setStatsTick((t) => t + 1), 200);
+    };
     div.on("plotly_relayout", handler);
-    return () => div.removeAllListeners?.("plotly_relayout");
+    return () => {
+      if (timer) clearTimeout(timer);
+      div.removeAllListeners?.("plotly_relayout");
+    };
   }, [showStats, hasTraces]);
 
   const zoomAxis = useCallback((axis: "x" | "y1" | "y2", direction: "in" | "out") => {

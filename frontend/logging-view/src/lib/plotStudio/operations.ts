@@ -1,35 +1,41 @@
-import type { OperationType, SignalPoint } from "../../types/plotStudio";
+import type { OperationType, SeriesData } from "../../types/plotStudio";
 
-function interpolate(data: SignalPoint[], idx: number, t: number): number {
-  if (idx >= data.length - 1) return data[data.length - 1].value;
-  const p1 = data[idx];
-  const p2 = data[idx + 1];
-  const ratio = (t - p1.time) / (p2.time - p1.time);
-  return p1.value + ratio * (p2.value - p1.value);
+function interpolate(time: Float64Array, value: Float64Array, idx: number, t: number): number {
+  if (idx >= time.length - 1) return value[value.length - 1];
+  const t1 = time[idx];
+  const t2 = time[idx + 1];
+  const ratio = (t - t1) / (t2 - t1);
+  return value[idx] + ratio * (value[idx + 1] - value[idx]);
 }
 
 export function performOperation(
-  dataA: SignalPoint[],
-  dataB: SignalPoint[],
+  dataA: SeriesData,
+  dataB: SeriesData,
   type: OperationType,
-): SignalPoint[] {
-  const minTime = Math.max(dataA[0].time, dataB[0].time);
-  const maxTime = Math.min(dataA[dataA.length - 1].time, dataB[dataB.length - 1].time);
+): SeriesData {
+  const { time: aTime, value: aValue } = dataA;
+  const { time: bTime, value: bValue } = dataB;
 
-  const avgDtA = (dataA[dataA.length - 1].time - dataA[0].time) / (dataA.length - 1);
-  const avgDtB = (dataB[dataB.length - 1].time - dataB[0].time) / (dataB.length - 1);
+  const minTime = Math.max(aTime[0], bTime[0]);
+  const maxTime = Math.min(aTime[aTime.length - 1], bTime[bTime.length - 1]);
+
+  const avgDtA = (aTime[aTime.length - 1] - aTime[0]) / (aTime.length - 1);
+  const avgDtB = (bTime[bTime.length - 1] - bTime[0]) / (bTime.length - 1);
   const dt = Math.max(1, Math.min(avgDtA, avgDtB));
 
-  const result: SignalPoint[] = [];
+  const estN = Math.max(0, Math.floor((maxTime - minTime) / dt) + 2);
+  const outTime = new Float64Array(estN);
+  const outValue = new Float64Array(estN);
   let idxA = 0;
   let idxB = 0;
+  let i = 0;
 
-  for (let t = minTime; t <= maxTime; t += dt) {
-    while (idxA < dataA.length - 1 && dataA[idxA + 1].time < t) idxA++;
-    while (idxB < dataB.length - 1 && dataB[idxB + 1].time < t) idxB++;
+  for (let t = minTime; t <= maxTime; t += dt, i++) {
+    while (idxA < aTime.length - 1 && aTime[idxA + 1] < t) idxA++;
+    while (idxB < bTime.length - 1 && bTime[idxB + 1] < t) idxB++;
 
-    const valueA = interpolate(dataA, idxA, t);
-    const valueB = interpolate(dataB, idxB, t);
+    const valueA = interpolate(aTime, aValue, idxA, t);
+    const valueB = interpolate(bTime, bValue, idxB, t);
 
     let resultValue: number;
     switch (type) {
@@ -39,8 +45,9 @@ export function performOperation(
       case "divide":   resultValue = valueB !== 0 ? valueA / valueB : 0; break;
     }
 
-    result.push({ time: t, value: resultValue });
+    outTime[i] = t;
+    outValue[i] = resultValue;
   }
 
-  return result;
+  return { time: outTime.subarray(0, i), value: outValue.subarray(0, i) };
 }

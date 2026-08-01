@@ -1,17 +1,22 @@
 // Shared types for the Plot Studio (simple mode).
 // All signal data — whether from CSV files, math operations, or transforms —
-// is normalized into SignalPoint arrays so the rest of the app can treat them uniformly.
+// is normalized into SeriesData so the rest of the app can treat them uniformly.
 
-/** A single sample: time in milliseconds (normalized to start at 0), value in raw units. */
-export interface SignalPoint {
-  time: number;
-  value: number;
+/**
+ * Structure-of-arrays sample set: time (ms, normalized to start at 0) and
+ * value, always equal length. Typed arrays avoid per-sample object overhead
+ * for logging sessions that easily reach hundreds of thousands of points,
+ * and Plotly.js's Data.x/y accept them directly with no copy needed.
+ */
+export interface SeriesData {
+  time: Float64Array;
+  value: Float64Array;
 }
 
-/** A loaded CSV file, stored as a parsed point array alongside display metadata. */
+/** A loaded CSV file, stored as parsed series data alongside display metadata. */
 export interface FileSignal {
   name: string;
-  data: SignalPoint[];
+  data: SeriesData;
   pointCount: number;
 }
 
@@ -29,7 +34,7 @@ export interface Operation {
   type: OperationType;
   signalA: string; // signalId of source A
   signalB: string; // signalId of source B
-  data: SignalPoint[];
+  data: SeriesData;
 }
 
 /**
@@ -41,7 +46,7 @@ export interface Transform {
   name: string;
   sourceSignal: string; // signalId of the source
   expression: string;   // e.g. "2*x", "sin(x)", "x^2"
-  data: SignalPoint[];
+  data: SeriesData;
 }
 
 /** Assignment of a signal to a specific plot, including display options. */

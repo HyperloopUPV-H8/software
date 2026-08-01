@@ -12,12 +12,12 @@ function useDetectedRate(): number | null {
   const studioFiles = useStore((s) => s.studioFiles);
   return useMemo(() => {
     const first = studioFiles.values().next().value;
-    if (!first || first.data.length < 8) return null;
-    const pts = first.data;
-    const n = Math.min(pts.length - 1, 512);
+    if (!first || first.data.time.length < 8) return null;
+    const time = first.data.time;
+    const n = Math.min(time.length - 1, 512);
     const dts: number[] = [];
     for (let i = 1; i <= n; i++) {
-      const dt = pts[i].time - pts[i - 1].time;
+      const dt = time[i] - time[i - 1];
       if (dt > 0) dts.push(dt);
     }
     if (dts.length === 0) return null;

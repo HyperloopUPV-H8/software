@@ -5,10 +5,10 @@
 // (assigned to a plot or picked in an operation/transform) and cached in
 // studioFiles afterwards.
 import { useCallback, useMemo } from "react";
-import { parseCSV } from "../../../lib/plotStudio/csv";
+import { parseCSVInWorker } from "../../../lib/plotStudio/csv";
 import { getSignalName } from "../../../lib/plotStudio/units";
 import { useStore } from "../../../store/store";
-import type { SignalPoint } from "../../../types/plotStudio";
+import type { SeriesData } from "../../../types/plotStudio";
 
 export interface AvailableSignal {
   /** "BOARD/measId" for session series, "op_N" / "tr_N" for composed ones. */
@@ -60,7 +60,7 @@ export function useSignalLoader() {
   const addStudioFiles = useStore((s) => s.addStudioFiles);
 
   return useCallback(
-    async (signalId: string): Promise<SignalPoint[] | null> => {
+    async (signalId: string): Promise<SeriesData | null> => {
       const cached =
         studioFiles.get(signalId)?.data ??
         studioOperations.get(signalId)?.data ??
@@ -75,10 +75,9 @@ export function useSignalLoader() {
       const file = sessionFiles.get(`${folderName}/data/${board}/${measId}.csv`);
       if (!file) return null;
 
-      const text = await file.text();
-      const data = parseCSV(text, settings?.time_unit ?? "ms");
-      if (data.length === 0) return null;
-      addStudioFiles([{ name: signalId, data, pointCount: data.length }]);
+      const data = await parseCSVInWorker(file, settings?.time_unit ?? "ms");
+      if (data.value.length === 0) return null;
+      addStudioFiles([{ name: signalId, data, pointCount: data.value.length }]);
       return data;
     },
     [sessionFiles, folderName, settings, studioFiles, studioOperations, studioTransforms, addStudioFiles],

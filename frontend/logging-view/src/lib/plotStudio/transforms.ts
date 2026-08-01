@@ -1,4 +1,4 @@
-import type { SignalPoint } from "../../types/plotStudio";
+import type { SeriesData } from "../../types/plotStudio";
 
 function safeEval(expr: string, x: number): number {
   const processed = expr
@@ -24,8 +24,20 @@ function safeEval(expr: string, x: number): number {
   }
 }
 
-export function applyTransform(data: SignalPoint[], expression: string): SignalPoint[] {
-  return data
-    .map((point) => ({ time: point.time, value: safeEval(expression, point.value) }))
-    .filter((p) => isFinite(p.value));
+export function applyTransform(data: SeriesData, expression: string): SeriesData {
+  const n = data.value.length;
+  const outTime = new Float64Array(n);
+  const outValue = new Float64Array(n);
+  let count = 0;
+
+  for (let i = 0; i < n; i++) {
+    const v = safeEval(expression, data.value[i]);
+    if (isFinite(v)) {
+      outTime[count] = data.time[i];
+      outValue[count] = v;
+      count++;
+    }
+  }
+
+  return { time: outTime.subarray(0, count), value: outValue.subarray(0, count) };
 }

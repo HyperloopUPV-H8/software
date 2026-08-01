@@ -4,13 +4,14 @@
 import { Button, Separator } from "@workspace/ui/components";
 import { X } from "@workspace/ui/icons";
 import { cn } from "@workspace/ui/lib";
-import { computeNoiseStats, estimateNoiseFloor } from "../../lib/plotStudio/stats";
-import type { SignalPoint } from "../../types/plotStudio";
+import { useMemo } from "react";
+import { computeRangeStats } from "../../lib/plotStudio/stats";
+import type { SeriesData } from "../../types/plotStudio";
 
 interface SignalEntry {
   signalId: string;
   name: string;
-  data: SignalPoint[] | null;
+  data: SeriesData | null;
   /** Trace color from lib/plotStudio/palette — matches the curve in the chart. */
   color: string;
 }
@@ -61,6 +62,16 @@ export default function StatsPanel({ signalData, getVisibleRange, onClose }: Sta
   const range = getVisibleRange();
   const rangeLabel = range ? `${range[0].toFixed(2)} – ${range[1].toFixed(2)} ms` : "full signal";
 
+  const computed = useMemo(
+    () => signalData.map((s) => ({
+      signalId: s.signalId, name: s.name, color: s.color,
+      result: s.data && s.data.value.length >= 2 ? computeRangeStats(s.data, range) : null,
+    })),
+    // range is a fresh array identity every call — key on its bounds instead.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [signalData, range?.[0], range?.[1]],
+  );
+
   return (
     <div className="border-t">
       {/* Header */}
@@ -88,16 +99,9 @@ export default function StatsPanel({ signalData, getVisibleRange, onClose }: Sta
       <Separator />
 
       <div className="space-y-5 p-4">
-        {signalData.map(({ signalId, name, data, color }) => {
-          if (!data || data.length < 2) return null;
-          const filtered = range
-            ? data.filter((p) => p.time >= range[0] && p.time <= range[1])
-            : data;
-          if (filtered.length < 2) return null;
-
-          const stats = computeNoiseStats(filtered);
-          const floor = estimateNoiseFloor(filtered);
-          if (!stats) return null;
+        {computed.map(({ signalId, name, color, result }) => {
+          if (!result) return null;
+          const { stats, floor, count } = result;
 
           const values: Record<string, number> = {
             mean: stats.mean, std: stats.std, rms: stats.rms,
@@ -112,7 +116,7 @@ export default function StatsPanel({ signalData, getVisibleRange, onClose }: Sta
                 <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: color }} />
                 <span className="text-foreground text-sm font-semibold">{name}</span>
                 <span className="text-muted-foreground text-[11px]">
-                  ({filtered.length.toLocaleString()} pts in range)
+                  ({count.toLocaleString()} pts in range)
                 </span>
               </div>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-8">
@@ -131,7 +135,7 @@ export default function StatsPanel({ signalData, getVisibleRange, onClose }: Sta
           );
         })}
 
-        {signalData.every((s) => !s.data || s.data.length < 2) && (
+        {computed.every((s) => !s.result) && (
           <div className="text-muted-foreground py-6 text-center text-sm">
             No data to analyze in the current range.
           </div>
