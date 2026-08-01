@@ -19,10 +19,10 @@ const SidebarToggleHandle = () => {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className={cn(
-        "absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 sm:flex",
-        "group-data-[side=left]:-right-4 group-data-[side=right]:left-0",
+        "absolute inset-y-0 z-20 hidden w-8 -translate-x-1/2 sm:flex",
+        "group-data-[side=left]:-right-8 group-data-[side=right]:left-0",
         "group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full",
-        "[[data-side=left][data-collapsible=offcanvas]_&]:-right-2",
+        "[[data-side=left][data-collapsible=offcanvas]_&]:-right-4",
         "flex-col items-center justify-center",
         "cursor-pointer border-0 bg-transparent p-0 outline-none",
       )}
@@ -43,21 +43,21 @@ const SidebarToggleHandle = () => {
                                left is hidden behind the screen boundary. */}
       <div
         className={cn(
-          "relative z-10 flex items-center rounded-md p-1",
+          "relative z-10 flex items-center rounded-md p-2",
           "border bg-sidebar shadow-md transition-colors duration-150",
           hovered ? "border-primary/40" : "border-border/60",
         )}
       >
         <ChevronLeft
           className={cn(
-            "size-4 transition-colors duration-150",
+            "size-8 transition-colors duration-150",
             hovered ? "text-primary/70" : "text-muted-foreground/40",
           )}
         />
         {!isOpen && (
           <ChevronRight
             className={cn(
-              "-ml-2 size-4 transition-colors duration-150",
+              "-ml-4 size-8 transition-colors duration-150",
               hovered ? "text-primary/70" : "text-muted-foreground/40",
             )}
           />
