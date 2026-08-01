@@ -10,7 +10,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components";
-import { Activity, AlertTriangle, Pencil, RefreshCw, Trash2 } from "@workspace/ui/icons";
+import { Activity, AlertTriangle, ChevronDown, Pencil, RefreshCw, Trash2 } from "@workspace/ui/icons";
 import Plotly from "plotly.js-dist";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { computeFFT } from "../../../lib/plotStudio/fft";
@@ -105,6 +105,7 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [plotHeight, setPlotHeight] = useState(500);
   const [showStats, setShowStats]   = useState(false);
+  const [collapsed, setCollapsed]   = useState(false);
 
   // Inline rename
   const [editingName, setEditingName] = useState(false);
@@ -335,6 +336,12 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
 
       {/* Header */}
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-4 py-2.5">
+        <Button variant="ghost" size="icon-sm" onClick={() => setCollapsed((v) => !v)}
+          aria-label={collapsed ? "Expand plot" : "Collapse plot"}
+          className="text-muted-foreground hover:text-foreground hover:bg-muted -ml-1.5 shrink-0">
+          <ChevronDown className={`size-5 transition-transform ${collapsed ? "-rotate-90" : ""}`} />
+        </Button>
+
         <div className="flex min-w-0 items-center gap-2">
           <Activity className="text-primary size-4 shrink-0" />
 
@@ -444,39 +451,43 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon-xs" onClick={() => removeStudioPlot(plot.id)}
-                aria-label="Delete plot"
+                aria-label="Close plot"
                 className="text-muted-foreground hover:text-destructive hover:bg-destructive/10">
                 <Trash2 className="size-3.5" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Delete plot</TooltipContent>
+            <TooltipContent>Close plot</TooltipContent>
           </Tooltip>
         </div>
       </div>
 
-      {hasTraces ? (
-        // Chart — white canvas kept intentionally for the academic/LaTeX export style
-        <div ref={containerRef} className="relative bg-white" style={{ height: plotHeight }}>
-          <PlotlyChart ref={chartRef} traces={traces} layout={layout} config={PLOTLY_CONFIG} style={{ height: "100%" }} />
-          <div
-            onMouseDown={onResizeMouseDown}
-            className="hover:bg-primary/10 group absolute inset-x-0 bottom-0 flex h-3 cursor-ns-resize items-center justify-center"
-          >
-            <div className="bg-border group-hover:bg-primary/50 h-0.5 w-12 rounded-full transition-colors" />
+      {/* Kept mounted (not conditionally removed) while collapsed, so Plotly's
+          zoom/pan state and WebGL context survive expand/collapse. */}
+      <div className={collapsed ? "hidden" : undefined}>
+        {hasTraces ? (
+          // Chart — white canvas kept intentionally for the academic/LaTeX export style
+          <div ref={containerRef} className="relative bg-white" style={{ height: plotHeight }}>
+            <PlotlyChart ref={chartRef} traces={traces} layout={layout} config={PLOTLY_CONFIG} style={{ height: "100%" }} />
+            <div
+              onMouseDown={onResizeMouseDown}
+              className="hover:bg-primary/10 group absolute inset-x-0 bottom-0 flex h-3 cursor-ns-resize items-center justify-center"
+            >
+              <div className="bg-border group-hover:bg-primary/50 h-0.5 w-12 rounded-full transition-colors" />
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="border-muted-foreground/20 bg-muted/20 m-4 mt-1 flex h-40 flex-col items-center justify-center gap-2 rounded-lg border border-dashed">
-          <Activity className="text-muted-foreground/40 size-6" />
-          <p className="text-muted-foreground text-xs">
-            No signals to display — assign one from the <span className="text-foreground font-medium">Plots</span> panel
-          </p>
-        </div>
-      )}
+        ) : (
+          <div className="border-muted-foreground/20 bg-muted/20 m-4 mt-1 flex h-40 flex-col items-center justify-center gap-2 rounded-lg border border-dashed">
+            <Activity className="text-muted-foreground/40 size-6" />
+            <p className="text-muted-foreground text-xs">
+              No signals to display — assign one from the <span className="text-foreground font-medium">Plots</span> panel
+            </p>
+          </div>
+        )}
 
-      {showStats && hasTraces && (
-        <StatsPanel signalData={statsData} getVisibleRange={getVisibleRange} onClose={() => setShowStats(false)} />
-      )}
+        {showStats && hasTraces && (
+          <StatsPanel signalData={statsData} getVisibleRange={getVisibleRange} onClose={() => setShowStats(false)} />
+        )}
+      </div>
     </div>
   );
 }

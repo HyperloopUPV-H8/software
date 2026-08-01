@@ -26,6 +26,8 @@ export interface PlotStudioSlice {
   addStudioPlot: () => void;
   removeStudioPlot: (id: string) => void;
   renameStudioPlot: (id: string, name: string) => void;
+  toggleStudioPlotHidden: (id: string) => void;
+  reorderStudioPlots: (orderedIds: string[]) => void;
   addSignalToStudioPlot: (plotId: string, signalId: string) => void;
   removeSignalFromStudioPlot: (plotId: string, signalId: string) => void;
   updateStudioSignalAxis: (plotId: string, signalId: string, axis: "left" | "right") => void;
@@ -131,6 +133,30 @@ export const createPlotStudioSlice: StateCreator<PlotStudioSlice> = (set) => ({
       if (!plot || !trimmed) return {};
       const next = new Map(s.studioPlots);
       next.set(id, { ...plot, name: trimmed });
+      return { studioPlots: next };
+    }),
+
+  toggleStudioPlotHidden: (id) =>
+    set((s) => {
+      const plot = s.studioPlots.get(id);
+      if (!plot) return {};
+      const next = new Map(s.studioPlots);
+      next.set(id, { ...plot, hidden: !plot.hidden });
+      return { studioPlots: next };
+    }),
+
+  // Rebuilds the Map in the given key order — Maps iterate in insertion
+  // order, so this is how plot order (sidebar list + PlotsArea) is changed.
+  reorderStudioPlots: (orderedIds) =>
+    set((s) => {
+      const next = new Map<string, PlotState>();
+      for (const id of orderedIds) {
+        const plot = s.studioPlots.get(id);
+        if (plot) next.set(id, plot);
+      }
+      s.studioPlots.forEach((plot, id) => {
+        if (!next.has(id)) next.set(id, plot);
+      });
       return { studioPlots: next };
     }),
 

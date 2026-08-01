@@ -57,6 +57,7 @@ export interface PlotState {
   id: string;   // DOM element ID ("plot_0", "plot_1", …)
   name: string;
   signals: PlotSignal[];
+  hidden?: boolean; // if true, skipped in PlotsArea but still managed in the sidebar list
 }
 
 /** Summary statistics for a signal over a time range. */

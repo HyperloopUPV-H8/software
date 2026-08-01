@@ -12,7 +12,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components";
-import { Activity, Plus, Trash2, X } from "@workspace/ui/icons";
+import { Activity, Eye, EyeOff, GripVertical, Plus, Trash2, X } from "@workspace/ui/icons";
 import { cn } from "@workspace/ui/lib";
 import { useState } from "react";
 import { resolveSignalColor } from "../../../lib/plotStudio/palette";
@@ -29,6 +29,8 @@ export default function PlotsSection() {
   const adjData = useStore((s) => s.adjData);
   const addStudioPlot              = useStore((s) => s.addStudioPlot);
   const removeStudioPlot           = useStore((s) => s.removeStudioPlot);
+  const toggleStudioPlotHidden     = useStore((s) => s.toggleStudioPlotHidden);
+  const reorderStudioPlots         = useStore((s) => s.reorderStudioPlots);
   const addSignalToStudioPlot      = useStore((s) => s.addSignalToStudioPlot);
   const removeSignalFromStudioPlot = useStore((s) => s.removeSignalFromStudioPlot);
   const updateStudioSignalAxis     = useStore((s) => s.updateStudioSignalAxis);
@@ -38,8 +40,20 @@ export default function PlotsSection() {
   const ensureLoaded = useSignalLoader();
   // Plot ids with a CSV parse in flight (shows "Loading…" in the trigger)
   const [assigning, setAssigning] = useState<Set<string>>(new Set());
+  // Drag-to-reorder: id of the plot currently being dragged
+  const [draggingId, setDraggingId] = useState<string | null>(null);
 
   const plots = Array.from(studioPlots.values());
+
+  const handleDrop = (targetId: string) => {
+    if (!draggingId || draggingId === targetId) return;
+    const ids = plots.map((p) => p.id);
+    const from = ids.indexOf(draggingId);
+    const to = ids.indexOf(targetId);
+    ids.splice(to, 0, ids.splice(from, 1)[0]);
+    reorderStudioPlots(ids);
+    setDraggingId(null);
+  };
 
   const shortName = (id: string) =>
     id.includes("/") ? id.split("/").slice(1).join("/") : id.replace(/\.csv$/, "");
@@ -68,9 +82,23 @@ export default function PlotsSection() {
       )}
 
       {plots.map((plot) => (
-        <div key={plot.id} className="bg-card overflow-hidden rounded-lg border shadow-sm">
-          {/* Plot header */}
-          <div className="from-primary/5 flex items-center gap-2 border-b bg-gradient-to-r to-transparent px-3 py-2">
+        <div key={plot.id}
+          className={cn(
+            "bg-card overflow-hidden rounded-lg border shadow-sm transition-opacity",
+            plot.hidden && "opacity-50",
+            draggingId === plot.id && "opacity-30",
+          )}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={() => handleDrop(plot.id)}
+        >
+          {/* Plot header — draggable to reorder plots (reflected in PlotsArea too) */}
+          <div
+            draggable
+            onDragStart={() => setDraggingId(plot.id)}
+            onDragEnd={() => setDraggingId(null)}
+            className="from-primary/5 flex cursor-grab items-center gap-2 border-b bg-gradient-to-r to-transparent px-3 py-2 active:cursor-grabbing"
+          >
+            <GripVertical className="text-muted-foreground/50 size-3.5 shrink-0" />
             <div className="bg-primary/20 flex size-4 shrink-0 items-center justify-center rounded-sm">
               <Activity className="text-primary size-3" />
             </div>
@@ -78,13 +106,24 @@ export default function PlotsSection() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="ghost" size="icon-xs"
+                  onClick={() => toggleStudioPlotHidden(plot.id)}
+                  aria-label={plot.hidden ? `Show ${plot.name}` : `Hide ${plot.name}`}
+                  className="text-muted-foreground hover:text-foreground hover:bg-muted">
+                  {plot.hidden ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left">{plot.hidden ? "Show plot" : "Hide plot"}</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon-xs"
                   onClick={() => removeStudioPlot(plot.id)}
-                  aria-label={`Remove ${plot.name}`}
+                  aria-label={`Close ${plot.name}`}
                   className="text-muted-foreground hover:text-destructive hover:bg-destructive/10">
                   <X className="size-3.5" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="left">Remove plot</TooltipContent>
+              <TooltipContent side="left">Close plot</TooltipContent>
             </Tooltip>
           </div>
 

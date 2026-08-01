@@ -51,14 +51,19 @@ function EmptyState() {
 export default function PlotsArea() {
   const studioPlots = useStore((s) => s.studioPlots);
   const plots = Array.from(studioPlots.values());
+  const visiblePlots = plots.filter((plot) => !plot.hidden);
 
   if (plots.length === 0) return <EmptyState />;
 
   return (
     <div className="flex flex-col gap-5 p-4">
-      {plots.map((plot) => (
-        <PlotWrapper key={plot.id} plot={plot} />
-      ))}
+      {visiblePlots.length === 0 ? (
+        <p className="text-muted-foreground py-8 text-center text-sm">
+          All plots are hidden — unhide one from the right panel to see it here.
+        </p>
+      ) : (
+        visiblePlots.map((plot) => <PlotWrapper key={plot.id} plot={plot} />)
+      )}
     </div>
   );
 }
