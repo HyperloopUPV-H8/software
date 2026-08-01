@@ -1,29 +1,5 @@
 import type { NoiseFloor, NoiseStats, SeriesData } from "../../types/plotStudio";
-
-// First index whose time is >= target (assumes time is non-decreasing, which
-// holds here — parseCSV only shifts by a constant offset, never reorders).
-function lowerBound(time: Float64Array, target: number): number {
-  let lo = 0;
-  let hi = time.length;
-  while (lo < hi) {
-    const mid = (lo + hi) >>> 1;
-    if (time[mid] < target) lo = mid + 1;
-    else hi = mid;
-  }
-  return lo;
-}
-
-// First index whose time is > target.
-function upperBound(time: Float64Array, target: number): number {
-  let lo = 0;
-  let hi = time.length;
-  while (lo < hi) {
-    const mid = (lo + hi) >>> 1;
-    if (time[mid] <= target) lo = mid + 1;
-    else hi = mid;
-  }
-  return lo;
-}
+import { lowerBound, upperBound } from "./range";
 
 // Single pass, no allocation, no Math.min/max spread — spreading hundreds of
 // thousands of arguments into Math.min/max throws "Maximum call stack size

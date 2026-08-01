@@ -1,6 +1,6 @@
 // Statistics panel shown under a plot. Metrics are computed over the visible
-// X range only (live — the parent re-renders this panel on every Plotly
-// relayout, so zooming/panning updates the numbers immediately).
+// X range only (live — the parent tracks the current Plotly viewport,
+// debounced, and passes it down as `visibleRange`).
 import { Button, Separator } from "@workspace/ui/components";
 import { X } from "@workspace/ui/icons";
 import { cn } from "@workspace/ui/lib";
@@ -18,7 +18,7 @@ interface SignalEntry {
 
 interface StatsPanelProps {
   signalData: SignalEntry[];
-  getVisibleRange: () => [number, number] | null;
+  visibleRange: [number, number] | null;
   onClose: () => void;
 }
 
@@ -58,18 +58,15 @@ function StatCard({ label, value, color, bg, primary }: {
   );
 }
 
-export default function StatsPanel({ signalData, getVisibleRange, onClose }: StatsPanelProps) {
-  const range = getVisibleRange();
-  const rangeLabel = range ? `${range[0].toFixed(2)} – ${range[1].toFixed(2)} ms` : "full signal";
+export default function StatsPanel({ signalData, visibleRange, onClose }: StatsPanelProps) {
+  const rangeLabel = visibleRange ? `${visibleRange[0].toFixed(2)} – ${visibleRange[1].toFixed(2)} ms` : "full signal";
 
   const computed = useMemo(
     () => signalData.map((s) => ({
       signalId: s.signalId, name: s.name, color: s.color,
-      result: s.data && s.data.value.length >= 2 ? computeRangeStats(s.data, range) : null,
+      result: s.data && s.data.value.length >= 2 ? computeRangeStats(s.data, visibleRange) : null,
     })),
-    // range is a fresh array identity every call — key on its bounds instead.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [signalData, range?.[0], range?.[1]],
+    [signalData, visibleRange],
   );
 
   return (

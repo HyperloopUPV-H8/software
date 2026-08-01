@@ -13,8 +13,10 @@ import {
 import { Activity, AlertTriangle, ChevronDown, Pencil, RefreshCw, Trash2 } from "@workspace/ui/icons";
 import Plotly from "plotly.js-dist";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { decimateLTTB } from "../../../lib/plotStudio/decimate";
 import { computeFFT } from "../../../lib/plotStudio/fft";
 import { resolveSignalColor } from "../../../lib/plotStudio/palette";
+import { lowerBound, upperBound } from "../../../lib/plotStudio/range";
 import { commonUnits, getSignalName, getSignalUnits, unitsMismatch } from "../../../lib/plotStudio/units";
 import { displayName, getSignalData } from "../../../store/slices/plotStudioSlice";
 import { useStore } from "../../../store/store";
@@ -34,9 +36,12 @@ const PLOTLY_CONFIG: Partial<Plotly.Config> = {
   toImageButtonOptions: { format: "svg", width: 1200, height: 800, scale: 1 },
 };
 
-// Above this point count, render with WebGL (scattergl) instead of SVG —
-// logging sessions easily reach 100k+ samples per signal.
-const GL_POINT_THRESHOLD = 20_000;
+// Above this point count, decimate before handing points to Plotly (always
+// SVG scatter — see the comment in the traces useMemo below for why not GL).
+// A full-resolution SVG path with hundreds of thousands of vertices
+// is what actually freezes the tab; ~8k is comfortably smooth to paint/pan
+// and visually indistinguishable at typical screen widths.
+const DECIMATE_THRESHOLD = 8_000;
 
 // Plotly divs expose a Node-style event emitter after newPlot()
 type PlotlyEventDiv = HTMLDivElement & {
@@ -97,7 +102,6 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
   const studioTransforms = useStore((s) => s.studioTransforms);
   const fftSampleRateOverride = useStore((s) => s.fftSampleRateOverride);
   const adjData = useStore((s) => s.adjData);
-  const webglAvailable = useStore((s) => s.webglAvailable);
   const removeStudioPlot = useStore((s) => s.removeStudioPlot);
   const renameStudioPlot = useStore((s) => s.renameStudioPlot);
 
@@ -106,6 +110,9 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
   const [plotHeight, setPlotHeight] = useState(500);
   const [showStats, setShowStats]   = useState(false);
   const [collapsed, setCollapsed]   = useState(false);
+  // Current X-axis viewport, tracked (debounced) from Plotly relayout events.
+  // Drives both zoom-adaptive decimation (traces useMemo) and the Stats panel.
+  const [visibleRange, setVisibleRange] = useState<[number, number] | null>(null);
 
   // Inline rename
   const [editingName, setEditingName] = useState(false);
@@ -137,6 +144,15 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
   }, [plot.signals, adjData, hasFFT]);
   const hasUnitsMismatch = axisUnits.leftMismatch || axisUnits.rightMismatch;
 
+  const getVisibleRange = useCallback((): [number, number] | null => {
+    const div = chartRef.current?.getDiv();
+    if (!div) return null;
+    const gd = div as Plotly.PlotlyHTMLElement & { _fullLayout: Record<string, { range?: number[] }> };
+    const range = gd._fullLayout["xaxis"]?.range;
+    if (!range || range.length < 2) return null;
+    return [Math.min(range[0], range[1]), Math.max(range[0], range[1])];
+  }, []);
+
   const traces = useMemo<Plotly.Data[]>(
     () =>
       plot.signals.flatMap((sig, idx) => {
@@ -152,26 +168,58 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
           const unit = getSignalUnits(adjData, sig.signalId);
           if (unit) name = `${name} (${unit})`;
         }
+
+        let xArr: Float64Array;
+        let yArr: Float64Array;
         if (hasFFT) {
           const fftResult = computeFFT(data, fftSampleRateOverride);
+          xArr = fftResult.frequency;
+          yArr = fftResult.magnitude;
+        } else {
+          xArr = data.time;
+          yArr = data.value;
+        }
+
+        // Slice to the current zoom window, then decimate for rendering.
+        // Always SVG scatter, never scattergl — decimation already bounds
+        // the point count sent to Plotly, so WebGL's raw point-count
+        // headroom brings nothing, and this user's environment can't
+        // sustain a WebGL context at all (immediate "context was lost").
+        let sliceStart = 0;
+        let sliceEnd = xArr.length;
+        if (visibleRange) {
+          sliceStart = lowerBound(xArr, visibleRange[0]);
+          sliceEnd = upperBound(xArr, visibleRange[1]);
+        }
+
+        let renderX = xArr.subarray(sliceStart, sliceEnd);
+        let renderY = yArr.subarray(sliceStart, sliceEnd);
+        if (renderX.length > DECIMATE_THRESHOLD) {
+          const decimated = decimateLTTB(renderX, renderY, DECIMATE_THRESHOLD);
+          renderX = decimated.time;
+          renderY = decimated.value;
+        }
+
+        const traceType = "scatter" as const;
+
+        if (hasFFT) {
           return [{
-            x: fftResult.frequency,
-            y: fftResult.magnitude,
-            type: webglAvailable && fftResult.frequency.length > GL_POINT_THRESHOLD ? ("scattergl" as const) : ("scatter" as const),
+            x: renderX, y: renderY,
+            type: traceType,
             mode: "lines" as const,
             name: `${name} (FFT)`, line: { width: 2, color },
             yaxis: sig.yAxis === "right" ? ("y2" as const) : ("y" as const),
           }];
         }
         return [{
-          x: data.time, y: data.value,
-          type: webglAvailable && data.value.length > GL_POINT_THRESHOLD ? ("scattergl" as const) : ("scatter" as const),
+          x: renderX, y: renderY,
+          type: traceType,
           mode: "lines" as const,
           name, line: { width: 2.5, color },
           yaxis: sig.yAxis === "right" ? ("y2" as const) : ("y" as const),
         }];
       }),
-    [plot.signals, studioFiles, studioOperations, studioTransforms, fftSampleRateOverride, webglAvailable, adjData, axisUnits, hasFFT],
+    [plot.signals, studioFiles, studioOperations, studioTransforms, fftSampleRateOverride, adjData, axisUnits, hasFFT, visibleRange],
   );
 
   const hasTraces = traces.length > 0;
@@ -265,26 +313,38 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
     };
   }, []);
 
-  // Re-render the stats panel whenever the user zooms/pans the chart, so the
-  // "visible range" statistics track the current viewport live. Debounced —
-  // relayout fires many times/sec during a drag, and recomputing stats over
-  // a large signal on every tick is what made interaction janky/unresponsive.
-  const [, setStatsTick] = useState(0);
+  // Track the visible X range whenever the user zooms/pans, so decimation and
+  // the Stats panel both track the current viewport live. Debounced — relayout
+  // fires many times/sec during a drag, and recomputing on every tick is what
+  // made interaction janky/unresponsive. Runs regardless of whether Stats is
+  // open, since decimation needs this too.
   useEffect(() => {
-    if (!showStats || !hasTraces) return;
+    if (!hasTraces) return;
     const div = chartRef.current?.getDiv() as PlotlyEventDiv | null | undefined;
     if (!div?.on) return;
     let timer: ReturnType<typeof setTimeout> | null = null;
     const handler = () => {
       if (timer) clearTimeout(timer);
-      timer = setTimeout(() => setStatsTick((t) => t + 1), 200);
+      timer = setTimeout(() => setVisibleRange(getVisibleRange()), 200);
     };
     div.on("plotly_relayout", handler);
     return () => {
       if (timer) clearTimeout(timer);
       div.removeAllListeners?.("plotly_relayout");
     };
-  }, [showStats, hasTraces]);
+  }, [hasTraces, getVisibleRange]);
+
+  // Time (ms) and frequency (Hz) are unrelated axes — a range captured in one
+  // mode must not be reused to slice the other after toggling FFT. Plotly's
+  // own uirevision-driven zoom reset on mode switch is an internal `react()`
+  // reconciliation, not a user interaction, so it never fires plotly_relayout.
+  // Reset during render (not an effect) per React's "adjusting state when a
+  // prop changes" pattern — avoids an extra cascading render.
+  const [prevHasFFT, setPrevHasFFT] = useState(hasFFT);
+  if (prevHasFFT !== hasFFT) {
+    setPrevHasFFT(hasFFT);
+    setVisibleRange(null);
+  }
 
   const zoomAxis = useCallback((axis: "x" | "y1" | "y2", direction: "in" | "out") => {
     const div = chartRef.current?.getDiv();
@@ -330,15 +390,6 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
     }),
     [plot.signals, studioFiles, studioOperations, studioTransforms, adjData],
   );
-
-  const getVisibleRange = useCallback((): [number, number] | null => {
-    const div = chartRef.current?.getDiv();
-    if (!div) return null;
-    const gd = div as Plotly.PlotlyHTMLElement & { _fullLayout: Record<string, { range?: number[] }> };
-    const range = gd._fullLayout["xaxis"]?.range;
-    if (!range || range.length < 2) return null;
-    return [Math.min(range[0], range[1]), Math.max(range[0], range[1])];
-  }, []);
 
   return (
     <div className="bg-card overflow-hidden rounded-xl border shadow-md transition-shadow hover:shadow-lg">
@@ -496,7 +547,7 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
         )}
 
         {showStats && hasTraces && (
-          <StatsPanel signalData={statsData} getVisibleRange={getVisibleRange} onClose={() => setShowStats(false)} />
+          <StatsPanel signalData={statsData} visibleRange={visibleRange} onClose={() => setShowStats(false)} />
         )}
       </div>
     </div>
