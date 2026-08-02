@@ -5,12 +5,55 @@
 //
 // Files are keyed by webkitRelativePath ("folder/data/BOARD/meas.csv") and kept
 // in sessionFiles for later CSV reading during plotting. Not persisted.
+//
+// openSession never aborts the whole load on a settings or ADJ failure — each stage
+// is independently fallible so a session can still open in CSV-only "degraded" mode.
+// See SessionStatus (types/session.ts) for the resulting green/yellow/red cascade.
 import type { StateCreator } from "zustand";
-import type { AdjArchive, DroppedFile, LoggerSettings, SeriesKey } from "../../types/session";
+import type {
+  AdjArchive,
+  AdjStatus,
+  DroppedFile,
+  LoggerSettings,
+  SeriesKey,
+  SessionStatus,
+} from "../../types/session";
 import type { Store } from "../store";
 
 const ADJ_ARCHIVE_URL = (hash: string) =>
   `https://hyperloop-upv.github.io/ADJ-Archive/storage/commit-${hash}.json`;
+
+type SettingsIssue = "missing" | "malformed" | null;
+
+function computeSessionStatus(
+  settingsIssue: SettingsIssue,
+  availableSeries: Record<string, string[]>,
+  adjStatus: AdjStatus | null,
+): SessionStatus {
+  const hasCsv = Object.keys(availableSeries).length > 0;
+
+  if (settingsIssue === null) {
+    return { level: "ok", message: "Session loaded correctly.", adj: adjStatus };
+  }
+
+  if (hasCsv) {
+    const reason =
+      settingsIssue === "malformed"
+        ? "logger_settings.json is malformed"
+        : "logger_settings.json not found";
+    return {
+      level: "degraded",
+      message: `${reason} — showing CSV data only.`,
+      adj: adjStatus,
+    };
+  }
+
+  const reason =
+    settingsIssue === "malformed"
+      ? "logger_settings.json is malformed and no CSV data was found"
+      : "No logger_settings.json or CSV data was found";
+  return { level: "error", message: `${reason} in this folder.`, adj: adjStatus };
+}
 
 export interface SessionSlice {
   folderName: string | null;
@@ -23,7 +66,11 @@ export interface SessionSlice {
   // All session files keyed by webkitRelativePath, for later CSV reading.
   sessionFiles: Map<string, DroppedFile>;
   isLoading: boolean;
-  sessionError: string | null;
+  // Persistent — reflects the currently open session, cleared only by clearSession.
+  sessionStatus: SessionStatus | null;
+  // Transient — set once per openSession() call, meant to auto-dismiss as a toast.
+  // Kept separate from sessionStatus so dismissing the toast doesn't blank the badge.
+  sessionStatusToast: SessionStatus | null;
   // Open/closed state of the "Session" collapsible in the sidebar. Auto-closes
   // the first time a measurement gets checked (0 → 1 selected), to free up
   // space for the series list — but not on every subsequent selection, so a
@@ -36,6 +83,7 @@ export interface SessionSlice {
   clearSelectedSeries: () => void;
   clearSession: () => void;
   setSessionPanelOpen: (open: boolean) => void;
+  setSessionStatusToast: (status: SessionStatus | null) => void;
 }
 
 export const createSessionSlice: StateCreator<Store, [], [], SessionSlice> = (set) => ({
@@ -46,34 +94,44 @@ export const createSessionSlice: StateCreator<Store, [], [], SessionSlice> = (se
   selectedSeries: {},
   sessionFiles: new Map(),
   isLoading: false,
-  sessionError: null,
+  sessionStatus: null,
+  sessionStatusToast: null,
   isSessionPanelOpen: true,
 
   openSession: async (files) => {
     try {
-      set({ isLoading: true, sessionError: null });
+      set({ isLoading: true });
 
       const fileArray = files;
 
       // Derive the session folder name from the first file's relative path.
       const folderName = fileArray[0]?.webkitRelativePath.split("/")[0] ?? "Session";
 
-      // Locate logger_settings.json at the root of the selected folder (2 path segments).
+      // Stage 1: locate + parse logger_settings.json at the folder root (2 path
+      // segments). A missing or malformed file doesn't abort the load — it just
+      // downgrades the eventual status to "degraded"/"error" below.
+      let settings: LoggerSettings | null = null;
+      let settingsIssue: SettingsIssue = null;
       const settingsFile = fileArray.find(
         (f) =>
           f.name === "logger_settings.json" &&
           f.webkitRelativePath.split("/").length === 2,
       );
-      if (!settingsFile) throw new Error("logger_settings.json not found in selected folder");
-      const settings: LoggerSettings = JSON.parse(await settingsFile.text());
+      if (!settingsFile) {
+        settingsIssue = "missing";
+      } else {
+        try {
+          const parsed = JSON.parse(await settingsFile.text());
+          if (!parsed?.adj_commit_hash) throw new Error("missing adj_commit_hash");
+          settings = parsed;
+        } catch {
+          settingsIssue = "malformed";
+        }
+      }
 
-      // Fetch the ADJ archive snapshot at the recorded commit.
-      const adjResponse = await fetch(ADJ_ARCHIVE_URL(settings.adj_commit_hash));
-      if (!adjResponse.ok) throw new Error(`ADJ fetch failed: ${adjResponse.status}`);
-      const adjData: AdjArchive = await adjResponse.json();
-
-      // Build board → measurementIds map from data/<BOARD>/<id>.csv files.
+      // Stage 2: build board → measurementIds map from data/<BOARD>/<id>.csv files.
       // webkitRelativePath format: folder/data/BOARD/measurement.csv (4 segments).
+      // Runs regardless of settings outcome — this is what makes CSV-only mode work.
       // Deduped via Set: directory drops can yield the same relative path twice
       // (e.g. rotated/overlapping log files), which would otherwise show up as
       // duplicate rows in the series sidebar.
@@ -91,6 +149,28 @@ export const createSessionSlice: StateCreator<Store, [], [], SessionSlice> = (se
         availableSeries[boardName] = [...ids];
       }
 
+      // Stage 3: fetch the ADJ archive snapshot, only possible when settings parsed
+      // (adj_commit_hash lives there). Failure here never aborts the session load —
+      // it's surfaced as an additional AdjStatus layered on the overall status.
+      let adjData: AdjArchive | null = null;
+      let adjStatus: AdjStatus | null = null;
+      if (settings) {
+        try {
+          const adjResponse = await fetch(ADJ_ARCHIVE_URL(settings.adj_commit_hash));
+          if (!adjResponse.ok) throw new Error(`ADJ fetch failed: ${adjResponse.status}`);
+          adjData = await adjResponse.json();
+          adjStatus = { ok: true, message: null };
+        } catch (err) {
+          adjStatus = {
+            ok: false,
+            message: `ADJ archive not found for commit ${settings.adj_commit_hash.slice(0, 7)} — signal names/units unavailable.`,
+          };
+          void err;
+        }
+      }
+
+      const status = computeSessionStatus(settingsIssue, availableSeries, adjStatus);
+
       set({
         folderName,
         settings,
@@ -100,9 +180,14 @@ export const createSessionSlice: StateCreator<Store, [], [], SessionSlice> = (se
         sessionFiles: new Map(fileArray.map((f) => [f.webkitRelativePath, f])),
         isLoading: false,
         isSessionPanelOpen: true,
+        sessionStatus: status,
+        sessionStatusToast: status,
       });
     } catch (err) {
-      set({ sessionError: String(err), isLoading: false });
+      // Last-resort net for genuinely unexpected exceptions (e.g. a DroppedFile.text()
+      // I/O rejection) — the staged logic above should make this rare.
+      const status: SessionStatus = { level: "error", message: String(err), adj: null };
+      set({ isLoading: false, sessionStatus: status, sessionStatusToast: status });
     }
   },
 
@@ -127,6 +212,8 @@ export const createSessionSlice: StateCreator<Store, [], [], SessionSlice> = (se
 
   setSessionPanelOpen: (open) => set({ isSessionPanelOpen: open }),
 
+  setSessionStatusToast: (status) => set({ sessionStatusToast: status }),
+
   clearSession: () =>
     set({
       folderName: null,
@@ -135,7 +222,8 @@ export const createSessionSlice: StateCreator<Store, [], [], SessionSlice> = (se
       availableSeries: {},
       selectedSeries: {},
       sessionFiles: new Map(),
-      sessionError: null,
+      sessionStatus: null,
+      sessionStatusToast: null,
       isSessionPanelOpen: true,
     }),
 });

@@ -2,6 +2,7 @@ import { DndContext } from "@dnd-kit/core";
 import { SidebarInset, SidebarProvider } from "@workspace/ui/components";
 import { useEffect, type ReactNode } from "react";
 import Header from "../components/header/Header";
+import SessionStatusToast from "../components/SessionStatusToast";
 import AppSidebar from "../components/sidebar/AppSidebar";
 import SignalDragOverlay from "../components/simple/SignalDragOverlay";
 import { useSignalDnd } from "../components/simple/hooks/useSignalDnd";
@@ -40,6 +41,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
           </div>
           <SignalDragOverlay activeIds={activeIds} />
         </DndContext>
+        <SessionStatusToast />
       </SidebarProvider>
     </div>
   );

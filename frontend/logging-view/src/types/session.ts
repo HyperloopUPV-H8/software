@@ -53,6 +53,24 @@ export interface LoggerSettings {
   date: string;
 }
 
+// Overall session-open outcome: "ok" = settings parsed; "degraded" = settings
+// missing/malformed but CSVs were found (session still opens, CSV-only); "error" =
+// neither settings nor CSVs found.
+export type SessionStatusLevel = "ok" | "degraded" | "error";
+
+// ADJ archive fetch outcome — only checked when settings parsed (adj_commit_hash comes
+// from there). Layered on top of SessionStatus.level, never downgrades it.
+export interface AdjStatus {
+  ok: boolean;
+  message: string | null; // null when ok === true
+}
+
+export interface SessionStatus {
+  level: SessionStatusLevel;
+  message: string;
+  adj: AdjStatus | null; // null = not checked
+}
+
 // Key format used to uniquely identify a measurement across boards: "BOARD/measurementId"
 export type SeriesKey = string;
 

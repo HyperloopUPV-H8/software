@@ -10,11 +10,21 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
 } from "@workspace/ui/components";
-import { BookOpen, ChevronDown, ExternalLink, GitCommit, Timer, X } from "@workspace/ui/icons";
+import {
+  AlertTriangle,
+  BookOpen,
+  ChevronDown,
+  ExternalLink,
+  GitCommit,
+  Timer,
+  X,
+} from "@workspace/ui/icons";
 import { cn } from "@workspace/ui/lib";
 import { useCallback, useRef, useState } from "react";
 import { useStore } from "../../store/store";
 import type { DroppedFile } from "../../types/session";
+import SessionStatusBadge from "./SessionStatusBadge";
+import { sessionStatusStyles } from "./sessionStatusStyles";
 
 // Backend writes dates as "2025-06-15T13-45-22" (dashes in time part).
 function formatSessionDate(raw: string): string {
@@ -69,6 +79,8 @@ const FolderPickerGroup = () => {
   const clearSession = useStore((s) => s.clearSession);
   const folderName = useStore((s) => s.folderName);
   const settings = useStore((s) => s.settings);
+  const availableSeries = useStore((s) => s.availableSeries);
+  const sessionStatus = useStore((s) => s.sessionStatus);
   const isLoading = useStore((s) => s.isLoading);
   const isSessionPanelOpen = useStore((s) => s.isSessionPanelOpen);
   const setSessionPanelOpen = useStore((s) => s.setSessionPanelOpen);
@@ -136,6 +148,14 @@ const FolderPickerGroup = () => {
           {/* Collapsed summary — inline, only visible when collapsed */}
           {folderName && (
             <span className="group-data-[state=open]/session:hidden flex min-w-0 items-center gap-1 truncate text-[10px] opacity-60">
+              {sessionStatus && (
+                <span
+                  className={cn(
+                    "size-1.5 shrink-0 rounded-full",
+                    sessionStatusStyles[sessionStatus.level].dotClass,
+                  )}
+                />
+              )}
               <span className="truncate font-medium">{folderName}</span>
               {settings && (
                 <>
@@ -183,6 +203,7 @@ const FolderPickerGroup = () => {
 
               <div className="text-muted-foreground pr-4">
                 <p className="text-foreground truncate font-medium">{folderName}</p>
+                {sessionStatus && <SessionStatusBadge status={sessionStatus} className="mt-1" />}
                 {settings && (
                   <div className="mt-1 space-y-0.5">
                     <p className="truncate">{formatSessionDate(settings.date)}</p>
@@ -223,8 +244,21 @@ const FolderPickerGroup = () => {
                       >
                         <BookOpen className="size-3 shrink-0" />
                       </button>
+                      {sessionStatus?.adj && !sessionStatus.adj.ok && (
+                        <span title={sessionStatus.adj.message ?? undefined}>
+                          <AlertTriangle className="size-3 shrink-0 text-amber-600 dark:text-amber-400" />
+                        </span>
+                      )}
                     </div>
                   </div>
+                )}
+                {!settings && Object.keys(availableSeries).length > 0 && (
+                  <p className="mt-1 truncate">
+                    {Object.keys(availableSeries).length} board
+                    {Object.keys(availableSeries).length !== 1 && "s"} ·{" "}
+                    {Object.values(availableSeries).reduce((n, ids) => n + ids.length, 0)} series
+                    (CSV-only)
+                  </p>
                 )}
                 <button
                   onClick={handleButtonClick}
