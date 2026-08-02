@@ -37,17 +37,44 @@ export const test = base.extend<ElectronFixtures>({
   // a mode is chosen. Send it directly instead of clicking a button, so this
   // doesn't depend on how many view folders the build produced.
   //
+  // If the build only contains one view (as the e2e "testing" build does),
+  // the selector's own renderer auto-sends that mode as soon as it loads
+  // (renderer/mode-selector/index.html), which can win the race against our
+  // explicit call and close the selector window before we reach it — so
+  // that call is best-effort. Windows are buffered from an event listener
+  // rather than awaited sequentially, since window creation can likewise
+  // outrun sequential `waitForEvent("window")` calls once a mode is picked.
+  //
   // createWindow() runs before createLogWindow() inside the "mode-selected"
-  // handler, so Control Station opens before Backend Logs.
+  // handler, so among the windows opened after the selector, the first is
+  // Control Station and the second is Backend Logs.
   windows: async ({ app }, use) => {
-    const selectorWindow = await app.firstWindow();
-    await selectorWindow.waitForLoadState("domcontentloaded");
-    await selectorWindow.evaluate(() =>
-      (window as any).electronAPI.setInitialMode("testing"),
-    );
+    const seen = new Set<Page>(app.windows());
+    app.on("window", (page) => seen.add(page));
 
-    const main = await app.waitForEvent("window");
-    const logs = await app.waitForEvent("window");
+    const selectorWindow = await app.firstWindow();
+    seen.add(selectorWindow);
+
+    try {
+      await selectorWindow.waitForLoadState("domcontentloaded");
+      await selectorWindow.evaluate(() =>
+        (window as any).electronAPI.setInitialMode("testing"),
+      );
+    } catch {
+      // Selector already auto-selected and closed itself — same outcome.
+    }
+
+    const start = Date.now();
+    while ([...seen].filter((p) => p !== selectorWindow).length < 2) {
+      if (Date.now() - start > 15000) {
+        throw new Error(
+          "Timed out waiting for Control Station and Backend Logs windows to open",
+        );
+      }
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+
+    const [main, logs] = [...seen].filter((p) => p !== selectorWindow);
 
     await main.waitForLoadState("domcontentloaded");
     await logs.waitForLoadState("domcontentloaded");
