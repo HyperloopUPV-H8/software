@@ -104,6 +104,7 @@ function setupIpcHandlers() {
       { mode: "testing", label: "Testing View" },
       { mode: "competition", label: "Competition View" },
       { mode: "flashing", label: "Flashing View" },
+      { mode: "logging", label: "Logging View" },
     ];
     const rendererDir = join(getAppPath(), "renderer");
     return ALL_VIEWS.filter(({ mode }) =>

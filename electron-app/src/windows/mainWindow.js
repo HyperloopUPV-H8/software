@@ -99,6 +99,7 @@ function loadView(view) {
       "competition-view": "Competition View",
       "testing-view": "Testing View",
       "flashing-view": "Flashing View",
+      "logging-view": "Logging View",
     };
     mainWindow.setTitle(
       `Hyperloop Control Station - ${titles[view] ?? view}`,

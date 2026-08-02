@@ -17,6 +17,7 @@ const VALID_MODES = {
   testing: "testing-view",
   flashing: "flashing-view",
   competition: "competition-view",
+  logging: "logging-view",
   default: "testing-view",
 };
 

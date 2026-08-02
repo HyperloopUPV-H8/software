@@ -90,6 +90,15 @@ const CONFIG = {
       "pnpm run build",
     ],
   },
+  "logging-view": {
+    type: "frontend",
+    path: join(ROOT, "frontend/logging-view"),
+    dest: join(__dirname, "renderer/logging-view"),
+    commands: [
+      "pnpm --filter logging-view install --frozen-lockfile",
+      "pnpm run build",
+    ],
+  },
 };
 
 // --- Helpers ---
