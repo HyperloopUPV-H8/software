@@ -26,6 +26,7 @@ import {
   Trash2,
 } from "@workspace/ui/icons";
 import { cn } from "@workspace/ui/lib";
+import logoIcon from "@workspace/ui/outreach/main/logo_icon.svg?inline";
 import Plotly from "plotly.js-dist";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { decimateLTTB } from "../../../lib/plotStudio/decimate";
@@ -159,7 +160,7 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
   const getVisibleRange = useCallback((): [number, number] | null => {
     const div = chartRef.current?.getDiv();
     if (!div) return null;
-    const gd = div as Plotly.PlotlyHTMLElement & { _fullLayout: Record<string, { range?: number[] }> };
+    const gd = div as unknown as Plotly.PlotlyHTMLElement & { _fullLayout: Record<string, { range?: number[] }> };
     const range = gd._fullLayout["xaxis"]?.range;
     if (!range || range.length < 2) return null;
     return [Math.min(range[0], range[1]), Math.max(range[0], range[1])];
@@ -307,7 +308,7 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
   const zoomAxis = useCallback((axis: "x" | "y1" | "y2", direction: "in" | "out") => {
     const div = chartRef.current?.getDiv();
     if (!div) return;
-    const gd = div as Plotly.PlotlyHTMLElement & { _fullLayout: Record<string, { range?: number[] }> };
+    const gd = div as unknown as Plotly.PlotlyHTMLElement & { _fullLayout: Record<string, { range?: number[] }> };
     const factor   = direction === "in" ? 0.7 : 1.4;
     const axisKey  = axis === "x" ? "xaxis" : axis === "y1" ? "yaxis" : "yaxis2";
     const rangeKey = axis === "x" ? "xaxis.range" : axis === "y1" ? "yaxis.range" : "yaxis2.range";
@@ -321,7 +322,7 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
   const resetZoom = useCallback(() => {
     const div = chartRef.current?.getDiv();
     if (!div) return;
-    Plotly.relayout(div, { "xaxis.autorange": true, "yaxis.autorange": true, "yaxis2.autorange": true });
+    Plotly.relayout(div, { "xaxis.autorange": true, "yaxis.autorange": true, "yaxis2.autorange": true } as Partial<Plotly.Layout>);
   }, []);
 
   // Exports always render in the light/academic theme regardless of the
@@ -335,20 +336,51 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
       theme: getPlotlyTheme(false),
       hasFFT, hasRightAxis, plotId: plot.id,
       leftUnits: axisUnits.left, rightUnits: axisUnits.right,
+      fontScale: 1.8,
     });
+    // Carry over whatever title the user typed via Plotly's click-to-edit —
+    // gd.layout is Plotly's live, mutated layout (relayout writes
+    // title.text into it), whereas exportLayout is rebuilt fresh from
+    // buildPlotLayout and starts blank.
+    const liveTitle = gd.layout?.title;
+    const liveTitleText = typeof liveTitle === "object" ? liveTitle?.text : liveTitle;
+    if (liveTitleText) exportLayout.title = { ...exportLayout.title, text: liveTitleText };
+
     const xRange  = gd._fullLayout["xaxis"]?.range;
     const yRange  = gd._fullLayout["yaxis"]?.range;
     const y2Range = gd._fullLayout["yaxis2"]?.range;
     if (xRange) exportLayout.xaxis = { ...exportLayout.xaxis, range: xRange, autorange: false };
     if (yRange) exportLayout.yaxis = { ...exportLayout.yaxis, range: yRange, autorange: false };
     if (y2Range && exportLayout.yaxis2) exportLayout.yaxis2 = { ...exportLayout.yaxis2, range: y2Range, autorange: false };
+
+    // Team branding watermark, bottom-right corner — export-only (not shown
+    // on the live/on-screen chart). Paper coords span the whole canvas
+    // (margins included), so x:1/y:0 with right/bottom anchors is the true
+    // image corner. ~260px square on the 2400x1600 export canvas.
+    exportLayout.images = [{
+      source: logoIcon,
+      xref: "paper", yref: "paper",
+      x: 0.99, y: 0.015,
+      xanchor: "right", yanchor: "bottom",
+      sizex: 0.11, sizey: 0.165,
+      opacity: 1,
+      layer: "above",
+    }];
+
     return { data: gd.data, layout: exportLayout };
   };
 
   const exportPNG = () => {
     const figure = buildExportFigure();
     if (!figure) return;
-    Plotly.downloadImage(figure, { format: "png", width: 2400, height: 1600, scale: 2, filename: `${plot.name}_${Date.now()}` });
+    // downloadImage's types don't expose `scale` (DownloadImgopts lacks it,
+    // unlike ToImgopts) even though Plotly supports it at runtime — go
+    // through toImage + a manual anchor download instead, matching the
+    // pattern the SVG export used before it was removed.
+    Plotly.toImage(figure, { format: "png", width: 2400, height: 1600, scale: 4 }).then((url) => {
+      const a = document.createElement("a");
+      a.href = url; a.download = `${plot.name}_${Date.now()}.png`; a.click();
+    });
   };
 
   const statsData = useMemo(
@@ -473,7 +505,7 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
                   <IconDownload />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Export PNG (2×)</TooltipContent>
+              <TooltipContent>Export PNG (4×)</TooltipContent>
             </Tooltip>
           </div>
 

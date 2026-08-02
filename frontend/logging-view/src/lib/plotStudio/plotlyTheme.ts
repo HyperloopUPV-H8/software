@@ -52,26 +52,42 @@ export interface BuildPlotLayoutParams {
   plotId: string;
   leftUnits: string | undefined;
   rightUnits: string | undefined;
+  // Uniformly scales font sizes and line/tick widths. The live chart always
+  // uses 1 (matches on-screen density); PNG export passes a larger value so
+  // text reads clearly at the export's fixed pixel size (see PlotWrapper's
+  // buildExportFigure).
+  fontScale?: number;
 }
 
 export function buildPlotLayout({
-  theme, hasFFT, hasRightAxis, plotId, leftUnits, rightUnits,
+  theme, hasFFT, hasRightAxis, plotId, leftUnits, rightUnits, fontScale = 1,
 }: BuildPlotLayoutParams): Partial<Plotly.Layout> {
+  // The live chart's plot area is only a few hundred px tall (resizable, user
+  // controlled), while export renders into a fixed 1600px-tall canvas — the
+  // same legend "y" fraction lands at very different pixel offsets from the
+  // x-axis on each, so the two need separately tuned gaps rather than one
+  // value scaled by fontScale.
+  const isExport = fontScale !== 1;
+  const marginBottom = isExport ? 110 * fontScale : 130;
+  const marginTop    = isExport ? 70 * fontScale  : 40 * fontScale;
+  const marginSide   = isExport ? 1.5 : 1; // extra breathing room around the export canvas only
+  const legendY = isExport ? -0.1 : -0.35;
   const base: Partial<Plotly.Layout> = {
     autosize: true,
     // Preserve zoom/pan across data changes (adding signals, stats, etc.);
     // reset only when the X-axis meaning flips between time and frequency.
     uirevision: hasFFT ? `${plotId}:fft` : plotId,
     paper_bgcolor: theme.paperBg, plot_bgcolor: theme.plotBg,
-    font: { color: theme.fontColor, family: FONT_FAMILY, size: 14 },
+    font: { color: theme.fontColor, family: FONT_FAMILY, size: 14 * fontScale },
     // Plot title stays editable (click-to-enter placeholder); Plotly's
     // subtitle prompt is hidden via CSS (.gtitle-subtitle in index.css)
     // since there's no config flag to disable just that piece.
-    title: {},
+    title: { font: { size: 22 * fontScale } },
     xaxis: {
-      title: { text: hasFFT ? "Frequency (Hz)" : "Time (ms)", font: { size: 16, color: theme.fontColor } },
-      gridcolor: theme.gridColor, linecolor: theme.neutralLineColor, linewidth: 1.5, mirror: true,
-      ticks: "outside", tickwidth: 1.5, tickcolor: theme.neutralLineColor, color: theme.neutralLineColor,
+      title: { text: hasFFT ? "Frequency (Hz)" : "Time (ms)", font: { size: 16 * fontScale, color: theme.fontColor } },
+      tickfont: { size: 14 * fontScale, color: theme.neutralLineColor },
+      gridcolor: theme.gridColor, linecolor: theme.neutralLineColor, linewidth: 1.5 * fontScale, mirror: true,
+      ticks: "outside", tickwidth: 1.5 * fontScale, tickcolor: theme.neutralLineColor, color: theme.neutralLineColor,
       showline: true, zeroline: false, fixedrange: false,
       exponentformat: "power", separatethousands: true,
     },
@@ -80,26 +96,30 @@ export function buildPlotLayout({
         text: hasRightAxis
           ? `Value (Left${leftUnits ? `, ${leftUnits}` : ""})`
           : `Value${leftUnits ? ` (${leftUnits})` : ""}`,
-        font: { size: 16, color: hasRightAxis ? LEFT_AXIS_ACCENT : theme.fontColor },
+        font: { size: 16 * fontScale, color: hasRightAxis ? LEFT_AXIS_ACCENT : theme.fontColor },
       },
-      gridcolor: theme.gridColor, linecolor: hasRightAxis ? LEFT_AXIS_ACCENT : theme.neutralLineColor, linewidth: 1.5, mirror: !hasRightAxis,
-      ticks: "outside", tickwidth: 1.5, tickcolor: hasRightAxis ? LEFT_AXIS_ACCENT : theme.neutralLineColor, color: hasRightAxis ? LEFT_AXIS_ACCENT : theme.neutralLineColor,
+      tickfont: { size: 14 * fontScale, color: hasRightAxis ? LEFT_AXIS_ACCENT : theme.neutralLineColor },
+      gridcolor: theme.gridColor, linecolor: hasRightAxis ? LEFT_AXIS_ACCENT : theme.neutralLineColor, linewidth: 1.5 * fontScale, mirror: !hasRightAxis,
+      ticks: "outside", tickwidth: 1.5 * fontScale, tickcolor: hasRightAxis ? LEFT_AXIS_ACCENT : theme.neutralLineColor, color: hasRightAxis ? LEFT_AXIS_ACCENT : theme.neutralLineColor,
       showline: true, zeroline: false, fixedrange: false,
       exponentformat: "power", separatethousands: true,
     },
-    margin: { l: 80, r: hasRightAxis ? 80 : 40, t: 40, b: 130 },
+    margin: {
+      l: 80 * fontScale * marginSide, r: (hasRightAxis ? 80 : 40) * fontScale * marginSide,
+      t: marginTop, b: marginBottom,
+    },
     // Unified hover: one label per signal at the same X — much easier to
     // compare synchronized measurements than per-point "closest" mode.
     hovermode: "x unified",
     hoverlabel: {
       bgcolor: theme.hoverBg,
       bordercolor: theme.hoverBorder,
-      font: { family: FONT_FAMILY, size: 12, color: theme.hoverFontColor },
+      font: { family: FONT_FAMILY, size: 12 * fontScale, color: theme.hoverFontColor },
     },
     showlegend: true,
     legend: {
-      bgcolor: theme.legendBg, bordercolor: theme.legendBorder, borderwidth: 1, font: { size: 13, color: theme.legendFontColor },
-      orientation: "h", x: 1, xanchor: "right", y: -0.35, yanchor: "top",
+      bgcolor: theme.legendBg, bordercolor: theme.legendBorder, borderwidth: 1, font: { size: 13 * fontScale, color: theme.legendFontColor },
+      orientation: "h", x: 1, xanchor: "right", y: legendY, yanchor: "top",
     },
   };
   if (theme.modebar) {
@@ -107,9 +127,10 @@ export function buildPlotLayout({
   }
   if (hasRightAxis) {
     base.yaxis2 = {
-      title: { text: `Value (Right${rightUnits ? `, ${rightUnits}` : ""})`, font: { size: 16, color: RIGHT_AXIS_ACCENT } },
+      title: { text: `Value (Right${rightUnits ? `, ${rightUnits}` : ""})`, font: { size: 16 * fontScale, color: RIGHT_AXIS_ACCENT } },
+      tickfont: { size: 14 * fontScale, color: RIGHT_AXIS_ACCENT },
       overlaying: "y", side: "right", gridcolor: "transparent",
-      linecolor: RIGHT_AXIS_ACCENT, linewidth: 1.5, ticks: "outside", tickwidth: 1.5,
+      linecolor: RIGHT_AXIS_ACCENT, linewidth: 1.5 * fontScale, ticks: "outside", tickwidth: 1.5 * fontScale,
       tickcolor: RIGHT_AXIS_ACCENT, color: RIGHT_AXIS_ACCENT, showline: true, zeroline: false, fixedrange: false,
       exponentformat: "power", separatethousands: true,
     };
