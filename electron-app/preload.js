@@ -26,8 +26,9 @@ const { contextBridge, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld("electronAPI", {
   // Get the currently loaded view name
   getCurrentView: () => ipcRenderer.invoke("get-current-view"),
-  // Switch to a different view by name
-  switchView: (view) => ipcRenderer.invoke("switch-view", view),
+  // Switch to a different view by name, optionally passing query params
+  // through to the loaded view's URL (e.g. an ADJ commit hash)
+  switchView: (view, query) => ipcRenderer.invoke("switch-view", view, query),
   // Save configuration object to file
   saveConfig: (config) => ipcRenderer.invoke("save-config", config),
   // Get current configuration object

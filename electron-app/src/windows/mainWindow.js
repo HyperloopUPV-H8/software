@@ -4,10 +4,11 @@
  * Handles creation, view loading, and window state management.
  */
 
-import { BrowserWindow, app, dialog } from "electron";
+import { BrowserWindow, Menu, app, dialog } from "electron";
 import fs from "fs";
 import path from "path";
 import { getAppPath } from "../utils/paths.js";
+import { showAboutWindow } from "./aboutWindow.js";
 
 // Get the application root path
 const appPath = getAppPath();
@@ -46,6 +47,20 @@ function createWindow(screenWidth, screenHeight, initialView) {
     backgroundColor: "#1a1a1a",
   });
 
+  // Right-click anywhere in the view to reach About — only offered in
+  // logging-view, since the About window credits its author specifically
+  // (not the Control Station as a whole).
+  mainWindow.webContents.on("context-menu", (_event, _params) => {
+    if (currentView !== "logging-view") return;
+    const contextMenu = Menu.buildFromTemplate([
+      {
+        label: "About",
+        click: () => showAboutWindow(mainWindow),
+      },
+    ]);
+    contextMenu.popup({ window: mainWindow });
+  });
+
   // If an initial view string is provided, load it.
   // If `initialView` is explicitly null, skip loading so caller can decide later.
   if (typeof initialView === "string") {
@@ -77,12 +92,15 @@ function createWindow(screenWidth, screenHeight, initialView) {
 /**
  * Loads a specific view into the main window.
  * @param {string} view - The name of the view to load (e.g., "ethernet-view", "control-station").
+ * @param {{ query?: Record<string, string> }} [opts] - Optional load options.
+ *   `query` is appended as a query string (e.g. adj-view's initial commit hash),
+ *   readable in the renderer via `new URLSearchParams(window.location.search)`.
  * @returns {void}
  * @example
  * loadView("control-station");
- * loadView("ethernet-view");
+ * loadView("adj-view", { query: { commit: "abc123" } });
  */
-function loadView(view) {
+function loadView(view, opts = {}) {
   // Update current view tracking
   currentView = view;
   // Construct path to view HTML file
@@ -93,12 +111,18 @@ function loadView(view) {
   // Check if view file exists
   if (fs.existsSync(viewPath)) {
     // Load the view HTML file
-    mainWindow.loadFile(viewPath);
+    if (opts.query) {
+      mainWindow.loadFile(viewPath, { query: opts.query });
+    } else {
+      mainWindow.loadFile(viewPath);
+    }
     // Update window title based on view type
     const titles = {
       "competition-view": "Competition View",
       "testing-view": "Testing View",
       "flashing-view": "Flashing View",
+      "logging-view": "Logging View",
+      "adj-view": "ADJ Viewer",
     };
     mainWindow.setTitle(
       `Hyperloop Control Station - ${titles[view] ?? view}`,

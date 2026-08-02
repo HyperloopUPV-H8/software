@@ -1,9 +1,11 @@
 packages:
-  # frontend
-  - frontend/frontend-kit/**
-  - frontend/testing-view
-  - frontend/competition-view
-  - frontend/flashing-view
+  # Frontend packages
+  - "frontend/frontend-kit/**"
+  - "frontend/testing-view"
+  - "frontend/competition-view"
+  - "frontend/logging-view"
+  - "frontend/flashing-view"
+  - "frontend/adj-view"
 
   # Backend packages
   - "backend"

@@ -1,0 +1,18 @@
+// Config and plot creation improvements  
+const config = {
+    responsive: true,
+    displayModeBar: true,
+    displaylogo: false,
+    modeBarButtonsToRemove: ['select2d', 'lasso2d'],
+    toImageButtonOptions: {
+        format: 'svg',
+        width: 1200,
+        height: 800,
+        scale: 1
+    }
+};
+
+Plotly.newPlot(container, traces, layout, config);
+
+// Add resize functionality
+makeResizable(container);

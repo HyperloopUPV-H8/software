@@ -2,7 +2,7 @@ import { Badge, Button, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger
 import { FileCode2, Loader2, SunMoon, Upload } from "@workspace/ui/icons";
 import { cn } from "@workspace/ui/lib/utils";
 import { useEffect, useRef, useState } from "react";
-import logo from "../../assets/logo.svg";
+import logo from "@workspace/ui/outreach/h11/h11-isotipo_black.svg";
 import { BoardCard } from "./components/board-card";
 import { SectionCard } from "./components/section-card";
 import type { Board, BoardsResponse, GeneralState, OperationalState } from "./types";
