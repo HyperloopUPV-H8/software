@@ -25,18 +25,31 @@ import {
 import { Activity, Eye, EyeOff, GripVertical, Plus, Trash2, X } from "@workspace/ui/icons";
 import { cn } from "@workspace/ui/lib";
 import { useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { resolveSignalColor } from "../../../lib/plotStudio/palette";
 import { getSignalName } from "../../../lib/plotStudio/units";
+import { getSignal } from "../../../store/slices/plotStudioSlice";
 import { useStore } from "../../../store/store";
 import { useSignalLoader } from "../hooks/useStudioSignals";
 import SignalSelect from "../SignalSelect";
 
 export default function PlotsSection() {
   const studioPlots      = useStore((s) => s.studioPlots);
-  const studioFiles      = useStore((s) => s.studioFiles);
-  const studioOperations = useStore((s) => s.studioOperations);
-  const studioTransforms = useStore((s) => s.studioTransforms);
   const adjData = useStore((s) => s.adjData);
+  // Display names only, keyed by signalId — not the full signal objects (with
+  // their data arrays) — so this list only re-renders when a name assigned to
+  // one of *these* signals actually changes, not on every unrelated file/
+  // operation/transform mutation elsewhere in the store.
+  const signalNames = useStore(
+    useShallow((s) => {
+      const names: Record<string, string> = {};
+      s.studioPlots.forEach((p) => p.signals.forEach((sig) => {
+        if (names[sig.signalId] !== undefined) return;
+        names[sig.signalId] = getSignal(sig.signalId, s)?.name ?? sig.signalId;
+      }));
+      return names;
+    }),
+  );
   const addStudioPlot              = useStore((s) => s.addStudioPlot);
   const removeStudioPlot           = useStore((s) => s.removeStudioPlot);
   const toggleStudioPlotHidden     = useStore((s) => s.toggleStudioPlotHidden);
@@ -157,7 +170,6 @@ export default function PlotsSection() {
           {plot.signals.length > 0 && (
             <div className="flex flex-col gap-1 px-2 py-2">
               {plot.signals.map((sig, idx) => {
-                const signal = studioFiles.get(sig.signalId) ?? studioOperations.get(sig.signalId) ?? studioTransforms.get(sig.signalId);
                 // Ref to the hidden-ish color input, so the context menu's
                 // "Change Color" item can open the same native picker.
                 let colorInputEl: HTMLInputElement | null = null;
@@ -181,7 +193,7 @@ export default function PlotsSection() {
                       <TooltipContent side="left">Signal color</TooltipContent>
                     </Tooltip>
                     <span className="text-foreground min-w-0 flex-1 truncate text-[11px] font-medium">
-                      {getSignalName(adjData, sig.signalId) ?? shortName(signal?.name ?? sig.signalId)}
+                      {getSignalName(adjData, sig.signalId) ?? shortName(signalNames[sig.signalId] ?? sig.signalId)}
                     </span>
                     <div className="flex shrink-0 items-center gap-1">
                       <Select

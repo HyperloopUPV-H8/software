@@ -28,7 +28,8 @@ import {
 import { cn } from "@workspace/ui/lib";
 import logoIcon from "@workspace/ui/outreach/main/logo_icon.svg?inline";
 import Plotly from "plotly.js-dist";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { decimateLTTB } from "../../../lib/plotStudio/decimate";
 import { computeFFT } from "../../../lib/plotStudio/fft";
 import { traceColor, resolveSignalColor } from "../../../lib/plotStudio/palette";
@@ -36,7 +37,7 @@ import { buildPlotLayout, buildTimelineLayout, getPlotlyTheme } from "../../../l
 import { lowerBound, upperBound } from "../../../lib/plotStudio/range";
 import { computeStateSegments, isDiscreteSeries, stateLabel } from "../../../lib/plotStudio/timeline";
 import { commonUnits, getEnumLabels, getSignalName, getSignalType, getSignalUnits, isDiscreteMeasurement, unitsMismatch } from "../../../lib/plotStudio/units";
-import { displayName, getSignalData } from "../../../store/slices/plotStudioSlice";
+import { displayName, getSignal } from "../../../store/slices/plotStudioSlice";
 import { useStore } from "../../../store/store";
 import type { PlotState } from "../../../types/plotStudio";
 import StatsPanel from "../StatsPanel";
@@ -111,10 +112,14 @@ function exportTimestamp(): string {
 
 interface PlotWrapperProps { plot: PlotState }
 
-export default function PlotWrapper({ plot }: PlotWrapperProps) {
-  const studioFiles      = useStore((s) => s.studioFiles);
-  const studioOperations = useStore((s) => s.studioOperations);
-  const studioTransforms = useStore((s) => s.studioTransforms);
+function PlotWrapper({ plot }: PlotWrapperProps) {
+  // Only the signals this plot actually uses — resolved from the shared
+  // studioFiles/studioOperations/studioTransforms Maps via useShallow, so an
+  // unrelated edit elsewhere (another plot's signal, a new file) doesn't
+  // invalidate this component just because those Maps got a new reference.
+  const resolvedSignals = useStore(
+    useShallow((s) => plot.signals.map((sig) => getSignal(sig.signalId, s))),
+  );
   const fftSampleRateOverride = useStore((s) => s.fftSampleRateOverride);
   const adjData = useStore((s) => s.adjData);
   const removeStudioPlot = useStore((s) => s.removeStudioPlot);
@@ -165,9 +170,9 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
     if (getSignalType(adjData, firstSignal.signalId) !== undefined) {
       return isDiscreteMeasurement(adjData, firstSignal.signalId);
     }
-    const data = getSignalData(firstSignal.signalId, { studioFiles, studioOperations, studioTransforms });
+    const data = resolvedSignals[0]?.data;
     return !!data && isDiscreteSeries(data);
-  }, [hasFFT, firstSignal, adjData, studioFiles, studioOperations, studioTransforms]);
+  }, [hasFFT, firstSignal, adjData, resolvedSignals]);
 
   // Units are only meaningful in time-domain mode — an FFT'd plot shows
   // magnitude, not any signal's source unit.
@@ -197,11 +202,11 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
   // the timeline traces below and buildTimelineLayout's categorical y-axis.
   const timelineRowLabels = useMemo(
     () =>
-      plot.signals.map((sig) => {
-        const signal = studioFiles.get(sig.signalId) ?? studioOperations.get(sig.signalId) ?? studioTransforms.get(sig.signalId);
+      plot.signals.map((sig, idx) => {
+        const signal = resolvedSignals[idx];
         return getSignalName(adjData, sig.signalId) ?? displayName(signal?.name ?? sig.signalId);
       }),
-    [plot.signals, studioFiles, studioOperations, studioTransforms, adjData],
+    [plot.signals, resolvedSignals, adjData],
   );
 
   const timelineTraces = useMemo<Plotly.Data[]>(() => {
@@ -212,7 +217,7 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
     // numeric code).
     const allSegments: { row: string; start: number; end: number; value: number; label: string; hoverText: string }[] = [];
     plot.signals.forEach((sig, idx) => {
-      const data = getSignalData(sig.signalId, { studioFiles, studioOperations, studioTransforms });
+      const data = resolvedSignals[idx]?.data;
       if (!data || data.value.length < 1) return;
       const enumLabels = getEnumLabels(adjData, sig.signalId);
       const row = timelineRowLabels[idx];
@@ -242,14 +247,14 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
         hovertemplate: "%{y}<br>%{text}<extra></extra>",
       };
     });
-  }, [hasTimeline, plot.signals, studioFiles, studioOperations, studioTransforms, adjData, timelineRowLabels]);
+  }, [hasTimeline, plot.signals, resolvedSignals, adjData, timelineRowLabels]);
 
   const traces = useMemo<Plotly.Data[]>(
     () =>
       hasTimeline ? timelineTraces : plot.signals.flatMap((sig, idx) => {
-        const data = getSignalData(sig.signalId, { studioFiles, studioOperations, studioTransforms });
+        const signal = resolvedSignals[idx];
+        const data = signal?.data;
         if (!data || data.value.length < 2) return [];
-        const signal = studioFiles.get(sig.signalId) ?? studioOperations.get(sig.signalId) ?? studioTransforms.get(sig.signalId);
         let name = getSignalName(adjData, sig.signalId) ?? displayName(signal?.name ?? sig.signalId);
         const color = resolveSignalColor(sig.color, idx);
         // Axis title can't show a unit when signals on it disagree — put each
@@ -310,7 +315,7 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
           yaxis: sig.yAxis === "right" ? ("y2" as const) : ("y" as const),
         }];
       }),
-    [plot.signals, studioFiles, studioOperations, studioTransforms, fftSampleRateOverride, adjData, axisUnits, hasFFT, hasTimeline, timelineTraces, visibleRange],
+    [plot.signals, resolvedSignals, fftSampleRateOverride, adjData, axisUnits, hasFFT, hasTimeline, timelineTraces, visibleRange],
   );
 
   const hasTraces = traces.length > 0;
@@ -472,12 +477,12 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
 
   const statsData = useMemo(
     () => plot.signals.map((sig, idx) => {
-      const data   = getSignalData(sig.signalId, { studioFiles, studioOperations, studioTransforms });
-      const signal = studioFiles.get(sig.signalId) ?? studioOperations.get(sig.signalId) ?? studioTransforms.get(sig.signalId);
+      const signal = resolvedSignals[idx];
+      const data = signal?.data ?? null;
       const name = getSignalName(adjData, sig.signalId) ?? displayName(signal?.name ?? sig.signalId);
       return { signalId: sig.signalId, name, data, color: resolveSignalColor(sig.color, idx) };
     }),
-    [plot.signals, studioFiles, studioOperations, studioTransforms, adjData],
+    [plot.signals, resolvedSignals, adjData],
   );
 
   return (
@@ -675,3 +680,5 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
     </ContextMenu>
   );
 }
+
+export default memo(PlotWrapper);

@@ -59,6 +59,7 @@ export const createPlotStudioSlice: StateCreator<PlotStudioSlice> = (set) => ({
       nextFiles.delete(name);
       const nextPlots = new Map(s.studioPlots);
       nextPlots.forEach((plot, id) => {
+        if (!plot.signals.some((sig) => sig.signalId === name)) return;
         nextPlots.set(id, {
           ...plot,
           signals: plot.signals.filter((sig) => sig.signalId !== name),
@@ -81,6 +82,7 @@ export const createPlotStudioSlice: StateCreator<PlotStudioSlice> = (set) => ({
       nextOps.delete(id);
       const nextPlots = new Map(s.studioPlots);
       nextPlots.forEach((plot, plotId) => {
+        if (!plot.signals.some((sig) => sig.signalId === id)) return;
         nextPlots.set(plotId, {
           ...plot,
           signals: plot.signals.filter((sig) => sig.signalId !== id),
@@ -103,6 +105,7 @@ export const createPlotStudioSlice: StateCreator<PlotStudioSlice> = (set) => ({
       nextTrs.delete(id);
       const nextPlots = new Map(s.studioPlots);
       nextPlots.forEach((plot, plotId) => {
+        if (!plot.signals.some((sig) => sig.signalId === id)) return;
         nextPlots.set(plotId, {
           ...plot,
           signals: plot.signals.filter((sig) => sig.signalId !== id),
@@ -227,17 +230,20 @@ export const createPlotStudioSlice: StateCreator<PlotStudioSlice> = (set) => ({
   setStudioFFTSampleRate: (rate) => set({ fftSampleRateOverride: rate }),
 });
 
+// Helper: resolve a signal (file/operation/transform) from store state
+export function getSignal(
+  id: string,
+  state: Pick<PlotStudioSlice, "studioFiles" | "studioOperations" | "studioTransforms">,
+): FileSignal | Operation | Transform | undefined {
+  return state.studioFiles.get(id) ?? state.studioOperations.get(id) ?? state.studioTransforms.get(id);
+}
+
 // Helper: get signal data from store state
 export function getSignalData(
   id: string,
   state: Pick<PlotStudioSlice, "studioFiles" | "studioOperations" | "studioTransforms">,
 ) {
-  return (
-    state.studioFiles.get(id)?.data ??
-    state.studioOperations.get(id)?.data ??
-    state.studioTransforms.get(id)?.data ??
-    null
-  );
+  return getSignal(id, state)?.data ?? null;
 }
 
 // Helper: all signals unified
