@@ -1,10 +1,8 @@
+// Tab-based ADJ archive browser (Boards / Measurements / Packets / General).
+// Pure data-in component — the page hosting it owns commit-hash fetching,
+// loading/error states, and header chrome.
 import {
   Badge,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
   Input,
   Tabs,
   TabsContent,
@@ -13,7 +11,6 @@ import {
 } from "@workspace/ui/components";
 import {
   Activity,
-  BookOpen,
   ChevronDown,
   ChevronRight,
   ChevronUp,
@@ -25,12 +22,11 @@ import {
 } from "@workspace/ui/icons";
 import { cn, getTypeBadgeClass, typeBadgeClasses } from "@workspace/ui/lib";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useStore } from "../../store/store";
-import type { AdjArchive, AdjMeasurement, AdjPacket } from "../../types/session";
+import type { AdjArchive, AdjMeasurement, AdjPacket } from "../types/adj";
 
 // ─── types ───────────────────────────────────────────────────────────────────
 
-type BoardMeta = {
+export type BoardMeta = {
   name: string;
   id: number;
   ip: string;
@@ -44,7 +40,7 @@ type SortDir = "asc" | "desc";
 
 // ─── data helpers ─────────────────────────────────────────────────────────────
 
-function extractBoards(adjData: AdjArchive): BoardMeta[] {
+export function extractBoards(adjData: AdjArchive): BoardMeta[] {
   return Object.entries(adjData.boards)
     .map(([boardName, boardGroup]) => {
       const g = boardGroup as Record<string, unknown>;
@@ -751,17 +747,10 @@ function useKeyboardSearch(ref: React.RefObject<HTMLInputElement | null>) {
   }, [ref]);
 }
 
-// ─── main dialog ─────────────────────────────────────────────────────────────
+// ─── main tabs component ─────────────────────────────────────────────────────
 
-interface AdjViewerDialogProps {
-  children: React.ReactNode;
-}
-
-export const AdjViewerDialog = ({ children }: AdjViewerDialogProps) => {
-  const adjData = useStore((s) => s.adjData);
-  const settings = useStore((s) => s.settings);
-
-  const boards = useMemo(() => (adjData ? extractBoards(adjData) : []), [adjData]);
+export const AdjViewerTabs = ({ adjData }: { adjData: AdjArchive }) => {
+  const boards = useMemo(() => extractBoards(adjData), [adjData]);
 
   // Lifted state for cross-tab navigation
   const [activeTab, setActiveTab] = useState("boards");
@@ -772,70 +761,36 @@ export const AdjViewerDialog = ({ children }: AdjViewerDialogProps) => {
     setActiveTab("measurements");
   }, []);
 
-  const totalMeasurements = boards.reduce((s, b) => s + b.measurements.length, 0);
-  const totalPackets = boards.reduce((s, b) => s + b.packets.length + b.orders.length, 0);
-
   return (
-    <Dialog>
-      <DialogTrigger asChild>{children}</DialogTrigger>
-      {/* sm:max-w-4xl overrides default sm:max-w-lg; flex flex-col overrides grid */}
-      <DialogContent className="flex h-[85vh] flex-col gap-0 p-0 sm:max-w-4xl">
-        <DialogHeader className="shrink-0 border-b px-6 py-4">
-          <DialogTitle className="flex flex-wrap items-center gap-2">
-            <BookOpen className="text-primary size-4" />
-            ADJ Viewer
-            {settings && (
-              <span className="text-muted-foreground font-mono text-xs font-normal">
-                {settings.adj_commit_hash.slice(0, 7)}
-              </span>
-            )}
-            {adjData && (
-              <div className="text-muted-foreground ml-auto flex gap-3 pr-6 text-[11px] font-normal">
-                <span><span className="text-foreground font-semibold">{boards.length}</span> boards</span>
-                <span><span className="text-foreground font-semibold">{totalMeasurements}</span> measurements</span>
-                <span><span className="text-foreground font-semibold">{totalPackets}</span> packets</span>
-              </div>
-            )}
-          </DialogTitle>
-        </DialogHeader>
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col gap-0">
+      <TabsList className="mb-4 w-fit shrink-0">
+        <TabsTrigger value="boards" className="gap-1.5 text-xs">
+          <Cpu className="size-3.5" /> Boards
+        </TabsTrigger>
+        <TabsTrigger value="measurements" className="gap-1.5 text-xs">
+          <Activity className="size-3.5" /> Measurements
+        </TabsTrigger>
+        <TabsTrigger value="packets" className="gap-1.5 text-xs">
+          <Network className="size-3.5" /> Packets
+        </TabsTrigger>
+        <TabsTrigger value="general" className="gap-1.5 text-xs">
+          <Server className="size-3.5" /> General
+        </TabsTrigger>
+      </TabsList>
 
-        {adjData ? (
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col gap-0 px-6 pt-4">
-            <TabsList className="mb-4 w-fit shrink-0">
-              <TabsTrigger value="boards" className="gap-1.5 text-xs">
-                <Cpu className="size-3.5" /> Boards
-              </TabsTrigger>
-              <TabsTrigger value="measurements" className="gap-1.5 text-xs">
-                <Activity className="size-3.5" /> Measurements
-              </TabsTrigger>
-              <TabsTrigger value="packets" className="gap-1.5 text-xs">
-                <Network className="size-3.5" /> Packets
-              </TabsTrigger>
-              <TabsTrigger value="general" className="gap-1.5 text-xs">
-                <Server className="size-3.5" /> General
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="boards" className="min-h-0 flex-1 overflow-hidden pb-4">
-              <BoardsTab boards={boards} onJumpToMeasurements={handleJumpToMeasurements} />
-            </TabsContent>
-            {/* key remounts MeasurementsTab on cross-tab jump so initialBoardFilter takes effect cleanly */}
-            <TabsContent value="measurements" className="min-h-0 flex-1 overflow-hidden pb-4">
-              <MeasurementsTab key={[...jumpBoardFilter].join(",")} boards={boards} initialBoardFilter={jumpBoardFilter} />
-            </TabsContent>
-            <TabsContent value="packets" className="min-h-0 flex-1 overflow-hidden pb-4">
-              <PacketsTab boards={boards} />
-            </TabsContent>
-            <TabsContent value="general" className="min-h-0 flex-1 overflow-hidden pb-4">
-              <GeneralTab adjData={adjData} />
-            </TabsContent>
-          </Tabs>
-        ) : (
-          <div className="text-muted-foreground flex flex-1 items-center justify-center text-sm">
-            No session loaded.
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+      <TabsContent value="boards" className="min-h-0 flex-1 overflow-hidden pb-4">
+        <BoardsTab boards={boards} onJumpToMeasurements={handleJumpToMeasurements} />
+      </TabsContent>
+      {/* key remounts MeasurementsTab on cross-tab jump so initialBoardFilter takes effect cleanly */}
+      <TabsContent value="measurements" className="min-h-0 flex-1 overflow-hidden pb-4">
+        <MeasurementsTab key={[...jumpBoardFilter].join(",")} boards={boards} initialBoardFilter={jumpBoardFilter} />
+      </TabsContent>
+      <TabsContent value="packets" className="min-h-0 flex-1 overflow-hidden pb-4">
+        <PacketsTab boards={boards} />
+      </TabsContent>
+      <TabsContent value="general" className="min-h-0 flex-1 overflow-hidden pb-4">
+        <GeneralTab adjData={adjData} />
+      </TabsContent>
+    </Tabs>
   );
 };

@@ -92,12 +92,15 @@ function createWindow(screenWidth, screenHeight, initialView) {
 /**
  * Loads a specific view into the main window.
  * @param {string} view - The name of the view to load (e.g., "ethernet-view", "control-station").
+ * @param {{ query?: Record<string, string> }} [opts] - Optional load options.
+ *   `query` is appended as a query string (e.g. adj-view's initial commit hash),
+ *   readable in the renderer via `new URLSearchParams(window.location.search)`.
  * @returns {void}
  * @example
  * loadView("control-station");
- * loadView("ethernet-view");
+ * loadView("adj-view", { query: { commit: "abc123" } });
  */
-function loadView(view) {
+function loadView(view, opts = {}) {
   // Update current view tracking
   currentView = view;
   // Construct path to view HTML file
@@ -108,13 +111,18 @@ function loadView(view) {
   // Check if view file exists
   if (fs.existsSync(viewPath)) {
     // Load the view HTML file
-    mainWindow.loadFile(viewPath);
+    if (opts.query) {
+      mainWindow.loadFile(viewPath, { query: opts.query });
+    } else {
+      mainWindow.loadFile(viewPath);
+    }
     // Update window title based on view type
     const titles = {
       "competition-view": "Competition View",
       "testing-view": "Testing View",
       "flashing-view": "Flashing View",
       "logging-view": "Logging View",
+      "adj-view": "ADJ Viewer",
     };
     mainWindow.setTitle(
       `Hyperloop Control Station - ${titles[view] ?? view}`,

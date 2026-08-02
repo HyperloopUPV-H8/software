@@ -9,6 +9,7 @@
     "build:competition-view": "turbo build --filter=competition-view",
     "build:flashing-view": "turbo build --filter=flashing-view",
     "build:logging-view": "turbo build --filter=logging-view",
+    "build:adj-view": "turbo build --filter=adj-view",
     "build:win": "pnpm --filter hyperloop-control-station build:win",
     "build:linux": "pnpm --filter hyperloop-control-station build:linux",
     "build:mac": "pnpm --filter hyperloop-control-station build:mac",

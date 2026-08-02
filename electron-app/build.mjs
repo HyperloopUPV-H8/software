@@ -99,6 +99,15 @@ const CONFIG = {
       "pnpm run build",
     ],
   },
+  "adj-view": {
+    type: "frontend",
+    path: join(ROOT, "frontend/adj-view"),
+    dest: join(__dirname, "renderer/adj-view"),
+    commands: [
+      "pnpm --filter adj-view install --frozen-lockfile",
+      "pnpm run build",
+    ],
+  },
 };
 
 // --- Helpers ---
