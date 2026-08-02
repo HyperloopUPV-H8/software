@@ -8,7 +8,7 @@ import {
 } from "@workspace/ui/components";
 import { Info } from "lucide-react";
 import { useState } from "react";
-import logo from "../../assets/logo.svg";
+import logo from "@workspace/ui/outreach/h11/h11-isotipo_black.svg";
 
 /**
  * Sidebar footer item that opens the About dialog with team credits.

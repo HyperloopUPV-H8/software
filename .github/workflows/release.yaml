@@ -22,6 +22,14 @@ on:
         description: "Include Flashing View"
         type: boolean
         default: true
+      include-logging:
+        description: "Include Logging View"
+        type: boolean
+        default: true
+      include-adj:
+        description: "Include ADJ Viewer"
+        type: boolean
+        default: true
 
 
 jobs:
@@ -34,6 +42,8 @@ jobs:
       include_testing: ${{ steps.get_version.outputs.include_testing }}
       include_competition: ${{ steps.get_version.outputs.include_competition }}
       include_flashing: ${{ steps.get_version.outputs.include_flashing }}
+      include_logging: ${{ steps.get_version.outputs.include_logging }}
+      include_adj: ${{ steps.get_version.outputs.include_adj }}
     steps:
       - name: Determine version
         id: get_version
@@ -43,6 +53,8 @@ jobs:
           echo "include_testing=${{ github.event.inputs.include-testing }}" >> $GITHUB_OUTPUT
           echo "include_competition=${{ github.event.inputs.include-competition }}" >> $GITHUB_OUTPUT
           echo "include_flashing=${{ github.event.inputs.include-flashing }}" >> $GITHUB_OUTPUT
+          echo "include_logging=${{ github.event.inputs.include-logging }}" >> $GITHUB_OUTPUT
+          echo "include_adj=${{ github.event.inputs.include-adj }}" >> $GITHUB_OUTPUT
 
   create-draft-release:
     name: Create Draft Release
@@ -95,6 +107,12 @@ jobs:
           if [ "${{ needs.determine-version.outputs.include_flashing }}" = "true" ]; then
             FILTERS="$FILTERS --filter=flashing-view"
           fi
+          if [ "${{ needs.determine-version.outputs.include_logging }}" = "true" ]; then
+            FILTERS="$FILTERS --filter=logging-view"
+          fi
+          if [ "${{ needs.determine-version.outputs.include_adj }}" = "true" ]; then
+            FILTERS="$FILTERS --filter=adj-view"
+          fi
           pnpm turbo build $FILTERS
 
       - uses: actions/upload-artifact@v4
@@ -116,6 +134,20 @@ jobs:
         with:
           name: flashing-dist
           path: frontend/flashing-view/dist/**
+          retention-days: 1
+
+      - uses: actions/upload-artifact@v4
+        if: needs.determine-version.outputs.include_logging == 'true'
+        with:
+          name: logging-dist
+          path: frontend/logging-view/dist/**
+          retention-days: 1
+
+      - uses: actions/upload-artifact@v4
+        if: needs.determine-version.outputs.include_adj == 'true'
+        with:
+          name: adj-dist
+          path: frontend/adj-view/dist/**
           retention-days: 1
 
   build-backend:
@@ -299,6 +331,20 @@ jobs:
         with:
           name: flashing-dist
           path: electron-app/renderer/flashing-view
+
+      - name: Download logging-view dist
+        if: needs.determine-version.outputs.include_logging == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: logging-dist
+          path: electron-app/renderer/logging-view
+
+      - name: Download adj-view dist
+        if: needs.determine-version.outputs.include_adj == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: adj-dist
+          path: electron-app/renderer/adj-view
 
       - uses: pnpm/action-setup@v4
         with:

@@ -12,7 +12,6 @@ export * from "./gaming";
 export * from "./layout";
 export * from "./mail";
 export * from "./math";
-export * from "./medical";
 export * from "./notifications";
 export * from "./photography";
 export * from "./science";

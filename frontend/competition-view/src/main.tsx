@@ -11,3 +11,6 @@ createRoot(document.getElementById("root")!).render(
     </HashRouter>
   </StrictMode>,
 );
+
+// Logging View
+// Javier Ribal del Río (@JavierRibaldelRio) - H11 - Main author

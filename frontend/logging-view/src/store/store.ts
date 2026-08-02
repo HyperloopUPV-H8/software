@@ -1,0 +1,54 @@
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { createAppSlice, type AppSlice } from "./slices/appSlice";
+import { createCatalogSlice, type CatalogSlice } from "./slices/catalogSlice";
+import {
+  createConnectionsSlice,
+  type ConnectionsSlice,
+} from "./slices/connectionsSlice";
+import {
+  createMessagesSlice,
+  type MessagesSlice,
+} from "./slices/messagesSlice";
+import {
+  createPlotStudioSlice,
+  type PlotStudioSlice,
+} from "./slices/plotStudioSlice";
+import {
+  createSessionSlice,
+  type SessionSlice,
+} from "./slices/sessionSlice";
+import {
+  createTelemetrySlice,
+  type TelemetrySlice,
+} from "./slices/telemetrySlice";
+
+export type Store = AppSlice &
+  CatalogSlice &
+  ConnectionsSlice &
+  MessagesSlice &
+  PlotStudioSlice &
+  SessionSlice &
+  TelemetrySlice;
+
+export const useStore = create<Store>()(
+  persist(
+    (...a) => ({
+      ...createAppSlice(...a),
+      ...createCatalogSlice(...a),
+      ...createConnectionsSlice(...a),
+      ...createMessagesSlice(...a),
+      ...createPlotStudioSlice(...a),
+      ...createSessionSlice(...a),
+      ...createTelemetrySlice(...a),
+    }),
+    {
+      name: "competition-view-storage",
+      version: 1,
+      // Only persist lightweight user-preference data, never live telemetry.
+      partialize: (state) => ({
+        isDarkMode: state.isDarkMode,
+      }),
+    },
+  ),
+);
