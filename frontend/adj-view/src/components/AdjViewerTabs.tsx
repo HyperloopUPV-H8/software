@@ -16,13 +16,15 @@ import {
   ChevronUp,
   Cpu,
   ExternalLink,
+  Layers,
   Network,
   Search,
   Server,
 } from "@workspace/ui/icons";
 import { cn, getTypeBadgeClass, typeBadgeClasses } from "@workspace/ui/lib";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { AdjArchive, AdjMeasurement, AdjPacket } from "../types/adj";
+import type { AdjArchive, AdjMeasurement, AdjPacket, AdjSocket } from "../types/adj";
+import { NetworkTab } from "./NetworkTab";
 
 // ─── types ───────────────────────────────────────────────────────────────────
 
@@ -33,6 +35,7 @@ export type BoardMeta = {
   measurements: AdjMeasurement[];
   packets: AdjPacket[];
   orders: AdjPacket[];
+  sockets: AdjSocket[];
 };
 
 type SortKey = "board" | "name" | "type" | "units" | "id";
@@ -52,6 +55,7 @@ export function extractBoards(adjData: AdjArchive): BoardMeta[] {
         measurements: (g[`${boardName}_measurements`] as AdjMeasurement[] | undefined) ?? [],
         packets: (g["packets"] as AdjPacket[] | undefined) ?? [],
         orders: (g["orders"] as AdjPacket[] | undefined) ?? [],
+        sockets: (g["sockets"] as AdjSocket[] | undefined) ?? [],
       };
     })
     .sort((a, b) => a.name.localeCompare(b.name));
@@ -820,7 +824,10 @@ export const AdjViewerTabs = ({ adjData }: { adjData: AdjArchive }) => {
           <Activity className="size-3.5" /> Measurements
         </TabsTrigger>
         <TabsTrigger value="packets" className="gap-1.5 text-xs">
-          <Network className="size-3.5" /> Packets
+          <Layers className="size-3.5" /> Packets
+        </TabsTrigger>
+        <TabsTrigger value="network" className="gap-1.5 text-xs">
+          <Network className="size-3.5" /> Network
         </TabsTrigger>
         <TabsTrigger value="general" className="gap-1.5 text-xs">
           <Server className="size-3.5" /> General
@@ -842,6 +849,9 @@ export const AdjViewerTabs = ({ adjData }: { adjData: AdjArchive }) => {
       </TabsContent>
       <TabsContent value="packets" className="min-h-0 flex-1 overflow-hidden pb-4">
         <PacketsTab boards={boards} onJumpToMeasurements={handleJumpToPacketMeasurements} />
+      </TabsContent>
+      <TabsContent value="network" className="min-h-0 flex-1 overflow-hidden pb-4">
+        <NetworkTab boards={boards} generalInfo={adjData.general_info} />
       </TabsContent>
       <TabsContent value="general" className="min-h-0 flex-1 overflow-hidden pb-4">
         <GeneralTab adjData={adjData} />

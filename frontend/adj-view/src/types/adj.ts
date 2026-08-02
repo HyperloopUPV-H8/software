@@ -29,10 +29,20 @@ export interface AdjBoardInfo {
   packets: string[];
 }
 
+// A board's network socket. ServerSocket entries have no remote_ip — the board
+// listens, but the archive doesn't record who connects. DatagramSocket entries
+// always have remote_ip (a raw IP, or sometimes a key from general_info.addresses).
+export interface AdjSocket {
+  type: string;
+  name: string;
+  port: number;
+  remote_ip?: string;
+}
+
 // boards[boardName] is a nested group, not a flat object.
 // Keys: boardName (AdjBoardInfo), `${boardName}_measurements` (AdjMeasurement[]),
-//       "packets", "packets_old", "orders", "orders_old" (AdjPacket[]).
-export type AdjBoardGroup = Record<string, AdjBoardInfo | AdjMeasurement[] | AdjPacket[] | unknown>;
+//       "packets", "packets_old", "orders", "orders_old" (AdjPacket[]), "sockets" (AdjSocket[]).
+export type AdjBoardGroup = Record<string, AdjBoardInfo | AdjMeasurement[] | AdjPacket[] | AdjSocket[] | unknown>;
 
 export interface AdjArchive {
   boards: Record<string, AdjBoardGroup>;
