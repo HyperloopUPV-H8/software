@@ -1,5 +1,11 @@
+import Plotly from "plotly.js-dist";
+import { forwardRef, useImperativeHandle, useRef } from "react";
+import { buildAndDownloadPdf } from "../../../lib/pdfExport/buildPdf";
+import { collectAnnexRows, collectSessionInfo, collectStatsRows } from "../../../lib/pdfExport/collectData";
+import { PDF_CHART_IMAGE_OPTS } from "../../../lib/pdfExport/assets";
+import type { ChartExport, PdfExportOptions, PdfExportResult } from "../../../lib/pdfExport/types";
 import { useStore } from "../../../store/store";
-import PlotWrapper from "./PlotWrapper";
+import PlotWrapper, { type PlotExportHandle } from "./PlotWrapper";
 
 function EmptyState() {
   return (
@@ -48,10 +54,59 @@ function EmptyState() {
   );
 }
 
-export default function PlotsArea() {
+export interface PlotsAreaHandle {
+  exportToPdf: (options: PdfExportOptions) => Promise<PdfExportResult>;
+}
+
+const PlotsArea = forwardRef<PlotsAreaHandle>((_props, ref) => {
   const studioPlots = useStore((s) => s.studioPlots);
   const plots = Array.from(studioPlots.values());
   const visiblePlots = plots.filter((plot) => !plot.hidden);
+
+  const plotHandles = useRef(new Map<string, PlotExportHandle>());
+  const setPlotHandleRef = (id: string) => (el: PlotExportHandle | null) => {
+    if (el) plotHandles.current.set(id, el);
+    else plotHandles.current.delete(id);
+  };
+
+  useImperativeHandle(ref, () => ({
+    exportToPdf: async (options) => {
+      const charts: ChartExport[] = [];
+      let skipped = 0;
+
+      // Sequential, not Promise.all — Plotly.toImage does a heavy synchronous
+      // render internally per call; running many in parallel would spike
+      // peak memory/CPU for sessions with several plots.
+      for (const plot of visiblePlots) {
+        const handle = plotHandles.current.get(plot.id);
+        if (!handle || !handle.hasTraces) { skipped++; continue; }
+        const figure = handle.getExportFigure(PDF_CHART_IMAGE_OPTS.height);
+        if (!figure) { skipped++; continue; }
+        try {
+          const imageDataUrl = await Plotly.toImage(figure, PDF_CHART_IMAGE_OPTS);
+          charts.push({
+            plotId: handle.plotId,
+            title: handle.title,
+            imageDataUrl,
+            pixelWidth: PDF_CHART_IMAGE_OPTS.width,
+            pixelHeight: PDF_CHART_IMAGE_OPTS.height,
+          });
+        } catch (err) {
+          console.warn(`PDF export: failed to render plot "${handle.title}"`, err);
+          skipped++;
+        }
+      }
+
+      const state = useStore.getState();
+      const statsRows = options.includeStats ? collectStatsRows(visiblePlots, state, state.adjData) : [];
+      const annexRows = options.includeAnnex ? collectAnnexRows(visiblePlots, state, state.adjData) : [];
+      const sessionInfo = collectSessionInfo(state);
+
+      await buildAndDownloadPdf({ charts, options, statsRows, annexRows, sessionInfo });
+
+      return { generated: charts.length, skipped };
+    },
+  }), [visiblePlots]);
 
   if (plots.length === 0) return <EmptyState />;
 
@@ -62,8 +117,13 @@ export default function PlotsArea() {
           All plots are hidden — unhide one from the right panel to see it here.
         </p>
       ) : (
-        visiblePlots.map((plot) => <PlotWrapper key={plot.id} plot={plot} />)
+        visiblePlots.map((plot) => (
+          <PlotWrapper key={plot.id} ref={setPlotHandleRef(plot.id)} plot={plot} />
+        ))
       )}
     </div>
   );
-}
+});
+
+PlotsArea.displayName = "PlotsArea";
+export default PlotsArea;

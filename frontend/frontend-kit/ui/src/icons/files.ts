@@ -1,5 +1,6 @@
 export {
   FileCode2,
+  FileDown,
   Folder,
   FolderOpen,
   Trash2,

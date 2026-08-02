@@ -3,11 +3,12 @@
 // VS Code-style: a fixed activity bar with one open section at a time, and
 // only the plots area scrolls.
 import { Button, Separator } from "@workspace/ui/components";
-import { PanelRight, Plus } from "@workspace/ui/icons";
+import { FileDown, PanelRight, Plus } from "@workspace/ui/icons";
 import { cn } from "@workspace/ui/lib";
 import { useRef, useState } from "react";
 import { useStore } from "../../store/store";
-import PlotsArea from "./plots/PlotsArea";
+import PdfExportModal from "./modals/PdfExportModal";
+import PlotsArea, { type PlotsAreaHandle } from "./plots/PlotsArea";
 import StudioSidebar from "./sidebar/StudioSidebar";
 import { STUDIO_SECTIONS } from "./sidebar/studioSections";
 
@@ -16,11 +17,16 @@ export default function PlotStudio() {
   const [activeSection, setActiveSection] = useState<string | null>(STUDIO_SECTIONS[0].id);
   // Remembered so the toolbar toggle reopens the last-used section
   const lastSection = useRef(STUDIO_SECTIONS[0].id);
+  const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
+  const plotsAreaRef = useRef<PlotsAreaHandle>(null);
 
   const seriesCount = useStore((s) =>
     Object.values(s.availableSeries).reduce((n, ids) => n + ids.length, 0),
   );
   const plotCount = useStore((s) => s.studioPlots.size);
+  const visiblePlotCount = useStore((s) =>
+    Array.from(s.studioPlots.values()).filter((p) => !p.hidden).length,
+  );
   const addStudioPlot = useStore((s) => s.addStudioPlot);
 
   // VS Code semantics: clicking the active icon closes the panel
@@ -49,6 +55,15 @@ export default function PlotStudio() {
               <Plus className="mr-1 size-3.5" />
               Add Plot
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPdfDialogOpen(true)}
+              disabled={visiblePlotCount === 0}
+            >
+              <FileDown className="mr-1 size-3.5" />
+              Export PDF
+            </Button>
             <Separator orientation="vertical" className="h-5" />
             <Button
               variant="ghost"
@@ -64,11 +79,18 @@ export default function PlotStudio() {
 
         {/* Scrolling plots area */}
         <div className="min-h-0 flex-1 overflow-y-auto">
-          <PlotsArea />
+          <PlotsArea ref={plotsAreaRef} />
         </div>
       </div>
 
       <StudioSidebar activeSection={activeSection} onSelect={selectSection} />
+
+      <PdfExportModal
+        open={pdfDialogOpen}
+        onClose={() => setPdfDialogOpen(false)}
+        onExport={(options) => plotsAreaRef.current!.exportToPdf(options)}
+        visiblePlotCount={visiblePlotCount}
+      />
     </div>
   );
 }

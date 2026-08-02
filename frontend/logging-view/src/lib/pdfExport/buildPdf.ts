@@ -1,0 +1,67 @@
+// Orchestrates the full report: builds pages in content order (TOC
+// placeholder, stats, one page per chart, series annex, check page), then a
+// second pass fills the TOC with real page numbers and stamps
+// header/footer/sw-badge on every page — this needs every page to already
+// exist so page numbers (TOC) and the check page's index (sw-badge) are known.
+import { jsPDF } from "jspdf";
+import { exportTimestamp, formatExportDate } from "../plotStudio/format";
+import { addAnnexPage, addChartPage, addCheckPage, addStatsPage, drawHeaderFooter, fillTocPage } from "./pages";
+import type { AnnexRow, ChartExport, PdfExportOptions, SessionInfo, StatsRow } from "./types";
+
+export async function buildAndDownloadPdf(input: {
+  charts: ChartExport[];
+  options: PdfExportOptions;
+  statsRows: StatsRow[];
+  annexRows: AnnexRow[];
+  sessionInfo: SessionInfo;
+  filename?: string;
+}): Promise<void> {
+  const { charts, options, statsRows, annexRows, sessionInfo, filename } = input;
+  const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+
+  // jsPDF documents start with one page already created — reuse it for
+  // whichever section comes first instead of leaving a stray blank page.
+  let firstPageConsumed = false;
+  const ensureFreshPage = () => {
+    if (!firstPageConsumed) { firstPageConsumed = true; return; }
+    doc.addPage();
+  };
+
+  let tocPageIndex: number | null = null;
+  if (options.includeToc) {
+    ensureFreshPage();
+    tocPageIndex = doc.getNumberOfPages();
+  }
+
+  if (options.includeStats && statsRows.length > 0) {
+    ensureFreshPage();
+    addStatsPage(doc, statsRows);
+  }
+
+  const tocEntries: { title: string; page: number }[] = [];
+  for (const chart of charts) {
+    ensureFreshPage();
+    addChartPage(doc, chart);
+    tocEntries.push({ title: chart.title, page: doc.getNumberOfPages() });
+  }
+
+  if (options.includeAnnex && annexRows.length > 0) {
+    ensureFreshPage();
+    addAnnexPage(doc, annexRows);
+  }
+
+  ensureFreshPage();
+  addCheckPage(doc);
+  const checkPageIndex = doc.getNumberOfPages();
+
+  if (tocPageIndex !== null) fillTocPage(doc, tocEntries, sessionInfo);
+
+  const dateStr = formatExportDate();
+  const totalPages = doc.getNumberOfPages();
+  for (let p = 1; p <= totalPages; p++) {
+    doc.setPage(p);
+    drawHeaderFooter(doc, { dateStr, showSwBadge: p !== checkPageIndex, pageNumber: p, totalPages });
+  }
+
+  doc.save(filename ?? `PlotStudio_Report__${exportTimestamp()}.pdf`);
+}

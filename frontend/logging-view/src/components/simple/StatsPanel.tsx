@@ -5,6 +5,7 @@ import { Button, Separator } from "@workspace/ui/components";
 import { X } from "@workspace/ui/icons";
 import { cn } from "@workspace/ui/lib";
 import { useMemo } from "react";
+import { fmt } from "../../lib/plotStudio/format";
 import { computeRangeStats } from "../../lib/plotStudio/stats";
 import type { SeriesData } from "../../types/plotStudio";
 
@@ -32,16 +33,6 @@ const STAT_CARDS = [
   { key: "noiseFloor", label: "Noise Floor σ", color: "text-primary", primary: true },
   { key: "count",      label: "Samples",       color: "text-muted-foreground", integer: true },
 ] as const;
-
-// Compact numeric formatting: plain notation in a sane range, scientific
-// outside it. Number(toPrecision) round-trips to strip trailing zeros safely.
-function fmt(v: number, integer?: boolean): string {
-  if (!Number.isFinite(v)) return "—";
-  if (integer) return v.toLocaleString();
-  const abs = Math.abs(v);
-  if (abs !== 0 && (abs >= 1e6 || abs < 1e-4)) return v.toExponential(3);
-  return String(Number(v.toPrecision(5)));
-}
 
 export default function StatsPanel({ signalData, visibleRange, onClose }: StatsPanelProps) {
   const rangeLabel = visibleRange ? `${visibleRange[0].toFixed(2)} – ${visibleRange[1].toFixed(2)} ms` : "full signal";

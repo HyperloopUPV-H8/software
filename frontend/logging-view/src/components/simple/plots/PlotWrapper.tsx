@@ -28,10 +28,11 @@ import {
 import { cn } from "@workspace/ui/lib";
 import logoIcon from "@workspace/ui/outreach/main/logo_icon.svg?inline";
 import Plotly from "plotly.js-dist";
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { decimateLTTB } from "../../../lib/plotStudio/decimate";
 import { computeFFT } from "../../../lib/plotStudio/fft";
+import { exportTimestamp } from "../../../lib/plotStudio/format";
 import { traceColor, resolveSignalColor } from "../../../lib/plotStudio/palette";
 import { buildPlotLayout, buildTimelineLayout, getPlotlyTheme } from "../../../lib/plotStudio/plotlyTheme";
 import { lowerBound, upperBound } from "../../../lib/plotStudio/range";
@@ -103,16 +104,23 @@ function IconDownload() {
   );
 }
 
-// "YYYY-MM-DD_HH-MM" in local time, for export filenames.
-function exportTimestamp(): string {
-  const d = new Date();
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}`;
+// Imperative handle exposed to PlotsArea for report/PDF export — lets the
+// export orchestrator (outside this component) reuse the exact same
+// FFT/decimation/timeline-aware figure builder the PNG export button uses,
+// without duplicating that logic.
+export interface PlotExportHandle {
+  plotId: string;
+  title: string;
+  hasTraces: boolean;
+  // exportHeight: target render canvas height in px — legend/title spacing
+  // is tuned relative to it (see plotlyTheme.ts). Defaults to 1600, matching
+  // the single-plot PNG export button.
+  getExportFigure: (exportHeight?: number) => { data: Plotly.Data[]; layout: Partial<Plotly.Layout> } | null;
 }
 
 interface PlotWrapperProps { plot: PlotState }
 
-function PlotWrapper({ plot }: PlotWrapperProps) {
+const PlotWrapper = forwardRef<PlotExportHandle, PlotWrapperProps>(({ plot }, ref) => {
   // Only the signals this plot actually uses — resolved from the shared
   // studioFiles/studioOperations/studioTransforms Maps via useShallow, so an
   // unrelated edit elsewhere (another plot's signal, a new file) doesn't
@@ -414,17 +422,17 @@ function PlotWrapper({ plot }: PlotWrapperProps) {
   // Exports always render in the light/academic theme regardless of the
   // on-screen app theme (publication-figure look), but keep whatever
   // zoom/pan range is currently visible rather than autoranging to all data.
-  const buildExportFigure = () => {
+  const buildExportFigure = (exportHeight = 1600) => {
     const div = chartRef.current?.getDiv();
     if (!div) return null;
     const gd = div as unknown as Plotly.PlotlyHTMLElement & { _fullLayout: Record<string, { range?: number[] }> };
     const exportLayout = hasTimeline
-      ? buildTimelineLayout({ theme: getPlotlyTheme(false), plotId: plot.id, rowLabels: timelineRowLabels, fontScale: 1.8 })
+      ? buildTimelineLayout({ theme: getPlotlyTheme(false), plotId: plot.id, rowLabels: timelineRowLabels, fontScale: 1.8, exportHeight })
       : buildPlotLayout({
           theme: getPlotlyTheme(false),
           hasFFT, hasRightAxis, plotId: plot.id,
           leftUnits: axisUnits.left, rightUnits: axisUnits.right,
-          fontScale: 1.8,
+          fontScale: 1.8, exportHeight,
         });
     // Carry over whatever title the user typed via Plotly's click-to-edit —
     // gd.layout is Plotly's live, mutated layout (relayout writes
@@ -461,6 +469,13 @@ function PlotWrapper({ plot }: PlotWrapperProps) {
 
     return { data: gd.data, layout: exportLayout };
   };
+
+  useImperativeHandle(ref, () => ({
+    plotId: plot.id,
+    title: plot.name,
+    hasTraces,
+    getExportFigure: buildExportFigure,
+  }));
 
   const exportPNG = () => {
     const figure = buildExportFigure();
@@ -679,6 +694,7 @@ function PlotWrapper({ plot }: PlotWrapperProps) {
     </ContextMenuContent>
     </ContextMenu>
   );
-}
+});
 
+PlotWrapper.displayName = "PlotWrapper";
 export default memo(PlotWrapper);

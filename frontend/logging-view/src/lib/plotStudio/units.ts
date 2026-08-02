@@ -1,13 +1,19 @@
 import type { AdjArchive, AdjMeasurement } from "../../types/session";
 
+/** Board name for a "BOARD/measId" session signal. Composed signals
+ * (op_N/tr_N ids, no "/") and plain CSV signals resolve to null. */
+export function boardOf(signalId: string): string | null {
+  const slash = signalId.indexOf("/");
+  return slash === -1 ? null : signalId.slice(0, slash);
+}
+
 // Looks up the AdjMeasurement for a "BOARD/measId" signal from the ADJ archive.
 // Composed signals (op_N/tr_N ids have no "/") and unknown ids resolve to undefined.
 function findMeasurement(adjData: AdjArchive | null, signalId: string): AdjMeasurement | undefined {
   if (!adjData) return undefined;
-  const slash = signalId.indexOf("/");
-  if (slash === -1) return undefined;
-  const board = signalId.slice(0, slash);
-  const measId = signalId.slice(slash + 1);
+  const board = boardOf(signalId);
+  if (board === null) return undefined;
+  const measId = signalId.slice(board.length + 1);
 
   const group = adjData.boards[board] as Record<string, unknown> | undefined;
   const measurements = group?.[`${board}_measurements`];

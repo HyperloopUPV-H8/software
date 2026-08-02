@@ -57,21 +57,33 @@ export interface BuildPlotLayoutParams {
   // text reads clearly at the export's fixed pixel size (see PlotWrapper's
   // buildExportFigure).
   fontScale?: number;
+  // Target export canvas height in px (e.g. 1600 for the single-plot PNG
+  // export, 1000 for a PDF report's chart pages — see PDF_CHART_IMAGE_OPTS).
+  // Only meaningful when fontScale !== 1. Legend "y" is a *fraction* of this
+  // height, so a smaller export canvas needs a proportionally larger
+  // fraction to keep the same absolute pixel gap below the x-axis title —
+  // without this, a shorter canvas collides the legend into the title.
+  exportHeight?: number;
 }
 
+// Absolute pixel gap (at the historical 1600px-tall single-plot PNG export)
+// between the x-axis and the legend's top edge — the reference every other
+// export height is scaled against so the visual gap stays constant.
+const EXPORT_LEGEND_GAP_PX = 190;
+
 export function buildPlotLayout({
-  theme, hasFFT, hasRightAxis, plotId, leftUnits, rightUnits, fontScale = 1,
+  theme, hasFFT, hasRightAxis, plotId, leftUnits, rightUnits, fontScale = 1, exportHeight = 1600,
 }: BuildPlotLayoutParams): Partial<Plotly.Layout> {
   // The live chart's plot area is only a few hundred px tall (resizable, user
-  // controlled), while export renders into a fixed 1600px-tall canvas — the
-  // same legend "y" fraction lands at very different pixel offsets from the
+  // controlled), while export renders into a fixed-height canvas — the same
+  // legend "y" fraction lands at very different pixel offsets from the
   // x-axis on each, so the two need separately tuned gaps rather than one
   // value scaled by fontScale.
   const isExport = fontScale !== 1;
-  const marginBottom = isExport ? 110 * fontScale : 130;
+  const marginBottom = isExport ? 140 * fontScale : 130;
   const marginTop    = isExport ? 70 * fontScale  : 40 * fontScale;
   const marginSide   = isExport ? 1.5 : 1; // extra breathing room around the export canvas only
-  const legendY = isExport ? -0.1 : -0.35;
+  const legendY = isExport ? -EXPORT_LEGEND_GAP_PX / exportHeight : -0.35;
   const base: Partial<Plotly.Layout> = {
     autosize: true,
     // Preserve zoom/pan across data changes (adding signals, stats, etc.);
@@ -143,6 +155,8 @@ export interface BuildTimelineLayoutParams {
   plotId: string;
   rowLabels: string[]; // one per signal, top-to-bottom in assignment order
   fontScale?: number;
+  // See BuildPlotLayoutParams.exportHeight.
+  exportHeight?: number;
 }
 
 // Sibling to buildPlotLayout for the "Cronograma" (Gantt) plot mode: one
@@ -152,10 +166,11 @@ export interface BuildTimelineLayoutParams {
 // X title) that folding this into buildPlotLayout would mean more branches
 // than shared code.
 export function buildTimelineLayout({
-  theme, plotId, rowLabels, fontScale = 1,
+  theme, plotId, rowLabels, fontScale = 1, exportHeight = 1600,
 }: BuildTimelineLayoutParams): Partial<Plotly.Layout> {
   const isExport = fontScale !== 1;
   const marginSide = isExport ? 1.5 : 1;
+  const legendY = isExport ? -EXPORT_LEGEND_GAP_PX / exportHeight : -0.25;
   const base: Partial<Plotly.Layout> = {
     autosize: true,
     uirevision: `${plotId}:timeline`,
@@ -180,7 +195,7 @@ export function buildTimelineLayout({
     },
     margin: {
       l: 120 * fontScale * marginSide, r: 40 * fontScale * marginSide,
-      t: (isExport ? 70 : 40) * fontScale, b: (isExport ? 110 : 60) * fontScale,
+      t: (isExport ? 70 : 40) * fontScale, b: (isExport ? 140 : 60) * fontScale,
     },
     hovermode: "closest",
     hoverlabel: {
@@ -191,7 +206,7 @@ export function buildTimelineLayout({
     showlegend: true,
     legend: {
       bgcolor: theme.legendBg, bordercolor: theme.legendBorder, borderwidth: 1, font: { size: 13 * fontScale, color: theme.legendFontColor },
-      orientation: "h", x: 1, xanchor: "right", y: isExport ? -0.1 : -0.25, yanchor: "top",
+      orientation: "h", x: 1, xanchor: "right", y: legendY, yanchor: "top",
     },
   };
   if (theme.modebar) {

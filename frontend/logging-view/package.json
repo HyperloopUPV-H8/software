@@ -19,6 +19,8 @@
     "@vitejs/plugin-react-swc": "^4.2.3",
     "@workspace/core": "workspace:*",
     "@workspace/ui": "workspace:*",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "lucide-react": "^0.563.0",
     "plotly.js-dist": "^3.7.0",
     "react": "^19.2.4",
