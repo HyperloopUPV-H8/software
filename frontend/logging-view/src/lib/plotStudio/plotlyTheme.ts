@@ -64,9 +64,10 @@ export function buildPlotLayout({
     uirevision: hasFFT ? `${plotId}:fft` : plotId,
     paper_bgcolor: theme.paperBg, plot_bgcolor: theme.plotBg,
     font: { color: theme.fontColor, family: FONT_FAMILY, size: 14 },
-    // Plot title stays editable (click-to-enter placeholder); the subtitle
-    // line is explicitly blanked so it doesn't show its own placeholder.
-    title: { subtitle: { text: "" } },
+    // Plot title stays editable (click-to-enter placeholder); Plotly's
+    // subtitle prompt is hidden via CSS (.gtitle-subtitle in index.css)
+    // since there's no config flag to disable just that piece.
+    title: {},
     xaxis: {
       title: { text: hasFFT ? "Frequency (Hz)" : "Time (ms)", font: { size: 16, color: theme.fontColor } },
       gridcolor: theme.gridColor, linecolor: theme.neutralLineColor, linewidth: 1.5, mirror: true,

@@ -49,7 +49,7 @@ const PLOTLY_CONFIG: Partial<Plotly.Config> = {
   modeBarButtonsToRemove: ["select2d", "lasso2d"],
   modeBarButtonsToAdd: ["togglespikelines", "hoverclosest", "hovercompare"],
   editable: true,
-  toImageButtonOptions: { format: "svg", width: 1200, height: 800, scale: 1 },
+  toImageButtonOptions: { format: "png", width: 1200, height: 800, scale: 1 },
 };
 
 // Above this point count, decimate before handing points to Plotly (always
@@ -87,16 +87,6 @@ function ZoomGroup({
         −
       </button>
     </div>
-  );
-}
-
-function IconExportSVG() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <rect x="3" y="3" width="18" height="18" rx="2"/>
-      <circle cx="8.5" cy="8.5" r="1.5"/>
-      <polyline points="21 15 16 10 5 21"/>
-    </svg>
   );
 }
 
@@ -355,15 +345,6 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
     return { data: gd.data, layout: exportLayout };
   };
 
-  const exportSVG = () => {
-    const figure = buildExportFigure();
-    if (!figure) return;
-    Plotly.toImage(figure, { format: "svg", width: 1200, height: 800 }).then((url) => {
-      const a = document.createElement("a");
-      a.href = url; a.download = `${plot.name}_${Date.now()}.svg`; a.click();
-    });
-  };
-
   const exportPNG = () => {
     const figure = buildExportFigure();
     if (!figure) return;
@@ -487,15 +468,6 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
           <div className="flex items-center gap-0.5">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon-xs" onClick={exportSVG} disabled={!hasTraces}
-                  aria-label="Export SVG" className="text-muted-foreground hover:text-foreground">
-                  <IconExportSVG />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Export SVG</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
                 <Button variant="ghost" size="icon-xs" onClick={exportPNG} disabled={!hasTraces}
                   aria-label="Export PNG" className="text-muted-foreground hover:text-foreground">
                   <IconDownload />
@@ -570,10 +542,6 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
       <ContextMenuCheckboxItem checked={showStats} onCheckedChange={() => setShowStats((v) => !v)} disabled={!hasTraces}>
         Show Stats
       </ContextMenuCheckboxItem>
-      <ContextMenuItem onClick={exportSVG} disabled={!hasTraces}>
-        <IconExportSVG />
-        Export SVG
-      </ContextMenuItem>
       <ContextMenuItem onClick={exportPNG} disabled={!hasTraces}>
         <IconDownload />
         Export PNG

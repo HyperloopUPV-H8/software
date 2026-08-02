@@ -12,3 +12,10 @@ body {
   color: var(--foreground);
   background-color: var(--background);
 }
+
+/* Plot Studio charts have editable:true so users can click-to-set the main
+   title, but Plotly hardcodes a "Click to enter Plot subtitle" prompt
+   alongside it with no config to disable just that piece — hide it. */
+.js-plotly-plot .gtitle-subtitle {
+  display: none;
+}
