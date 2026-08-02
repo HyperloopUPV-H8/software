@@ -63,5 +63,5 @@ export async function buildAndDownloadPdf(input: {
     drawHeaderFooter(doc, { dateStr, showSwBadge: p !== checkPageIndex, pageNumber: p, totalPages });
   }
 
-  doc.save(filename ?? `PlotStudio_Report__${exportTimestamp()}.pdf`);
+  doc.save(filename ?? `Logging_Report_${exportTimestamp()}_Hyperloop-UPV.pdf`);
 }
