@@ -31,7 +31,22 @@ function hexToRgb(hex: string): [number, number, number] {
 // (see sessionSlice.ts's ADJ_ARCHIVE_URL, which points at its GitHub Pages
 // host) — used to link the session's recorded ADJ commit hash.
 function adjCommitUrl(hash: string): string {
-  return `https://github.com/hyperloop-upv/ADJ-Archive/commit/${hash}`;
+  return `https://hyperloop-upv.github.io/ADJ-Archive/storage/commit-${hash}.json`;
+}
+
+function formatSessionDate(raw: string | null): string {
+  if (!raw) return "-";
+  const fixed = raw.replace(/T(\d{2})-(\d{2})-(\d{2})$/, "T$1:$2:$3");
+  const date = new Date(fixed);
+  if (Number.isNaN(date.getTime())) return raw;
+  return date.toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 }
 
 /** Header: full Hyperloop logo (left) + page number (right). Footer: date
@@ -109,7 +124,7 @@ export function fillTocPage(doc: jsPDF, entries: { title: string; page: number }
   const valueX = MARGIN.left + 38;
   const rows: [string, string][] = [
     ["Session", sessionInfo.folderName ?? "-"],
-    ["Date", sessionInfo.date ?? "-"],
+    ["Date", formatSessionDate(sessionInfo.date)],
     ["Time unit", sessionInfo.timeUnit ?? "-"],
   ];
   doc.setFontSize(10);
