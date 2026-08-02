@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
   Label,
+  Spinner,
 } from "@workspace/ui/components";
 import { useState } from "react";
 import type { PdfExportOptions, PdfExportResult } from "../../../lib/pdfExport/types";
@@ -28,7 +29,11 @@ export default function PdfExportModal({ open, onClose, onExport, visiblePlotCou
   const [busy, setBusy]   = useState(false);
   const [error, setError] = useState("");
 
-  const handleClose = () => { setError(""); onClose(); };
+  const handleClose = () => {
+    if (busy) return; // generation is already underway — closing wouldn't stop it, just hide progress
+    setError("");
+    onClose();
+  };
 
   const handleExport = async () => {
     setError("");
@@ -57,34 +62,45 @@ export default function PdfExportModal({ open, onClose, onExport, visiblePlotCou
           </p>
         </DialogHeader>
 
-        <div className="flex flex-col gap-3 py-1">
-          {visiblePlotCount === 0 && (
-            <div className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-600 dark:text-amber-400">
-              No visible plots — add or unhide a plot first.
-            </div>
-          )}
+        {busy ? (
+          <div className="flex flex-col items-center gap-3 py-8">
+            <Spinner className="text-primary size-8" />
+            <p className="text-muted-foreground text-sm">Generating PDF report…</p>
+            <p className="text-muted-foreground text-center text-xs">
+              Rendering {visiblePlotCount} plot{visiblePlotCount !== 1 && "s"} — this can take a moment.
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3 py-1">
+            {visiblePlotCount === 0 && (
+              <div className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-600 dark:text-amber-400">
+                No visible plots — add or unhide a plot first.
+              </div>
+            )}
 
-          <label className="flex items-center gap-2.5 text-sm">
-            <Checkbox checked={includeToc} onCheckedChange={(v) => setIncludeToc(v === true)} />
-            <Label className="font-normal">Include Table of Contents</Label>
-          </label>
-          <label className="flex items-center gap-2.5 text-sm">
-            <Checkbox checked={includeStats} onCheckedChange={(v) => setIncludeStats(v === true)} />
-            <Label className="font-normal">Include Statistics page (full data range)</Label>
-          </label>
-          <label className="flex items-center gap-2.5 text-sm">
-            <Checkbox checked={includeAnnex} onCheckedChange={(v) => setIncludeAnnex(v === true)} />
-            <Label className="font-normal">Include Series Annex</Label>
-          </label>
+            <label className="flex items-center gap-2.5 text-sm">
+              <Checkbox checked={includeToc} onCheckedChange={(v) => setIncludeToc(v === true)} />
+              <Label className="font-normal">Include Table of Contents</Label>
+            </label>
+            <label className="flex items-center gap-2.5 text-sm">
+              <Checkbox checked={includeStats} onCheckedChange={(v) => setIncludeStats(v === true)} />
+              <Label className="font-normal">Include Statistics page (full data range)</Label>
+            </label>
+            <label className="flex items-center gap-2.5 text-sm">
+              <Checkbox checked={includeAnnex} onCheckedChange={(v) => setIncludeAnnex(v === true)} />
+              <Label className="font-normal">Include Series Annex</Label>
+            </label>
 
-          {error && (
-            <p className="text-destructive bg-destructive/10 rounded-md px-3 py-2 text-xs">{error}</p>
-          )}
-        </div>
+            {error && (
+              <p className="text-destructive bg-destructive/10 rounded-md px-3 py-2 text-xs">{error}</p>
+            )}
+          </div>
+        )}
 
         <div className="flex gap-2 pt-1">
-          <Button variant="outline" className="flex-1" onClick={handleClose}>Cancel</Button>
+          <Button variant="outline" className="flex-1" onClick={handleClose} disabled={busy}>Cancel</Button>
           <Button className="flex-1" onClick={handleExport} disabled={busy || visiblePlotCount === 0}>
+            {busy && <Spinner className="mr-1.5 size-3.5" />}
             {busy ? "Generating…" : "Generate PDF"}
           </Button>
         </div>
