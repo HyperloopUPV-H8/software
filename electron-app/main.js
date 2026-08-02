@@ -71,6 +71,14 @@ app.whenReady().then(async () => {
       }
     });
 
+    // Setup application lifecycle handlers (window-all-closed, before-quit, activate, exceptions)
+    // before showing the selector — the selector's renderer can auto-select
+    // and close itself (when only one view is built) before the main
+    // process finishes creating the replacement window, and without a
+    // window-all-closed listener in place that transient zero-window state
+    // would make Electron quit by default.
+    setupLifecycleHandlers();
+
     // Show mode selector and get user choice
     try {
       await showModeSelector(screenWidth, screenHeight);
@@ -81,9 +89,6 @@ app.whenReady().then(async () => {
 
     // Setup auto-updater
     setupUpdater();
-
-    // Setup application lifecycle handlers (window-all-closed, before-quit, activate, exceptions)
-    setupLifecycleHandlers();
   } catch (error) {
     logger.electron.error("Failed to initialize application:", error);
     app.quit();

@@ -12,6 +12,7 @@ import { logger } from "../utils/logger.js";
 import { getAppPath } from "../utils/paths.js";
 import { createLogWindow, createWindow } from "../windows/index.js";
 import { loadView } from "../windows/mainWindow.js";
+import { setTransitionMode } from "./lifecycle.js";
 
 const VALID_MODES = {
   testing: "testing-view",
@@ -67,6 +68,13 @@ async function showModeSelector(screenWidth, screenHeight) {
       return;
     }
 
+    // The selector's own renderer can auto-select a mode and close itself
+    // with zero user interaction when only one view is built (see
+    // renderer/mode-selector/index.html). That close can complete before
+    // createWindow() below runs, leaving a moment with no windows open —
+    // guard window-all-closed against quitting during that handoff.
+    setTransitionMode(true);
+
     // Listen for mode selection from renderer
     ipcMain.once("mode-selected", async (_event, mode) => {
       try {
@@ -97,6 +105,7 @@ async function showModeSelector(screenWidth, screenHeight) {
         logger.electron.error("Error handling mode selection:", error);
         reject(error);
       } finally {
+        setTransitionMode(false);
         try {
           selectorWindow.close();
         } catch (e) {}
