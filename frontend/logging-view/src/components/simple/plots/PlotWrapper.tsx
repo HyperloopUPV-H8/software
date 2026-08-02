@@ -101,6 +101,13 @@ function IconDownload() {
   );
 }
 
+// "YYYY-MM-DD_HH-MM" in local time, for export filenames.
+function exportTimestamp(): string {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}`;
+}
+
 interface PlotWrapperProps { plot: PlotState }
 
 export default function PlotWrapper({ plot }: PlotWrapperProps) {
@@ -379,7 +386,7 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
     // pattern the SVG export used before it was removed.
     Plotly.toImage(figure, { format: "png", width: 2400, height: 1600, scale: 4 }).then((url) => {
       const a = document.createElement("a");
-      a.href = url; a.download = `${plot.name}_${Date.now()}.png`; a.click();
+      a.href = url; a.download = `${plot.name}__${exportTimestamp()}.png`; a.click();
     });
   };
 
@@ -505,7 +512,7 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
                   <IconDownload />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Export PNG (4×)</TooltipContent>
+              <TooltipContent>Export PNG</TooltipContent>
             </Tooltip>
           </div>
 
