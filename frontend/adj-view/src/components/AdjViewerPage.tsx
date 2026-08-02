@@ -3,14 +3,22 @@
 import {
   Badge,
   Button,
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
   Input,
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@workspace/ui/components";
-import { BookOpen, GitCommit, Loader2, SunMoon } from "@workspace/ui/icons";
+import { BookOpen, GitCommit, Loader2, RefreshCw, SunMoon } from "@workspace/ui/icons";
 import { useCallback, useEffect, useState } from "react";
+import { config } from "../../config";
+import { useBranches } from "../hooks/useBranches";
 import type { AdjArchive } from "../types/adj";
 import { AdjViewerTabs, extractBoards } from "./AdjViewerTabs";
 
@@ -21,6 +29,15 @@ async function fetchAdjArchive(hash: string): Promise<AdjArchive> {
   const response = await fetch(ADJ_ARCHIVE_URL(hash));
   if (!response.ok) throw new Error(`ADJ fetch failed: ${response.status}`);
   return response.json();
+}
+
+async function resolveBranchToCommit(branch: string): Promise<string> {
+  const response = await fetch(
+    `https://api.github.com/repos/${config.ADJ_GITHUB_REPO}/branches/${encodeURIComponent(branch)}`,
+  );
+  if (!response.ok) throw new Error(`Branch lookup failed: ${response.status}`);
+  const data = await response.json();
+  return data.commit.sha as string;
 }
 
 interface AdjViewerPageProps {
@@ -34,6 +51,11 @@ export function AdjViewerPage({ isDark, onToggleTheme }: AdjViewerPageProps) {
   const [adjData, setAdjData] = useState<AdjArchive | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { branches, isLoading: branchesLoading, error: branchesError, refetch: refetchBranches } = useBranches(true);
+  const [branchInput, setBranchInput] = useState("");
+  const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
+  const [resolvingBranch, setResolvingBranch] = useState(false);
 
   const boards = adjData ? extractBoards(adjData) : [];
   const totalMeasurements = boards.reduce((s, b) => s + b.measurements.length, 0);
@@ -55,6 +77,20 @@ export function AdjViewerPage({ isDark, onToggleTheme }: AdjViewerPageProps) {
   }, []);
 
   const handleLoad = () => load(hashInput.trim());
+
+  const handleBranchSelect = async (branch: string) => {
+    if (!branch) return;
+    try {
+      setResolvingBranch(true);
+      setError(null);
+      const sha = await resolveBranchToCommit(branch);
+      await load(sha);
+    } catch (err) {
+      setError(String(err));
+    } finally {
+      setResolvingBranch(false);
+    }
+  };
 
   // If launched from logging-view's "View ADJ" shortcut, the main process
   // passes the session's commit hash through as a query param — load it
@@ -87,6 +123,57 @@ export function AdjViewerPage({ isDark, onToggleTheme }: AdjViewerPageProps) {
         )}
 
         <div className="ml-auto flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <Combobox
+              items={branches}
+              value={selectedBranch}
+              onValueChange={(v) => {
+                setSelectedBranch(v);
+                setBranchInput(v ?? "");
+                if (v) handleBranchSelect(v);
+              }}
+            >
+              <ComboboxInput
+                placeholder={branchesLoading ? "Loading branches…" : "Branch…"}
+                value={branchInput}
+                onChange={(e) => {
+                  setBranchInput(e.target.value);
+                  setSelectedBranch(null);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleBranchSelect(branchInput.trim());
+                }}
+                className="h-8 w-[10rem] text-xs"
+              />
+              <ComboboxContent>
+                <ComboboxEmpty>No branches found</ComboboxEmpty>
+                <ComboboxList>
+                  {(item) => (
+                    <ComboboxItem key={item} value={item}>
+                      {item}
+                    </ComboboxItem>
+                  )}
+                </ComboboxList>
+              </ComboboxContent>
+            </Combobox>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={refetchBranches}
+              disabled={branchesLoading}
+              title="Refetch branches"
+              className={`size-8 ${branchesError ? "text-destructive hover:text-destructive" : ""}`}
+            >
+              {resolvingBranch ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <RefreshCw className={`size-3.5 ${branchesLoading ? "animate-spin" : ""}`} />
+              )}
+            </Button>
+          </div>
+
+          <span className="text-muted-foreground text-[10px]">or</span>
+
           <Input
             placeholder="ADJ commit hash…"
             value={hashInput}
