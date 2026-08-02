@@ -15,7 +15,6 @@ import { cn } from "@workspace/ui/lib";
 import { useCallback, useRef, useState } from "react";
 import { useStore } from "../../store/store";
 import type { DroppedFile } from "../../types/session";
-import { AdjViewerDialog } from "./AdjViewerDialog";
 
 // Backend writes dates as "2025-06-15T13-45-22" (dashes in time part).
 function formatSessionDate(raw: string): string {
@@ -208,15 +207,22 @@ const FolderPickerGroup = () => {
                         </span>
                         <ExternalLink className="size-3 shrink-0" />
                       </button>
-                      <AdjViewerDialog>
-                        <button
-                          type="button"
-                          className="text-muted-foreground hover:text-primary flex items-center gap-0.5 opacity-60 hover:opacity-100 transition-colors"
-                          title="View ADJ"
-                        >
-                          <BookOpen className="size-3 shrink-0" />
-                        </button>
-                      </AdjViewerDialog>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!window.electronAPI) {
+                            console.warn("electronAPI is not available");
+                            return;
+                          }
+                          window.electronAPI.switchView("adj-view", {
+                            commit: settings.adj_commit_hash,
+                          });
+                        }}
+                        className="text-muted-foreground hover:text-primary flex items-center gap-0.5 opacity-60 hover:opacity-100 transition-colors"
+                        title="View ADJ"
+                      >
+                        <BookOpen className="size-3 shrink-0" />
+                      </button>
                     </div>
                   </div>
                 )}

@@ -105,6 +105,7 @@ function setupIpcHandlers() {
       { mode: "competition", label: "Competition View" },
       { mode: "flashing", label: "Flashing View" },
       { mode: "logging", label: "Logging View" },
+      { mode: "adj", label: "ADJ Viewer" },
     ];
     const rendererDir = join(getAppPath(), "renderer");
     return ALL_VIEWS.filter(({ mode }) =>
@@ -117,10 +118,12 @@ function setupIpcHandlers() {
    * @description Switches the main window to the specified view.
    * @param {import("electron").IpcMainInvokeEvent} event - The IPC event object.
    * @param {string} view - The name of the view to switch to (e.g., "ethernet-view", "control-station").
+   * @param {Record<string, string>} [query] - Optional query params passed through to the
+   *   loaded view's URL (e.g. `{ commit: hash }` so adj-view can auto-load a commit).
    * @returns {string} The view name that was loaded.
    */
-  ipcMain.handle("switch-view", (event, view) => {
-    loadView(view);
+  ipcMain.handle("switch-view", (event, view, query) => {
+    loadView(view, query ? { query } : undefined);
     return view;
   });
 

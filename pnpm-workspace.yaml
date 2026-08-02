@@ -5,6 +5,7 @@ packages:
   - "frontend/competition-view"
   - "frontend/logging-view"
   - "frontend/flashing-view"
+  - "frontend/adj-view"
 
   # Backend packages
   - "backend"
