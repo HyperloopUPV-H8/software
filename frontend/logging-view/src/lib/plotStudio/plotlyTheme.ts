@@ -137,3 +137,65 @@ export function buildPlotLayout({
   }
   return base;
 }
+
+export interface BuildTimelineLayoutParams {
+  theme: PlotlyThemeColors;
+  plotId: string;
+  rowLabels: string[]; // one per signal, top-to-bottom in assignment order
+  fontScale?: number;
+}
+
+// Sibling to buildPlotLayout for the "Cronograma" (Gantt) plot mode: one
+// categorical row per signal instead of a shared numeric Y axis. Reuses the
+// same theme/font/margin conventions so the two modes look like the same
+// app, but the shapes diverge enough (no yaxis2, no FFT/time toggle on the
+// X title) that folding this into buildPlotLayout would mean more branches
+// than shared code.
+export function buildTimelineLayout({
+  theme, plotId, rowLabels, fontScale = 1,
+}: BuildTimelineLayoutParams): Partial<Plotly.Layout> {
+  const isExport = fontScale !== 1;
+  const marginSide = isExport ? 1.5 : 1;
+  const base: Partial<Plotly.Layout> = {
+    autosize: true,
+    uirevision: `${plotId}:timeline`,
+    paper_bgcolor: theme.paperBg, plot_bgcolor: theme.plotBg,
+    font: { color: theme.fontColor, family: FONT_FAMILY, size: 14 * fontScale },
+    title: { font: { size: 22 * fontScale } },
+    barmode: "stack",
+    xaxis: {
+      title: { text: "Time (ms)", font: { size: 16 * fontScale, color: theme.fontColor } },
+      tickfont: { size: 14 * fontScale, color: theme.neutralLineColor },
+      gridcolor: theme.gridColor, linecolor: theme.neutralLineColor, linewidth: 1.5 * fontScale, mirror: true,
+      ticks: "outside", tickwidth: 1.5 * fontScale, tickcolor: theme.neutralLineColor, color: theme.neutralLineColor,
+      showline: true, zeroline: false, fixedrange: false,
+    },
+    yaxis: {
+      type: "category",
+      categoryarray: rowLabels,
+      autorange: "reversed", // first-assigned signal on top, Gantt convention
+      tickfont: { size: 14 * fontScale, color: theme.neutralLineColor },
+      gridcolor: theme.gridColor, linecolor: theme.neutralLineColor, linewidth: 1.5 * fontScale,
+      showline: true, zeroline: false, fixedrange: true,
+    },
+    margin: {
+      l: 120 * fontScale * marginSide, r: 40 * fontScale * marginSide,
+      t: (isExport ? 70 : 40) * fontScale, b: (isExport ? 110 : 60) * fontScale,
+    },
+    hovermode: "closest",
+    hoverlabel: {
+      bgcolor: theme.hoverBg,
+      bordercolor: theme.hoverBorder,
+      font: { family: FONT_FAMILY, size: 12 * fontScale, color: theme.hoverFontColor },
+    },
+    showlegend: true,
+    legend: {
+      bgcolor: theme.legendBg, bordercolor: theme.legendBorder, borderwidth: 1, font: { size: 13 * fontScale, color: theme.legendFontColor },
+      orientation: "h", x: 1, xanchor: "right", y: isExport ? -0.1 : -0.25, yanchor: "top",
+    },
+  };
+  if (theme.modebar) {
+    base.modebar = theme.modebar;
+  }
+  return base;
+}

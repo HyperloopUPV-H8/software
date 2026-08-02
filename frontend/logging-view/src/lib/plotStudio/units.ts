@@ -26,6 +26,34 @@ export function getSignalName(adjData: AdjArchive | null, signalId: string): str
   return findMeasurement(adjData, signalId)?.name;
 }
 
+/** State labels for an enum-typed session signal, indexed by numeric code. */
+export function getEnumLabels(adjData: AdjArchive | null, signalId: string): string[] | undefined {
+  return findMeasurement(adjData, signalId)?.enumValues;
+}
+
+/** Raw ADJ type string ("float32", "enum", "bool", …), lowercased.
+ * `undefined` means no ADJ metadata was found at all (e.g. a plain CSV file)
+ * — distinct from a known-but-non-discrete type like "float32". Callers that
+ * fall back to data-driven heuristics when type info is missing must check
+ * for `undefined` specifically, not just "not enum/bool", or every known
+ * float/int signal would also hit the fallback. */
+export function getSignalType(adjData: AdjArchive | null, signalId: string): string | undefined {
+  return findMeasurement(adjData, signalId)?.type?.toLowerCase();
+}
+
+/** True for ADJ-typed enum/boolean signals. Some ADJ archives type genuine
+ * enums as "string" (see frontend-kit's typeUtils.ts, which buckets "string"
+ * with "enum" for badge coloring) rather than literally "enum" — a type
+ * match alone would miss those, so this also treats "carries enumValues" as
+ * sufficient on its own, regardless of the exact type spelling. */
+export function isDiscreteMeasurement(adjData: AdjArchive | null, signalId: string): boolean {
+  const m = findMeasurement(adjData, signalId);
+  if (!m) return false;
+  const type = m.type?.toLowerCase();
+  if (type === "enum" || type === "bool" || type === "boolean") return true;
+  return !!m.enumValues && m.enumValues.length > 0;
+}
+
 // True when two or more signals on the same axis have known but different
 // units (e.g. mixing "mm" and "V") — distinct from simply not knowing a unit.
 export function unitsMismatch(units: (string | undefined)[]): boolean {

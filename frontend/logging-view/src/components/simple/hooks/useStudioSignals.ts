@@ -6,7 +6,7 @@
 // studioFiles afterwards.
 import { useCallback, useMemo } from "react";
 import { parseCSVInWorker } from "../../../lib/plotStudio/csv";
-import { getSignalName } from "../../../lib/plotStudio/units";
+import { getEnumLabels, getSignalName } from "../../../lib/plotStudio/units";
 import { useStore } from "../../../store/store";
 import type { SeriesData } from "../../../types/plotStudio";
 
@@ -58,6 +58,7 @@ export function useSignalLoader() {
   const studioOperations = useStore((s) => s.studioOperations);
   const studioTransforms = useStore((s) => s.studioTransforms);
   const addStudioFiles = useStore((s) => s.addStudioFiles);
+  const adjData = useStore((s) => s.adjData);
 
   return useCallback(
     async (signalId: string): Promise<SeriesData | null> => {
@@ -75,12 +76,16 @@ export function useSignalLoader() {
       const file = sessionFiles.get(`${folderName}/data/${board}/${measId}.csv`);
       if (!file) return null;
 
-      const data = await parseCSVInWorker(file, settings?.time_unit ?? "ms");
+      // Enum/bool signals are logged as text state names ("Idle", "true"),
+      // not the numeric code — pass the known ADJ state names so parseCSV
+      // can recover the matching code instead of dropping every row.
+      const enumValues = getEnumLabels(adjData, signalId);
+      const data = await parseCSVInWorker(file, settings?.time_unit ?? "ms", enumValues);
       if (data.value.length === 0) return null;
       addStudioFiles([{ name: signalId, data, pointCount: data.value.length }]);
       return data;
     },
-    [sessionFiles, folderName, settings, studioFiles, studioOperations, studioTransforms, addStudioFiles],
+    [sessionFiles, folderName, settings, studioFiles, studioOperations, studioTransforms, addStudioFiles, adjData],
   );
 }
 

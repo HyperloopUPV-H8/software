@@ -31,10 +31,11 @@ import Plotly from "plotly.js-dist";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { decimateLTTB } from "../../../lib/plotStudio/decimate";
 import { computeFFT } from "../../../lib/plotStudio/fft";
-import { resolveSignalColor } from "../../../lib/plotStudio/palette";
-import { buildPlotLayout, getPlotlyTheme } from "../../../lib/plotStudio/plotlyTheme";
+import { traceColor, resolveSignalColor } from "../../../lib/plotStudio/palette";
+import { buildPlotLayout, buildTimelineLayout, getPlotlyTheme } from "../../../lib/plotStudio/plotlyTheme";
 import { lowerBound, upperBound } from "../../../lib/plotStudio/range";
-import { commonUnits, getSignalName, getSignalUnits, unitsMismatch } from "../../../lib/plotStudio/units";
+import { computeStateSegments, isDiscreteSeries, stateLabel } from "../../../lib/plotStudio/timeline";
+import { commonUnits, getEnumLabels, getSignalName, getSignalType, getSignalUnits, isDiscreteMeasurement, unitsMismatch } from "../../../lib/plotStudio/units";
 import { displayName, getSignalData } from "../../../store/slices/plotStudioSlice";
 import { useStore } from "../../../store/store";
 import type { PlotState } from "../../../types/plotStudio";
@@ -149,6 +150,25 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
   const hasFFT       = plot.showFFT;
   const signalCount  = plot.signals.length;
 
+  // No manual toggle — a plot automatically becomes a "Cronograma" (Gantt
+  // state timeline) the moment its first assigned signal is enum/boolean.
+  // ADJ type metadata, when present, is authoritative (a known "float32"
+  // signal must never fall through to the data heuristic below, or a
+  // slowly-changing/quantized float gets misread as discrete). The data
+  // heuristic only kicks in for signals with NO ADJ metadata at all — plain
+  // CSV files loaded directly into Plot Studio. Later signals just adopt
+  // whatever shape the first signal set. FFT is an explicit user toggle and
+  // takes precedence if both would otherwise apply.
+  const firstSignal = plot.signals[0];
+  const hasTimeline = useMemo(() => {
+    if (hasFFT || !firstSignal) return false;
+    if (getSignalType(adjData, firstSignal.signalId) !== undefined) {
+      return isDiscreteMeasurement(adjData, firstSignal.signalId);
+    }
+    const data = getSignalData(firstSignal.signalId, { studioFiles, studioOperations, studioTransforms });
+    return !!data && isDiscreteSeries(data);
+  }, [hasFFT, firstSignal, adjData, studioFiles, studioOperations, studioTransforms]);
+
   // Units are only meaningful in time-domain mode — an FFT'd plot shows
   // magnitude, not any signal's source unit.
   const axisUnits = useMemo(() => {
@@ -173,9 +193,60 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
     return [Math.min(range[0], range[1]), Math.max(range[0], range[1])];
   }, []);
 
+  // Row label per signal, top-to-bottom in assignment order — shared between
+  // the timeline traces below and buildTimelineLayout's categorical y-axis.
+  const timelineRowLabels = useMemo(
+    () =>
+      plot.signals.map((sig) => {
+        const signal = studioFiles.get(sig.signalId) ?? studioOperations.get(sig.signalId) ?? studioTransforms.get(sig.signalId);
+        return getSignalName(adjData, sig.signalId) ?? displayName(signal?.name ?? sig.signalId);
+      }),
+    [plot.signals, studioFiles, studioOperations, studioTransforms, adjData],
+  );
+
+  const timelineTraces = useMemo<Plotly.Data[]>(() => {
+    if (!hasTimeline) return [];
+    // One flat list of segments across every signal, tagged with its row
+    // label and the label to show for its state value (per-signal enum
+    // lookup, since two signals could give different meanings to the same
+    // numeric code).
+    const allSegments: { row: string; start: number; end: number; value: number; label: string; hoverText: string }[] = [];
+    plot.signals.forEach((sig, idx) => {
+      const data = getSignalData(sig.signalId, { studioFiles, studioOperations, studioTransforms });
+      if (!data || data.value.length < 1) return;
+      const enumLabels = getEnumLabels(adjData, sig.signalId);
+      const row = timelineRowLabels[idx];
+      for (const seg of computeStateSegments(data)) {
+        const label = stateLabel(seg.value, enumLabels);
+        allSegments.push({
+          row, start: seg.start, end: seg.end, value: seg.value, label,
+          hoverText: `${label} (${seg.start.toFixed(0)} – ${seg.end.toFixed(0)} ms)`,
+        });
+      }
+    });
+
+    // Group into one bar trace per unique state value so each state gets a
+    // single legend entry spanning every signal's row.
+    const uniqueValues = [...new Set(allSegments.map((s) => s.value))].sort((a, b) => a - b);
+    return uniqueValues.map((value, colorIdx) => {
+      const segs = allSegments.filter((s) => s.value === value);
+      return {
+        type: "bar" as const,
+        orientation: "h" as const,
+        base: segs.map((s) => s.start),
+        x: segs.map((s) => s.end - s.start),
+        y: segs.map((s) => s.row),
+        text: segs.map((s) => s.hoverText),
+        name: segs[0].label,
+        marker: { color: traceColor(colorIdx) },
+        hovertemplate: "%{y}<br>%{text}<extra></extra>",
+      };
+    });
+  }, [hasTimeline, plot.signals, studioFiles, studioOperations, studioTransforms, adjData, timelineRowLabels]);
+
   const traces = useMemo<Plotly.Data[]>(
     () =>
-      plot.signals.flatMap((sig, idx) => {
+      hasTimeline ? timelineTraces : plot.signals.flatMap((sig, idx) => {
         const data = getSignalData(sig.signalId, { studioFiles, studioOperations, studioTransforms });
         if (!data || data.value.length < 2) return [];
         const signal = studioFiles.get(sig.signalId) ?? studioOperations.get(sig.signalId) ?? studioTransforms.get(sig.signalId);
@@ -239,18 +310,21 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
           yaxis: sig.yAxis === "right" ? ("y2" as const) : ("y" as const),
         }];
       }),
-    [plot.signals, studioFiles, studioOperations, studioTransforms, fftSampleRateOverride, adjData, axisUnits, hasFFT, visibleRange],
+    [plot.signals, studioFiles, studioOperations, studioTransforms, fftSampleRateOverride, adjData, axisUnits, hasFFT, hasTimeline, timelineTraces, visibleRange],
   );
 
   const hasTraces = traces.length > 0;
 
   const layout = useMemo<Partial<Plotly.Layout>>(
-    () => buildPlotLayout({
-      theme: getPlotlyTheme(isDarkMode),
-      hasFFT, hasRightAxis, plotId: plot.id,
-      leftUnits: axisUnits.left, rightUnits: axisUnits.right,
-    }),
-    [hasRightAxis, hasFFT, plot.id, axisUnits, isDarkMode],
+    () =>
+      hasTimeline
+        ? buildTimelineLayout({ theme: getPlotlyTheme(isDarkMode), plotId: plot.id, rowLabels: timelineRowLabels })
+        : buildPlotLayout({
+            theme: getPlotlyTheme(isDarkMode),
+            hasFFT, hasRightAxis, plotId: plot.id,
+            leftUnits: axisUnits.left, rightUnits: axisUnits.right,
+          }),
+    [hasRightAxis, hasFFT, hasTimeline, timelineRowLabels, plot.id, axisUnits, isDarkMode],
   );
 
   // Drag-to-resize
@@ -339,12 +413,14 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
     const div = chartRef.current?.getDiv();
     if (!div) return null;
     const gd = div as unknown as Plotly.PlotlyHTMLElement & { _fullLayout: Record<string, { range?: number[] }> };
-    const exportLayout = buildPlotLayout({
-      theme: getPlotlyTheme(false),
-      hasFFT, hasRightAxis, plotId: plot.id,
-      leftUnits: axisUnits.left, rightUnits: axisUnits.right,
-      fontScale: 1.8,
-    });
+    const exportLayout = hasTimeline
+      ? buildTimelineLayout({ theme: getPlotlyTheme(false), plotId: plot.id, rowLabels: timelineRowLabels, fontScale: 1.8 })
+      : buildPlotLayout({
+          theme: getPlotlyTheme(false),
+          hasFFT, hasRightAxis, plotId: plot.id,
+          leftUnits: axisUnits.left, rightUnits: axisUnits.right,
+          fontScale: 1.8,
+        });
     // Carry over whatever title the user typed via Plotly's click-to-edit —
     // gd.layout is Plotly's live, mutated layout (relayout writes
     // title.text into it), whereas exportLayout is rebuilt fresh from
@@ -353,12 +429,16 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
     const liveTitleText = typeof liveTitle === "object" ? liveTitle?.text : liveTitle;
     if (liveTitleText) exportLayout.title = { ...exportLayout.title, text: liveTitleText };
 
-    const xRange  = gd._fullLayout["xaxis"]?.range;
-    const yRange  = gd._fullLayout["yaxis"]?.range;
-    const y2Range = gd._fullLayout["yaxis2"]?.range;
+    // The y-axis is categorical in timeline mode — only the x (time) range
+    // carries over, copying a numeric range onto a category axis would break it.
+    const xRange = gd._fullLayout["xaxis"]?.range;
     if (xRange) exportLayout.xaxis = { ...exportLayout.xaxis, range: xRange, autorange: false };
-    if (yRange) exportLayout.yaxis = { ...exportLayout.yaxis, range: yRange, autorange: false };
-    if (y2Range && exportLayout.yaxis2) exportLayout.yaxis2 = { ...exportLayout.yaxis2, range: y2Range, autorange: false };
+    if (!hasTimeline) {
+      const yRange  = gd._fullLayout["yaxis"]?.range;
+      const y2Range = gd._fullLayout["yaxis2"]?.range;
+      if (yRange) exportLayout.yaxis = { ...exportLayout.yaxis, range: yRange, autorange: false };
+      if (y2Range && exportLayout.yaxis2) exportLayout.yaxis2 = { ...exportLayout.yaxis2, range: y2Range, autorange: false };
+    }
 
     // Team branding watermark, bottom-right corner — export-only (not shown
     // on the live/on-screen chart). Paper coords span the whole canvas
@@ -475,8 +555,9 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
           {/* Zoom cluster — only meaningful with traces */}
           {hasTraces && (
             <div className="bg-muted/40 flex items-center gap-1 rounded-lg border px-1.5 py-1">
-              <ZoomGroup label="Y◀" axis="y1" onZoom={zoomAxis} />
-              {hasRightAxis && <ZoomGroup label="Y▶" axis="y2" onZoom={zoomAxis} />}
+              {/* Categorical y-axis in timeline mode isn't zoomable the same way — X (time) still is. */}
+              {!hasTimeline && <ZoomGroup label="Y◀" axis="y1" onZoom={zoomAxis} />}
+              {!hasTimeline && hasRightAxis && <ZoomGroup label="Y▶" axis="y2" onZoom={zoomAxis} />}
               <ZoomGroup label="X" axis="x" onZoom={zoomAxis} />
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -494,7 +575,7 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
             variant={showStats ? "default" : "outline"}
             size="xs"
             onClick={() => setShowStats((v) => !v)}
-            disabled={!hasTraces}
+            disabled={!hasTraces || hasTimeline}
             className="gap-1"
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -555,7 +636,7 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
           </div>
         )}
 
-        {showStats && hasTraces && (
+        {showStats && hasTraces && !hasTimeline && (
           <StatsPanel signalData={statsData} visibleRange={visibleRange} onClose={() => setShowStats(false)} />
         )}
       </div>
@@ -578,7 +659,7 @@ export default function PlotWrapper({ plot }: PlotWrapperProps) {
         Reset Zoom
       </ContextMenuItem>
       <ContextMenuSeparator />
-      <ContextMenuCheckboxItem checked={showStats} onCheckedChange={() => setShowStats((v) => !v)} disabled={!hasTraces}>
+      <ContextMenuCheckboxItem checked={showStats} onCheckedChange={() => setShowStats((v) => !v)} disabled={!hasTraces || hasTimeline}>
         Show Stats
       </ContextMenuCheckboxItem>
       <ContextMenuItem onClick={exportPNG} disabled={!hasTraces}>
