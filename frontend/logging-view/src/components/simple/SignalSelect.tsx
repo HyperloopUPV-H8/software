@@ -37,6 +37,10 @@ export default function SignalSelect({
   // null → board list; a board name (or COMPOSED) → its series list
   const [activeBoard, setActiveBoard] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  // Keyboard-highlighted row in the step-2 series list (arrow keys move it,
+  // Enter picks it). Reset to 0 at every call site that changes query or
+  // activeBoard, since either invalidates which row "top of list" refers to.
+  const [highlightIndex, setHighlightIndex] = useState(0);
 
   const excluded = new Set(exclude ?? []);
   const byBoard = new Map<string, AvailableSignal[]>();
@@ -59,6 +63,7 @@ export default function SignalSelect({
     setOpen(o);
     if (o) {
       setQuery("");
+      setHighlightIndex(0);
       // Skip the board step when there is only one group to choose from
       if (boardNames.length === 1 && composed.length === 0) {
         setActiveBoard(boardNames[0]);
@@ -80,6 +85,8 @@ export default function SignalSelect({
   const visibleItems = q
     ? activeItems.filter((s) => s.label.toLowerCase().includes(q))
     : activeItems;
+  const safeHighlight =
+    visibleItems.length === 0 ? -1 : Math.min(Math.max(highlightIndex, 0), visibleItems.length - 1);
 
   return (
     // modal=true — this picker is used inside Dialogs (OperationModal,
@@ -131,7 +138,7 @@ export default function SignalSelect({
               <button
                 key={board}
                 type="button"
-                onClick={() => { setActiveBoard(board); setQuery(""); }}
+                onClick={() => { setActiveBoard(board); setQuery(""); setHighlightIndex(0); }}
                 className="hover:bg-accent hover:text-accent-foreground flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm transition-colors"
               >
                 <span className="min-w-0 flex-1 truncate font-medium">{board}</span>
@@ -144,7 +151,7 @@ export default function SignalSelect({
             {composed.length > 0 && (
               <button
                 type="button"
-                onClick={() => { setActiveBoard(COMPOSED); setQuery(""); }}
+                onClick={() => { setActiveBoard(COMPOSED); setQuery(""); setHighlightIndex(0); }}
                 className="hover:bg-accent hover:text-accent-foreground flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm transition-colors"
               >
                 <span className="text-muted-foreground shrink-0">∑𝑓</span>
@@ -176,9 +183,17 @@ export default function SignalSelect({
               <Input
                 autoFocus
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => { setQuery(e.target.value); setHighlightIndex(0); }}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" && visibleItems.length > 0) pick(visibleItems[0].id);
+                  if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    setHighlightIndex((i) => Math.min(i + 1, visibleItems.length - 1));
+                  } else if (e.key === "ArrowUp") {
+                    e.preventDefault();
+                    setHighlightIndex((i) => Math.max(i - 1, 0));
+                  } else if (e.key === "Enter" && safeHighlight >= 0) {
+                    pick(visibleItems[safeHighlight].id);
+                  }
                 }}
                 placeholder="Filter…"
                 className="h-8 rounded-none border-0 pl-8 text-xs shadow-none focus-visible:ring-0"
@@ -191,12 +206,19 @@ export default function SignalSelect({
                   No matches
                 </div>
               )}
-              {visibleItems.map((s) => (
+              {visibleItems.map((s, idx) => (
                 <button
                   key={s.id}
+                  ref={(el) => {
+                    if (idx === safeHighlight) el?.scrollIntoView({ block: "nearest" });
+                  }}
                   type="button"
                   onClick={() => pick(s.id)}
-                  className="hover:bg-accent hover:text-accent-foreground flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm transition-colors"
+                  onMouseEnter={() => setHighlightIndex(idx)}
+                  className={cn(
+                    "hover:bg-accent hover:text-accent-foreground flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm transition-colors",
+                    idx === safeHighlight && "bg-accent text-accent-foreground",
+                  )}
                 >
                   {glyphFor(s.kind) && (
                     <span className="text-muted-foreground shrink-0">{glyphFor(s.kind)}</span>

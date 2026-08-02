@@ -16,6 +16,10 @@ export interface PlotStudioSlice {
   studioOpCounter: number;
   studioTrCounter: number;
   fftSampleRateOverride: number | null;
+  // Transient warning shown after a signal assignment fails to load (e.g. a
+  // multi-select drag where one CSV is missing/malformed) — not persisted,
+  // cleared by the banner itself after a timeout or on dismiss.
+  signalLoadWarning: string | null;
 
   addStudioFiles: (files: FileSignal[]) => void;
   removeStudioFile: (name: string) => void;
@@ -34,6 +38,7 @@ export interface PlotStudioSlice {
   toggleStudioPlotFFT: (plotId: string) => void;
   updateStudioSignalColor: (plotId: string, signalId: string, color: string) => void;
   setStudioFFTSampleRate: (rate: number | null) => void;
+  setSignalLoadWarning: (message: string | null) => void;
 }
 
 export const createPlotStudioSlice: StateCreator<PlotStudioSlice> = (set) => ({
@@ -45,6 +50,7 @@ export const createPlotStudioSlice: StateCreator<PlotStudioSlice> = (set) => ({
   studioOpCounter: 0,
   studioTrCounter: 0,
   fftSampleRateOverride: null,
+  signalLoadWarning: null,
 
   addStudioFiles: (files) =>
     set((s) => {
@@ -228,6 +234,8 @@ export const createPlotStudioSlice: StateCreator<PlotStudioSlice> = (set) => ({
     }),
 
   setStudioFFTSampleRate: (rate) => set({ fftSampleRateOverride: rate }),
+
+  setSignalLoadWarning: (message) => set({ signalLoadWarning: message }),
 });
 
 // Helper: resolve a signal (file/operation/transform) from store state

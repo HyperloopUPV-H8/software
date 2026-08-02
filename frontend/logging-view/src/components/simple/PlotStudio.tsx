@@ -3,9 +3,9 @@
 // VS Code-style: a fixed activity bar with one open section at a time, and
 // only the plots area scrolls.
 import { Button, Separator } from "@workspace/ui/components";
-import { FileDown, PanelRight, Plus } from "@workspace/ui/icons";
+import { FileDown, PanelRight, Plus, X } from "@workspace/ui/icons";
 import { cn } from "@workspace/ui/lib";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useStore } from "../../store/store";
 import PdfExportModal from "./modals/PdfExportModal";
 import PlotsArea, { type PlotsAreaHandle } from "./plots/PlotsArea";
@@ -28,6 +28,14 @@ export default function PlotStudio() {
     Array.from(s.studioPlots.values()).filter((p) => !p.hidden).length,
   );
   const addStudioPlot = useStore((s) => s.addStudioPlot);
+  const signalLoadWarning = useStore((s) => s.signalLoadWarning);
+  const setSignalLoadWarning = useStore((s) => s.setSignalLoadWarning);
+
+  useEffect(() => {
+    if (!signalLoadWarning) return;
+    const timer = setTimeout(() => setSignalLoadWarning(null), 6000);
+    return () => clearTimeout(timer);
+  }, [signalLoadWarning, setSignalLoadWarning]);
 
   // VS Code semantics: clicking the active icon closes the panel
   const selectSection = (id: string) => {
@@ -76,6 +84,20 @@ export default function PlotStudio() {
             </Button>
           </div>
         </div>
+
+        {signalLoadWarning && (
+          <div className="flex shrink-0 items-center gap-2 border-b border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs text-amber-600 dark:text-amber-400">
+            <span className="flex-1">{signalLoadWarning}</span>
+            <button
+              type="button"
+              aria-label="Dismiss"
+              onClick={() => setSignalLoadWarning(null)}
+              className="shrink-0 opacity-70 hover:opacity-100"
+            >
+              <X className="size-3.5" />
+            </button>
+          </div>
+        )}
 
         {/* Scrolling plots area */}
         <div className="min-h-0 flex-1 overflow-y-auto">

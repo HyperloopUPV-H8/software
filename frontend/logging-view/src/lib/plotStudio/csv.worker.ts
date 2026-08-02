@@ -3,9 +3,8 @@
 // in ./csv.ts — do not import this file directly elsewhere.
 import { parseCSV } from "./csv";
 
-self.onmessage = async (e: MessageEvent<{ file: File; timeUnit: string; enumValues?: string[] }>) => {
-  const { file, timeUnit, enumValues } = e.data;
-  const text = await file.text();
+self.onmessage = (e: MessageEvent<{ text: string; timeUnit: string; enumValues?: string[] }>) => {
+  const { text, timeUnit, enumValues } = e.data;
   const { time, value } = parseCSV(text, timeUnit, enumValues);
   const timeBuffer = time.buffer;
   const valueBuffer = value.buffer;

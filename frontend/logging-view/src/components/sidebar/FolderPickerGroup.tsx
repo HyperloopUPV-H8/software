@@ -128,7 +128,7 @@ const FolderPickerGroup = () => {
         type="file"
         className="hidden"
         onChange={handleFileChange}
-        webkitdirectory=""
+        {...{ webkitdirectory: "" }}
       />
 
       <CollapsibleTrigger asChild>

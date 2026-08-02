@@ -48,6 +48,10 @@ export default function OperationModal({ open, onClose }: { open: boolean; onClo
       const dataA = await ensureLoaded(signalA);
       const dataB = await ensureLoaded(signalB);
       if (!dataA || !dataB) { setError("Failed to load signal data."); return; }
+      if (dataA.time.length < 2 || dataB.time.length < 2) {
+        setError("Selected signal has only one sample — cannot combine it with another.");
+        return;
+      }
       addStudioOperation({ name: name.trim(), type, signalA, signalB, data: performOperation(dataA, dataB, type) });
       setName(""); setSignalA(""); setSignalB(""); setType("subtract");
       onClose();

@@ -6,6 +6,7 @@
 // studioFiles afterwards.
 import { useCallback, useMemo } from "react";
 import { parseCSVInWorker } from "../../../lib/plotStudio/csv";
+import { displayName } from "../../../store/slices/plotStudioSlice";
 import { getEnumLabels, getSignalName } from "../../../lib/plotStudio/units";
 import { useStore } from "../../../store/store";
 import type { SeriesData } from "../../../types/plotStudio";
@@ -92,21 +93,32 @@ export function useSignalLoader() {
 /**
  * Loads each signal id (sequentially — avoids firing many concurrent CSV
  * parses for a large multi-select) and assigns it to plotId. Ids that fail
- * to load are silently skipped (no toast system in this app — matches
- * useSignalLoader's null-on-failure convention); already-assigned ids are a
+ * to load are skipped and surfaced via signalLoadWarning (see
+ * plotStudioSlice) instead of failing silently; already-assigned ids are a
  * no-op via addSignalToStudioPlot's own dedup guard.
  */
 export function useAssignSignalsToPlot() {
   const ensureLoaded = useSignalLoader();
   const addSignalToStudioPlot = useStore((s) => s.addSignalToStudioPlot);
+  const setSignalLoadWarning = useStore((s) => s.setSignalLoadWarning);
 
   return useCallback(
     async (plotId: string, signalIds: string[]) => {
+      const failed: string[] = [];
       for (const id of signalIds) {
         const data = await ensureLoaded(id);
         if (data) addSignalToStudioPlot(plotId, id);
+        else failed.push(id);
+      }
+      if (failed.length > 0) {
+        const names = failed.map(displayName).join(", ");
+        setSignalLoadWarning(
+          failed.length === 1
+            ? `Could not load "${names}" — the data may be missing or malformed.`
+            : `Could not load ${failed.length} signals: ${names}.`,
+        );
       }
     },
-    [ensureLoaded, addSignalToStudioPlot],
+    [ensureLoaded, addSignalToStudioPlot, setSignalLoadWarning],
   );
 }

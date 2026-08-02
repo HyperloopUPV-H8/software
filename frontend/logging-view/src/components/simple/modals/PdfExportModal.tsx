@@ -39,20 +39,31 @@ export default function PdfExportModal({ open, onClose, onExport, visiblePlotCou
   const [includeAnnex, setIncludeAnnex] = useState(true);
   const [busy, setBusy]   = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
 
   const handleClose = () => {
     if (busy) return; // generation is already underway — closing wouldn't stop it, just hide progress
     setError("");
+    setNotice("");
     onClose();
   };
 
   const handleExport = async () => {
     setError("");
+    setNotice("");
     setBusy(true);
     try {
       const result = await onExport({ title, includeToc, includeStats, statsMode, includeAnnex });
       if (result.generated === 0) {
         setError("No plots could be rendered — nothing to export.");
+        return;
+      }
+      if (result.skipped > 0) {
+        // Partial success — the PDF was downloaded, but keep the dialog open
+        // with a notice instead of silently closing on an incomplete report.
+        setNotice(
+          `Exported ${result.generated} of ${result.generated + result.skipped} plots — ${result.skipped} could not be rendered.`,
+        );
         return;
       }
       onClose();
@@ -125,11 +136,18 @@ export default function PdfExportModal({ open, onClose, onExport, visiblePlotCou
             {error && (
               <p className="text-destructive bg-destructive/10 rounded-md px-3 py-2 text-xs">{error}</p>
             )}
+            {notice && (
+              <div className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-600 dark:text-amber-400">
+                {notice} The PDF with the successfully rendered plots was already downloaded.
+              </div>
+            )}
           </div>
         )}
 
         <div className="flex gap-2 pt-1">
-          <Button variant="outline" className="flex-1" onClick={handleClose} disabled={busy}>Cancel</Button>
+          <Button variant="outline" className="flex-1" onClick={handleClose} disabled={busy}>
+            {notice ? "Close" : "Cancel"}
+          </Button>
           <Button className="flex-1" onClick={handleExport} disabled={busy || visiblePlotCount === 0}>
             {busy && <Spinner className="mr-1.5 size-3.5" />}
             {busy ? "Generating…" : "Generate PDF"}

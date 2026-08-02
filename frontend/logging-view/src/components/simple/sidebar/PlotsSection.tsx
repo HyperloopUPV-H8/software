@@ -190,14 +190,18 @@ export default function PlotsSection() {
                           {/* Trace color — click to override; matches the curve in the chart */}
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <input
-                                ref={(el) => { colorInputEl = el; }}
-                                type="color"
-                                value={resolveSignalColor(sig.color, sig.colorIndex)}
-                                onChange={(e) => updateStudioSignalColor(plot.id, sig.signalId, e.target.value)}
-                                aria-label="Signal color"
-                                className="size-2.5 shrink-0 cursor-pointer appearance-none rounded-full border-0 bg-transparent p-0 [&::-webkit-color-swatch]:rounded-full [&::-webkit-color-swatch]:border-0 [&::-webkit-color-swatch-wrapper]:p-0"
-                              />
+                              {/* Label wrapper enlarges the click target well beyond the
+                                  tiny visible dot, without changing its visual size. */}
+                              <label className="-m-1.5 shrink-0 cursor-pointer p-1.5">
+                                <input
+                                  ref={(el) => { colorInputEl = el; }}
+                                  type="color"
+                                  value={resolveSignalColor(sig.color, sig.colorIndex)}
+                                  onChange={(e) => updateStudioSignalColor(plot.id, sig.signalId, e.target.value)}
+                                  aria-label="Signal color"
+                                  className="size-2.5 cursor-pointer appearance-none rounded-full border-0 bg-transparent p-0 [&::-webkit-color-swatch]:rounded-full [&::-webkit-color-swatch]:border-0 [&::-webkit-color-swatch-wrapper]:p-0"
+                                />
+                              </label>
                             </TooltipTrigger>
                             <TooltipContent side="left">Signal color</TooltipContent>
                           </Tooltip>

@@ -1,4 +1,5 @@
 import type { SeriesData } from "../../types/plotStudio";
+import type { DroppedFile } from "../../types/session";
 
 // Multipliers to convert raw timestamp units → milliseconds.
 const TIME_UNIT_TO_MS: Record<string, number> = {
@@ -77,7 +78,13 @@ export function parseCSV(text: string, timeUnit = "ms", enumValues?: string[]): 
  * hundreds of thousands of rows, and reading + parsing that synchronously
  * (as parseCSV does) would freeze the tab for the whole duration.
  */
-export function parseCSVInWorker(file: File, timeUnit = "ms", enumValues?: string[]): Promise<SeriesData> {
+export async function parseCSVInWorker(file: DroppedFile, timeUnit = "ms", enumValues?: string[]): Promise<SeriesData> {
+  // Read the text on the main thread and hand the worker a plain string —
+  // directory-drop sessions store synthetic DroppedFile objects (a closure
+  // over the real File, not the File itself), and a function property like
+  // `.text` can't survive postMessage's structured clone (throws
+  // DataCloneError). The heavy work (CSV parsing) still happens off-thread.
+  const text = await file.text();
   return new Promise((resolve, reject) => {
     const worker = new Worker(new URL("./csv.worker.ts", import.meta.url), { type: "module" });
     worker.onmessage = (e: MessageEvent<{ timeBuffer: ArrayBuffer; valueBuffer: ArrayBuffer; count: number }>) => {
@@ -86,6 +93,6 @@ export function parseCSVInWorker(file: File, timeUnit = "ms", enumValues?: strin
       resolve({ time: new Float64Array(timeBuffer, 0, count), value: new Float64Array(valueBuffer, 0, count) });
     };
     worker.onerror = (err) => { worker.terminate(); reject(err); };
-    worker.postMessage({ file, timeUnit, enumValues });
+    worker.postMessage({ text, timeUnit, enumValues });
   });
 }

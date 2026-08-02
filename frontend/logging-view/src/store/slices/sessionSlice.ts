@@ -21,7 +21,7 @@ export interface SessionSlice {
   // Selected series keys ("BOARD/measurementId") stored as a set-like Record.
   selectedSeries: Record<SeriesKey, boolean>;
   // All session files keyed by webkitRelativePath, for later CSV reading.
-  sessionFiles: Map<string, File>;
+  sessionFiles: Map<string, DroppedFile>;
   isLoading: boolean;
   sessionError: string | null;
   // Open/closed state of the "Session" collapsible in the sidebar. Auto-closes

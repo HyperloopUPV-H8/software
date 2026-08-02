@@ -403,9 +403,6 @@ importers:
       tailwindcss:
         specifier: ^4.1.18
         version: 4.1.18
-      uplot:
-        specifier: ^1.6.32
-        version: 1.6.32
       zustand:
         specifier: ^5.0.11
         version: 5.0.11(@types/react@19.2.11)(immer@11.1.0)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
