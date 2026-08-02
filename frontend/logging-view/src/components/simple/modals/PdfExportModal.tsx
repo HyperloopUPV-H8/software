@@ -1,7 +1,8 @@
 // Dialog for exporting all currently visible plots to a single PDF report.
 // The report itself (cover branding, chart pages, check page) always
-// includes the same fixed elements — these three checkboxes only control the
-// optional Index/Statistics/Annex sections (src/lib/pdfExport).
+// includes the same fixed elements — these checkboxes only control the
+// optional Index/Statistics/Annex sections (src/lib/pdfExport). The stats
+// layout control (combined vs. per-sheet) only matters when stats are on.
 import {
   Button,
   Checkbox,
@@ -10,10 +11,16 @@ import {
   DialogHeader,
   DialogTitle,
   Label,
+  SegmentedControl,
   Spinner,
 } from "@workspace/ui/components";
 import { useState } from "react";
 import type { PdfExportOptions, PdfExportResult } from "../../../lib/pdfExport/types";
+
+const STATS_MODE_OPTIONS: { label: string; value: PdfExportOptions["statsMode"] }[] = [
+  { label: "All together", value: "combined" },
+  { label: "Per sheet", value: "perSheet" },
+];
 
 interface PdfExportModalProps {
   open: boolean;
@@ -25,6 +32,7 @@ interface PdfExportModalProps {
 export default function PdfExportModal({ open, onClose, onExport, visiblePlotCount }: PdfExportModalProps) {
   const [includeToc, setIncludeToc]     = useState(true);
   const [includeStats, setIncludeStats] = useState(true);
+  const [statsMode, setStatsMode]       = useState<PdfExportOptions["statsMode"]>("combined");
   const [includeAnnex, setIncludeAnnex] = useState(true);
   const [busy, setBusy]   = useState(false);
   const [error, setError] = useState("");
@@ -39,7 +47,7 @@ export default function PdfExportModal({ open, onClose, onExport, visiblePlotCou
     setError("");
     setBusy(true);
     try {
-      const result = await onExport({ includeToc, includeStats, includeAnnex });
+      const result = await onExport({ includeToc, includeStats, statsMode, includeAnnex });
       if (result.generated === 0) {
         setError("No plots could be rendered — nothing to export.");
         return;
@@ -86,6 +94,12 @@ export default function PdfExportModal({ open, onClose, onExport, visiblePlotCou
               <Checkbox checked={includeStats} onCheckedChange={(v) => setIncludeStats(v === true)} />
               <Label className="font-normal">Include Statistics page (full data range)</Label>
             </label>
+            {includeStats && (
+              <div className="ml-6 flex items-center gap-2.5">
+                <span className="text-muted-foreground text-xs">Layout</span>
+                <SegmentedControl options={STATS_MODE_OPTIONS} value={statsMode} onChange={setStatsMode} />
+              </div>
+            )}
             <label className="flex items-center gap-2.5 text-sm">
               <Checkbox checked={includeAnnex} onCheckedChange={(v) => setIncludeAnnex(v === true)} />
               <Label className="font-normal">Include Series Annex</Label>

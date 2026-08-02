@@ -38,6 +38,9 @@ export interface AnnexRow {
 export interface PdfExportOptions {
   includeToc: boolean;
   includeStats: boolean;
+  // Only meaningful when includeStats is true: one combined table before the
+  // charts, or one table per plot placed right after its chart page.
+  statsMode: "combined" | "perSheet";
   includeAnnex: boolean;
 }
 

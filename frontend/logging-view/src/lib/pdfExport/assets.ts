@@ -30,12 +30,15 @@ export const HEADER_LOGO_HEIGHT = 14;
 export const CORNER_LOGO_SIZE = 8;
 export const BADGE_BOTTOM_OFFSET = 6;
 
-// Final "check" page layout: sw logo up top, check mark below it, shifted
-// down from strict vertical center to sit closer to the sw logo as a group.
-export const CHECK_PAGE_SW_LOGO_WIDTH = 40;
-export const CHECK_PAGE_SW_LOGO_TOP = 45;
-export const CHECK_LOGO_SIZE = 45;
-export const CHECK_LOGO_Y_OFFSET = 20;
+// Final "check" page layout: a top-down brand stack — full team logo (the
+// hero element, larger since this page skips the usual header logo), then
+// the smaller sw sub-brand mark, then the smaller check mark — each centered
+// horizontally with a fixed gap between them (see addCheckPage in pages.ts).
+export const CHECK_PAGE_FULL_LOGO_WIDTH = 180;
+export const CHECK_PAGE_FULL_LOGO_TOP = 34;
+export const CHECK_PAGE_STACK_GAP = 18;
+export const CHECK_PAGE_SW_LOGO_WIDTH = 28;
+export const CHECK_LOGO_SIZE = 30;
 
 // Reserved band every page-drawing function must stay within — the
 // header/footer pass (drawHeaderFooter) owns everything outside it.

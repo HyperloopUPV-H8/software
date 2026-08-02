@@ -69,7 +69,7 @@ export function collectAnnexRows(
 ): AnnexRow[] {
   const rows = new Map<string, AnnexRow>();
   for (const plot of visiblePlots) {
-    plot.signals.forEach((sig, idx) => {
+    plot.signals.forEach((sig) => {
       if (rows.has(sig.signalId)) return;
       const signal = getSignal(sig.signalId, state);
       const name = getSignalName(adjData, sig.signalId) ?? displayName(signal?.name ?? sig.signalId);
@@ -79,7 +79,7 @@ export function collectAnnexRows(
         board: boardOf(sig.signalId),
         unit: getSignalUnits(adjData, sig.signalId),
         type: getSignalType(adjData, sig.signalId),
-        color: resolveSignalColor(sig.color, idx),
+        color: resolveSignalColor(sig.color, sig.colorIndex),
       });
     });
   }

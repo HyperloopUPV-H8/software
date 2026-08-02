@@ -8,8 +8,9 @@ import {
   ASSET_ASPECT,
   BADGE_BOTTOM_OFFSET,
   CHECK_LOGO_SIZE,
-  CHECK_LOGO_Y_OFFSET,
-  CHECK_PAGE_SW_LOGO_TOP,
+  CHECK_PAGE_FULL_LOGO_TOP,
+  CHECK_PAGE_FULL_LOGO_WIDTH,
+  CHECK_PAGE_STACK_GAP,
   CHECK_PAGE_SW_LOGO_WIDTH,
   CONTENT_BOTTOM,
   CONTENT_TOP,
@@ -50,16 +51,19 @@ function formatSessionDate(raw: string | null): string {
 }
 
 /** Header: full Hyperloop logo (left) + page number (right). Footer: date
- * (center) + "sw" mark and "Logging View" label (bottom-left) — every page
- * except the dedicated check page at the end. */
+ * (center) + "sw" mark and "Logging View" label (bottom-left). The header
+ * logo and sw badge are both skipped on the dedicated check page at the
+ * end, which draws its own larger versions of the same brand marks. */
 export function drawHeaderFooter(
   doc: jsPDF,
-  opts: { dateStr: string; showSwBadge: boolean; pageNumber: number; totalPages: number },
+  opts: { dateStr: string; showHeaderLogo: boolean; showSwBadge: boolean; pageNumber: number; totalPages: number },
 ) {
   const logoH = HEADER_LOGO_HEIGHT;
-  const logoW = logoH * ASSET_ASPECT.fullLogo;
   const logoY = (MARGIN.top - logoH) / 2;
-  doc.addImage(PDF_ASSETS.fullLogo, "PNG", MARGIN.left, logoY, logoW, logoH);
+  if (opts.showHeaderLogo) {
+    const logoW = logoH * ASSET_ASPECT.fullLogo;
+    doc.addImage(PDF_ASSETS.fullLogo, "PNG", MARGIN.left, logoY, logoW, logoH);
+  }
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
@@ -148,13 +152,22 @@ export function fillTocPage(doc: jsPDF, entries: { title: string; page: number }
 }
 
 /** Full-data-range per-signal stats, one flat table grouped (in row order)
- * by plot — may spill onto further pages via autoTable's own pagination. */
-export function addStatsPage(doc: jsPDF, rows: StatsRow[]) {
+ * by plot — may spill onto further pages via autoTable's own pagination.
+ * `title` lets callers reuse this for either the single combined page
+ * ("Statistics (full data range)") or a per-plot page in "per sheet" mode,
+ * where the redundant "Plot" column (same value on every row) is dropped. */
+export function addStatsPage(
+  doc: jsPDF,
+  rows: StatsRow[],
+  opts: { title?: string; showPlotColumn?: boolean } = {},
+) {
+  const { title = "Statistics (full data range)", showPlotColumn = true } = opts;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
-  doc.text("Statistics (full data range)", MARGIN.left, CONTENT_TOP + 4);
+  doc.text(title, MARGIN.left, CONTENT_TOP + 4);
   doc.setFont("helvetica", "normal");
 
+  const headRow = ["Signal", "Mean", "Std Dev", "RMS", "Peak-to-Peak", "Min", "Max", "Noise Floor", "Samples"];
   autoTable(doc, {
     startY: CONTENT_TOP + 10,
     margin: { top: CONTENT_TOP, bottom: MARGIN.bottom, left: MARGIN.left, right: MARGIN.right },
@@ -162,9 +175,10 @@ export function addStatsPage(doc: jsPDF, rows: StatsRow[]) {
     // like σ have no glyph and render as garbled spaced-out mojibake, so
     // headers stay plain ASCII here even though the on-screen StatsPanel
     // (real web fonts, no such limit) can use "σ" directly.
-    head: [["Plot", "Signal", "Mean", "Std Dev", "RMS", "Peak-to-Peak", "Min", "Max", "Noise Floor", "Samples"]],
+    head: [showPlotColumn ? ["Plot", ...headRow] : headRow],
     body: rows.map((r) => [
-      r.plotName, r.signalName,
+      ...(showPlotColumn ? [r.plotName] : []),
+      r.signalName,
       fmt(r.mean), fmt(r.std), fmt(r.rms), fmt(r.peakToPeak), fmt(r.min), fmt(r.max), fmt(r.noiseFloor),
       fmt(r.samples, true),
     ]),
@@ -225,17 +239,25 @@ export function addChartPage(doc: jsPDF, chart: ChartExport) {
   doc.addImage(chart.imageDataUrl, "PNG", x, y, w, h);
 }
 
-/** Final page of the report: the sw logo up top, the team's "check" mark
- * below it, shifted down from strict vertical center. */
+/** Final page of the report: a centered top-down brand stack — the full
+ * "Hyperloop UPV" team logo, then the "Logging View - Software" sub-brand
+ * mark, then the team's "check" mark — each gap-separated from the next. */
 export function addCheckPage(doc: jsPDF) {
+  const fullW = CHECK_PAGE_FULL_LOGO_WIDTH;
+  const fullH = fullW / ASSET_ASPECT.fullLogo;
+  const fullX = (PAGE.width - fullW) / 2;
+  const fullY = CHECK_PAGE_FULL_LOGO_TOP;
+  doc.addImage(PDF_ASSETS.fullLogo, "PNG", fullX, fullY, fullW, fullH);
+
   const swW = CHECK_PAGE_SW_LOGO_WIDTH;
   const swH = swW / ASSET_ASPECT.swLogo;
   const swX = (PAGE.width - swW) / 2;
-  doc.addImage(PDF_ASSETS.swLogo, "PNG", swX, CHECK_PAGE_SW_LOGO_TOP, swW, swH);
+  const swY = fullY + fullH + CHECK_PAGE_STACK_GAP;
+  doc.addImage(PDF_ASSETS.swLogo, "PNG", swX, swY, swW, swH);
 
   const w = CHECK_LOGO_SIZE;
   const h = w / ASSET_ASPECT.checkLogo;
   const x = (PAGE.width - w) / 2;
-  const y = (PAGE.height - h) / 2 + CHECK_LOGO_Y_OFFSET;
+  const y = swY + swH + CHECK_PAGE_STACK_GAP;
   doc.addImage(PDF_ASSETS.checkLogo, "PNG", x, y, w, h);
 }

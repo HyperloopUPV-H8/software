@@ -1,6 +1,7 @@
 // Orchestrates the full report: builds pages in content order (TOC
-// placeholder, stats, one page per chart, series annex, check page), then a
-// second pass fills the TOC with real page numbers and stamps
+// placeholder, then either a combined stats page or, in "per sheet" mode, one
+// stats page interleaved right after each chart page, series annex, check
+// page), then a second pass fills the TOC with real page numbers and stamps
 // header/footer/sw-badge on every page — this needs every page to already
 // exist so page numbers (TOC) and the check page's index (sw-badge) are known.
 import { jsPDF } from "jspdf";
@@ -33,7 +34,8 @@ export async function buildAndDownloadPdf(input: {
     tocPageIndex = doc.getNumberOfPages();
   }
 
-  if (options.includeStats && statsRows.length > 0) {
+  const statsPerSheet = options.includeStats && options.statsMode === "perSheet";
+  if (options.includeStats && !statsPerSheet && statsRows.length > 0) {
     ensureFreshPage();
     addStatsPage(doc, statsRows);
   }
@@ -43,6 +45,16 @@ export async function buildAndDownloadPdf(input: {
     ensureFreshPage();
     addChartPage(doc, chart);
     tocEntries.push({ title: chart.title, page: doc.getNumberOfPages() });
+
+    if (statsPerSheet) {
+      // statsRows carries plotName (== chart.title, both sourced from
+      // PlotState.name) so each chart's rows can be picked back out here.
+      const plotStatsRows = statsRows.filter((r) => r.plotName === chart.title);
+      if (plotStatsRows.length > 0) {
+        ensureFreshPage();
+        addStatsPage(doc, plotStatsRows, { title: `Statistics — ${chart.title}`, showPlotColumn: false });
+      }
+    }
   }
 
   if (options.includeAnnex && annexRows.length > 0) {
@@ -60,7 +72,8 @@ export async function buildAndDownloadPdf(input: {
   const totalPages = doc.getNumberOfPages();
   for (let p = 1; p <= totalPages; p++) {
     doc.setPage(p);
-    drawHeaderFooter(doc, { dateStr, showSwBadge: p !== checkPageIndex, pageNumber: p, totalPages });
+    const isCheckPage = p === checkPageIndex;
+    drawHeaderFooter(doc, { dateStr, showHeaderLogo: !isCheckPage, showSwBadge: !isCheckPage, pageNumber: p, totalPages });
   }
 
   doc.save(filename ?? `Logging_Report_${exportTimestamp()}_Hyperloop-UPV.pdf`);
