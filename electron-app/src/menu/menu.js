@@ -4,7 +4,9 @@
  * Defines menu structure with File, Tools, and Help sections with keyboard shortcuts and actions.
  */
 
-import { BrowserWindow, Menu, app, dialog } from "electron";
+import { BrowserWindow, Menu, app } from "electron";
+import { showAboutWindow } from "../windows/aboutWindow.js";
+import { getCurrentView } from "../windows/mainWindow.js";
 
 /**
  * Creates the application menu with File, Tools, and Help sections.
@@ -75,13 +77,11 @@ function createMenu() {
       submenu: [
         {
           label: "About",
+          // Only meaningful in logging-view — the About window credits its
+          // author specifically, not the Control Station as a whole.
           click: () => {
-            dialog.showMessageBox(BrowserWindow.getFocusedWindow() ?? undefined, {
-              type: "info",
-              title: "About",
-              message: "Hyperloop UPV Control Station",
-              detail: `Version ${app.getVersion()}\n\nControl and monitoring software for Hyperloop pod.`,
-            });
+            if (getCurrentView() !== "logging-view") return;
+            showAboutWindow(BrowserWindow.getFocusedWindow());
           },
         },
       ],

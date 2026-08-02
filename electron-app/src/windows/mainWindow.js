@@ -4,10 +4,11 @@
  * Handles creation, view loading, and window state management.
  */
 
-import { BrowserWindow, app, dialog } from "electron";
+import { BrowserWindow, Menu, app, dialog } from "electron";
 import fs from "fs";
 import path from "path";
 import { getAppPath } from "../utils/paths.js";
+import { showAboutWindow } from "./aboutWindow.js";
 
 // Get the application root path
 const appPath = getAppPath();
@@ -44,6 +45,20 @@ function createWindow(screenWidth, screenHeight, initialView) {
     },
     title: "Hyperloop Control Station",
     backgroundColor: "#1a1a1a",
+  });
+
+  // Right-click anywhere in the view to reach About — only offered in
+  // logging-view, since the About window credits its author specifically
+  // (not the Control Station as a whole).
+  mainWindow.webContents.on("context-menu", (_event, _params) => {
+    if (currentView !== "logging-view") return;
+    const contextMenu = Menu.buildFromTemplate([
+      {
+        label: "About",
+        click: () => showAboutWindow(mainWindow),
+      },
+    ]);
+    contextMenu.popup({ window: mainWindow });
   });
 
   // If an initial view string is provided, load it.
