@@ -159,6 +159,7 @@ const PlotWrapper = forwardRef<PlotExportHandle, PlotWrapperProps>(({ plot }, re
     setEditingName(false);
   };
 
+  const hasLeftAxis  = plot.signals.some((s) => s.yAxis === "left");
   const hasRightAxis = plot.signals.some((s) => s.yAxis === "right");
   const hasFFT       = plot.showFFT;
   const signalCount  = plot.signals.length;
@@ -258,20 +259,22 @@ const PlotWrapper = forwardRef<PlotExportHandle, PlotWrapperProps>(({ plot }, re
   }, [hasTimeline, plot.signals, resolvedSignals, adjData, timelineRowLabels]);
 
   const traces = useMemo<Plotly.Data[]>(
-    () =>
-      hasTimeline ? timelineTraces : plot.signals.flatMap((sig, idx) => {
+    () => {
+      if (hasTimeline) return timelineTraces;
+      const signalTraces: Plotly.Data[] = plot.signals.flatMap((sig, idx) => {
         const signal = resolvedSignals[idx];
         const data = signal?.data;
         if (!data || data.value.length < 2) return [];
         let name = getSignalName(adjData, sig.signalId) ?? displayName(signal?.name ?? sig.signalId);
         const color = resolveSignalColor(sig.color, sig.colorIndex);
+        const isRight = sig.yAxis === "right";
         // Right-axis traces are dashed so axis membership reads at a glance,
         // independent of how many colors are in play (color alone doesn't
         // scale as a left/right cue once there are more than two traces).
-        const dash: Plotly.Dash = sig.yAxis === "right" ? "dash" : "solid";
+        const dash: Plotly.Dash = isRight ? "dash" : "solid";
         // Axis title can't show a unit when signals on it disagree — put each
         // signal's own unit in the legend instead so it's still visible.
-        const axisMismatch = sig.yAxis === "right" ? axisUnits.rightMismatch : axisUnits.leftMismatch;
+        const axisMismatch = isRight ? axisUnits.rightMismatch : axisUnits.leftMismatch;
         if (axisMismatch && !hasFFT) {
           const unit = getSignalUnits(adjData, sig.signalId);
           if (unit) name = `${name} (${unit})`;
@@ -316,7 +319,7 @@ const PlotWrapper = forwardRef<PlotExportHandle, PlotWrapperProps>(({ plot }, re
             type: traceType,
             mode: "lines" as const,
             name: `${name} (FFT)`, line: { width: 2, color, dash },
-            yaxis: sig.yAxis === "right" ? ("y2" as const) : ("y" as const),
+            yaxis: isRight ? ("y2" as const) : ("y" as const),
           }];
         }
         return [{
@@ -324,10 +327,30 @@ const PlotWrapper = forwardRef<PlotExportHandle, PlotWrapperProps>(({ plot }, re
           type: traceType,
           mode: "lines" as const,
           name, line: { width: 2.5, color, dash },
-          yaxis: sig.yAxis === "right" ? ("y2" as const) : ("y" as const),
+          yaxis: isRight ? ("y2" as const) : ("y" as const),
         }];
-      }),
-    [plot.signals, resolvedSignals, fftSampleRateOverride, adjData, axisUnits, hasFFT, hasTimeline, timelineTraces, visibleRange],
+      });
+
+      // If every trace ended up on the right (secondary) axis, the primary
+      // "y" axis has nothing plotted against it — Plotly doesn't draw an
+      // axis's line/border at all when it has zero traces, which otherwise
+      // makes the plot's left border vanish. A fully invisible dummy trace
+      // keeps "y" registered as in-use so its border still renders, without
+      // moving the real signal off the right axis the user chose for it.
+      if (hasRightAxis && !hasLeftAxis && signalTraces.length > 0) {
+        signalTraces.push({
+          x: [], y: [],
+          type: "scatter" as const,
+          mode: "markers" as const,
+          yaxis: "y" as const,
+          showlegend: false,
+          hoverinfo: "skip" as const,
+        });
+      }
+
+      return signalTraces;
+    },
+    [plot.signals, resolvedSignals, fftSampleRateOverride, adjData, axisUnits, hasFFT, hasLeftAxis, hasRightAxis, hasTimeline, timelineTraces, visibleRange],
   );
 
   const hasTraces = traces.length > 0;
@@ -338,10 +361,10 @@ const PlotWrapper = forwardRef<PlotExportHandle, PlotWrapperProps>(({ plot }, re
         ? buildTimelineLayout({ theme: getPlotlyTheme(isDarkMode), plotId: plot.id, rowLabels: timelineRowLabels })
         : buildPlotLayout({
             theme: getPlotlyTheme(isDarkMode),
-            hasFFT, hasRightAxis, plotId: plot.id,
+            hasFFT, hasLeftAxis, hasRightAxis, plotId: plot.id,
             leftUnits: axisUnits.left, rightUnits: axisUnits.right,
           }),
-    [hasRightAxis, hasFFT, hasTimeline, timelineRowLabels, plot.id, axisUnits, isDarkMode],
+    [hasLeftAxis, hasRightAxis, hasFFT, hasTimeline, timelineRowLabels, plot.id, axisUnits, isDarkMode],
   );
 
   // Drag-to-resize
@@ -434,7 +457,7 @@ const PlotWrapper = forwardRef<PlotExportHandle, PlotWrapperProps>(({ plot }, re
       ? buildTimelineLayout({ theme: getPlotlyTheme(false), plotId: plot.id, rowLabels: timelineRowLabels, fontScale: 1.8, exportHeight })
       : buildPlotLayout({
           theme: getPlotlyTheme(false),
-          hasFFT, hasRightAxis, plotId: plot.id,
+          hasFFT, hasLeftAxis, hasRightAxis, plotId: plot.id,
           leftUnits: axisUnits.left, rightUnits: axisUnits.right,
           fontScale: 1.8, exportHeight,
         });
@@ -580,7 +603,7 @@ const PlotWrapper = forwardRef<PlotExportHandle, PlotWrapperProps>(({ plot }, re
           {hasTraces && (
             <div className="bg-muted/40 flex items-center gap-1 rounded-lg border px-1.5 py-1">
               {/* Categorical y-axis in timeline mode isn't zoomable the same way — X (time) still is. */}
-              {!hasTimeline && <ZoomGroup label="Y◀" axis="y1" onZoom={zoomAxis} />}
+              {!hasTimeline && hasLeftAxis && <ZoomGroup label="Y◀" axis="y1" onZoom={zoomAxis} />}
               {!hasTimeline && hasRightAxis && <ZoomGroup label="Y▶" axis="y2" onZoom={zoomAxis} />}
               <ZoomGroup label="X" axis="x" onZoom={zoomAxis} />
               <Tooltip>

@@ -43,6 +43,7 @@ export function getPlotlyTheme(isDarkMode: boolean): PlotlyThemeColors {
 export interface BuildPlotLayoutParams {
   theme: PlotlyThemeColors;
   hasFFT: boolean;
+  hasLeftAxis: boolean;
   hasRightAxis: boolean;
   plotId: string;
   leftUnits: string | undefined;
@@ -67,7 +68,7 @@ export interface BuildPlotLayoutParams {
 const EXPORT_LEGEND_GAP_PX = 190;
 
 export function buildPlotLayout({
-  theme, hasFFT, hasRightAxis, plotId, leftUnits, rightUnits, fontScale = 1, exportHeight = 1600,
+  theme, hasFFT, hasLeftAxis, hasRightAxis, plotId, leftUnits, rightUnits, fontScale = 1, exportHeight = 1600,
 }: BuildPlotLayoutParams): Partial<Plotly.Layout> {
   // The live chart's plot area is only a few hundred px tall (resizable, user
   // controlled), while export renders into a fixed-height canvas — the same
@@ -98,21 +99,34 @@ export function buildPlotLayout({
       showline: true, zeroline: false, fixedrange: false,
       exponentformat: "power", separatethousands: true,
     },
-    yaxis: {
-      title: {
-        text: hasRightAxis
-          ? `Value (Left${leftUnits ? `, ${leftUnits}` : ""})`
-          : `Value${leftUnits ? ` (${leftUnits})` : ""}`,
-        font: { size: 16 * fontScale, color: theme.fontColor },
-      },
-      tickfont: { size: 14 * fontScale, color: theme.neutralLineColor },
-      gridcolor: theme.gridColor, linecolor: theme.neutralLineColor, linewidth: 1.5 * fontScale, mirror: !hasRightAxis,
-      ticks: "outside", tickwidth: 1.5 * fontScale, tickcolor: theme.neutralLineColor, color: theme.neutralLineColor,
-      showline: true, zeroline: false, fixedrange: false,
-      exponentformat: "power", separatethousands: true,
-    },
+    yaxis: hasLeftAxis
+      ? {
+          title: {
+            text: hasRightAxis
+              ? `Value (Left${leftUnits ? `, ${leftUnits}` : ""})`
+              : `Value${leftUnits ? ` (${leftUnits})` : ""}`,
+            font: { size: 16 * fontScale, color: theme.fontColor },
+          },
+          tickfont: { size: 14 * fontScale, color: theme.neutralLineColor },
+          gridcolor: theme.gridColor, linecolor: theme.neutralLineColor, linewidth: 1.5 * fontScale, mirror: !hasRightAxis,
+          ticks: "outside", tickwidth: 1.5 * fontScale, tickcolor: theme.neutralLineColor, color: theme.neutralLineColor,
+          showline: true, zeroline: false, fixedrange: false,
+          exponentformat: "power", separatethousands: true,
+        }
+      : {
+          // Nothing is actually plotted on the left axis (every signal is on
+          // the right) — keep just its border line for a clean box, but hide
+          // the numeric scale/ticks/title, which would otherwise show a
+          // meaningless default [-1, 1] range with no bearing on the data.
+          title: undefined,
+          showticklabels: false,
+          ticks: "",
+          gridcolor: "transparent",
+          linecolor: theme.neutralLineColor, linewidth: 1.5 * fontScale, mirror: false,
+          showline: true, zeroline: false, fixedrange: true,
+        },
     margin: {
-      l: 80 * fontScale * marginSide, r: (hasRightAxis ? 80 : 40) * fontScale * marginSide,
+      l: (hasLeftAxis ? 80 : 40) * fontScale * marginSide, r: (hasRightAxis ? 80 : 40) * fontScale * marginSide,
       t: marginTop, b: marginBottom,
     },
     // Unified hover: one label per signal at the same X — much easier to
