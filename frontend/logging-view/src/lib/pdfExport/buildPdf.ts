@@ -1,12 +1,14 @@
-// Orchestrates the full report: builds pages in content order (TOC
-// placeholder, then either a combined stats page or, in "per sheet" mode, one
-// stats page interleaved right after each chart page, series annex, check
-// page), then a second pass fills the TOC with real page numbers and stamps
-// header/footer/sw-badge on every page — this needs every page to already
-// exist so page numbers (TOC) and the check page's index (sw-badge) are known.
+// Orchestrates the full report: builds pages in content order (optional
+// cover page, TOC placeholder, then either a combined stats page or, in "per
+// sheet" mode, one stats page interleaved right after each chart page,
+// series annex, check page), then a second pass fills the TOC with real page
+// numbers and stamps header/footer/sw-badge on every page — this needs every
+// page to already exist so page numbers (TOC) and the check/cover pages'
+// indices (which skip the header logo and sw badge) are known.
 import { jsPDF } from "jspdf";
+import { registerRobotoFont } from "./fonts";
 import { exportTimestamp, formatExportDate } from "../plotStudio/format";
-import { addAnnexPage, addChartPage, addCheckPage, addStatsPage, drawHeaderFooter, fillTocPage } from "./pages";
+import { addAnnexPage, addChartPage, addCheckPage, addCoverPage, addStatsPage, drawHeaderFooter, fillTocPage } from "./pages";
 import type { AnnexRow, ChartExport, PdfExportOptions, SessionInfo, StatsRow } from "./types";
 
 export async function buildAndDownloadPdf(input: {
@@ -19,6 +21,7 @@ export async function buildAndDownloadPdf(input: {
 }): Promise<void> {
   const { charts, options, statsRows, annexRows, sessionInfo, filename } = input;
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+  registerRobotoFont(doc);
 
   // jsPDF documents start with one page already created — reuse it for
   // whichever section comes first instead of leaving a stray blank page.
@@ -27,6 +30,14 @@ export async function buildAndDownloadPdf(input: {
     if (!firstPageConsumed) { firstPageConsumed = true; return; }
     doc.addPage();
   };
+
+  const title = options.title.trim();
+  let coverPageIndex: number | null = null;
+  if (title) {
+    ensureFreshPage();
+    addCoverPage(doc, title);
+    coverPageIndex = doc.getNumberOfPages();
+  }
 
   let tocPageIndex: number | null = null;
   if (options.includeToc) {
@@ -66,14 +77,17 @@ export async function buildAndDownloadPdf(input: {
   addCheckPage(doc);
   const checkPageIndex = doc.getNumberOfPages();
 
-  if (tocPageIndex !== null) fillTocPage(doc, tocEntries, sessionInfo);
+  if (tocPageIndex !== null) fillTocPage(doc, tocPageIndex, tocEntries, sessionInfo);
 
   const dateStr = formatExportDate();
   const totalPages = doc.getNumberOfPages();
   for (let p = 1; p <= totalPages; p++) {
     doc.setPage(p);
-    const isCheckPage = p === checkPageIndex;
-    drawHeaderFooter(doc, { dateStr, showHeaderLogo: !isCheckPage, showSwBadge: !isCheckPage, pageNumber: p, totalPages });
+    // Cover and check pages are both plain brand-stack pages — neither wants
+    // the standard header logo or footer sw badge duplicating what's already
+    // drawn, larger, in the stack itself.
+    const isBrandStackPage = p === checkPageIndex || p === coverPageIndex;
+    drawHeaderFooter(doc, { dateStr, showHeaderLogo: !isBrandStackPage, showSwBadge: !isBrandStackPage, pageNumber: p, totalPages });
   }
 
   doc.save(filename ?? `Logging_Report_${exportTimestamp()}_Hyperloop-UPV.pdf`);

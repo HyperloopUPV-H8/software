@@ -7,26 +7,22 @@ import { fmt } from "../plotStudio/format";
 import {
   ASSET_ASPECT,
   BADGE_BOTTOM_OFFSET,
-  CHECK_LOGO_SIZE,
-  CHECK_PAGE_FULL_LOGO_TOP,
-  CHECK_PAGE_FULL_LOGO_WIDTH,
-  CHECK_PAGE_STACK_GAP,
-  CHECK_PAGE_SW_LOGO_WIDTH,
+  BRAND_STACK_CHECK_LOGO_SIZE,
+  BRAND_STACK_FULL_LOGO_WIDTH,
+  BRAND_STACK_GAP,
+  BRAND_STACK_SW_LOGO_WIDTH,
+  BRAND_STACK_TOP,
   CONTENT_BOTTOM,
   CONTENT_TOP,
   CORNER_LOGO_SIZE,
+  COVER_TITLE_BLOCK_HEIGHT,
+  COVER_TITLE_FONT_SIZE,
   HEADER_LOGO_HEIGHT,
   MARGIN,
   PAGE,
   PDF_ASSETS,
 } from "./assets";
 import type { AnnexRow, ChartExport, SessionInfo, StatsRow } from "./types";
-
-function hexToRgb(hex: string): [number, number, number] {
-  const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);
-  if (!m) return [128, 128, 128];
-  return [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)];
-}
 
 // Same GitHub org/repo the ADJ archive JSON snapshots are published under
 // (see sessionSlice.ts's ADJ_ARCHIVE_URL, which points at its GitHub Pages
@@ -94,12 +90,18 @@ export function drawHeaderFooter(
   }
 }
 
-/** Fills the reserved TOC page (page 1) once every chart's real page number
- * is known — called last, after all other pages exist. Below the entry list,
- * in whatever room remains, a "Session Configuration" block summarizes the
- * logger_settings.json the session was opened with. */
-export function fillTocPage(doc: jsPDF, entries: { title: string; page: number }[], sessionInfo?: SessionInfo) {
-  doc.setPage(1);
+/** Fills the reserved TOC page once every chart's real page number is known
+ * — called last, after all other pages exist. `pageIndex` is usually 1, but
+ * shifts to 2 when an optional cover page (addCoverPage) precedes it. Below
+ * the entry list, in whatever room remains, a "Session Configuration" block
+ * summarizes the logger_settings.json the session was opened with. */
+export function fillTocPage(
+  doc: jsPDF,
+  pageIndex: number,
+  entries: { title: string; page: number }[],
+  sessionInfo?: SessionInfo,
+) {
+  doc.setPage(pageIndex);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
   doc.text("Table of Contents", MARGIN.left, CONTENT_TOP + 6);
@@ -187,31 +189,21 @@ export function addStatsPage(
   });
 }
 
-/** Deduped series metadata across every exported plot, with a color swatch
- * per row — may spill onto further pages via autoTable's own pagination. */
+/** Deduped series metadata across every exported plot — may spill onto
+ * further pages via autoTable's own pagination. */
 export function addAnnexPage(doc: jsPDF, rows: AnnexRow[]) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
   doc.text("Series Annex", MARGIN.left, CONTENT_TOP + 4);
   doc.setFont("helvetica", "normal");
 
-  const colorColIndex = 4;
   autoTable(doc, {
     startY: CONTENT_TOP + 10,
     margin: { top: CONTENT_TOP, bottom: MARGIN.bottom, left: MARGIN.left, right: MARGIN.right },
-    head: [["Signal", "Board", "Unit", "Type", "Color"]],
-    body: rows.map((r) => [r.name, r.board ?? "-", r.unit ?? "-", r.type ?? "-", ""]),
+    head: [["Signal", "Board", "Unit", "Type"]],
+    body: rows.map((r) => [r.name, r.board ?? "-", r.unit ?? "-", r.type ?? "-"]),
     styles: { fontSize: 8, cellPadding: 2 },
     headStyles: { fillColor: [45, 45, 45] },
-    didDrawCell: (data) => {
-      if (data.section !== "body" || data.column.index !== colorColIndex) return;
-      const row = rows[data.row.index];
-      if (!row) return;
-      const [r, g, b] = hexToRgb(row.color);
-      doc.setFillColor(r, g, b);
-      const size = Math.min(data.cell.height, data.cell.width) - 3;
-      doc.rect(data.cell.x + 1.5, data.cell.y + (data.cell.height - size) / 2, size, size, "F");
-    },
   });
 }
 
@@ -239,25 +231,58 @@ export function addChartPage(doc: jsPDF, chart: ChartExport) {
   doc.addImage(chart.imageDataUrl, "PNG", x, y, w, h);
 }
 
-/** Final page of the report: a centered top-down brand stack — the full
- * "Hyperloop UPV" team logo, then the "Logging View - Software" sub-brand
+/** Centered top-down brand stack shared by the closing check page and the
+ * optional cover page: the full "Hyperloop UPV" team logo, then (cover page
+ * only) a large Roboto title, then the "Logging View - Software" sub-brand
  * mark, then the team's "check" mark — each gap-separated from the next. */
-export function addCheckPage(doc: jsPDF) {
-  const fullW = CHECK_PAGE_FULL_LOGO_WIDTH;
+function addBrandStack(doc: jsPDF, title?: string) {
+  const fullW = BRAND_STACK_FULL_LOGO_WIDTH;
   const fullH = fullW / ASSET_ASPECT.fullLogo;
   const fullX = (PAGE.width - fullW) / 2;
-  const fullY = CHECK_PAGE_FULL_LOGO_TOP;
+  const fullY = BRAND_STACK_TOP;
   doc.addImage(PDF_ASSETS.fullLogo, "PNG", fullX, fullY, fullW, fullH);
 
-  const swW = CHECK_PAGE_SW_LOGO_WIDTH;
+  let nextY = fullY + fullH + BRAND_STACK_GAP;
+  if (title) {
+    doc.setFont("Roboto", "bold");
+    doc.setFontSize(COVER_TITLE_FONT_SIZE);
+    // Long titles shrink to fit rather than overflowing the margins —
+    // measured/scaled at the nominal size, so the reserved block height and
+    // baseline offset below (both derived from COVER_TITLE_FONT_SIZE) stay
+    // valid even for a shrunk title.
+    const maxTitleWidth = PAGE.width - MARGIN.left - MARGIN.right - 20;
+    const textWidth = doc.getTextWidth(title);
+    if (textWidth > maxTitleWidth) doc.setFontSize(COVER_TITLE_FONT_SIZE * (maxTitleWidth / textWidth));
+    // Baseline placed near the block's bottom (matches jsPDF's own
+    // getTextDimensions height for this font/size), ascenders rising into
+    // the block above it.
+    doc.text(title, PAGE.width / 2, nextY + COVER_TITLE_FONT_SIZE * 0.3528, { align: "center" });
+    doc.setFont("helvetica", "normal");
+    nextY += COVER_TITLE_BLOCK_HEIGHT + BRAND_STACK_GAP;
+  }
+
+  const swW = BRAND_STACK_SW_LOGO_WIDTH;
   const swH = swW / ASSET_ASPECT.swLogo;
   const swX = (PAGE.width - swW) / 2;
-  const swY = fullY + fullH + CHECK_PAGE_STACK_GAP;
+  const swY = nextY;
   doc.addImage(PDF_ASSETS.swLogo, "PNG", swX, swY, swW, swH);
 
-  const w = CHECK_LOGO_SIZE;
+  const w = BRAND_STACK_CHECK_LOGO_SIZE;
   const h = w / ASSET_ASPECT.checkLogo;
   const x = (PAGE.width - w) / 2;
-  const y = swY + swH + CHECK_PAGE_STACK_GAP;
+  const y = swY + swH + BRAND_STACK_GAP;
   doc.addImage(PDF_ASSETS.checkLogo, "PNG", x, y, w, h);
+}
+
+/** Final page of the report: the brand stack with no title. */
+export function addCheckPage(doc: jsPDF) {
+  addBrandStack(doc);
+}
+
+/** Optional first page of the report, prepended when the user gives the
+ * export a document title: identical brand stack to the closing check page,
+ * with that title (Roboto, large) inserted between the full logo and the sw
+ * mark. */
+export function addCoverPage(doc: jsPDF, title: string) {
+  addBrandStack(doc, title);
 }

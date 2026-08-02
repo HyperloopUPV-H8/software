@@ -4,7 +4,6 @@
 import { computeRangeStats } from "../plotStudio/stats";
 import { isDiscreteSeries } from "../plotStudio/timeline";
 import { boardOf, getSignalName, getSignalType, getSignalUnits, isDiscreteMeasurement } from "../plotStudio/units";
-import { resolveSignalColor } from "../plotStudio/palette";
 import { displayName, getSignal, type PlotStudioSlice } from "../../store/slices/plotStudioSlice";
 import type { AdjArchive, LoggerSettings } from "../../types/session";
 import type { PlotState } from "../../types/plotStudio";
@@ -60,8 +59,7 @@ export function collectStatsRows(
   return rows;
 }
 
-/** Series metadata across all given plots, deduped by signalId — the color
- * shown is from the first plot in which the signal appears. */
+/** Series metadata across all given plots, deduped by signalId. */
 export function collectAnnexRows(
   visiblePlots: PlotState[],
   state: SignalState,
@@ -79,7 +77,6 @@ export function collectAnnexRows(
         board: boardOf(sig.signalId),
         unit: getSignalUnits(adjData, sig.signalId),
         type: getSignalType(adjData, sig.signalId),
-        color: resolveSignalColor(sig.color, sig.colorIndex),
       });
     });
   }

@@ -30,12 +30,15 @@ export interface AnnexRow {
   board: string | null;
   unit: string | undefined;
   type: string | undefined;
-  color: string;
 }
 
 /** Sections the user opted into via the export dialog. Chart pages, the
  * header/footer, and the final check page are always included. */
 export interface PdfExportOptions {
+  // Trimmed document title shown on a cover page (full logo, title in
+  // Roboto, sw logo, check mark) prepended to the report. Empty means no
+  // cover page — the report starts straight at the TOC/first chart.
+  title: string;
   includeToc: boolean;
   includeStats: boolean;
   // Only meaningful when includeStats is true: one combined table before the

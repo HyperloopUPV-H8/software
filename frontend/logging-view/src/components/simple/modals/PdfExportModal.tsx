@@ -1,8 +1,9 @@
 // Dialog for exporting all currently visible plots to a single PDF report.
-// The report itself (cover branding, chart pages, check page) always
-// includes the same fixed elements — these checkboxes only control the
-// optional Index/Statistics/Annex sections (src/lib/pdfExport). The stats
-// layout control (combined vs. per-sheet) only matters when stats are on.
+// The report itself (chart pages, check page) always includes the same
+// fixed elements — these checkboxes only control the optional Index/
+// Statistics/Annex sections (src/lib/pdfExport). The stats layout control
+// (combined vs. per-sheet) only matters when stats are on. A non-empty title
+// additionally prepends a cover page (see addCoverPage in pages.ts).
 import {
   Button,
   Checkbox,
@@ -10,6 +11,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  Input,
   Label,
   SegmentedControl,
   Spinner,
@@ -30,6 +32,7 @@ interface PdfExportModalProps {
 }
 
 export default function PdfExportModal({ open, onClose, onExport, visiblePlotCount }: PdfExportModalProps) {
+  const [title, setTitle]               = useState("");
   const [includeToc, setIncludeToc]     = useState(true);
   const [includeStats, setIncludeStats] = useState(true);
   const [statsMode, setStatsMode]       = useState<PdfExportOptions["statsMode"]>("combined");
@@ -47,7 +50,7 @@ export default function PdfExportModal({ open, onClose, onExport, visiblePlotCou
     setError("");
     setBusy(true);
     try {
-      const result = await onExport({ includeToc, includeStats, statsMode, includeAnnex });
+      const result = await onExport({ title, includeToc, includeStats, statsMode, includeAnnex });
       if (result.generated === 0) {
         setError("No plots could be rendered — nothing to export.");
         return;
@@ -85,6 +88,20 @@ export default function PdfExportModal({ open, onClose, onExport, visiblePlotCou
                 No visible plots — add or unhide a plot first.
               </div>
             )}
+
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="pdf-title" className="text-sm font-normal">Document title (optional)</Label>
+              <Input
+                id="pdf-title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="e.g. Session Report"
+                className="h-8 text-sm"
+              />
+              <p className="text-muted-foreground text-[11px]">
+                Adds a cover page with this title between the Hyperloop UPV and sw logos.
+              </p>
+            </div>
 
             <label className="flex items-center gap-2.5 text-sm">
               <Checkbox checked={includeToc} onCheckedChange={(v) => setIncludeToc(v === true)} />
