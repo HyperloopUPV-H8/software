@@ -166,80 +166,92 @@ export default function PlotsSection() {
             </Tooltip>
           </div>
 
-          {/* Assigned signals */}
+          {/* Assigned signals — grouped by axis so left/right membership is
+              obvious from list position, not just a small per-row dropdown. */}
           {plot.signals.length > 0 && (
-            <div className="flex flex-col gap-1 px-2 py-2">
-              {plot.signals.map((sig, idx) => {
-                // Ref to the hidden-ish color input, so the context menu's
-                // "Change Color" item can open the same native picker.
-                let colorInputEl: HTMLInputElement | null = null;
+            <div className="flex flex-col gap-2 px-2 py-2">
+              {(["left", "right"] as const).map((axis) => {
+                const axisSignals = plot.signals.filter((sig) => sig.yAxis === axis);
+                if (axisSignals.length === 0) return null;
                 return (
-                  <ContextMenu key={sig.signalId}>
-                    <ContextMenuTrigger asChild>
-                  <div
-                    className="bg-muted/30 hover:bg-muted/60 group flex items-center gap-2 rounded-md border px-2 py-1.5 transition-colors">
-                    {/* Trace color — click to override; matches the curve in the chart */}
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <input
-                          ref={(el) => { colorInputEl = el; }}
-                          type="color"
-                          value={resolveSignalColor(sig.color, idx)}
-                          onChange={(e) => updateStudioSignalColor(plot.id, sig.signalId, e.target.value)}
-                          aria-label="Signal color"
-                          className="size-2.5 shrink-0 cursor-pointer appearance-none rounded-full border-0 bg-transparent p-0 [&::-webkit-color-swatch]:rounded-full [&::-webkit-color-swatch]:border-0 [&::-webkit-color-swatch-wrapper]:p-0"
-                        />
-                      </TooltipTrigger>
-                      <TooltipContent side="left">Signal color</TooltipContent>
-                    </Tooltip>
-                    <span className="text-foreground min-w-0 flex-1 truncate text-[11px] font-medium">
-                      {getSignalName(adjData, sig.signalId) ?? shortName(signalNames[sig.signalId] ?? sig.signalId)}
+                  <div key={axis} className="flex flex-col gap-1">
+                    <span className="text-muted-foreground px-0.5 text-[10px] font-semibold tracking-wide">
+                      {axis === "left" ? "◀ Left axis" : "Right axis ▶"}
                     </span>
-                    <div className="flex shrink-0 items-center gap-1">
-                      <Select
-                        value={sig.yAxis}
-                        onValueChange={(v) => updateStudioSignalAxis(plot.id, sig.signalId, v as "left" | "right")}
-                      >
-                        <SelectTrigger size="sm" className="h-5 w-16 border-0 bg-transparent px-1 text-[10px] shadow-none focus-visible:ring-0">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="left">◀ Left</SelectItem>
-                          <SelectItem value="right">Right ▶</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button variant="ghost" size="icon-xs"
-                        onClick={() => removeSignalFromStudioPlot(plot.id, sig.signalId)}
-                        aria-label="Remove signal from plot"
-                        className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 size-4 opacity-0 transition-opacity group-hover:opacity-100">
-                        <Trash2 className="size-3" />
-                      </Button>
-                    </div>
+                    {axisSignals.map((sig) => {
+                      // Ref to the hidden-ish color input, so the context menu's
+                      // "Change Color" item can open the same native picker.
+                      let colorInputEl: HTMLInputElement | null = null;
+                      return (
+                        <ContextMenu key={sig.signalId}>
+                          <ContextMenuTrigger asChild>
+                        <div
+                          className="bg-muted/30 hover:bg-muted/60 group flex items-center gap-2 rounded-md border px-2 py-1.5 transition-colors">
+                          {/* Trace color — click to override; matches the curve in the chart */}
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <input
+                                ref={(el) => { colorInputEl = el; }}
+                                type="color"
+                                value={resolveSignalColor(sig.color, sig.colorIndex)}
+                                onChange={(e) => updateStudioSignalColor(plot.id, sig.signalId, e.target.value)}
+                                aria-label="Signal color"
+                                className="size-2.5 shrink-0 cursor-pointer appearance-none rounded-full border-0 bg-transparent p-0 [&::-webkit-color-swatch]:rounded-full [&::-webkit-color-swatch]:border-0 [&::-webkit-color-swatch-wrapper]:p-0"
+                              />
+                            </TooltipTrigger>
+                            <TooltipContent side="left">Signal color</TooltipContent>
+                          </Tooltip>
+                          <span className="text-foreground min-w-0 flex-1 truncate text-[11px] font-medium">
+                            {getSignalName(adjData, sig.signalId) ?? shortName(signalNames[sig.signalId] ?? sig.signalId)}
+                          </span>
+                          <div className="flex shrink-0 items-center gap-1">
+                            <Select
+                              value={sig.yAxis}
+                              onValueChange={(v) => updateStudioSignalAxis(plot.id, sig.signalId, v as "left" | "right")}
+                            >
+                              <SelectTrigger size="sm" className="h-5 w-16 border-0 bg-transparent px-1 text-[10px] shadow-none focus-visible:ring-0">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="left">◀ Left</SelectItem>
+                                <SelectItem value="right">Right ▶</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Button variant="ghost" size="icon-xs"
+                              onClick={() => removeSignalFromStudioPlot(plot.id, sig.signalId)}
+                              aria-label="Remove signal from plot"
+                              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 size-4 opacity-0 transition-opacity group-hover:opacity-100">
+                              <Trash2 className="size-3" />
+                            </Button>
+                          </div>
+                        </div>
+                          </ContextMenuTrigger>
+                          <ContextMenuContent>
+                            <ContextMenuLabel>Axis</ContextMenuLabel>
+                            <ContextMenuRadioGroup
+                              value={sig.yAxis}
+                              onValueChange={(v) => updateStudioSignalAxis(plot.id, sig.signalId, v as "left" | "right")}
+                            >
+                              <ContextMenuRadioItem value="left">Left</ContextMenuRadioItem>
+                              <ContextMenuRadioItem value="right">Right</ContextMenuRadioItem>
+                            </ContextMenuRadioGroup>
+                            <ContextMenuSeparator />
+                            <ContextMenuItem onClick={() => colorInputEl?.click()}>
+                              Change Color
+                            </ContextMenuItem>
+                            <ContextMenuSeparator />
+                            <ContextMenuItem
+                              variant="destructive"
+                              onClick={() => removeSignalFromStudioPlot(plot.id, sig.signalId)}
+                            >
+                              <Trash2 className="size-3.5" />
+                              Remove from Plot
+                            </ContextMenuItem>
+                          </ContextMenuContent>
+                        </ContextMenu>
+                      );
+                    })}
                   </div>
-                    </ContextMenuTrigger>
-                    <ContextMenuContent>
-                      <ContextMenuLabel>Axis</ContextMenuLabel>
-                      <ContextMenuRadioGroup
-                        value={sig.yAxis}
-                        onValueChange={(v) => updateStudioSignalAxis(plot.id, sig.signalId, v as "left" | "right")}
-                      >
-                        <ContextMenuRadioItem value="left">Left</ContextMenuRadioItem>
-                        <ContextMenuRadioItem value="right">Right</ContextMenuRadioItem>
-                      </ContextMenuRadioGroup>
-                      <ContextMenuSeparator />
-                      <ContextMenuItem onClick={() => colorInputEl?.click()}>
-                        Change Color
-                      </ContextMenuItem>
-                      <ContextMenuSeparator />
-                      <ContextMenuItem
-                        variant="destructive"
-                        onClick={() => removeSignalFromStudioPlot(plot.id, sig.signalId)}
-                      >
-                        <Trash2 className="size-3.5" />
-                        Remove from Plot
-                      </ContextMenuItem>
-                    </ContextMenuContent>
-                  </ContextMenu>
                 );
               })}
             </div>

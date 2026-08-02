@@ -53,7 +53,8 @@ export interface Transform {
 export interface PlotSignal {
   signalId: string;
   yAxis: "left" | "right"; // which Y axis to plot against
-  color?: string;           // user-picked trace color override; falls back to the palette by index
+  color?: string;           // user-picked trace color override; falls back to the palette by colorIndex
+  colorIndex: number;       // palette slot assigned at add-time; stable across removal of other signals
 }
 
 /** A named plot containing an ordered list of signal assignments. */
@@ -65,6 +66,7 @@ export interface PlotState {
   // Per-plot, not per-signal — FFT and time-domain traces can't coexist on
   // one plot (they'd need incompatible X-axis semantics on the same axis).
   showFFT: boolean;
+  nextColorIndex: number; // monotonically increasing; never reused, so colors don't reshuffle on removal
 }
 
 /** Summary statistics for a signal over a time range. */

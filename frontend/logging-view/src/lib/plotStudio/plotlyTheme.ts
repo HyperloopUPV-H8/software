@@ -22,11 +22,6 @@ export interface PlotlyThemeColors {
 
 const FONT_FAMILY = "Computer Modern, Latin Modern Math, Times New Roman, serif";
 
-// Dual-axis accent colors are identical in both themes — both read fine on
-// white and on the app's dark background.
-const LEFT_AXIS_ACCENT  = "#1f77b4";
-const RIGHT_AXIS_ACCENT = "#ff7f0e";
-
 export function getPlotlyTheme(isDarkMode: boolean): PlotlyThemeColors {
   if (!isDarkMode) {
     return {
@@ -108,11 +103,11 @@ export function buildPlotLayout({
         text: hasRightAxis
           ? `Value (Left${leftUnits ? `, ${leftUnits}` : ""})`
           : `Value${leftUnits ? ` (${leftUnits})` : ""}`,
-        font: { size: 16 * fontScale, color: hasRightAxis ? LEFT_AXIS_ACCENT : theme.fontColor },
+        font: { size: 16 * fontScale, color: theme.fontColor },
       },
-      tickfont: { size: 14 * fontScale, color: hasRightAxis ? LEFT_AXIS_ACCENT : theme.neutralLineColor },
-      gridcolor: theme.gridColor, linecolor: hasRightAxis ? LEFT_AXIS_ACCENT : theme.neutralLineColor, linewidth: 1.5 * fontScale, mirror: !hasRightAxis,
-      ticks: "outside", tickwidth: 1.5 * fontScale, tickcolor: hasRightAxis ? LEFT_AXIS_ACCENT : theme.neutralLineColor, color: hasRightAxis ? LEFT_AXIS_ACCENT : theme.neutralLineColor,
+      tickfont: { size: 14 * fontScale, color: theme.neutralLineColor },
+      gridcolor: theme.gridColor, linecolor: theme.neutralLineColor, linewidth: 1.5 * fontScale, mirror: !hasRightAxis,
+      ticks: "outside", tickwidth: 1.5 * fontScale, tickcolor: theme.neutralLineColor, color: theme.neutralLineColor,
       showline: true, zeroline: false, fixedrange: false,
       exponentformat: "power", separatethousands: true,
     },
@@ -139,11 +134,14 @@ export function buildPlotLayout({
   }
   if (hasRightAxis) {
     base.yaxis2 = {
-      title: { text: `Value (Right${rightUnits ? `, ${rightUnits}` : ""})`, font: { size: 16 * fontScale, color: RIGHT_AXIS_ACCENT } },
-      tickfont: { size: 14 * fontScale, color: RIGHT_AXIS_ACCENT },
-      overlaying: "y", side: "right", gridcolor: "transparent",
-      linecolor: RIGHT_AXIS_ACCENT, linewidth: 1.5 * fontScale, ticks: "outside", tickwidth: 1.5 * fontScale,
-      tickcolor: RIGHT_AXIS_ACCENT, color: RIGHT_AXIS_ACCENT, showline: true, zeroline: false, fixedrange: false,
+      title: { text: `Value (Right${rightUnits ? `, ${rightUnits}` : ""})`, font: { size: 16 * fontScale, color: theme.fontColor } },
+      tickfont: { size: 14 * fontScale, color: theme.neutralLineColor },
+      // Dashed grid mirrors the dashed right-axis traces (Plotly can't dash
+      // the axis border itself, only its gridlines) — visible here, unlike
+      // the left axis's solid grid, so the two scales read as distinct.
+      overlaying: "y", side: "right", gridcolor: theme.gridColor, griddash: "dash",
+      linecolor: theme.neutralLineColor, linewidth: 1.5 * fontScale, ticks: "outside", tickwidth: 1.5 * fontScale,
+      tickcolor: theme.neutralLineColor, color: theme.neutralLineColor, showline: true, zeroline: false, fixedrange: false,
       exponentformat: "power", separatethousands: true,
     };
   }

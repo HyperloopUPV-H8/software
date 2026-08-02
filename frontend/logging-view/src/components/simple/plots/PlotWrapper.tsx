@@ -264,7 +264,11 @@ const PlotWrapper = forwardRef<PlotExportHandle, PlotWrapperProps>(({ plot }, re
         const data = signal?.data;
         if (!data || data.value.length < 2) return [];
         let name = getSignalName(adjData, sig.signalId) ?? displayName(signal?.name ?? sig.signalId);
-        const color = resolveSignalColor(sig.color, idx);
+        const color = resolveSignalColor(sig.color, sig.colorIndex);
+        // Right-axis traces are dashed so axis membership reads at a glance,
+        // independent of how many colors are in play (color alone doesn't
+        // scale as a left/right cue once there are more than two traces).
+        const dash: Plotly.Dash = sig.yAxis === "right" ? "dash" : "solid";
         // Axis title can't show a unit when signals on it disagree — put each
         // signal's own unit in the legend instead so it's still visible.
         const axisMismatch = sig.yAxis === "right" ? axisUnits.rightMismatch : axisUnits.leftMismatch;
@@ -311,7 +315,7 @@ const PlotWrapper = forwardRef<PlotExportHandle, PlotWrapperProps>(({ plot }, re
             x: renderX, y: renderY,
             type: traceType,
             mode: "lines" as const,
-            name: `${name} (FFT)`, line: { width: 2, color },
+            name: `${name} (FFT)`, line: { width: 2, color, dash },
             yaxis: sig.yAxis === "right" ? ("y2" as const) : ("y" as const),
           }];
         }
@@ -319,7 +323,7 @@ const PlotWrapper = forwardRef<PlotExportHandle, PlotWrapperProps>(({ plot }, re
           x: renderX, y: renderY,
           type: traceType,
           mode: "lines" as const,
-          name, line: { width: 2.5, color },
+          name, line: { width: 2.5, color, dash },
           yaxis: sig.yAxis === "right" ? ("y2" as const) : ("y" as const),
         }];
       }),

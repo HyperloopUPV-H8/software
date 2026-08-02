@@ -120,7 +120,7 @@ export const createPlotStudioSlice: StateCreator<PlotStudioSlice> = (set) => ({
       const id = `plot_${s.studioPlotCounter}`;
       newId = id;
       const next = new Map(s.studioPlots);
-      next.set(id, { id, name: `Plot ${next.size + 1}`, signals: [], showFFT: false });
+      next.set(id, { id, name: `Plot ${next.size + 1}`, signals: [], showFFT: false, nextColorIndex: 0 });
       return { studioPlots: next, studioPlotCounter: s.studioPlotCounter + 1 };
     });
     return newId;
@@ -172,9 +172,9 @@ export const createPlotStudioSlice: StateCreator<PlotStudioSlice> = (set) => ({
       const plot = s.studioPlots.get(plotId);
       if (!plot) return {};
       if (plot.signals.some((sig) => sig.signalId === signalId)) return {};
-      const newSignal: PlotSignal = { signalId, yAxis: "left" };
+      const newSignal: PlotSignal = { signalId, yAxis: "left", colorIndex: plot.nextColorIndex };
       const next = new Map(s.studioPlots);
-      next.set(plotId, { ...plot, signals: [...plot.signals, newSignal] });
+      next.set(plotId, { ...plot, signals: [...plot.signals, newSignal], nextColorIndex: plot.nextColorIndex + 1 });
       return { studioPlots: next };
     }),
 
