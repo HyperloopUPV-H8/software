@@ -345,10 +345,10 @@ function BoardsTab({
                 </div>
               </div>
 
-              {/* Expanded: measurements list */}
+              {/* Expanded: measurements list — scrollable so long boards don't get cut off */}
               {expanded && board.measurements.length > 0 && (
-                <div className="border-t">
-                  {board.measurements.slice(0, 30).map((m) => (
+                <div className="max-h-[20rem] overflow-y-auto border-t">
+                  {board.measurements.map((m) => (
                     <div key={m.id} className="hover:bg-muted/30 flex items-center gap-2 border-b px-3 py-1.5 text-xs last:border-0">
                       <span className="min-w-0 flex-1 truncate font-medium">{m.name}</span>
                       {m.type && (
@@ -360,11 +360,6 @@ function BoardsTab({
                       <span className="text-muted-foreground shrink-0 font-mono text-[10px]">{m.id}</span>
                     </div>
                   ))}
-                  {board.measurements.length > 30 && (
-                    <div className="text-muted-foreground px-3 py-1.5 text-[10px]">
-                      +{board.measurements.length - 30} more — use Measurements tab
-                    </div>
-                  )}
                 </div>
               )}
             </div>
@@ -381,13 +376,18 @@ function BoardsTab({
 function MeasurementsTab({
   boards,
   initialBoardFilter,
+  initialVariableFilter,
+  packetLabel,
 }: {
   boards: BoardMeta[];
   initialBoardFilter: Set<string>;
+  initialVariableFilter: Set<string>;
+  packetLabel: string | null;
 }) {
   const [query, setQuery] = useState("");
   const [activeBoards, setActiveBoards] = useState<Set<string>>(initialBoardFilter);
   const [activeTypes, setActiveTypes] = useState<Set<string>>(new Set());
+  const [activeVariables, setActiveVariables] = useState<Set<string>>(initialVariableFilter);
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -415,6 +415,7 @@ function MeasurementsTab({
       .filter((r) => {
         if (activeBoards.size > 0 && !activeBoards.has(r.board)) return false;
         if (activeTypes.size > 0 && !activeTypes.has(normalizeType(r.type ?? ""))) return false;
+        if (activeVariables.size > 0 && !activeVariables.has(r.id)) return false;
         if (q && !r.name.toLowerCase().includes(q) && !r.id.toLowerCase().includes(q) && !r.board.toLowerCase().includes(q)) return false;
         return true;
       })
@@ -424,7 +425,7 @@ function MeasurementsTab({
         const vb = (sortKey === "units" ? (b.displayUnits ?? "") : sortKey === "type" ? (b.type ?? "") : String(b[sortKey as keyof typeof b] ?? "")).toLowerCase();
         return va.localeCompare(vb) * dir;
       });
-  }, [allRows, query, activeBoards, activeTypes, sortKey, sortDir]);
+  }, [allRows, query, activeBoards, activeTypes, activeVariables, sortKey, sortDir]);
 
   const toggleBoard = (name: string) =>
     setActiveBoards((s) => { const n = new Set(s); if (n.has(name)) n.delete(name); else n.add(name); return n; });
@@ -470,13 +471,30 @@ function MeasurementsTab({
           ))}
       </div>
 
+      {/* Packet-jump pill — separate from FilterPills since it's a single named
+          value (the packet that triggered the jump), not a board/type set. */}
+      {packetLabel && activeVariables.size > 0 && (
+        <div className="flex items-center gap-1.5">
+          <span className="border-primary/40 bg-primary/10 text-primary inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium">
+            Packet: {packetLabel}
+            <button
+              type="button"
+              onClick={() => setActiveVariables(new Set())}
+              className="hover:text-destructive leading-none"
+            >
+              ✕
+            </button>
+          </span>
+        </div>
+      )}
+
       {/* Active filter pills */}
       <FilterPills
         activeBoards={activeBoards}
         activeTypes={activeTypes}
         onClearBoard={toggleBoard}
         onClearType={toggleType}
-        onClearAll={() => { setActiveBoards(new Set()); setActiveTypes(new Set()); }}
+        onClearAll={() => { setActiveBoards(new Set()); setActiveTypes(new Set()); setActiveVariables(new Set()); }}
       />
 
       {/* Table */}
@@ -568,7 +586,13 @@ function MeasurementsTab({
 
 // ─── Packets tab ──────────────────────────────────────────────────────────────
 
-function PacketsTab({ boards }: { boards: BoardMeta[] }) {
+function PacketsTab({
+  boards,
+  onJumpToMeasurements,
+}: {
+  boards: BoardMeta[];
+  onJumpToMeasurements: (boardName: string, packetName: string, variableIds: string[]) => void;
+}) {
   const [query, setQuery] = useState("");
   const [kind, setKind] = useState<"packets" | "orders">("packets");
   const [activeBoards, setActiveBoards] = useState<Set<string>>(new Set());
@@ -647,30 +671,41 @@ function PacketsTab({ boards }: { boards: BoardMeta[] }) {
       />
 
       <div className="flex-1 space-y-2 overflow-y-auto pr-1">
-        {filtered.map((r, i) => (
-          <div key={i} className="bg-muted/20 rounded-lg border px-3 py-2">
-            <div className="mb-1.5 flex flex-wrap items-center gap-2">
-              <span className="font-semibold"><Highlight text={r.name} query={q} /></span>
-              <Badge variant="secondary" className="font-mono text-[10px]">ID {r.id}</Badge>
-              {r.period != null && (
-                <Badge variant="outline" className="font-mono text-[10px]">{r.period} {r.period_type}</Badge>
+        {filtered.map((r, i) => {
+          const hasVariables = r.variables && r.variables.length > 0;
+          return (
+            <div
+              key={i}
+              onClick={hasVariables ? () => onJumpToMeasurements(r.board, r.name, r.variables) : undefined}
+              className={cn(
+                "bg-muted/20 rounded-lg border px-3 py-2 transition-colors",
+                hasVariables && "cursor-pointer hover:bg-muted/30",
               )}
-              {r.socket && (
-                <Badge variant="outline" className="font-mono text-[10px]">{r.socket}</Badge>
-              )}
-              <span className="text-muted-foreground ml-auto font-mono text-[10px]">
-                <Highlight text={r.board} query={q} />
-              </span>
-            </div>
-            {r.variables && r.variables.length > 0 && (
-              <div className="flex flex-wrap gap-1">
-                {r.variables.map((v) => (
-                  <span key={v} className="bg-muted rounded px-1.5 py-0.5 font-mono text-[10px]">{v}</span>
-                ))}
+              title={hasVariables ? "View measurements" : undefined}
+            >
+              <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                <span className="font-semibold"><Highlight text={r.name} query={q} /></span>
+                <Badge variant="secondary" className="font-mono text-[10px]">ID {r.id}</Badge>
+                {r.period != null && (
+                  <Badge variant="outline" className="font-mono text-[10px]">{r.period} {r.period_type}</Badge>
+                )}
+                {r.socket && (
+                  <Badge variant="outline" className="font-mono text-[10px]">{r.socket}</Badge>
+                )}
+                <span className="text-muted-foreground ml-auto font-mono text-[10px]">
+                  <Highlight text={r.board} query={q} />
+                </span>
               </div>
-            )}
-          </div>
-        ))}
+              {hasVariables && (
+                <div className="flex flex-wrap gap-1">
+                  {r.variables.map((v) => (
+                    <span key={v} className="bg-muted rounded px-1.5 py-0.5 font-mono text-[10px]">{v}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
         {filtered.length === 0 && <EmptyState text={`No ${kind} match the current filters.`} />}
       </div>
     </div>
@@ -755,11 +790,25 @@ export const AdjViewerTabs = ({ adjData }: { adjData: AdjArchive }) => {
   // Lifted state for cross-tab navigation
   const [activeTab, setActiveTab] = useState("boards");
   const [jumpBoardFilter, setJumpBoardFilter] = useState<Set<string>>(new Set());
+  const [jumpVariableFilter, setJumpVariableFilter] = useState<Set<string>>(new Set());
+  const [jumpPacketLabel, setJumpPacketLabel] = useState<string | null>(null);
 
   const handleJumpToMeasurements = useCallback((boardName: string) => {
     setJumpBoardFilter(new Set([boardName]));
+    setJumpVariableFilter(new Set());
+    setJumpPacketLabel(null);
     setActiveTab("measurements");
   }, []);
+
+  const handleJumpToPacketMeasurements = useCallback(
+    (boardName: string, packetName: string, variableIds: string[]) => {
+      setJumpBoardFilter(new Set([boardName]));
+      setJumpVariableFilter(new Set(variableIds));
+      setJumpPacketLabel(packetName);
+      setActiveTab("measurements");
+    },
+    [],
+  );
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col gap-0">
@@ -781,12 +830,18 @@ export const AdjViewerTabs = ({ adjData }: { adjData: AdjArchive }) => {
       <TabsContent value="boards" className="min-h-0 flex-1 overflow-hidden pb-4">
         <BoardsTab boards={boards} onJumpToMeasurements={handleJumpToMeasurements} />
       </TabsContent>
-      {/* key remounts MeasurementsTab on cross-tab jump so initialBoardFilter takes effect cleanly */}
+      {/* key remounts MeasurementsTab on cross-tab jump so initialBoardFilter/initialVariableFilter take effect cleanly */}
       <TabsContent value="measurements" className="min-h-0 flex-1 overflow-hidden pb-4">
-        <MeasurementsTab key={[...jumpBoardFilter].join(",")} boards={boards} initialBoardFilter={jumpBoardFilter} />
+        <MeasurementsTab
+          key={`${[...jumpBoardFilter].join(",")}|${[...jumpVariableFilter].join(",")}`}
+          boards={boards}
+          initialBoardFilter={jumpBoardFilter}
+          initialVariableFilter={jumpVariableFilter}
+          packetLabel={jumpPacketLabel}
+        />
       </TabsContent>
       <TabsContent value="packets" className="min-h-0 flex-1 overflow-hidden pb-4">
-        <PacketsTab boards={boards} />
+        <PacketsTab boards={boards} onJumpToMeasurements={handleJumpToPacketMeasurements} />
       </TabsContent>
       <TabsContent value="general" className="min-h-0 flex-1 overflow-hidden pb-4">
         <GeneralTab adjData={adjData} />
