@@ -28,6 +28,16 @@ export const test = base.extend<ElectronFixtures>({
       },
     });
 
+    // Surface the app's own logging (and any crash) in the test output —
+    // Playwright doesn't forward it by default, which otherwise leaves
+    // "Target page, context or browser has been closed" failures with no
+    // clue as to why the process actually went away.
+    app.process().stdout?.on("data", (d) => process.stdout.write(`[electron] ${d}`));
+    app.process().stderr?.on("data", (d) => process.stderr.write(`[electron] ${d}`));
+    app.process().on("exit", (code, signal) =>
+      console.log(`[electron] process exited (code=${code}, signal=${signal})`),
+    );
+
     await use(app);
     await app.close();
   },
