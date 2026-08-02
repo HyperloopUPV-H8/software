@@ -1,12 +1,12 @@
 import { SidebarMenuButton } from "@workspace/ui/components";
 import { Link } from "react-router";
-import logo from "../../assets/logo.svg";
+import logo from "@workspace/ui/outreach/h11/h11-isotipo_black.svg";
 
 const Logo = () => (
   <Link to="/">
     <SidebarMenuButton
       size="lg"
-      tooltip="Hyperloop UPV — Competition View"
+      tooltip="Hyperloop UPV — Logging View"
       className="text-base font-bold"
     >
       <img src={logo} alt="Hyperloop UPV" className="max-h-8 max-w-8 dark:invert" />

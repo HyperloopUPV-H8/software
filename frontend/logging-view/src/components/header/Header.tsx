@@ -3,7 +3,7 @@
 // store state, since each mode has a distinct UI.
 import { SegmentedControl } from "@workspace/ui/components";
 import { useLocation, useNavigate } from "react-router";
-import logo from "../../assets/logo.svg";
+import logo from "@workspace/ui/outreach/h11/h11-isotipo_black.svg";
 
 type ViewMode = "normal" | "simple";
 
