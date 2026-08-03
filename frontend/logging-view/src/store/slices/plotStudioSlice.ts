@@ -20,6 +20,10 @@ export interface PlotStudioSlice {
   // multi-select drag where one CSV is missing/malformed) — not persisted,
   // cleared by the banner itself after a timeout or on dismiss.
   signalLoadWarning: string | null;
+  // Transient confirmation toast, set to the new plot's name whenever
+  // addStudioPlot runs (whichever of its several call sites triggered it) —
+  // not persisted, cleared by the toast itself after a timeout or on dismiss.
+  plotAddedToast: string | null;
 
   addStudioFiles: (files: FileSignal[]) => void;
   removeStudioFile: (name: string) => void;
@@ -36,9 +40,11 @@ export interface PlotStudioSlice {
   removeSignalFromStudioPlot: (plotId: string, signalId: string) => void;
   updateStudioSignalAxis: (plotId: string, signalId: string, axis: "left" | "right") => void;
   toggleStudioPlotFFT: (plotId: string) => void;
+  toggleStudioPlotLocked: (plotId: string) => void;
   updateStudioSignalColor: (plotId: string, signalId: string, color: string) => void;
   setStudioFFTSampleRate: (rate: number | null) => void;
   setSignalLoadWarning: (message: string | null) => void;
+  setPlotAddedToast: (name: string | null) => void;
 }
 
 export const createPlotStudioSlice: StateCreator<PlotStudioSlice> = (set) => ({
@@ -51,6 +57,7 @@ export const createPlotStudioSlice: StateCreator<PlotStudioSlice> = (set) => ({
   studioTrCounter: 0,
   fftSampleRateOverride: null,
   signalLoadWarning: null,
+  plotAddedToast: null,
 
   addStudioFiles: (files) =>
     set((s) => {
@@ -125,9 +132,10 @@ export const createPlotStudioSlice: StateCreator<PlotStudioSlice> = (set) => ({
     set((s) => {
       const id = `plot_${s.studioPlotCounter}`;
       newId = id;
+      const name = `Plot ${s.studioPlots.size + 1}`;
       const next = new Map(s.studioPlots);
-      next.set(id, { id, name: `Plot ${next.size + 1}`, signals: [], showFFT: false, nextColorIndex: 0 });
-      return { studioPlots: next, studioPlotCounter: s.studioPlotCounter + 1 };
+      next.set(id, { id, name, signals: [], showFFT: false, nextColorIndex: 0 });
+      return { studioPlots: next, studioPlotCounter: s.studioPlotCounter + 1, plotAddedToast: name };
     });
     return newId;
   },
@@ -219,6 +227,15 @@ export const createPlotStudioSlice: StateCreator<PlotStudioSlice> = (set) => ({
       return { studioPlots: next };
     }),
 
+  toggleStudioPlotLocked: (plotId) =>
+    set((s) => {
+      const plot = s.studioPlots.get(plotId);
+      if (!plot) return {};
+      const next = new Map(s.studioPlots);
+      next.set(plotId, { ...plot, locked: !plot.locked });
+      return { studioPlots: next };
+    }),
+
   updateStudioSignalColor: (plotId, signalId, color) =>
     set((s) => {
       const plot = s.studioPlots.get(plotId);
@@ -236,6 +253,8 @@ export const createPlotStudioSlice: StateCreator<PlotStudioSlice> = (set) => ({
   setStudioFFTSampleRate: (rate) => set({ fftSampleRateOverride: rate }),
 
   setSignalLoadWarning: (message) => set({ signalLoadWarning: message }),
+
+  setPlotAddedToast: (name) => set({ plotAddedToast: name }),
 });
 
 // Helper: resolve a signal (file/operation/transform) from store state
