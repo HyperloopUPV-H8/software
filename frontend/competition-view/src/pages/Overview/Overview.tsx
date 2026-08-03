@@ -22,6 +22,7 @@ import {
   PCU,
   PROP_CURRENT_RANGE,
   SPEED_RANGE,
+  TEMP_RANGE,
 } from "../../constants/measurements";
 import useMeasurement from "../../hooks/useMeasurement";
 import { useIsStale, useStaleFlags } from "../../hooks/useIsStale";
@@ -335,6 +336,8 @@ const HV_BATTERY_STALE_IDS = [
   HVBMS.batteriesVoltage,
   HVBMS.currentReading,
   HVBMS.voltageReading,
+  HVBMS.tempMin,
+  HVBMS.tempMax,
 ] as const;
 
 const HvBatteryCard = () => {
@@ -342,8 +345,11 @@ const HvBatteryCard = () => {
   const hvVoltage = useMeasurement(BOARDS.HVBMS, HVBMS.batteriesVoltage);
   const hvCurrent = useMeasurement(BOARDS.HVBMS, HVBMS.currentReading);
   const hvVSensor = useMeasurement(BOARDS.HVBMS, HVBMS.voltageReading);
+  const hvTempMin = useMeasurement(BOARDS.HVBMS,HVBMS.tempMin);
+  const hvTempMax = useMeasurement(BOARDS.HVBMS,HVBMS.tempMax);
 
-  const [socStale, vStale, iStale, dcStale] = useStaleFlags(BOARDS.HVBMS, HV_BATTERY_STALE_IDS);
+  const [socStale, vStale, iStale, dcStale,tempMinStale,
+    tempMaxStale] = useStaleFlags(BOARDS.HVBMS, HV_BATTERY_STALE_IDS);
 
   return (
     <BatteryCard
@@ -355,6 +361,8 @@ const HvBatteryCard = () => {
         { label: "Pack V",    value: fmtNum(hvVoltage), unit: "V", stale: vStale,  range: PACK_V_RANGE   },
         { label: "Current",   value: fmtNum(hvCurrent), unit: "A", stale: iStale,  range: HV_CURRENT_RANGE },
         { label: "DC Link",   value: fmtNum(hvVSensor), unit: "V", stale: dcStale, range: DC_BUS_V_RANGE },
+        { label: "T max",   value: fmtNum(hvTempMax), unit: "ºC", stale: tempMaxStale, range: TEMP_RANGE},
+        { label: "T min",   value: fmtNum(hvTempMin), unit: "ºC", stale: tempMinStale, range: TEMP_RANGE},
       ]}
     />
   );
