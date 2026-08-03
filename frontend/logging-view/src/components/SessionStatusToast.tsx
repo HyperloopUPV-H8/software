@@ -2,6 +2,8 @@
 // Floats above page content so it's visible regardless of which route the user is
 // on (a session can be opened from the sidebar on any page). Mirrors the auto-dismiss
 // + manual-dismiss pattern used by the signalLoadWarning banner in PlotStudio.tsx.
+// Bottom-right, same corner as PlotAddedToast, so every transient notification
+// in the app reads as one consistent toast stack.
 import { AlertTriangle, X } from "@workspace/ui/icons";
 import { cn } from "@workspace/ui/lib";
 import { useEffect } from "react";
@@ -25,7 +27,7 @@ const SessionStatusToast = () => {
   return (
     <div
       className={cn(
-        "fixed top-4 right-4 z-40 w-80 rounded-lg border p-3 text-xs shadow-lg",
+        "fixed bottom-4 right-4 z-40 w-80 rounded-lg border p-3 text-xs shadow-lg",
         badgeClass,
       )}
     >
