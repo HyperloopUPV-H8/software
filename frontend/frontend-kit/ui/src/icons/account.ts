@@ -1,1 +1,1 @@
-export { Settings, Settings2, Wrench } from "lucide-react";
+export { Lock, Settings, Settings2, Unlock, Wrench } from "lucide-react";

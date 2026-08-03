@@ -214,6 +214,10 @@ export const createSessionSlice: StateCreator<Store, [], [], SessionSlice> = (se
 
   setSessionStatusToast: (status) => set({ sessionStatusToast: status }),
 
+  // Closing a session also tears down everything built from it in Plot
+  // Studio — plots, loaded CSV signals, and composed operations/transforms
+  // (derived from those same CSVs) — since none of it means anything once
+  // its source session is gone.
   clearSession: () =>
     set({
       folderName: null,
@@ -225,5 +229,9 @@ export const createSessionSlice: StateCreator<Store, [], [], SessionSlice> = (se
       sessionStatus: null,
       sessionStatusToast: null,
       isSessionPanelOpen: true,
+      studioPlots: new Map(),
+      studioFiles: new Map(),
+      studioOperations: new Map(),
+      studioTransforms: new Map(),
     }),
 });

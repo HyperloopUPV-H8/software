@@ -60,6 +60,10 @@ export interface BuildPlotLayoutParams {
   // fraction to keep the same absolute pixel gap below the x-axis title —
   // without this, a shorter canvas collides the legend into the title.
   exportHeight?: number;
+  // Freezes every axis (fixedrange) so pan/zoom/scroll-zoom/box-zoom and
+  // double-click-autoscale are all no-ops — the "lock plot" feature. Hover/
+  // tooltips still work. Never set for export figures (always a static image).
+  locked?: boolean;
 }
 
 // Absolute pixel gap (at the historical 1600px-tall single-plot PNG export)
@@ -68,7 +72,7 @@ export interface BuildPlotLayoutParams {
 const EXPORT_LEGEND_GAP_PX = 190;
 
 export function buildPlotLayout({
-  theme, hasFFT, hasLeftAxis, hasRightAxis, plotId, leftUnits, rightUnits, fontScale = 1, exportHeight = 1600,
+  theme, hasFFT, hasLeftAxis, hasRightAxis, plotId, leftUnits, rightUnits, fontScale = 1, exportHeight = 1600, locked = false,
 }: BuildPlotLayoutParams): Partial<Plotly.Layout> {
   // The live chart's plot area is only a few hundred px tall (resizable, user
   // controlled), while export renders into a fixed-height canvas — the same
@@ -96,7 +100,7 @@ export function buildPlotLayout({
       tickfont: { size: 14 * fontScale, color: theme.neutralLineColor },
       gridcolor: theme.gridColor, linecolor: theme.neutralLineColor, linewidth: 1.5 * fontScale, mirror: true,
       ticks: "outside", tickwidth: 1.5 * fontScale, tickcolor: theme.neutralLineColor, color: theme.neutralLineColor,
-      showline: true, zeroline: false, fixedrange: false,
+      showline: true, zeroline: false, fixedrange: locked,
       exponentformat: "power", separatethousands: true,
     },
     yaxis: hasLeftAxis
@@ -110,7 +114,7 @@ export function buildPlotLayout({
           tickfont: { size: 14 * fontScale, color: theme.neutralLineColor },
           gridcolor: theme.gridColor, linecolor: theme.neutralLineColor, linewidth: 1.5 * fontScale, mirror: !hasRightAxis,
           ticks: "outside", tickwidth: 1.5 * fontScale, tickcolor: theme.neutralLineColor, color: theme.neutralLineColor,
-          showline: true, zeroline: false, fixedrange: false,
+          showline: true, zeroline: false, fixedrange: locked,
           exponentformat: "power", separatethousands: true,
         }
       : {
@@ -155,7 +159,7 @@ export function buildPlotLayout({
       // the left axis's solid grid, so the two scales read as distinct.
       overlaying: "y", side: "right", gridcolor: theme.gridColor, griddash: "dash",
       linecolor: theme.neutralLineColor, linewidth: 1.5 * fontScale, ticks: "outside", tickwidth: 1.5 * fontScale,
-      tickcolor: theme.neutralLineColor, color: theme.neutralLineColor, showline: true, zeroline: false, fixedrange: false,
+      tickcolor: theme.neutralLineColor, color: theme.neutralLineColor, showline: true, zeroline: false, fixedrange: locked,
       exponentformat: "power", separatethousands: true,
     };
   }
@@ -169,6 +173,8 @@ export interface BuildTimelineLayoutParams {
   fontScale?: number;
   // See BuildPlotLayoutParams.exportHeight.
   exportHeight?: number;
+  // See BuildPlotLayoutParams.locked.
+  locked?: boolean;
 }
 
 // Sibling to buildPlotLayout for the "Cronograma" (Gantt) plot mode: one
@@ -178,7 +184,7 @@ export interface BuildTimelineLayoutParams {
 // X title) that folding this into buildPlotLayout would mean more branches
 // than shared code.
 export function buildTimelineLayout({
-  theme, plotId, rowLabels, fontScale = 1, exportHeight = 1600,
+  theme, plotId, rowLabels, fontScale = 1, exportHeight = 1600, locked = false,
 }: BuildTimelineLayoutParams): Partial<Plotly.Layout> {
   const isExport = fontScale !== 1;
   const marginSide = isExport ? 1.5 : 1;
@@ -195,7 +201,7 @@ export function buildTimelineLayout({
       tickfont: { size: 14 * fontScale, color: theme.neutralLineColor },
       gridcolor: theme.gridColor, linecolor: theme.neutralLineColor, linewidth: 1.5 * fontScale, mirror: true,
       ticks: "outside", tickwidth: 1.5 * fontScale, tickcolor: theme.neutralLineColor, color: theme.neutralLineColor,
-      showline: true, zeroline: false, fixedrange: false,
+      showline: true, zeroline: false, fixedrange: locked,
     },
     yaxis: {
       type: "category",

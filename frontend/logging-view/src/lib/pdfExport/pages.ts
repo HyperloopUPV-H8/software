@@ -112,8 +112,14 @@ export function fillTocPage(
   const lineHeight = 8;
   entries.forEach((entry, i) => {
     if (y > CONTENT_BOTTOM) return; // more entries than a single TOC page can hold — rare, clipped
-    doc.text(`${i + 1}. ${entry.title}`, MARGIN.left, y);
-    doc.text(String(entry.page), PAGE.width - MARGIN.right, y, { align: "right" });
+    // Internal link — jumps straight to that chart's page (entry.page is
+    // already the 1-based page number textWithLink's pageNumber expects,
+    // same as getNumberOfPages() in buildPdf.ts). Blue, matching the ADJ
+    // commit hash link's color below, so it reads as clickable.
+    doc.setTextColor(37, 99, 235);
+    doc.textWithLink(`${i + 1}. ${entry.title}`, MARGIN.left, y, { pageNumber: entry.page });
+    doc.textWithLink(String(entry.page), PAGE.width - MARGIN.right, y, { pageNumber: entry.page, align: "right" });
+    doc.setTextColor(0);
     y += lineHeight;
   });
 

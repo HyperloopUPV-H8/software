@@ -21,9 +21,11 @@ import {
   Activity,
   AlertTriangle,
   ChevronDown,
+  Lock,
   Pencil,
   RefreshCw,
   Trash2,
+  Unlock,
 } from "@workspace/ui/icons";
 import { cn } from "@workspace/ui/lib";
 import logoIcon from "@workspace/ui/outreach/main/logo_icon.svg?inline";
@@ -50,10 +52,16 @@ const PLOTLY_CONFIG: Partial<Plotly.Config> = {
   displaylogo: false,
   scrollZoom: true,
   showTips: false,
-  modeBarButtonsToRemove: ["select2d", "lasso2d"],
+  // Plotly's own built-in "Download plot as a PNG" button is removed —
+  // it snapshots the raw on-screen (dark-mode) canvas with no branding,
+  // unlike the header's "Export PNG" button (exportPNG below), which always
+  // renders in the light/print theme with the Hyperloop logo watermark.
+  // Keeping both around meant whichever one a user reached for (this one
+  // sits right in the modebar, next to Autoscale/Reset axes) gave
+  // inconsistent, sometimes unbranded exports.
+  modeBarButtonsToRemove: ["select2d", "lasso2d", "toImage"],
   modeBarButtonsToAdd: ["togglespikelines", "hoverclosest", "hovercompare"],
   editable: true,
-  toImageButtonOptions: { format: "png", width: 1200, height: 800, scale: 1 },
 };
 
 // Above this point count, decimate before handing points to Plotly (always
@@ -134,6 +142,8 @@ const PlotWrapper = forwardRef<PlotExportHandle, PlotWrapperProps>(({ plot }, re
   const renameStudioPlot = useStore((s) => s.renameStudioPlot);
   const isDarkMode = useStore((s) => s.isDarkMode);
   const toggleStudioPlotFFT = useStore((s) => s.toggleStudioPlotFFT);
+  const toggleStudioPlotLocked = useStore((s) => s.toggleStudioPlotLocked);
+  const locked = !!plot.locked;
 
   const chartRef     = useRef<PlotlyChartHandle>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -146,13 +156,14 @@ const PlotWrapper = forwardRef<PlotExportHandle, PlotWrapperProps>(({ plot }, re
 
   // Drop target for signals dragged from the left Series sidebar — assignment
   // itself happens centrally in useSignalDnd's handleDragEnd (AppLayout.tsx).
-  const { setNodeRef: setDropRef, isOver } = useDroppable({ id: plot.id });
+  // Disabled while locked, so a stray drag can't assign a signal by mistake.
+  const { setNodeRef: setDropRef, isOver } = useDroppable({ id: plot.id, disabled: locked });
 
   // Inline rename
   const [editingName, setEditingName] = useState(false);
   const [draftName, setDraftName]     = useState(plot.name);
 
-  const startRename = () => { setDraftName(plot.name); setEditingName(true); };
+  const startRename = () => { if (locked) return; setDraftName(plot.name); setEditingName(true); };
   const commitRename = () => {
     const t = draftName.trim();
     if (t && t !== plot.name) renameStudioPlot(plot.id, t);
@@ -358,13 +369,22 @@ const PlotWrapper = forwardRef<PlotExportHandle, PlotWrapperProps>(({ plot }, re
   const layout = useMemo<Partial<Plotly.Layout>>(
     () =>
       hasTimeline
-        ? buildTimelineLayout({ theme: getPlotlyTheme(isDarkMode), plotId: plot.id, rowLabels: timelineRowLabels })
+        ? buildTimelineLayout({ theme: getPlotlyTheme(isDarkMode), plotId: plot.id, rowLabels: timelineRowLabels, locked })
         : buildPlotLayout({
             theme: getPlotlyTheme(isDarkMode),
             hasFFT, hasLeftAxis, hasRightAxis, plotId: plot.id,
             leftUnits: axisUnits.left, rightUnits: axisUnits.right,
+            locked,
           }),
-    [hasLeftAxis, hasRightAxis, hasFFT, hasTimeline, timelineRowLabels, plot.id, axisUnits, isDarkMode],
+    [hasLeftAxis, hasRightAxis, hasFFT, hasTimeline, timelineRowLabels, plot.id, axisUnits, isDarkMode, locked],
+  );
+
+  // editable (click-to-rename title/legend) is the one PLOTLY_CONFIG option
+  // that isn't axis-scoped (fixedrange, set via `layout` above, already
+  // blocks pan/zoom/scroll-zoom/box-zoom while locked) — gated separately here.
+  const plotlyConfig = useMemo<Partial<Plotly.Config>>(
+    () => ({ ...PLOTLY_CONFIG, editable: !locked }),
+    [locked],
   );
 
   // Drag-to-resize
@@ -373,11 +393,12 @@ const PlotWrapper = forwardRef<PlotExportHandle, PlotWrapperProps>(({ plot }, re
   const startHeight = useRef(0);
 
   const onResizeMouseDown = useCallback((e: React.MouseEvent) => {
+    if (locked) return;
     isResizing.current  = true;
     startY.current      = e.clientY;
     startHeight.current = containerRef.current?.offsetHeight ?? plotHeight;
     e.preventDefault();
-  }, [plotHeight]);
+  }, [plotHeight, locked]);
 
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
@@ -531,10 +552,12 @@ const PlotWrapper = forwardRef<PlotExportHandle, PlotWrapperProps>(({ plot }, re
     <ContextMenu>
     <ContextMenuTrigger asChild>
     <div
+      id={plot.id}
       ref={setDropRef}
       className={cn(
         "bg-card overflow-hidden rounded-xl border shadow-md transition-shadow hover:shadow-lg",
         isOver && "ring-primary ring-2 ring-offset-2",
+        locked && "ring-1 ring-amber-500/40",
       )}
     >
       {/* Gradient accent strip */}
@@ -569,13 +592,15 @@ const PlotWrapper = forwardRef<PlotExportHandle, PlotWrapperProps>(({ plot }, re
               type="button"
               onDoubleClick={startRename}
               className="group/name flex min-w-0 items-center gap-1.5"
-              title="Double-click to rename"
+              title={locked ? undefined : "Double-click to rename"}
             >
               <span className="text-foreground truncate text-sm font-semibold">{plot.name}</span>
-              <Pencil
-                onClick={startRename}
-                className="text-muted-foreground size-3 shrink-0 cursor-pointer opacity-0 transition-opacity hover:!opacity-100 group-hover/name:opacity-60"
-              />
+              {!locked && (
+                <Pencil
+                  onClick={startRename}
+                  className="text-muted-foreground size-3 shrink-0 cursor-pointer opacity-0 transition-opacity hover:!opacity-100 group-hover/name:opacity-60"
+                />
+              )}
             </button>
           )}
 
@@ -599,8 +624,10 @@ const PlotWrapper = forwardRef<PlotExportHandle, PlotWrapperProps>(({ plot }, re
         </div>
 
         <div className="ml-auto flex items-center gap-1.5">
-          {/* Zoom cluster — only meaningful with traces */}
-          {hasTraces && (
+          {/* Zoom cluster — only meaningful with traces, and hidden while
+              locked since the axes are fixedrange (see `layout` above) and
+              these buttons would otherwise bypass that via direct relayout calls. */}
+          {hasTraces && !locked && (
             <div className="bg-muted/40 flex items-center gap-1 rounded-lg border px-1.5 py-1">
               {/* Categorical y-axis in timeline mode isn't zoomable the same way — X (time) still is. */}
               {!hasTimeline && hasLeftAxis && <ZoomGroup label="Y◀" axis="y1" onZoom={zoomAxis} />}
@@ -617,6 +644,26 @@ const PlotWrapper = forwardRef<PlotExportHandle, PlotWrapperProps>(({ plot }, re
               </Tooltip>
             </div>
           )}
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={locked ? "default" : "ghost"}
+                size="icon-xs"
+                onClick={() => toggleStudioPlotLocked(plot.id)}
+                aria-label={locked ? `Unlock ${plot.name}` : `Lock ${plot.name}`}
+                className={cn(
+                  !locked && "text-muted-foreground hover:text-foreground",
+                  locked && "bg-amber-500/90 text-white hover:bg-amber-500",
+                )}
+              >
+                {locked ? <Lock className="size-3.5" /> : <Unlock className="size-3.5" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {locked ? "Locked — view can't be changed by accident. Click to unlock" : "Lock plot"}
+            </TooltipContent>
+          </Tooltip>
 
           <Button
             variant={showStats ? "default" : "outline"}
@@ -666,13 +713,15 @@ const PlotWrapper = forwardRef<PlotExportHandle, PlotWrapperProps>(({ plot }, re
           // Chart canvas follows app dark mode; exports stay pinned to the
           // light/academic theme regardless (see buildExportFigure above).
           <div ref={containerRef} className="relative" style={{ height: plotHeight, backgroundColor: isDarkMode ? "#181818" : "white" }}>
-            <PlotlyChart ref={chartRef} traces={traces} layout={layout} config={PLOTLY_CONFIG} style={{ height: "100%" }} />
-            <div
-              onMouseDown={onResizeMouseDown}
-              className="hover:bg-primary/10 group absolute inset-x-0 bottom-0 flex h-3 cursor-ns-resize items-center justify-center"
-            >
-              <div className="bg-border group-hover:bg-primary/50 h-0.5 w-12 rounded-full transition-colors" />
-            </div>
+            <PlotlyChart ref={chartRef} traces={traces} layout={layout} config={plotlyConfig} style={{ height: "100%" }} />
+            {!locked && (
+              <div
+                onMouseDown={onResizeMouseDown}
+                className="hover:bg-primary/10 group absolute inset-x-0 bottom-0 flex h-3 cursor-ns-resize items-center justify-center"
+              >
+                <div className="bg-border group-hover:bg-primary/50 h-0.5 w-12 rounded-full transition-colors" />
+              </div>
+            )}
           </div>
         ) : (
           <div className="border-muted-foreground/20 bg-muted/20 m-4 mt-1 flex h-40 flex-col items-center justify-center gap-2 rounded-lg border border-dashed">
@@ -690,9 +739,13 @@ const PlotWrapper = forwardRef<PlotExportHandle, PlotWrapperProps>(({ plot }, re
     </div>
     </ContextMenuTrigger>
     <ContextMenuContent>
-      <ContextMenuItem onClick={startRename}>
+      <ContextMenuItem onClick={startRename} disabled={locked}>
         <Pencil className="size-3.5" />
         Rename
+      </ContextMenuItem>
+      <ContextMenuItem onClick={() => toggleStudioPlotLocked(plot.id)}>
+        {locked ? <Unlock className="size-3.5" /> : <Lock className="size-3.5" />}
+        {locked ? "Unlock" : "Lock"}
       </ContextMenuItem>
       <ContextMenuCheckboxItem checked={plot.showFFT} onCheckedChange={() => toggleStudioPlotFFT(plot.id)}>
         Frequency spectrum (FFT)
@@ -701,7 +754,7 @@ const PlotWrapper = forwardRef<PlotExportHandle, PlotWrapperProps>(({ plot }, re
         <ChevronDown className={`size-3.5 transition-transform ${collapsed ? "-rotate-90" : ""}`} />
         {collapsed ? "Expand" : "Collapse"}
       </ContextMenuItem>
-      <ContextMenuItem onClick={resetZoom} disabled={!hasTraces}>
+      <ContextMenuItem onClick={resetZoom} disabled={!hasTraces || locked}>
         <RefreshCw className="size-3.5" />
         Reset Zoom
       </ContextMenuItem>

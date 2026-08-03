@@ -81,6 +81,12 @@ export default function PlotsSection() {
   const shortName = (id: string) =>
     id.includes("/") ? id.split("/").slice(1).join("/") : id.replace(/\.csv$/, "");
 
+  // Jump to a plot's card in the main PlotsArea — mirrors PlotWrapper's
+  // `id={plot.id}` on its outer card so this is a plain in-page anchor.
+  const scrollToPlot = (plotId: string) => {
+    document.getElementById(plotId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   const assign = async (plotId: string, signalId: string) => {
     setAssigning((prev) => new Set(prev).add(plotId));
     try {
@@ -125,7 +131,18 @@ export default function PlotsSection() {
             <div className="bg-primary/20 flex size-4 shrink-0 items-center justify-center rounded-sm">
               <Activity className="text-primary size-3" />
             </div>
-            <span className="text-foreground flex-1 truncate text-xs font-semibold">{plot.name}</span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={() => scrollToPlot(plot.id)}
+                  className="text-foreground hover:text-primary min-w-0 flex-1 truncate text-left text-xs font-semibold hover:underline"
+                >
+                  {plot.name}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="left">Jump to plot</TooltipContent>
+            </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
                 <label className="text-muted-foreground hover:text-foreground flex shrink-0 cursor-pointer items-center gap-1 text-[10px] transition-colors">
