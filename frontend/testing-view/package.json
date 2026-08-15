@@ -20,7 +20,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@radix-ui/react-slot": "^1.2.4",
-    "@tailwindcss/vite": "^4.1.18",
+    "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-virtual": "^3.13.18",
     "@types/lodash": "^4.17.23",
     "@vitejs/plugin-react-swc": "^4.2.3",
