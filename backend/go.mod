@@ -6,7 +6,7 @@ require (
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/google/gopacket v1.1.19
 	github.com/google/uuid v1.3.0
-	github.com/gorilla/websocket v1.5.0
+	github.com/gorilla/websocket v1.5.3
 	github.com/jmaralo/sntp v0.0.0-20240116111937-45a0a3419272
 	github.com/pelletier/go-toml/v2 v2.0.7
 	github.com/rs/zerolog v1.29.0
