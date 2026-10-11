@@ -11,6 +11,7 @@ use std::{
 use gix::Repository;
 use tracing::{debug, info, instrument, warn};
 
+// Common error type for filesystem and Git failures; Send + Sync allows cross-thread use.
 type BoxError = Box<dyn std::error::Error + Send + Sync>;
 
 const ADJ_URL: &str = "https://github.com/HyperloopUPV/adj.git";
@@ -37,6 +38,7 @@ const GIT_REMOTE: &str = "origin";
 /// or inaccessible, cloning or checkout fails, or replacement fails. Clone errors
 /// do not automatically fall back to the cache. If rollback fails, the error
 /// includes the preserved backup's location.
+// Log returned errors at the public boundary; helpers trace progress without duplicate warnings.
 #[instrument(level = "debug", err(level = "warn"))]
 pub fn update_adj(path: Option<PathBuf>, branch: &str) -> Result<(String, String), BoxError> {
     let (repo, dir) = adj_exists_repo(path)?;
@@ -163,6 +165,7 @@ fn adj_exists_repo(path: Option<PathBuf>) -> Result<(Option<Repository>, PathBuf
 // Stage beside ADJ so both installation and rollback use same-filesystem renames.
 #[instrument(level = "debug", skip(url))]
 fn git_replace(path: &Path, branch: &str, url: &str) -> Result<(String, String), BoxError> {
+    // A relative path like "adj" has an empty parent; stage in the current directory.
     let parent = path
         .parent()
         .filter(|p| !p.as_os_str().is_empty())
