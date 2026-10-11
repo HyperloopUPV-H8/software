@@ -64,16 +64,16 @@ pub struct OrderPacket {
 /// A protection packet: sent by a board when one of its declared
 /// [`super::Protection`]s triggers.
 ///
-/// `measurement` and `protection` together are the two halves of the
-/// compound wire id — decoding that split is `protocol`'s job, this type
-/// just holds the result.
+/// `id` is the compound wire id: [`AdjId::measurement_id`] gives the
+/// watched measurement, [`AdjId::protection_position`] which of that
+/// measurement's protections triggered (see [`super::Protection::id`]).
+/// Kept as a single field rather than storing both halves separately —
+/// they're never independent of each other, so there's nothing a second
+/// field would add beyond a second place for them to disagree.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ProtectionPacket {
-    /// The measurement this protection watches.
-    pub measurement: AdjId,
-    /// Which of that measurement's protections triggered — see
-    /// [`super::Protection::id`].
-    pub protection: AdjId,
+    /// The compound id this protection triggered under.
+    pub id: AdjId,
     /// When it triggered.
     pub timestamp: ShortTimestamp,
     /// The value that triggered it, decoded with the same wire type as the
@@ -164,10 +164,10 @@ mod tests {
     }
 
     #[test]
-    fn a_protection_packet_carries_its_measurement_and_its_own_position_separately() {
+    fn a_protection_packets_id_splits_into_its_measurement_and_its_own_position() {
+        // (1 << 13) | 3000 = 8192 | 3000 = 11192
         let packet = ProtectionPacket {
-            measurement: AdjId(3000),
-            protection: AdjId(1),
+            id: AdjId((1u16 << 13) | 3000),
             timestamp: ShortTimestamp {
                 hour: 12,
                 minute: 0,
@@ -177,8 +177,8 @@ mod tests {
             value: Value::Number(53.2),
         };
 
-        assert_eq!(packet.measurement, AdjId(3000));
-        assert_eq!(packet.protection, AdjId(1));
+        assert_eq!(packet.id.measurement_id(), AdjId(3000));
+        assert_eq!(packet.id.protection_position(), 1);
     }
 
     #[test]

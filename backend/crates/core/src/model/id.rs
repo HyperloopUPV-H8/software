@@ -12,6 +12,24 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct AdjId(pub u16);
 
+impl AdjId {
+    /// The high 3 bits: `0` for a normal `packet`/`order`/`measurement`
+    /// id, `1`-`7` for which of the watched measurement's protections this
+    /// is.
+    pub fn protection_position(self) -> u8 {
+        (self.0 >> 13) as u8
+    }
+
+    /// The watched measurement's id: this id with its high 3 bits (the
+    /// protection's position) zeroed out.
+    ///
+    /// For a normal, non-protection id (`protection_position() == 0`),
+    /// this is just the id itself.
+    pub fn measurement_id(self) -> AdjId {
+        AdjId(self.0 & 0x1FFF)
+    }
+}
+
 /// Unique identifier of a board, defined by the ADJ.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct BoardId(pub u16);
@@ -73,5 +91,20 @@ mod tests {
         let packet = AdjId(1);
         let board = BoardId(1);
         assert_eq!(packet.0, board.0); // only the inner numbers can be compared
+    }
+
+    #[test]
+    fn a_normal_ids_position_is_zero_and_it_is_its_own_measurement_id() {
+        let id = AdjId(3000);
+        assert_eq!(id.protection_position(), 0);
+        assert_eq!(id.measurement_id(), AdjId(3000));
+    }
+
+    #[test]
+    fn a_protections_compound_id_splits_into_position_and_measurement() {
+        // (3 << 13) | 100 = 24576 | 100 = 24676
+        let compound = AdjId((3u16 << 13) | 100);
+        assert_eq!(compound.protection_position(), 3);
+        assert_eq!(compound.measurement_id(), AdjId(100));
     }
 }

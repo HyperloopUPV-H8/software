@@ -56,6 +56,10 @@ Every board of the vehicle, as a `HashMap<BoardId, Board>` keyed by id — the A
 Defined as their own types (wrapping a `u16`) instead of using a plain `u16`, so the compiler won't let an `AdjId` be confused with a `BoardId` by mistake, even though both are just numbers underneath
 ### 2.1 `AdjId`
 ID of an ADJ packet in u16. Structure of ID can be found in the ADJ documentation.
+
+For a protection's compound id (the high 3 bits are the protection's position, the low 13 bits the watched measurement's id — see the struct's own docs for the full range table), `AdjId` exposes the split as two methods instead of leaving every caller to redo the shift/mask:
+- `protection_position() -> u8`: the high 3 bits (`0` for a normal, non-protection id).
+- `measurement_id() -> AdjId`: the id with its high 3 bits zeroed out — the watched measurement's own id.
 ### 2.2 `BoardId`
 Unique identifier of a board, defined by the ADJ documentation.
 ### 2.3 `MacAddress`
@@ -138,10 +142,8 @@ Vector list of values (`Vec<Value>`) to set for each field of the order.
 ### 4.4 `ProtectionPacket`
 Sent by a board when one of its declared protections triggers.
 
-#### `measurement`
-The measurement this protection watches (`AdjId`).
-#### `protection`
-Which of that measurement's protections triggered (`AdjId`).
+#### `id`
+The compound wire id this protection triggered under (`AdjId`). Use `id.measurement_id()` for the measurement it watches and `id.protection_position()` for which of that measurement's protections this is (see `Protection::id`). Kept as a single field rather than storing both halves separately — they're never independent of each other, so a second field would only add a second place for them to disagree.
 #### `timestamp`
 When the protection triggered (`ShortTimestamp`).
 #### `value`

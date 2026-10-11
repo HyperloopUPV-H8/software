@@ -71,9 +71,12 @@ pub(crate) fn load_board(root: &Path, name: &str, rel_path: &str) -> Result<Boar
                 })?;
 
             for (idx, _protection) in measurement.protections.iter().enumerate() {
-                // protection number into bits 13-15, and the measurement ID into bits 0-12.
-                let pos = idx as u16 + 1; //Change to u16 to match ADJ ID size. We start at one because 0 is the measurement id not a protection by ADJ definition.
-                let protection_packet_id = (pos << 13) | measurement.id.0; // Push Protection number 13 bits into specified region of the ID. Perform OR with the ID.
+                // The compound id's high 3 bits/low 13 bits split — see
+                // `AdjId::protection_position`/`AdjId::measurement_id` for
+                // the inverse of this composition. `pos` starts at 1, not
+                // 0: that's reserved for a normal, non-protection id.
+                let pos = idx as u16 + 1;
+                let protection_packet_id = (pos << 13) | measurement.id.0;
 
                 let packet = PacketDef {
                     id: AdjId(protection_packet_id),
