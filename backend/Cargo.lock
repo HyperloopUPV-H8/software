@@ -2091,6 +2091,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9737e026353e5cd0736f98eddae28665118eb6f6600902a7f50db585621fecb6"
 
 [[package]]
+name = "ntp_usg-proto"
+version = "5.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "31316ff46fc87e03a95e55b93525a27feecfd86fab094ca887a773395f13f50a"
+dependencies = [
+ "byteorder",
+ "log",
+]
+
+[[package]]
+name = "ntp_usg-server"
+version = "5.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0002bd55912864af88a46077abd71db2c4cda88887b46b19c31e1e9a1f289e4e"
+dependencies = [
+ "ntp_usg-proto",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
 name = "nu-ansi-term"
 version = "0.50.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2729,7 +2750,9 @@ dependencies = [
  "bytes",
  "dirs",
  "gix",
+ "ntp_usg-server",
  "serde",
+ "serde_json",
  "tempfile",
  "thiserror",
  "tokio",
@@ -3040,6 +3063,7 @@ version = "0.1.44"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "63e71662fa4b2a2c3a26f570f037eb95bb1f85397f3cd8076caed2f026a6d100"
 dependencies = [
+ "log",
  "pin-project-lite",
  "tracing-attributes",
  "tracing-core",
