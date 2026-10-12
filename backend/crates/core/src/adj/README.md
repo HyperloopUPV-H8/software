@@ -30,9 +30,33 @@ Adj
 └── info (AdjInfo)
       ├── ports: HashMap<String, Port>
       ├── addresses: HashMap<String, IpAddr>
-      ├── message_ids: HashMap<String, AdjId>
+      ├── message_ids: HashMap<String, AdjId>        -- name -> id, straight from the ADJ
+      ├── message_levels: HashMap<AdjId, MessageLevel> -- id -> severity, the reverse
       └── protection_types: HashMap<String, ProtectionTypeInfo>
 ```
+
+`message_ids` is the ADJ's own direction: a name (e.g. `"fault"`) to its
+id. Not every entry is one of `model::MessageLevel`'s four severities —
+other reserved names (e.g. `add_state_order`) share this same map.
+
+`message_levels` is the direction decoding actually needs: a wire id
+(all a decoder ever has) straight to its severity, with no name in
+between. It's the reverse of `message_ids`, restricted to whichever of
+`MessageLevel::ALL`'s four names `message_ids` declares — built once in
+`adj::raw::types`'s `TryFrom<RawGeneralInfo> for AdjInfo`, right after
+`message_ids` itself, so it can never drift out of sync with it:
+
+```rust
+let message_levels: HashMap<AdjId, MessageLevel> = MessageLevel::ALL
+    .into_iter()
+    .filter_map(|level| message_ids.get(level.name()).map(|&id| (id, level)))
+    .collect();
+```
+
+Which ADJ name corresponds to which `MessageLevel` is **not** decided
+here — `level.name()` (see `model/README.md` §4.4) is the one place
+that association is spelled out, so `adj` doesn't hardcode
+`"fault"`/`"warning"`/`"info"`/`"panic"` itself.
 
 ---
 

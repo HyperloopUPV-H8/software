@@ -188,6 +188,13 @@ Informational message, no action implied.
 #### `Panic`
 An unrecoverable firmware error.
 
+`MessageLevel` also exposes:
+- `ALL: [MessageLevel; 4]` — every severity, for code that needs to go through each one (e.g. building a lookup from a loaded ADJ's `message_ids`).
+- `name(self) -> &'static str` — this severity's key in `general_info.json`'s `message_ids` (`"fault"`, `"warning"`, `"info"`, `"panic"`).
+- `from_name(name: &str) -> Option<MessageLevel>` — the inverse of `name()`; `None` if `name` isn't one of the four.
+
+This is deliberately where the name↔severity association lives — in `model`, not `adj` or `protocol` — since it's domain knowledge about the severity itself. `adj::AdjInfo::message_levels` (see `adj/README.md`) calls into `name()`/`ALL` to build its id→severity lookup rather than hardcoding `"fault"`/`"warning"`/`"info"`/`"panic"` itself.
+
 ### 4.5 `MessagePacket`
 A free-text message sent by a board.
 

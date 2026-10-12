@@ -175,6 +175,41 @@ pub enum MessageLevel {
     Panic,
 }
 
+impl MessageLevel {
+    /// All four severities, in no particular order — for code that needs
+    /// to go through each one, e.g. building a lookup from a loaded
+    /// ADJ's `general_info.json` `message_ids` (see [`MessageLevel::name`]).
+    pub const ALL: [MessageLevel; 4] = [
+        MessageLevel::Fault,
+        MessageLevel::Warning,
+        MessageLevel::Info,
+        MessageLevel::Panic,
+    ];
+
+    /// This severity's key in `general_info.json`'s `message_ids` map
+    /// (ADJv3: `"fault"`, `"warning"`, `"info"`, `"panic"`). That map
+    /// only gives a severity's *name*, not which `MessageLevel` it is —
+    /// this is the one place that association is spelled out, so
+    /// nothing else has to hardcode these four strings again.
+    pub fn name(self) -> &'static str {
+        match self {
+            MessageLevel::Fault => "fault",
+            MessageLevel::Warning => "warning",
+            MessageLevel::Info => "info",
+            MessageLevel::Panic => "panic",
+        }
+    }
+
+    /// The inverse of [`MessageLevel::name`]: the severity named `name`,
+    /// or `None` if `name` isn't one of the four (e.g. `general_info.json`
+    /// declares other, unrelated reserved names in that same map).
+    pub fn from_name(name: &str) -> Option<MessageLevel> {
+        MessageLevel::ALL
+            .into_iter()
+            .find(|level| level.name() == name)
+    }
+}
+
 /// A free-text message sent by a board.
 #[derive(Debug, Clone, PartialEq)]
 pub struct MessagePacket {
@@ -271,6 +306,20 @@ mod tests {
                 assert_eq!(a == b, i == j);
             }
         }
+    }
+
+    #[test]
+    fn each_message_levels_name_matches_the_adj_and_is_distinct() {
+        let names: Vec<&str> = MessageLevel::ALL.iter().map(|level| level.name()).collect();
+        assert_eq!(names, vec!["fault", "warning", "info", "panic"]);
+    }
+
+    #[test]
+    fn from_name_is_the_inverse_of_name() {
+        for level in MessageLevel::ALL {
+            assert_eq!(MessageLevel::from_name(level.name()), Some(level));
+        }
+        assert_eq!(MessageLevel::from_name("not_a_severity"), None);
     }
 
     #[test]
