@@ -2,7 +2,7 @@
 //! telemetry (`Data` packets) from any board. Receive-only — the backend
 //! never sends anything over this socket.
 //!
-//! The actual decoding lives in [`super::packet::data`], independent of
+//! The actual decoding lives in [`super::packet::data_order`], independent of
 //! UDP — this module only adds the transport-level guarantee: a UDP
 //! datagram is a complete, already-delimited buffer (the OS preserves
 //! datagram boundaries even on a socket shared by every board), unlike
