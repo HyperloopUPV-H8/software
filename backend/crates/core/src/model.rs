@@ -21,7 +21,7 @@ pub use board::{Board, PacketDef, PacketKind, PodData};
 pub use id::{AdjId, BoardId, MacAddress, Port};
 pub use measurement::{Measurement, MeasurementKind, NumericKind, Range};
 pub use packet::{
-    DataPacket, MessageLevel, MessagePacket, OrderPacket, Packet, ProtectionPacket, ShortTimestamp,
+    DataPacket, MessageLevel, MessagePacket, OrderPacket, Packet, ProtectionPacket, ShortTimestamp, DataOrderPacket
 };
 pub use protections::{Protection, ProtectionKind, Severity};
 pub use value::Value;
