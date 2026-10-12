@@ -1,7 +1,7 @@
 //! Decodes a `Data` packet: a board's periodic telemetry. Only ever
 //! received, over UDP — a board never receives one back.
 
-use crate::model::{AdjId, DataPacket, MeasurementKind, NumericKind, PacketKind};
+use crate::model::{AdjId, DataPacket, PacketKind};
 use crate::protocol::{DecodeError, Index, wire};
 
 /// Decodes a complete, already-delimited buffer into a [`DataPacket`],
@@ -31,16 +31,7 @@ pub fn decode(bytes: &[u8], index: &Index) -> Result<DataPacket, DecodeError> {
     let mut pointer = 2; // Pointer to after ID in bytes
 
     for measurement in measurements {
-        let width = match &measurement.kind { // Set width of measurement according to the type.
-            MeasurementKind::Numeric { wire_type } => match wire_type {
-                NumericKind::U8 | NumericKind::I8 => 1,
-                NumericKind::U16 | NumericKind::I16 => 2,
-                NumericKind::U32 | NumericKind::I32 | NumericKind::F32 => 4,
-                NumericKind::U64 | NumericKind::I64 | NumericKind::F64 => 8,
-            },
-            MeasurementKind::Boolean => 1,
-            MeasurementKind::Enum { .. } => 1
-        };
+        let width = wire::byte_width(&measurement.kind);
 
         let next = pointer + width;
 
