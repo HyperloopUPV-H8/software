@@ -6,7 +6,7 @@ when updating online.
 
 ## Workflow
 
-`update_adj(path, branch)` returns the checked-out commit hash and full message.
+`update_adj(path, branch)` returns the full hash of the checked-out commit.
 A custom path identifies the ADJ repository itself. The default is
 `<cache directory>/hyperloop-control-station/adj`, using `dirs::cache_dir()`.
 An existing invalid repository or inaccessible path returns an error.
@@ -18,7 +18,7 @@ availability.
 ### Online
 
 - Shallow-clone the requested branch into a temporary directory beside ADJ.
-- Complete checkout and read its commit information before touching the cache.
+- Complete checkout and read its commit hash before touching the cache.
 - Move the old cache aside and install the new checkout.
 - Restore the old cache if installation fails. If restoration also fails,
   preserve the backup and include its location in the error.
@@ -30,7 +30,7 @@ switch is needed because the checkout is replaced.
 
 ### Offline
 
-- If ADJ exists, return its current commit without updating or switching branches.
+- If ADJ exists, return its current commit hash without updating or switching branches.
 - Otherwise, return `ADJ is not available locally and cannot be downloaded`.
 
 The cached branch may differ from the requested branch when offline.
@@ -48,6 +48,15 @@ Replacement is intended for startup, before the backend reads ADJ, with one
 updater at a time. The backup and installation renames are not jointly atomic
 across a process crash. The connectivity probe can succeed when GitHub is
 unreachable, or fail when GitHub is reachable.
+
+## Errors
+
+Public helpers return `GitError` with five categories: `Path`, `Repository`,
+`Clone`, `Replacement`, and `UnavailableOffline`. `RepositoryError` and
+`CloneError` group the concrete `gix` causes inside the corresponding categories.
+Only individual reference-iteration errors retain a dynamic source, as exposed
+by `gix`. If rollback fails, `Replacement` also retains the restoration error
+and backup path for recovery.
 
 ## Verification
 
