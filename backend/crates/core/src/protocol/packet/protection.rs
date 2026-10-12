@@ -3,29 +3,45 @@
 //! `encode`, purely so tests can build well-formed frames without
 //! hand-written byte arrays — nothing in the real backend calls it, since
 //! a protection never travels backend -> board.
-//! Structure
-//! ```
-//! | 0-1   | 2     | 3     | 4     | 5     | 6-9   | 10-13 | 14-17 | 18-21 | 22-25 | 26-29 | 30-33 |
-//! |-------|-------|-------|-------|-------|-------|-------|-------| 30-33 | 34-37 | 38-41 | 42-45 |
-//! | id    | hora  | min   | seg   | subseg| resv | resv  | value | value  | value  | value  | value  |
-//! | 34-37 | 38-41 | 42-45 |
-//! |-------| 34-37 | 38-41 | 42-45 |
-//! | value | value | value |
-//! ```
 //!
+//! Wire structure (whole frame, including the leading id):
+//! ```text
+//! | byte(s) | 0-1 | 2    | 3   | 4   | 5      | 6-7  | 8..          |
+//! |---------|-----|------|-----|-----|--------|------|--------------|
+//! | field   | id  | hora | min | seg | subseg | resv | value        |
+//! ```
+//! `id` (2 bytes) is normally read by a TCP dispatcher before it even
+//! knows to call [`decode`] (it needs the id first, to decide this is a
+//! protection and not a message) — when that's the case, pass it as
+//! `Some`, and `reader` should start right at byte 2 above. Otherwise
+//! pass `None`: `reader` should then start at byte 0, id included, and
+//! `decode` reads it itself — all of this frame's byte parsing stays in
+//! this file either way, never split out into whatever dispatches here.
+//! `resv` (2 bytes) only exists to align `value` to an 8-byte offset;
+//! it's read and discarded, never stored. `value`'s width is whatever
+//! [`crate::protocol::wire::byte_width`] says for the watched
+//! measurement's kind — not fixed, unlike every other field here.
 
 use crate::model::{AdjId, PacketKind, ProtectionPacket, ShortTimestamp};
 use crate::protocol::{DecodeError, EncodeError, Index, wire};
 use std::io::Read;
 
-/// Decodes a protection frame's remaining bytes, given the frame's
-/// already-read compound id (`tcp::decode_next`'s job), resolving the
-/// watched measurement's wire type against `index`.
+/// Decodes a protection frame, resolving the watched measurement's wire
+/// type against `index`.
+///
+/// `compound_id`: `Some` if the caller already read it (see this
+/// module's doc comment); `None` to have `decode` read it itself off
+/// `reader`'s first 2 bytes.
 pub fn decode(
     mut reader: impl Read,
-    compound_id: AdjId,
+    compound_id: Option<AdjId>,
     index: &Index,
 ) -> Result<ProtectionPacket, DecodeError> {
+    let compound_id = match compound_id {
+        Some(id) => id,
+        None => read_id(&mut reader)?,
+    };
+
     // Look up the packet definition for this compound id, and ensure it's a
     // protection packet. If not, the frame is malformed and we can't decode it.
     let packet_def = index
@@ -60,16 +76,22 @@ pub fn decode(
     })
 }
 
-/// Encodes a [`ProtectionPacket`] back into the bytes [`decode`] expects.
+/// Reads a raw little-endian 16-bit id off the front of `reader`. The
+/// one piece of byte parsing [`decode`]/[`encode`] share, so it only
+/// lives here once instead of wherever else might need an `AdjId`.
+fn read_id(reader: &mut impl Read) -> Result<AdjId, DecodeError> {
+    let mut bytes = [0u8; 2];
+    reader.read_exact(&mut bytes)?;
+    Ok(AdjId(u16::from_le_bytes(bytes)))
+}
+
+/// Encodes a [`ProtectionPacket`] back into the bytes [`decode`] expects
+/// — a complete, self-contained frame, leading id included.
 ///
 /// Nothing in the real backend calls this — per the ADJ spec, protection
 /// packets only ever travel board -> backend. This exists purely so
 /// tests can build well-formed frames without hand-written byte arrays,
 /// and to prove `decode` recovers exactly what was encoded.
-///
-/// Like `decode`, doesn't write the leading compound id (`packet.id`) —
-/// `decode` doesn't read it either, since that's resolved one level up,
-/// by whatever dispatches to this function in the first place.
 pub fn encode(packet: &ProtectionPacket, index: &Index) -> Result<Vec<u8>, EncodeError> {
     let packet_def = index
         .packet(packet.id)
@@ -79,17 +101,17 @@ pub fn encode(packet: &ProtectionPacket, index: &Index) -> Result<Vec<u8>, Encod
         return Err(EncodeError::WrongKind { id: packet.id });
     };
 
+    let mut bytes = packet.id.0.to_le_bytes().to_vec();
     // `hora`/`min`/`seg`/`subseg` (1 byte each), then 2 bytes of `resv`
-    let header = [
+    // — decode discards these, nothing to round-trip.
+    bytes.extend([
         packet.timestamp.hour,
         packet.timestamp.minute,
         packet.timestamp.second,
         packet.timestamp.subsecond,
-        0, // resv — decode discards these, nothing to round-trip
-        0, // resv
-    ];
-    let mut bytes = header.to_vec();
-
+        0,
+        0,
+    ]);
     bytes.extend(wire::encode_value(&packet.value, &measurement.kind)?);
 
     Ok(bytes)
@@ -152,7 +174,7 @@ mod tests {
         bytes.extend(53.2f32.to_le_bytes());
         let reader = Cursor::new(bytes);
 
-        let Ok(packet) = decode(reader, compound_id, &index) else {
+        let Ok(packet) = decode(reader, Some(compound_id), &index) else {
             unreachable!("decoding a well-formed protection frame should succeed");
         };
 
@@ -161,6 +183,30 @@ mod tests {
         assert_eq!(packet.timestamp.hour, 12);
         assert_eq!(packet.timestamp.minute, 30);
         assert_eq!(packet.timestamp.second, 5);
+        assert_eq!(packet.value, Value::Number(f64::from(53.2f32)));
+    }
+
+    #[test]
+    fn decode_reads_the_id_itself_when_not_given_one() {
+        let measurement = sample_measurement(
+            100,
+            MeasurementKind::Numeric {
+                wire_type: NumericKind::F32,
+            },
+        );
+        let (index, compound_id) = index_with_protection(measurement, 1);
+
+        // Full frame, id included — nobody's pre-read it for us.
+        let mut bytes = compound_id.0.to_le_bytes().to_vec();
+        bytes.extend([12, 30, 5, 0, 0, 0]); // hora, min, seg, subseg, resv(2)
+        bytes.extend(53.2f32.to_le_bytes());
+
+        let Ok(packet) = decode(Cursor::new(bytes), None, &index) else {
+            unreachable!("decoding a well-formed protection frame should succeed");
+        };
+
+        assert_eq!(packet.id, compound_id);
+        assert_eq!(packet.timestamp.hour, 12);
         assert_eq!(packet.value, Value::Number(f64::from(53.2f32)));
     }
 
@@ -176,7 +222,7 @@ mod tests {
         let unknown_id = AdjId((2 << 13) | 100);
 
         assert!(matches!(
-            decode(Cursor::new(vec![]), unknown_id, &index),
+            decode(Cursor::new(vec![]), Some(unknown_id), &index),
             Err(DecodeError::UnknownId(id)) if id == unknown_id
         ));
     }
@@ -209,7 +255,7 @@ mod tests {
         let index = Index::new(&pod_data);
 
         assert!(matches!(
-            decode(Cursor::new(vec![]), compound_id, &index),
+            decode(Cursor::new(vec![]), Some(compound_id), &index),
             Err(DecodeError::WrongKind { id }) if id == compound_id
         ));
     }
@@ -228,7 +274,7 @@ mod tests {
         let reader = Cursor::new(vec![0u8; 6]);
 
         assert!(matches!(
-            decode(reader, compound_id, &index),
+            decode(reader, Some(compound_id), &index),
             Err(DecodeError::Io(_))
         ));
     }
@@ -259,7 +305,9 @@ mod tests {
         let Ok(bytes) = encode(&original, &index) else {
             unreachable!("encoding a well-formed protection packet should succeed");
         };
-        let Ok(decoded) = decode(Cursor::new(bytes), compound_id, &index) else {
+        // `encode` writes the id too, so `decode` can read it back itself —
+        // proves the full frame round-trips, not just the body.
+        let Ok(decoded) = decode(Cursor::new(bytes), None, &index) else {
             unreachable!("decoding what we just encoded should succeed");
         };
 
@@ -291,8 +339,9 @@ mod tests {
             unreachable!("encoding a well-formed protection packet should succeed");
         };
 
-        assert_eq!(bytes[4], 0);
-        assert_eq!(bytes[5], 0);
+        // bytes[0..2] = id, [2..6] = timestamp, [6..8] = resv.
+        assert_eq!(bytes[6], 0);
+        assert_eq!(bytes[7], 0);
     }
 
     #[test]
