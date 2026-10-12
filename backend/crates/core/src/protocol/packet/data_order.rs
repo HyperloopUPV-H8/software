@@ -1,119 +1,128 @@
-use crate::model::{AdjId, DataPacket, PacketKind, Value, DataOrderPacket};
-use crate::protocol::{wire, EncodeError, Index, DecodeError};
+//! Encodes and decodes a positional Data/Order packet — see
+//! [`crate::model::DataOrderPacket`] for why both share this one wire
+//! shape under a phantom `Kind`.
+//!
+//! [`encode`]/[`decode`] are generic over that `Kind` via
+//! [`crate::model::KindTag`], so they're written once and work for either
+//! [`crate::model::Data`] or [`crate::model::Order`] — the backend itself
+//! only ever calls `encode::<Order>` (via [`super::super::tcp`]) and
+//! `decode::<Data>` (via [`super::super::udp`]), but that restriction
+//! lives at the transport layer, not here. [`crate::model::KindTag`] only
+//! answers whether a `PacketDef`'s kind matches `Kind` at all; the actual
+//! measurement list comes from [`crate::model::PacketKind::measurements`]
+//! either way.
 
+use crate::model::{AdjId, DataOrderPacket, KindTag};
+use crate::protocol::{DecodeError, EncodeError, Index, wire};
 
-//! Encodes an `Order` packet: a command sent to a board. Only ever sent,
-//! over TCP — the backend never receives one back.
-
-/// Encodes `order` into the bytes to write to a board's connection,
+/// Encodes `packet` into the bytes to write to a board's connection,
 /// resolving its field shapes against `index`.
-pub fn encode(order: &DataOrderPacket<Value>, index: &Index) -> Result<Vec<u8>, EncodeError> {
-
-    //Unwrap PacketDef for kind
+pub fn encode<Kind: KindTag>(
+    packet: &DataOrderPacket<Kind>,
+    index: &Index,
+) -> Result<Vec<u8>, EncodeError> {
+    // Look up the packet definition for this packet's id
     let packet_def = index
-        .packet(order.id)
-        .ok_or(EncodeError::UnknownId(order.id))?;// Question mark for error propagation and prevent crash
+        .packet(packet.id)
+        .ok_or(EncodeError::UnknownId(packet.id))?;
 
-    //Check if packetdef is PacketKind::Order(measurement). Also returns the list of measurements
-    let measurements = match &packet_def.kind{
-        PacketKind::Order(measurements) => measurements,
-        _ => return Err(EncodeError::WrongKind {id:order.id})
-    };
-
-    //Check if length of list of fields matches number of measurements.
-    if order.values.len() != measurements.len(){
-        return Err(EncodeError::WrongFieldCount {expected:measurements.len(),got:order.values.len()})
+    // Check that the packet is an order or data, as expected by the generic KindTag
+    if !Kind::matches(&packet_def.kind) {
+        return Err(EncodeError::WrongKind { id: packet.id });
     }
 
+    // Get the measurements for this packet
+    let measurements = packet_def.kind.measurements();
+
+    // Check that the number of values that we want to encode matches the number of measurements in the packet definition
+    if packet.values.len() != measurements.len() {
+        return Err(EncodeError::WrongFieldCount {
+            expected: measurements.len(),
+            got: packet.values.len(),
+        });
+    }
+
+    // Encode the packet id as little-endian u16
     let mut bytes = Vec::new();
+    bytes.extend_from_slice(&packet.id.0.to_le_bytes());
 
-    bytes.extend_from_slice(&order.id.0.to_le_bytes());//Header prefix of byte stream to 16 bit little-endian
+    // for each value in the packet encode it according to the corresponding measurements
+    for (field, measurement) in packet.values.iter().zip(measurements) {
+        // Encode the field value according to the measurement's kind
+        let field_bytes = wire::encode_value(field, &measurement.kind)?;
 
-    //Encoding to bytes
-    for (field,measurement) in order.values.iter().zip(measurements){ //For each measurement
-        let field_bytes = wire::encode_value(field,&measurement.kind)?;// Encode field Value into bytes according to MeasurementKind
-        bytes.extend(field_bytes);// Adds to byte stream
+        // Append the encoded field bytes to the output vector
+        bytes.extend(field_bytes);
     }
 
-    Ok(bytes) // Return bytes
+    Ok(bytes)
 }
 
-
-//
-//     "look up order.id in `index` to get its PacketDef (UnknownId if \
-//          absent); match its `kind` for PacketKind::Order(measurements) \
-//          (WrongKind if it's some other kind); error with WrongFieldCount \
-//          if order.fields.len() doesn't match measurements.len(); encode \
-//          the id then each field positionally via wire::encode_value"
-//
-
-//! Decodes a `Data` packet: a board's periodic telemetry. Only ever
-//! received, over UDP — a board never receives one back.
-
-/// Decodes a complete, already-delimited buffer into a [`DataPacket`],
-/// resolving its field shapes against `index`.
-pub fn decode(bytes: &[u8], index: &Index) -> Result<DataOrderPacket<Value>, DecodeError> {
+/// Decodes a complete, already-delimited buffer into a
+/// [`DataOrderPacket<Kind>`], resolving its field shapes against `index`.
+pub fn decode<Kind: KindTag>(
+    bytes: &[u8],
+    index: &Index,
+) -> Result<DataOrderPacket<Kind>, DecodeError> {
+    // The first two bytes are the packet id, in little-endian u16
     if bytes.len() < 2 {
-        // If less than 2 bytes return error
         return Err(DecodeError::UnexpectedEof);
     }
 
-    let id: [u8; 2] = bytes[0..2] // Recieve first two bytes
-        .try_into() // Tries to make it into desired type
-        .map_err(|_| DecodeError::UnexpectedEof)?; // If fails, return error
+    // generate the packet id from the first two bytes
+    let id: [u8; 2] = bytes[0..2]
+        .try_into()
+        .map_err(|_| DecodeError::UnexpectedEof)?;
 
-    let adj_id = AdjId(u16::from_le_bytes(id)); // Parse into u16 and make it AdjId type
+    // generate ADJ id from the little-endian bytes
+    let adj_id = AdjId(u16::from_le_bytes(id));
 
-    let packet_def = index.get(adj_id).ok_or(DecodeError::UnknownId(adj_id))?; // Get packet definition from index
+    // Look up the packet definition for this id if not found return an UnknownId error
+    let packet_def = index.packet(adj_id).ok_or(DecodeError::UnknownId(adj_id))?;
 
-    let measurements = match &packet_def.kind {
-        // Get measurements from packet definition
-        PacketKind::Data(measurements) => measurements, // If packet kind is data, return measurements
-        _ => return Err(DecodeError::WrongKind { id: adj_id }), // If not, return Error
-    };
+    // Check that the packet is an order or data, as expected by the generic KindTag
+    if !Kind::matches(&packet_def.kind) {
+        return Err(DecodeError::WrongKind { id: adj_id });
+    }
+    // Get the measurements for this packet
+    let measurements = packet_def.kind.measurements();
 
-    let mut values = Vec::with_capacity(measurements.len()); // Create vectir list of values same size as measurements
+    // Prepare a vector to hold the decoded values and a pointer to track the current position in the byte slice
+    let mut values = Vec::with_capacity(measurements.len());
+    let mut pointer = 2;
 
-    let mut pointer = 2; // Pointer to after ID in bytes
-
+    // For each measurement, decode the corresponding bytes from the input slice
     for measurement in measurements {
         let width = wire::byte_width(&measurement.kind);
-
         let next = pointer + width;
 
+        // Check if there are enough bytes to decode the field
         if bytes.len() < next {
-            // Check if there is enough bytes left
             return Err(DecodeError::UnexpectedEof);
         }
 
-        let field = &bytes[pointer..next]; // Size of field (bytes between pointer and next position)
-        let value = wire::decode_value(field, &measurement.kind)?; // Decode value from field size and measurement width
-        values.push(value); //Add to list of values
+        // Slice the bytes for the current field and decode it according to the measurement's kind
+        let field = &bytes[pointer..next];
+        let value = wire::decode_value(field, &measurement.kind)?; // Append the decoded value to the values vector
+        values.push(value);
 
-        pointer = next; // Next position
+        pointer = next;
     }
 
-    Ok(DataPacket { id: adj_id, values }) // Return data packet
+    Ok(DataOrderPacket::new(adj_id, values))
 }
-
-//
-//     "read the leading 16-bit id; look up its PacketDef in `index` \
-//          (UnknownId if absent); match its `kind` for \
-//          PacketKind::Data(measurements) (WrongKind if it's some other \
-//          kind); decode each measurement's value positionally via \
-//          wire::decode_value, advancing through `bytes` using each \
-//          measurement's own wire width"
-//
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::model::{
-        Board, BoardId, MacAddress, Measurement, MeasurementKind, NumericKind, PacketDef,
-        PacketKind, PodData, Value,
+        Board, BoardId, Data, DataPacket, MacAddress, Measurement, MeasurementKind, NumericKind,
+        Order, OrderPacket, PacketDef, PacketKind, PodData, Value,
     };
     use std::collections::HashMap;
     use std::net::IpAddr;
+
+    // Auxiliar function to create a sample measurement for testing
 
     fn sample_measurement(id: u16, kind: MeasurementKind) -> Measurement {
         Measurement {
@@ -158,35 +167,43 @@ mod tests {
         let packet_def = sample_packet_def(
             order_id,
             PacketKind::Order(vec![
-                sample_measurement(1, MeasurementKind::Numeric { wire_type: NumericKind::U16 }),
-                sample_measurement(2, MeasurementKind::Boolean),
+                sample_measurement(
+                    1,
+                    MeasurementKind::Numeric {
+                        wire_type: NumericKind::U16,
+                    },
+                ),
+                sample_measurement(
+                    2,
+                    MeasurementKind::Enum {
+                        options: vec!["Off".to_string(), "On".to_string()],
+                    },
+                ),
             ]),
         );
 
         let index = make_test_index(vec![packet_def]);
 
-        let packet = DataOrderPacket {
-            id: order_id,
-            values: vec![Value::Number(300.0), Value::Bool(true)],
-        };
+        let packet = OrderPacket::new(order_id, vec![Value::Number(300.0), Value::Number(1.0)]);
 
-        let encoded = encode(&packet, &index).expect("encoding should succeed");
+        let Ok(encoded) = encode(&packet, &index) else {
+            unreachable!("encoding a well-formed order should succeed");
+        };
 
         // 1001 in little-endian u16: [0xE9, 0x03]
         // 300 in little-endian u16: [0x2C, 0x01]
-        // true: [0x01]
+        // enum index 1: [0x01]
         assert_eq!(encoded, vec![0xE9, 0x03, 0x2C, 0x01, 0x01]);
     }
 
     #[test]
     fn encode_fails_on_unknown_id() {
         let index = make_test_index(vec![]);
-        let packet = DataOrderPacket {
-            id: AdjId(9999),
-            values: vec![],
-        };
+        let packet = OrderPacket::new(AdjId(9999), vec![]);
 
-        let err = encode(&packet, &index).unwrap_err();
+        let Err(err) = encode(&packet, &index) else {
+            unreachable!("encoding an unknown id should fail");
+        };
         assert_eq!(err, EncodeError::UnknownId(AdjId(9999)));
     }
 
@@ -196,12 +213,11 @@ mod tests {
         let packet_def = sample_packet_def(data_id, PacketKind::Data(vec![]));
 
         let index = make_test_index(vec![packet_def]);
-        let packet = DataOrderPacket {
-            id: data_id,
-            values: vec![],
-        };
+        let packet = OrderPacket::new(data_id, vec![]);
 
-        let err = encode(&packet, &index).unwrap_err();
+        let Err(err) = encode(&packet, &index) else {
+            unreachable!("encoding the wrong packet kind should fail");
+        };
         assert_eq!(err, EncodeError::WrongKind { id: data_id });
     }
 
@@ -211,18 +227,27 @@ mod tests {
         let packet_def = sample_packet_def(
             order_id,
             PacketKind::Order(vec![
-                sample_measurement(1, MeasurementKind::Numeric { wire_type: NumericKind::U8 }),
-                sample_measurement(2, MeasurementKind::Numeric { wire_type: NumericKind::U8 }),
+                sample_measurement(
+                    1,
+                    MeasurementKind::Numeric {
+                        wire_type: NumericKind::U8,
+                    },
+                ),
+                sample_measurement(
+                    2,
+                    MeasurementKind::Numeric {
+                        wire_type: NumericKind::U8,
+                    },
+                ),
             ]),
         );
 
         let index = make_test_index(vec![packet_def]);
-        let packet = DataOrderPacket {
-            id: order_id,
-            values: vec![Value::Number(10.0)],
-        };
+        let packet = OrderPacket::new(order_id, vec![Value::Number(10.0)]);
 
-        let err = encode(&packet, &index).unwrap_err();
+        let Err(err) = encode(&packet, &index) else {
+            unreachable!("encoding with the wrong field count should fail");
+        };
         assert_eq!(
             err,
             EncodeError::WrongFieldCount {
@@ -240,8 +265,18 @@ mod tests {
         let packet_def = sample_packet_def(
             data_id,
             PacketKind::Data(vec![
-                sample_measurement(1, MeasurementKind::Numeric { wire_type: NumericKind::U16 }),
-                sample_measurement(2, MeasurementKind::Boolean),
+                sample_measurement(
+                    1,
+                    MeasurementKind::Numeric {
+                        wire_type: NumericKind::U16,
+                    },
+                ),
+                sample_measurement(
+                    2,
+                    MeasurementKind::Enum {
+                        options: vec!["Off".to_string(), "On".to_string()],
+                    },
+                ),
             ]),
         );
 
@@ -249,22 +284,26 @@ mod tests {
 
         // 3001 in little-endian u16: [0xB9, 0x0B]
         // 500 in little-endian u16: [0xF4, 0x01]
-        // false: [0x00]
+        // enum index 0: [0x00]
         let raw_bytes = [0xB9, 0x0B, 0xF4, 0x01, 0x00];
 
-        let decoded = decode(&raw_bytes, &index).expect("decoding should succeed");
+        let Ok(decoded) = decode::<Data>(&raw_bytes, &index) else {
+            unreachable!("decoding a well-formed data packet should succeed");
+        };
 
         assert_eq!(decoded.id, data_id);
         assert_eq!(
             decoded.values,
-            vec![Value::Number(500.0), Value::Bool(false)]
+            vec![Value::Number(500.0), Value::Enum("Off".to_string())]
         );
     }
 
     #[test]
     fn decode_fails_when_buffer_is_shorter_than_header() {
         let index = make_test_index(vec![]);
-        let err = decode(&[0x01], &index).unwrap_err();
+        let Err(err) = decode::<Data>(&[0x01], &index) else {
+            unreachable!("decoding a buffer shorter than the header should fail");
+        };
         assert_eq!(err, DecodeError::UnexpectedEof);
     }
 
@@ -273,15 +312,20 @@ mod tests {
         let data_id = AdjId(3002);
         let packet_def = sample_packet_def(
             data_id,
-            PacketKind::Data(vec![
-                sample_measurement(1, MeasurementKind::Numeric { wire_type: NumericKind::U32 }),
-            ]),
+            PacketKind::Data(vec![sample_measurement(
+                1,
+                MeasurementKind::Numeric {
+                    wire_type: NumericKind::U32,
+                },
+            )]),
         );
 
         let index = make_test_index(vec![packet_def]);
 
         let raw_bytes = [0xBA, 0x0B, 0x01, 0x02];
-        let err = decode(&raw_bytes, &index).unwrap_err();
+        let Err(err) = decode::<Data>(&raw_bytes, &index) else {
+            unreachable!("decoding a truncated payload should fail");
+        };
         assert_eq!(err, DecodeError::UnexpectedEof);
     }
 
@@ -290,7 +334,9 @@ mod tests {
         let index = make_test_index(vec![]);
         let raw_bytes = [0x88, 0x13];
 
-        let err = decode(&raw_bytes, &index).unwrap_err();
+        let Err(err) = decode::<Data>(&raw_bytes, &index) else {
+            unreachable!("decoding an unknown id should fail");
+        };
         assert_eq!(err, DecodeError::UnknownId(AdjId(5000)));
     }
 
@@ -302,7 +348,79 @@ mod tests {
         let index = make_test_index(vec![packet_def]);
         let raw_bytes = [0xA1, 0x0F];
 
-        let err = decode(&raw_bytes, &index).unwrap_err();
+        let Err(err) = decode::<Data>(&raw_bytes, &index) else {
+            unreachable!("decoding the wrong packet kind should fail");
+        };
         assert_eq!(err, DecodeError::WrongKind { id: order_id });
+    }
+
+    // --- ROUND-TRIP TESTS ---
+    //
+    // `encode`/`decode` are generic over `Kind`, so the same `PacketDef`
+    // works for both directions here — that genericity is the whole
+    // point of giving `DataOrderPacket` a phantom `Kind` in the first
+    // place, instead of writing one hardcoded pair of functions per kind.
+    //
+    // Enum fields are left out of both: `encode_enum` takes an
+    // already-selected index (`Value::Number`) but `decode_enum` returns
+    // the option's text (`Value::Enum`) — see `wire.rs` — so an enum
+    // field's `Value` is never expected to round-trip unchanged, only its
+    // underlying byte.
+
+    fn numeric_measurements() -> Vec<Measurement> {
+        vec![
+            sample_measurement(
+                1,
+                MeasurementKind::Numeric {
+                    wire_type: NumericKind::U16,
+                },
+            ),
+            sample_measurement(
+                2,
+                MeasurementKind::Numeric {
+                    wire_type: NumericKind::I8,
+                },
+            ),
+        ]
+    }
+
+    #[test]
+    fn an_order_packet_round_trips_through_encode_then_decode() {
+        let id = AdjId(6001);
+        let index = make_test_index(vec![sample_packet_def(
+            id,
+            PacketKind::Order(numeric_measurements()),
+        )]);
+        let original = OrderPacket::new(id, vec![Value::Number(1234.0), Value::Number(-5.0)]);
+
+        let Ok(bytes) = encode(&original, &index) else {
+            unreachable!("encoding this well-formed order should succeed");
+        };
+        let Ok(decoded) = decode::<Order>(&bytes, &index) else {
+            unreachable!("decoding what we just encoded should succeed");
+        };
+
+        assert_eq!(decoded.id, original.id);
+        assert_eq!(decoded.values, original.values);
+    }
+
+    #[test]
+    fn a_data_packet_round_trips_through_encode_then_decode() {
+        let id = AdjId(6002);
+        let index = make_test_index(vec![sample_packet_def(
+            id,
+            PacketKind::Data(numeric_measurements()),
+        )]);
+        let original = DataPacket::new(id, vec![Value::Number(42.0), Value::Number(-1.0)]);
+
+        let Ok(bytes) = encode(&original, &index) else {
+            unreachable!("encoding this well-formed data packet should succeed");
+        };
+        let Ok(decoded) = decode::<Data>(&bytes, &index) else {
+            unreachable!("decoding what we just encoded should succeed");
+        };
+
+        assert_eq!(decoded.id, original.id);
+        assert_eq!(decoded.values, original.values);
     }
 }
