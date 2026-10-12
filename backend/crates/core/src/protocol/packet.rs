@@ -5,6 +5,6 @@
 //! only ever received (over UDP), an `Order` only ever sent (over TCP),
 //! so there's no `encode` for the former or `decode` for the latter.
 
-pub mod data_order;
 pub mod message;
 pub mod protection;
+pub mod data_order;
