@@ -6,9 +6,9 @@
 //! Every wire width here is fixed by the measurement's own `kind` (a
 //! `NumericKind` always has a known byte width; booleans and enums are
 //! fixed-width too), so decoding never needs to report back how many
-//! bytes it consumed — the caller already has the `MeasurementKind` (from
-//! the `Measurement` it's decoding) and can derive the width from it
-//! directly if it needs to advance through a buffer.
+//! bytes it consumed — [`byte_width`] derives it straight from the
+//! `MeasurementKind`, for a caller that needs to advance through a buffer
+//! or know how much to read off a stream before decoding.
 //!
 //! [`decode_value`]/[`encode_value`] are thin dispatchers: they only pick
 //! which per-kind function to call. All the actual work lives in its own
@@ -33,6 +33,23 @@ pub fn encode_value(value: &Value, kind: &MeasurementKind) -> Result<Vec<u8>, En
         MeasurementKind::Numeric { wire_type } => encode_numeric(value, *wire_type),
         MeasurementKind::Boolean => encode_boolean(value),
         MeasurementKind::Enum { options } => encode_enum(value, options),
+    }
+}
+
+/// How many bytes `kind` takes on the wire.
+pub fn byte_width(kind: &MeasurementKind) -> usize {
+    match kind {
+        MeasurementKind::Numeric { wire_type } => match wire_type {
+            NumericKind::U8 | NumericKind::I8 => 1,
+            NumericKind::U16 | NumericKind::I16 => 2,
+            NumericKind::U32 | NumericKind::I32 | NumericKind::F32 => 4,
+            NumericKind::U64 | NumericKind::I64 | NumericKind::F64 => 8,
+        },
+        // Not yet confirmed against firmware — see `decode_boolean`.
+        MeasurementKind::Boolean => {
+            todo!("confirm the wire width firmware uses for a boolean measurement")
+        }
+        MeasurementKind::Enum { .. } => 1,
     }
 }
 
@@ -169,6 +186,36 @@ pub fn encode_enum(value: &Value, options: &[String]) -> Result<Vec<u8>, EncodeE
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn byte_width_matches_each_numeric_kinds_wire_size() {
+        let cases = [
+            (NumericKind::U8, 1),
+            (NumericKind::I8, 1),
+            (NumericKind::U16, 2),
+            (NumericKind::I16, 2),
+            (NumericKind::U32, 4),
+            (NumericKind::I32, 4),
+            (NumericKind::F32, 4),
+            (NumericKind::U64, 8),
+            (NumericKind::I64, 8),
+            (NumericKind::F64, 8),
+        ];
+
+        for (wire_type, expected) in cases {
+            assert_eq!(byte_width(&MeasurementKind::Numeric { wire_type }), expected);
+        }
+    }
+
+    #[test]
+    fn byte_width_of_an_enum_is_always_one() {
+        assert_eq!(
+            byte_width(&MeasurementKind::Enum {
+                options: vec!["Idle".to_string(), "Fault".to_string()]
+            }),
+            1
+        );
+    }
 
     #[test]
     fn decodes_an_unsigned_integer_little_endian() {
