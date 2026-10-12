@@ -32,7 +32,7 @@ protocol/
 │   ├── data_order.rs # Data (telemetry) & Order (command) packets
 │   ├── message.rs    # Free-text log message packets
 │   └── protection.rs # Protection trigger packets
-├── tcp.rs            # TCP transport framing (stub)
+├── tcp.rs            # TCP transport framing
 └── udp.rs            # UDP transport framing
 ```
 
@@ -154,18 +154,20 @@ bytes.
 - `decode(reader, compound_id: Option<AdjId>, index)` - Decode a protection frame, resolving its id itself if not given one
 - `encode(packet, index)` - Test-only: encode a complete `ProtectionPacket` frame, id included
 
-### `tcp.rs` - TCP Transport Framing ⚠ Partial
+### `tcp.rs` - TCP Transport Framing
 
 Handles the dedicated TCP connection to each board. A TCP connection carries:
 - Protection events (board → backend)
 - Free-text messages (board → backend)
 - Order commands (backend → board)
 
+`decode_next` reads the frame's leading 16-bit id itself (via `packet::read_id`, `pub(super)` so `tcp` — a sibling of `packet`, not a descendant — can reach it), then dispatches purely on the raw id: `id.0 >= 8192` (`1 << 13` — a protection's compound id always has its high 3 bits set, see `AdjId`'s own docs) goes to `packet::protection::decode(reader, Some(id), index)`, anything below that to `packet::message::decode(reader, Some(id), index)`. Neither branch does its own lookup first — each `decode` already resolves `UnknownId`/`WrongKind` against `index` itself.
+
 **Key types:**
 - `TcpFrame` - Enum of frames that can be received over TCP (Protection, Message)
 
 **Key functions:**
-- `decode_next(reader, index)` - ⚠ Stub - Decode the next frame from a TCP stream
+- `decode_next(reader, index)` - ✓ Implemented - Decode the next frame from a TCP stream
 - `encode_order(order, index)` - ✓ Implemented - Encode an order for sending
 
 ### `udp.rs` - UDP Transport Framing
@@ -193,7 +195,7 @@ Handles the shared UDP socket for periodic telemetry. UDP datagrams are complete
 - ✅ **Wire-level boolean types** - Single byte, confirmed with firmware
 - ✅ **Message packets** - decode implemented, with tests (encode exists for test symmetry only)
 - ✅ **Protection packets** - decode implemented, with tests (encode exists for test symmetry only)
-- ⚠️ **TCP framing** - Partial (decode_next not implemented)
+- ✅ **TCP framing** - `decode_next` implemented and tested (dispatches to protection/message by `id.0 >= 8192`)
 
 ## Testing
 

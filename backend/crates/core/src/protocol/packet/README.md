@@ -22,9 +22,9 @@ see its own module doc and `model/README.md`'s §4.2 for why.
 These two are different: over TCP, a `Protection` frame and a `Message`
 frame share the same leading 16-bit id space, so **something** has to
 read that id before it even knows which of the two decoders to call.
-That something is `tcp::decode_next` (still unimplemented). To keep that
-reality from leaking actual decoding logic into `tcp.rs`, both files
-take their id as `Option<AdjId>` — the exact same shape:
+That something is `tcp::decode_next`. To keep that reality from leaking
+actual decoding logic into `tcp.rs`, both files take their id as
+`Option<AdjId>` — the exact same shape:
 
 ```rust
 // protection.rs
@@ -76,11 +76,15 @@ decide *which* of `protection::decode`/`message::decode` to call — there
 is no way around this for a non-seekable stream: once those bytes are
 consumed, there's no handing them to the other function's `None` path
 instead. That single mechanical "read a `u16`" is the one piece of
-byte-handling that's expected to exist in `tcp.rs`. It is not decoding —
-nothing is validated or interpreted by it beyond "is the top bit of
-`AdjId::protection_position()` set" — and its result is immediately
-handed to the matching function as `Some(id)`, which then resolves it
-against `index` itself and does everything else.
+byte-handling that's expected to exist in `tcp.rs` — it calls the exact
+same private `read_id` helper `protection.rs`/`message.rs` use for their
+own `None` path (defined once in `packet.rs`, `pub(super)` so `tcp.rs`
+can reach it too, rather than duplicated a third time). It is not
+decoding — nothing is validated or interpreted by it beyond a single
+`id.0 >= 8192` comparison (a protection's compound id always has its
+high 3 bits set, see `AdjId`'s own docs) — and its result is
+immediately handed to the matching function as `Some(id)`, which then
+resolves it against `index` itself and does everything else.
 
 ## Tests
 

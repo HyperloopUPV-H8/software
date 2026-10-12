@@ -26,10 +26,15 @@ use std::io::Read;
 ///
 /// Shared by [`message`]/[`protection`] — the only two kinds whose
 /// `decode` ever needs to read its own leading id, when the caller
-/// doesn't already know it (see each module's own doc comment on why).
-/// [`data_order`] doesn't need this: it reads its id a different way,
-/// straight out of an in-memory byte slice, never a `Read` stream.
-fn read_id(reader: &mut impl Read) -> Result<AdjId, DecodeError> {
+/// doesn't already know it (see each module's own doc comment on why) —
+/// and by [`super::tcp::decode_next`], which needs the id *before* it
+/// can even decide which of the two to call. `pub(super)` (visible to
+/// `protocol` and everything under it) rather than private, for that
+/// last caller: `tcp` is `packet`'s sibling, not its descendant, so
+/// private wouldn't reach it. [`data_order`] doesn't need this: it reads
+/// its id a different way, straight out of an in-memory byte slice,
+/// never a `Read` stream.
+pub(super) fn read_id(reader: &mut impl Read) -> Result<AdjId, DecodeError> {
     let mut bytes = [0u8; 2];
     reader.read_exact(&mut bytes)?;
     Ok(AdjId(u16::from_le_bytes(bytes)))
