@@ -39,10 +39,10 @@ pub fn encode(order: &OrderPacket, index: &Index) -> Result<Vec<u8>, EncodeError
 
 
 
-// todo!(
+// 
 //     "look up order.id in `index` to get its PacketDef (UnknownId if \
 //          absent); match its `kind` for PacketKind::Order(measurements) \
 //          (WrongKind if it's some other kind); error with WrongFieldCount \
 //          if order.fields.len() doesn't match measurements.len(); encode \
 //          the id then each field positionally via wire::encode_value"
-// )
+// 
