@@ -52,11 +52,18 @@ export const test = base.extend<ElectronFixtures>({
 
             const selector = findWindow(app, "/mode-selector/index.html");
             if (!selector) return false;
-            if ((await selector.locator("#button-grid button").count()) > 1) {
-              await selector
-                .getByRole("button", { name: "Testing View", exact: true })
-                .click();
-              return true;
+            try {
+              if ((await selector.locator("#button-grid button").count()) > 1) {
+                await selector
+                  .getByRole("button", { name: "Testing View", exact: true })
+                  .click();
+                return true;
+              }
+            } catch (error) {
+              // Single-view builds close the selector automatically. It can
+              // disappear during any awaited locator call, including click.
+              // Retry discovery so the Testing View window confirms startup.
+              if (!selector.isClosed()) throw error;
             }
             return false;
           },
