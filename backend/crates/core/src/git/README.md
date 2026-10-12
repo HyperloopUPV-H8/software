@@ -1,8 +1,6 @@
 # ADJ Git helpers
 
-This module manages ADJ as an application-owned, replaceable data cache using
-`gix`, with `tracing` for logging. It does not preserve local edits or commits
-when updating online.
+This module downloads and updates the local [ADJ repository](https://github.com/Hyperloop-UPV/adj) using [`gix`](https://crates.io/crates/gix), with [`tracing`](https://crates.io/crates/tracing) for logging. It supports branch selection and offline use of an existing local checkout.
 
 ## Workflow
 
@@ -17,6 +15,8 @@ availability.
 
 ### Online
 
+Online updates replace the local checkout and do not preserve local edits or commits.
+
 - Shallow-clone the requested branch into a temporary directory beside ADJ.
 - Complete checkout and read its commit hash before touching the cache.
 - Move the old cache aside and install the new checkout.
@@ -25,8 +25,8 @@ availability.
 - Remove the old cache after successful installation.
 
 A clone error leaves the old cache untouched and is returned directly; it does
-not automatically fall back to offline operation. No fetch, merge, or branch
-switch is needed because the checkout is replaced.
+not automatically fall back to offline operation. No separate fetch of the
+existing cache, merge, or branch switch is needed because the checkout is replaced.
 
 ### Offline
 
@@ -38,9 +38,12 @@ The cached branch may differ from the requested branch when offline.
 ## Other Helpers
 
 - `open_repo` opens the custom or default repository path.
-- `list_remote_branches` lists cached remote-tracking references, without making
-  a network request. Results can be stale and include the remote name.
-- `branch_exists` checks for a cached `refs/remotes/<remote>/<branch>` reference.
+- `list_remote_branches(repo)` queries the default fetch remote and returns sorted short
+  branch names, without downloading objects or updating local references. It
+  requires remote access and does not fall back to cached branches on failure.
+- `branch_exists(repo, name)` uses that listing to check an exact short branch
+  name. Query errors are propagated; `false` means a successful query did not
+  find the branch, not that the remote was unreachable.
 
 ## Limitations
 
@@ -54,9 +57,8 @@ unreachable, or fail when GitHub is reachable.
 Public helpers return `GitError` with five categories: `Path`, `Repository`,
 `Clone`, `Replacement`, and `UnavailableOffline`. `RepositoryError` and
 `CloneError` group the concrete `gix` causes inside the corresponding categories.
-Only individual reference-iteration errors retain a dynamic source, as exposed
-by `gix`. If rollback fails, `Replacement` also retains the restoration error
-and backup path for recovery.
+If rollback fails, `Replacement` also retains the restoration error and backup
+path for recovery.
 
 ## Verification
 
