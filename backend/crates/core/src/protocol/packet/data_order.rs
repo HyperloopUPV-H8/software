@@ -104,3 +104,205 @@ pub fn decode(bytes: &[u8], index: &Index) -> Result<DataOrderPacket<Value>, Dec
 //          wire::decode_value, advancing through `bytes` using each \
 //          measurement's own wire width"
 //
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::model::{
+        Board, BoardId, MacAddress, Measurement, MeasurementKind, NumericKind, PacketDef,
+        PacketKind, PodData, Value,
+    };
+    use std::collections::HashMap;
+    use std::net::IpAddr;
+
+    fn sample_measurement(id: u16, kind: MeasurementKind) -> Measurement {
+        Measurement {
+            id: AdjId(id),
+            alias: format!("field_{id}"),
+            name: format!("Field {id}"),
+            display_units: String::new(),
+            kind,
+            protections: vec![],
+        }
+    }
+
+    fn sample_packet_def(id: AdjId, kind: PacketKind) -> PacketDef {
+        PacketDef {
+            id,
+            board: BoardId(1),
+            name: "TestPacket".into(),
+            kind,
+        }
+    }
+
+    fn make_test_index(defs: Vec<PacketDef>) -> Index {
+        let packets: HashMap<AdjId, PacketDef> = defs.into_iter().map(|p| (p.id, p)).collect();
+        let board = Board {
+            id: BoardId(1),
+            name: "TestBoard".to_string(),
+            ip: IpAddr::from([127, 0, 0, 1]),
+            mac: MacAddress([0; 6]),
+            packets,
+        };
+        let pod_data = PodData {
+            boards: HashMap::from([(board.id, board)]),
+        };
+        Index::new(&pod_data)
+    }
+
+    // --- ENCODE TESTS ---
+
+    #[test]
+    fn encode_success_little_endian_and_positional_fields() {
+        let order_id = AdjId(1001);
+        let packet_def = sample_packet_def(
+            order_id,
+            PacketKind::Order(vec![
+                sample_measurement(1, MeasurementKind::Numeric { wire_type: NumericKind::U16 }),
+                sample_measurement(2, MeasurementKind::Boolean),
+            ]),
+        );
+
+        let index = make_test_index(vec![packet_def]);
+
+        let packet = DataOrderPacket {
+            id: order_id,
+            values: vec![Value::Number(300.0), Value::Bool(true)],
+        };
+
+        let encoded = encode(&packet, &index).expect("encoding should succeed");
+
+        // 1001 in little-endian u16: [0xE9, 0x03]
+        // 300 in little-endian u16: [0x2C, 0x01]
+        // true: [0x01]
+        assert_eq!(encoded, vec![0xE9, 0x03, 0x2C, 0x01, 0x01]);
+    }
+
+    #[test]
+    fn encode_fails_on_unknown_id() {
+        let index = make_test_index(vec![]);
+        let packet = DataOrderPacket {
+            id: AdjId(9999),
+            values: vec![],
+        };
+
+        let err = encode(&packet, &index).unwrap_err();
+        assert_eq!(err, EncodeError::UnknownId(AdjId(9999)));
+    }
+
+    #[test]
+    fn encode_fails_on_wrong_kind() {
+        let data_id = AdjId(2001);
+        let packet_def = sample_packet_def(data_id, PacketKind::Data(vec![]));
+
+        let index = make_test_index(vec![packet_def]);
+        let packet = DataOrderPacket {
+            id: data_id,
+            values: vec![],
+        };
+
+        let err = encode(&packet, &index).unwrap_err();
+        assert_eq!(err, EncodeError::WrongKind { id: data_id });
+    }
+
+    #[test]
+    fn encode_fails_on_wrong_field_count() {
+        let order_id = AdjId(1002);
+        let packet_def = sample_packet_def(
+            order_id,
+            PacketKind::Order(vec![
+                sample_measurement(1, MeasurementKind::Numeric { wire_type: NumericKind::U8 }),
+                sample_measurement(2, MeasurementKind::Numeric { wire_type: NumericKind::U8 }),
+            ]),
+        );
+
+        let index = make_test_index(vec![packet_def]);
+        let packet = DataOrderPacket {
+            id: order_id,
+            values: vec![Value::Number(10.0)],
+        };
+
+        let err = encode(&packet, &index).unwrap_err();
+        assert_eq!(
+            err,
+            EncodeError::WrongFieldCount {
+                expected: 2,
+                got: 1,
+            }
+        );
+    }
+
+    // --- DECODE TESTS ---
+
+    #[test]
+    fn decode_success_little_endian_and_values() {
+        let data_id = AdjId(3001);
+        let packet_def = sample_packet_def(
+            data_id,
+            PacketKind::Data(vec![
+                sample_measurement(1, MeasurementKind::Numeric { wire_type: NumericKind::U16 }),
+                sample_measurement(2, MeasurementKind::Boolean),
+            ]),
+        );
+
+        let index = make_test_index(vec![packet_def]);
+
+        // 3001 in little-endian u16: [0xB9, 0x0B]
+        // 500 in little-endian u16: [0xF4, 0x01]
+        // false: [0x00]
+        let raw_bytes = [0xB9, 0x0B, 0xF4, 0x01, 0x00];
+
+        let decoded = decode(&raw_bytes, &index).expect("decoding should succeed");
+
+        assert_eq!(decoded.id, data_id);
+        assert_eq!(
+            decoded.values,
+            vec![Value::Number(500.0), Value::Bool(false)]
+        );
+    }
+
+    #[test]
+    fn decode_fails_when_buffer_is_shorter_than_header() {
+        let index = make_test_index(vec![]);
+        let err = decode(&[0x01], &index).unwrap_err();
+        assert_eq!(err, DecodeError::UnexpectedEof);
+    }
+
+    #[test]
+    fn decode_fails_on_unexpected_eof_in_payload() {
+        let data_id = AdjId(3002);
+        let packet_def = sample_packet_def(
+            data_id,
+            PacketKind::Data(vec![
+                sample_measurement(1, MeasurementKind::Numeric { wire_type: NumericKind::U32 }),
+            ]),
+        );
+
+        let index = make_test_index(vec![packet_def]);
+
+        let raw_bytes = [0xBA, 0x0B, 0x01, 0x02];
+        let err = decode(&raw_bytes, &index).unwrap_err();
+        assert_eq!(err, DecodeError::UnexpectedEof);
+    }
+
+    #[test]
+    fn decode_fails_on_unknown_id() {
+        let index = make_test_index(vec![]);
+        let raw_bytes = [0x88, 0x13];
+
+        let err = decode(&raw_bytes, &index).unwrap_err();
+        assert_eq!(err, DecodeError::UnknownId(AdjId(5000)));
+    }
+
+    #[test]
+    fn decode_fails_on_wrong_kind() {
+        let order_id = AdjId(4001);
+        let packet_def = sample_packet_def(order_id, PacketKind::Order(vec![]));
+
+        let index = make_test_index(vec![packet_def]);
+        let raw_bytes = [0xA1, 0x0F];
+
+        let err = decode(&raw_bytes, &index).unwrap_err();
+        assert_eq!(err, DecodeError::WrongKind { id: order_id });
+    }
+}
