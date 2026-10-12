@@ -51,7 +51,7 @@ pub fn decode(
 ) -> Result<MessagePacket, DecodeError> {
     let id = match id {
         Some(id) => id,
-        None => read_id(&mut reader)?,
+        None => super::read_id(&mut reader)?,
     };
 
     // Look up the packet definition for this id, and ensure it's a
@@ -80,15 +80,6 @@ pub fn decode(
         origin,
         message,
     })
-}
-
-/// Reads a raw little-endian 16-bit id off the front of `reader`. The
-/// one piece of byte parsing [`decode`]/[`encode`] share, so it only
-/// lives here once instead of wherever else might need an `AdjId`.
-fn read_id(reader: &mut impl Read) -> Result<AdjId, DecodeError> {
-    let mut bytes = [0u8; 2];
-    reader.read_exact(&mut bytes)?;
-    Ok(AdjId(u16::from_le_bytes(bytes)))
 }
 
 /// Reads bytes up to the first `0x00` (exclusive) or `max` bytes total,

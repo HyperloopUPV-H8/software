@@ -17,3 +17,20 @@
 pub mod data_order;
 pub mod message;
 pub mod protection;
+
+use crate::model::AdjId;
+use crate::protocol::DecodeError;
+use std::io::Read;
+
+/// Reads a raw little-endian 16-bit id off the front of `reader`.
+///
+/// Shared by [`message`]/[`protection`] — the only two kinds whose
+/// `decode` ever needs to read its own leading id, when the caller
+/// doesn't already know it (see each module's own doc comment on why).
+/// [`data_order`] doesn't need this: it reads its id a different way,
+/// straight out of an in-memory byte slice, never a `Read` stream.
+fn read_id(reader: &mut impl Read) -> Result<AdjId, DecodeError> {
+    let mut bytes = [0u8; 2];
+    reader.read_exact(&mut bytes)?;
+    Ok(AdjId(u16::from_le_bytes(bytes)))
+}
