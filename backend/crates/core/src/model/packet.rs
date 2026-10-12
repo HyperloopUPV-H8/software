@@ -213,8 +213,15 @@ impl MessageLevel {
 /// A free-text message sent by a board.
 #[derive(Debug, Clone, PartialEq)]
 pub struct MessagePacket {
-    /// How severe the message is.
-    pub level: MessageLevel,
+    /// The wire id this message was sent under — one of the severities
+    /// declared in `general_info.json`'s `message_ids`.
+    ///
+    /// Not a [`MessageLevel`] directly, the same way [`ProtectionPacket::id`]
+    /// isn't a [`super::Protection`]: this is what was actually on the
+    /// wire, and resolving it to a severity means looking it up (see
+    /// [`PacketKind::Message`]/[`crate::protocol::Index`]), not storing
+    /// a second, redundant copy of it here.
+    pub id: AdjId,
     /// When it was sent.
     pub timestamp: ShortTimestamp,
     /// Where it came from, e.g. a source file path.

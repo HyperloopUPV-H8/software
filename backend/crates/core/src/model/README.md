@@ -15,8 +15,8 @@ Telemetry sent by a board: one value per measurement, decoded positionally in th
 The single measurement one of a board's declared protections watches. Always exactly one — never a list.
 #### `Order(Vec<Measurement>)`
 An order sent to a board. Many orders take no parameters at all, so this can be empty.
-#### `Message`
-A free-text log line. Never carries measurement data.
+#### `Message(MessageLevel)`
+A free-text log line of this severity. Never carries measurement data — the severity is the only thing that tells one `Message` `PacketDef` apart from another. Lives here, on `PacketKind`, rather than as a separate field on `PacketDef`: a message's severity is as much part of "what kind of packet is this" as a `Data` packet's measurement list is.
 
 `PacketKind` also exposes a `measurements()` method that flattens any variant into a `&[Measurement]` slice, for code that just wants every measurement a packet references regardless of its kind.
 
@@ -198,8 +198,8 @@ This is deliberately where the name↔severity association lives — in `model`,
 ### 4.5 `MessagePacket`
 A free-text message sent by a board.
 
-#### `level`
-How severe the message is (`MessageLevel`).
+#### `id`
+The wire id this message was sent under — one of the severities declared in `general_info.json`'s `message_ids`. Not a `MessageLevel` directly, the same way `ProtectionPacket::id` isn't a `Protection`: resolving it to a severity means looking it up (`PacketKind::Message`/`protocol::Index`), not storing a second, redundant copy of it here.
 #### `timestamp`
 When the message was sent (`ShortTimestamp`).
 #### `origin`

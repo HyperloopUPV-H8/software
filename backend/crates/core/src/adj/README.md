@@ -23,7 +23,10 @@ Adj
 │     └── boards: HashMap<BoardId, Board>
 │           ├── measurements: HashMap<String, Measurement>
 │           └── packets: HashMap<AdjId, PacketDef>
-│                 ├── explicit (Data, Order, Message — declared in packets.json)
+│                 ├── explicit (Data, Order, Message — declared in packets.json;
+│                 │     a "message"-type packet's own `name` must be one of
+│                 │     MessageLevel::ALL's four severities, resolved via
+│                 │     MessageLevel::from_name — UnknownMessageSeverity if not)
 │                 └── synthetic (Protection — one per declared protection,
 │                       derived from each measurement's own `protections`;
 │                       never declared directly in packets.json)
@@ -54,9 +57,22 @@ let message_levels: HashMap<AdjId, MessageLevel> = MessageLevel::ALL
 ```
 
 Which ADJ name corresponds to which `MessageLevel` is **not** decided
-here — `level.name()` (see `model/README.md` §4.4) is the one place
-that association is spelled out, so `adj` doesn't hardcode
-`"fault"`/`"warning"`/`"info"`/`"panic"` itself.
+here — `level.name()`/`MessageLevel::from_name` (see `model/README.md`
+§4.4) is the one place that association is spelled out, so `adj`
+doesn't hardcode `"fault"`/`"warning"`/`"info"`/`"panic"` itself.
+
+**One layer up, `protocol::Index` is what actually turns
+`message_levels` into something a decoder can look up a packet by.**
+`Index::new(pod_data, message_levels)` takes `message_levels` as
+`Option<&HashMap<AdjId, MessageLevel>>` — `None` for callers with no
+`AdjInfo` at all (most tests in this crate, which only build a bare
+`PodData`) — and, for each entry, synthesizes a
+`PacketDef { kind: PacketKind::Message(level), board: BoardId(0), .. }`
+into the very same `AdjId -> PacketDef` table every other packet lives
+in. `BoardId(0)` (reserved, not validated — see `AdjId`/`BoardId`'s own
+docs) because a severity isn't owned by any one board — any board's
+free-text log frame can reuse the same `"fault"` id. See
+`protocol/README.md`'s `index.rs` section for the full picture.
 
 ---
 

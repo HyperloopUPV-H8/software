@@ -10,7 +10,7 @@
 //! left out rather than guessed — add them once the packet-level JSON
 //! shape is settled.
 
-use super::{AdjId, BoardId, MacAddress, Measurement};
+use super::{AdjId, BoardId, MacAddress, Measurement, MessageLevel};
 use std::collections::HashMap;
 use std::net::IpAddr;
 
@@ -29,8 +29,10 @@ pub enum PacketKind {
     Protection(Measurement),
     /// A command sent to a board. Many orders take no parameters at all.
     Order(Vec<Measurement>),
-    /// A free-text log line. Never carries measurement data.
-    Message,
+    /// A free-text log line of this severity. Never carries measurement
+    /// data — the severity is the only thing that tells one `Message`
+    /// `PacketDef` apart from another.
+    Message(MessageLevel),
 }
 
 impl PacketKind {
@@ -41,7 +43,7 @@ impl PacketKind {
         match self {
             PacketKind::Data(measurements) | PacketKind::Order(measurements) => measurements,
             PacketKind::Protection(measurement) => std::slice::from_ref(measurement),
-            PacketKind::Message => &[],
+            PacketKind::Message(_) => &[],
         }
     }
 }

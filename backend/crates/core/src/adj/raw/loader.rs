@@ -4,7 +4,7 @@ use super::types::{RawBoard, RawGeneralInfo, RawMeasurement, RawPacket};
 use crate::adj::error::LoadError;
 use crate::adj::{Adj, AdjInfo};
 use crate::model::{
-    AdjId, Board, BoardId, MacAddress, Measurement, PacketDef, PacketKind, PodData,
+    AdjId, Board, BoardId, MacAddress, Measurement, MessageLevel, PacketDef, PacketKind, PodData,
 };
 use serde::de::DeserializeOwned;
 use std::collections::HashMap;
@@ -143,7 +143,16 @@ fn build_packet_def(
             &raw.variables,
             measurements,
         )?),
-        "message" => PacketKind::Message,
+        // The packet's own `name` must be one of `MessageLevel`'s four
+        // severities (`"fault"`/`"warning"`/`"info"`/`"panic"`) — that's
+        // the only way a `"message"`-type packet in `packets.json` says
+        // which severity it is; nothing else in its JSON shape does.
+        "message" => PacketKind::Message(MessageLevel::from_name(&raw.name).ok_or_else(|| {
+            LoadError::UnknownMessageSeverity {
+                board: board.to_string(),
+                name: raw.name.clone(),
+            }
+        })?),
         other => {
             return Err(LoadError::UnknownPacketType {
                 board: board.to_string(),
@@ -261,6 +270,34 @@ mod tests {
         assert!(matches!(
             build_packet_def("VCU", BoardId(3), raw, &HashMap::new()),
             Err(LoadError::UnknownAlias { .. })
+        ));
+    }
+
+    #[test]
+    fn build_packet_def_resolves_a_message_packets_severity_from_its_name() {
+        let raw = RawPacket {
+            id: 2,
+            kind: "message".to_string(),
+            name: "fault".to_string(),
+            variables: vec![],
+        };
+        let Ok(packet) = build_packet_def("VCU", BoardId(3), raw, &HashMap::new()) else {
+            unreachable!("\"fault\" is a known message severity");
+        };
+        assert_eq!(packet.kind, PacketKind::Message(MessageLevel::Fault));
+    }
+
+    #[test]
+    fn build_packet_def_rejects_a_message_whose_name_isnt_a_severity() {
+        let raw = RawPacket {
+            id: 2,
+            kind: "message".to_string(),
+            name: "not_a_severity".to_string(),
+            variables: vec![],
+        };
+        assert!(matches!(
+            build_packet_def("VCU", BoardId(3), raw, &HashMap::new()),
+            Err(LoadError::UnknownMessageSeverity { .. })
         ));
     }
 

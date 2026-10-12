@@ -31,6 +31,13 @@ impl AdjId {
 }
 
 /// Unique identifier of a board, defined by the ADJ.
+///
+/// `BoardId(0)` is reserved: no real board uses it. [`crate::protocol::Index`]
+/// uses it as the `board` for a synthesized [`super::PacketDef`] that
+/// isn't owned by any one board at all — a message severity, a
+/// session-wide id any board's free-text log frame can reuse. Not
+/// validated anywhere; just a convention, the same way `0` is excluded
+/// from [`AdjId`]'s own special range above.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct BoardId(pub u16);
 
