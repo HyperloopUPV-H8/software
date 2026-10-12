@@ -7,6 +7,7 @@
 //! describes a whole packet.
 
 use super::{AdjId, Value};
+use std::marker::PhantomData;
 
 /// A short timestamp carrying only the time of day: hour, minute, second
 /// and a sub-second fraction, each one byte.
@@ -32,8 +33,22 @@ pub struct ShortTimestamp {
     pub subsecond: u8,
 }
 
+/// Tags a [`DataOrderPacket`] as a board's periodic telemetry
+/// ([`DataPacket`]) rather than a command sent to one.
+///
+/// Carries no data — see [`DataOrderPacket`] for why it exists at all.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Data;
+
+/// Tags a [`DataOrderPacket`] as a command sent to a board
+/// ([`OrderPacket`]) rather than telemetry received from one.
+///
+/// Carries no data — see [`DataOrderPacket`] for why it exists at all.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Order;
+
 /// A Data/Order packet: the decoded values of the measurements a board just
-/// sent.
+/// sent, or that an order is about to send to one.
 ///
 /// The wire protocol is positional: values are not individually tagged
 /// with their measurement's id, just written back to back in the order
@@ -41,18 +56,58 @@ pub struct ShortTimestamp {
 /// [`super::PacketKind::Data`] list. `values[i]` is the decoded value of
 /// that list's `i`-th measurement — matching them up by position is
 /// `protocol`'s job, this type just holds the result in that same order.
-
+///
+/// `Kind` is a phantom type parameter (either [`Data`] or [`Order`], never
+/// anything else — see [`DataPacket`]/[`OrderPacket`]): the struct stores
+/// no `Kind` value, nothing to store (`Data`/`Order` carry no data), it
+/// only exists so the compiler can tell a [`DataPacket`] apart from an
+/// [`OrderPacket`], the same way [`super::AdjId`]/[`super::BoardId`]
+/// (`id.rs`) are distinct types so the compiler won't let one be confused
+/// with the other, even though both are just a `u16` underneath. Before
+/// this, [`DataPacket`] and [`OrderPacket`] were both plain aliases for
+/// the same concrete struct — nothing stopped a `DataPacket`, decoded off
+/// the UDP socket, from being passed to [`crate::protocol::tcp::encode_order`]
+/// by mistake; that mix-up is now a compile error:
+///
+/// ```compile_fail
+/// use software_core::model::{AdjId, DataPacket, OrderPacket};
+///
+/// fn send_order(_order: OrderPacket) {}
+///
+/// let data = DataPacket::new(AdjId(1000), vec![]);
+/// send_order(data); // doesn't compile: `DataPacket` isn't an `OrderPacket`
+/// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct DataOrderPacket<T>{
+pub struct DataOrderPacket<Kind> {
+    /// The packet's id.
     pub id: AdjId,
-    pub values: Vec<T>,
+    /// Each measurement's decoded value, in the same order as the
+    /// matching [`super::PacketKind::Data`]/[`super::PacketKind::Order`]
+    /// list.
+    pub values: Vec<Value>,
+    _marker: PhantomData<Kind>,
+}
+
+impl<Kind> DataOrderPacket<Kind> {
+    /// Builds a packet tagged as `Kind`, e.g. `DataPacket::new(id, values)`
+    /// or `OrderPacket::new(id, values)`.
+    pub fn new(id: AdjId, values: Vec<Value>) -> Self {
+        Self {
+            id,
+            values,
+            _marker: PhantomData,
+        }
+    }
 }
 
 /// An order sent from the backend to a board.
 ///
 /// Positional, the same way [`DataPacket::values`] is: see its docs.
-pub type OrderPacket = DataOrderPacket<Value>;
-pub type DataPacket = DataOrderPacket<Value>;
+pub type OrderPacket = DataOrderPacket<Order>;
+/// A set of measurements sent by a board.
+///
+/// Positional, the same way [`DataOrderPacket::values`] is: see its docs.
+pub type DataPacket = DataOrderPacket<Data>;
 
 /// A protection packet: sent by a board when one of its declared
 /// [`super::Protection`]s triggers.
@@ -194,10 +249,7 @@ mod tests {
     fn data_packet_values_are_positional_not_tagged_with_an_id() {
         // values[0] is whatever measurements[0] is in this packet's
         // PacketDef — there is no id stored alongside each value here.
-        let packet = DataPacket {
-            id: AdjId(1000),
-            values: vec![Value::Number(53.2), Value::Bool(true)],
-        };
+        let packet = DataPacket::new(AdjId(1000), vec![Value::Number(53.2), Value::Bool(true)]);
 
         assert_eq!(packet.values[0], Value::Number(53.2));
         assert_eq!(packet.values[1], Value::Bool(true));
@@ -205,19 +257,34 @@ mod tests {
 
     #[test]
     fn packet_wraps_each_kind_without_mixing_them_up() {
-        let data = Packet::Data(DataPacket {
-            id: AdjId(1000),
-            values: vec![],
-        });
-        let order = Packet::Order(OrderPacket {
-            id: AdjId(2000),
-            values: vec![],
-        });
+        let data = Packet::Data(DataPacket::new(AdjId(1000), vec![]));
+        let order = Packet::Order(OrderPacket::new(AdjId(2000), vec![]));
 
         assert_ne!(data, order);
         match data {
             Packet::Data(_) => {}
             _ => unreachable!("this is a Packet::Data"),
         }
+    }
+
+    #[test]
+    fn two_data_packets_with_the_same_id_and_values_are_equal() {
+        let a = DataPacket::new(AdjId(1000), vec![Value::Number(1.0)]);
+        let b = DataPacket::new(AdjId(1000), vec![Value::Number(1.0)]);
+        assert_eq!(a, b);
+    }
+
+    #[test]
+    fn an_order_packet_and_a_data_packet_built_from_the_same_id_and_values_are_different_types() {
+        // This is the whole point of tagging `DataOrderPacket` with a
+        // phantom `Kind`: `DataPacket` and `OrderPacket` used to be plain
+        // aliases for the same concrete struct, so nothing here would even
+        // have been a type error before. There's no runtime assertion to
+        // make for that — see this module's `compile_fail` doctest on
+        // `DataOrderPacket`, which proves the mix-up doesn't compile.
+        let data = DataPacket::new(AdjId(1000), vec![]);
+        let order = OrderPacket::new(AdjId(1000), vec![]);
+        assert_eq!(data.id, order.id);
+        assert_eq!(data.values, order.values);
     }
 }

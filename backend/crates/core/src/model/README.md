@@ -123,23 +123,39 @@ Second of Timestamp of values 0–59.
 #### `subsecond`
 The sub-second fraction, as the raw byte on the wire. Its exact unit (e.g. milliseconds, or 1/256ths of a second) hasn't been confirmed yet, so it is kept as a raw `u8` here instead of converted to something like a `Duration` — convert it once the unit is settled.
 
-### 4.2 `DataPacket`
-Struct for the decoded values of the measurements a board just sent. Values are positional: they are not individually tagged with their measurement ID, but written in the order their `Measurement`s appear in this packet's `PacketKind::Data` list.
+### 4.2 `DataOrderPacket<Kind>` — a phantom type
+`DataPacket` and `OrderPacket` hold the exact same shape (`id: AdjId`, `values: Vec<Value>`, both positional — see below), so they're both built on one generic struct, `DataOrderPacket<Kind>`, instead of being copy-pasted. The two used to just be `type` aliases for the very same concrete struct (`type OrderPacket = DataOrderPacket; type DataPacket = DataOrderPacket;`) — which meant they weren't actually distinct types at all: nothing stopped a `DataPacket` just decoded off the UDP socket from being passed to `protocol::tcp::encode_order` (which wants an *order* to send) by mistake, the compiler had no way to tell them apart.
+
+`Kind` fixes that. It's a *phantom* type parameter — `DataOrderPacket` doesn't actually store a `Kind` value (there's nothing to store, see `Data`/`Order` below), it only exists so the compiler tracks which one a given packet was built as:
+```rust
+pub struct DataOrderPacket<Kind> {
+    pub id: AdjId,
+    pub values: Vec<Value>,
+    _marker: PhantomData<Kind>,
+}
+```
+`_marker` is private, so a `DataOrderPacket` can't be built with struct-literal syntax from outside `packet.rs` — use `DataOrderPacket::new(id, values)` (or, through the aliases below, `DataPacket::new(...)`/`OrderPacket::new(...)`) instead.
+
+#### `Data` / `Order`
+Two empty marker structs — the only two types `Kind` is ever instantiated with. Neither is ever actually constructed; they only ever appear as a type argument. That's what makes the whole thing *phantom*: the type parameter has no representation in the compiled struct, it's erased after type-checking, the same way `id.rs` (§2) uses distinct `AdjId`/`BoardId` types so the compiler won't confuse two different kinds of `u16`.
+
+#### `DataPacket` / `OrderPacket`
+```rust
+pub type DataPacket = DataOrderPacket<Data>;
+pub type OrderPacket = DataOrderPacket<Order>;
+```
+Now genuinely different types: a function that takes an `OrderPacket` cannot be called with a `DataPacket`, even though both just wrap the same `(AdjId, Vec<Value>)` underneath — the mix-up is a compile error instead of a bug waiting to happen. `DataOrderPacket`'s own doc comment has a `compile_fail` doctest proving exactly that (run by `cargo test`, like any other doctest).
+
+`DataPacket` holds the decoded values of the measurements a board just sent — positional, not individually tagged with their measurement ID, just written in the order their `Measurement`s appear in this packet's `PacketKind::Data` list.
+
+`OrderPacket` holds an order sent from the backend to a board — positional the same way, matching `PacketKind::Order`'s measurement list.
 
 #### `id`
-Which packet definition this is an instance of (`AdjId`).
+Which packet/order definition this is an instance of (`AdjId`).
 #### `values`
 Vector list of decoded values (`Vec<Value>`) corresponding positionally to the packet definition's measurements.
 
-### 4.3 `OrderPacket`
-An order sent from the backend to a board. Also positional, matching field definitions in order.
-
-#### `id`
-Which order definition this is an instance of (`AdjId`).
-#### `fields`
-Vector list of values (`Vec<Value>`) to set for each field of the order.
-
-### 4.4 `ProtectionPacket`
+### 4.3 `ProtectionPacket`
 Sent by a board when one of its declared protections triggers.
 
 #### `id`
@@ -149,7 +165,7 @@ When the protection triggered (`ShortTimestamp`).
 #### `value`
 The value that triggered the protection (`Value`), decoded with the same wire type as the watched measurement.
 
-### 4.5 `MessageLevel`
+### 4.4 `MessageLevel`
 Enum indicating how severe a message is (reusing `general_info.json`'s `message_ids`). Distinct from `Severity` because message and protection formats are separate in ADJv3.
 
 #### `Fault`
@@ -161,7 +177,7 @@ Informational message, no action implied.
 #### `Panic`
 An unrecoverable firmware error.
 
-### 4.6 `MessagePacket`
+### 4.5 `MessagePacket`
 A free-text message sent by a board.
 
 #### `level`
@@ -173,7 +189,7 @@ Source identifier, such as a source file path (`String`).
 #### `message`
 The text contents of the message (`String`).
 
-### 4.7 `Packet`
+### 4.6 `Packet`
 Enum representing any packet actually sent or received over the wire, once decoded.
 
 #### `Data`
