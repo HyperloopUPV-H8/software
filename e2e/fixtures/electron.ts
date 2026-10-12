@@ -1,5 +1,6 @@
 import {
   _electron as electron,
+  expect,
   test as base,
   type ElectronApplication,
   type Page,
@@ -9,6 +10,20 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ELECTRON_APP_PATH = path.resolve(__dirname, "../../electron-app");
+
+function findWindow(app: ElectronApplication, pathname: string) {
+  return app.windows().find((page) => {
+    return !page.isClosed() && new URL(page.url()).pathname.endsWith(pathname);
+  });
+}
+
+async function waitForWindow(app: ElectronApplication, pathname: string) {
+  // Windows can be created before they navigate, or before a fixture subscribes.
+  await expect
+    .poll(() => Boolean(findWindow(app, pathname)), { timeout: 15_000 })
+    .toBe(true);
+  return findWindow(app, pathname)!;
+}
 
 type ElectronFixtures = {
   app: ElectronApplication;
@@ -27,28 +42,51 @@ export const test = base.extend<ElectronFixtures>({
       },
     });
 
-    // Wait for both windows to open before yielding the app fixture,
-    // so logPage and logWindow fixtures can safely index into app.windows()
-    await app.firstWindow();           // Backend Logs — always first
-    await app.waitForEvent("window");  // Control Station — always second
+    try {
+      // A build containing only Testing View selects it automatically. Otherwise
+      // enter through the same mode selector button used during normal startup.
+      await expect
+        .poll(
+          async () => {
+            if (findWindow(app, "/testing-view/index.html")) return true;
 
-    await use(app);
-    await app.close();
+            const selector = findWindow(app, "/mode-selector/index.html");
+            if (!selector) return false;
+            if ((await selector.locator("#button-grid button").count()) > 1) {
+              await selector
+                .getByRole("button", { name: "Testing View", exact: true })
+                .click();
+              return true;
+            }
+            return false;
+          },
+          { timeout: 15_000 },
+        )
+        .toBe(true);
+
+      await waitForWindow(app, "/testing-view/index.html");
+      await waitForWindow(app, "/log-viewer/index.html");
+      await use(app);
+    } finally {
+      await app.close();
+    }
   },
 
-  // Backend logs window — always opens first
+  // Locate windows by their loaded view, independently of creation order.
   logPage: async ({ app }, use) => {
-    const page = app.windows()[0];
+    const page = await waitForWindow(app, "/log-viewer/index.html");
     await page.waitForLoadState("domcontentloaded");
     await use(page);
   },
 
-  // Main control station window — always opens second
-  // Waits for the app to reach "active" mode before yielding
+  // Wait for Testing View to leave its loading state before yielding.
   page: async ({ app }, use) => {
-    const page = app.windows()[1];
+    const page = await waitForWindow(app, "/testing-view/index.html");
     await page.waitForLoadState("domcontentloaded");
-    await page.waitForSelector('[data-testid="mode-badge"]:not([data-mode="loading"])', { timeout: 15000 });
+    await page.waitForSelector(
+      '[data-testid="mode-badge"]:not([data-mode="loading"])',
+      { timeout: 15000 },
+    );
     await use(page);
   },
 });
