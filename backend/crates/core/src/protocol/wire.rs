@@ -203,7 +203,10 @@ mod tests {
         ];
 
         for (wire_type, expected) in cases {
-            assert_eq!(byte_width(&MeasurementKind::Numeric { wire_type }), expected);
+            assert_eq!(
+                byte_width(&MeasurementKind::Numeric { wire_type }),
+                expected
+            );
         }
     }
 
