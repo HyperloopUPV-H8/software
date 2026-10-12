@@ -36,6 +36,10 @@ pub enum DecodeError {
         max: usize,
     },
 
+    /// A free-text field's bytes weren't valid UTF-8.
+    #[error("string field wasn't valid UTF-8: {0:?}")]
+    InvalidUtf8(Vec<u8>),
+
     /// A looked-up packet exists, but isn't the kind this function expects
     /// (e.g. `packet::data::decode` found an id that resolves to an
     /// `Order`).
@@ -65,6 +69,7 @@ impl PartialEq for DecodeError {
                 },
             ) => a_index == b_index && a_options == b_options,
             (Self::UnterminatedString { max: a }, Self::UnterminatedString { max: b }) => a == b,
+            (Self::InvalidUtf8(a), Self::InvalidUtf8(b)) => a == b,
             (Self::WrongKind { id: a }, Self::WrongKind { id: b }) => a == b,
             _ => false,
         }
@@ -114,4 +119,17 @@ pub enum EncodeError {
         /// The packet whose kind didn't match.
         id: AdjId,
     },
+
+    /// A string field's content plus its terminator wouldn't fit in the
+    /// wire format's maximum length.
+    #[error("string content plus its terminator doesn't fit in {max} byte(s)")]
+    StringTooLong {
+        /// The field's maximum length, terminator included.
+        max: usize,
+    },
+
+    /// A string field contains an embedded NUL byte, which would be
+    /// misread as an early terminator on the wire.
+    #[error("string contains an embedded NUL byte")]
+    EmbeddedNulByte,
 }
