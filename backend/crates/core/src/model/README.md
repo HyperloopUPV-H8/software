@@ -139,6 +139,17 @@ pub struct DataOrderPacket<Kind> {
 #### `Data` / `Order`
 Two empty marker structs — the only two types `Kind` is ever instantiated with. Neither is ever actually constructed; they only ever appear as a type argument. That's what makes the whole thing *phantom*: the type parameter has no representation in the compiled struct, it's erased after type-checking, the same way `id.rs` (§2) uses distinct `AdjId`/`BoardId` types so the compiler won't confuse two different kinds of `u16`.
 
+#### `KindTag`
+The compiler erases `Kind` after type-checking, so nothing at runtime can look at a `DataOrderPacket<Kind>` and ask "is this actually a `Data` one?" — `KindTag` is how code that's generic over `Kind` answers that anyway, by asking the question of the *type* instead of the *value*:
+```rust
+pub trait KindTag {
+    fn matches(kind: &PacketKind) -> bool;
+}
+```
+`Data`/`Order` each implement it by checking which `PacketKind` (§1.1) variant they stand for (`matches!(kind, PacketKind::Data(_))` / `PacketKind::Order(_)`). This is the only thing `KindTag` decides — once a `PacketDef`'s kind is confirmed to match, the actual measurement list still comes from the existing `PacketKind::measurements()` (§1.1), not from `KindTag` itself.
+
+`protocol::packet::data_order`'s `encode`/`decode` use this to be generic over `Kind`: written once, they work for both `DataPacket` and `OrderPacket` instead of needing a near-duplicate pair of functions per kind.
+
 #### `DataPacket` / `OrderPacket`
 ```rust
 pub type DataPacket = DataOrderPacket<Data>;

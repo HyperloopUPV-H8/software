@@ -6,7 +6,7 @@
 //! packet or a protection *can* look like, or [`super::PacketDef`], which
 //! describes a whole packet.
 
-use super::{AdjId, Value};
+use super::{AdjId, PacketKind, Value};
 use std::marker::PhantomData;
 
 /// A short timestamp carrying only the time of day: hour, minute, second
@@ -46,6 +46,34 @@ pub struct Data;
 /// Carries no data — see [`DataOrderPacket`] for why it exists at all.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Order;
+
+/// Bridges a [`DataOrderPacket`]'s phantom `Kind` to the runtime
+/// [`PacketKind`] variant it stands for.
+///
+/// `protocol::packet::data_order`'s `encode`/`decode` are generic over
+/// `Kind`: they're written once and work for both [`Data`] and [`Order`],
+/// instead of needing a near-identical copy per kind. This trait is the
+/// one yes/no question that generic code can't answer on its own —
+/// "is this `PacketDef`'s kind actually the one I was asked to
+/// encode/decode?" — everything after that (pulling out the
+/// measurements) is already handled by [`PacketKind::measurements`],
+/// kind-agnostic, so there's no need to redo that here.
+pub trait KindTag {
+    /// Whether `kind` is the variant this `Kind` stands for.
+    fn matches(kind: &PacketKind) -> bool;
+}
+
+impl KindTag for Data {
+    fn matches(kind: &PacketKind) -> bool {
+        matches!(kind, PacketKind::Data(_))
+    }
+}
+
+impl KindTag for Order {
+    fn matches(kind: &PacketKind) -> bool {
+        matches!(kind, PacketKind::Order(_))
+    }
+}
 
 /// A Data/Order packet: the decoded values of the measurements a board just
 /// sent, or that an order is about to send to one.
