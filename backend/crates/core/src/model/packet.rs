@@ -32,7 +32,7 @@ pub struct ShortTimestamp {
     pub subsecond: u8,
 }
 
-/// A data packet: the decoded values of the measurements a board just
+/// A Data/Order packet: the decoded values of the measurements a board just
 /// sent.
 ///
 /// The wire protocol is positional: values are not individually tagged
@@ -41,25 +41,18 @@ pub struct ShortTimestamp {
 /// [`super::PacketKind::Data`] list. `values[i]` is the decoded value of
 /// that list's `i`-th measurement — matching them up by position is
 /// `protocol`'s job, this type just holds the result in that same order.
+
 #[derive(Debug, Clone, PartialEq)]
-pub struct DataPacket {
-    /// Which packet definition this is an instance of.
+pub struct DataOrderPacket<T>{
     pub id: AdjId,
-    /// The decoded value of each measurement in the packet, positional —
-    /// see the struct-level docs above.
-    pub values: Vec<Value>,
+    pub values: Vec<T>,
 }
 
 /// An order sent from the backend to a board.
 ///
 /// Positional, the same way [`DataPacket::values`] is: see its docs.
-#[derive(Debug, Clone, PartialEq)]
-pub struct OrderPacket {
-    /// Which order definition this is an instance of.
-    pub id: AdjId,
-    /// The value to set for each field of the order, positional.
-    pub fields: Vec<Value>,
-}
+pub type OrderPacket = DataOrderPacket<Value>;
+pub type DataPacket = DataOrderPacket<Value>;
 
 /// A protection packet: sent by a board when one of its declared
 /// [`super::Protection`]s triggers.
@@ -218,7 +211,7 @@ mod tests {
         });
         let order = Packet::Order(OrderPacket {
             id: AdjId(2000),
-            fields: vec![],
+            values: vec![],
         });
 
         assert_ne!(data, order);
