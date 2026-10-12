@@ -12,9 +12,7 @@ pub use update::update_adj;
 ///
 /// Five categories identify the failed operation and preserve its underlying
 /// error as [`std::error::Error::source`]. [`RepositoryError`] and [`CloneError`]
-/// retain concrete `gix` causes and are boxed to keep this enum small. Only
-/// [`RepositoryError::ReferenceItem`] uses a dynamically typed cause, as exposed
-/// by the `gix` iterator.
+/// retain concrete `gix` causes and are boxed to keep this enum small.
 ///
 /// A failed connectivity probe is not itself an error when cached ADJ exists.
 /// If no cache exists, the operation returns [`GitError::UnavailableOffline`].
@@ -24,8 +22,8 @@ pub enum GitError {
     #[error("ADJ path operation failed: {0}")]
     Path(#[source] std::io::Error),
 
-    /// Opening the repository or reading its references or HEAD failed.
-    /// An absent reference is not itself an error.
+    /// Opening the repository, reading HEAD, or querying local or remote refs failed.
+    /// A branch missing from a successful remote listing is not an error.
     #[error("ADJ repository operation failed: {0}")]
     Repository(#[source] Box<RepositoryError>),
 
