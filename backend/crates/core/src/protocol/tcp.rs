@@ -45,5 +45,5 @@ pub fn decode_next(reader: impl Read, index: &Index) -> Result<TcpFrame, DecodeE
 
 /// Encodes `order` into the bytes to write to the board's connection.
 pub fn encode_order(order: &OrderPacket, index: &Index) -> Result<Vec<u8>, EncodeError> {
-    packet::order::encode(order, index)
+    packet::data_order::encode(order, index)
 }

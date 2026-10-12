@@ -13,5 +13,5 @@ use crate::model::DataPacket;
 
 /// Decodes a single UDP datagram's bytes into a [`DataPacket`].
 pub fn decode_datagram(bytes: &[u8], index: &Index) -> Result<DataPacket, DecodeError> {
-    packet::data::decode(bytes, index)
+    packet::data_order::decode(bytes, index)
 }
