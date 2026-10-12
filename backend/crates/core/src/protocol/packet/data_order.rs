@@ -156,7 +156,7 @@ mod tests {
         let pod_data = PodData {
             boards: HashMap::from([(board.id, board)]),
         };
-        Index::new(&pod_data)
+        Index::new(&pod_data, None)
     }
 
     // --- ENCODE TESTS ---

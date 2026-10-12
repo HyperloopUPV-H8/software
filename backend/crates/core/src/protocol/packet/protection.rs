@@ -157,7 +157,7 @@ mod tests {
         let pod_data = PodData {
             boards: HashMap::from([(board.id, board)]),
         };
-        (Index::new(&pod_data), compound_id)
+        (Index::new(&pod_data, None), compound_id)
     }
 
     #[test]
@@ -252,7 +252,7 @@ mod tests {
         let pod_data = PodData {
             boards: HashMap::from([(board.id, board)]),
         };
-        let index = Index::new(&pod_data);
+        let index = Index::new(&pod_data, None);
 
         assert!(matches!(
             decode(Cursor::new(vec![]), Some(compound_id), &index),
@@ -397,7 +397,7 @@ mod tests {
         let pod_data = PodData {
             boards: HashMap::from([(board.id, board)]),
         };
-        let index = Index::new(&pod_data);
+        let index = Index::new(&pod_data, None);
 
         let packet = ProtectionPacket {
             id: compound_id,
