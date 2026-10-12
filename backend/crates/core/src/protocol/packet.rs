@@ -8,4 +8,3 @@
 pub mod data_order;
 pub mod message;
 pub mod protection;
-pub mod data_order;
