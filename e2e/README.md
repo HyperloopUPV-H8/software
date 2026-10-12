@@ -27,9 +27,14 @@ These tests launch the full Electron app and drive it through Playwright. They c
 
 | Fixture    | Description                                                         |
 | :--------- | :------------------------------------------------------------------ |
-| `app`      | Launches the Electron app and waits for both windows to be ready    |
+| `app`      | Launches Electron, selects Testing View, and waits for the Testing View and Backend Logs windows |
 | `page`     | The main Control Station window — waits for the app to leave loading state |
 | `logPage`  | The Backend Logs window                                             |
+
+The fixture clicks **Testing View** on the startup mode selector. Builds containing
+only Testing View skip the selector automatically, which the fixture also supports.
+Windows are located by their loaded URL, not their creation order. Electron is
+closed even if startup or a test fails.
 
 ---
 
