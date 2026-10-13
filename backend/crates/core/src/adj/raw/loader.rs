@@ -4,7 +4,7 @@ use super::types::{RawBoard, RawGeneralInfo, RawMeasurement, RawPacket};
 use crate::adj::error::LoadError;
 use crate::adj::{Adj, AdjInfo};
 use crate::model::{
-    AdjId, Board, BoardId, MacAddress, Measurement, MessageLevel, PacketDef, PacketKind, PodData,
+    AdjId, Board, BoardId, MacAddress, Measurement, MessageLevel, PacketDef, PacketType, PodData,
 };
 use serde::de::DeserializeOwned;
 use std::collections::HashMap;
@@ -82,7 +82,7 @@ pub(crate) fn load_board(root: &Path, name: &str, rel_path: &str) -> Result<Boar
                     id: AdjId(protection_packet_id),
                     board: board_id,
                     name: format!("{}_{}_protection_{}", name, measurement.alias, idx + 1),
-                    kind: PacketKind::Protection(measurement.clone()),
+                    packet_type: PacketType::Protection(measurement.clone()),
                 };
                 packets.insert(packet.id, packet);
             }
@@ -130,14 +130,14 @@ fn build_packet_def(
     raw: RawPacket,
     measurements: &HashMap<String, Measurement>,
 ) -> Result<PacketDef, LoadError> {
-    let kind = match raw.kind.as_str() {
-        "data" => PacketKind::Data(resolve_measurements(
+    let packet_type = match raw.packet_type.as_str() {
+        "data" => PacketType::Data(resolve_measurements(
             board,
             &raw.name,
             &raw.variables,
             measurements,
         )?),
-        "order" => PacketKind::Order(resolve_measurements(
+        "order" => PacketType::Order(resolve_measurements(
             board,
             &raw.name,
             &raw.variables,
@@ -147,7 +147,7 @@ fn build_packet_def(
         // severities (`"fault"`/`"warning"`/`"info"`/`"panic"`) — that's
         // the only way a `"message"`-type packet in `packets.json` says
         // which severity it is; nothing else in its JSON shape does.
-        "message" => PacketKind::Message(MessageLevel::from_name(&raw.name).ok_or_else(|| {
+        "message" => PacketType::Message(MessageLevel::from_name(&raw.name).ok_or_else(|| {
             LoadError::UnknownMessageSeverity {
                 board: board.to_string(),
                 name: raw.name.clone(),
@@ -166,7 +166,7 @@ fn build_packet_def(
         id: AdjId(raw.id),
         board: board_id,
         name: raw.name,
-        kind,
+        packet_type,
     })
 }
 
@@ -217,7 +217,7 @@ fn parse_mac(raw: &str) -> Option<MacAddress> {
 mod tests {
     use super::*;
     use crate::adj::ProtectionTypeInfo;
-    use crate::model::{PacketKind, Port, ProtectionKind, Severity};
+    use crate::model::{PacketType, Port, ProtectionKind, Severity};
     use std::path::Path;
     use std::time::Duration;
 
@@ -249,7 +249,7 @@ mod tests {
     fn build_packet_def_rejects_unknown_packet_type() {
         let raw = RawPacket {
             id: 1,
-            kind: "status".to_string(),
+            packet_type: "status".to_string(),
             name: "Status".to_string(),
             variables: vec![],
         };
@@ -263,7 +263,7 @@ mod tests {
     fn build_packet_def_rejects_unknown_alias() {
         let raw = RawPacket {
             id: 1,
-            kind: "data".to_string(),
+            packet_type: "data".to_string(),
             name: "Status".to_string(),
             variables: vec!["missing".to_string()],
         };
@@ -277,21 +277,21 @@ mod tests {
     fn build_packet_def_resolves_a_message_packets_severity_from_its_name() {
         let raw = RawPacket {
             id: 2,
-            kind: "message".to_string(),
+            packet_type: "message".to_string(),
             name: "fault".to_string(),
             variables: vec![],
         };
         let Ok(packet) = build_packet_def("VCU", BoardId(3), raw, &HashMap::new()) else {
             unreachable!("\"fault\" is a known message severity");
         };
-        assert_eq!(packet.kind, PacketKind::Message(MessageLevel::Fault));
+        assert_eq!(packet.packet_type, PacketType::Message(MessageLevel::Fault));
     }
 
     #[test]
     fn build_packet_def_rejects_a_message_whose_name_isnt_a_severity() {
         let raw = RawPacket {
             id: 2,
-            kind: "message".to_string(),
+            packet_type: "message".to_string(),
             name: "not_a_severity".to_string(),
             variables: vec![],
         };
@@ -326,14 +326,14 @@ mod tests {
         let Some(order) = vcu.packets.get(&AdjId(600)) else {
             unreachable!("VCU should have order 600");
         };
-        let PacketKind::Order(_) = &order.kind else {
+        let PacketType::Order(_) = &order.packet_type else {
             unreachable!("order 600 should be an Order");
         };
         assert_eq!(order.board, BoardId(3));
         let Some(data) = vcu.packets.get(&AdjId(625)) else {
             unreachable!("VCU should have data packet 625");
         };
-        let PacketKind::Data(_) = &data.kind else {
+        let PacketType::Data(_) = &data.packet_type else {
             unreachable!("data packet 625 should be Data");
         };
 
@@ -343,7 +343,7 @@ mod tests {
         let Some(protected) = pcu
             .packets
             .values()
-            .flat_map(|p| p.kind.measurements())
+            .flat_map(|p| p.packet_type.measurements())
             .find(|m| !m.protections.is_empty())
         else {
             unreachable!("PCU should have a measurement with a protection");
@@ -375,7 +375,7 @@ mod tests {
         let Some(protection_packet) = pcu.packets.get(&AdjId((1u16 << 13) | protected.id.0)) else {
             unreachable!("PCU should have a synthetic protection packet");
         };
-        let PacketKind::Protection(measurement) = &protection_packet.kind else {
+        let PacketType::Protection(measurement) = &protection_packet.packet_type else {
             unreachable!("protection_packet should be a Protection");
         };
         assert_eq!(measurement, protected);

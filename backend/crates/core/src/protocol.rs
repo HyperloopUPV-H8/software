@@ -11,7 +11,7 @@
 //! compiler enforces the separation the ADJ itself draws between what
 //! travels over which transport, not runtime convention. `tcp`/`udp`
 //! themselves are thin wrappers around [`crate::protocol::packet`], which
-//! does the actual per-packet-kind work independent of transport.
+//! does the actual per-packet-type work independent of transport.
 
 mod error;
 mod index;

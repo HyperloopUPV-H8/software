@@ -6,8 +6,8 @@ This module is meant to store and organize all the different structs, enums and 
 
 ## 1. `board.rs`
 All structs and enums needed for the Pod can be found defined in this file.
-### 1.1 `PacketKind`
-Enum used to define what kind of packet a `PacketDef` declares. Not every kind carries the same shape, so each variant holds whatever measurement data is actually meaningful for it, instead of every packet being forced through one shared field.
+### 1.1 `PacketType`
+Enum used to define what type of packet a `PacketDef` declares. Not every type carries the same shape, so each variant holds whatever measurement data is actually meaningful for it, instead of every packet being forced through one shared field.
 
 #### `Data(Vec<Measurement>)`
 Telemetry sent by a board: one value per measurement, decoded positionally in this order.
@@ -16,9 +16,9 @@ The single measurement one of a board's declared protections watches. Always exa
 #### `Order(Vec<Measurement>)`
 An order sent to a board. Many orders take no parameters at all, so this can be empty.
 #### `Message(MessageLevel)`
-A free-text log line of this severity. Never carries measurement data — the severity is the only thing that tells one `Message` `PacketDef` apart from another. Lives here, on `PacketKind`, rather than as a separate field on `PacketDef`: a message's severity is as much part of "what kind of packet is this" as a `Data` packet's measurement list is.
+A free-text log line of this severity. Never carries measurement data — the severity is the only thing that tells one `Message` `PacketDef` apart from another. Lives here, on `PacketType`, rather than as a separate field on `PacketDef`: a message's severity is as much part of "what type of packet is this" as a `Data` packet's measurement list is.
 
-`PacketKind` also exposes a `measurements()` method that flattens any variant into a `&[Measurement]` slice, for code that just wants every measurement a packet references regardless of its kind.
+`PacketType` also exposes a `measurements()` method that flattens any variant into a `&[Measurement]` slice, for code that just wants every measurement a packet references regardless of its type.
 
 ### 1.2 `PacketDef`
 Struct used to define the structure of a packet a board can send or recieve.
@@ -29,8 +29,8 @@ ID of a packet, using the AdjId type which is a u16. Structure of ID is defined 
 The owning board's `BoardId`. Carried here too (not just reachable through the owning `Board`) so anything holding just a `&PacketDef` — e.g. a lookup table indexed by `AdjId` — knows which board it belongs to without a separate index back to it.
 #### `name`
 Human-readable String shown to the user to identify packet.
-#### `kind`
-`PacketKind` enum: both what kind of packet this is, and the measurement shape — if any — specific to that kind.
+#### `packet_type`
+`PacketType` enum: both what type of packet this is, and the measurement shape — if any — specific to that type.
 
 ### 1.3 `Board`
 Struct used to identify a single board in the vehicle.
@@ -139,16 +139,16 @@ pub struct DataOrderPacket<Kind> {
 #### `Data` / `Order`
 Two empty marker structs — the only two types `Kind` is ever instantiated with. Neither is ever actually constructed; they only ever appear as a type argument. That's what makes the whole thing *phantom*: the type parameter has no representation in the compiled struct, it's erased after type-checking, the same way `id.rs` (§2) uses distinct `AdjId`/`BoardId` types so the compiler won't confuse two different kinds of `u16`.
 
-#### `KindTag`
-The compiler erases `Kind` after type-checking, so nothing at runtime can look at a `DataOrderPacket<Kind>` and ask "is this actually a `Data` one?" — `KindTag` is how code that's generic over `Kind` answers that anyway, by asking the question of the *type* instead of the *value*:
+#### `PacketTypeTag`
+The compiler erases `Kind` after type-checking, so nothing at runtime can look at a `DataOrderPacket<Kind>` and ask "is this actually a `Data` one?" — `PacketTypeTag` is how code that's generic over `Kind` answers that anyway, by asking the question of the *type* instead of the *value*:
 ```rust
-pub trait KindTag {
-    fn matches(kind: &PacketKind) -> bool;
+pub trait PacketTypeTag {
+    fn matches(packet_type: &PacketType) -> bool;
 }
 ```
-`Data`/`Order` each implement it by checking which `PacketKind` (§1.1) variant they stand for (`matches!(kind, PacketKind::Data(_))` / `PacketKind::Order(_)`). This is the only thing `KindTag` decides — once a `PacketDef`'s kind is confirmed to match, the actual measurement list still comes from the existing `PacketKind::measurements()` (§1.1), not from `KindTag` itself.
+`Data`/`Order` each implement it by checking which `PacketType` (§1.1) variant they stand for (`matches!(packet_type, PacketType::Data(_))` / `PacketType::Order(_)`). This is the only thing `PacketTypeTag` decides — once a `PacketDef`'s type is confirmed to match, the actual measurement list still comes from the existing `PacketType::measurements()` (§1.1), not from `PacketTypeTag` itself.
 
-`protocol::packet::data_order`'s `encode`/`decode` use this to be generic over `Kind`: written once, they work for both `DataPacket` and `OrderPacket` instead of needing a near-duplicate pair of functions per kind.
+`protocol::packet::data_order`'s `encode`/`decode` use this to be generic over `Kind`: written once, they work for both `DataPacket` and `OrderPacket` instead of needing a near-duplicate pair of functions per type.
 
 #### `DataPacket` / `OrderPacket`
 ```rust
@@ -157,9 +157,9 @@ pub type OrderPacket = DataOrderPacket<Order>;
 ```
 Now genuinely different types: a function that takes an `OrderPacket` cannot be called with a `DataPacket`, even though both just wrap the same `(AdjId, Vec<Value>)` underneath — the mix-up is a compile error instead of a bug waiting to happen. `DataOrderPacket`'s own doc comment has a `compile_fail` doctest proving exactly that (run by `cargo test`, like any other doctest).
 
-`DataPacket` holds the decoded values of the measurements a board just sent — positional, not individually tagged with their measurement ID, just written in the order their `Measurement`s appear in this packet's `PacketKind::Data` list.
+`DataPacket` holds the decoded values of the measurements a board just sent — positional, not individually tagged with their measurement ID, just written in the order their `Measurement`s appear in this packet's `PacketType::Data` list.
 
-`OrderPacket` holds an order sent from the backend to a board — positional the same way, matching `PacketKind::Order`'s measurement list.
+`OrderPacket` holds an order sent from the backend to a board — positional the same way, matching `PacketType::Order`'s measurement list.
 
 #### `id`
 Which packet/order definition this is an instance of (`AdjId`).
@@ -199,7 +199,7 @@ This is deliberately where the name↔severity association lives — in `model`,
 A free-text message sent by a board.
 
 #### `id`
-The wire id this message was sent under — one of the severities declared in `general_info.json`'s `message_ids`. Not a `MessageLevel` directly, the same way `ProtectionPacket::id` isn't a `Protection`: resolving it to a severity means looking it up (`PacketKind::Message`/`protocol::Index`), not storing a second, redundant copy of it here.
+The wire id this message was sent under — one of the severities declared in `general_info.json`'s `message_ids`. Not a `MessageLevel` directly, the same way `ProtectionPacket::id` isn't a `Protection`: resolving it to a severity means looking it up (`PacketType::Message`/`protocol::Index`), not storing a second, redundant copy of it here.
 #### `timestamp`
 When the message was sent (`ShortTimestamp`).
 #### `origin`

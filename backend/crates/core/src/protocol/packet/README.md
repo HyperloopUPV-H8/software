@@ -1,6 +1,6 @@
-# `packet/` — Per-Packet-Kind Codecs
+# `packet/` — Per-Packet-Type Codecs
 
-Each file here owns **all** the byte-level parsing for one packet kind —
+Each file here owns **all** the byte-level parsing for one packet type —
 how many bytes a field takes, in what order, what terminates a string,
 what the leading id means. That parsing never gets split out into
 `tcp.rs`/`udp.rs` (the transport layer) or anywhere else. A transport
@@ -14,7 +14,7 @@ Self-contained both ways: `encode`/`decode` always read/write the
 leading 2-byte id themselves, since there's no dispatch ambiguity to
 resolve first — a UDP datagram is unambiguously `Data`, and an order is
 only ever something the backend already decided to send. Generic over
-`Kind` (`model::KindTag`), written once for both `Data` and `Order` —
+`Kind` (`model::PacketTypeTag`), written once for both `Data` and `Order` —
 see its own module doc and `model/README.md`'s §4.2 for why.
 
 ## `message.rs` / `protection.rs`
@@ -44,27 +44,27 @@ pub fn encode(packet: &MessagePacket, index: &Index) -> Result<Vec<u8>, EncodeEr
   this case `reader` must start at byte 0 of the frame, id included, and
   `decode` reads those 2 bytes itself. Either way, the id is then
   resolved against `index` — `index.packet(id)` + matching
-  `PacketKind::Protection`/`PacketKind::Message` — to confirm it's
-  actually the declared kind (`UnknownId`/`WrongKind` otherwise). A
+  `PacketType::Protection`/`PacketType::Message` — to confirm it's
+  actually the declared type (`UnknownId`/`WrongPacketType` otherwise). A
   message's severity is just another `PacketDef` by the time it gets
   here (see `index.rs`'s own docs) — there's no separate lookup for it.
 
 One real difference between the two: `ProtectionPacket` stores its
 `id` *and* the triggering `value` (which needs the watched measurement's
-wire type, from `PacketKind::Protection(measurement)`, to decode at
+wire type, from `PacketType::Protection(measurement)`, to decode at
 all). `MessagePacket` only stores `id` — its severity is metadata
 *about* that id, not part of the frame's own byte layout, so `decode`
-only uses `PacketKind::Message(level)` to confirm the kind and discards
+only uses `PacketType::Message(level)` to confirm the type and discards
 `level` immediately; nothing about `timestamp`/`origin`/`message`'s
 bytes depends on which severity it is. Look the severity up again via
 `index.packet(id)` if it's needed later — it's never stored redundantly
 on the decoded instance.
 
 Either way, **every byte of this frame is parsed inside the file that
-owns that packet kind** — `tcp.rs` never touches a timestamp, a `resv`
+owns that packet type** — `tcp.rs` never touches a timestamp, a `resv`
 byte, a measurement's wire width, or a NUL-terminated string. `encode`
 always writes the leading id back out too (from `packet.id`, after
-confirming via `index` it resolves to the right kind), so its output is
+confirming via `index` it resolves to the right type), so its output is
 a complete, self-contained frame — feed it straight into
 `decode(reader, None, index)` and get the same packet back; that's
 exactly what each file's round-trip test does.

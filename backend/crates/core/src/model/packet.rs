@@ -6,7 +6,7 @@
 //! packet or a protection *can* look like, or [`super::PacketDef`], which
 //! describes a whole packet.
 
-use super::{AdjId, PacketKind, Value};
+use super::{AdjId, PacketType, Value};
 use std::marker::PhantomData;
 
 /// A short timestamp carrying only the time of day: hour, minute, second
@@ -48,30 +48,30 @@ pub struct Data;
 pub struct Order;
 
 /// Bridges a [`DataOrderPacket`]'s phantom `Kind` to the runtime
-/// [`PacketKind`] variant it stands for.
+/// [`PacketType`] variant it stands for.
 ///
 /// `protocol::packet::data_order`'s `encode`/`decode` are generic over
 /// `Kind`: they're written once and work for both [`Data`] and [`Order`],
-/// instead of needing a near-identical copy per kind. This trait is the
+/// instead of needing a near-identical copy per type. This trait is the
 /// one yes/no question that generic code can't answer on its own —
-/// "is this `PacketDef`'s kind actually the one I was asked to
+/// "is this `PacketDef`'s type actually the one I was asked to
 /// encode/decode?" — everything after that (pulling out the
-/// measurements) is already handled by [`PacketKind::measurements`],
-/// kind-agnostic, so there's no need to redo that here.
-pub trait KindTag {
-    /// Whether `kind` is the variant this `Kind` stands for.
-    fn matches(kind: &PacketKind) -> bool;
+/// measurements) is already handled by [`PacketType::measurements`],
+/// type-agnostic, so there's no need to redo that here.
+pub trait PacketTypeTag {
+    /// Whether `packet_type` is the variant this `Kind` stands for.
+    fn matches(packet_type: &PacketType) -> bool;
 }
 
-impl KindTag for Data {
-    fn matches(kind: &PacketKind) -> bool {
-        matches!(kind, PacketKind::Data(_))
+impl PacketTypeTag for Data {
+    fn matches(packet_type: &PacketType) -> bool {
+        matches!(packet_type, PacketType::Data(_))
     }
 }
 
-impl KindTag for Order {
-    fn matches(kind: &PacketKind) -> bool {
-        matches!(kind, PacketKind::Order(_))
+impl PacketTypeTag for Order {
+    fn matches(packet_type: &PacketType) -> bool {
+        matches!(packet_type, PacketType::Order(_))
     }
 }
 
@@ -81,7 +81,7 @@ impl KindTag for Order {
 /// The wire protocol is positional: values are not individually tagged
 /// with their measurement's id, just written back to back in the order
 /// their [`super::Measurement`]s appear in this packet's
-/// [`super::PacketKind::Data`] list. `values[i]` is the decoded value of
+/// [`super::PacketType::Data`] list. `values[i]` is the decoded value of
 /// that list's `i`-th measurement — matching them up by position is
 /// `protocol`'s job, this type just holds the result in that same order.
 ///
@@ -110,7 +110,7 @@ pub struct DataOrderPacket<Kind> {
     /// The packet's id.
     pub id: AdjId,
     /// Each measurement's decoded value, in the same order as the
-    /// matching [`super::PacketKind::Data`]/[`super::PacketKind::Order`]
+    /// matching [`super::PacketType::Data`]/[`super::PacketType::Order`]
     /// list.
     pub values: Vec<Value>,
     _marker: PhantomData<Kind>,
@@ -219,7 +219,7 @@ pub struct MessagePacket {
     /// Not a [`MessageLevel`] directly, the same way [`ProtectionPacket::id`]
     /// isn't a [`super::Protection`]: this is what was actually on the
     /// wire, and resolving it to a severity means looking it up (see
-    /// [`PacketKind::Message`]/[`crate::protocol::Index`]), not storing
+    /// [`PacketType::Message`]/[`crate::protocol::Index`]), not storing
     /// a second, redundant copy of it here.
     pub id: AdjId,
     /// When it was sent.

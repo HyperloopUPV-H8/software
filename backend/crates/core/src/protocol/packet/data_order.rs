@@ -3,21 +3,21 @@
 //! shape under a phantom `Kind`.
 //!
 //! [`encode`]/[`decode`] are generic over that `Kind` via
-//! [`crate::model::KindTag`], so they're written once and work for either
-//! [`crate::model::Data`] or [`crate::model::Order`] — the backend itself
-//! only ever calls `encode::<Order>` (via [`super::super::tcp`]) and
-//! `decode::<Data>` (via [`super::super::udp`]), but that restriction
-//! lives at the transport layer, not here. [`crate::model::KindTag`] only
-//! answers whether a `PacketDef`'s kind matches `Kind` at all; the actual
-//! measurement list comes from [`crate::model::PacketKind::measurements`]
-//! either way.
+//! [`crate::model::PacketTypeTag`], so they're written once and work for
+//! either [`crate::model::Data`] or [`crate::model::Order`] — the backend
+//! itself only ever calls `encode::<Order>` (via [`super::super::tcp`])
+//! and `decode::<Data>` (via [`super::super::udp`]), but that restriction
+//! lives at the transport layer, not here. [`crate::model::PacketTypeTag`]
+//! only answers whether a `PacketDef`'s type matches `Kind` at all; the
+//! actual measurement list comes from
+//! [`crate::model::PacketType::measurements`] either way.
 
-use crate::model::{AdjId, DataOrderPacket, KindTag};
+use crate::model::{AdjId, DataOrderPacket, PacketTypeTag};
 use crate::protocol::{DecodeError, EncodeError, Index, wire};
 
 /// Encodes `packet` into the bytes to write to a board's connection,
 /// resolving its field shapes against `index`.
-pub fn encode<Kind: KindTag>(
+pub fn encode<Kind: PacketTypeTag>(
     packet: &DataOrderPacket<Kind>,
     index: &Index,
 ) -> Result<Vec<u8>, EncodeError> {
@@ -26,13 +26,13 @@ pub fn encode<Kind: KindTag>(
         .packet(packet.id)
         .ok_or(EncodeError::UnknownId(packet.id))?;
 
-    // Check that the packet is an order or data, as expected by the generic KindTag
-    if !Kind::matches(&packet_def.kind) {
-        return Err(EncodeError::WrongKind { id: packet.id });
+    // Check that the packet is an order or data, as expected by the generic PacketTypeTag
+    if !Kind::matches(&packet_def.packet_type) {
+        return Err(EncodeError::WrongPacketType { id: packet.id });
     }
 
     // Get the measurements for this packet
-    let measurements = packet_def.kind.measurements();
+    let measurements = packet_def.packet_type.measurements();
 
     // Check that the number of values that we want to encode matches the number of measurements in the packet definition
     if packet.values.len() != measurements.len() {
@@ -60,7 +60,7 @@ pub fn encode<Kind: KindTag>(
 
 /// Decodes a complete, already-delimited buffer into a
 /// [`DataOrderPacket<Kind>`], resolving its field shapes against `index`.
-pub fn decode<Kind: KindTag>(
+pub fn decode<Kind: PacketTypeTag>(
     bytes: &[u8],
     index: &Index,
 ) -> Result<DataOrderPacket<Kind>, DecodeError> {
@@ -80,12 +80,12 @@ pub fn decode<Kind: KindTag>(
     // Look up the packet definition for this id if not found return an UnknownId error
     let packet_def = index.packet(adj_id).ok_or(DecodeError::UnknownId(adj_id))?;
 
-    // Check that the packet is an order or data, as expected by the generic KindTag
-    if !Kind::matches(&packet_def.kind) {
-        return Err(DecodeError::WrongKind { id: adj_id });
+    // Check that the packet is an order or data, as expected by the generic PacketTypeTag
+    if !Kind::matches(&packet_def.packet_type) {
+        return Err(DecodeError::WrongPacketType { id: adj_id });
     }
     // Get the measurements for this packet
-    let measurements = packet_def.kind.measurements();
+    let measurements = packet_def.packet_type.measurements();
 
     // Prepare a vector to hold the decoded values and a pointer to track the current position in the byte slice
     let mut values = Vec::with_capacity(measurements.len());
@@ -117,7 +117,7 @@ mod tests {
     use super::*;
     use crate::model::{
         Board, BoardId, Data, DataPacket, MacAddress, Measurement, MeasurementKind, NumericKind,
-        Order, OrderPacket, PacketDef, PacketKind, PodData, Value,
+        Order, OrderPacket, PacketDef, PacketType, PodData, Value,
     };
     use std::collections::HashMap;
     use std::net::IpAddr;
@@ -135,12 +135,12 @@ mod tests {
         }
     }
 
-    fn sample_packet_def(id: AdjId, kind: PacketKind) -> PacketDef {
+    fn sample_packet_def(id: AdjId, packet_type: PacketType) -> PacketDef {
         PacketDef {
             id,
             board: BoardId(1),
             name: "TestPacket".into(),
-            kind,
+            packet_type,
         }
     }
 
@@ -166,7 +166,7 @@ mod tests {
         let order_id = AdjId(1001);
         let packet_def = sample_packet_def(
             order_id,
-            PacketKind::Order(vec![
+            PacketType::Order(vec![
                 sample_measurement(
                     1,
                     MeasurementKind::Numeric {
@@ -208,17 +208,17 @@ mod tests {
     }
 
     #[test]
-    fn encode_fails_on_wrong_kind() {
+    fn encode_fails_on_wrong_packet_type() {
         let data_id = AdjId(2001);
-        let packet_def = sample_packet_def(data_id, PacketKind::Data(vec![]));
+        let packet_def = sample_packet_def(data_id, PacketType::Data(vec![]));
 
         let index = make_test_index(vec![packet_def]);
         let packet = OrderPacket::new(data_id, vec![]);
 
         let Err(err) = encode(&packet, &index) else {
-            unreachable!("encoding the wrong packet kind should fail");
+            unreachable!("encoding the wrong packet type should fail");
         };
-        assert_eq!(err, EncodeError::WrongKind { id: data_id });
+        assert_eq!(err, EncodeError::WrongPacketType { id: data_id });
     }
 
     #[test]
@@ -226,7 +226,7 @@ mod tests {
         let order_id = AdjId(1002);
         let packet_def = sample_packet_def(
             order_id,
-            PacketKind::Order(vec![
+            PacketType::Order(vec![
                 sample_measurement(
                     1,
                     MeasurementKind::Numeric {
@@ -264,7 +264,7 @@ mod tests {
         let data_id = AdjId(3001);
         let packet_def = sample_packet_def(
             data_id,
-            PacketKind::Data(vec![
+            PacketType::Data(vec![
                 sample_measurement(
                     1,
                     MeasurementKind::Numeric {
@@ -312,7 +312,7 @@ mod tests {
         let data_id = AdjId(3002);
         let packet_def = sample_packet_def(
             data_id,
-            PacketKind::Data(vec![sample_measurement(
+            PacketType::Data(vec![sample_measurement(
                 1,
                 MeasurementKind::Numeric {
                     wire_type: NumericKind::U32,
@@ -341,17 +341,17 @@ mod tests {
     }
 
     #[test]
-    fn decode_fails_on_wrong_kind() {
+    fn decode_fails_on_wrong_packet_type() {
         let order_id = AdjId(4001);
-        let packet_def = sample_packet_def(order_id, PacketKind::Order(vec![]));
+        let packet_def = sample_packet_def(order_id, PacketType::Order(vec![]));
 
         let index = make_test_index(vec![packet_def]);
         let raw_bytes = [0xA1, 0x0F];
 
         let Err(err) = decode::<Data>(&raw_bytes, &index) else {
-            unreachable!("decoding the wrong packet kind should fail");
+            unreachable!("decoding the wrong packet type should fail");
         };
-        assert_eq!(err, DecodeError::WrongKind { id: order_id });
+        assert_eq!(err, DecodeError::WrongPacketType { id: order_id });
     }
 
     // --- ROUND-TRIP TESTS ---
@@ -359,7 +359,7 @@ mod tests {
     // `encode`/`decode` are generic over `Kind`, so the same `PacketDef`
     // works for both directions here — that genericity is the whole
     // point of giving `DataOrderPacket` a phantom `Kind` in the first
-    // place, instead of writing one hardcoded pair of functions per kind.
+    // place, instead of writing one hardcoded pair of functions per type.
     //
     // Enum fields are left out of both: `encode_enum` takes an
     // already-selected index (`Value::Number`) but `decode_enum` returns
@@ -389,7 +389,7 @@ mod tests {
         let id = AdjId(6001);
         let index = make_test_index(vec![sample_packet_def(
             id,
-            PacketKind::Order(numeric_measurements()),
+            PacketType::Order(numeric_measurements()),
         )]);
         let original = OrderPacket::new(id, vec![Value::Number(1234.0), Value::Number(-5.0)]);
 
@@ -409,7 +409,7 @@ mod tests {
         let id = AdjId(6002);
         let index = make_test_index(vec![sample_packet_def(
             id,
-            PacketKind::Data(numeric_measurements()),
+            PacketType::Data(numeric_measurements()),
         )]);
         let original = DataPacket::new(id, vec![Value::Number(42.0), Value::Number(-1.0)]);
 

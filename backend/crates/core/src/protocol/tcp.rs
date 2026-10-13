@@ -3,7 +3,7 @@
 //! orders to it. Never a `Data` packet — see the module doc on
 //! [`super`].
 //!
-//! Both functions here are thin: the actual per-kind decoding lives in
+//! Both functions here are thin: the actual per-type decoding lives in
 //! [`super::packet::protection`]/[`super::packet::message`]/
 //! [`super::packet::data_order`], independent of TCP. This module only adds
 //! the transport-level guarantee — [`decode_next`] can only ever return
@@ -35,8 +35,9 @@ pub enum TcpFrame {
 /// position (see [`crate::model::AdjId`]'s own docs on its ranges), so
 /// `id.0 >= 8192` (`1 << 13`) is a protection; anything below that hands
 /// off to `message::decode` instead — `message::decode` resolves it
-/// against `index` itself (`UnknownId`/`WrongKind` if it isn't actually
-/// a declared message), so there's no separate lookup to do here first.
+/// against `index` itself (`UnknownId`/`WrongPacketType` if it isn't
+/// actually a declared message), so there's no separate lookup to do here
+/// first.
 /// Either call's result is wrapped in the matching [`TcpFrame`] variant.
 pub fn decode_next(mut reader: impl Read, index: &Index) -> Result<TcpFrame, DecodeError> {
     let id = packet::read_id(&mut reader)?;
@@ -60,7 +61,7 @@ mod tests {
     use super::*;
     use crate::model::{
         AdjId, Board, BoardId, MacAddress, Measurement, MeasurementKind, MessageLevel, NumericKind,
-        PacketDef, PacketKind, PodData, ShortTimestamp, Value,
+        PacketDef, PacketType, PodData, ShortTimestamp, Value,
     };
     use std::collections::HashMap;
     use std::io::Cursor;
@@ -84,7 +85,7 @@ mod tests {
             id: compound_id,
             board: BoardId(1),
             name: "temp_protection".to_string(),
-            kind: PacketKind::Protection(measurement),
+            packet_type: PacketType::Protection(measurement),
         };
         let board = Board {
             id: BoardId(1),

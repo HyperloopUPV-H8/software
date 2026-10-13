@@ -42,7 +42,7 @@ protocol/
 
 Provides a fast lookup table from packet IDs (`AdjId`) to their declarations (`PacketDef`). Built once from loaded ADJ configuration data (`PodData`), it owns cloned copies of packet definitions so it can be shared across async tasks via `Arc<Index>`.
 
-A message severity is not a separate lookup bolted onto `Index` — it's just another `PacketDef`. `Index::new(pod_data, message_levels)` takes `message_levels` as `Option<&HashMap<AdjId, MessageLevel>>` (an ADJ's `adj::AdjInfo::message_levels` — `None` for callers with no `AdjInfo` at all, e.g. most tests here) and, for each entry, synthesizes a `PacketDef { kind: PacketKind::Message(level), board: BoardId(0), .. }` into the very same `AdjId -> PacketDef` table as every board's own packets. `BoardId(0)` (reserved, not validated — see `AdjId`/`BoardId`'s own docs) because a severity isn't owned by any one board. Resolving a message is then `Index::packet(id)` + matching `PacketKind::Message(level)`, exactly like `packet::protection` already does for `PacketKind::Protection`.
+A message severity is not a separate lookup bolted onto `Index` — it's just another `PacketDef`. `Index::new(pod_data, message_levels)` takes `message_levels` as `Option<&HashMap<AdjId, MessageLevel>>` (an ADJ's `adj::AdjInfo::message_levels` — `None` for callers with no `AdjInfo` at all, e.g. most tests here) and, for each entry, synthesizes a `PacketDef { packet_type: PacketType::Message(level), board: BoardId(0), .. }` into the very same `AdjId -> PacketDef` table as every board's own packets. `BoardId(0)` (reserved, not validated — see `AdjId`/`BoardId`'s own docs) because a severity isn't owned by any one board. Resolving a message is then `Index::packet(id)` + matching `PacketType::Message(level)`, exactly like `packet::protection` already does for `PacketType::Protection`.
 
 **Key types:**
 - `Index` - HashMap-based lookup from `AdjId` to `PacketDef` (synthesized `Message` entries included)
@@ -63,14 +63,14 @@ Defines errors that can occur during packet encoding and decoding.
   - `InvalidEnumValue` - Enum index out of range
   - `UnterminatedString` - String field not null-terminated
   - `InvalidUtf8` - String field's bytes weren't valid UTF-8
-  - `WrongKind` - Packet exists but isn't expected kind
+  - `WrongPacketType` - Packet exists but isn't expected type
 
 - `EncodeError` - Errors when converting packets to bytes
   - `UnknownId` - No packet declared with this ID
   - `WrongFieldCount` - Missing or extra fields in order
   - `TypeMismatch` - Value doesn't match declared type
   - `OutOfRange` - Numeric value doesn't fit wire type
-  - `WrongKind` - Packet exists but isn't expected kind
+  - `WrongPacketType` - Packet exists but isn't expected type
   - `StringTooLong` - String field + terminator doesn't fit the max length
   - `EmbeddedNulByte` - String field contains a `\0` byte
 
@@ -90,16 +90,16 @@ Handles conversion between raw bytes and `Value` types for individual measuremen
 
 ### `packet/` - Packet-Level Encoding/Decoding
 
-Contains per-packet-kind encoding and decoding logic, independent of
+Contains per-packet-type encoding and decoding logic, independent of
 transport. **Hard rule for this directory: all byte-level parsing for a
-packet kind lives in its own file here, never in `tcp.rs`/`udp.rs`.**
+packet type lives in its own file here, never in `tcp.rs`/`udp.rs`.**
 See **[`packet/README.md`](packet/README.md)** for the full design
 rationale (the `Option<AdjId>` pattern below, and exactly what `tcp.rs`
 is and isn't allowed to do).
 
 #### `data_order.rs`
 
-Handles the positional Data/Order wire shape shared by both packet kinds
+Handles the positional Data/Order wire shape shared by both packet types
 (see `model::DataOrderPacket`'s phantom `Kind`). `encode`/`decode` are
 generic over `Kind`, written once for both:
 - **Order packets** (commands sent to boards) - sent over TCP
@@ -128,7 +128,7 @@ a protection) — so, same as `protection.rs`, `id` is `Option<AdjId>`:
 `Some` if the caller already read it (and `reader` starts right after
 the id), `None` to have `decode` read it itself. Either way, `id` is
 resolved against `index` to confirm it's actually a declared
-`PacketKind::Message` (`UnknownId`/`WrongKind` otherwise) — but unlike
+`PacketType::Message` (`UnknownId`/`WrongPacketType` otherwise) — but unlike
 `protection.rs`, the severity itself is never stored on the decoded
 `MessagePacket`; it's metadata about the id, not about this particular
 instance, so look it up again via `index.packet(id)` if it's needed.
@@ -161,7 +161,7 @@ Handles the dedicated TCP connection to each board. A TCP connection carries:
 - Free-text messages (board → backend)
 - Order commands (backend → board)
 
-`decode_next` reads the frame's leading 16-bit id itself (via `packet::read_id`, `pub(super)` so `tcp` — a sibling of `packet`, not a descendant — can reach it), then dispatches purely on the raw id: `id.0 >= 8192` (`1 << 13` — a protection's compound id always has its high 3 bits set, see `AdjId`'s own docs) goes to `packet::protection::decode(reader, Some(id), index)`, anything below that to `packet::message::decode(reader, Some(id), index)`. Neither branch does its own lookup first — each `decode` already resolves `UnknownId`/`WrongKind` against `index` itself.
+`decode_next` reads the frame's leading 16-bit id itself (via `packet::read_id`, `pub(super)` so `tcp` — a sibling of `packet`, not a descendant — can reach it), then dispatches purely on the raw id: `id.0 >= 8192` (`1 << 13` — a protection's compound id always has its high 3 bits set, see `AdjId`'s own docs) goes to `packet::protection::decode(reader, Some(id), index)`, anything below that to `packet::message::decode(reader, Some(id), index)`. Neither branch does its own lookup first — each `decode` already resolves `UnknownId`/`WrongPacketType` against `index` itself.
 
 **Key types:**
 - `TcpFrame` - Enum of frames that can be received over TCP (Protection, Message)
@@ -204,7 +204,7 @@ The module includes comprehensive unit tests for:
 - Order/Data packet encoding and decoding, including round trips
 - Message/Protection packet decoding (timestamps, strings, values) and
   their test-only encoding, including round trips
-- Error propagation for unknown IDs, wrong kinds, type mismatches,
+- Error propagation for unknown IDs, wrong packet types, type mismatches,
   unterminated/invalid strings, and out-of-range values
 
 Run tests with:

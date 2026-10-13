@@ -1,12 +1,12 @@
-//! Encode/decode for one specific kind of packet, independent of which
+//! Encode/decode for one specific type of packet, independent of which
 //! transport carries it — that mapping lives in [`super::tcp`]/
 //! [`super::udp`], which are thin wrappers around these.
 //!
 //! [`data_order`]'s `encode`/`decode` are generic over `Kind`
-//! ([`crate::model::KindTag`]), so they work for both `Data` and `Order`
-//! alike; the backend itself only ever exercises one direction per kind
-//! (an order is only ever sent, data only ever received), but that's a
-//! restriction `tcp`/`udp` apply, not something baked into the codec.
+//! ([`crate::model::PacketTypeTag`]), so they work for both `Data` and
+//! `Order` alike; the backend itself only ever exercises one direction per
+//! type (an order is only ever sent, data only ever received), but that's
+//! a restriction `tcp`/`udp` apply, not something baked into the codec.
 //!
 //! [`message`]/[`protection`] are genuinely one-directional in
 //! production — a board only ever sends these, never receives them —
@@ -24,7 +24,7 @@ use std::io::Read;
 
 /// Reads a raw little-endian 16-bit id off the front of `reader`.
 ///
-/// Shared by [`message`]/[`protection`] — the only two kinds whose
+/// Shared by [`message`]/[`protection`] — the only two types whose
 /// `decode` ever needs to read its own leading id, when the caller
 /// doesn't already know it (see each module's own doc comment on why) —
 /// and by [`super::tcp::decode_next`], which needs the id *before* it

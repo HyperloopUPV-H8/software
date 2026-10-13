@@ -22,7 +22,7 @@
 //! [`crate::protocol::wire::byte_width`] says for the watched
 //! measurement's kind — not fixed, unlike every other field here.
 
-use crate::model::{AdjId, PacketKind, ProtectionPacket, ShortTimestamp};
+use crate::model::{AdjId, PacketType, ProtectionPacket, ShortTimestamp};
 use crate::protocol::{DecodeError, EncodeError, Index, wire};
 use std::io::Read;
 
@@ -48,8 +48,8 @@ pub fn decode(
         .packet(compound_id)
         .ok_or(DecodeError::UnknownId(compound_id))?;
 
-    let PacketKind::Protection(measurement) = &packet_def.kind else {
-        return Err(DecodeError::WrongKind { id: compound_id });
+    let PacketType::Protection(measurement) = &packet_def.packet_type else {
+        return Err(DecodeError::WrongPacketType { id: compound_id });
     };
 
     // `hora`/`min`/`seg`/`subseg` (1 byte each), then 2 bytes of `resv`
@@ -88,8 +88,8 @@ pub fn encode(packet: &ProtectionPacket, index: &Index) -> Result<Vec<u8>, Encod
         .packet(packet.id)
         .ok_or(EncodeError::UnknownId(packet.id))?;
 
-    let PacketKind::Protection(measurement) = &packet_def.kind else {
-        return Err(EncodeError::WrongKind { id: packet.id });
+    let PacketType::Protection(measurement) = &packet_def.packet_type else {
+        return Err(EncodeError::WrongPacketType { id: packet.id });
     };
 
     let mut bytes = packet.id.0.to_le_bytes().to_vec();
@@ -136,7 +136,7 @@ mod tests {
             id: compound_id,
             board: BoardId(1),
             name: "mock_protection".to_string(),
-            kind: PacketKind::Protection(measurement),
+            packet_type: PacketType::Protection(measurement),
         };
         let board = Board {
             id: BoardId(1),
@@ -219,7 +219,7 @@ mod tests {
     }
 
     #[test]
-    fn a_non_protection_packet_at_that_id_is_the_wrong_kind() {
+    fn a_non_protection_packet_at_that_id_is_the_wrong_packet_type() {
         let measurement = sample_measurement(
             200,
             MeasurementKind::Numeric {
@@ -231,7 +231,7 @@ mod tests {
             id: compound_id,
             board: BoardId(1),
             name: "mock_data".to_string(),
-            kind: PacketKind::Data(vec![measurement]),
+            packet_type: PacketType::Data(vec![measurement]),
         };
         let board = Board {
             id: BoardId(1),
@@ -247,7 +247,7 @@ mod tests {
 
         assert!(matches!(
             decode(Cursor::new(vec![]), Some(compound_id), &index),
-            Err(DecodeError::WrongKind { id }) if id == compound_id
+            Err(DecodeError::WrongPacketType { id }) if id == compound_id
         ));
     }
 
@@ -364,7 +364,7 @@ mod tests {
     }
 
     #[test]
-    fn encode_fails_on_wrong_kind() {
+    fn encode_fails_on_wrong_packet_type() {
         let measurement = sample_measurement(
             200,
             MeasurementKind::Numeric {
@@ -376,7 +376,7 @@ mod tests {
             id: compound_id,
             board: BoardId(1),
             name: "mock_data".to_string(),
-            kind: PacketKind::Data(vec![measurement]),
+            packet_type: PacketType::Data(vec![measurement]),
         };
         let board = Board {
             id: BoardId(1),
@@ -402,9 +402,9 @@ mod tests {
         };
 
         let Err(err) = encode(&packet, &index) else {
-            unreachable!("encoding the wrong packet kind should fail");
+            unreachable!("encoding the wrong packet type should fail");
         };
-        assert_eq!(err, EncodeError::WrongKind { id: compound_id });
+        assert_eq!(err, EncodeError::WrongPacketType { id: compound_id });
     }
 
     #[test]

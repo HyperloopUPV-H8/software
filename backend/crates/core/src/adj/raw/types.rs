@@ -79,7 +79,7 @@ fn default_fault() -> bool {
 pub(crate) struct RawPacket {
     pub(crate) id: u16,
     #[serde(rename = "type")]
-    pub(crate) kind: String,
+    pub(crate) packet_type: String,
     pub(crate) name: String,
     #[serde(default)]
     pub(crate) variables: Vec<String>,
@@ -306,7 +306,7 @@ fn parse_duration(text: &str) -> Result<Duration, ProtectionError> {
 mod tests {
     use super::*;
     use crate::adj::raw::loader::load_board;
-    use crate::model::PacketKind;
+    use crate::model::PacketType;
     use std::net::IpAddr;
 
     fn raw_protection(
@@ -623,7 +623,7 @@ mod tests {
         let protection_count = board
             .packets
             .values()
-            .filter(|p| matches!(p.kind, PacketKind::Protection(_)))
+            .filter(|p| matches!(p.packet_type, PacketType::Protection(_)))
             .count();
         assert_eq!(
             protection_count, 2,

@@ -67,7 +67,7 @@ doesn't hardcode `"fault"`/`"warning"`/`"info"`/`"panic"` itself.
 `Option<&HashMap<AdjId, MessageLevel>>` — `None` for callers with no
 `AdjInfo` at all (most tests in this crate, which only build a bare
 `PodData`) — and, for each entry, synthesizes a
-`PacketDef { kind: PacketKind::Message(level), board: BoardId(0), .. }`
+`PacketDef { packet_type: PacketType::Message(level), board: BoardId(0), .. }`
 into the very same `AdjId -> PacketDef` table every other packet lives
 in. `BoardId(0)` (reserved, not validated — see `AdjId`/`BoardId`'s own
 docs) because a severity isn't owned by any one board — any board's
@@ -89,4 +89,4 @@ The `Adj` object enforces a clear architectural boundary between **vehicle topol
 The raw deserialization types and the loader logic live isolated inside `raw`[cite: 2]. This enables non-station tools (such as bus sniffers, test runners, or simulators) to parse and ingest ADJ directories without dragging along application-level UI or station state logic.
 
 ### 3. Unified Packet Map (`packets`)
-Protections defined under measurements are materialized during loading as first-class `PacketKind::Protection(Measurement)` packets alongside the explicit data, order and message packets declared in `packets.json`. Downstream networking layers can route and handle every wire event uniformly via `Board::packets` without needing specialized traversal logic for nested measurement alarms. `packets.json` itself never declares a `"type": "protection"` entry directly — that shape only exists synthesized, one per protection a measurement declares, never as a free-standing declaration with its own arbitrary variable list.
+Protections defined under measurements are materialized during loading as first-class `PacketType::Protection(Measurement)` packets alongside the explicit data, order and message packets declared in `packets.json`. Downstream networking layers can route and handle every wire event uniformly via `Board::packets` without needing specialized traversal logic for nested measurement alarms. `packets.json` itself never declares a `"type": "protection"` entry directly — that shape only exists synthesized, one per protection a measurement declares, never as a free-standing declaration with its own arbitrary variable list.

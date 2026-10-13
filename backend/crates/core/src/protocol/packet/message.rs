@@ -24,12 +24,12 @@
 //!
 //! Unlike [`super::protection`] too, [`MessagePacket`] doesn't carry its
 //! own severity — `id` is resolved against `index` to confirm it's
-//! actually a declared [`crate::model::PacketKind::Message`] (so a
-//! `WrongKind`/`UnknownId` frame is rejected), but the severity itself
-//! is never stored redundantly on the decoded instance; look it up via
-//! `index.packet(id)` again if it's needed.
+//! actually a declared [`crate::model::PacketType::Message`] (so a
+//! `WrongPacketType`/`UnknownId` frame is rejected), but the severity
+//! itself is never stored redundantly on the decoded instance; look it up
+//! via `index.packet(id)` again if it's needed.
 
-use crate::model::{AdjId, MessagePacket, PacketKind, ShortTimestamp};
+use crate::model::{AdjId, MessagePacket, PacketType, ShortTimestamp};
 use crate::protocol::{DecodeError, EncodeError, Index};
 use std::io::Read;
 
@@ -58,8 +58,8 @@ pub fn decode(
     // message packet. If not, the frame is malformed and we can't decode it.
     let packet_def = index.packet(id).ok_or(DecodeError::UnknownId(id))?;
 
-    let PacketKind::Message(_) = &packet_def.kind else {
-        return Err(DecodeError::WrongKind { id });
+    let PacketType::Message(_) = &packet_def.packet_type else {
+        return Err(DecodeError::WrongPacketType { id });
     };
 
     let mut header = [0u8; 4];
@@ -113,8 +113,8 @@ pub fn encode(packet: &MessagePacket, index: &Index) -> Result<Vec<u8>, EncodeEr
         .packet(packet.id)
         .ok_or(EncodeError::UnknownId(packet.id))?;
 
-    let PacketKind::Message(_) = &packet_def.kind else {
-        return Err(EncodeError::WrongKind { id: packet.id });
+    let PacketType::Message(_) = &packet_def.packet_type else {
+        return Err(EncodeError::WrongPacketType { id: packet.id });
     };
 
     let mut bytes = packet.id.0.to_le_bytes().to_vec();
@@ -284,7 +284,7 @@ mod tests {
             id: data_id,
             board: BoardId(1),
             name: "bcu_data".to_string(),
-            kind: PacketKind::Data(vec![]),
+            packet_type: PacketType::Data(vec![]),
         };
         let board = Board {
             id: BoardId(1),
@@ -302,7 +302,7 @@ mod tests {
         let Err(err) = decode(Cursor::new(bytes), None, &index) else {
             unreachable!("decoding an id that resolves to a Data packet should fail");
         };
-        assert_eq!(err, DecodeError::WrongKind { id: data_id });
+        assert_eq!(err, DecodeError::WrongPacketType { id: data_id });
     }
 
     // --- ENCODE TESTS ---
@@ -356,13 +356,13 @@ mod tests {
     }
 
     #[test]
-    fn encode_fails_on_wrong_kind() {
+    fn encode_fails_on_wrong_packet_type() {
         let data_id = AdjId(2000);
         let packet_def = PacketDef {
             id: data_id,
             board: BoardId(1),
             name: "bcu_data".to_string(),
-            kind: PacketKind::Data(vec![]),
+            packet_type: PacketType::Data(vec![]),
         };
         let board = Board {
             id: BoardId(1),
@@ -391,7 +391,7 @@ mod tests {
         let Err(err) = encode(&packet, &index) else {
             unreachable!("encoding into a non-message packet's id should fail");
         };
-        assert_eq!(err, EncodeError::WrongKind { id: data_id });
+        assert_eq!(err, EncodeError::WrongPacketType { id: data_id });
     }
 
     #[test]

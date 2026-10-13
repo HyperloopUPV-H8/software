@@ -40,12 +40,12 @@ pub enum DecodeError {
     #[error("string field wasn't valid UTF-8: {0:?}")]
     InvalidUtf8(Vec<u8>),
 
-    /// A looked-up packet exists, but isn't the kind this function expects
+    /// A looked-up packet exists, but isn't the type this function expects
     /// (e.g. `packet::data::decode` found an id that resolves to an
     /// `Order`).
-    #[error("packet {id:?} isn't the expected kind")]
-    WrongKind {
-        /// The packet whose kind didn't match.
+    #[error("packet {id:?} isn't the expected type")]
+    WrongPacketType {
+        /// The packet whose type didn't match.
         id: AdjId,
     },
 }
@@ -70,7 +70,7 @@ impl PartialEq for DecodeError {
             ) => a_index == b_index && a_options == b_options,
             (Self::UnterminatedString { max: a }, Self::UnterminatedString { max: b }) => a == b,
             (Self::InvalidUtf8(a), Self::InvalidUtf8(b)) => a == b,
-            (Self::WrongKind { id: a }, Self::WrongKind { id: b }) => a == b,
+            (Self::WrongPacketType { id: a }, Self::WrongPacketType { id: b }) => a == b,
             _ => false,
         }
     }
@@ -111,12 +111,12 @@ pub enum EncodeError {
         max: f64,
     },
 
-    /// A looked-up packet exists, but isn't the kind this function expects
+    /// A looked-up packet exists, but isn't the type this function expects
     /// (e.g. `packet::order::encode` found an id that resolves to a
     /// `Data` packet).
-    #[error("packet {id:?} isn't the expected kind")]
-    WrongKind {
-        /// The packet whose kind didn't match.
+    #[error("packet {id:?} isn't the expected type")]
+    WrongPacketType {
+        /// The packet whose type didn't match.
         id: AdjId,
     },
 

@@ -1,6 +1,6 @@
 //! The `id -> PacketDef` lookup `tcp`/`udp` decode against.
 
-use crate::model::{AdjId, BoardId, MessageLevel, PacketDef, PacketKind, PodData};
+use crate::model::{AdjId, BoardId, MessageLevel, PacketDef, PacketType, PodData};
 use std::collections::HashMap;
 
 /// A lookup table from a packet's [`AdjId`] to its declaration, built once
@@ -49,7 +49,7 @@ impl Index {
                         id,
                         board: BoardId(0),
                         name: level.name().to_string(),
-                        kind: PacketKind::Message(level),
+                        packet_type: PacketType::Message(level),
                     },
                 );
             }
@@ -60,7 +60,8 @@ impl Index {
 
     /// Looks up a packet's declaration by id — a message severity
     /// resolves through here too, as a synthesized `PacketDef` with
-    /// `kind: PacketKind::Message(level)`; see this type's doc comment.
+    /// `packet_type: PacketType::Message(level)`; see this type's doc
+    /// comment.
     pub fn packet(&self, id: AdjId) -> Option<&PacketDef> {
         self.by_id.get(&id)
     }
@@ -69,7 +70,7 @@ impl Index {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::model::{Board, BoardId, MacAddress, PacketKind};
+    use crate::model::{Board, BoardId, MacAddress, PacketType};
     use std::net::IpAddr;
 
     fn sample_pod_data() -> PodData {
@@ -77,7 +78,7 @@ mod tests {
             id: AdjId(1000),
             board: BoardId(1),
             name: "bcu_data".to_string(),
-            kind: PacketKind::Data(vec![]),
+            packet_type: PacketType::Data(vec![]),
         };
         let board = Board {
             id: BoardId(1),
@@ -114,7 +115,7 @@ mod tests {
         let Some(packet) = index.packet(AdjId(2)) else {
             unreachable!("the \"fault\" severity was declared at id 2");
         };
-        assert_eq!(packet.kind, PacketKind::Message(MessageLevel::Fault));
+        assert_eq!(packet.packet_type, PacketType::Message(MessageLevel::Fault));
         assert_eq!(packet.board, BoardId(0));
     }
 
