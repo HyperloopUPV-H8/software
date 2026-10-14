@@ -1,38 +1,7 @@
-use super::{GitError, update::unwrap_repo_path};
+use super::{error::{RepositoryError, GitError}, update::unwrap_repo_path};
 use gix::Repository;
 use std::path::PathBuf;
 use tracing::{debug, instrument};
-
-/// Concrete repository failures wrapped by [`GitError::Repository`].
-///
-/// Variants identify local reads or remote-reference queries and preserve the
-/// original `gix` error as their source.
-#[derive(Debug, thiserror::Error)]
-pub enum RepositoryError {
-    /// An existing repository could not be opened or validated.
-    #[error("repository could not be opened: {0}")]
-    Open(#[from] gix::open::Error),
-
-    /// HEAD could not be resolved to a commit ID, including an unborn HEAD.
-    #[error("HEAD could not be resolved: {0}")]
-    Head(#[from] gix::reference::head_id::Error),
-
-    /// No default fetch remote could be determined, including ambiguous configurations.
-    #[error("no default fetch remote could be determined")]
-    NoDefaultRemote,
-
-    /// The selected default remote could not be loaded from repository configuration.
-    #[error("default fetch remote could not be loaded: {0}")]
-    FindDefaultRemote(#[from] gix::remote::find::existing::Error),
-
-    /// A transport connection to the selected remote could not be prepared.
-    #[error("remote connection failed: {0}")]
-    RemoteConnect(#[from] gix::remote::connect::Error),
-
-    /// The remote handshake or query of advertised references failed.
-    #[error("remote reference query failed: {0}")]
-    RemoteRefMap(#[from] gix::remote::ref_map::Error),
-}
 
 /// Opens an existing repository without fetching or changing its checkout.
 ///

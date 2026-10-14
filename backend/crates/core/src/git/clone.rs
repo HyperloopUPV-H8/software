@@ -1,37 +1,12 @@
-use super::{GitError, update::get_commit_hash};
+use super::{
+    error::{CloneError, GitError},
+    update::get_commit_hash,
+};
 use gix::Repository;
 use std::{fs, path::Path, sync::atomic::AtomicBool};
 use tracing::{debug, info, instrument, warn};
 
 const GIT_REMOTE: &str = "origin";
-
-/// Concrete clone failures wrapped by [`GitError::Clone`].
-///
-/// Preparation, name validation, fetching, and checkout expose different `gix`
-/// error types. These variants retain each original error as their source.
-#[derive(Debug, thiserror::Error)]
-pub enum CloneError {
-    /// Clone preparation failed before downloading repository data.
-    #[error("clone preparation failed: {0}")]
-    Prepare(#[from] gix::clone::Error),
-
-    /// The configured remote name was invalid.
-    #[error("remote name is invalid: {0}")]
-    RemoteName(#[from] gix::remote::name::Error),
-
-    /// The requested branch name was not a valid Git reference name.
-    #[error("branch name is invalid: {0}")]
-    BranchName(#[from] gix::validate::reference::name::Error),
-
-    /// Fetching failed, including a missing requested branch.
-    /// This can indicate network, configuration, or remote-reference failures.
-    #[error("fetch failed: {0}")]
-    Fetch(#[from] gix::clone::fetch::Error),
-
-    /// Downloaded data could not be checked out into the working tree.
-    #[error("checkout failed: {0}")]
-    Checkout(#[from] gix::clone::checkout::main_worktree::Error),
-}
 
 // Fetch and check out the requested branch instead of switching an existing repo.
 #[instrument(level = "debug", skip(url))]
@@ -171,7 +146,8 @@ mod tests {
 
     // Verify branch selection, newer commits, and removal of stale cache files.
     #[test]
-    fn clones_and_replaces_with_requested_branch() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    fn clones_and_replaces_with_requested_branch()
+    -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let temp = tempfile::tempdir()?;
         let source = temp.path().join("source");
         let cache = temp.path().join("cache").join("adj");
@@ -210,7 +186,8 @@ mod tests {
 
     // Verify clone failures preserve cached ADJ and leave no staging debris.
     #[test]
-    fn failed_clone_preserves_existing_cache() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    fn failed_clone_preserves_existing_cache()
+    -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let temp = tempfile::tempdir()?;
         let source = temp.path().join("source");
         let cache = temp.path().join("adj");
