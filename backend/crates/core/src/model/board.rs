@@ -10,17 +10,17 @@
 //! left out rather than guessed — add them once the packet-level JSON
 //! shape is settled.
 
-use super::{AdjId, BoardId, MacAddress, Measurement};
+use super::{AdjId, BoardId, MacAddress, Measurement, MessageLevel};
 use std::collections::HashMap;
 use std::net::IpAddr;
 
-/// What kind of packet a [`PacketDef`] declares, carrying whatever
-/// measurement shape — if any — is specific to that kind. Not every kind
+/// What type of packet a [`PacketDef`] declares, carrying whatever
+/// measurement shape — if any — is specific to that type. Not every type
 /// has measurements, so this says so in the type instead of forcing every
 /// [`PacketDef`] through one shared `measurements: Vec<Measurement>` field
 /// regardless of whether that's meaningful for it.
 #[derive(Debug, Clone, PartialEq)]
-pub enum PacketKind {
+pub enum PacketType {
     /// A board's periodic telemetry: one value per measurement, decoded
     /// positionally in this order.
     Data(Vec<Measurement>),
@@ -29,19 +29,21 @@ pub enum PacketKind {
     Protection(Measurement),
     /// A command sent to a board. Many orders take no parameters at all.
     Order(Vec<Measurement>),
-    /// A free-text log line. Never carries measurement data.
-    Message,
+    /// A free-text log line of this severity. Never carries measurement
+    /// data — the severity is the only thing that tells one `Message`
+    /// `PacketDef` apart from another.
+    Message(MessageLevel),
 }
 
-impl PacketKind {
-    /// Every measurement this packet's kind references, flattened — for
-    /// code that doesn't care which kind this is, just what measurements
+impl PacketType {
+    /// Every measurement this packet's type references, flattened — for
+    /// code that doesn't care which type this is, just what measurements
     /// it touches.
     pub fn measurements(&self) -> &[Measurement] {
         match self {
-            PacketKind::Data(measurements) | PacketKind::Order(measurements) => measurements,
-            PacketKind::Protection(measurement) => std::slice::from_ref(measurement),
-            PacketKind::Message => &[],
+            PacketType::Data(measurements) | PacketType::Order(measurements) => measurements,
+            PacketType::Protection(measurement) => std::slice::from_ref(measurement),
+            PacketType::Message(_) => &[],
         }
     }
 }
@@ -64,8 +66,8 @@ pub struct PacketDef {
     /// The human-readable name shown to the user.
     pub name: String,
     /// Whether this is data, order, protection or message — and the
-    /// measurement shape specific to that kind, if any.
-    pub kind: PacketKind,
+    /// measurement shape specific to that type, if any.
+    pub packet_type: PacketType,
 }
 
 /// A single board of the vehicle, as defined by the ADJ.
@@ -130,7 +132,7 @@ mod tests {
                     id: AdjId(1000),
                     board: BoardId(1),
                     name: "bcu_data".to_string(),
-                    kind: PacketKind::Data(vec![sample_measurement()]),
+                    packet_type: PacketType::Data(vec![sample_measurement()]),
                 },
             )]),
         };
@@ -139,7 +141,7 @@ mod tests {
         let Some(packet) = board.packets.get(&AdjId(1000)) else {
             unreachable!("the packet we just inserted should be there");
         };
-        let PacketKind::Data(measurements) = &packet.kind else {
+        let PacketType::Data(measurements) = &packet.packet_type else {
             unreachable!("packet should be Data");
         };
         assert_eq!(measurements.len(), 1);
