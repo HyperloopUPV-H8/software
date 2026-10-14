@@ -1,5 +1,5 @@
 import { Button, Separator, Slider } from "@workspace/ui/components";
-import { ChevronUp } from "@workspace/ui/icons";
+import { ChevronDown } from "@workspace/ui/icons";
 import { useEffect, useRef, useState } from "react";
 import { useStore } from "../../store/store";
 import type { MessageKind } from "../../types/message";
@@ -27,10 +27,10 @@ const readStoredFontSize = () => {
 /**
  * Full message log with per-kind filtering and a clear button.
  *
- * Messages are stored newest-first, so the top of the list is always the
- * latest entry. A floating "Latest" button appears when the user scrolls
- * down into older messages, and new entries auto-scroll to the top only
- * while the user hasn't scrolled away.
+ * Terminal-style log: messages are stored oldest-first, so the latest entry
+ * is at the bottom and the view follows it. A floating "Latest" button
+ * appears once the user scrolls up into history, which also pauses the
+ * auto-scroll until they return to the bottom.
  */
 const Messages = () => {
   const messages      = useStore((s) => s.messages);
@@ -58,21 +58,24 @@ const Messages = () => {
 
   const filtered = messages.filter((m) => activeKinds.has(m.kind));
 
-  // Auto-scroll to top (latest message) when a new entry arrives,
-  // but only if the user hasn't scrolled down into history.
+  // Jumps instantly: a smooth scroll still in flight when the next message
+  // lands would read as "scrolled away" and stall the follow.
+  const scrollToLatest = (behavior: ScrollBehavior = "auto") => {
+    const el = scrollRef.current;
+    el?.scrollTo({ top: el.scrollHeight, behavior });
+  };
+
+  // Follow the bottom as entries arrive, unless the user scrolled up.
   useEffect(() => {
     if (filtered.length > prevLenRef.current && !scrolledAway) {
-      scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+      scrollToLatest();
     }
     prevLenRef.current = filtered.length;
   }, [filtered.length, scrolledAway]);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    setScrolledAway(e.currentTarget.scrollTop > 80);
-  };
-
-  const scrollToLatest = () => {
-    scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    const el = e.currentTarget;
+    setScrolledAway(el.scrollHeight - el.scrollTop - el.clientHeight > 80);
   };
 
   return (
@@ -145,10 +148,10 @@ const Messages = () => {
           <Button
             size="sm"
             variant="secondary"
-            onClick={scrollToLatest}
+            onClick={() => scrollToLatest("smooth")}
             className="fixed bottom-6 right-6 z-10 gap-1.5 shadow-md"
           >
-            <ChevronUp className="size-3.5" />
+            <ChevronDown className="size-3.5" />
             Latest
           </Button>
         )}

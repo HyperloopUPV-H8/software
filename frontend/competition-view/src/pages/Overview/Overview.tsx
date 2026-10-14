@@ -1,5 +1,5 @@
 import { Button } from "@workspace/ui/components";
-import { ChevronUp, MessageSquare } from "@workspace/ui/icons";
+import { ChevronDown, MessageSquare } from "@workspace/ui/icons";
 import {
   BatteryFull,
   Gauge,
@@ -280,9 +280,14 @@ const MessagesPanel = () => {
   const scrollRef  = useRef<HTMLDivElement>(null);
   const prevLenRef = useRef(0);
 
+  const scrollToLatest = (behavior: ScrollBehavior = "auto") => {
+    const el = scrollRef.current;
+    el?.scrollTo({ top: el.scrollHeight, behavior });
+  };
+
   useEffect(() => {
     if (messages.length > prevLenRef.current && !scrolledAway) {
-      scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+      scrollToLatest();
     }
     prevLenRef.current = messages.length;
   }, [messages.length, scrolledAway]);
@@ -303,7 +308,10 @@ const MessagesPanel = () => {
 
       <div
         ref={scrollRef}
-        onScroll={(e) => setScrolledAway(e.currentTarget.scrollTop > 60)}
+        onScroll={(e) => {
+          const el = e.currentTarget;
+          setScrolledAway(el.scrollHeight - el.scrollTop - el.clientHeight > 60);
+        }}
         className="relative min-h-0 flex-1 overflow-y-auto"
       >
         {messages.length === 0 ? (
@@ -313,9 +321,9 @@ const MessagesPanel = () => {
         )}
         {scrolledAway && (
           <Button size="sm" variant="secondary"
-            onClick={() => scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
+            onClick={() => scrollToLatest("smooth")}
             className="sticky bottom-3 left-1/2 z-10 -translate-x-1/2 gap-1 px-2 py-1 text-xs shadow">
-            <ChevronUp className="size-3" /> Latest
+            <ChevronDown className="size-3" /> Latest
           </Button>
         )}
       </div>
