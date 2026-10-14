@@ -1,4 +1,7 @@
-use super::{error::{RepositoryError, GitError}, update::unwrap_repo_path};
+use super::{
+    error::{GitError, RepositoryError},
+    update::unwrap_repo_path,
+};
 use gix::Repository;
 use std::path::PathBuf;
 use tracing::{debug, instrument};
