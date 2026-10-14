@@ -85,6 +85,16 @@ pub enum LoadError {
         type_name: String,
     },
 
+    /// A `"type": "message"` packet's `name` isn't one of
+    /// [`crate::model::MessageLevel`]'s four severities.
+    #[error("board {board:?}, packet {name:?}: not a known message severity")]
+    UnknownMessageSeverity {
+        /// The board declaring this message packet.
+        board: String,
+        /// The packet's name — the text that failed to match a severity.
+        name: String,
+    },
+
     /// A packet or order references a measurement alias that doesn't exist
     /// among that board's own measurements.
     #[error("board {board:?}, packet {name:?}: unknown measurement alias {alias:?}")]

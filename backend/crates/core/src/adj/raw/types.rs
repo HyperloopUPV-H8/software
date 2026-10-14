@@ -8,7 +8,8 @@
 use crate::adj::error::{LoadError, MeasurementError, ProtectionError};
 use crate::adj::info::{AdjInfo, ProtectionTypeInfo};
 use crate::model::{
-    AdjId, Measurement, MeasurementKind, NumericKind, Port, Protection, ProtectionKind, Severity,
+    AdjId, Measurement, MeasurementKind, MessageLevel, NumericKind, Port, Protection,
+    ProtectionKind, Severity,
 };
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -78,7 +79,7 @@ fn default_fault() -> bool {
 pub(crate) struct RawPacket {
     pub(crate) id: u16,
     #[serde(rename = "type")]
-    pub(crate) kind: String,
+    pub(crate) packet_type: String,
     pub(crate) name: String,
     #[serde(default)]
     pub(crate) variables: Vec<String>,
@@ -100,6 +101,21 @@ impl TryFrom<RawGeneralInfo> for AdjInfo {
             addresses.insert(name, addr);
         }
 
+        let message_ids: HashMap<String, AdjId> = raw
+            .message_ids
+            .into_iter()
+            .map(|(name, id)| (name, AdjId(id)))
+            .collect();
+
+        // The reverse of `message_ids`, restricted to the four names
+        // that are actually a `MessageLevel` — see `AdjInfo::message_levels`'s
+        // own doc comment for why this is worth precomputing here rather
+        // than leaving every caller to search `message_ids` by value.
+        let message_levels: HashMap<AdjId, MessageLevel> = MessageLevel::ALL
+            .into_iter()
+            .filter_map(|level| message_ids.get(level.name()).map(|&id| (id, level)))
+            .collect();
+
         Ok(AdjInfo {
             ports: raw
                 .ports
@@ -107,11 +123,8 @@ impl TryFrom<RawGeneralInfo> for AdjInfo {
                 .map(|(name, port)| (name, Port(port)))
                 .collect(),
             addresses,
-            message_ids: raw
-                .message_ids
-                .into_iter()
-                .map(|(name, id)| (name, AdjId(id)))
-                .collect(),
+            message_ids,
+            message_levels,
             protection_types: raw
                 .protection_types
                 .into_iter()
@@ -293,7 +306,7 @@ fn parse_duration(text: &str) -> Result<Duration, ProtectionError> {
 mod tests {
     use super::*;
     use crate::adj::raw::loader::load_board;
-    use crate::model::PacketKind;
+    use crate::model::PacketType;
     use std::net::IpAddr;
 
     fn raw_protection(
@@ -488,7 +501,12 @@ mod tests {
             ports: HashMap::from([("TCP_SERVER".to_string(), 50500u16)]),
             addresses: HashMap::from([("backend".to_string(), "192.168.0.9".to_string())]),
             protection_types,
-            message_ids: HashMap::from([("fault".to_string(), 2u16)]),
+            message_ids: HashMap::from([
+                ("fault".to_string(), 2u16),
+                // Not a `MessageLevel` — shares `message_ids` with the
+                // four severities, but shouldn't appear in `message_levels`.
+                ("add_state_order".to_string(), 5u16),
+            ]),
         };
 
         let Ok(info) = AdjInfo::try_from(raw) else {
@@ -498,7 +516,13 @@ mod tests {
         assert_eq!(info.ports["TCP_SERVER"], Port(50500));
         assert_eq!(info.addresses["backend"], IpAddr::from([192, 168, 0, 9]));
         assert_eq!(info.message_ids["fault"], AdjId(2));
+        assert_eq!(info.message_ids["add_state_order"], AdjId(5));
         assert!(info.protection_types["Range"].is_range);
+
+        // `message_levels` is the reverse of `message_ids`, but only for
+        // the one entry that's actually a `MessageLevel`.
+        assert_eq!(info.message_levels.len(), 1);
+        assert_eq!(info.message_levels[&AdjId(2)], MessageLevel::Fault);
     }
 
     #[test]
@@ -599,7 +623,7 @@ mod tests {
         let protection_count = board
             .packets
             .values()
-            .filter(|p| matches!(p.kind, PacketKind::Protection(_)))
+            .filter(|p| matches!(p.packet_type, PacketType::Protection(_)))
             .count();
         assert_eq!(
             protection_count, 2,
