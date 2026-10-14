@@ -309,7 +309,7 @@ const MessagesPanel = () => {
         {messages.length === 0 ? (
           <p className="text-muted-foreground flex h-full items-center justify-center text-sm">No messages</p>
         ) : (
-          messages.map((msg) => <MessageItem key={msg.id} message={msg} />)
+          messages.map((msg) => <MessageItem key={msg.id} message={msg} size="sm" />)
         )}
         {scrolledAway && (
           <Button size="sm" variant="secondary"

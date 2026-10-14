@@ -1,4 +1,4 @@
-import { Button, Separator } from "@workspace/ui/components";
+import { Button, Separator, Slider } from "@workspace/ui/components";
 import { ChevronUp } from "@workspace/ui/icons";
 import { useEffect, useRef, useState } from "react";
 import { useStore } from "../../store/store";
@@ -12,6 +12,16 @@ const KIND_LABEL: Record<MessageKind, string> = {
   warning: "Warning",
   fault:   "Fault",
   ok:      "Ok",
+};
+
+const FONT_SIZE_KEY = "messages.fontSize";
+const MIN_FONT_SIZE = 12;
+const MAX_FONT_SIZE = 24;
+const DEFAULT_FONT_SIZE = 16;
+
+const readStoredFontSize = () => {
+  const stored = Number(localStorage.getItem(FONT_SIZE_KEY));
+  return stored >= MIN_FONT_SIZE && stored <= MAX_FONT_SIZE ? stored : DEFAULT_FONT_SIZE;
 };
 
 /**
@@ -30,6 +40,11 @@ const Messages = () => {
     new Set(ALL_KINDS),
   );
   const [scrolledAway, setScrolledAway] = useState(false);
+  const [fontSize, setFontSize] = useState(readStoredFontSize);
+
+  useEffect(() => {
+    localStorage.setItem(FONT_SIZE_KEY, String(fontSize));
+  }, [fontSize]);
 
   const scrollRef    = useRef<HTMLDivElement>(null);
   const prevLenRef   = useRef(0);
@@ -79,7 +94,21 @@ const Messages = () => {
           </Button>
         ))}
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground text-xs" aria-hidden>A</span>
+            <Slider
+              value={[fontSize]}
+              onValueChange={([value]) => setFontSize(value)}
+              min={MIN_FONT_SIZE}
+              max={MAX_FONT_SIZE}
+              step={1}
+              className="w-24"
+              aria-label="Message font size"
+            />
+            <span className="text-muted-foreground text-base" aria-hidden>A</span>
+          </div>
+          <Separator orientation="vertical" className="data-[orientation=vertical]:h-4" />
           <span className="text-muted-foreground text-xs">
             {filtered.length} / {messages.length}
           </span>
@@ -106,7 +135,9 @@ const Messages = () => {
             <p className="text-muted-foreground text-sm">No messages</p>
           </div>
         ) : (
-          filtered.map((msg) => <MessageItem key={msg.id} message={msg} />)
+          filtered.map((msg) => (
+            <MessageItem key={msg.id} message={msg} fontSizePx={fontSize} />
+          ))
         )}
 
         {/* Floating "scroll to latest" button */}
