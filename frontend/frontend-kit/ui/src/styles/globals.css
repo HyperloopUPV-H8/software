@@ -178,6 +178,63 @@ body,
   --error: #f87171;
 }
 
+/* Twight uses the mode selector's navy blue (#20274c). */
+.twight {
+  --background: #f4f6fb;
+  --foreground: #20274c;
+  --card: #ffffff;
+  --card-foreground: #20274c;
+  --popover: #ffffff;
+  --popover-foreground: #20274c;
+  --primary: #20274c;
+  --primary-foreground: #ffffff;
+  --secondary: #e6ebf7;
+  --secondary-foreground: #20274c;
+  --muted: #e6ebf7;
+  --muted-foreground: #526184;
+  --accent: #dce4f5;
+  --accent-foreground: #20274c;
+  --border: #c8d2e8;
+  --input: #c8d2e8;
+  --ring: #526fba;
+  --sidebar: #edf1f9;
+  --sidebar-foreground: #20274c;
+  --sidebar-primary: #20274c;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #dce4f5;
+  --sidebar-accent-foreground: #20274c;
+  --sidebar-border: #c8d2e8;
+  --sidebar-ring: #526fba;
+}
+
+.twight.dark {
+  --background: #11162d;
+  --foreground: #edeef0;
+  --card: #1a203d;
+  --card-foreground: #edeef0;
+  --popover: #20274c;
+  --popover-foreground: #edeef0;
+  --primary: #a6bcff;
+  --primary-foreground: #20274c;
+  --secondary: #20274c;
+  --secondary-foreground: #edeef0;
+  --muted: #20274c;
+  --muted-foreground: #aab8d8;
+  --accent: #2c3863;
+  --accent-foreground: #edf2ff;
+  --border: #36436b;
+  --input: #36436b;
+  --ring: #a6bcff;
+  --sidebar: #20274c;
+  --sidebar-foreground: #edeef0;
+  --sidebar-primary: #a6bcff;
+  --sidebar-primary-foreground: #20274c;
+  --sidebar-accent: #2c3863;
+  --sidebar-accent-foreground: #edf2ff;
+  --sidebar-border: #36436b;
+  --sidebar-ring: #a6bcff;
+}
+
 @theme inline {
   /* Main colors */
   --color-background: var(--background);
