@@ -69,16 +69,14 @@ const MESSAGE_VARIANTS = [
 
 const randomMessage = () => {
   const base = MESSAGE_VARIANTS[Math.floor(Math.random() * MESSAGE_VARIANTS.length)];
+  // Only the reading varies; bounds and expected values are fixed protection
+  // limits, so jittering them would produce messages the pod can't produce.
+  const data = base.payload?.data;
   const payload =
-    typeof base.payload === "object" && typeof base.payload.data === "object"
+    typeof data === "object" && typeof data.value === "number"
       ? {
           ...base.payload,
-          data: Object.fromEntries(
-            Object.entries(base.payload.data).map(([k, v]) => [
-              k,
-              typeof v === "number" ? Number((v * (0.9 + Math.random() * 0.2)).toFixed(2)) : v,
-            ]),
-          ),
+          data: { ...data, value: Number((data.value * (0.9 + Math.random() * 0.2)).toFixed(2)) },
         }
       : base.payload;
 
