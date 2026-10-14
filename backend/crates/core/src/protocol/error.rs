@@ -36,18 +36,48 @@ pub enum DecodeError {
         max: usize,
     },
 
-    /// A looked-up packet exists, but isn't the kind this function expects
+    /// A free-text field's bytes weren't valid UTF-8.
+    #[error("string field wasn't valid UTF-8: {0:?}")]
+    InvalidUtf8(Vec<u8>),
+
+    /// A looked-up packet exists, but isn't the type this function expects
     /// (e.g. `packet::data::decode` found an id that resolves to an
     /// `Order`).
-    #[error("packet {id:?} isn't the expected kind")]
-    WrongKind {
-        /// The packet whose kind didn't match.
+    #[error("packet {id:?} isn't the expected type")]
+    WrongPacketType {
+        /// The packet whose type didn't match.
         id: AdjId,
     },
 }
 
+impl PartialEq for DecodeError {
+    // `Io`'s `std::io::Error` doesn't implement `PartialEq`, so this can't
+    // be derived — compare by `ErrorKind` instead for that variant.
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::UnknownId(a), Self::UnknownId(b)) => a == b,
+            (Self::UnexpectedEof, Self::UnexpectedEof) => true,
+            (Self::Io(a), Self::Io(b)) => a.kind() == b.kind(),
+            (
+                Self::InvalidEnumValue {
+                    index: a_index,
+                    options: a_options,
+                },
+                Self::InvalidEnumValue {
+                    index: b_index,
+                    options: b_options,
+                },
+            ) => a_index == b_index && a_options == b_options,
+            (Self::UnterminatedString { max: a }, Self::UnterminatedString { max: b }) => a == b,
+            (Self::InvalidUtf8(a), Self::InvalidUtf8(b)) => a == b,
+            (Self::WrongPacketType { id: a }, Self::WrongPacketType { id: b }) => a == b,
+            _ => false,
+        }
+    }
+}
+
 /// An error encoding a packet into bytes.
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, thiserror::Error, PartialEq)]
 pub enum EncodeError {
     /// No packet is declared with this id.
     #[error("unknown packet id {0:?}")]
@@ -81,12 +111,25 @@ pub enum EncodeError {
         max: f64,
     },
 
-    /// A looked-up packet exists, but isn't the kind this function expects
+    /// A looked-up packet exists, but isn't the type this function expects
     /// (e.g. `packet::order::encode` found an id that resolves to a
     /// `Data` packet).
-    #[error("packet {id:?} isn't the expected kind")]
-    WrongKind {
-        /// The packet whose kind didn't match.
+    #[error("packet {id:?} isn't the expected type")]
+    WrongPacketType {
+        /// The packet whose type didn't match.
         id: AdjId,
     },
+
+    /// A string field's content plus its terminator wouldn't fit in the
+    /// wire format's maximum length.
+    #[error("string content plus its terminator doesn't fit in {max} byte(s)")]
+    StringTooLong {
+        /// The field's maximum length, terminator included.
+        max: usize,
+    },
+
+    /// A string field contains an embedded NUL byte, which would be
+    /// misread as an early terminator on the wire.
+    #[error("string contains an embedded NUL byte")]
+    EmbeddedNulByte,
 }

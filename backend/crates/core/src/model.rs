@@ -17,11 +17,12 @@ mod packet;
 mod protections;
 mod value;
 
-pub use board::{Board, PacketDef, PacketKind, PodData};
+pub use board::{Board, PacketDef, PacketType, PodData};
 pub use id::{AdjId, BoardId, MacAddress, Port};
 pub use measurement::{Measurement, MeasurementKind, NumericKind, Range};
 pub use packet::{
-    DataPacket, MessageLevel, MessagePacket, OrderPacket, Packet, ProtectionPacket, ShortTimestamp, DataOrderPacket
+    Data, DataOrderPacket, DataPacket, MessageLevel, MessagePacket, Order, OrderPacket, Packet,
+    PacketTypeTag, ProtectionPacket, ShortTimestamp,
 };
 pub use protections::{Protection, ProtectionKind, Severity};
 pub use value::Value;

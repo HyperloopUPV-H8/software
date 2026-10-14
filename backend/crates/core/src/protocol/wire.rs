@@ -45,10 +45,7 @@ pub fn byte_width(kind: &MeasurementKind) -> usize {
             NumericKind::U32 | NumericKind::I32 | NumericKind::F32 => 4,
             NumericKind::U64 | NumericKind::I64 | NumericKind::F64 => 8,
         },
-        // Not yet confirmed against firmware — see `decode_boolean`.
-        MeasurementKind::Boolean => {
-            todo!("confirm the wire width firmware uses for a boolean measurement")
-        }
+        MeasurementKind::Boolean => 1,
         MeasurementKind::Enum { .. } => 1,
     }
 }
@@ -128,19 +125,20 @@ fn numeric_range(wire_type: NumericKind) -> (f64, f64) {
     }
 }
 
-/// Decodes a boolean value.
-///
-/// Wire width isn't settled yet — not specified anywhere in the ADJv3
-/// spec read so far. Confirm against firmware before implementing.
+/// Decodes a boolean value: a single byte, zero for `false`, any other
+/// value for `true`.
 pub fn decode_boolean(bytes: &[u8]) -> Result<Value, DecodeError> {
-    let _ = bytes;
-    todo!("confirm the wire width firmware uses for a boolean measurement")
+    let &byte = bytes.first().ok_or(DecodeError::UnexpectedEof)?;
+    Ok(Value::Bool(byte != 0))
 }
 
-/// Encodes a boolean value.
+/// Encodes a boolean value as a single byte: `0x00` for `false`, `0x01`
+/// for `true`.
 pub fn encode_boolean(value: &Value) -> Result<Vec<u8>, EncodeError> {
-    let _ = value;
-    todo!("confirm the wire width firmware uses for a boolean measurement")
+    let Value::Bool(value) = value else {
+        return Err(EncodeError::TypeMismatch);
+    };
+    Ok(vec![u8::from(*value)])
 }
 
 /// Decodes an enum value: a single `uint8` byte, the index into
@@ -203,7 +201,10 @@ mod tests {
         ];
 
         for (wire_type, expected) in cases {
-            assert_eq!(byte_width(&MeasurementKind::Numeric { wire_type }), expected);
+            assert_eq!(
+                byte_width(&MeasurementKind::Numeric { wire_type }),
+                expected
+            );
         }
     }
 
@@ -215,6 +216,56 @@ mod tests {
             }),
             1
         );
+    }
+
+    #[test]
+    fn byte_width_of_a_boolean_is_one() {
+        assert_eq!(byte_width(&MeasurementKind::Boolean), 1);
+    }
+
+    #[test]
+    fn decodes_a_zero_byte_as_false() {
+        let Ok(value) = decode_boolean(&[0x00]) else {
+            unreachable!("decoding a zero byte should succeed");
+        };
+        assert_eq!(value, Value::Bool(false));
+    }
+
+    #[test]
+    fn decodes_any_nonzero_byte_as_true() {
+        let Ok(value) = decode_boolean(&[0xFF]) else {
+            unreachable!("decoding a nonzero byte should succeed");
+        };
+        assert_eq!(value, Value::Bool(true));
+    }
+
+    #[test]
+    fn decode_boolean_rejects_empty_input() {
+        assert!(matches!(
+            decode_boolean(&[]),
+            Err(DecodeError::UnexpectedEof)
+        ));
+    }
+
+    #[test]
+    fn boolean_round_trips_through_encode_then_decode() {
+        for value in [true, false] {
+            let Ok(bytes) = encode_boolean(&Value::Bool(value)) else {
+                unreachable!("encoding a well-formed boolean should succeed");
+            };
+            let Ok(decoded) = decode_boolean(&bytes) else {
+                unreachable!("decoding what we just encoded should succeed");
+            };
+            assert_eq!(decoded, Value::Bool(value));
+        }
+    }
+
+    #[test]
+    fn encode_boolean_rejects_the_wrong_value_variant() {
+        assert!(matches!(
+            encode_boolean(&Value::Number(1.0)),
+            Err(EncodeError::TypeMismatch)
+        ));
     }
 
     #[test]
