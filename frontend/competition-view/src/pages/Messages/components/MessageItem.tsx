@@ -12,8 +12,8 @@ const KIND_BADGE_CLASS: Record<MessageKind, string> = {
 
 const KIND_ROW_CLASS: Record<MessageKind, string> = {
   info:    "",
-  warning: "bg-amber-50/40 dark:bg-amber-900/10",
-  fault:   "bg-red-50/40   dark:bg-red-900/10",
+  warning: "bg-amber-100 dark:bg-amber-900/10",
+  fault:   "bg-red-100   dark:bg-red-900/10",
   ok:      "",
 };
 
