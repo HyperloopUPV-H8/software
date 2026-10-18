@@ -44,14 +44,28 @@ pub struct Adj {
     pub info: AdjInfo,
 }
 
-/// Updates the ADJ repository, loads its data, and returns its full commit hash.
+/// The result of [`auto_adj`]: the loaded ADJ data and the checked-out commit hash.
+#[cfg(feature = "git")]
+#[derive(Debug, Clone)]
+pub struct AutoAdj {
+    /// Vehicle data
+    pub adj: Adj,
+    /// Full commit hash of the repository checkout used to load the ADJ.
+    pub hash: String,
+}
+
+/// Updates the ADJ repository and returns an [`AutoAdj`] containing the loaded
+/// data and the full commit hash of the checkout used to load it.
 ///
 /// `path` identifies the repository directory, not its parent. If omitted,
 /// the platform's user cache directory is used.
 ///
 /// Online, the repository is replaced and local edits and commits are discarded.
 /// Offline, the current cached checkout is loaded without switching branches,
-/// so it may differ from `branch`. Clone failures do not fall back to the cache.
+/// so it may differ from `branch`; `hash` is the full commit hash of its HEAD.
+/// If no cached repository is available offline, or a Git operation fails,
+/// returns [`LoadError::Git`] instead of an [`AutoAdj`], so no hash is returned.
+/// Clone failures do not fall back to the cache.
 ///
 /// This performs blocking network and filesystem operations. Call during startup,
 /// before readers use ADJ, with only one updater at a time.
@@ -63,11 +77,11 @@ pub struct Adj {
 /// Loading failures do not restore the previous cache.
 #[cfg(feature = "git")]
 #[instrument(level = "debug")]
-pub fn auto_adj(path: Option<PathBuf>, branch: &str) -> Result<(Adj, String), LoadError> {
+pub fn auto_adj(path: Option<PathBuf>, branch: &str) -> Result<AutoAdj, LoadError> {
     let repo_path = unwrap_repo_path(path)?;
     let hash = update_adj(Some(repo_path.clone()), branch)?;
     let adj = load_from_dir(&repo_path)?;
 
     info!(path = ?repo_path, %hash, "ADJ loaded");
-    Ok((adj, hash))
+    Ok(AutoAdj { adj, hash })
 }
