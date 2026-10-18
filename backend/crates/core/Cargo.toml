@@ -29,7 +29,14 @@ serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
 tracing.workspace = true
-tokio = { workspace = true, optional = true, features = ["macros", "rt-multi-thread"] }
+# `io-util` is what `net` needs on top of the workspace's own list
+# (`net`, `sync`, `time`...): `AsyncReadExt`/`AsyncWriteExt`, i.e. reading
+# a TCP stream into a buffer at all.
+tokio = { workspace = true, optional = true, features = [
+    "macros",
+    "rt-multi-thread",
+    "io-util",
+] }
 tracing-subscriber = { workspace = true, optional = true , features = ["env-filter", "fmt"]}
 tracing-appender = { workspace = true, optional = true }
 ntp_usg-server = { version = "5.0.0", optional = true, features = ["ipv4", "tokio"] }
