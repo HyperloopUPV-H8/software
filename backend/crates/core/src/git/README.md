@@ -15,7 +15,8 @@ availability.
 
 ### Online
 
-Online updates replace the local checkout and do not preserve local edits or commits.
+Online updates require a non-empty branch. They replace the local checkout and
+do not preserve local edits or commits.
 
 - Shallow-clone the requested branch into a temporary directory beside ADJ.
 - Complete checkout and read its commit hash before touching the cache.
@@ -34,6 +35,16 @@ existing cache, merge, or branch switch is needed because the checkout is replac
 - Otherwise, return `ADJ is not available locally and cannot be downloaded`.
 
 The cached branch may differ from the requested branch when offline.
+
+### Empty Branch
+
+Passing `branch = ""` skips downloading and replacing ADJ, even when online.
+
+- If a cached repository exists, return its current commit hash without updating
+  or switching branches, preserving local edits and commits.
+- Otherwise, return `GitError::UnavailableOffline`, even if connectivity is available.
+
+The connectivity probe still runs when the branch is empty.
 
 ## Other Helpers
 

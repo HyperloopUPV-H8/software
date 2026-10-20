@@ -10,15 +10,19 @@ use tracing::{debug, info, instrument, warn};
 
 const ADJ_URL: &str = "https://github.com/Hyperloop-UPV/adj.git";
 
-/// Downloads the requested ADJ branch, replacing the application-managed cache.
+/// Updates ADJ to the requested branch or uses the existing application-managed cache.
 ///
 /// `path` is the repository directory, not its parent. If omitted, it defaults to
 /// `<cache directory>/hyperloop-control-station/adj`. `branch` selects the branch
-/// to clone when the connectivity probe succeeds.
+/// to clone when non-empty and the connectivity probe succeeds.
 ///
-/// Online, local edits and commits are discarded only after a fresh checkout
-/// succeeds. Offline, the current cached checkout is used without switching
-/// branches, so it may differ from `branch`. Returns its full commit hash.
+/// With a non-empty branch and connectivity, local edits and commits are discarded
+/// only after a fresh checkout succeeds. Offline, the current cached checkout is
+/// used without switching branches, so it may differ from `branch`.
+///
+/// An empty `branch` ("") uses the cached checkout without updating or switching
+/// branches, preserving local edits and commits regardless of connectivity.
+/// The connectivity probe still runs. Returns the checked-out commit's full hash.
 ///
 /// This performs blocking network and filesystem operations. Call during startup,
 /// before readers use ADJ, with only one updater at a time. Replacement uses two
