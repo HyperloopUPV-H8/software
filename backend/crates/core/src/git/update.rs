@@ -35,14 +35,21 @@ const ADJ_URL: &str = "https://github.com/Hyperloop-UPV/adj.git";
 pub fn update_adj(path: Option<PathBuf>, branch: &str) -> Result<String, GitError> {
     let (repo, dir) = adj_exists_repo(path)?;
 
-    if check_internet_connection() {
+    if check_internet_connection() && branch != "" {
         info!(path = ?dir, branch, "starting ADJ update");
         // Release repository handles before moving the existing cache directory.
         drop(repo);
         git_replace(&dir, branch, ADJ_URL)
     } else if let Some(repo) = repo {
-        warn!(path = ?dir, requested_branch = branch,
-            "connectivity probe failed; using cached ADJ without switching branches");
+        
+        if branch == "" {
+            warn!(path = ?dir, requested_branch = branch,
+                "branch not specified; using cached ADJ with current branch");
+
+        } else {
+            warn!(path = ?dir, requested_branch = branch,
+                "connectivity probe failed; using cached ADJ without switching branches");
+        }
         get_commit_hash(&repo)
     } else {
         Err(GitError::UnavailableOffline)
