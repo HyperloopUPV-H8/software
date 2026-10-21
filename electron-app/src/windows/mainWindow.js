@@ -51,9 +51,7 @@ function createWindow(screenWidth, screenHeight, initialView) {
   const window = mainWindow;
   setWindowMenu(window);
 
-  // Right-click anywhere in the view to reach About — only offered in
-  // logging-view, since the About window credits its author specifically
-  // (not the Control Station as a whole).
+  // Keep Logging View's existing right-click shortcut to application information.
   mainWindow.webContents.on("context-menu", (_event, _params) => {
     if (currentView !== "logging-view") return;
     const contextMenu = Menu.buildFromTemplate([

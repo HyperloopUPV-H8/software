@@ -21,17 +21,31 @@ Creates native menus for the main window, backend logs, and About window. The mo
 
 The selector retains **File > Reload / Return to Selector / Exit**, with Return to Selector disabled to prevent opening another selector.
 
-### Tools Menu
+### Edit Menu
 
+- **Undo**, **Redo**, **Cut**, **Copy**, **Paste** - Native editing commands and their platform shortcuts. Select All is intentionally omitted.
+
+### View Menu
+
+- **Reload** - Reloads the invoking window (also available in Control Station)
 - **Zoom In** (`CmdOrCtrl+Plus`) - Increases zoom of the focused window
 - **Zoom Out** (`CmdOrCtrl+-`) - Decreases zoom of the focused window
 - **Reset Zoom** (`CmdOrCtrl+0`) - Restores the focused window to 100% zoom
 - **Toggle Full Screen** (`F11`) - Toggles fullscreen on the focused window
-- **Toggle DevTools** (`F12`) - Opens/closes Chrome DevTools for the focused window
+- **Development > Toggle DevTools** (`F12`) - Opens/closes Chrome DevTools for the focused window
+
+### Window Menu
+
+- **Show Main Window** - Restores and focuses the active mode's main window
+- **Show Backend Logs** - Reopens or focuses backend logs in Testing and Competition. Keeps the latest 2000 messages, including output received while the window was closed. Reopening does not restart the backend.
+- **Minimize** - Minimizes the focused window
 
 ### Help Menu
 
-- **About** - Displays application information dialog
+- **About Control Station** - Shows application information, the installed version, and Logging View attribution from every mode
+- **Check for Updates...** - Checks for a newer release and reports the result. Updates download automatically; installation requires choosing Restart. Development builds show an informational message without contacting release servers.
+
+The selector keeps its existing Tools and Help menus; the additional menus above apply to the other windows.
 
 ## Functions
 

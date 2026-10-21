@@ -50,9 +50,7 @@ describe("mode service startup", () => {
           }),
       );
       const opening = openMode(1280, 800, mode);
-      expect(startBackend).toHaveBeenCalledWith(
-        createLogWindow.mock.results[0].value,
-      );
+      expect(startBackend).toHaveBeenCalledOnce();
       expect(loadView).not.toHaveBeenCalled();
       ready();
       await opening;

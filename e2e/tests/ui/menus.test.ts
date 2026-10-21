@@ -1,6 +1,125 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "../../fixtures/electron";
 
+for (const view of ["Testing View", "Competition View"]) {
+  test(`Window reopens backend logs with history in ${view}`, async ({
+    app,
+  }) => {
+    test.setTimeout(60_000);
+    if (view === "Competition View") {
+      const available = await app.evaluate(({ Menu }) =>
+        Menu.getApplicationMenu()!.items[0].submenu!.items.some(
+          (item) => item.label === "Competition View",
+        ),
+      );
+      test.skip(!available, "Competition View is not installed");
+      await app.evaluate(({ BrowserWindow, Menu }) => {
+        const item = Menu.getApplicationMenu()!.items[0].submenu!.items.find(
+          (item) => item.label === "Competition View",
+        )!;
+        item.click(item, BrowserWindow.getAllWindows()[0], {} as never);
+      });
+      await expect
+        .poll(
+          () =>
+            app
+              .windows()
+              .some((window) =>
+                window.url().includes("/competition-view/index.html"),
+              ),
+          { timeout: 15_000 },
+        )
+        .toBe(true);
+      await expect
+        .poll(() =>
+          app
+            .windows()
+            .some((window) =>
+              window.url().includes("/testing-view/index.html"),
+            ),
+        )
+        .toBe(false);
+    }
+
+    const logs = app
+      .windows()
+      .find((window) => window.url().includes("/log-viewer/index.html"))!;
+    await expect(logs.locator("#log-container")).not.toBeEmpty();
+    const firstLine = await logs
+      .locator("#log-container > div")
+      .first()
+      .innerText();
+    await app.evaluate(({ BrowserWindow }) => {
+      BrowserWindow.getAllWindows()
+        .find((window) =>
+          window.webContents.getURL().includes("/log-viewer/index.html"),
+        )!
+        .close();
+    });
+    const opened = app.waitForEvent("window");
+    await app.evaluate(({ BrowserWindow, Menu }) => {
+      const menu = Menu.getApplicationMenu()!;
+      menu.items
+        .find((item) => item.label === "Window")!
+        .submenu!.emit("menu-will-show");
+      const item = menu.getMenuItemById("show-backend-logs")!;
+      if (!item.enabled) throw new Error("Backend logs should be available");
+      item.click(item, BrowserWindow.getAllWindows()[0], {} as never);
+    });
+    const reopened = await opened;
+    await expect(reopened).toHaveTitle("Backend Logs");
+    await expect(reopened.locator("#log-container")).toContainText(firstLine);
+    expect(
+      await app.evaluate(
+        ({ BrowserWindow }) =>
+          BrowserWindow.getAllWindows().filter((window) =>
+            window.webContents.getURL().includes("/log-viewer/index.html"),
+          ).length,
+      ),
+    ).toBe(1);
+  });
+}
+
+test("English menus and About are available in Testing View", async ({
+  app,
+}) => {
+  const menus = await app.evaluate(({ Menu }) => {
+    const menu = Menu.getApplicationMenu()!;
+    return {
+      labels: menu.items.map((item) => item.label),
+      edit: menu.items
+        .find((item) => item.label === "Edit")!
+        .submenu!.items.map((item) => item.role)
+        .filter(Boolean),
+      help: menu.items
+        .find((item) => item.label === "Help")!
+        .submenu!.items.map((item) => item.label),
+    };
+  });
+  expect(menus.labels).toEqual([
+    "Control Station",
+    "Edit",
+    "View",
+    "Window",
+    "Help",
+  ]);
+  expect(menus.edit).toEqual(["undo", "redo", "cut", "copy", "paste"]);
+  expect(menus.help).toEqual(["About Control Station", "Check for Updates..."]);
+  const opened = app.waitForEvent("window");
+  await app.evaluate(({ BrowserWindow, Menu }) => {
+    const item = Menu.getApplicationMenu()!.items.find(
+      (item) => item.label === "Help",
+    )!.submenu!.items[0];
+    const main = BrowserWindow.getAllWindows().find((window) =>
+      window.webContents.getURL().includes("/testing-view/"),
+    )!;
+    item.click(item, main, {} as never);
+  });
+  const about = await opened;
+  await expect(about).toHaveTitle("About Control Station");
+  await expect(about.locator("#app-version")).toContainText("Version");
+});
+
 async function openAdjFromRenderer(page: Page) {
   await page.evaluate(() => {
     const { electronAPI } = window as unknown as {

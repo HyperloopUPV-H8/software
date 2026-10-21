@@ -1,6 +1,6 @@
 /**
  * @module windows/aboutWindow
- * @description Small "About" window — team logo, SW logo, and author credit.
+ * @description Application information, installed version, and Logging View credit.
  * Reachable via the main window's right-click context menu and the
  * Help > About application menu item.
  */
@@ -26,14 +26,14 @@ function showAboutWindow(parentWindow) {
   }
 
   aboutWindow = new BrowserWindow({
-    width: 380,
-    height: 440,
+    width: 480,
+    height: 480,
     resizable: false,
     minimizable: false,
     maximizable: false,
     modal: !!parentWindow,
     parent: parentWindow ?? undefined,
-    title: "About Logging View",
+    title: "About Control Station",
     backgroundColor: "#111111",
     webPreferences: {
       preload: path.join(getAppPath(), "preload.js"),

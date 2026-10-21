@@ -9,7 +9,9 @@ import fs from "fs";
 import path from "path";
 import { getAppPath } from "../utils/paths.js";
 import { showAboutWindow } from "../windows/aboutWindow.js";
-import { getCurrentView } from "../windows/mainWindow.js";
+import { getCurrentView, getMainWindow } from "../windows/mainWindow.js";
+import { showLogWindow } from "../windows/logWindow.js";
+import { checkForUpdates } from "../app/updater.js";
 
 /**
  * Creates the Control Station menu, or the original File menu for the selector.
@@ -69,9 +71,27 @@ function createMenu({ isSelector = false } = {}) {
         },
       ],
     },
+    ...(!isSelector
+      ? [
+          {
+            label: "Edit",
+            submenu: [
+              { role: "undo", label: "Undo" },
+              { role: "redo", label: "Redo" },
+              { type: "separator" },
+              { role: "cut", label: "Cut" },
+              { role: "copy", label: "Copy" },
+              { role: "paste", label: "Paste" },
+            ],
+          },
+        ]
+      : []),
     {
-      label: "Tools",
+      label: isSelector ? "Tools" : "View",
       submenu: [
+        ...(!isSelector
+          ? [{ role: "reload", label: "Reload" }, { type: "separator" }]
+          : []),
         { role: "zoomIn", label: "Zoom In" },
         { role: "zoomOut", label: "Zoom Out" },
         { role: "resetZoom", label: "Reset Zoom" },
@@ -85,35 +105,93 @@ function createMenu({ isSelector = false } = {}) {
             }
           },
         },
-        {
-          label: "Toggle DevTools",
-          accelerator: "F12",
-          click: (_, browserWindow) => {
-            if (browserWindow) {
-              browserWindow.webContents.toggleDevTools();
-            }
-          },
-        },
+        ...(isSelector
+          ? [
+              {
+                role: "toggleDevTools",
+                label: "Toggle DevTools",
+                accelerator: "F12",
+              },
+            ]
+          : [
+              {
+                label: "Development",
+                submenu: [
+                  {
+                    role: "toggleDevTools",
+                    label: "Toggle DevTools",
+                    accelerator: "F12",
+                  },
+                ],
+              },
+            ]),
       ],
     },
+    ...(!isSelector
+      ? [
+          {
+            label: "Window",
+            submenu: [
+              {
+                label: "Show Main Window",
+                click: () => {
+                  const window = getMainWindow();
+                  if (!window || window.isDestroyed()) return;
+                  if (window.isMinimized()) window.restore();
+                  window.show();
+                  window.focus();
+                },
+              },
+              {
+                id: "show-backend-logs",
+                label: "Show Backend Logs",
+                enabled: hasBackendView(),
+                click: () => {
+                  if (hasBackendView()) showLogWindow();
+                },
+              },
+              { type: "separator" },
+              { role: "minimize", label: "Minimize" },
+            ],
+          },
+        ]
+      : []),
     {
       label: "Help",
       submenu: [
         {
-          label: "About",
-          // Only meaningful in logging-view — the About window credits its
-          // author specifically, not the Control Station as a whole.
-          click: () => {
-            if (getCurrentView() !== "logging-view") return;
-            showAboutWindow(BrowserWindow.getFocusedWindow());
-          },
+          label: isSelector ? "About" : "About Control Station",
+          click: (_, window) =>
+            showAboutWindow(window ?? BrowserWindow.getFocusedWindow()),
         },
+        ...(!isSelector
+          ? [
+              {
+                label: "Check for Updates...",
+                click: (_, window) =>
+                  checkForUpdates(window ?? BrowserWindow.getFocusedWindow()),
+              },
+            ]
+          : []),
       ],
     },
   ];
 
   const menu = Menu.buildFromTemplate(template);
+  if (!isSelector) {
+    // Menus outlive view changes, so refresh availability whenever Window opens.
+    const windowMenu = menu.items.find(
+      (item) => item.label === "Window",
+    ).submenu;
+    windowMenu.on("menu-will-show", () => {
+      menu.getMenuItemById("show-backend-logs").enabled = hasBackendView();
+    });
+  }
   return menu;
+}
+
+function hasBackendView() {
+  return ["testing-view", "competition-view"].includes(getCurrentView());
 }
 
 /** Assign a menu to a window; macOS uses the focused window's application menu. */

@@ -154,7 +154,7 @@ async function startServices(screenWidth, screenHeight, view) {
     logWindow.show(); // Show the log window
 
     try {
-      await startBackend(logWindow);
+      await startBackend();
       logger.electron.header("Backend process spawned");
     } catch (err) {
       logger.electron.error("Failed to start backend:", err);
