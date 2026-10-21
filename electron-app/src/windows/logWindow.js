@@ -2,6 +2,7 @@ import { BrowserWindow } from "electron";
 import path from "path";
 
 import { getAppPath } from "../utils/paths.js";
+import { setWindowMenu } from "../menu/menu.js";
 
 // Get the application root path
 const appPath = getAppPath();
@@ -19,6 +20,8 @@ export const createLogWindow = (screenWidth, screenHeight) => {
       nodeIntegration: false,
     },
   });
+
+  setWindowMenu(logWindow);
 
   const logFilePath = path.join(appPath, "src", "log-viewer", "index.html");
   logWindow.loadFile(logFilePath);

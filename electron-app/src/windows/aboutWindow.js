@@ -9,6 +9,7 @@ import { BrowserWindow } from "electron";
 import path from "path";
 import { getAppPath } from "../utils/paths.js";
 import { logger } from "../utils/logger.js";
+import { setWindowMenu } from "../menu/menu.js";
 
 let aboutWindow = null;
 
@@ -41,7 +42,7 @@ function showAboutWindow(parentWindow) {
     },
   });
 
-  aboutWindow.setMenuBarVisibility(false);
+  setWindowMenu(aboutWindow);
 
   const aboutPath = path.join(getAppPath(), "renderer", "about", "index.html");
   aboutWindow.loadFile(aboutPath).catch((err) => {

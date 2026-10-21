@@ -9,6 +9,7 @@ import fs from "fs";
 import path from "path";
 import { getAppPath } from "../utils/paths.js";
 import { showAboutWindow } from "./aboutWindow.js";
+import { setWindowMenu } from "../menu/menu.js";
 
 // Get the application root path
 const appPath = getAppPath();
@@ -47,6 +48,9 @@ function createWindow(screenWidth, screenHeight, initialView) {
     backgroundColor: "#1a1a1a",
   });
 
+  const window = mainWindow;
+  setWindowMenu(window);
+
   // Right-click anywhere in the view to reach About — only offered in
   // logging-view, since the About window credits its author specifically
   // (not the Control Station as a whole).
@@ -83,7 +87,7 @@ function createWindow(screenWidth, screenHeight, initialView) {
 
   // Clear window reference when closed
   mainWindow.on("closed", () => {
-    mainWindow = null;
+    if (mainWindow === window) mainWindow = null;
   });
 
   return mainWindow;
@@ -124,9 +128,7 @@ function loadView(view, opts = {}) {
       "logging-view": "Logging View",
       "adj-view": "ADJ Viewer",
     };
-    mainWindow.setTitle(
-      `Hyperloop Control Station - ${titles[view] ?? view}`,
-    );
+    mainWindow.setTitle(`Hyperloop Control Station - ${titles[view] ?? view}`);
   } else {
     // Log error and show dialog if view not found
     console.error(`View not found: ${viewPath}`);

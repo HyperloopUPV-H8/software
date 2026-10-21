@@ -1,27 +1,47 @@
 /**
  * @module menu
  * @description Application menu creation and management for the Electron application.
- * Defines menu structure with File, Tools, and Help sections with keyboard shortcuts and actions.
+ * Defines window menus and shortcuts for navigating the Control Station.
  */
 
 import { BrowserWindow, Menu, app } from "electron";
+import fs from "fs";
+import path from "path";
+import { getAppPath } from "../utils/paths.js";
 import { showAboutWindow } from "../windows/aboutWindow.js";
 import { getCurrentView } from "../windows/mainWindow.js";
 
 /**
- * Creates the application menu with File, Tools, and Help sections.
- * Includes menu items for reloading, exiting, toggling fullscreen/DevTools, and app information.
- * Menu actions operate on the currently focused window, so the menu can be
- * shared by all windows via Menu.setApplicationMenu.
- * View switching is no longer available since the mode is selected at startup.
+ * Creates the Control Station menu, or the original File menu for the selector.
+ * Only views included in the installed build are offered as destinations.
  * @returns {Menu} The built application menu.
  * @example
  * Menu.setApplicationMenu(createMenu());
  */
-function createMenu() {
+function createMenu({ isSelector = false } = {}) {
+  const views = [
+    { mode: "testing", label: "Testing View" },
+    { mode: "competition", label: "Competition View" },
+    { mode: "flashing", label: "Flashing View" },
+    { mode: "logging", label: "Logging View" },
+    { mode: "adj", label: "ADJ Viewer" },
+  ];
+  const viewItems = isSelector
+    ? []
+    : views
+        .filter(({ mode }) =>
+          fs.existsSync(
+            path.join(getAppPath(), "renderer", `${mode}-view`, "index.html"),
+          ),
+        )
+        .map(({ mode, label }) => ({
+          label,
+          click: () => app.emit("switch-mode", mode),
+        }));
+
   const template = [
     {
-      label: "File",
+      label: isSelector ? "File" : "Control Station",
       submenu: [
         {
           label: "Reload",
@@ -32,14 +52,18 @@ function createMenu() {
             }
           },
         },
+        ...(viewItems.length
+          ? [{ type: "separator" }, ...viewItems, { type: "separator" }]
+          : []),
         {
           label: "Return to Selector",
           accelerator: "CmdOrCtrl+Shift+S",
+          enabled: !isSelector,
           click: () => app.emit("return-to-selector"),
         },
         { type: "separator" },
         {
-          label: "Exit",
+          label: isSelector ? "Exit" : "Quit",
           accelerator: "CmdOrCtrl+Q",
           click: () => app.quit(),
         },
@@ -92,4 +116,15 @@ function createMenu() {
   return menu;
 }
 
-export { createMenu };
+/** Assign a menu to a window; macOS uses the focused window's application menu. */
+function setWindowMenu(window, options) {
+  const menu = createMenu(options);
+  if (process.platform === "darwin") {
+    window.on("focus", () => Menu.setApplicationMenu(menu));
+    if (window.isFocused()) Menu.setApplicationMenu(menu);
+  } else {
+    window.setMenu(menu);
+  }
+}
+
+export { createMenu, setWindowMenu };

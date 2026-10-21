@@ -4,7 +4,7 @@ Application menu system for the Electron application. Provides the native menu b
 
 ## Overview
 
-Creates the native application menu bar shared by all windows. Menu actions operate on the currently focused window, so shortcuts like fullscreen and DevTools work in the main window, the mode selector, and the log window alike.
+Creates native menus for the main window, backend logs, and About window. The mode selector keeps its original File menu. Menu actions such as reload, fullscreen, and DevTools operate on the window that invoked them.
 
 ## Files
 
@@ -12,11 +12,14 @@ Creates the native application menu bar shared by all windows. Menu actions oper
 
 ## Menu Structure
 
-### File Menu
+### Control Station Menu
 
 - **Reload** (`CmdOrCtrl+R`) - Reloads the focused window
+- **Testing View**, **Competition View**, **Flashing View**, **Logging View**, **ADJ Viewer** - Switches directly to the chosen mode, stopping the previous services and starting those required by the destination. Only views included in the build are listed.
 - **Return to Selector** (`CmdOrCtrl+Shift+S`) - Stops services and returns to the mode selector
-- **Exit** (`CmdOrCtrl+Q`) - Quits the application
+- **Quit** (`CmdOrCtrl+Q`) - Quits the application
+
+The selector retains **File > Reload / Return to Selector / Exit**, with Return to Selector disabled to prevent opening another selector.
 
 ### Tools Menu
 
@@ -32,9 +35,13 @@ Creates the native application menu bar shared by all windows. Menu actions oper
 
 ## Functions
 
-### `createMenu()`
+### `createMenu({ isSelector = false } = {})`
 
-Builds and returns the application menu. Set it globally with `Menu.setApplicationMenu(createMenu())` so it applies to every window.
+Builds the Control Station menu, or the original File menu when `isSelector` is true. The default menu is installed during application initialization.
+
+### `setWindowMenu(window, options)`
+
+Assigns a window's menu on Windows/Linux. On macOS, updates the application menu when that window gains focus.
 
 ## Dependencies
 
