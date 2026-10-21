@@ -27,7 +27,7 @@ export const AppLayout = ({ children, backendConnected }: AppLayoutProps) => {
   useEffect(() => {
     const root = window.document.documentElement;
     // Remove old schemes if you have more than one
-    root.classList.remove("default", "pink");
+    root.classList.remove("default", "pink", "twight");
     root.classList.add(colorScheme);
   }, [colorScheme]);
 
