@@ -12,6 +12,7 @@ import { showAboutWindow } from "../windows/aboutWindow.js";
 import { getCurrentView, getMainWindow } from "../windows/mainWindow.js";
 import { showLogWindow } from "../windows/logWindow.js";
 import { checkForUpdates } from "../app/updater.js";
+import { openAppLocation, openProjectLink } from "./toolActions.js";
 
 /**
  * Creates the Control Station menu, or the original File menu for the selector.
@@ -130,6 +131,30 @@ function createMenu({ isSelector = false } = {}) {
     ...(!isSelector
       ? [
           {
+            label: "Tools",
+            submenu: [
+              {
+                label: "Open ADJ Repository",
+                click: (_, window) => openProjectLink("adj", window),
+              },
+              { type: "separator" },
+              ...[
+                { label: "Open App Cache Folder", location: "cache" },
+                { label: "Open Settings Folder", location: "settings" },
+                { label: "Open Logger Folder", location: "logger" },
+                { label: "Open config.toml", location: "config" },
+                { label: "Open ADJ Folder", location: "adj" },
+              ].map(({ label, location }) => ({
+                label,
+                click: (_, window) => openAppLocation(location, window),
+              })),
+            ],
+          },
+        ]
+      : []),
+    ...(!isSelector
+      ? [
+          {
             label: "Window",
             submenu: [
               {
@@ -170,6 +195,11 @@ function createMenu({ isSelector = false } = {}) {
                 label: "Check for Updates...",
                 click: (_, window) =>
                   checkForUpdates(window ?? BrowserWindow.getFocusedWindow()),
+              },
+              { type: "separator" },
+              {
+                label: "Report an Issue...",
+                click: (_, window) => openProjectLink("issue", window),
               },
             ]
           : []),

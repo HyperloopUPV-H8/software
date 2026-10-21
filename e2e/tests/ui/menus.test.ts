@@ -93,18 +93,24 @@ test("English menus and About are available in Testing View", async ({
         .filter(Boolean),
       help: menu.items
         .find((item) => item.label === "Help")!
-        .submenu!.items.map((item) => item.label),
+        .submenu!.items.filter((item) => item.type !== "separator")
+        .map((item) => item.label),
     };
   });
   expect(menus.labels).toEqual([
     "Control Station",
     "Edit",
     "View",
+    "Tools",
     "Window",
     "Help",
   ]);
   expect(menus.edit).toEqual(["undo", "redo", "cut", "copy", "paste"]);
-  expect(menus.help).toEqual(["About Control Station", "Check for Updates..."]);
+  expect(menus.help).toEqual([
+    "About Control Station",
+    "Check for Updates...",
+    "Report an Issue...",
+  ]);
   const opened = app.waitForEvent("window");
   await app.evaluate(({ BrowserWindow, Menu }) => {
     const item = Menu.getApplicationMenu()!.items.find(
@@ -129,6 +135,65 @@ async function openAdjFromRenderer(page: Page) {
   });
   await expect(page).toHaveURL(/\/adj-view\/index\.html$/);
 }
+
+test("Tools opens app locations and project pages through the OS", async ({
+  app,
+}) => {
+  const opened = await app.evaluate(async ({ BrowserWindow, Menu, shell }) => {
+    const paths: string[] = [];
+    const urls: string[] = [];
+    const originalOpenPath = shell.openPath;
+    const originalOpenExternal = shell.openExternal;
+    shell.openPath = async (target) => {
+      paths.push(target);
+      return "";
+    };
+    shell.openExternal = async (url) => {
+      urls.push(url);
+    };
+    try {
+      const menu = Menu.getApplicationMenu()!;
+      const tools = menu.items.find((item) => item.label === "Tools")!.submenu!;
+      const window = BrowserWindow.getAllWindows()[0];
+      for (const label of [
+        "Open ADJ Repository",
+        "Open App Cache Folder",
+        "Open Settings Folder",
+        "Open Logger Folder",
+        "Open config.toml",
+        "Open ADJ Folder",
+      ]) {
+        const item = tools.items.find((item) => item.label === label)!;
+        await item.click(item, window, {} as never);
+      }
+      const issue = menu.items
+        .find((item) => item.label === "Help")!
+        .submenu!.items.find((item) => item.label === "Report an Issue...")!;
+      await issue.click(issue, window, {} as never);
+      await new Promise<void>((resolve) => setImmediate(resolve));
+      return {
+        paths,
+        urls,
+        tools: tools.items
+          .filter((item) => item.type !== "separator")
+          .map((item) => item.label),
+      };
+    } finally {
+      shell.openPath = originalOpenPath;
+      shell.openExternal = originalOpenExternal;
+    }
+  });
+  expect(opened.paths).toHaveLength(5);
+  expect(opened.paths.some((target) => target.endsWith("config.toml"))).toBe(
+    true,
+  );
+  expect(opened.paths.some((target) => target.endsWith("logger"))).toBe(true);
+  expect(opened.tools).not.toContain("Open Logger Settings");
+  expect(opened.urls).toEqual([
+    "https://github.com/Hyperloop-UPV/adj",
+    "https://github.com/Hyperloop-UPV/software/issues/new/choose",
+  ]);
+});
 
 test("Control Station menu switches modes and returns through the selector", async ({
   app,

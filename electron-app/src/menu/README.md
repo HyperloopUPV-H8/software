@@ -34,6 +34,15 @@ The selector retains **File > Reload / Return to Selector / Exit**, with Return 
 - **Toggle Full Screen** (`F11`) - Toggles fullscreen on the focused window
 - **Development > Toggle DevTools** (`F12`) - Opens/closes Chrome DevTools for the focused window
 
+### Tools Menu
+
+- **Open ADJ Repository** - Opens the project's ADJ repository in the browser
+- **Open App Cache Folder** - Opens Go's OS-specific cache folder for `hyperloop-control-station` (honors `XDG_CACHE_HOME` on Linux)
+- **Open Settings Folder** - Opens the directory containing the active `config.toml`
+- **Open Logger Folder** - Opens `<logging.logging_path>/logger`, resolving relative or empty paths against the Go backend's working directory; creates the directory on first use if needed
+- **Open config.toml** - Opens the active configuration file in its default application
+- **Open ADJ Folder** - Opens the Go backend's existing `adj` folder under the application cache. The backend does not support a separate configured local ADJ path.
+
 ### Window Menu
 
 - **Show Main Window** - Restores and focuses the active mode's main window
@@ -44,6 +53,7 @@ The selector retains **File > Reload / Return to Selector / Exit**, with Return 
 
 - **About Control Station** - Shows application information, the installed version, and Logging View attribution from every mode
 - **Check for Updates...** - Checks for a newer release and reports the result. Updates download automatically; installation requires choosing Restart. Development builds show an informational message without contacting release servers.
+- **Report an Issue...** - Opens the software repository's new-issue form; no issue is submitted automatically
 
 The selector keeps its existing Tools and Help menus; the additional menus above apply to the other windows.
 

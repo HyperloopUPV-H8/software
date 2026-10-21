@@ -6,6 +6,7 @@ import { getCurrentView, getMainWindow } from "../../windows/mainWindow.js";
 import { showLogWindow } from "../../windows/logWindow.js";
 import { checkForUpdates } from "../../app/updater.js";
 import { showAboutWindow } from "../../windows/aboutWindow.js";
+import { openAppLocation, openProjectLink } from "../toolActions.js";
 
 vi.mock("electron", () => ({
   app: { emit: vi.fn(), quit: vi.fn() },
@@ -35,6 +36,10 @@ vi.mock("../../windows/mainWindow.js", () => ({
 vi.mock("../../windows/aboutWindow.js", () => ({ showAboutWindow: vi.fn() }));
 vi.mock("../../windows/logWindow.js", () => ({ showLogWindow: vi.fn() }));
 vi.mock("../../app/updater.js", () => ({ checkForUpdates: vi.fn() }));
+vi.mock("../toolActions.js", () => ({
+  openAppLocation: vi.fn(),
+  openProjectLink: vi.fn(),
+}));
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -50,6 +55,7 @@ describe("Control Station menu", () => {
       "Control Station",
       "Edit",
       "View",
+      "Tools",
       "Window",
       "Help",
     ]);
@@ -62,8 +68,41 @@ describe("Control Station menu", () => {
     expect(
       menu.items
         .find((item) => item.label === "Help")
-        .submenu.map((item) => item.label),
-    ).toEqual(["About Control Station", "Check for Updates..."]);
+        .submenu.filter((item) => item.label)
+        .map((item) => item.label),
+    ).toEqual([
+      "About Control Station",
+      "Check for Updates...",
+      "Report an Issue...",
+    ]);
+  });
+
+  it("opens application locations from Tools and issue creation from Help", () => {
+    const menu = createMenu();
+    const window = {};
+    const tools = menu.items.find((item) => item.label === "Tools").submenu;
+    tools
+      .find((item) => item.label === "Open ADJ Repository")
+      .click(null, window);
+    expect(openProjectLink).toHaveBeenCalledWith("adj", window);
+    for (const [label, location] of [
+      ["Open App Cache Folder", "cache"],
+      ["Open Settings Folder", "settings"],
+      ["Open Logger Folder", "logger"],
+      ["Open config.toml", "config"],
+      ["Open ADJ Folder", "adj"],
+    ]) {
+      tools.find((item) => item.label === label).click(null, window);
+      expect(openAppLocation).toHaveBeenLastCalledWith(location, window);
+    }
+    menu.items
+      .find((item) => item.label === "Help")
+      .submenu.find((item) => item.label === "Report an Issue...")
+      .click(null, window);
+    expect(openProjectLink).toHaveBeenLastCalledWith("issue", window);
+    expect(tools.some((item) => item.label === "Open Logger Settings")).toBe(
+      false,
+    );
   });
 
   it.each(["testing-view", "competition-view"])(
