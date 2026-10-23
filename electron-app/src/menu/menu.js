@@ -175,6 +175,25 @@ function createMenu({ isSelector = false } = {}) {
                   if (hasBackendView()) showLogWindow();
                 },
               },
+              {
+                id: "new-competition-window",
+                label: "New Competition Window",
+                visible: canOpenCompetitionWindow(),
+                enabled: canOpenCompetitionWindow(),
+                click: () => {
+                  if (canOpenCompetitionWindow())
+                    app.emit("new-competition-window");
+                },
+              },
+              {
+                id: "new-testing-window",
+                label: "New Testing Window",
+                visible: canOpenTestingWindow(),
+                enabled: canOpenTestingWindow(),
+                click: () => {
+                  if (canOpenTestingWindow()) app.emit("new-testing-window");
+                },
+              },
               { type: "separator" },
               { role: "minimize", label: "Minimize" },
             ],
@@ -215,6 +234,14 @@ function createMenu({ isSelector = false } = {}) {
     ).submenu;
     windowMenu.on("menu-will-show", () => {
       menu.getMenuItemById("show-backend-logs").enabled = hasBackendView();
+      const newWindow = menu.getMenuItemById("new-testing-window");
+      newWindow.visible = canOpenTestingWindow();
+      newWindow.enabled = newWindow.visible;
+      const newCompetitionWindow = menu.getMenuItemById(
+        "new-competition-window",
+      );
+      newCompetitionWindow.visible = canOpenCompetitionWindow();
+      newCompetitionWindow.enabled = newCompetitionWindow.visible;
     });
   }
   return menu;
@@ -222,6 +249,24 @@ function createMenu({ isSelector = false } = {}) {
 
 function hasBackendView() {
   return ["testing-view", "competition-view"].includes(getCurrentView());
+}
+
+function canOpenTestingWindow() {
+  return (
+    hasBackendView() &&
+    fs.existsSync(
+      path.join(getAppPath(), "renderer", "testing-view", "index.html"),
+    )
+  );
+}
+
+function canOpenCompetitionWindow() {
+  return (
+    getCurrentView() === "competition-view" &&
+    fs.existsSync(
+      path.join(getAppPath(), "renderer", "competition-view", "index.html"),
+    )
+  );
 }
 
 /** Assign a menu to a window; macOS uses the focused window's application menu. */

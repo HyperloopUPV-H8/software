@@ -133,6 +133,105 @@ describe("Control Station menu", () => {
     const submenu = menu.items.find((item) => item.label === "Window").submenu;
     submenu.on.mock.calls[0][1]();
     expect(menu.getMenuItemById("show-backend-logs").enabled).toBe(true);
+    expect(menu.getMenuItemById("new-testing-window").visible).toBe(true);
+  });
+
+  it.each(["testing-view", "competition-view"])(
+    "offers an additional Testing window in %s",
+    (view) => {
+      getCurrentView.mockReturnValue(view);
+      const item = createMenu().getMenuItemById("new-testing-window");
+      expect(item.label).toBe("New Testing Window");
+      expect(item.visible).toBe(true);
+      expect(item.enabled).toBe(true);
+      item.click();
+      expect(app.emit).toHaveBeenCalledWith("new-testing-window");
+    },
+  );
+
+  it.each(["logging-view", "adj-view", "flashing-view"])(
+    "hides additional Testing windows in %s",
+    (view) => {
+      getCurrentView.mockReturnValue(view);
+      const item = createMenu().getMenuItemById("new-testing-window");
+      expect(item.visible).toBe(false);
+      expect(item.enabled).toBe(false);
+      item.click();
+      expect(app.emit).not.toHaveBeenCalled();
+    },
+  );
+
+  it("does not offer Testing windows when that view is not packaged", () => {
+    getCurrentView.mockReturnValue("competition-view");
+    fs.existsSync.mockReturnValue(false);
+    const item = createMenu().getMenuItemById("new-testing-window");
+    expect(item.visible).toBe(false);
+    item.click();
+    expect(app.emit).not.toHaveBeenCalled();
+  });
+
+  it("offers both Competition and Testing windows in Competition mode", () => {
+    getCurrentView.mockReturnValue("competition-view");
+    const menu = createMenu();
+    const competition = menu.getMenuItemById("new-competition-window");
+    expect(competition.visible).toBe(true);
+    expect(competition.enabled).toBe(true);
+    expect(competition.label).toBe("New Competition Window");
+    expect(menu.getMenuItemById("new-testing-window").visible).toBe(true);
+    competition.click();
+    expect(app.emit).toHaveBeenCalledWith("new-competition-window");
+  });
+
+  it.each(["testing-view", "logging-view", "adj-view", "flashing-view"])(
+    "hides new Competition windows in %s",
+    (view) => {
+      getCurrentView.mockReturnValue(view);
+      const item = createMenu().getMenuItemById("new-competition-window");
+      expect(item.visible).toBe(false);
+      expect(item.enabled).toBe(false);
+      item.click();
+      expect(app.emit).not.toHaveBeenCalled();
+    },
+  );
+
+  it("keeps Testing available if Competition is not packaged", () => {
+    getCurrentView.mockReturnValue("competition-view");
+    fs.existsSync.mockImplementation(
+      (file) => file !== "/app/renderer/competition-view/index.html",
+    );
+    const menu = createMenu();
+    const item = menu.getMenuItemById("new-competition-window");
+    expect(item.visible).toBe(false);
+    item.click();
+    expect(app.emit).not.toHaveBeenCalled();
+    expect(menu.getMenuItemById("new-testing-window").visible).toBe(true);
+  });
+
+  it("refreshes the new Competition option after changing mode", () => {
+    getCurrentView.mockReturnValue("testing-view");
+    const menu = createMenu();
+    const refresh = menu.items.find((item) => item.label === "Window").submenu
+      .on.mock.calls[0][1];
+    getCurrentView.mockReturnValue("competition-view");
+    refresh();
+    expect(menu.getMenuItemById("new-competition-window").visible).toBe(true);
+    getCurrentView.mockReturnValue("logging-view");
+    refresh();
+    expect(menu.getMenuItemById("new-competition-window").visible).toBe(false);
+  });
+
+  it("hides a stale new-window item after changing to a non-backend mode", () => {
+    getCurrentView.mockReturnValue("testing-view");
+    const menu = createMenu();
+    getCurrentView.mockReturnValue("logging-view");
+    menu.items
+      .find((item) => item.label === "Window")
+      .submenu.on.mock.calls[0][1]();
+    const item = menu.getMenuItemById("new-testing-window");
+    expect(item.visible).toBe(false);
+    expect(item.enabled).toBe(false);
+    item.click();
+    expect(app.emit).not.toHaveBeenCalled();
   });
 
   it("restores and focuses the main window", () => {

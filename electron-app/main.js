@@ -23,6 +23,10 @@ import { stopBackend } from "./src/processes/backend.js";
 import { stopBlcuProgramming } from "./src/processes/blcuProgramming.js";
 import { logger } from "./src/utils/logger.js";
 import { getCurrentView, getMainWindow } from "./src/windows/mainWindow.js";
+import {
+  createCompetitionWindow,
+  createTestingWindow,
+} from "./src/windows/additionalViewWindow.js";
 
 /**
  * Initializes the application when Electron is ready.
@@ -97,6 +101,18 @@ app.whenReady().then(async () => {
     }
     app.on("return-to-selector", () => changeMode());
     app.on("switch-mode", (mode) => changeMode(mode));
+    app.on("new-testing-window", () => {
+      if (
+        isChangingMode ||
+        !["testing-view", "competition-view"].includes(getCurrentView())
+      )
+        return;
+      void createTestingWindow(getMainWindow());
+    });
+    app.on("new-competition-window", () => {
+      if (isChangingMode || getCurrentView() !== "competition-view") return;
+      void createCompetitionWindow(getMainWindow());
+    });
 
     // Register shutdown cleanup before the selector can start any services.
     setupLifecycleHandlers();

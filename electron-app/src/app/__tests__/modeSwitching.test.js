@@ -32,8 +32,12 @@ vi.mock("../../utils/logger.js", () => ({
   logger: { electron: { info: vi.fn(), error: vi.fn() } },
 }));
 vi.mock("../../windows/mainWindow.js", () => ({
-  getCurrentView: () => "testing-view",
+  getCurrentView: vi.fn(() => "testing-view"),
   getMainWindow: vi.fn(),
+}));
+vi.mock("../../windows/additionalViewWindow.js", () => ({
+  createTestingWindow: vi.fn(),
+  createCompetitionWindow: vi.fn(),
 }));
 
 const flush = async () => {
@@ -46,6 +50,8 @@ beforeEach(async () => {
   vi.useFakeTimers();
   const { app } = await import("electron");
   app.removeAllListeners();
+  const { getCurrentView } = await import("../../windows/mainWindow.js");
+  getCurrentView.mockReturnValue("testing-view");
 });
 afterEach(() => {
   vi.useRealTimers();
@@ -122,5 +128,79 @@ describe("menu mode transitions", () => {
     expect(window.focus).toHaveBeenCalledOnce();
     expect(h.stopBackend).not.toHaveBeenCalled();
     expect(h.openMode).not.toHaveBeenCalled();
+  });
+
+  it.each(["testing-view", "competition-view"])(
+    "opens secondary Testing windows in %s without restarting services",
+    async (view) => {
+      const h = await start();
+      const { getCurrentView, getMainWindow } =
+        await import("../../windows/mainWindow.js");
+      const { createTestingWindow } =
+        await import("../../windows/additionalViewWindow.js");
+      const mainWindow = {};
+      getCurrentView.mockReturnValue(view);
+      getMainWindow.mockReturnValue(mainWindow);
+      h.app.emit("new-testing-window");
+      h.app.emit("new-testing-window");
+      expect(createTestingWindow).toHaveBeenCalledTimes(2);
+      expect(createTestingWindow).toHaveBeenLastCalledWith(mainWindow);
+      expect(h.stopBackend).not.toHaveBeenCalled();
+      expect(h.openMode).not.toHaveBeenCalled();
+    },
+  );
+
+  it("does not create extra windows during mode transitions or in Logging mode", async () => {
+    const h = await start();
+    const { getCurrentView } = await import("../../windows/mainWindow.js");
+    const { createTestingWindow } =
+      await import("../../windows/additionalViewWindow.js");
+    getCurrentView.mockReturnValue("logging-view");
+    h.app.emit("new-testing-window");
+    expect(createTestingWindow).not.toHaveBeenCalled();
+    getCurrentView.mockReturnValue("testing-view");
+    h.app.emit("return-to-selector");
+    h.app.emit("new-testing-window");
+    expect(createTestingWindow).not.toHaveBeenCalled();
+  });
+
+  it("does not create extra windows before startup finishes", async () => {
+    const modes = await import("../index.js");
+    modes.showModeSelector.mockImplementationOnce(() => new Promise(() => {}));
+    const h = await start();
+    const { createTestingWindow } =
+      await import("../../windows/additionalViewWindow.js");
+    h.app.emit("new-testing-window");
+    expect(createTestingWindow).not.toHaveBeenCalled();
+  });
+
+  it("opens additional Competition windows while preserving the Testing option", async () => {
+    const h = await start();
+    const { getCurrentView, getMainWindow } =
+      await import("../../windows/mainWindow.js");
+    const { createCompetitionWindow, createTestingWindow } =
+      await import("../../windows/additionalViewWindow.js");
+    getCurrentView.mockReturnValue("competition-view");
+    const mainWindow = {};
+    getMainWindow.mockReturnValue(mainWindow);
+    h.app.emit("new-competition-window");
+    h.app.emit("new-testing-window");
+    expect(createCompetitionWindow).toHaveBeenCalledWith(mainWindow);
+    expect(createTestingWindow).toHaveBeenCalledWith(mainWindow);
+    expect(h.stopBackend).not.toHaveBeenCalled();
+    expect(h.openMode).not.toHaveBeenCalled();
+  });
+
+  it("rejects new Competition windows outside Competition and during a transition", async () => {
+    const h = await start();
+    const { getCurrentView } = await import("../../windows/mainWindow.js");
+    const { createCompetitionWindow } =
+      await import("../../windows/additionalViewWindow.js");
+    h.app.emit("new-competition-window");
+    expect(createCompetitionWindow).not.toHaveBeenCalled();
+    getCurrentView.mockReturnValue("competition-view");
+    h.app.emit("return-to-selector");
+    h.app.emit("new-competition-window");
+    expect(createCompetitionWindow).not.toHaveBeenCalled();
   });
 });
