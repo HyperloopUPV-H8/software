@@ -1,9 +1,11 @@
 //! The TCP client: one connection per board, one task each.
 //!
-//! **Not written yet.** This file currently holds only the error type
-//! [`super::Error`] aggregates, plus the contract below, so that the rest
-//! of `net` compiles and whoever implements this module knows what the
-//! shared part expects of it. See [`super`] and `net/README.md`.
+//! **Socket I/O not written yet.** Handles support board lookup, routing
+//! orders by ID and queueing through bounded channels. In-memory framing is
+//! implemented, but connecting, writing to sockets and receiving from sockets
+//! remain unimplemented. This module exposes the error type [`super::Error`]
+//! aggregates and defines the transport contract.
+//! See [`super`] and `net/README.md`.
 //!
 //! # What this module is
 //!
@@ -63,9 +65,11 @@
 //!   [`super::Event::Received`] per frame, and [`Error`] on the error
 //!   channel. Never stamp a timestamp by hand — [`super::Reporter::notify`]
 //!   does it. Never touch disk, WebSocket or aggregation.
-//! - **A decode failure is fatal**: see [`Error::is_fatal`]. Log it and
-//!   report it on the error channel — and that is all this module does
-//!   about it. Sending the pod to fault is not `net`'s call to make:
+//! - **A terminal decode failure is fatal**: see [`Error::is_fatal`]. An
+//!   unsuccessful attempt on at most 374 pending bytes is not terminal;
+//!   it only means "wait for more" under the framing rule above. Log a
+//!   terminal failure and report it on the error channel, which is all this
+//!   module does about it. Sending the pod to fault is not `net`'s call to make:
 //!   whoever consumes the error channel reads [`Error::is_fatal`] and
 //!   decides, which also keeps the "fault once" guard in one place
 //!   instead of one per transport. The stream cannot be resynchronised
@@ -76,11 +80,17 @@
 //!   is what the backoff is for, and only the report goes up.
 
 use super::Reporter;
-use crate::model::{AdjId, BoardId, OrderPacket};
-use crate::protocol::{DecodeError, Index};
-use std::net::SocketAddr;
-use std::sync::Arc;
-use std::time::Duration;
+use crate::{model::BoardId, protocol::Index};
+use std::{cmp::min, net::SocketAddr, sync::Arc, time::Duration};
+
+mod board_handle;
+mod error;
+mod framing;
+mod handles;
+
+pub use board_handle::BoardHandle;
+pub use error::{Error, SendError, Unreachable};
+pub use handles::Handles;
 
 /// One board to keep a connection to.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -99,12 +109,36 @@ pub struct BoardLink {
 /// How long to wait between reconnection attempts.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Backoff {
-    /// The first wait after a connection fails or drops.
-    pub initial: Duration,
-    /// The ceiling the doubling stops at. Retries are unlimited: a board
-    /// that is not up yet is the normal state before a test, not an
-    /// error to give up on.
-    pub max: Duration,
+    // The first wait after a connection fails or drops.
+    initial: u64,
+    // Times tried to backoff
+    count: u64,
+    // The ceiling the doubling stops at. Retries are unlimited: a board
+    // that is not up yet is the normal state before a test, not an
+    // error to give up on.
+    max: u64,
+}
+
+impl Backoff {
+    /// Creates an instance of Backoff
+    /// Arguments:
+    /// - initial: value for first backoff atempt
+    /// - max: max value of backoff
+    pub fn new(initial: u64, max: u64) -> Self {
+        Self {
+            initial,
+            count: 0,
+            max,
+        }
+    }
+
+    /// Returns the backoff interval for each attempt
+    pub fn get_interval(&mut self) -> Duration {
+        let res = min(self.max, self.initial * 2u64.pow(self.count as u32));
+        // Increments the count for the next get_interval
+        self.count += 1;
+        Duration::from_millis(res)
+    }
 }
 
 /// How to run the TCP client.
@@ -150,184 +184,10 @@ pub fn spawn(config: Config, adj: Arc<Index>, reporter: Reporter) -> Handles {
     todo!("the TCP client is not written yet: see this module's contract")
 }
 
-/// The writing side of every connection [`spawn`] opened.
-///
-/// The representation is left to the implementation — a writer channel
-/// per board and the task handles — so that this file states the API and
-/// nothing else.
-#[derive(Debug)]
-pub struct Handles {}
-
-impl Handles {
-    /// The handle for one board, or `None` if the config did not list it.
-    #[must_use]
-    pub fn board(&self, board: BoardId) -> Option<&BoardHandle> {
-        let _ = board;
-        todo!("the TCP client is not written yet: see this module's contract")
-    }
-
-    /// Hands an order to the board it belongs to, resolved by its id
-    /// through the [`Index`].
-    ///
-    /// Returns once the order is queued on that board's writer, not once
-    /// it is on the wire — the write itself is bounded by
-    /// [`Config::write_timeout`] and reported through [`Error::Write`].
-    ///
-    /// # Errors
-    ///
-    /// See [`SendError`]: an id no ADJ declares, a board with no client,
-    /// or a connection task that is gone.
-    pub async fn send(&self, order: OrderPacket) -> Result<(), SendError> {
-        let _ = order;
-        todo!("the TCP client is not written yet: see this module's contract")
-    }
-
-    /// Sends the fault — the order with id 0 — to every board at once.
-    ///
-    /// This module does not decide to fault the pod; `station` does, by
-    /// reading [`Error::is_fatal`] off the error channel. This is only
-    /// the one place that can actually write it, so it is where the
-    /// fan-out lives. A *received* packet with id 0 is a board asking for
-    /// the same thing, and `station` answers it by calling this, so that
-    /// logic does not exist twice.
-    ///
-    /// # Errors
-    ///
-    /// [`Unreachable`], naming the boards the fault did not reach rather
-    /// than collapsing them into one opaque failure: a fault that only
-    /// half landed is exactly what the operator has to be told.
-    pub async fn propagate_fault(&self) -> Result<(), Unreachable> {
-        todo!("the TCP client is not written yet: see this module's contract")
-    }
-
-    /// Closes every connection and waits for its task to finish.
-    pub async fn shutdown(self) {
-        todo!("the TCP client is not written yet: see this module's contract")
-    }
-}
-
-/// The writing side of one board's connection.
-///
-/// The representation is left to the implementation, same as
-/// [`Handles`].
-#[derive(Debug)]
-pub struct BoardHandle {}
-
-impl BoardHandle {
-    /// Hands an order to this board's writer, without consulting the
-    /// order's id — [`Handles::send`] is what routes.
-    ///
-    /// # Errors
-    ///
-    /// [`SendError::Gone`] if this connection's task is no longer there.
-    pub async fn send(&self, order: OrderPacket) -> Result<(), SendError> {
-        let _ = order;
-        todo!("the TCP client is not written yet: see this module's contract")
-    }
-}
-
-/// Why an order could not be handed to a writer.
-///
-/// Returned to the caller, not reported through [`super::Reporter`]: it
-/// says something about the order that was asked for, not about the state
-/// of a connection. [`Error`] is the one that travels on the error
-/// channel.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, thiserror::Error)]
-pub enum SendError {
-    /// No order with this id is declared in the loaded ADJ.
-    #[error("no order is declared with id {0:?}")]
-    UnknownId(AdjId),
-    /// The order resolves to a board the config did not list, so no
-    /// client was ever opened for it.
-    #[error("board {0:?} has no TCP client: the config does not list it")]
-    NoClient(BoardId),
-    /// The board's connection task is no longer running.
-    #[error("board {0:?}: its connection task is gone")]
-    Gone(BoardId),
-}
-
-/// The boards a fault broadcast did not reach.
-///
-/// Never empty: a broadcast that reached everybody returns `Ok`.
-#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
-#[error("the fault did not reach these boards: {0:?}")]
-pub struct Unreachable(pub Vec<BoardId>);
-
-/// Something that went wrong on a board's TCP connection.
-///
-/// Every variant names its board, which is the whole identity of a link:
-/// one connection per board.
-#[derive(Debug, thiserror::Error)]
-pub enum Error {
-    /// The connection could not be opened.
-    #[error("board {board:?}: could not connect")]
-    Connect {
-        /// The board that was being connected to.
-        board: BoardId,
-        /// The underlying I/O failure.
-        #[source]
-        source: std::io::Error,
-    },
-
-    /// A frame could not be decoded, which means the loaded ADJ does not
-    /// describe what the board is sending. Fatal: see
-    /// [`Error::is_fatal`].
-    #[error("board {board:?}: could not decode a frame")]
-    Decode {
-        /// The board whose frame failed.
-        board: BoardId,
-        /// What [`crate::protocol`] said about it.
-        #[source]
-        source: DecodeError,
-    },
-
-    /// An order or a keep-alive could not be written.
-    #[error("board {board:?}: could not write")]
-    Write {
-        /// The board that was being written to.
-        board: BoardId,
-        /// The underlying I/O failure.
-        #[source]
-        source: std::io::Error,
-    },
-}
-
-impl Error {
-    /// Whether this error means the pod has to be sent to fault.
-    ///
-    /// "Fatal" is about the **pod**, not about this process: the backend
-    /// stays up — still reading its other connections, still serving the
-    /// frontend, still recording — so that whoever is operating the pod
-    /// can see what happened. Nothing here ever calls
-    /// `std::process::exit`.
-    ///
-    /// Only [`Error::Decode`] qualifies, and this is the one place where
-    /// the behaviour deliberately departs from the Go backend. Go treated
-    /// an undecodable frame as a connection that had fallen out of step,
-    /// and reconnecting was the remedy. But nothing corrupts a frame in
-    /// flight — TCP checksums and retransmits — so a frame that will not
-    /// decode means the loaded ADJ does not match what the firmware is
-    /// sending, and reopening the connection cannot fix that. The stream
-    /// still cannot be resynchronised mid-frame, so the connection is
-    /// closed and reopened anyway; what changes is that the pod is also
-    /// sent to fault instead of carrying on as if a retry would help.
-    ///
-    /// [`Error::Connect`] and [`Error::Write`] are not fatal: a board
-    /// that is not up yet, or a write that failed on a connection that
-    /// just dropped, is exactly what the reconnection loop with its
-    /// backoff is for. Losing a board for good is reported through
-    /// [`super::Event::Disconnected`], not through this.
-    pub fn is_fatal(&self) -> bool {
-        match self {
-            Error::Decode { .. } => true,
-            Error::Connect { .. } | Error::Write { .. } => false,
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::protocol::DecodeError;
 
     fn io_error() -> std::io::Error {
         std::io::Error::from(std::io::ErrorKind::ConnectionRefused)
